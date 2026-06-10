@@ -26,3 +26,5 @@
 - Hardened full installer skill handling so existing global skills are skipped,
   new installs target Codex only, GitHub clone uses an OpenSSL override, and
   reported skill install failures stop the installer.
+- Suppressed raw Skills CLI progress output on successful installs so Windows
+  PowerShell users see short ASCII status lines instead of mojibake blocks.

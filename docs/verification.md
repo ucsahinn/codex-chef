@@ -43,9 +43,10 @@ to update the current user's Codex and Git guard files:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Force
 ```
 
-Expected skill behavior is idempotent: already installed skills are reported as
-`Skill already installed`, and new skill installs fail the installer if the
-Skills CLI reports clone, installation, or write failures.
+Expected skill behavior is idempotent and quiet: already installed skills are
+reported as `Skill already installed`, successful new installs are reported as
+`Installed skill`, and raw Skills CLI output is shown only when clone,
+installation, or write failures need diagnosis.
 
 Remote verification after push:
 

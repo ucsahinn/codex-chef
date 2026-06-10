@@ -45,9 +45,10 @@ dosyalarını güncellemenin güvenli olduğunu doğruladıktan sonra installer'
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Force
 ```
 
-Beklenen skill davranışı idempotenttir: kurulu skill'ler `Skill already
-installed` olarak geçer; yeni skill kurulumunda Skills CLI clone, installation
-veya write hatası bildirirse installer fail eder.
+Beklenen skill davranışı idempotent ve sessizdir: kurulu skill'ler `Skill
+already installed`, başarılı yeni kurulumlar `Installed skill` olarak görünür;
+ham Skills CLI çıktısı yalnız clone, installation veya write hatasını teşhis
+etmek gerektiğinde basılır.
 
 Push sonrası remote doğrulama:
 

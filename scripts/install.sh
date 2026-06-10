@@ -150,7 +150,11 @@ const env = {
   ...process.env,
   GIT_CONFIG_COUNT: process.env.GIT_CONFIG_COUNT || "1",
   GIT_CONFIG_KEY_0: process.env.GIT_CONFIG_KEY_0 || "http.sslBackend",
-  GIT_CONFIG_VALUE_0: process.env.GIT_CONFIG_VALUE_0 || "openssl"
+  GIT_CONFIG_VALUE_0: process.env.GIT_CONFIG_VALUE_0 || "openssl",
+  CI: process.env.CI || "1",
+  NO_COLOR: process.env.NO_COLOR || "1",
+  FORCE_COLOR: process.env.FORCE_COLOR || "0",
+  TERM: process.env.TERM || "dumb"
 };
 const installed = new Set();
 const listResult = spawnSync("npx", ["skills", "list", "--global", "--json"], {
@@ -179,13 +183,14 @@ for (const skill of catalog.skills.filter((item) => item.install)) {
     ["skills", "add", skill.package, "--skill", skill.skill, "--agent", "codex", "--yes", "--global"],
     { encoding: "utf8", env }
   );
-  process.stdout.write(result.stdout || "");
-  process.stderr.write(result.stderr || "");
   const output = `${result.stdout || ""}\n${result.stderr || ""}`;
   if (result.status !== 0 || /Failed to install|Installation failed|Failed to clone/.test(output)) {
+    process.stdout.write(result.stdout || "");
+    process.stderr.write(result.stderr || "");
     console.error(`Skill install failed for ${skill.name}`);
     process.exit(1);
   }
+  console.log(`Installed skill: ${skill.name}`);
 }
 NODE
 fi

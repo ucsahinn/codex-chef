@@ -170,6 +170,10 @@ if ($InstallSkills) {
   $env:GIT_CONFIG_COUNT = "1"
   $env:GIT_CONFIG_KEY_0 = "http.sslBackend"
   $env:GIT_CONFIG_VALUE_0 = "openssl"
+  $env:CI = "1"
+  $env:NO_COLOR = "1"
+  $env:FORCE_COLOR = "0"
+  $env:TERM = "dumb"
   $InstalledSkills = @{}
   try {
     $InstalledJson = & npx.cmd skills list --global --json 2>$null
@@ -195,11 +199,12 @@ if ($InstallSkills) {
     Write-Host "Installing skill: $($Skill.name) from $($Skill.package) --skill $($Skill.skill)"
     $Output = & npx.cmd skills add $Skill.package --skill $Skill.skill --agent codex --yes --global 2>&1
     $ExitCode = $LASTEXITCODE
-    $Output | ForEach-Object { Write-Host $_ }
     $OutputText = ($Output -join [Environment]::NewLine)
     if ($ExitCode -ne 0 -or $OutputText -match "Failed to install|Installation failed|Failed to clone") {
+      $Output | ForEach-Object { Write-Host $_ }
       throw "Skill install failed for $($Skill.name)"
     }
+    Write-Host "Installed skill: $($Skill.name)"
   }
 }
 
