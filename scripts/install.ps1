@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param(
+  [switch]$All,
   [switch]$InstallSkills,
   [switch]$InstallGitGuards,
   [switch]$Force,
@@ -7,6 +8,11 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+if ($All) {
+  $InstallSkills = $true
+  $InstallGitGuards = $true
+}
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $CodexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".codex" }

@@ -3,11 +3,13 @@ set -euo pipefail
 
 INSTALL_SKILLS=0
 INSTALL_GIT_GUARDS=0
+ALL=0
 FORCE=0
 NO_BACKUP=0
 
 for arg in "$@"; do
   case "$arg" in
+    --all) ALL=1 ;;
     --install-skills) INSTALL_SKILLS=1 ;;
     --install-git-guards) INSTALL_GIT_GUARDS=1 ;;
     --force) FORCE=1 ;;
@@ -18,6 +20,11 @@ for arg in "$@"; do
       ;;
   esac
 done
+
+if [ "$ALL" -eq 1 ]; then
+  INSTALL_SKILLS=1
+  INSTALL_GIT_GUARDS=1
+fi
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"

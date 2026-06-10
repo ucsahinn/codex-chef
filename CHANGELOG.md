@@ -11,3 +11,5 @@
 - Added optional local plugin marketplace package.
 - Added public-readiness, verification, privacy, support, and conduct docs.
 - Added security audit script covering safe defaults, disabled authenticated MCPs, and leak patterns.
+- Added one-shot installer flags and complete English/Turkish docs pairing.
+- Added completion audit docs that map requirements to repository evidence.

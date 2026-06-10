@@ -17,13 +17,16 @@ dizini kullanır.
 ## PowerShell Kurulumu
 
 ```powershell
-cd "$env:USERPROFILE\Desktop\codex-enterprise-starter"
+git clone https://github.com/ucsahinn/codex-enterprise-starter.git
+cd codex-enterprise-starter
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -InstallSkills -InstallGitGuards -Force
+.\scripts\install.ps1 -All -Force
 ```
 
 Kullanışlı parametreler:
 
+- `-All`: Codex template'lerini, seçilmiş skill'leri ve global Git guard'larını
+  birlikte kurar.
 - `-InstallSkills`: `catalog/skills.json` içindeki skill'leri kurmayı dener.
 - `-InstallGitGuards`: global Git ignore ve pre-commit hook kurar.
 - `-Force`: yedek aldıktan sonra yönetilen Codex dosyalarının üzerine yazar.
@@ -32,13 +35,15 @@ Kullanışlı parametreler:
 ## Bash veya WSL Kurulumu
 
 ```bash
-cd ~/Desktop/codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-enterprise-starter.git
+cd codex-enterprise-starter
 chmod +x scripts/install.sh
-./scripts/install.sh --install-skills --install-git-guards --force
+./scripts/install.sh --all --force
 ```
 
 Kullanışlı flagler:
 
+- `--all`
 - `--install-skills`
 - `--install-git-guards`
 - `--force`

@@ -37,7 +37,7 @@ PowerShell:
 git clone https://github.com/ucsahinn/codex-enterprise-starter.git
 cd codex-enterprise-starter
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -InstallSkills -InstallGitGuards -Force
+.\scripts\install.ps1 -All -Force
 ```
 
 Bash or WSL:
@@ -46,7 +46,7 @@ Bash or WSL:
 git clone https://github.com/ucsahinn/codex-enterprise-starter.git
 cd codex-enterprise-starter
 chmod +x scripts/install.sh
-./scripts/install.sh --install-skills --install-git-guards --force
+./scripts/install.sh --all --force
 ```
 
 After installation, restart Codex and run:
@@ -55,6 +55,24 @@ After installation, restart Codex and run:
 codex doctor --summary
 codex --strict-config "Summarize the active Codex setup."
 ```
+
+Use `-InstallSkills` / `--install-skills` or `-InstallGitGuards` /
+`--install-git-guards` when you want only one part of the full setup.
+
+## How To Use It
+
+Start with [docs/how-to.md](docs/how-to.md) for the day-to-day operating
+model. The intended flow is:
+
+1. Map unfamiliar code with `code_mapper`.
+2. Verify current APIs and product behavior with `docs_researcher`.
+3. Implement in the main thread with repo instructions and selected skills.
+4. Run `test_verifier`, `frontend_verifier`, or `security_auditor` when the
+   task shape calls for deeper evidence.
+5. Use `release_verifier` before any push, tag, release, package, or deploy.
+
+This makes the setup behave like a small specialist software team while keeping
+the main Codex thread focused on decisions, implementation, and final evidence.
 
 ## Safe Defaults
 
@@ -132,6 +150,8 @@ The docs in this repo are based on the current Codex manual fetched on
 
 See:
 
+- [docs/how-to.md](docs/how-to.md)
+- [docs/completion-audit.md](docs/completion-audit.md)
 - [docs/verification.md](docs/verification.md)
 - [docs/public-readiness.md](docs/public-readiness.md)
 - [SECURITY.md](SECURITY.md)

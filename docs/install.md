@@ -16,13 +16,15 @@ Codex uses `~/.codex`; if `CODEX_HOME` is set, the installer uses that path.
 ## PowerShell Install
 
 ```powershell
-cd "$env:USERPROFILE\Desktop\codex-enterprise-starter"
+git clone https://github.com/ucsahinn/codex-enterprise-starter.git
+cd codex-enterprise-starter
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -InstallSkills -InstallGitGuards -Force
+.\scripts\install.ps1 -All -Force
 ```
 
 Useful switches:
 
+- `-All`: install Codex templates, curated skills, and global Git guards.
 - `-InstallSkills`: attempt to install entries from `catalog/skills.json`.
 - `-InstallGitGuards`: install global Git ignore and pre-commit hook.
 - `-Force`: overwrite managed Codex files after creating backups.
@@ -31,13 +33,15 @@ Useful switches:
 ## Bash or WSL Install
 
 ```bash
-cd ~/Desktop/codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-enterprise-starter.git
+cd codex-enterprise-starter
 chmod +x scripts/install.sh
-./scripts/install.sh --install-skills --install-git-guards --force
+./scripts/install.sh --all --force
 ```
 
 Useful flags:
 
+- `--all`
 - `--install-skills`
 - `--install-git-guards`
 - `--force`

@@ -38,7 +38,7 @@ PowerShell:
 git clone https://github.com/ucsahinn/codex-enterprise-starter.git
 cd codex-enterprise-starter
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -InstallSkills -InstallGitGuards -Force
+.\scripts\install.ps1 -All -Force
 ```
 
 Bash veya WSL:
@@ -47,7 +47,7 @@ Bash veya WSL:
 git clone https://github.com/ucsahinn/codex-enterprise-starter.git
 cd codex-enterprise-starter
 chmod +x scripts/install.sh
-./scripts/install.sh --install-skills --install-git-guards --force
+./scripts/install.sh --all --force
 ```
 
 Kurulumdan sonra Codex'i yeniden başlat ve şunları çalıştır:
@@ -56,6 +56,25 @@ Kurulumdan sonra Codex'i yeniden başlat ve şunları çalıştır:
 codex doctor --summary
 codex --strict-config "Summarize the active Codex setup."
 ```
+
+Tam kurulumun sadece bir bölümünü istiyorsan `-InstallSkills` /
+`--install-skills` veya `-InstallGitGuards` / `--install-git-guards`
+kullanabilirsin.
+
+## Nasıl Kullanılır?
+
+Günlük kullanım modeli için [docs/how-to.tr.md](docs/how-to.tr.md) dosyasından
+başla. Hedef akış:
+
+1. Bilinmeyen kodu önce `code_mapper` ile haritalat.
+2. Güncel API, kütüphane ve Codex davranışını `docs_researcher` ile doğrulat.
+3. Ana thread içinde repo talimatları ve doğru skill'lerle uygula.
+4. İşin şekline göre `test_verifier`, `frontend_verifier` veya
+   `security_auditor` ile daha güçlü kanıt topla.
+5. Push, tag, release, paket veya deploy öncesi `release_verifier` kullan.
+
+Böylece Codex tek bir sohbet gibi değil, uzman ajanları olan küçük bir yazılım
+ekibi gibi çalışır; ana thread ise karar, uygulama ve final kanıtına odaklanır.
 
 ## Güvenli Varsayılanlar
 
@@ -92,7 +111,7 @@ kurulum tarafında değişiklik yapmış. Önemli güncel konumlar:
 - `~/.gitignore_global`
 - `~/.githooks/pre-commit`
 
-Normalize edilmiş denetim için [docs/local-audit.md](docs/local-audit.md)
+Normalize edilmiş denetim için [docs/local-audit.tr.md](docs/local-audit.tr.md)
 dosyasına bak.
 
 ## GitHub'a Pushlamadan Önce
@@ -133,7 +152,9 @@ ve yerel kurulum kanıtları baz alınarak hazırlandı.
 
 Bakılacak dosyalar:
 
-- [docs/verification.md](docs/verification.md)
-- [docs/public-readiness.md](docs/public-readiness.md)
+- [docs/how-to.tr.md](docs/how-to.tr.md)
+- [docs/completion-audit.tr.md](docs/completion-audit.tr.md)
+- [docs/verification.tr.md](docs/verification.tr.md)
+- [docs/public-readiness.tr.md](docs/public-readiness.tr.md)
 - [SECURITY.md](SECURITY.md)
 - [SUPPORT.md](SUPPORT.md)

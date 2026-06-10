@@ -17,18 +17,11 @@ const requiredPublicFiles = [
   "CONTRIBUTING.md",
   "LICENSE",
   "CHANGELOG.md",
+  "docs/how-to.md",
+  "docs/how-to.tr.md",
+  "docs/completion-audit.md",
+  "docs/completion-audit.tr.md",
   ".github/workflows/validate.yml"
-];
-
-const bilingualDocPairs = [
-  "docs/install",
-  "docs/security-model",
-  "docs/codex-surfaces",
-  "docs/codex-flags",
-  "docs/mcp-catalog",
-  "docs/publish",
-  "docs/verification",
-  "docs/public-readiness"
 ];
 
 const externalMcpServers = ["github", "figma", "linear", "notion", "sentry", "vercel", "supabase", "filesystem"];
@@ -64,9 +57,21 @@ for (const file of requiredPublicFiles) {
   if (!exists(file)) failures.push(`Missing public-readiness file: ${file}`);
 }
 
-for (const base of bilingualDocPairs) {
-  if (!exists(`${base}.md`)) failures.push(`Missing English doc: ${base}.md`);
-  if (!exists(`${base}.tr.md`)) failures.push(`Missing Turkish doc: ${base}.tr.md`);
+const docsDir = path.join(root, "docs");
+if (fs.existsSync(docsDir)) {
+  const docFiles = fs.readdirSync(docsDir).filter((file) => file.endsWith(".md"));
+  const docSet = new Set(docFiles);
+  for (const file of docFiles) {
+    if (file.endsWith(".tr.md")) {
+      const english = file.replace(/\.tr\.md$/, ".md");
+      if (!docSet.has(english)) failures.push(`Missing English doc pair for docs/${file}: docs/${english}`);
+    } else {
+      const turkish = file.replace(/\.md$/, ".tr.md");
+      if (!docSet.has(turkish)) failures.push(`Missing Turkish doc pair for docs/${file}: docs/${turkish}`);
+    }
+  }
+} else {
+  failures.push("Missing docs directory.");
 }
 
 const files = walk(root);

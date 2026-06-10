@@ -20,9 +20,14 @@ derived local setup.
 3. Keep docs and templates aligned:
    - `README.md`
    - `README.tr.md`
+   - `docs/how-to.md`
+   - `docs/how-to.tr.md`
+   - `docs/completion-audit.md`
+   - `docs/completion-audit.tr.md`
    - `docs/install.md`
    - `docs/install.tr.md`
    - `docs/security-model.md`
+   - every English doc in `docs/` should have a matching `.tr.md` pair
 4. Validate after edits:
    - `npm run validate`
    - `git status --short`

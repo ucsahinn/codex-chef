@@ -16,6 +16,10 @@ const requiredFiles = [
   "CHANGELOG.md",
   "AGENTS.md",
   "package.json",
+  "docs/how-to.md",
+  "docs/how-to.tr.md",
+  "docs/completion-audit.md",
+  "docs/completion-audit.tr.md",
   "catalog/mcp-servers.json",
   "catalog/skills.json",
   "templates/codex/config.windows.toml",
@@ -82,6 +86,27 @@ for (const file of requiredFiles) {
 }
 
 const files = walk(root);
+
+const docsDir = path.join(root, "docs");
+if (fs.existsSync(docsDir)) {
+  const docFiles = fs.readdirSync(docsDir).filter((file) => file.endsWith(".md"));
+  const docSet = new Set(docFiles);
+  for (const file of docFiles) {
+    if (file.endsWith(".tr.md")) {
+      const english = file.replace(/\.tr\.md$/, ".md");
+      if (!docSet.has(english)) {
+        failures.push(`Missing English doc pair for docs/${file}: docs/${english}`);
+      }
+    } else {
+      const turkish = file.replace(/\.md$/, ".tr.md");
+      if (!docSet.has(turkish)) {
+        failures.push(`Missing Turkish doc pair for docs/${file}: docs/${turkish}`);
+      }
+    }
+  }
+} else {
+  failures.push("Missing docs directory.");
+}
 
 for (const file of files) {
   const rel = toPosix(path.relative(root, file));

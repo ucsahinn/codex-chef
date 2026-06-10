@@ -1,0 +1,72 @@
+# Tamamlanma Denetimi
+
+Tarih: 2026-06-10
+
+Bu denetim istenen final durumu mevcut repo kanıtlarıyla eşleştirir.
+
+## Gereksinimler
+
+| Gereksinim | Kanıt | Durum |
+| --- | --- | --- |
+| İngilizce ve Türkçe içerik eksiksiz olmalı. | Her `docs/*.md` dosyasının `.tr.md` karşılığı var. `scripts/validate-repo.mjs` ve `scripts/security-audit.mjs` bu eşleşmeyi otomatik zorunlu tutuyor. | Tamam |
+| Kurulumun net bir how-to rehberi olmalı. | `docs/how-to.md` ve `docs/how-to.tr.md` tek seferlik kurulum, doğrulama, çalışma modeli, MCP varsayılanları, profiller, hazır promptlar ve güvenlik kurallarını anlatıyor. | Tamam |
+| Tek komutlu kurulum Codex'i güçlü uzman setup'a çevirmeli. | `scripts/install.ps1 -All -Force` ve `scripts/install.sh --all --force` Codex template'lerini, seçilmiş skill'leri, Git guard'larını, uzman ajanları, profilleri, kuralları ve yerel plugin'i kuruyor. | Tamam |
+| Setup, yazılım ekibi gibi çalışan subagent'lar içermeli. | `templates/codex/config.*.toml` içinde `code_mapper`, `docs_researcher`, `code_reviewer`, `frontend_verifier`, `security_auditor`, `test_verifier` ve `release_verifier` kayıtlı. | Tamam |
+| Araştırma ve güncel doküman erişimi hazır olmalı. | OpenAI Docs MCP ve Context7 varsayılan açık; `docs/research-notes.md` ve `docs/research-notes.tr.md` kullanılan resmi Codex manual başlıklarını kaydediyor. | Tamam |
+| `--seq` tarzı parçalama desteği olmalı. | `sequential-thinking` MCP Windows ve Unix template'lerinde varsayılan açık ve MCP kataloglarında dokümante. | Tamam |
+| Tarayıcı/UI doğrulaması hazır olmalı. | Playwright ve Chrome DevTools MCP'leri varsayılan açık; `frontend_verifier` kayıtlı ve dokümante. | Tamam |
+| Güvenlik güçlü kalmalı. | Sandbox ve onay varsayılanları konservatif, dış hesap/database/filesystem MCP'leri kapalı, Git guard'ları opsiyonel, Gitleaks release doğrulamasının parçası. | Tamam |
+| Public repo yerel state veya secret içermemeli. | Validasyon yerel kullanıcı yollarını, Codex session/memory yollarını, private key marker'larını, yaygın token pattern'lerini, yasak secret dosya adlarını, database'leri ve paket artifact'lerini engelliyor. | Tamam |
+| Sonraki bakım aynı hizada kalmalı. | Paketlenen `enterprise-codex-operator` skill'i README/install/how-to doküman hizasını ve iki dilli docs eşleşmesini zorunlu tutuyor. | Tamam |
+
+## Doğrulama Kanıtı
+
+Repo kökünden çalıştır:
+
+```bash
+npm run check
+```
+
+Beklenen sonuç:
+
+```text
+Validation passed.
+Security audit passed.
+```
+
+Release hazırlığı için kullanılan ek kontroller:
+
+```bash
+node --check scripts/validate-repo.mjs
+node --check scripts/security-audit.mjs
+```
+
+PowerShell parser kontrolü:
+
+```powershell
+powershell.exe -NoProfile -Command "`$errors = `$null; [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath scripts\install.ps1), [ref]`$errors) | Out-Null; if (`$errors) { exit 1 }; 'PowerShell parse OK'"
+```
+
+Bash syntax kontrolü:
+
+```bash
+bash -n scripts/install.sh
+```
+
+TOML parse kontrolü:
+
+```bash
+python -c "import pathlib,tomllib; [tomllib.loads(p.read_text(encoding='utf-8')) for p in pathlib.Path('templates/codex').rglob('*.toml')]; print('TOML parse OK')"
+```
+
+Gitleaks kuruluysa secret scan:
+
+```bash
+gitleaks detect --redact --no-banner --no-git --verbose
+```
+
+## Yayın Notu
+
+Installer tasarım gereği sadece yerel kurulum yapar. Commit, push, publish,
+deploy, secret rotation veya dış hesap değişikliği yapmaz. Bu aksiyonlar açık
+kullanıcı kararı olarak kalır.
