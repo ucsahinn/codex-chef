@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="README.md">English</a> | <a href="README.tr.md">Türkçe</a>
+  <a href="README.md">🇬🇧 English</a> | <a href="README.tr.md">🇹🇷 Türkçe</a>
 </p>
 
 Windows ağırlıklı çalışan güçlü kullanıcılar ve küçük ekipler için güvenlik
@@ -30,7 +30,7 @@ linkleri korunur.
 Bu repo token, auth dosyası, memory, session, yerel proje yolu, private key,
 cookie veya makineye özel gizli durum içermez.
 
-## Ne Kurar?
+## 🧩 Ne Kurar?
 
 - `~/.codex/AGENTS.md` kalıcı çalışma anlaşmaları.
 - `~/.codex/config.toml` güvenli varsayılanlar, MCP sunucuları, feature flagler
@@ -43,7 +43,7 @@ cookie veya makineye özel gizli durum içermez.
 - İsteğe bağlı skill kurulumu: `catalog/skills.json`.
 - Yerel plugin marketplace kaydı: `codex-enterprise-workflows`.
 
-## Hızlı Kurulum
+## ⚡ Hızlı Kurulum
 
 Repo'yu herhangi bir klasöre clone edip installer'ı repo kökünden çalıştır.
 
@@ -76,7 +76,7 @@ Tam kurulumun sadece bir bölümünü istiyorsan `-InstallSkills` /
 `--install-skills` veya `-InstallGitGuards` / `--install-git-guards`
 kullanabilirsin.
 
-## Nasıl Kullanılır?
+## 🧭 Nasıl Kullanılır?
 
 Günlük kullanım modeli için [docs/how-to.tr.md](docs/how-to.tr.md) dosyasından
 başla. Hedef akış:
@@ -91,13 +91,13 @@ başla. Hedef akış:
 Böylece Codex tek bir sohbet gibi değil, uzman ajanları olan küçük bir yazılım
 ekibi gibi çalışır; ana thread ise karar, uygulama ve final kanıtına odaklanır.
 
-## Görsel Akış
+## 🎬 Görsel Akış
 
 <p align="center">
   <img src="assets/workflow-overview.svg" alt="Kurulum, routing, araştırma, uygulama ve doğrulama adımlarını gösteren workflow diyagramı" width="100%" />
 </p>
 
-## Güvenli Varsayılanlar
+## 🛡️ Güvenli Varsayılanlar
 
 - Sandbox açık kalır.
 - Onay politikası interaktif kalır.
@@ -107,19 +107,19 @@ ekibi gibi çalışır; ana thread ise karar, uygulama ve final kanıtına odakl
 - GitHub push, release, deploy, secret rotation, package publish, yıkıcı dosya
   işlemleri ve credential erişimi açık kullanıcı onayına bağlıdır.
 
-## Güven Sinyalleri
+## ✅ Güven Sinyalleri
 
 | Sinyal | Kanıt |
 | --- | --- |
-| Public-safe tasarım | Token, auth dosyası, session, memory, cookie, private key veya makineye özel state içermez. |
-| Gerçek doğrulama | `npm run check` repo validasyonu ve güvenlik audit scriptlerini çalıştırır. |
-| İki dilli doküman | İngilizce ve Türkçe docs eşleşmesi validator tarafından zorunlu tutulur. |
-| Erişilebilir görseller | SVG asset'lerde `title` ve `desc`, README görsellerinde anlamlı alt text bulunur. |
-| Konservatif connector'lar | Authenticated hesap, database ve filesystem MCP'leri ihtiyaç olana kadar disabled kalır. |
-| Community akışı | Issue ve PR template'leri public-safe hatırlatmalar içerir. |
-| Dependency hijyeni | Dependabot GitHub Actions ve npm manifest güncellemelerini takip eder. |
+| 🛡️ Public-safe tasarım | Token, auth dosyası, session, memory, cookie, private key veya makineye özel state içermez. |
+| ✅ Gerçek doğrulama | `npm run check` repo validasyonu ve güvenlik audit scriptlerini çalıştırır. |
+| 🌐 İki dilli doküman | İngilizce ve Türkçe docs eşleşmesi validator tarafından zorunlu tutulur. |
+| 🎬 Erişilebilir animasyonlu görseller | SVG asset'lerde `title`, `desc`, hafif motion, reduced-motion fallback ve README alt text bulunur. |
+| 🔒 Konservatif connector'lar | Authenticated hesap, database ve filesystem MCP'leri ihtiyaç olana kadar disabled kalır. |
+| 🤝 Community akışı | Issue ve PR template'leri public-safe hatırlatmalar içerir. |
+| ♻️ Dependency hijyeni | Dependabot GitHub Actions ve npm manifest güncellemelerini takip eder. |
 
-## Repo Yapısı
+## 📁 Repo Yapısı
 
 ```text
 .github/                 Validation workflow, issue ve PR template'leri
@@ -132,7 +132,7 @@ templates/codex/         ~/.codex içine kopyalanan dosyalar
 templates/git/           İsteğe bağlı global Git hijyen dosyaları
 ```
 
-## Önceki Çalışmada Nereler Değişmiş?
+## 🔎 Önceki Çalışmada Nereler Değişmiş?
 
 Önceki global Codex çalışması yeni bir Masaüstü repo oluşturmamış. Canlı global
 kurulum tarafında değişiklik yapmış. Önemli güncel konumlar:
@@ -149,7 +149,7 @@ kurulum tarafında değişiklik yapmış. Önemli güncel konumlar:
 Normalize edilmiş denetim için [docs/local-audit.tr.md](docs/local-audit.tr.md)
 dosyasına bak.
 
-## GitHub'a Pushlamadan Önce
+## 🚀 GitHub'a Pushlamadan Önce
 
 Bu repo pushlanabilir olacak şekilde hazırlanmıştır, fakat installer commit,
 push, release, deploy veya remote oluşturma yapmaz.
@@ -168,7 +168,7 @@ Gitleaks kuruluysa:
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
-## Resmi Codex Kaynakları
+## 📚 Resmi Codex Kaynakları
 
 Bu repodaki dokümanlar 2026-06-10 tarihinde fetch edilen güncel Codex manual'ı
 ve yerel kurulum kanıtları baz alınarak hazırlandı.
@@ -183,7 +183,7 @@ ve yerel kurulum kanıtları baz alınarak hazırlandı.
 - Plugins: https://developers.openai.com/codex/plugins
 - Windows: https://developers.openai.com/codex/windows
 
-## Public Hazırlık
+## 🧾 Public Hazırlık
 
 Bakılacak dosyalar:
 

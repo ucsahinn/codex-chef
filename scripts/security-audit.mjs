@@ -6,7 +6,7 @@ const root = path.resolve(process.cwd());
 const failures = [];
 const warnings = [];
 
-const ignoredDirs = new Set([".git", "node_modules", "dist", "build", "coverage", ".next", "tmp", "temp"]);
+const ignoredDirs = new Set([".git", ".serena", "node_modules", "dist", "build", "coverage", ".next", "tmp", "temp"]);
 const requiredPublicFiles = [
   "README.md",
   "README.tr.md",

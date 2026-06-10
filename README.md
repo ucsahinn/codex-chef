@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="README.md">English</a> | <a href="README.tr.md">Türkçe</a>
+  <a href="README.md">🇬🇧 English</a> | <a href="README.tr.md">🇹🇷 Türkçe</a>
 </p>
 
 A security-first Codex setup kit for Windows-first power users and small teams.
@@ -31,7 +31,7 @@ source pages in the docs.
 This repository does not include tokens, auth files, memories, sessions, local
 project paths, private keys, cookies, or machine-specific state.
 
-## What It Installs
+## 🧩 What It Installs
 
 - `~/.codex/AGENTS.md` durable working agreements.
 - `~/.codex/config.toml` with safe defaults, MCP servers, feature flags, and
@@ -46,7 +46,7 @@ project paths, private keys, cookies, or machine-specific state.
 - A local plugin marketplace entry for the bundled
   `codex-enterprise-workflows` plugin.
 
-## Quick Start
+## ⚡ Quick Start
 
 Clone the repository anywhere, then run the installer from the repository root.
 
@@ -78,7 +78,7 @@ codex --strict-config "Summarize the active Codex setup."
 Use `-InstallSkills` / `--install-skills` or `-InstallGitGuards` /
 `--install-git-guards` when you want only one part of the full setup.
 
-## How To Use It
+## 🧭 How To Use It
 
 Start with [docs/how-to.md](docs/how-to.md) for the day-to-day operating
 model. The intended flow is:
@@ -93,13 +93,13 @@ model. The intended flow is:
 This makes the setup behave like a small specialist software team while keeping
 the main Codex thread focused on decisions, implementation, and final evidence.
 
-## Visual Overview
+## 🎬 Visual Overview
 
 <p align="center">
   <img src="assets/workflow-overview.svg" alt="Workflow overview showing install, route, research, implement, and verify steps" width="100%" />
 </p>
 
-## Safe Defaults
+## 🛡️ Safe Defaults
 
 - Sandbox stays enabled.
 - Approval policy stays interactive.
@@ -109,19 +109,19 @@ the main Codex thread focused on decisions, implementation, and final evidence.
 - GitHub push, release creation, deployment, secret rotation, package publishing,
   destructive file operations, and credential access remain approval-gated.
 
-## Trust Signals
+## ✅ Trust Signals
 
 | Signal | Evidence |
 | --- | --- |
-| Public-safe by design | No tokens, auth files, sessions, memories, cookies, private keys, or machine-specific state are included. |
-| Real validation | `npm run check` runs repository validation and security audit scripts. |
-| Bilingual docs | English and Turkish docs are paired and enforced by validation. |
-| Accessible visuals | SVG assets include `title` and `desc`, and README images include alt text. |
-| Conservative connectors | Authenticated account, database, and filesystem MCPs stay disabled until needed. |
-| Community flow | Issue and PR templates include public-safe reminders. |
-| Dependency hygiene | Dependabot tracks GitHub Actions and npm manifest updates. |
+| 🛡️ Public-safe by design | No tokens, auth files, sessions, memories, cookies, private keys, or machine-specific state are included. |
+| ✅ Real validation | `npm run check` runs repository validation and security audit scripts. |
+| 🌐 Bilingual docs | English and Turkish docs are paired and enforced by validation. |
+| 🎬 Accessible animated visuals | SVG assets include `title`, `desc`, lightweight motion, reduced-motion fallback, and README alt text. |
+| 🔒 Conservative connectors | Authenticated account, database, and filesystem MCPs stay disabled until needed. |
+| 🤝 Community flow | Issue and PR templates include public-safe reminders. |
+| ♻️ Dependency hygiene | Dependabot tracks GitHub Actions and npm manifest updates. |
 
-## Repository Layout
+## 📁 Repository Layout
 
 ```text
 .github/                 Validation workflow plus issue and PR templates
@@ -134,7 +134,7 @@ templates/codex/         Files copied into ~/.codex
 templates/git/           Optional global Git hygiene files
 ```
 
-## What Was Found Locally
+## 🔎 What Was Found Locally
 
 The previous global Codex work changed the live user setup, not a new Desktop
 repository. The important current-state locations were:
@@ -150,7 +150,7 @@ repository. The important current-state locations were:
 
 See [docs/local-audit.md](docs/local-audit.md) for the normalized audit.
 
-## Publishing To GitHub
+## 🚀 Publishing To GitHub
 
 This repository is designed to be pushed after validation, but the installer's
 job is local setup only. It does not create remotes, commit, push, publish,
@@ -170,7 +170,7 @@ If Gitleaks is installed:
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
-## Official Codex References
+## 📚 Official Codex References
 
 The docs in this repo are based on the current Codex manual fetched on
 2026-06-10 and local configuration evidence. Start with:
@@ -185,7 +185,7 @@ The docs in this repo are based on the current Codex manual fetched on
 - Plugins: https://developers.openai.com/codex/plugins
 - Windows: https://developers.openai.com/codex/windows
 
-## Public Readiness
+## 🧾 Public Readiness
 
 See:
 

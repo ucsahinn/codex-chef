@@ -10,7 +10,7 @@ This audit maps the requested end state to current repository evidence.
 | --- | --- | --- |
 | English and Turkish content must be complete. | Every `docs/*.md` file has a matching `.tr.md` pair. `scripts/validate-repo.mjs` and `scripts/security-audit.mjs` enforce the pairing automatically. | Complete |
 | The GitHub main screen must show Turkish. | `README.md` includes a language switch to `README.tr.md` and a Turkish short summary before the first major section. `scripts/validate-repo.mjs` enforces this storefront signal. | Complete |
-| The repository should use purposeful visuals and icons. | `README.md` and `README.tr.md` include real badges plus `assets/banner.svg` and `assets/workflow-overview.svg`; SVG validation requires title and description metadata. | Complete |
+| The repository should use purposeful visuals and icons. | `README.md` and `README.tr.md` include real badges, emoji accents, and `assets/banner.svg` plus `assets/workflow-overview.svg`; SVG validation requires title, description, lightweight animation, and reduced-motion fallback. | Complete |
 | GitHub community flows should be public-safe. | `.github/ISSUE_TEMPLATE/*` and `.github/pull_request_template.md` guide bug reports, docs suggestions, and PRs away from secrets and private local state. | Complete |
 | README should expose trust quickly. | `README.md` and `README.tr.md` include a trust-signal table covering public-safe scope, validation, bilingual docs, accessible visuals, connector defaults, and community flow. | Complete |
 | Dependency update hygiene should be visible. | `.github/dependabot.yml` tracks GitHub Actions and npm manifest updates on a weekly cadence. | Complete |

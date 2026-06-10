@@ -10,7 +10,7 @@ Bu denetim istenen final durumu mevcut repo kanıtlarıyla eşleştirir.
 | --- | --- | --- |
 | İngilizce ve Türkçe içerik eksiksiz olmalı. | Her `docs/*.md` dosyasının `.tr.md` karşılığı var. `scripts/validate-repo.mjs` ve `scripts/security-audit.mjs` bu eşleşmeyi otomatik zorunlu tutuyor. | Tamam |
 | GitHub ana ekranında Türkçe görünür olmalı. | `README.md` içinde `README.tr.md` dil geçişi ve ilk ana bölümden önce Türkçe kısa özet var. `scripts/validate-repo.mjs` bu storefront sinyalini zorunlu tutuyor. | Tamam |
-| Repo amacına uygun ikon ve görseller kullanmalı. | `README.md` ve `README.tr.md` gerçek badge'ler ile `assets/banner.svg` ve `assets/workflow-overview.svg` görsellerini içeriyor; SVG validasyonu title ve description metadata'sını zorunlu tutuyor. | Tamam |
+| Repo amacına uygun ikon ve görseller kullanmalı. | `README.md` ve `README.tr.md` gerçek badge'ler, emoji aksanları, `assets/banner.svg` ve `assets/workflow-overview.svg` görsellerini içeriyor; SVG validasyonu title, description, hafif animasyon ve reduced-motion fallback zorunlu tutuyor. | Tamam |
 | GitHub community akışları public-safe olmalı. | `.github/ISSUE_TEMPLATE/*` ve `.github/pull_request_template.md` bug bildirimi, doküman önerisi ve PR akışlarını secret ve private local state paylaşımından uzak tutuyor. | Tamam |
 | README güven sinyallerini hızlı göstermeli. | `README.md` ve `README.tr.md` public-safe kapsam, validasyon, iki dilli docs, erişilebilir görseller, connector varsayılanları ve community akışını anlatan güven sinyalleri tablosu içeriyor. | Tamam |
 | Dependency güncelleme hijyeni görünür olmalı. | `.github/dependabot.yml` GitHub Actions ve npm manifest güncellemelerini haftalık takip eder. | Tamam |

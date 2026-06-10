@@ -65,7 +65,7 @@ const deniedExtensions = new Set([
   ".tgz"
 ]);
 
-const ignoredDirs = new Set([".git", "node_modules", "dist", "build", "coverage", ".next", "tmp", "temp"]);
+const ignoredDirs = new Set([".git", ".serena", "node_modules", "dist", "build", "coverage", ".next", "tmp", "temp"]);
 
 function toPosix(filePath) {
   return filePath.split(path.sep).join("/");
@@ -178,6 +178,12 @@ for (const file of files) {
   if (rel.startsWith("assets/") && rel.endsWith(".svg")) {
     if (!/<title[\s>]/.test(text) || !/<desc[\s>]/.test(text)) {
       failures.push(`SVG asset must include title and desc for accessibility: ${rel}`);
+    }
+    if (!/(?:@keyframes|<animate(?:Transform)?[\s>])/.test(text)) {
+      failures.push(`SVG asset must include lightweight animation: ${rel}`);
+    }
+    if (!/prefers-reduced-motion/.test(text)) {
+      failures.push(`SVG asset must include reduced-motion fallback: ${rel}`);
     }
   }
 }

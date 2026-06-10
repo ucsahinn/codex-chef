@@ -17,3 +17,5 @@
 - Added bilingual public-safe issue templates and a pull request template.
 - Added README trust-signal tables and expanded repository map entries.
 - Added Dependabot configuration for GitHub Actions and npm manifest updates.
+- Added icon-rich README polish, animated SVG visuals, emoji accents, and reduced-motion validation.
+- Ignored local Serena state in Git and repository scans.

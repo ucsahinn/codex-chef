@@ -1,65 +1,135 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="520" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
   <title id="title">Codex Enterprise Starter workflow overview</title>
-  <desc id="desc">A workflow diagram showing install, route, research, implement, verify, and release readiness steps for the Codex Enterprise Starter.</desc>
+  <desc id="desc">An animated workflow diagram showing install, route, research, implement, verify, and release readiness steps for the Codex Enterprise Starter.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L10,5 L0,10 Z" fill="#0f766e"/>
     </marker>
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    <style>
+      .rail { stroke-dasharray: 8 12; animation: dash 11s linear infinite; }
+      .step { animation: lift .7s cubic-bezier(.22,1,.36,1) both; }
+      .d1 { animation-delay: .05s; }
+      .d2 { animation-delay: .15s; }
+      .d3 { animation-delay: .25s; }
+      .d4 { animation-delay: .35s; }
+      .d5 { animation-delay: .45s; }
+      .breath { transform-origin: center; animation: breath 2.8s ease-in-out infinite; }
+      .cursor { animation: cursor 1.25s steps(2, end) infinite; }
+      .sweep { animation: sweep 5.5s cubic-bezier(.22,1,.36,1) infinite; }
+      @keyframes dash { to { stroke-dashoffset: -180; } }
+      @keyframes lift { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes breath { 0%,100% { opacity: .52; transform: scale(1); } 50% { opacity: 1; transform: scale(1.12); } }
+      @keyframes cursor { 0%,45% { opacity: 1; } 46%,100% { opacity: .2; } }
+      @keyframes sweep { 0%,100% { transform: translateX(-24px); opacity: .1; } 50% { transform: translateX(184px); opacity: .9; } }
+      @media (prefers-reduced-motion: reduce) {
+        .rail, .step, .breath, .cursor, .sweep { animation: none; }
+      }
+    </style>
   </defs>
-  <rect width="1120" height="520" rx="24" fill="#f8fafc"/>
-  <rect x="32" y="32" width="1056" height="456" rx="18" fill="#ffffff" stroke="#cbd5e1"/>
-  <text x="72" y="86" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="34" font-weight="800" fill="#0f172a">One-shot Codex setup flow</text>
-  <text x="72" y="120" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" fill="#475569">Tek kurulumdan sonra Codex uzman ajanlar, MCP kaynakları ve güvenli doğrulama kapılarıyla çalışır.</text>
 
-  <g font-family="Inter, Segoe UI, Arial, sans-serif">
-    <g transform="translate(72 178)">
-      <rect width="152" height="116" rx="14" fill="#ecfeff" stroke="#0e7490"/>
-      <text x="22" y="38" font-size="18" font-weight="800" fill="#0f172a">Install</text>
-      <text x="22" y="68" font-size="14" fill="#334155">-All / --all</text>
-      <text x="22" y="92" font-size="14" fill="#334155">templates + plugin</text>
-    </g>
-    <g transform="translate(258 178)">
-      <rect width="152" height="116" rx="14" fill="#f0fdf4" stroke="#15803d"/>
-      <text x="22" y="38" font-size="18" font-weight="800" fill="#0f172a">Route</text>
-      <text x="22" y="68" font-size="14" fill="#334155">AGENTS.md</text>
-      <text x="22" y="92" font-size="14" fill="#334155">profiles + rules</text>
-    </g>
-    <g transform="translate(444 178)">
-      <rect width="152" height="116" rx="14" fill="#eef2ff" stroke="#4338ca"/>
-      <text x="22" y="38" font-size="18" font-weight="800" fill="#0f172a">Research</text>
-      <text x="22" y="68" font-size="14" fill="#334155">OpenAI Docs</text>
-      <text x="22" y="92" font-size="14" fill="#334155">Context7 + seq</text>
-    </g>
-    <g transform="translate(630 178)">
-      <rect width="152" height="116" rx="14" fill="#fff7ed" stroke="#c2410c"/>
-      <text x="22" y="38" font-size="18" font-weight="800" fill="#0f172a">Implement</text>
-      <text x="22" y="68" font-size="14" fill="#334155">main thread</text>
-      <text x="22" y="92" font-size="14" fill="#334155">selected skills</text>
-    </g>
-    <g transform="translate(816 178)">
-      <rect width="152" height="116" rx="14" fill="#fefce8" stroke="#a16207"/>
-      <text x="22" y="38" font-size="18" font-weight="800" fill="#0f172a">Verify</text>
-      <text x="22" y="68" font-size="14" fill="#334155">test + browser</text>
-      <text x="22" y="92" font-size="14" fill="#334155">security scan</text>
-    </g>
-  </g>
+  <rect width="1120" height="520" rx="24" fill="#f1f5f9"/>
+  <rect x="32" y="32" width="1056" height="456" rx="20" fill="#f8fafc" stroke="#cbd5e1"/>
+  <path d="M58 456 C220 405 286 468 452 426 C624 382 684 306 858 342 C972 366 1028 326 1064 282" fill="none" stroke="#0f766e" stroke-opacity="0.14" stroke-width="3"/>
+
+  <text x="72" y="86" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800" fill="#0f172a">One-shot Codex setup flow</text>
+  <text x="72" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#475569">Tek kurulumdan sonra Codex uzman ajanlar, MCP kaynakları ve güvenli doğrulama kapılarıyla çalışır.</text>
 
   <g fill="none" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow)">
-    <path d="M224 236 H252"/>
-    <path d="M410 236 H438"/>
-    <path d="M596 236 H624"/>
-    <path d="M782 236 H810"/>
+    <path class="rail" d="M224 248 H252"/>
+    <path class="rail" d="M410 248 H438"/>
+    <path class="rail" d="M596 248 H624"/>
+    <path class="rail" d="M782 248 H810"/>
   </g>
 
-  <g font-family="Inter, Segoe UI, Arial, sans-serif">
-    <rect x="72" y="352" width="280" height="78" rx="14" fill="#f8fafc" stroke="#94a3b8"/>
-    <text x="96" y="382" font-size="17" font-weight="800" fill="#0f172a">Specialist agents</text>
-    <text x="96" y="410" font-size="14" fill="#475569">mapper, researcher, reviewer, UI, security, test, release</text>
-    <rect x="420" y="352" width="280" height="78" rx="14" fill="#f8fafc" stroke="#94a3b8"/>
-    <text x="444" y="382" font-size="17" font-weight="800" fill="#0f172a">Safe defaults</text>
-    <text x="444" y="410" font-size="14" fill="#475569">sandbox on, approvals interactive, external MCPs disabled</text>
-    <rect x="768" y="352" width="280" height="78" rx="14" fill="#f8fafc" stroke="#94a3b8"/>
-    <text x="792" y="382" font-size="17" font-weight="800" fill="#0f172a">Public readiness</text>
-    <text x="792" y="410" font-size="14" fill="#475569">bilingual docs, completion audit, validation, Gitleaks</text>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <g class="step d1" transform="translate(72 176)" filter="url(#soft-shadow)">
+      <rect width="152" height="128" rx="16" fill="#ecfeff" stroke="#0e7490"/>
+      <g fill="none" stroke="#0e7490" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="22" y="22" width="42" height="30" rx="8"/>
+        <path d="M34 32 L42 38 L34 44 M48 44 H56"/>
+      </g>
+      <text x="22" y="72" font-size="18" font-weight="800" fill="#0f172a">Install</text>
+      <text x="22" y="98" font-size="14" fill="#334155">-All / --all</text>
+      <text x="22" y="120" font-size="14" fill="#334155">templates + plugin</text>
+    </g>
+    <g class="step d2" transform="translate(258 176)" filter="url(#soft-shadow)">
+      <rect width="152" height="128" rx="16" fill="#f0fdf4" stroke="#15803d"/>
+      <g fill="none" stroke="#15803d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="34" cy="31" r="9"/>
+        <circle cx="64" cy="23" r="9"/>
+        <circle cx="64" cy="49" r="9"/>
+        <path d="M43 31 C52 31 54 23 55 23 M43 31 C52 31 54 49 55 49"/>
+      </g>
+      <text x="22" y="72" font-size="18" font-weight="800" fill="#0f172a">Route</text>
+      <text x="22" y="98" font-size="14" fill="#334155">AGENTS.md</text>
+      <text x="22" y="120" font-size="14" fill="#334155">profiles + rules</text>
+    </g>
+    <g class="step d3" transform="translate(444 176)" filter="url(#soft-shadow)">
+      <rect width="152" height="128" rx="16" fill="#eef2ff" stroke="#4338ca"/>
+      <g fill="none" stroke="#4338ca" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="40" cy="34" r="16"/>
+        <path d="M52 46 L66 60"/>
+        <path class="sweep" d="M26 34 H54" stroke="#818cf8"/>
+      </g>
+      <text x="22" y="72" font-size="18" font-weight="800" fill="#0f172a">Research</text>
+      <text x="22" y="98" font-size="14" fill="#334155">OpenAI Docs</text>
+      <text x="22" y="120" font-size="14" fill="#334155">Context7 + seq</text>
+    </g>
+    <g class="step d4" transform="translate(630 176)" filter="url(#soft-shadow)">
+      <rect width="152" height="128" rx="16" fill="#fff7ed" stroke="#c2410c"/>
+      <g fill="none" stroke="#c2410c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M38 24 L22 39 L38 54"/>
+        <path d="M58 24 L74 39 L58 54"/>
+        <path d="M50 21 L46 58"/>
+        <path class="cursor" d="M84 54 V30"/>
+      </g>
+      <text x="22" y="72" font-size="18" font-weight="800" fill="#0f172a">Implement</text>
+      <text x="22" y="98" font-size="14" fill="#334155">main thread</text>
+      <text x="22" y="120" font-size="14" fill="#334155">selected skills</text>
+    </g>
+    <g class="step d5" transform="translate(816 176)" filter="url(#soft-shadow)">
+      <rect width="152" height="128" rx="16" fill="#fefce8" stroke="#a16207"/>
+      <g fill="none" stroke="#a16207" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M46 18 L74 28 V47 C74 66 59 78 46 82 C33 78 18 66 18 47 V28 Z"/>
+        <path d="M33 48 L43 58 L61 37"/>
+        <circle class="breath" cx="82" cy="20" r="7" fill="#facc15" stroke="none"/>
+      </g>
+      <text x="22" y="72" font-size="18" font-weight="800" fill="#0f172a">Verify</text>
+      <text x="22" y="98" font-size="14" fill="#334155">test + browser</text>
+      <text x="22" y="120" font-size="14" fill="#334155">security scan</text>
+    </g>
+  </g>
+
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="72" y="356" width="280" height="78" rx="16" fill="#f8fafc" stroke="#94a3b8"/>
+    <g fill="none" stroke="#0f766e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="96" y="376" width="26" height="22" rx="6"/>
+      <path d="M102 376 V370 M116 376 V370 M103 391 H115"/>
+    </g>
+    <text x="136" y="386" font-size="17" font-weight="800" fill="#0f172a">Specialist agents</text>
+    <text x="136" y="410" font-size="13" fill="#475569">mapper, researcher, reviewer</text>
+    <text x="136" y="428" font-size="13" fill="#475569">UI, security, test, release</text>
+
+    <rect x="420" y="356" width="280" height="78" rx="16" fill="#f8fafc" stroke="#94a3b8"/>
+    <g fill="none" stroke="#164e63" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M456 370 L478 378 V391 C478 407 466 416 456 420 C446 416 434 407 434 391 V378 Z"/>
+      <path d="M446 392 L454 400 L468 384"/>
+    </g>
+    <text x="492" y="386" font-size="17" font-weight="800" fill="#0f172a">Safe defaults</text>
+    <text x="492" y="410" font-size="13" fill="#475569">sandbox on, approvals</text>
+    <text x="492" y="428" font-size="13" fill="#475569">external MCPs disabled</text>
+
+    <rect x="768" y="356" width="280" height="78" rx="16" fill="#f8fafc" stroke="#94a3b8"/>
+    <g fill="none" stroke="#15803d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M798 372 H828 V414 H798 Z"/>
+      <path d="M805 386 H821 M805 398 H821 M805 410 H815"/>
+      <circle class="breath" cx="832" cy="374" r="6" fill="#34d399" stroke="none"/>
+    </g>
+    <text x="844" y="386" font-size="17" font-weight="800" fill="#0f172a">Public readiness</text>
+    <text x="844" y="410" font-size="13" fill="#475569">bilingual docs, audit</text>
+    <text x="844" y="428" font-size="13" fill="#475569">validation, Gitleaks</text>
   </g>
 </svg>

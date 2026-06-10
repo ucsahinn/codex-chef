@@ -29,7 +29,7 @@ derived local setup.
    - `docs/security-model.md`
    - every English doc in `docs/` should have a matching `.tr.md` pair
    - public README visuals under `assets/` should stay purposeful, accessible,
-     and public-safe
+     lightly animated with reduced-motion fallback, and public-safe
 4. Validate after edits:
    - `npm run validate`
    - `git status --short`

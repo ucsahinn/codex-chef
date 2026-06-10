@@ -1,56 +1,128 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
   <title id="title">Codex Enterprise Starter banner</title>
-  <desc id="desc">A public-safe banner showing a Codex setup package with agents, MCP connectors, skills, security checks, and bilingual documentation.</desc>
+  <desc id="desc">An animated public-safe banner showing a Codex setup package with icons for agents, MCP connectors, skills, verification gates, security checks, and bilingual documentation.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="52%" stop-color="#164e63"/>
+      <stop offset="48%" stop-color="#155e75"/>
       <stop offset="100%" stop-color="#0f766e"/>
     </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e0f2fe"/>
+    </linearGradient>
+    <linearGradient id="scan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#67e8f9" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#67e8f9" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#67e8f9" stop-opacity="0"/>
+    </linearGradient>
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#020617" flood-opacity="0.22"/>
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#061118" flood-opacity="0.25"/>
     </filter>
+    <style>
+      .route-line { stroke-dasharray: 12 18; animation: routeDash 14s linear infinite; }
+      .float { animation: floatY 7s cubic-bezier(.22,1,.36,1) infinite; }
+      .float-alt { animation: floatYAlt 8s cubic-bezier(.22,1,.36,1) infinite; }
+      .pulse { transform-origin: center; animation: pulse 2.8s ease-out infinite; }
+      .scan { animation: scanMove 6s cubic-bezier(.22,1,.36,1) infinite; }
+      .blink { animation: blink 1.4s steps(2, end) infinite; }
+      @keyframes routeDash { to { stroke-dashoffset: -240; } }
+      @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+      @keyframes floatYAlt { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+      @keyframes pulse { 0%,100% { opacity: .55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+      @keyframes scanMove { 0%,100% { transform: translateX(-70px); opacity: .05; } 50% { transform: translateX(250px); opacity: .85; } }
+      @keyframes blink { 0%,45% { opacity: 1; } 46%,100% { opacity: .25; } }
+      @media (prefers-reduced-motion: reduce) {
+        .route-line, .float, .float-alt, .pulse, .scan, .blink { animation: none; }
+      }
+    </style>
   </defs>
-  <rect width="1200" height="420" rx="28" fill="url(#bg)"/>
-  <path d="M72 318 C210 238 300 362 438 284 C568 210 676 236 798 176 C932 110 1028 142 1128 90" fill="none" stroke="#67e8f9" stroke-width="3" stroke-opacity="0.55"/>
-  <path d="M86 354 C208 296 318 330 446 310 C612 284 708 164 864 192 C984 214 1046 184 1134 126" fill="none" stroke="#a7f3d0" stroke-width="2" stroke-opacity="0.42"/>
+
+  <rect width="1200" height="420" rx="30" fill="url(#bg)"/>
+  <circle class="pulse" cx="1088" cy="74" r="10" fill="#a7f3d0" opacity="0.85"/>
+  <circle class="pulse" cx="92" cy="338" r="7" fill="#67e8f9" opacity="0.7"/>
+  <path class="route-line" d="M76 318 C210 238 300 362 438 284 C568 210 676 236 798 176 C932 110 1028 142 1128 90" fill="none" stroke="#67e8f9" stroke-width="3" stroke-opacity="0.52" stroke-linecap="round"/>
+  <path class="route-line" d="M86 354 C208 296 318 330 446 310 C612 284 708 164 864 192 C984 214 1046 184 1134 126" fill="none" stroke="#a7f3d0" stroke-width="2" stroke-opacity="0.42" stroke-linecap="round"/>
 
   <g filter="url(#shadow)">
-    <rect x="70" y="68" width="470" height="246" rx="18" fill="#f8fafc"/>
-    <rect x="92" y="92" width="92" height="18" rx="9" fill="#0f766e"/>
-    <rect x="92" y="128" width="340" height="18" rx="9" fill="#0f172a"/>
-    <rect x="92" y="164" width="386" height="12" rx="6" fill="#94a3b8"/>
-    <rect x="92" y="188" width="314" height="12" rx="6" fill="#cbd5e1"/>
-    <rect x="92" y="230" width="116" height="38" rx="10" fill="#0f766e"/>
-    <rect x="224" y="230" width="126" height="38" rx="10" fill="#e2e8f0"/>
-    <text x="92" y="340" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" fill="#e0f2fe">English + Türkçe</text>
+    <rect x="70" y="62" width="470" height="270" rx="22" fill="url(#panel)"/>
+    <rect x="94" y="88" width="422" height="40" rx="14" fill="#0f172a"/>
+    <circle cx="116" cy="108" r="5" fill="#fb7185"/>
+    <circle cx="134" cy="108" r="5" fill="#fbbf24"/>
+    <circle cx="152" cy="108" r="5" fill="#34d399"/>
+    <text x="178" y="115" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#dbeafe">scripts/install.ps1 -All -Force</text>
+    <rect class="scan" x="102" y="138" width="116" height="174" rx="12" fill="url(#scan)" opacity="0.7"/>
+
+    <g font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#334155">
+      <text x="104" y="166">&gt; copy templates</text>
+      <text x="104" y="196">&gt; register agents</text>
+      <text x="104" y="226">&gt; install skills</text>
+      <text x="104" y="256">&gt; run validation</text>
+      <text x="104" y="286">&gt; no secrets found</text>
+    </g>
+
+    <g class="float" transform="translate(350 154)" fill="none" stroke="#0f766e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="0" y="10" width="84" height="70" rx="18" fill="#ccfbf1" stroke="#0f766e"/>
+      <path d="M24 10 V0 M60 10 V0"/>
+      <circle cx="28" cy="42" r="5" fill="#0f766e" stroke="none"/>
+      <circle cx="56" cy="42" r="5" fill="#0f766e" stroke="none"/>
+      <path d="M28 62 H56"/>
+    </g>
+
+    <g class="float-alt" transform="translate(382 246)" fill="none" stroke="#164e63" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 12 L42 2 L68 12 V38 C68 60 52 73 42 78 C32 73 16 60 16 38 Z" fill="#e0f2fe"/>
+      <path d="M30 40 L39 49 L56 30"/>
+    </g>
   </g>
 
-  <g font-family="Inter, Segoe UI, Arial, sans-serif" fill="#ecfeff">
-    <text x="610" y="108" font-size="58" font-weight="800">Codex Enterprise Starter</text>
-    <text x="614" y="154" font-size="23" fill="#ccfbf1">One-shot setup for agents, skills, MCPs, rules, and safe release checks.</text>
-    <text x="614" y="188" font-size="23" fill="#dbeafe">Tek kurulumla uzman ajanlı, güvenli ve iki dilli Codex çalışma alanı.</text>
+  <g font-family="Segoe UI, Arial, sans-serif" fill="#ecfeff">
+    <text x="600" y="104" font-size="46" font-weight="800">Codex Enterprise Starter</text>
+    <text x="604" y="150" font-size="22" fill="#ccfbf1">Agents, MCPs, skills, rules, and release checks in one install.</text>
+    <text x="604" y="184" font-size="22" fill="#dbeafe">Uzman ajanlı, güvenli ve iki dilli Codex çalışma alanı.</text>
   </g>
 
-  <g font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">
-    <rect x="614" y="234" width="132" height="44" rx="12" fill="#f8fafc"/>
-    <text x="646" y="263" fill="#0f172a">Agents</text>
-    <rect x="762" y="234" width="112" height="44" rx="12" fill="#ecfeff"/>
-    <text x="797" y="263" fill="#0f172a">MCP</text>
-    <rect x="890" y="234" width="112" height="44" rx="12" fill="#f0fdf4"/>
-    <text x="924" y="263" fill="#0f172a">Skills</text>
-    <rect x="1018" y="234" width="120" height="44" rx="12" fill="#f8fafc"/>
-    <text x="1050" y="263" fill="#0f172a">Verify</text>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="750">
+    <g class="float">
+      <rect x="604" y="232" width="132" height="48" rx="14" fill="#f8fafc"/>
+      <g fill="none" stroke="#0f766e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="622" y="244" width="24" height="22" rx="6"/>
+        <path d="M628 244 V238 M640 244 V238 M628 257 H640"/>
+      </g>
+      <text x="656" y="263" fill="#0f172a">Agents</text>
+    </g>
+    <g class="float-alt">
+      <rect x="762" y="232" width="112" height="48" rx="14" fill="#ecfeff"/>
+      <g fill="none" stroke="#155e75" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="784" cy="256" r="8"/>
+        <path d="M792 256 H808 M808 246 V266 M808 246 H818 M808 266 H818"/>
+      </g>
+      <text x="820" y="263" fill="#0f172a">MCP</text>
+    </g>
+    <g class="float">
+      <rect x="890" y="232" width="112" height="48" rx="14" fill="#f0fdf4"/>
+      <g fill="none" stroke="#15803d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M916 242 L920 252 L930 256 L920 260 L916 270 L912 260 L902 256 L912 252 Z"/>
+      </g>
+      <text x="934" y="263" fill="#0f172a">Skills</text>
+    </g>
+    <g class="float-alt">
+      <rect x="1018" y="232" width="120" height="48" rx="14" fill="#f8fafc"/>
+      <g fill="none" stroke="#0f766e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1040 242 L1060 249 V260 C1060 272 1051 279 1040 282 C1029 279 1020 272 1020 260 V249 Z"/>
+        <path d="M1031 261 L1038 268 L1051 253"/>
+      </g>
+      <text x="1068" y="263" fill="#0f172a">Verify</text>
+    </g>
   </g>
 
   <g fill="none" stroke="#bae6fd" stroke-width="3" stroke-linecap="round">
-    <path d="M746 256 H762"/>
-    <path d="M874 256 H890"/>
-    <path d="M1002 256 H1018"/>
+    <path class="blink" d="M746 256 H762"/>
+    <path class="blink" d="M874 256 H890"/>
+    <path class="blink" d="M1002 256 H1018"/>
   </g>
 
-  <g font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" fill="#d1fae5">
-    <text x="614" y="328">Public-safe starter package</text>
-    <text x="614" y="354">No tokens, sessions, memories, cookies, private keys, or machine state</text>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#d1fae5">
+    <text x="604" y="328">Public-safe starter package</text>
+    <text x="604" y="354">No tokens, sessions, memories, cookies, private keys, or machine state</text>
   </g>
 </svg>

@@ -21,6 +21,7 @@
 .codex/logs/
 .codex/auth*
 .codex/*.local.toml
+.serena/
 codex-manual.md
 codex-manual.outline.md
 
