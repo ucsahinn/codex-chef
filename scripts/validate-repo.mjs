@@ -9,6 +9,9 @@ const requiredFiles = [
   "README.md",
   "README.tr.md",
   "SECURITY.md",
+  "PRIVACY.md",
+  "SUPPORT.md",
+  "CODE_OF_CONDUCT.md",
   "CONTRIBUTING.md",
   "CHANGELOG.md",
   "AGENTS.md",
@@ -21,6 +24,7 @@ const requiredFiles = [
   "templates/codex/rules/default.rules",
   "scripts/install.ps1",
   "scripts/install.sh",
+  "scripts/security-audit.mjs",
   "plugins/codex-enterprise-workflows/.codex-plugin/plugin.json",
   ".agents/plugins/marketplace.json"
 ];

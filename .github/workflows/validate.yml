@@ -18,3 +18,4 @@ jobs:
         with:
           node-version: 20
       - run: npm run validate
+      - run: npm run audit:security

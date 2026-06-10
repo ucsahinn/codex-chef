@@ -5,6 +5,10 @@ It turns a mature local Codex configuration into a clean, shareable repository:
 global instructions, MCP defaults, specialist agents, approval rules, skill
 catalogs, plugin packaging, validation scripts, and bilingual how-to docs.
 
+This is an unofficial community starter. It is not an OpenAI product, but it is
+designed from official Codex documentation and keeps links to the official
+source pages in the docs.
+
 This repository does not include tokens, auth files, memories, sessions, local
 project paths, private keys, cookies, or machine-specific state.
 
@@ -25,10 +29,13 @@ project paths, private keys, cookies, or machine-specific state.
 
 ## Quick Start
 
+Clone the repository anywhere, then run the installer from the repository root.
+
 PowerShell:
 
 ```powershell
-cd "$env:USERPROFILE\Desktop\codex-enterprise-starter"
+git clone https://github.com/ucsahinn/codex-enterprise-starter.git
+cd codex-enterprise-starter
 Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install.ps1 -InstallSkills -InstallGitGuards -Force
 ```
@@ -36,7 +43,8 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 Bash or WSL:
 
 ```bash
-cd ~/Desktop/codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-enterprise-starter.git
+cd codex-enterprise-starter
 chmod +x scripts/install.sh
 ./scripts/install.sh --install-skills --install-git-guards --force
 ```
@@ -94,7 +102,7 @@ deploy, or open pull requests.
 Before pushing:
 
 ```bash
-npm run validate
+npm run check
 git status --short
 git diff --cached
 ```
@@ -119,3 +127,12 @@ The docs in this repo are based on the current Codex manual fetched on
 - Permissions: https://developers.openai.com/codex/permissions
 - Plugins: https://developers.openai.com/codex/plugins
 - Windows: https://developers.openai.com/codex/windows
+
+## Public Readiness
+
+See:
+
+- [docs/verification.md](docs/verification.md)
+- [docs/public-readiness.md](docs/public-readiness.md)
+- [SECURITY.md](SECURITY.md)
+- [SUPPORT.md](SUPPORT.md)

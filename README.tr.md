@@ -8,6 +8,10 @@ kurulabilir bir repo haline getirmek. Bu repo global talimatları, MCP
 varsayılanlarını, uzman ajanları, onay kurallarını, skill kataloglarını, plugin
 paketini, doğrulama scriptlerini ve iki dilli kullanım dokümanlarını içerir.
 
+Bu resmi OpenAI ürünü değildir; community starter paketidir. Ancak resmi Codex
+dokümantasyonu baz alınarak hazırlanmıştır ve dokümanlarda resmi kaynak
+linkleri korunur.
+
 Bu repo token, auth dosyası, memory, session, yerel proje yolu, private key,
 cookie veya makineye özel gizli durum içermez.
 
@@ -26,10 +30,13 @@ cookie veya makineye özel gizli durum içermez.
 
 ## Hızlı Kurulum
 
+Repo'yu herhangi bir klasöre clone edip installer'ı repo kökünden çalıştır.
+
 PowerShell:
 
 ```powershell
-cd "$env:USERPROFILE\Desktop\codex-enterprise-starter"
+git clone https://github.com/ucsahinn/codex-enterprise-starter.git
+cd codex-enterprise-starter
 Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install.ps1 -InstallSkills -InstallGitGuards -Force
 ```
@@ -37,7 +44,8 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 Bash veya WSL:
 
 ```bash
-cd ~/Desktop/codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-enterprise-starter.git
+cd codex-enterprise-starter
 chmod +x scripts/install.sh
 ./scripts/install.sh --install-skills --install-git-guards --force
 ```
@@ -95,7 +103,7 @@ push, release, deploy veya remote oluşturma yapmaz.
 Push öncesi:
 
 ```bash
-npm run validate
+npm run check
 git status --short
 git diff --cached
 ```
@@ -120,3 +128,12 @@ ve yerel kurulum kanıtları baz alınarak hazırlandı.
 - Permissions: https://developers.openai.com/codex/permissions
 - Plugins: https://developers.openai.com/codex/plugins
 - Windows: https://developers.openai.com/codex/windows
+
+## Public Hazırlık
+
+Bakılacak dosyalar:
+
+- [docs/verification.md](docs/verification.md)
+- [docs/public-readiness.md](docs/public-readiness.md)
+- [SECURITY.md](SECURITY.md)
+- [SUPPORT.md](SUPPORT.md)

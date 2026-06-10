@@ -1,0 +1,42 @@
+# Public Readiness
+
+This repository is intended for public use, but it must stay honest about its
+scope.
+
+## Positioning
+
+- Community starter, not an official OpenAI product.
+- Official-source-backed, with links to Codex documentation.
+- Local setup kit, not a managed enterprise policy product.
+- Safe defaults first; users intentionally enable account connectors.
+
+## Public User Requirements
+
+- Clone-and-run instructions work from any directory.
+- Windows PowerShell and Bash/WSL installers exist.
+- Installers create backups before replacing managed files.
+- Users can smoke-test with temporary `CODEX_HOME` and `AGENTS_HOME`.
+- No real local state, auth, sessions, memories, project trust, or private paths
+  are published.
+- Authenticated MCPs are disabled until a user intentionally enables them.
+- The package is marked `private: true` to avoid accidental npm publishing.
+
+## Maintainer Requirements
+
+Before pushing:
+
+```bash
+npm run check
+git status --short
+git diff --cached --check
+gitleaks detect --redact --no-banner --no-git --verbose
+```
+
+After pushing:
+
+```bash
+git rev-parse HEAD
+git -c http.sslBackend=openssl ls-remote origin refs/heads/main
+```
+
+The hashes must match.

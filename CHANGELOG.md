@@ -9,3 +9,5 @@
 - Added install scripts for PowerShell and Bash.
 - Added validation script and GitHub Actions workflow.
 - Added optional local plugin marketplace package.
+- Added public-readiness, verification, privacy, support, and conduct docs.
+- Added security audit script covering safe defaults, disabled authenticated MCPs, and leak patterns.
