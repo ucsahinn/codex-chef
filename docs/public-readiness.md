@@ -11,6 +11,9 @@ scope.
 - Safe defaults first; users intentionally enable account connectors.
 - First-screen README includes English and Turkish entry points, real badges,
   emoji accents, and public-safe animated SVG visuals.
+- Senior operating standards are documented in
+  [docs/best-practices.md](best-practices.md) so public users can see how
+  skills, MCPs, hooks, plugins, docs, and verification gates should evolve.
 
 ## Public User Requirements
 
@@ -28,6 +31,8 @@ scope.
 - GitHub issue and pull request templates include public-safe reminders and
   bilingual context where useful.
 - Dependabot is configured for GitHub Actions and npm manifest update PRs.
+- Installable skill sources are checked offline by `npm run verify:skills` and
+  can be resolved online with `npm run verify:skills:online` before publication.
 
 ## Maintainer Requirements
 

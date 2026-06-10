@@ -13,6 +13,9 @@ Bu komut şunları çalıştırır:
   sızıntı pattern kontrolleri; README storefront sinyalleri ve SVG
   erişilebilirlik metadata'sı, hafif animasyon, reduced-motion fallback ve
   kurulabilir skill package ve skill adı formatı dahil.
+- `scripts/verify-skill-sources.mjs`: duplicate adlar, kategoriler, nedenler ve
+  kurulabilir `package` + `skill` çiftleri için offline skill katalog
+  doğrulaması.
 - `scripts/security-audit.mjs`: public repo dosyaları, iki dilli docs, güvenli
   Codex varsayılanları, disabled authenticated MCP'ler ve daha güçlü
   secret/state kontrolleri.
@@ -25,6 +28,13 @@ Ek release kontrolleri:
 git status --short
 git diff --cached --check
 gitleaks detect --redact --no-banner --no-git --verbose
+```
+
+Kurulabilir skill'ler değiştiğinde network destekli resolver kontrolünü de
+çalıştır:
+
+```bash
+npm run verify:skills:online
 ```
 
 Push sonrası remote doğrulama:

@@ -1,6 +1,6 @@
 # Completion Audit
 
-Date: 2026-06-10
+Date: 2026-06-11
 
 This audit maps the requested end state to current repository evidence.
 
@@ -13,6 +13,8 @@ This audit maps the requested end state to current repository evidence.
 | The repository should use purposeful visuals and icons. | `README.md` and `README.tr.md` include real badges, emoji accents, and `assets/banner.svg` plus `assets/workflow-overview.svg`; SVG validation requires title, description, lightweight animation, and reduced-motion fallback. | Complete |
 | GitHub community flows should be public-safe. | `.github/ISSUE_TEMPLATE/*` and `.github/pull_request_template.md` guide bug reports, docs suggestions, and PRs away from secrets and private local state. | Complete |
 | README should expose trust quickly. | `README.md` and `README.tr.md` include a trust-signal table covering public-safe scope, validation, bilingual docs, accessible visuals, connector defaults, and community flow. | Complete |
+| Senior operating standards should be explicit. | `docs/best-practices.md` and `docs/best-practices.tr.md` define source quality, surface routing, the operating loop, skill/package rules, public-safe rules, UI verification, and maintenance checks. | Complete |
+| Skill install sources should fail before users hit installer errors. | `scripts/verify-skill-sources.mjs` validates installable package/skill pairs offline, `npm run verify:skills:online` resolves them through the Skills CLI, and `npm run check` includes the offline gate. | Complete |
 | Dependency update hygiene should be visible. | `.github/dependabot.yml` tracks GitHub Actions and npm manifest updates on a weekly cadence. | Complete |
 | The setup must have a clear how-to. | `docs/how-to.md` and `docs/how-to.tr.md` describe one-shot install, verification, operating model, MCP defaults, profiles, common prompts, and safety rules. | Complete |
 | One-shot install should turn Codex into a strong specialist setup. | `scripts/install.ps1 -All -Force` and `scripts/install.sh --all --force` install Codex templates, verified public skill packages, Git guards, specialist agents, profiles, rules, and the local plugin. | Complete |
@@ -36,6 +38,7 @@ Expected result:
 
 ```text
 Validation passed.
+Skill source verification passed.
 Security audit passed.
 ```
 
@@ -43,6 +46,7 @@ Additional checks used for release readiness:
 
 ```bash
 node --check scripts/validate-repo.mjs
+node --check scripts/verify-skill-sources.mjs
 node --check scripts/security-audit.mjs
 ```
 

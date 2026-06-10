@@ -13,6 +13,9 @@ This runs:
   leak-pattern checks, including README storefront signals and SVG asset
   accessibility metadata, lightweight animation, reduced-motion fallback, and
   installable skill package and skill-name format.
+- `scripts/verify-skill-sources.mjs`: offline skill catalog validation for
+  duplicate names, categories, reasons, and installable `package` + `skill`
+  pairs.
 - `scripts/security-audit.mjs`: public-readiness files, bilingual docs, safe
   Codex defaults, disabled authenticated MCPs, and stronger secret/state
   checks.
@@ -25,6 +28,12 @@ Additional release checks:
 git status --short
 git diff --cached --check
 gitleaks detect --redact --no-banner --no-git --verbose
+```
+
+When installable skills change, also run the network-backed resolver check:
+
+```bash
+npm run verify:skills:online
 ```
 
 Remote verification after push:

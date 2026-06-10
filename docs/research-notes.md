@@ -3,7 +3,7 @@
 Research was based on:
 
 1. Current local Codex configuration evidence.
-2. The official Codex manual fetched on 2026-06-10.
+2. The official Codex manual fetched on 2026-06-11.
 3. The existing local global Codex security checklist and specialist agents.
 
 ## Official Topics Used

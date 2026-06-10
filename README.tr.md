@@ -30,6 +30,16 @@ linkleri korunur.
 Bu repo token, auth dosyası, memory, session, yerel proje yolu, private key,
 cookie veya makineye özel gizli durum içermez.
 
+## Hızlı Başla
+
+| Ne yapmak istiyorum? | Nereye bakayım? |
+| --- | --- |
+| Tüm setup'ı kurmak | [Hızlı Kurulum](#-hızlı-kurulum) |
+| Senior çalışma modelini anlamak | [docs/best-practices.tr.md](docs/best-practices.tr.md) |
+| Prompt, AGENTS.md, config, skill, plugin, MCP, rule veya hook ayrımını yapmak | [docs/codex-surfaces.tr.md](docs/codex-surfaces.tr.md) |
+| Push veya release öncesi doğrulamak | [docs/verification.tr.md](docs/verification.tr.md) |
+| Public-safe hazırlığı kontrol etmek | [docs/public-readiness.tr.md](docs/public-readiness.tr.md) |
+
 ## 🧩 Ne Kurar?
 
 - `~/.codex/AGENTS.md` kalıcı çalışma anlaşmaları.
@@ -42,6 +52,8 @@ cookie veya makineye özel gizli durum içermez.
   pre-commit hook.
 - İsteğe bağlı skill kurulumu: `catalog/skills.json` içindeki doğrulanmış public
   package kayıtları.
+- Kurulabilir skill'lerin yalnız repo adı gibi değil package/skill çifti olarak
+  çözüldüğünü kontrol eden offline ve opsiyonel online doğrulama.
 - Yerel plugin marketplace kaydı: `codex-enterprise-workflows`.
 
 ## ⚡ Hızlı Kurulum
@@ -116,6 +128,7 @@ ekibi gibi çalışır; ana thread ise karar, uygulama ve final kanıtına odakl
 | ✅ Gerçek doğrulama | `npm run check` repo validasyonu ve güvenlik audit scriptlerini çalıştırır. |
 | 🌐 İki dilli doküman | İngilizce ve Türkçe docs eşleşmesi validator tarafından zorunlu tutulur. |
 | 🎬 Erişilebilir animasyonlu görseller | SVG asset'lerde `title`, `desc`, hafif motion, reduced-motion fallback ve README alt text bulunur. |
+| 🧪 Skill kaynak gate'i | `npm run verify:skills`, kullanıcı installer hatasına düşmeden kurulabilir package/skill çiftlerini kontrol eder. |
 | 🔒 Konservatif connector'lar | Authenticated hesap, database ve filesystem MCP'leri ihtiyaç olana kadar disabled kalır. |
 | 🤝 Community akışı | Issue ve PR template'leri public-safe hatırlatmalar içerir. |
 | ♻️ Dependency hijyeni | Dependabot GitHub Actions ve npm manifest güncellemelerini takip eder. |
@@ -171,7 +184,7 @@ gitleaks detect --redact --no-banner --no-git --verbose
 
 ## 📚 Resmi Codex Kaynakları
 
-Bu repodaki dokümanlar 2026-06-10 tarihinde fetch edilen güncel Codex manual'ı
+Bu repodaki dokümanlar 2026-06-11 tarihinde fetch edilen güncel Codex manual'ı
 ve yerel kurulum kanıtları baz alınarak hazırlandı.
 
 - CLI reference: https://developers.openai.com/codex/cli/reference
@@ -189,6 +202,7 @@ ve yerel kurulum kanıtları baz alınarak hazırlandı.
 Bakılacak dosyalar:
 
 - [docs/how-to.tr.md](docs/how-to.tr.md)
+- [docs/best-practices.tr.md](docs/best-practices.tr.md)
 - [docs/completion-audit.tr.md](docs/completion-audit.tr.md)
 - [docs/verification.tr.md](docs/verification.tr.md)
 - [docs/public-readiness.tr.md](docs/public-readiness.tr.md)

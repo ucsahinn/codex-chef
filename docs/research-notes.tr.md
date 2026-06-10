@@ -3,7 +3,7 @@
 Araştırma şu kaynaklara dayandı:
 
 1. Güncel yerel Codex config kanıtı.
-2. 2026-06-10 tarihinde alınan resmi Codex manual.
+2. 2026-06-11 tarihinde alınan resmi Codex manual.
 3. Mevcut yerel global Codex güvenlik checklist'i ve uzman ajanları.
 
 ## Kullanılan Resmi Başlıklar

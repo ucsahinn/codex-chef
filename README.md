@@ -31,6 +31,16 @@ source pages in the docs.
 This repository does not include tokens, auth files, memories, sessions, local
 project paths, private keys, cookies, or machine-specific state.
 
+## Start Fast
+
+| I want to... | Go here |
+| --- | --- |
+| Install the full setup | [Quick Start](#-quick-start) |
+| Understand the senior operating model | [docs/best-practices.md](docs/best-practices.md) |
+| Decide whether something belongs in a prompt, AGENTS.md, config, skill, plugin, MCP, rule, or hook | [docs/codex-surfaces.md](docs/codex-surfaces.md) |
+| Verify before push or release | [docs/verification.md](docs/verification.md) |
+| Check public-safe readiness | [docs/public-readiness.md](docs/public-readiness.md) |
+
 ## 🧩 What It Installs
 
 - `~/.codex/AGENTS.md` durable working agreements.
@@ -44,6 +54,8 @@ project paths, private keys, cookies, or machine-specific state.
   obvious secrets and runs Gitleaks when available.
 - Optional skill installation from verified public packages in
   `catalog/skills.json`.
+- Offline and optional online skill-source verification so installable skills
+  resolve as package/skill pairs, not plain repository names.
 - A local plugin marketplace entry for the bundled
   `codex-enterprise-workflows` plugin.
 
@@ -118,6 +130,7 @@ the main Codex thread focused on decisions, implementation, and final evidence.
 | ✅ Real validation | `npm run check` runs repository validation and security audit scripts. |
 | 🌐 Bilingual docs | English and Turkish docs are paired and enforced by validation. |
 | 🎬 Accessible animated visuals | SVG assets include `title`, `desc`, lightweight motion, reduced-motion fallback, and README alt text. |
+| 🧪 Skill source gate | `npm run verify:skills` checks installable package/skill pairs before users hit installer failures. |
 | 🔒 Conservative connectors | Authenticated account, database, and filesystem MCPs stay disabled until needed. |
 | 🤝 Community flow | Issue and PR templates include public-safe reminders. |
 | ♻️ Dependency hygiene | Dependabot tracks GitHub Actions and npm manifest updates. |
@@ -174,7 +187,7 @@ gitleaks detect --redact --no-banner --no-git --verbose
 ## 📚 Official Codex References
 
 The docs in this repo are based on the current Codex manual fetched on
-2026-06-10 and local configuration evidence. Start with:
+2026-06-11 and local configuration evidence. Start with:
 
 - Codex CLI reference: https://developers.openai.com/codex/cli/reference
 - AGENTS.md guidance: https://developers.openai.com/codex/guides/agents-md
@@ -191,6 +204,7 @@ The docs in this repo are based on the current Codex manual fetched on
 See:
 
 - [docs/how-to.md](docs/how-to.md)
+- [docs/best-practices.md](docs/best-practices.md)
 - [docs/completion-audit.md](docs/completion-audit.md)
 - [docs/verification.md](docs/verification.md)
 - [docs/public-readiness.md](docs/public-readiness.md)

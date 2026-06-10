@@ -21,3 +21,5 @@
 - Ignored local Serena state in Git and repository scans.
 - Fixed optional skill installation to use verified packages with
   `--skill`, `--yes`, and `--global` instead of cloning plain skill names.
+- Added senior best-practice operating docs and a skill-source verification
+  script so installable packages are checked before users run the installer.

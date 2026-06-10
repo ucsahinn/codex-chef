@@ -5,8 +5,10 @@
   "description": "Security-first Codex setup kit with MCPs, skills, agents, docs, and installer scripts.",
   "scripts": {
     "validate": "node scripts/validate-repo.mjs",
+    "verify:skills": "node scripts/verify-skill-sources.mjs",
+    "verify:skills:online": "node scripts/verify-skill-sources.mjs --online",
     "audit:security": "node scripts/security-audit.mjs",
-    "check": "node scripts/validate-repo.mjs && node scripts/security-audit.mjs"
+    "check": "node scripts/validate-repo.mjs && node scripts/verify-skill-sources.mjs && node scripts/security-audit.mjs"
   },
   "engines": {
     "node": ">=18"

@@ -18,6 +18,8 @@ const requiredFiles = [
   "package.json",
   "docs/how-to.md",
   "docs/how-to.tr.md",
+  "docs/best-practices.md",
+  "docs/best-practices.tr.md",
   "docs/completion-audit.md",
   "docs/completion-audit.tr.md",
   "assets/banner.svg",
@@ -35,6 +37,7 @@ const requiredFiles = [
   "templates/codex/rules/default.rules",
   "scripts/install.ps1",
   "scripts/install.sh",
+  "scripts/verify-skill-sources.mjs",
   "scripts/security-audit.mjs",
   "plugins/codex-enterprise-workflows/.codex-plugin/plugin.json",
   ".agents/plugins/marketplace.json"

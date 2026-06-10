@@ -1,6 +1,6 @@
 # Tamamlanma Denetimi
 
-Tarih: 2026-06-10
+Tarih: 2026-06-11
 
 Bu denetim istenen final durumu mevcut repo kanıtlarıyla eşleştirir.
 
@@ -13,6 +13,8 @@ Bu denetim istenen final durumu mevcut repo kanıtlarıyla eşleştirir.
 | Repo amacına uygun ikon ve görseller kullanmalı. | `README.md` ve `README.tr.md` gerçek badge'ler, emoji aksanları, `assets/banner.svg` ve `assets/workflow-overview.svg` görsellerini içeriyor; SVG validasyonu title, description, hafif animasyon ve reduced-motion fallback zorunlu tutuyor. | Tamam |
 | GitHub community akışları public-safe olmalı. | `.github/ISSUE_TEMPLATE/*` ve `.github/pull_request_template.md` bug bildirimi, doküman önerisi ve PR akışlarını secret ve private local state paylaşımından uzak tutuyor. | Tamam |
 | README güven sinyallerini hızlı göstermeli. | `README.md` ve `README.tr.md` public-safe kapsam, validasyon, iki dilli docs, erişilebilir görseller, connector varsayılanları ve community akışını anlatan güven sinyalleri tablosu içeriyor. | Tamam |
+| Senior çalışma standartları açık olmalı. | `docs/best-practices.md` ve `docs/best-practices.tr.md` kaynak kalitesi, yüzey routing'i, çalışma döngüsü, skill/package kuralları, public-safe kurallar, UI doğrulaması ve bakım kontrollerini tanımlar. | Tamam |
+| Skill kurulum kaynakları kullanıcı installer hatasına düşmeden yakalanmalı. | `scripts/verify-skill-sources.mjs` kurulabilir package/skill çiftlerini offline doğrular, `npm run verify:skills:online` bunları Skills CLI üzerinden çözdürür ve `npm run check` offline gate'i içerir. | Tamam |
 | Dependency güncelleme hijyeni görünür olmalı. | `.github/dependabot.yml` GitHub Actions ve npm manifest güncellemelerini haftalık takip eder. | Tamam |
 | Kurulumun net bir how-to rehberi olmalı. | `docs/how-to.md` ve `docs/how-to.tr.md` tek seferlik kurulum, doğrulama, çalışma modeli, MCP varsayılanları, profiller, hazır promptlar ve güvenlik kurallarını anlatıyor. | Tamam |
 | Tek komutlu kurulum Codex'i güçlü uzman setup'a çevirmeli. | `scripts/install.ps1 -All -Force` ve `scripts/install.sh --all --force` Codex template'lerini, doğrulanmış public skill package'larını, Git guard'larını, uzman ajanları, profilleri, kuralları ve yerel plugin'i kuruyor. | Tamam |
@@ -36,6 +38,7 @@ Beklenen sonuç:
 
 ```text
 Validation passed.
+Skill source verification passed.
 Security audit passed.
 ```
 
@@ -43,6 +46,7 @@ Release hazırlığı için kullanılan ek kontroller:
 
 ```bash
 node --check scripts/validate-repo.mjs
+node --check scripts/verify-skill-sources.mjs
 node --check scripts/security-audit.mjs
 ```
 
