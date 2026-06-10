@@ -1,0 +1,149 @@
+# Windows-first Codex enterprise starter.
+# Copy to ~/.codex/config.toml with scripts/install.ps1.
+
+model = "gpt-5.5"
+review_model = "gpt-5.5"
+model_reasoning_effort = "medium"
+model_reasoning_summary = "auto"
+model_verbosity = "medium"
+personality = "pragmatic"
+
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[features]
+memories = true
+hooks = true
+multi_agent = true
+
+[memories]
+disable_on_external_context = true
+min_rate_limit_remaining_percent = 15
+
+[apps._default]
+enabled = true
+default_tools_enabled = true
+
+[agents]
+max_threads = 6
+
+[agents.code_mapper]
+description = "Read-only explorer that maps files, call paths, and existing patterns."
+config_file = "agents/code_mapper.toml"
+
+[agents.docs_researcher]
+description = "Primary-source researcher for current docs, APIs, and version-sensitive facts."
+config_file = "agents/docs_researcher.toml"
+
+[agents.code_reviewer]
+description = "Fresh-context senior review for diffs, PRs, and risky changes."
+config_file = "agents/code_reviewer.toml"
+
+[agents.frontend_verifier]
+description = "Browser-oriented verifier for UI changes and visual regressions."
+config_file = "agents/frontend_verifier.toml"
+
+[agents.security_auditor]
+description = "Read-only security auditor for auth, secrets, API routes, data access, permissions, and abuse paths."
+config_file = "agents/security_auditor.toml"
+
+[agents.test_verifier]
+description = "Validation specialist for tests, lint/typecheck/build, smoke checks, and failure evidence."
+config_file = "agents/test_verifier.toml"
+
+[agents.release_verifier]
+description = "Release readiness verifier for git hygiene, changelog/version checks, artifacts, secret scans, and publish gates."
+config_file = "agents/release_verifier.toml"
+
+[sandbox_workspace_write]
+network_access = false
+
+[windows]
+sandbox = "elevated"
+sandbox_private_desktop = true
+
+[mcp_servers.openaiDeveloperDocs]
+enabled = true
+url = "https://developers.openai.com/mcp"
+default_tools_approval_mode = "approve"
+
+[mcp_servers.context7]
+enabled = true
+command = "cmd.exe"
+args = ["/c", "npx", "-y", "@upstash/context7-mcp"]
+default_tools_approval_mode = "approve"
+
+[mcp_servers.sequential-thinking]
+enabled = true
+command = "cmd.exe"
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.playwright]
+enabled = true
+command = "cmd.exe"
+args = ["/c", "npx", "-y", "@playwright/mcp@latest"]
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.chrome-devtools]
+enabled = true
+command = "cmd.exe"
+args = ["/c", "npx", "-y", "chrome-devtools-mcp@latest", "--isolated", "--no-usage-statistics", "--redactNetworkHeaders", "--viewport", "1366x900"]
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.serena]
+enabled = true
+command = "uvx"
+args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "codex"]
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.memory]
+enabled = true
+command = "cmd.exe"
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-memory"]
+default_tools_approval_mode = "prompt"
+
+# Disabled by default because it grants local filesystem tool access.
+# Replace the path with an intentional workspace before enabling.
+[mcp_servers.filesystem]
+enabled = false
+command = "cmd.exe"
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "%USERPROFILE%\\Desktop"]
+default_tools_approval_mode = "prompt"
+
+# Authenticated/private connectors. Enable only when a task needs the service.
+[mcp_servers.github]
+enabled = false
+url = "https://api.githubcopilot.com/mcp/readonly"
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.figma]
+enabled = false
+url = "https://mcp.figma.com/mcp"
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.linear]
+enabled = false
+url = "https://mcp.linear.app/mcp"
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.notion]
+enabled = false
+url = "https://mcp.notion.com/mcp"
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.sentry]
+enabled = false
+url = "https://mcp.sentry.dev/mcp"
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.vercel]
+enabled = false
+url = "https://mcp.vercel.com"
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.supabase]
+enabled = false
+command = "cmd.exe"
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-postgres", "%SUPABASE_DB_URL%"]
+default_tools_approval_mode = "prompt"

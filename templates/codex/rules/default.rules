@@ -1,0 +1,79 @@
+# Curated global approval rules.
+# Keep this file general-purpose. Project-specific, release, publishing,
+# credential, and destructive operations must remain interactive.
+
+# Fast, read-only discovery.
+prefix_rule(pattern = ["rg"], decision = "allow")
+prefix_rule(pattern = ["rg", "--files"], decision = "allow")
+prefix_rule(pattern = ["Get-ChildItem"], decision = "allow")
+prefix_rule(pattern = ["Get-Content"], decision = "allow")
+prefix_rule(pattern = ["Select-String"], decision = "allow")
+prefix_rule(pattern = ["Select-Object"], decision = "allow")
+prefix_rule(pattern = ["Get-Command"], decision = "allow")
+prefix_rule(pattern = ["Get-Process"], decision = "allow")
+prefix_rule(pattern = ["Test-Path"], decision = "allow")
+prefix_rule(pattern = ["netstat", "-ano"], decision = "allow")
+
+# Read-only git inspection.
+prefix_rule(pattern = ["git", "status"], decision = "allow")
+prefix_rule(pattern = ["git", "status", "--short"], decision = "allow")
+prefix_rule(pattern = ["git", "diff"], decision = "allow")
+prefix_rule(pattern = ["git", "diff", "--"], decision = "allow")
+prefix_rule(pattern = ["git", "diff", "--stat"], decision = "allow")
+prefix_rule(pattern = ["git", "diff", "--cached"], decision = "allow")
+prefix_rule(pattern = ["git", "log"], decision = "allow")
+prefix_rule(pattern = ["git", "show"], decision = "allow")
+prefix_rule(pattern = ["git", "branch"], decision = "allow")
+prefix_rule(pattern = ["git", "remote"], decision = "allow")
+prefix_rule(pattern = ["git", "tag"], decision = "allow")
+prefix_rule(pattern = ["git", "ls-files"], decision = "allow")
+prefix_rule(pattern = ["git", "ls-remote"], decision = "allow")
+prefix_rule(pattern = ["git", "check-ignore"], decision = "allow")
+prefix_rule(pattern = ["git", "config", "--global", "--get"], decision = "allow")
+
+# Common local verification.
+prefix_rule(pattern = ["node", "-v"], decision = "allow")
+prefix_rule(pattern = ["node", "--check"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "ls"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "run", "test"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "run", "lint"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "run", "typecheck"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "run", "build"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "run", "clean"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "run", "ui:smoke"], decision = "allow")
+
+# Codex-local skill and MCP helpers. Keep package execution narrow.
+prefix_rule(pattern = ["npx.cmd", "skills", "find"], decision = "allow")
+prefix_rule(pattern = ["npx.cmd", "skills", "check"], decision = "allow")
+prefix_rule(pattern = ["npx.cmd", "skills", "add"], decision = "allow")
+prefix_rule(pattern = ["npx.cmd", "skills"], decision = "allow")
+prefix_rule(pattern = ["npx.cmd", "-y", "chrome-devtools-mcp@latest"], decision = "allow")
+
+# Non-destructive setup and local checks.
+prefix_rule(pattern = ["New-Item", "-ItemType", "Directory"], decision = "allow")
+prefix_rule(pattern = ["sc.exe", "query"], decision = "allow")
+prefix_rule(pattern = ["gitleaks", "version"], decision = "allow")
+prefix_rule(pattern = ["gitleaks", "detect", "--redact", "--no-banner", "--verbose"], decision = "allow")
+prefix_rule(pattern = ["gitleaks", "detect", "--redact", "--no-banner", "--no-git", "--verbose"], decision = "allow")
+
+# Always keep irreversible, external-write, credential, or broad shell operations interactive.
+prefix_rule(pattern = ["Remove-Item"], decision = "prompt", justification = "Destructive file operations require explicit approval.")
+prefix_rule(pattern = ["Move-Item"], decision = "prompt", justification = "Moving or renaming files outside a scoped edit requires approval.")
+prefix_rule(pattern = ["Copy-Item"], decision = "prompt", justification = "Copy operations can overwrite or exfiltrate files and require approval.")
+prefix_rule(pattern = ["rm"], decision = "prompt", justification = "Destructive file operations require explicit approval.")
+prefix_rule(pattern = ["del"], decision = "prompt", justification = "Destructive file operations require explicit approval.")
+prefix_rule(pattern = ["git", "add", "."], decision = "prompt", justification = "Stage explicit files after reviewing the diff; avoid blanket staging.")
+prefix_rule(pattern = ["git", "commit"], decision = "prompt", justification = "Commits should only be created when the user requests them.")
+prefix_rule(pattern = ["git", "push"], decision = "prompt", justification = "Pushing changes must remain an explicit user decision.")
+prefix_rule(pattern = ["git", "reset"], decision = "prompt", justification = "Reset can discard work and requires approval.")
+prefix_rule(pattern = ["git", "checkout"], decision = "prompt", justification = "Checkout can overwrite local changes and requires approval.")
+prefix_rule(pattern = ["git", "restore"], decision = "prompt", justification = "Restore can discard work and requires approval.")
+prefix_rule(pattern = ["npm.cmd", "install"], decision = "prompt", justification = "Dependency changes require explicit approval.")
+prefix_rule(pattern = ["npm.cmd", "uninstall"], decision = "prompt", justification = "Dependency changes require explicit approval.")
+prefix_rule(pattern = ["npm.cmd", "publish"], decision = "prompt", justification = "Publishing packages requires explicit approval.")
+prefix_rule(pattern = ["npx.cmd"], decision = "prompt", justification = "Ad-hoc package execution can download code and requires approval unless an exact safe prefix is listed above.")
+prefix_rule(pattern = ["gh"], decision = "prompt", justification = "GitHub API operations can read or write remote state and require approval.")
+prefix_rule(pattern = ["curl"], decision = "prompt", justification = "Network requests require approval unless they run inside the active sandbox policy.")
+prefix_rule(pattern = ["Invoke-RestMethod"], decision = "prompt", justification = "Network requests require approval unless they run inside the active sandbox policy.")
+prefix_rule(pattern = ["Invoke-WebRequest"], decision = "prompt", justification = "Network requests require approval unless they run inside the active sandbox policy.")
+prefix_rule(pattern = ["powershell.exe", "-Command"], decision = "prompt", justification = "Inline shell scripts can hide multiple effects and require approval.")

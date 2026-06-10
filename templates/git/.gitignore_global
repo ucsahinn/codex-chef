@@ -1,0 +1,57 @@
+# Codex Enterprise Starter global Git ignore.
+
+# Local env and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.kdbx
+*.age
+*.sops.*
+
+# Local databases and dumps
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.bak
+
+# Codex and AI local state
+.codex/sessions/
+.codex/memories/
+.codex/cache/
+.codex/logs/
+.codex/auth*
+AGENTS.override.md
+*.local.toml
+
+# Build output and caches
+node_modules/
+dist/
+build/
+coverage/
+.next/
+out/
+tmp/
+temp/
+*.log
+
+# Release artifacts
+*.zip
+*.tar.gz
+*.tgz
+*.msi
+*.exe
+*.dmg
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

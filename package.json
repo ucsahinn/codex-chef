@@ -1,0 +1,14 @@
+{
+  "name": "codex-enterprise-starter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Security-first Codex setup kit with MCPs, skills, agents, docs, and installer scripts.",
+  "scripts": {
+    "validate": "node scripts/validate-repo.mjs",
+    "check": "node scripts/validate-repo.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

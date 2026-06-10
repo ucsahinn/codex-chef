@@ -1,0 +1,21 @@
+{
+  "name": "codex-enterprise-starter",
+  "plugins": [
+    {
+      "name": "codex-enterprise-workflows",
+      "source": {
+        "source": "local",
+        "path": "./plugins/codex-enterprise-workflows"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "NONE"
+      },
+      "category": "Productivity",
+      "interface": {
+        "displayName": "Codex Enterprise Workflows",
+        "shortDescription": "Security-first Codex setup maintenance workflow."
+      }
+    }
+  ]
+}

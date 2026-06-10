@@ -1,0 +1,50 @@
+# Secrets and local auth
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.kdbx
+*.sqlite
+*.db
+*.dump
+
+# Codex local state
+.codex/sessions/
+.codex/memories/
+.codex/cache/
+.codex/logs/
+.codex/auth*
+.codex/*.local.toml
+codex-manual.md
+codex-manual.outline.md
+
+# Build and dependency output
+node_modules/
+dist/
+build/
+coverage/
+.next/
+out/
+tmp/
+temp/
+*.log
+
+# Release artifacts
+*.zip
+*.tar.gz
+*.tgz
+*.msi
+*.exe
+*.dmg
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

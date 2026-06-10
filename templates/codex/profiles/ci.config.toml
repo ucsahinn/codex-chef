@@ -1,0 +1,9 @@
+approval_policy = "never"
+sandbox_mode = "read-only"
+model_reasoning_effort = "medium"
+
+[features]
+hooks = false
+
+[sandbox_workspace_write]
+network_access = false

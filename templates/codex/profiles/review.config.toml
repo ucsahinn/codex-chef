@@ -1,0 +1,6 @@
+approval_policy = "never"
+sandbox_mode = "read-only"
+model_reasoning_effort = "high"
+
+[sandbox_workspace_write]
+network_access = false

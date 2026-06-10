@@ -1,0 +1,155 @@
+{
+  "version": "0.1.0",
+  "servers": [
+    {
+      "name": "openaiDeveloperDocs",
+      "category": "documentation",
+      "transport": "streamable_http",
+      "defaultEnabled": true,
+      "url": "https://developers.openai.com/mcp",
+      "auth": "none",
+      "approval": "approve",
+      "notes": "Official OpenAI developer documentation."
+    },
+    {
+      "name": "context7",
+      "category": "documentation",
+      "transport": "stdio",
+      "defaultEnabled": true,
+      "package": "@upstash/context7-mcp",
+      "auth": "none",
+      "approval": "approve",
+      "notes": "Current library and framework docs."
+    },
+    {
+      "name": "sequential-thinking",
+      "category": "reasoning",
+      "transport": "stdio",
+      "defaultEnabled": true,
+      "package": "@modelcontextprotocol/server-sequential-thinking",
+      "auth": "none",
+      "approval": "prompt",
+      "notes": "Structured decomposition helper."
+    },
+    {
+      "name": "playwright",
+      "category": "browser",
+      "transport": "stdio",
+      "defaultEnabled": true,
+      "package": "@playwright/mcp@latest",
+      "auth": "none",
+      "approval": "prompt",
+      "notes": "Browser automation and UI verification."
+    },
+    {
+      "name": "chrome-devtools",
+      "category": "browser",
+      "transport": "stdio",
+      "defaultEnabled": true,
+      "package": "chrome-devtools-mcp@latest",
+      "auth": "none",
+      "approval": "prompt",
+      "notes": "Chrome inspection with isolated mode and redacted network headers."
+    },
+    {
+      "name": "serena",
+      "category": "code-intelligence",
+      "transport": "stdio",
+      "defaultEnabled": true,
+      "command": "uvx",
+      "auth": "none",
+      "approval": "prompt",
+      "notes": "Semantic code navigation. Disable if uvx is unavailable."
+    },
+    {
+      "name": "memory",
+      "category": "local-state",
+      "transport": "stdio",
+      "defaultEnabled": true,
+      "package": "@modelcontextprotocol/server-memory",
+      "auth": "none",
+      "approval": "prompt",
+      "notes": "Local memory graph. Do not store secrets."
+    },
+    {
+      "name": "filesystem",
+      "category": "filesystem",
+      "transport": "stdio",
+      "defaultEnabled": false,
+      "package": "@modelcontextprotocol/server-filesystem",
+      "auth": "none",
+      "approval": "prompt",
+      "notes": "Enable only for intentional local paths."
+    },
+    {
+      "name": "github",
+      "category": "external-account",
+      "transport": "streamable_http",
+      "defaultEnabled": false,
+      "url": "https://api.githubcopilot.com/mcp/readonly",
+      "auth": "oauth",
+      "approval": "prompt",
+      "notes": "Repository and PR context. Keep disabled until needed."
+    },
+    {
+      "name": "figma",
+      "category": "external-account",
+      "transport": "streamable_http",
+      "defaultEnabled": false,
+      "url": "https://mcp.figma.com/mcp",
+      "auth": "oauth",
+      "approval": "prompt",
+      "notes": "Design context. Requires user or workspace auth."
+    },
+    {
+      "name": "linear",
+      "category": "external-account",
+      "transport": "streamable_http",
+      "defaultEnabled": false,
+      "url": "https://mcp.linear.app/mcp",
+      "auth": "oauth",
+      "approval": "prompt",
+      "notes": "Issue and project workflows."
+    },
+    {
+      "name": "notion",
+      "category": "external-account",
+      "transport": "streamable_http",
+      "defaultEnabled": false,
+      "url": "https://mcp.notion.com/mcp",
+      "auth": "oauth",
+      "approval": "prompt",
+      "notes": "Private docs and databases."
+    },
+    {
+      "name": "sentry",
+      "category": "external-account",
+      "transport": "streamable_http",
+      "defaultEnabled": false,
+      "url": "https://mcp.sentry.dev/mcp",
+      "auth": "oauth",
+      "approval": "prompt",
+      "notes": "Production errors and operational telemetry."
+    },
+    {
+      "name": "vercel",
+      "category": "external-account",
+      "transport": "streamable_http",
+      "defaultEnabled": false,
+      "url": "https://mcp.vercel.com",
+      "auth": "oauth",
+      "approval": "prompt",
+      "notes": "Project, deployment, and platform data."
+    },
+    {
+      "name": "supabase",
+      "category": "database",
+      "transport": "stdio",
+      "defaultEnabled": false,
+      "package": "@modelcontextprotocol/server-postgres",
+      "auth": "env:SUPABASE_DB_URL",
+      "approval": "prompt",
+      "notes": "Database access. Enable only with explicit task need."
+    }
+  ]
+}

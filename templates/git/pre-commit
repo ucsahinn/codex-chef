@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+set -eu
+
+echo "[codex-enterprise] pre-commit guard"
+
+blocked_paths="$(git diff --cached --name-only --diff-filter=ACMR | grep -Ei '(^|/)(\.env(\.|$)|.*\.(pem|key|p12|pfx|kdbx|sqlite|db|dump)$)' || true)"
+if [ -n "$blocked_paths" ]; then
+  echo "Blocked staged secret-like or local-state files:"
+  echo "$blocked_paths"
+  echo "Move secrets to local env/secret stores and stage explicit safe files only."
+  exit 1
+fi
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks detect --redact --no-banner --verbose
+else
+  echo "gitleaks not found; skipping secret scan."
+fi
