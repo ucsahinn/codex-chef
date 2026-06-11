@@ -13,6 +13,9 @@ Codex safety model.
 - Authenticated remote connectors are present as disabled examples.
 - Global command rules are narrow and biased toward read-only discovery and
   local verification.
+- Deletion, cleanup, pruning, uninstall, overwrite, database drop/truncate, and
+  other destructive operations require explicit user approval. Safe
+  non-destructive work can continue while the destructive part waits.
 
 ## MCP Boundaries
 
@@ -27,6 +30,12 @@ Rules used in this starter:
   the user intentionally enables and authenticates them.
 - Token values must come from environment variables, not repo files.
 - External write-capable tools should use prompt approval.
+- Read-only documentation MCPs may use `default_tools_approval_mode =
+  "approve"`; browser, account, filesystem, database, production, and mutating
+  tools should use `"prompt"`.
+- New MCP servers should prefer narrow config flags such as `enabled_tools`,
+  `disabled_tools`, `startup_timeout_sec`, and `tool_timeout_sec` over broad
+  prose-only instructions.
 
 Official reference: https://developers.openai.com/codex/mcp
 
@@ -36,6 +45,7 @@ Official reference: https://developers.openai.com/codex/mcp
 project-native verification commands. It prompts for:
 
 - destructive file operations
+- deletion, cleanup, pruning, overwrite, and uninstall actions
 - broad shell wrappers
 - dependency installation
 - package publishing

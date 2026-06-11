@@ -26,6 +26,8 @@ default_tools_enabled = true
 
 [agents]
 max_threads = 6
+max_depth = 1
+job_max_runtime_seconds = 1800
 
 [agents.code_mapper]
 description = "Read-only explorer that maps files, call paths, and existing patterns."
@@ -62,48 +64,64 @@ network_access = false
 enabled = true
 url = "https://developers.openai.com/mcp"
 default_tools_approval_mode = "approve"
+startup_timeout_sec = 20
+tool_timeout_sec = 120
 
 [mcp_servers.context7]
 enabled = true
 command = "npx"
 args = ["-y", "@upstash/context7-mcp"]
 default_tools_approval_mode = "approve"
+startup_timeout_sec = 20
+tool_timeout_sec = 120
 
 [mcp_servers.sequential-thinking]
 enabled = true
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 120
 
 [mcp_servers.playwright]
 enabled = true
 command = "npx"
 args = ["-y", "@playwright/mcp@latest"]
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 180
 
 [mcp_servers.chrome-devtools]
 enabled = true
 command = "npx"
 args = ["-y", "chrome-devtools-mcp@latest", "--isolated", "--no-usage-statistics", "--redactNetworkHeaders", "--viewport", "1366x900"]
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 180
 
 [mcp_servers.serena]
 enabled = true
 command = "uvx"
 args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "codex"]
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 30
+tool_timeout_sec = 180
 
 [mcp_servers.memory]
 enabled = true
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-memory"]
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 60
 
 [mcp_servers.filesystem]
 enabled = false
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-filesystem", "$HOME/Desktop"]
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 60
 
 [mcp_servers.github]
 enabled = false

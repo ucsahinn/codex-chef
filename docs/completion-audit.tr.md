@@ -80,3 +80,13 @@ gitleaks detect --redact --no-banner --no-git --verbose
 Installer tasarım gereği sadece yerel kurulum yapar. Commit, push, publish,
 deploy, secret rotation veya dış hesap değişikliği yapmaz. Bu aksiyonlar açık
 kullanıcı kararı olarak kalır.
+
+## 2026-06-11 Routing Ek Kapsam
+
+| Gereksinim | Kanit | Durum |
+| --- | --- | --- |
+| Global talimatlar subagent routing'i daha net yapmali ama otomasyonu abartmamali. | `~/.codex/AGENTS.md` ve `templates/codex/AGENTS.md`, task-shape routing icin uzman ajanin bilerek spawn edilmesini ve ozetin beklenmesini soyluyor; docs subagent'in acik delegasyon oldugunu netlestiriyor. | Tamam |
+| Skill routing resmi progressive disclosure davranisiyla uyumlu olmali. | Global/template `AGENTS.md` ve `docs/skills-and-agents.md`, explicit/implicit skill secimini, tam `SKILL.md` okuma kuralini, odakli reference yuklemeyi ve plugin paketleme sinirlarini anlatiyor. | Tamam |
+| MCP flagleri dokumante edilmeli ve template'lere islenmeli. | `templates/codex/config.*.toml` artik `max_depth`, `job_max_runtime_seconds` ve MCP startup/tool timeout alanlarini iceriyor; `docs/mcp-catalog.md`, `docs/codex-flags.md` ve `docs/security-model.md` approval mode, allow/deny list, timeout ve env-backed auth alanlarini anlatiyor. | Tamam |
+| Eslesen skill, ajan, MCP ve flagler uygulanabilir oldugunda zorunlu olmali. | `~/.codex/AGENTS.md`, `templates/codex/AGENTS.md`, `docs/skills-and-agents.md`, `docs/mcp-catalog.md` ve `docs/codex-flags.md` eslesen yuzeyin kullanilmasini ve atlanan bariz routing yuzeyinin gerekcesini ister. | Tamam |
+| Silme veya cleanup aksiyonlari acik onay beklemeli, guvenli isler devam edebilmeli. | `~/.codex/AGENTS.md`, `templates/codex/AGENTS.md`, root `AGENTS.md`, `docs/security-model.md` ve `templates/codex/rules/default.rules` deletion, cleanup, prune, uninstall, overwrite ve benzer destructive isler icin onay ister. | Tamam |

@@ -6,6 +6,15 @@ Resmi kaynak:
 
 https://developers.openai.com/codex/mcp
 
+Resmi MCP specification:
+
+https://modelcontextprotocol.io/specification
+
+MCP server'lar tool, resource ve prompt sunabilir. Her server'i bir capability
+boundary olarak dusun: dokumantasyon server'lari dusuk riskli context saglar;
+browser, filesystem, database, hesap, production, billing veya deploy server'lari
+daha guclu approval default'u ve daha dar tool exposure ister.
+
 ## Varsayılan Açık
 
 | Server | Amaç | Not |
@@ -32,3 +41,21 @@ https://developers.openai.com/codex/mcp
 
 Kural: Dokümantasyon MCP'leri iyi varsayılandır. Auth isteyen MCP'ler görev
 gerektirmeden ve kullanıcı onayı olmadan açılmamalıdır.
+Gorev enabled bir MCP server ile eslesiyorsa stale memory veya tahmin yerine o
+server kullanilir. Eslesen server disabled veya unavailable ise nedeni soylenir
+ve en guvenli fallback ile devam edilir.
+
+## Tercih Edilecek Config Flagleri
+
+| Config alani | Kullanim |
+| --- | --- |
+| `enabled` | Auth, database, production veya genis filesystem server'larini gerekene kadar kapali tutar. |
+| `default_tools_approval_mode` | Read-only docs icin `approve`; browser, account, filesystem, database, production veya mutating tool icin `prompt`. |
+| `enabled_tools` / `disabled_tools` | Server'i workflow icin gereken spesifik tool'larla sinirlar. |
+| `startup_timeout_sec` | Stdio server'a baslama suresi verir ama Codex'i sonsuza kadar bekletmez. |
+| `tool_timeout_sec` | Yavas browser, code-intelligence, docs veya external-account cagrisini sinirlar. |
+| `bearer_token_env_var`, `env_vars`, `env_http_headers` | Credential'i commit edilen dosya yerine environment variable'dan okur. |
+| `mcp_oauth_callback_port`, `mcp_oauth_callback_url` | OAuth provider sabit callback istiyorsa kullanilir. |
+
+MCP config degisince Codex'i yeniden baslat ve tool'lara guvenmeden once `/mcp`
+veya `codex mcp` ile aktif server'lari dogrula.

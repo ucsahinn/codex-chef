@@ -7,6 +7,19 @@ the skill is selected, so descriptions should be precise and front-loaded.
 
 Official reference: https://developers.openai.com/codex/skills
 
+Routing rule:
+
+- Explicit skill calls win when the user names `$skill` or a skill name.
+- Implicit skill calls work through the skill `description`; keep trigger words
+  at the front because Codex may shorten long skill lists in the initial
+  context.
+- Matching skill usage is mandatory for non-trivial tasks. Do not skip a
+  relevant skill just because the main thread can do the same work manually.
+- After a skill is selected, Codex should read the full `SKILL.md` and then only
+  load the references, templates, scripts, or assets needed for the task.
+- Use skills for reusable workflows. Use plugins when the workflow should be
+  distributed with MCP configuration, app mappings, assets, or lifecycle hooks.
+
 This repo includes:
 
 - `catalog/skills.json`: curated skill references, categories, and verified
@@ -49,6 +62,19 @@ This starter registers focused agents:
 
 Official reference: https://developers.openai.com/codex/subagents
 
-Security note: subagents do not bypass approvals, sandboxing, or connector auth.
-They are useful for focused side work, especially read-heavy exploration and
-verification.
+Routing rule:
+
+- Subagents are explicit delegation. Codex should deliberately spawn them when
+  the user asks for parallel/delegated work or the active global setup
+  authorizes task-shape routing.
+- For non-trivial work that maps to a registered specialist, use that specialist
+  and summarize the result before relying on it.
+- Use them for noisy, read-heavy, or evidence-heavy side work: exploration,
+  current docs, review, UI verification, security audit, test/build evidence,
+  and release readiness.
+- Keep write-heavy implementation in the main thread unless the user explicitly
+  asks to split write scopes. If multiple agents edit, assign non-overlapping
+  files and reconcile before verification.
+- Subagents inherit approvals, sandboxing, and connector auth. They must never
+  be used to bypass user approval, credentials, destructive actions, or
+  external-state controls.

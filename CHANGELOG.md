@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- Clarified global and template subagent routing so task-shape automation uses
+  deliberate specialist delegation instead of implying hidden background
+  spawning.
+- Added stronger skill-routing guidance for implicit triggers, full `SKILL.md`
+  loading, and plugin packaging boundaries.
+- Added MCP routing and config-flag guidance covering approval modes, tool
+  allow/deny lists, startup/tool timeouts, and environment-backed credentials.
+- Added explicit subagent depth and MCP timeout defaults to the Windows, Unix,
+  and live global Codex config templates.
+- Made matching skill, specialist-agent, MCP, and config-flag routing mandatory
+  when the task shape calls for it.
+- Strengthened deletion and cleanup approval rules while allowing safe
+  non-destructive work to continue.
+
 ## 0.1.0 - 2026-06-10
 
 - Initial Windows-first Codex enterprise setup starter.

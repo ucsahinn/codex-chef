@@ -34,3 +34,13 @@ Araştırma şu kaynaklara dayandı:
   olmamalıdır.
 - Native Windows sandbox birinci sınıf yoldur; WSL2 Linux-native workflow'larda
   daha uygundur.
+
+## 2026-06-11 Ek Not
+
+- MCP capability modeli Context7 uzerinden resmi MCP specification'a bakilarak
+  kontrol edildi: server'lar tool, resource ve prompt sunabilir.
+- MCP config sadece prose'a birakilmamali; `enabled`,
+  `default_tools_approval_mode`, tool allow/deny listeleri, startup/tool timeout
+  ve env-backed auth alanlariyla netlestirilmeli.
+- Subagent'lar delegated is icin gucludur ama resmi Codex davranisi spawn
+  adimini hala acik delegasyon olarak ele alir.

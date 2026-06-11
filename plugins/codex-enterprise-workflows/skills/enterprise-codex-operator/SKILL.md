@@ -18,10 +18,20 @@ derived local setup.
    - no secrets, sessions, memories, auth files, or local project paths are
      added to source
 3. Keep docs and templates aligned:
+   - `AGENTS.md`
    - `README.md`
    - `README.tr.md`
+   - `templates/codex/AGENTS.md`
+   - `templates/codex/config.windows.toml`
+   - `templates/codex/config.unix.toml`
    - `docs/how-to.md`
    - `docs/how-to.tr.md`
+   - `docs/skills-and-agents.md`
+   - `docs/skills-and-agents.tr.md`
+   - `docs/mcp-catalog.md`
+   - `docs/mcp-catalog.tr.md`
+   - `docs/codex-flags.md`
+   - `docs/codex-flags.tr.md`
    - `docs/completion-audit.md`
    - `docs/completion-audit.tr.md`
    - `docs/install.md`

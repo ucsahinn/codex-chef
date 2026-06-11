@@ -57,11 +57,12 @@ prefix_rule(pattern = ["gitleaks", "detect", "--redact", "--no-banner", "--verbo
 prefix_rule(pattern = ["gitleaks", "detect", "--redact", "--no-banner", "--no-git", "--verbose"], decision = "allow")
 
 # Always keep irreversible, external-write, credential, or broad shell operations interactive.
-prefix_rule(pattern = ["Remove-Item"], decision = "prompt", justification = "Destructive file operations require explicit approval.")
+# Deletion/removal/cleanup operations must ask first; non-destructive work may continue.
+prefix_rule(pattern = ["Remove-Item"], decision = "prompt", justification = "Deletion and destructive file operations require explicit user approval.")
 prefix_rule(pattern = ["Move-Item"], decision = "prompt", justification = "Moving or renaming files outside a scoped edit requires approval.")
 prefix_rule(pattern = ["Copy-Item"], decision = "prompt", justification = "Copy operations can overwrite or exfiltrate files and require approval.")
-prefix_rule(pattern = ["rm"], decision = "prompt", justification = "Destructive file operations require explicit approval.")
-prefix_rule(pattern = ["del"], decision = "prompt", justification = "Destructive file operations require explicit approval.")
+prefix_rule(pattern = ["rm"], decision = "prompt", justification = "Deletion and destructive file operations require explicit user approval.")
+prefix_rule(pattern = ["del"], decision = "prompt", justification = "Deletion and destructive file operations require explicit user approval.")
 prefix_rule(pattern = ["git", "add", "."], decision = "prompt", justification = "Stage explicit files after reviewing the diff; avoid blanket staging.")
 prefix_rule(pattern = ["git", "commit"], decision = "prompt", justification = "Commits should only be created when the user requests them.")
 prefix_rule(pattern = ["git", "push"], decision = "prompt", justification = "Pushing changes must remain an explicit user decision.")
@@ -69,7 +70,7 @@ prefix_rule(pattern = ["git", "reset"], decision = "prompt", justification = "Re
 prefix_rule(pattern = ["git", "checkout"], decision = "prompt", justification = "Checkout can overwrite local changes and requires approval.")
 prefix_rule(pattern = ["git", "restore"], decision = "prompt", justification = "Restore can discard work and requires approval.")
 prefix_rule(pattern = ["npm.cmd", "install"], decision = "prompt", justification = "Dependency changes require explicit approval.")
-prefix_rule(pattern = ["npm.cmd", "uninstall"], decision = "prompt", justification = "Dependency changes require explicit approval.")
+prefix_rule(pattern = ["npm.cmd", "uninstall"], decision = "prompt", justification = "Uninstalling dependencies requires explicit user approval.")
 prefix_rule(pattern = ["npm.cmd", "publish"], decision = "prompt", justification = "Publishing packages requires explicit approval.")
 prefix_rule(pattern = ["npx.cmd"], decision = "prompt", justification = "Ad-hoc package execution can download code and requires approval unless an exact safe prefix is listed above.")
 prefix_rule(pattern = ["gh"], decision = "prompt", justification = "GitHub API operations can read or write remote state and require approval.")

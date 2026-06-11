@@ -11,6 +11,11 @@
 - Preserve user work. Never revert, overwrite, or reformat unrelated changes.
 - Do not commit, push, publish, deploy, rotate secrets, or run destructive
   commands unless the user explicitly asks.
+- Any action that deletes, removes, prunes, uninstalls, drops, truncates,
+  overwrites, or cleans files, directories, dependencies, branches, artifacts,
+  caches, databases, external resources, or configuration requires explicit
+  user approval first. Continue safe non-destructive work, but pause the
+  destructive part until approval is granted.
 
 ## Codex Surface Routing
 
@@ -26,12 +31,20 @@
   boundary.
 - Use `AGENTS.override.md` only as a temporary local override and remove it
   when the override no longer applies.
+- When a task clearly matches an available skill, specialist agent, MCP server,
+  or config flag, using that surface is required unless a higher-priority
+  instruction blocks it. If an obvious routing surface is skipped, state the
+  concrete reason.
 
 ## Subagent Routing
 
-- Use subagents when the user asks for parallel or delegated agent work, or
-  when the active environment has explicitly authorized automatic routing.
+- Treat subagents as explicit delegation, not background magic. When the user
+  asks for parallel or delegated work, or this global setup authorizes automatic
+  task-shape routing, deliberately spawn the matching specialist and wait for a
+  summarized result before relying on it.
 - Do not spawn subagents for trivial, single-file, low-risk changes.
+- For non-trivial work that matches a registered specialist, use the specialist
+  instead of silently doing all exploration or verification in the main thread.
 - Prefer `code_mapper` before broad implementation, refactors, unfamiliar
   repositories, or architecture questions.
 - Prefer `docs_researcher` for current/version-sensitive APIs, Codex behavior,
@@ -46,8 +59,15 @@
   failing CI/test investigation.
 - Prefer `release_verifier` before push, tag, release, deploy, package,
   artifact cleanup, or public publication.
+- Pair specialists with the narrowest useful tool surface: `docs_researcher`
+  with official docs or Context7, `frontend_verifier` with browser MCPs,
+  `security_auditor` with read-only evidence, `test_verifier` with verification
+  commands, and `release_verifier` with git, artifact, and secret-scan gates.
 - For large tasks, use at most 2-4 focused subagents, keep write scopes
   separate, and summarize results before editing.
+- Keep write-heavy implementation in the main thread unless the user explicitly
+  asks to split write scopes. If multiple agents may edit, assign
+  non-overlapping files and reconcile before verification.
 - Subagents inherit approvals and sandboxing; never use them to bypass user
   approval, credentials, destructive actions, or external-state changes.
 
@@ -66,6 +86,15 @@
 
 ## Skill Routing
 
+- Use a skill when the user names it with `$SkillName` or plain text, or when
+  the task clearly matches the skill description.
+- Treat matching skill usage as mandatory for non-trivial tasks. Do not skip a
+  relevant skill merely because the main thread can do the work manually.
+- Before acting on a selected skill, read its full `SKILL.md`; if it references
+  required scripts, templates, or focused references, load only those needed for
+  the task.
+- Keep skill descriptions concise and front-loaded so implicit routing remains
+  reliable when the available-skill list is shortened.
 - Use `investigate` or `incident-triage` before fixing unclear failures,
   production errors, or regressions.
 - Use `new-feature` for bounded implementation work.
@@ -83,6 +112,36 @@
   access, secrets, or abuse paths are involved.
 - For UI/design work, prefer existing project design docs and components first,
   then use design/frontend skills as appropriate.
+- Prefer skills over deprecated custom prompts for reusable workflows. Package a
+  skill as a plugin when it should ship with MCP config, app integrations,
+  assets, or lifecycle hooks.
+
+## MCP Routing And Flags
+
+- Use OpenAI Docs MCP and the fetched Codex manual for OpenAI/Codex behavior,
+  Context7 or official project docs for libraries, `sequential-thinking` for
+  complex decomposition, Playwright or Chrome DevTools for UI/browser evidence,
+  Serena for semantic code navigation, and memory only for non-secret local
+  context.
+- Treat these MCP choices and their config flags as required when their task
+  shape appears; do not replace current docs, browser verification, or semantic
+  code navigation with guesswork when the matching MCP is available.
+- MCP servers can expose tools, resources, and prompts. Treat each server as a
+  capability boundary, especially when it can touch accounts, browsers,
+  filesystems, databases, production logs, billing, or deployments.
+- Keep MCP configuration in `~/.codex/config.toml` or trusted project
+  `.codex/config.toml`. Use `enabled = false` to park authenticated,
+  database, production, and broad filesystem connectors until the task needs
+  them.
+- Use `default_tools_approval_mode = "approve"` only for read-only
+  documentation lookups. Use `"prompt"` for browser, filesystem, account,
+  database, production, or potentially mutating tools.
+- Prefer precise config flags over prose-only safety rules: `enabled`,
+  `enabled_tools`, `disabled_tools`, `startup_timeout_sec`, `tool_timeout_sec`,
+  `bearer_token_env_var`, `env_vars`, and per-tool approval overrides.
+- Never store tokens in `AGENTS.md`, skills, repo docs, rules, shell history, or
+  committed config. Use OAuth or environment variables, then restart Codex and
+  verify active servers with `/mcp` or `codex mcp` before relying on them.
 
 ## Enterprise Dashboard UI Standards
 

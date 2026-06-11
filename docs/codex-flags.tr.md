@@ -47,3 +47,21 @@ codex --strict-config "Summarize the active setup."
 
 `danger-full-access` ve bypass flagleri standart çözüm değildir. Sadece dışarıdan
 izole edilmiş, atılabilir ortamda kullan.
+
+## MCP Config Alanlari
+
+MCP davranisi genelde tek seferlik CLI flaglerinden degil `config.toml`
+alanlarindan yonetilir.
+Gorev bu alanlardan birine denk geliyorsa alan bilerek kullanilir. Approval
+policy, tool exposure, timeout veya auth source sadece prose'a birakilmaz.
+
+| Alan | Kullanim |
+| --- | --- |
+| `enabled` | Server block'unu silmeden ac/kapat. |
+| `default_tools_approval_mode` | Server geneli tool onayi: `approve`, `prompt` veya `auto`. |
+| `enabled_tools` / `disabled_tools` | Belirli server icin allow-list veya deny-list. |
+| `startup_timeout_sec` | Server baslama suresini sinirlar. |
+| `tool_timeout_sec` | Tek tool cagrisinin suresini sinirlar. |
+| `required` | Enabled server baslamazsa Codex startup'i fail eder; opsiyonel lokal tool'larda dikkatli kullan. |
+| `bearer_token_env_var`, `env_vars`, `env_http_headers` | Secret'lari dosyadan degil environment variable'dan okur. |
+| `mcp_oauth_callback_port`, `mcp_oauth_callback_url` | OAuth provider sabit callback istediginde kullan. |

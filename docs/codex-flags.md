@@ -42,6 +42,25 @@ https://developers.openai.com/codex/cli/reference
 | `codex debug models` | Inspect the model catalog Codex sees. |
 | `codex execpolicy check` | Test rules against a command. |
 
+## MCP Config Fields
+
+Codex MCP behavior is usually controlled in `config.toml`, not by one-off CLI
+flags.
+When a task shape maps to one of these fields, use the field deliberately. Do
+not rely on prose alone for approval policy, tool exposure, timeouts, or auth
+source.
+
+| Field | Use |
+| --- | --- |
+| `enabled` | Turn a server on or off without deleting its block. |
+| `default_tools_approval_mode` | Set server-wide tool approval: `approve`, `prompt`, or `auto`. |
+| `enabled_tools` / `disabled_tools` | Allow-list or deny-list tools for a specific server. |
+| `startup_timeout_sec` | Bound server startup time. |
+| `tool_timeout_sec` | Bound individual tool-call runtime. |
+| `required` | Fail startup if an enabled server cannot initialize; avoid for optional local tools. |
+| `bearer_token_env_var`, `env_vars`, `env_http_headers` | Read secrets from environment variables instead of files. |
+| `mcp_oauth_callback_port`, `mcp_oauth_callback_url` | Configure OAuth callbacks only when a provider requires it. |
+
 ## Recommended Local Defaults
 
 Interactive work:

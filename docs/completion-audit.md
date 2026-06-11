@@ -80,3 +80,13 @@ gitleaks detect --redact --no-banner --no-git --verbose
 The installer is local-only by design. It does not commit, push, publish,
 deploy, rotate secrets, or change external accounts. Those actions remain
 explicit user decisions.
+
+## 2026-06-11 Routing Addendum
+
+| Requirement | Evidence | Status |
+| --- | --- | --- |
+| Global instructions should make subagent routing sharper without overstating automation. | `~/.codex/AGENTS.md` and `templates/codex/AGENTS.md` now state that task-shape routing must deliberately spawn specialists and wait for summaries; docs clarify that subagents are explicit delegation. | Complete |
+| Skill routing should reflect official progressive disclosure behavior. | Global/template `AGENTS.md` and `docs/skills-and-agents.md` document explicit and implicit skill invocation, full `SKILL.md` loading, focused references, and plugin packaging boundaries. | Complete |
+| MCP flags should be documented and encoded in templates. | `templates/codex/config.*.toml` include `max_depth`, `job_max_runtime_seconds`, and MCP startup/tool timeouts; `docs/mcp-catalog.md`, `docs/codex-flags.md`, and `docs/security-model.md` document approval modes, allow/deny lists, timeouts, and environment-backed auth. | Complete |
+| Matching skills, agents, MCPs, and flags should be treated as required when applicable. | `~/.codex/AGENTS.md`, `templates/codex/AGENTS.md`, `docs/skills-and-agents.md`, `docs/mcp-catalog.md`, and `docs/codex-flags.md` now say to use the matching surface and explain any skipped obvious routing surface. | Complete |
+| Delete or cleanup actions must pause for explicit approval while safe work continues. | `~/.codex/AGENTS.md`, `templates/codex/AGENTS.md`, root `AGENTS.md`, `docs/security-model.md`, and `templates/codex/rules/default.rules` require approval for deletion, cleanup, prune, uninstall, overwrite, and similar destructive work. | Complete |

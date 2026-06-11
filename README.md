@@ -117,8 +117,12 @@ the main Codex thread focused on decisions, implementation, and final evidence.
 - Sandbox stays enabled.
 - Approval policy stays interactive.
 - Agent network access stays off unless a profile or explicit approval enables it.
+- Matching skills, specialist agents, MCPs, and config flags are required when
+  the task shape calls for them.
 - Authenticated remote connectors are disabled by default.
 - MCPs that can touch external systems should prompt before risky tools.
+- Delete, cleanup, prune, uninstall, overwrite, drop, and truncate actions stay
+  approval-gated while safe non-destructive work can continue.
 - GitHub push, release creation, deployment, secret rotation, package publishing,
   destructive file operations, and credential access remain approval-gated.
 
@@ -132,6 +136,7 @@ the main Codex thread focused on decisions, implementation, and final evidence.
 | 🎬 Accessible animated visuals | SVG assets include `title`, `desc`, lightweight motion, reduced-motion fallback, and README alt text. |
 | 🧪 Skill source gate | `npm run verify:skills` checks installable package/skill pairs before users hit installer failures. |
 | 🔒 Conservative connectors | Authenticated account, database, and filesystem MCPs stay disabled until needed. |
+| 🧭 Mandatory routing | Applicable skills, specialist agents, MCPs, and config flags must be used or the skipped route must be explained. |
 | 🤝 Community flow | Issue and PR templates include public-safe reminders. |
 | ♻️ Dependency hygiene | Dependabot tracks GitHub Actions and npm manifest updates. |
 

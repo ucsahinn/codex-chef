@@ -115,8 +115,12 @@ ekibi gibi çalışır; ana thread ise karar, uygulama ve final kanıtına odakl
 - Sandbox açık kalır.
 - Onay politikası interaktif kalır.
 - Agent internet erişimi varsayılan olarak kapalıdır.
+- Görev şekli gerektiriyorsa eşleşen skill, uzman ajan, MCP ve config flagleri
+  kullanılmak zorundadır.
 - Kimlik doğrulama isteyen uzak connector'lar varsayılan olarak kapalıdır.
 - Dış sistemlere dokunabilecek MCP araçlarında onay tercih edilir.
+- Delete, cleanup, prune, uninstall, overwrite, drop ve truncate aksiyonları
+  onay bekler; güvenli non-destructive işler devam edebilir.
 - GitHub push, release, deploy, secret rotation, package publish, yıkıcı dosya
   işlemleri ve credential erişimi açık kullanıcı onayına bağlıdır.
 
@@ -130,6 +134,7 @@ ekibi gibi çalışır; ana thread ise karar, uygulama ve final kanıtına odakl
 | 🎬 Erişilebilir animasyonlu görseller | SVG asset'lerde `title`, `desc`, hafif motion, reduced-motion fallback ve README alt text bulunur. |
 | 🧪 Skill kaynak gate'i | `npm run verify:skills`, kullanıcı installer hatasına düşmeden kurulabilir package/skill çiftlerini kontrol eder. |
 | 🔒 Konservatif connector'lar | Authenticated hesap, database ve filesystem MCP'leri ihtiyaç olana kadar disabled kalır. |
+| 🧭 Zorunlu routing | Uygun skill, uzman ajan, MCP ve config flagleri kullanılır veya atlanan rota açıklanır. |
 | 🤝 Community akışı | Issue ve PR template'leri public-safe hatırlatmalar içerir. |
 | ♻️ Dependency hijyeni | Dependabot GitHub Actions ve npm manifest güncellemelerini takip eder. |
 

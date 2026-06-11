@@ -12,6 +12,9 @@ installable templates, docs, validation, and security guardrails.
 - Keep authenticated MCP connectors disabled by default.
 - Do not add approval rules that auto-allow destructive commands, credential
   access, publishing, deployments, releases, or broad shell execution.
+- Do not delete, prune, uninstall, drop, truncate, overwrite, or clean files,
+  directories, dependencies, artifacts, local state, or configuration without
+  explicit user approval. Non-destructive edits and validation may continue.
 - Install scripts must back up overwritten files and must not delete user data.
 - Run `npm run validate` before reporting the repo as push-ready.
 

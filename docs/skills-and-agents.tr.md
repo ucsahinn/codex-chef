@@ -8,6 +8,18 @@ tam talimatları yüklemez; bu yüzden açıklamalar net, kısa ve tetiklenme ko
 
 Resmi kaynak: https://developers.openai.com/codex/skills
 
+Routing kurali:
+
+- Kullanici `$skill` veya skill adini acikca yazarsa o secim onceliklidir.
+- Implicit skill secimi `description` alanindan calisir; tetik kelimelerini
+  basa koy, cunku Codex ilk context'te uzun skill listelerini kisaltabilir.
+- Non-trivial gorev bir skill ile eslesiyorsa skill kullanimi zorunludur. Ana
+  thread ayni isi manuel yapabilir diye ilgili skill atlanmaz.
+- Skill secildikten sonra Codex tam `SKILL.md` dosyasini okumali; sonra sadece
+  gorev icin gereken reference, template, script veya assetleri yuklemelidir.
+- Tekrarlanabilir workflow icin skill kullan. Workflow MCP config, app mapping,
+  asset veya lifecycle hook ile dagitilacaksa plugin olarak paketle.
+
 Bu repo şunları içerir:
 
 - `catalog/skills.json`: seçilmiş skill referansları, kategorileri ve varsa
@@ -51,6 +63,22 @@ Bu starter odaklı ajanlar kaydeder:
 - `release_verifier`: Git hijyeni, artifact, secret scan ve publish gate'leri.
 
 Resmi kaynak: https://developers.openai.com/codex/subagents
+
+Routing kurali:
+
+- Subagent kullanimi acik delegasyondur. Kullanici paralel/delege is isterse
+  veya aktif global setup task-shape routing'e izin veriyorsa Codex uygun uzman
+  ajani bilerek spawn etmelidir.
+- Non-trivial is kayitli bir uzmana denk geliyorsa o uzman kullanilir ve sonucu
+  kullanmadan once ozetlenir.
+- En iyi alanlari gurultulu okuma ve kanit toplama isleridir: kesif, guncel
+  docs, review, UI dogrulama, security audit, test/build kaniti ve release
+  hazirligi.
+- Yazma agirlikli uygulama ana thread'de kalir. Kullanici acikca bolmeyi
+  istemediyse birden fazla ajan ayni dosyalari edit etmemelidir.
+- Subagent'lar onay, sandbox ve connector auth sinirlarini miras alir. Kullanici
+  onayi, credential, destructive action veya dis sistem kontrolunu bypass etmek
+  icin kullanilmaz.
 
 Güvenlik notu: subagent'lar onayları, sandbox'ı veya connector auth sınırlarını
 atlamaz. En iyi kullanım alanları okuma ağırlıklı keşif, log/test inceleme,

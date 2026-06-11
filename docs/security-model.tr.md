@@ -15,6 +15,12 @@ hazırlandı.
 - Komut kuralları dar kapsamlıdır: ağırlık read-only keşif ve lokal doğrulama
   komutlarındadır.
 
+## Silme Onayi
+
+Silme, cleanup, prune, uninstall, overwrite, database drop/truncate ve benzer
+destructive islemler acik kullanici onayi ister. Destructive kisim beklerken
+guvenli non-destructive isler devam edebilir.
+
 ## MCP Sınırları
 
 MCP sunucuları shell sandbox dışında araçlar sunabilir. Bu yüzden özellikle
@@ -30,6 +36,15 @@ Bu starter'ın yaklaşımı:
 - Token ve credential değerleri repo dosyalarına değil environment variable
   olarak verilmelidir.
 - Dış sistemlere yazabilecek araçlarda onay tercih edilmelidir.
+
+Ek MCP flag kurali:
+
+- Read-only dokumantasyon MCP'leri `default_tools_approval_mode = "approve"`
+  kullanabilir; browser, account, filesystem, database, production ve mutating
+  tool'lar `"prompt"` kullanmalidir.
+- Yeni MCP server eklenirken sadece prose'a guvenme; `enabled_tools`,
+  `disabled_tools`, `startup_timeout_sec` ve `tool_timeout_sec` gibi dar config
+  flagleri tercih edilmelidir.
 
 Resmi kaynak: https://developers.openai.com/codex/mcp
 
