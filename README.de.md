@@ -25,7 +25,7 @@
 
 Sicherheitsorientiertes Codex-Setup fuer Windows-first Power-User und kleine Teams. Dieses Starter-Repo paketiert eine wiederholbare lokale Codex-Basis: dauerhafte Anweisungen, konservative Konfiguration, spezialisierte Agents, Approval Rules, MCP-Defaults, kuratierte Skill-Metadaten, Plugin-Paket, Validierungsskripte und mehrsprachige Einstiegspunkte.
 
-Dies ist ein inoffizieller Community-Starter, kein OpenAI-Produkt. Die tiefen Dokumente bleiben auf Englisch und Tuerkisch gepflegt; diese Seite ist der deutsche Einstieg.
+Dies ist ein inoffizieller Community-Starter, kein OpenAI-Produkt. README und tiefe Dokumentationsdateien sind in sechs Sprachen vorhanden; diese Seite ist der deutsche Einstieg.
 
 ## ⚡ Schnellstart
 
@@ -34,8 +34,8 @@ Dies ist ein inoffizieller Community-Starter, kein OpenAI-Produkt. Die tiefen Do
 | Sicher installieren | [Quick Start](#-quick-start) |
 | Vor dem Schreiben pruefen | [Dry Run](#-dry-run-first) |
 | Vollstaendigen Installationsplan sehen | [Install Plan](#-install-plan) |
-| Sicherheitsmodell pruefen | [Security model](docs/security-model.md) |
-| Veroeffentlichung vorbereiten | [Publishing](docs/publish.md) |
+| Sicherheitsmodell pruefen | [Sicherheitsmodell](docs/security-model.de.md) |
+| Veroeffentlichung vorbereiten | [Publishing](docs/publish.de.md) |
 
 ## 🧩 Installationsumfang
 
@@ -116,12 +116,12 @@ codex --strict-config "Summarize the active Codex setup."
 
 ## 📚 Dokumentation
 
-- [Install](docs/install.md)
-- [Verification](docs/verification.md)
-- [Security model](docs/security-model.md)
-- [Public readiness](docs/public-readiness.md)
-- [ECC compatibility](docs/ecc-compatibility.md)
-- [Advisory sources](docs/advisory-sources.md)
+- [Install](docs/install.de.md)
+- [Verification](docs/verification.de.md)
+- [Security model](docs/security-model.de.md)
+- [Public readiness](docs/public-readiness.de.md)
+- [ECC compatibility](docs/ecc-compatibility.de.md)
+- [Advisory sources](docs/advisory-sources.de.md)
 
 ## 🚀 Publishing Boundary
 

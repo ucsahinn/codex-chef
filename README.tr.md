@@ -23,7 +23,7 @@
   <sub>Deutsch · Español · English · Português (Brasil) · Türkçe · French</sub>
 </p>
 
-Windows ağırlıklı çalışan güçlü kullanıcılar ve küçük ekipler için güvenlik öncelikli Codex setup paketi. Tekrar edilebilir bir yerel Codex temeli kurar: kalıcı talimatlar, konservatif config, uzman ajanlar, onay kuralları, MCP varsayılanları, seçilmiş skill metadata'ları, plugin paketi, doğrulama scriptleri ve iki dilli dokümantasyon.
+Windows ağırlıklı çalışan güçlü kullanıcılar ve küçük ekipler için güvenlik öncelikli Codex setup paketi. Tekrar edilebilir bir yerel Codex temeli kurar: kalıcı talimatlar, konservatif config, uzman ajanlar, onay kuralları, MCP varsayılanları, seçilmiş skill metadata'ları, plugin paketi, doğrulama scriptleri ve altı dilli dokümantasyon.
 
 Bu resmi OpenAI ürünü değildir; community starter paketidir. Güncel resmi Codex dokümanlarıyla eşleştirilmiştir ve riskli aksiyonlar varsayılan olarak onaya bağlı kalır.
 
@@ -189,7 +189,7 @@ Böylece Codex tek bir sohbet gibi değil, uzman rolleri olan küçük bir yazı
 | 🛡️ Public-safe tasarım | Token, auth dosyası, session, memory, cookie, private key veya makineye özel state içermez. |
 | 🧪 Gerçek doğrulama | `npm run check` repo, docs, install-plan, agent drift, MCP drift, skill-source, supply-chain ve security kontrollerini çalıştırır. |
 | 🔐 Secret scan hazır | Gitleaks komutu dokümante edilir; Git hook varsa Gitleaks çalıştırır. |
-| 🌐 Çok dilli giriş | Deutsch, Español, English, Português (Brasil), Türkçe ve Français README dosyaları bulunur; İngilizce ve Türkçe derin doc çiftleri validation ile zorunlu tutulur. |
+| 🌐 Çok dilli docs | Deutsch, Español, English, Português (Brasil), Türkçe ve Français README ve derin dokümantasyon dosyaları bulunur; altı dilli deep docs validation ile zorunlu tutulur. |
 | 🎬 Erişilebilir görseller | SVG'lerde title, description, motion, reduced-motion fallback ve README alt text vardır. |
 | 🧩 Skill kaynak gate'i | `catalog/skills-lock.json` installable skill metadata'sıyla karşılaştırılır. |
 | 🤖 Agent drift gate'i | `catalog/agents.json` Windows/Unix config bloklari ve role TOML dosyalariyla karsilastirilir. |
@@ -206,7 +206,7 @@ Böylece Codex tek bir sohbet gibi değil, uzman rolleri olan küçük bir yazı
 assets/                  Public-safe README görselleri
 catalog/                 Skill ve MCP kaynak metadata'ları
 README*.md               Çok dilli public giriş dosyaları
-docs/                    İngilizce ve Türkçe kurulum rehberleri
+docs/                    Altı dilli kurulum ve doğrulama rehberleri
 manifests/               No-write install plan metadata'sı
 plugins/                 Bundled yerel Codex plugin'i
 schemas/                 Hafif validation schema'ları
@@ -232,6 +232,8 @@ npm run verify:skills:online
 Online skill doğrulaması network ve Skills CLI kullanır. Bu yüzden default offline gate'ten ayrı tutulur.
 
 ## 📚 Dokümantasyon
+
+Her derin rehberin İngilizce, Almanca, İspanyolca, Brezilya Portekizcesi, Türkçe ve Fransızca dosyası vardır. Örneğin `docs/install.md`, `docs/install.de.md`, `docs/install.es.md`, `docs/install.pt-BR.md`, `docs/install.tr.md` ve `docs/install.fr.md` ile eşleşir.
 
 - [Kurulum](docs/install.tr.md)
 - [Troubleshooting](docs/troubleshooting.tr.md)

@@ -1,5 +1,46 @@
 # Release Notes
 
+## v0.3.1 - 2026-06-15
+
+This patch completes the multilingual documentation surface that was introduced
+in v0.3.0. Root README files and deep `docs/` guides now have a consistent
+six-language file matrix.
+
+## Highlights
+
+- Added German, Spanish, Brazilian Portuguese, and French deep-doc files for
+  every English guide under `docs/`.
+- Added `npm run sync:doc-locales` to regenerate the additional localized
+  deep-doc files from the reviewed English guide structure.
+- Added `npm run validate:doc-locales` and included it in `npm run check` so
+  missing locale files fail locally and in CI.
+- Updated repo, security, workflow, and release-readiness validators so they
+  understand `de`, `es`, `pt-BR`, `tr`, and `fr` doc pairs instead of assuming
+  only English/Turkish.
+- Updated README positioning and links so the public surface no longer implies
+  that deep docs are only English/Turkish.
+
+## Upgrade Notes
+
+No installer behavior changed in this patch. Existing users can pull the repo
+and use the same dry-run and verification commands:
+
+```bash
+npm run check
+node scripts/plan-install.mjs --all --json
+```
+
+## Verification
+
+Release readiness for this patch should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.3.0 - 2026-06-14
 
 This release makes the starter more transparent and harder to drift by adapting

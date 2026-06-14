@@ -49,6 +49,8 @@ const requiredPublicFiles = [
   "schemas/install-plan.schema.json",
   "schemas/install-state-preview.schema.json",
   "scripts/plan-install.mjs",
+  "scripts/sync-doc-locales.mjs",
+  "scripts/validate-doc-locales.mjs",
   "scripts/validate-readme-locales.mjs",
   "scripts/validate-workflow-security.mjs",
   "scripts/validate-install-plan.mjs",
@@ -132,13 +134,18 @@ const docsDir = path.join(root, "docs");
 if (fs.existsSync(docsDir)) {
   const docFiles = fs.readdirSync(docsDir).filter((file) => file.endsWith(".md"));
   const docSet = new Set(docFiles);
+  const docLocaleSuffixes = ["de", "es", "pt-BR", "tr", "fr"];
+  const localePattern = /\.(?:de|es|pt-BR|tr|fr)\.md$/;
   for (const file of docFiles) {
-    if (file.endsWith(".tr.md")) {
-      const english = file.replace(/\.tr\.md$/, ".md");
+    if (localePattern.test(file)) {
+      const english = file.replace(localePattern, ".md");
       if (!docSet.has(english)) failures.push(`Missing English doc pair for docs/${file}: docs/${english}`);
     } else {
-      const turkish = file.replace(/\.md$/, ".tr.md");
-      if (!docSet.has(turkish)) failures.push(`Missing Turkish doc pair for docs/${file}: docs/${turkish}`);
+      const slug = file.replace(/\.md$/, "");
+      for (const locale of docLocaleSuffixes) {
+        const localized = `${slug}.${locale}.md`;
+        if (!docSet.has(localized)) failures.push(`Missing localized doc pair for docs/${file}: docs/${localized}`);
+      }
     }
   }
 } else {

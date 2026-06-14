@@ -1,0 +1,61 @@
+# Installationsleitfaden
+
+[Deutsch](install.de.md) | [Español](install.es.md) | [English](install.md) | [Português (Brasil)](install.pt-BR.md) | [Türkçe](install.tr.md) | [Français](install.fr.md)
+
+> Diese deutsche Anleitung ist Teil des sechssprachigen Dokumentationssatzes fuer `install.md`. Sie behält dieselbe Sicherheitsgrenze bei: zuerst eine Vorschau ausführen, keine Secrets speichern und jede Setup-Aenderung lokal verifizieren.
+
+## Was diese Seite abdeckt
+
+- Windows-first Installation mit PowerShell und ein passender Bash/WSL-Pfad.
+- Dry-run und Plan-Preview vor echten globalen Writes.
+- Backups und Rollback-Erwartungen für verwaltete Codex-Ziele.
+
+## Nützliche Befehle
+
+```powershell
+.\scripts\install.ps1 -All -Force -WhatIf
+```
+
+```bash
+./scripts/install.sh --all --force --dry-run
+```
+
+```bash
+node scripts/plan-install.mjs --all --json
+```
+
+## Sicherheitsgrenze
+
+- Keine Tokens, Cookies, Sessions, Memories oder privaten lokalen Pfade in die Dokumentation aufnehmen.
+- Reale globale Writes nur über den expliziten Installer-Flow ausführen.
+- Riskante Aktionen wie Commit, Push, Release, Publish oder GitHub-Settings bleiben menschliche Entscheidungen.
+
+## Verifikation
+
+- `npm run check` vor einer Veröffentlichung ausführen.
+- `git diff --check` nutzen, um Whitespace- und Markdown-Probleme zu erkennen.
+- `gitleaks detect --redact --no-banner --no-git --verbose` nutzen, wenn Gitleaks verfügbar ist.
+
+## Quellabschnitte
+
+Diese lokalisierte Datei folgt den Abschnitten der englischen Quelldatei. Source: [install.md](install.md).
+
+- Installation Guide
+- Prerequisites
+- PowerShell Install
+- Bash Or WSL Install
+- What Gets Backed Up
+- Post-Install Checks
+- Test Without Touching Your Real Setup
+- Rollback
+
+## Synchron halten
+
+Wenn sich das Verhalten oder ein Befehl ändert, aktualisiere alle sechs Sprachdateien und führe die Prüfungen aus.
+
+```bash
+npm run check
+npm run validate:doc-locales
+```
+
+Back to the localized entry point: [Deutsch](../README.de.md).

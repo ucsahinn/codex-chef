@@ -25,7 +25,7 @@
 
 Setup de Codex con prioridad en seguridad para usuarios avanzados Windows-first y equipos pequenos. Empaqueta una base local repetible para Codex: instrucciones duraderas, configuracion conservadora, agents especializados, reglas de aprobacion, defaults de MCP, metadata de skills curadas, plugin local, scripts de validacion y entradas multilingues.
 
-Este es un starter comunitario no oficial, no un producto de OpenAI. La documentacion profunda se mantiene en ingles y turco; esta pagina es la entrada en espanol.
+Este es un starter comunitario no oficial, no un producto de OpenAI. Los README y la documentación profunda existen en seis idiomas; esta página es la entrada en español.
 
 ## ⚡ Inicio Rapido
 
@@ -34,8 +34,8 @@ Este es un starter comunitario no oficial, no un producto de OpenAI. La document
 | Instalar de forma segura | [Quick Start](#-quick-start) |
 | Previsualizar sin escribir | [Dry Run](#-dry-run-first) |
 | Ver el plan completo | [Install Plan](#-install-plan) |
-| Revisar seguridad | [Security model](docs/security-model.md) |
-| Preparar publicacion | [Publishing](docs/publish.md) |
+| Revisar seguridad | [Modelo de seguridad](docs/security-model.es.md) |
+| Preparar publicacion | [Publishing](docs/publish.es.md) |
 
 ## 🧩 Superficie De Instalacion
 
@@ -116,12 +116,12 @@ codex --strict-config "Summarize the active Codex setup."
 
 ## 📚 Documentacion
 
-- [Install](docs/install.md)
-- [Verification](docs/verification.md)
-- [Security model](docs/security-model.md)
-- [Public readiness](docs/public-readiness.md)
-- [ECC compatibility](docs/ecc-compatibility.md)
-- [Advisory sources](docs/advisory-sources.md)
+- [Install](docs/install.es.md)
+- [Verification](docs/verification.es.md)
+- [Security model](docs/security-model.es.md)
+- [Public readiness](docs/public-readiness.es.md)
+- [ECC compatibility](docs/ecc-compatibility.es.md)
+- [Advisory sources](docs/advisory-sources.es.md)
 
 ## 🚀 Limite De Publicacion
 

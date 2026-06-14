@@ -1,5 +1,46 @@
 # Release Notları
 
+## v0.3.1 - 2026-06-15
+
+Bu patch, v0.3.0 ile eklenen çok dilli dokümantasyon yüzeyini tamamlar. Kök
+README dosyaları ve `docs/` altındaki derin rehberler artık tutarlı altı dilli
+dosya matrisine sahiptir.
+
+## Öne Çıkanlar
+
+- `docs/` altındaki her İngilizce rehber için Almanca, İspanyolca, Brezilya
+  Portekizcesi ve Fransızca deep-doc dosyaları eklendi.
+- Ek localized deep-doc dosyalarını gözden geçirilmiş İngilizce rehber
+  yapısından yeniden üretmek için `npm run sync:doc-locales` eklendi.
+- Eksik locale dosyaları lokal ve CI kontrollerinde fail etsin diye
+  `npm run validate:doc-locales` eklendi ve `npm run check` içine bağlandı.
+- Repo, security, workflow ve release-readiness validatorları `de`, `es`,
+  `pt-BR`, `tr` ve `fr` doc çiftlerini anlayacak şekilde güncellendi; sadece
+  İngilizce/Türkçe varsayımı kaldırıldı.
+- Public yüzey artık deep docs sadece İngilizce/Türkçe gibi görünmesin diye
+  README konumlandırması ve linkleri güncellendi.
+
+## Upgrade Notları
+
+Bu patch installer davranışını değiştirmez. Mevcut kullanıcılar repoyu çekip
+aynı dry-run ve doğrulama komutlarını kullanabilir:
+
+```bash
+npm run check
+node scripts/plan-install.mjs --all --json
+```
+
+## Doğrulama
+
+Bu patch için release readiness şu kontrolleri içermelidir:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.3.0 - 2026-06-14
 
 Bu release, ECC'nin manifest ve release-gate yaklaşımındaki güvenli fikirleri

@@ -25,7 +25,7 @@
 
 Setup de Codex com foco em segurança para usuarios Windows-first e equipes pequenas. Ele empacota uma base local repetivel para Codex: instrucoes duraveis, configuracao conservadora, agents especializados, approval rules, defaults de MCP, metadata de skills curadas, plugin local, scripts de validacao e entradas multilingues.
 
-Este e um starter comunitario nao oficial, nao um produto da OpenAI. A documentacao profunda fica em ingles e turco; esta pagina e a entrada em portugues do Brasil.
+Este é um starter comunitário não oficial, não um produto da OpenAI. Os READMEs e a documentação profunda existem em seis idiomas; esta página é a entrada em português do Brasil.
 
 ## ⚡ Comece Aqui
 
@@ -34,8 +34,8 @@ Este e um starter comunitario nao oficial, nao um produto da OpenAI. A documenta
 | Instalar com seguranca | [Quick Start](#-quick-start) |
 | Prever sem escrever | [Dry Run](#-dry-run-first) |
 | Ver o plano completo | [Install Plan](#-install-plan) |
-| Revisar seguranca | [Security model](docs/security-model.md) |
-| Preparar publicacao | [Publishing](docs/publish.md) |
+| Revisar seguranca | [Modelo de segurança](docs/security-model.pt-BR.md) |
+| Preparar publicacao | [Publishing](docs/publish.pt-BR.md) |
 
 ## 🧩 Superficie De Instalacao
 
@@ -116,12 +116,12 @@ codex --strict-config "Summarize the active Codex setup."
 
 ## 📚 Documentacao
 
-- [Install](docs/install.md)
-- [Verification](docs/verification.md)
-- [Security model](docs/security-model.md)
-- [Public readiness](docs/public-readiness.md)
-- [ECC compatibility](docs/ecc-compatibility.md)
-- [Advisory sources](docs/advisory-sources.md)
+- [Install](docs/install.pt-BR.md)
+- [Verification](docs/verification.pt-BR.md)
+- [Security model](docs/security-model.pt-BR.md)
+- [Public readiness](docs/public-readiness.pt-BR.md)
+- [ECC compatibility](docs/ecc-compatibility.pt-BR.md)
+- [Advisory sources](docs/advisory-sources.pt-BR.md)
 
 ## 🚀 Limite De Publicacao
 

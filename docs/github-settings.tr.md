@@ -50,11 +50,11 @@ veya private workspace URL kullanma.
 
 ## Release Metadata
 
-v0.3.0 için:
+v0.3.1 için:
 
 ```text
-Title: Codex Enterprise Starter v0.3.0
-Tag: v0.3.0
+Title: Codex Enterprise Starter v0.3.1
+Tag: v0.3.1
 Notes: docs/release-notes.md
 ```
 

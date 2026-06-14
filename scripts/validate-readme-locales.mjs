@@ -21,10 +21,38 @@ const requiredSignalGroups = [
   ["install.sh"],
   ["scripts/plan-install.mjs"],
   ["npm run check"],
-  ["docs/security-model.md", "docs/security-model.tr.md"],
-  ["docs/public-readiness.md", "docs/public-readiness.tr.md"],
-  ["docs/ecc-compatibility.md", "docs/ecc-compatibility.tr.md"],
-  ["docs/advisory-sources.md", "docs/advisory-sources.tr.md"]
+  [
+    "docs/security-model.md",
+    "docs/security-model.de.md",
+    "docs/security-model.es.md",
+    "docs/security-model.pt-BR.md",
+    "docs/security-model.tr.md",
+    "docs/security-model.fr.md"
+  ],
+  [
+    "docs/public-readiness.md",
+    "docs/public-readiness.de.md",
+    "docs/public-readiness.es.md",
+    "docs/public-readiness.pt-BR.md",
+    "docs/public-readiness.tr.md",
+    "docs/public-readiness.fr.md"
+  ],
+  [
+    "docs/ecc-compatibility.md",
+    "docs/ecc-compatibility.de.md",
+    "docs/ecc-compatibility.es.md",
+    "docs/ecc-compatibility.pt-BR.md",
+    "docs/ecc-compatibility.tr.md",
+    "docs/ecc-compatibility.fr.md"
+  ],
+  [
+    "docs/advisory-sources.md",
+    "docs/advisory-sources.de.md",
+    "docs/advisory-sources.es.md",
+    "docs/advisory-sources.pt-BR.md",
+    "docs/advisory-sources.tr.md",
+    "docs/advisory-sources.fr.md"
+  ]
 ];
 
 function read(file) {
@@ -56,7 +84,7 @@ for (const { file } of locales) {
     }
   }
 
-  if (!/unofficial|inoffizieller|no oficial|comunitario nao oficial|communautaire non officiel|resmi olmayan|resmi OpenAI ürünü değildir|community starter/i.test(text)) {
+  if (!/unofficial|inoffizieller|no oficial|comunit[aá]rio n(?:a|ã)o oficial|communautaire non officiel|resmi olmayan|resmi OpenAI ürünü değildir|community starter/i.test(text)) {
     failures.push(`${file} must state that the starter is unofficial/community maintained.`);
   }
   if (!/OpenAI/.test(text) || !/Codex/.test(text)) {
@@ -71,8 +99,8 @@ const english = read("README.md");
 if (!english.includes("multilingual README entry points")) {
   failures.push("README.md must describe the multilingual README entry points.");
 }
-if (!english.includes("English/Turkish deep docs")) {
-  failures.push("README.md must distinguish multilingual entry points from English/Turkish deep docs.");
+if (!english.includes("six-language deep docs")) {
+  failures.push("README.md must describe six-language deep docs coverage.");
 }
 
 if (failures.length > 0) {

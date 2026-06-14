@@ -23,7 +23,7 @@
   <sub>Deutsch · Español · English · Português (Brasil) · Türkçe · French</sub>
 </p>
 
-Security-first Codex setup for Windows-first power users and small teams. It packages a repeatable local Codex baseline: durable instructions, conservative config, specialist agents, approval rules, MCP defaults, curated skill metadata, plugin packaging, validation scripts, multilingual README entry points, and English/Turkish deep docs.
+Security-first Codex setup for Windows-first power users and small teams. It packages a repeatable local Codex baseline: durable instructions, conservative config, specialist agents, approval rules, MCP defaults, curated skill metadata, plugin packaging, validation scripts, multilingual README entry points, and six-language deep docs.
 
 This is an unofficial community starter, not an OpenAI product. It is mapped to current official Codex documentation and keeps risky actions approval-gated by default.
 
@@ -189,7 +189,7 @@ The result is a small specialist-team workflow inside Codex while the main threa
 | 🛡️ Public-safe by design | No tokens, auth files, sessions, memories, cookies, private keys, or machine-specific state are included. |
 | 🧪 Real validation | `npm run check` runs repo, docs, install-plan, agent drift, MCP drift, skill-source, supply-chain, and security checks. |
 | 🔐 Secret scanning ready | Gitleaks command is documented and the Git hook runs it when available. |
-| 🌐 Multilingual entry points | Deutsch, Español, English, Português (Brasil), Türkçe, and Français README files are present; English and Turkish deep doc pairs are enforced by validation. |
+| 🌐 Multilingual docs | Deutsch, Español, English, Português (Brasil), Türkçe, and Français README and deep documentation files are present; six-language deep docs are enforced by validation. |
 | 🎬 Accessible visuals | SVG assets include title, description, motion, reduced-motion fallback, and README alt text. |
 | 🧩 Skill source gate | `catalog/skills-lock.json` is checked against installable skill metadata. |
 | 🤖 Agent drift gate | `catalog/agents.json` is checked against Windows/Unix config blocks and role TOML files. |
@@ -206,7 +206,7 @@ The result is a small specialist-team workflow inside Codex while the main threa
 assets/                  Public-safe README visuals
 catalog/                 Skill and MCP source metadata
 README*.md               Multilingual public entry points
-docs/                    English and Turkish setup guides
+docs/                    Six-language setup and verification guides
 manifests/               No-write install plan metadata
 plugins/                 Bundled local Codex plugin
 schemas/                 Lightweight validation schemas
@@ -232,6 +232,8 @@ npm run verify:skills:online
 Online skill verification uses the network and the Skills CLI. It is intentionally separate from the default offline gate.
 
 ## 📚 Documentation
+
+Every deep guide has English, German, Spanish, Brazilian Portuguese, Turkish, and French files. For example, `docs/install.md` is paired with `docs/install.de.md`, `docs/install.es.md`, `docs/install.pt-BR.md`, `docs/install.tr.md`, and `docs/install.fr.md`.
 
 - [Install](docs/install.md)
 - [Troubleshooting](docs/troubleshooting.md)

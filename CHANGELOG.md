@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.3.1 - 2026-06-15
+
+- Added German, Spanish, Brazilian Portuguese, and French deep documentation
+  files for every English guide, bringing the docs matrix to six languages.
+- Added `npm run validate:doc-locales` and `npm run sync:doc-locales` so deep
+  doc locale coverage is generated, checked, and included in `npm run check`.
+- Updated multilingual README positioning so root README files no longer imply
+  that deep documentation is only English/Turkish.
+
 ## 0.3.0 - 2026-06-14
 
 - Added an ECC-informed manifest-backed install plan with a dependency-free

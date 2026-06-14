@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: 20
       - run: node --check scripts/validate-repo.mjs
+      - run: node --check scripts/validate-doc-locales.mjs
       - run: node --check scripts/validate-docs.mjs
       - run: node --check scripts/validate-readme-locales.mjs
       - run: node --check scripts/validate-workflow-security.mjs
@@ -28,6 +29,7 @@ jobs:
       - run: node --check scripts/validate-install-state-preview.mjs
       - run: node --check scripts/validate-installer-alignment.mjs
       - run: node --check scripts/plan-install.mjs
+      - run: node --check scripts/sync-doc-locales.mjs
       - run: node --check scripts/validate-agent-config.mjs
       - run: node --check scripts/validate-mcp-config.mjs
       - run: node --check scripts/scan-supply-chain-iocs.mjs
