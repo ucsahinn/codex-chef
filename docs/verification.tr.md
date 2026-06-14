@@ -9,37 +9,90 @@ npm run check
 
 Bu komut şunları çalıştırır:
 
-- `scripts/validate-repo.mjs`: yapı, JSON, TOML, plugin, skill ve temel
-  sızıntı pattern kontrolleri; README storefront sinyalleri ve SVG
-  erişilebilirlik metadata'sı, hafif animasyon, reduced-motion fallback ve
-  kurulabilir skill package ve skill adı formatı dahil.
-- `scripts/verify-skill-sources.mjs`: duplicate adlar, kategoriler, nedenler ve
-  kurulabilir `package` + `skill` çiftleri için offline skill katalog
-  doğrulaması.
-- `scripts/security-audit.mjs`: public repo dosyaları, iki dilli docs, güvenli
-  Codex varsayılanları, disabled authenticated MCP'ler ve daha güçlü
-  secret/state kontrolleri.
-- `.github/dependabot.yml`: GitHub Actions ve npm manifest için dependency
-  güncelleme hijyeni.
+- `scripts/validate-repo.mjs`: repo yapısı, JSON/TOML heuristics, plugin
+  manifest, skill metadata, MCP metadata, README sinyalleri, SVG
+  erişilebilirliği ve temel leak-pattern kontrolleri.
+- `scripts/validate-docs.mjs`: Markdown relative link kontrolleri ve GitHub
+  workflow shape kontrolleri.
+- `scripts/verify-skill-sources.mjs`: offline skill catalog validation ve
+  `catalog/skills-lock.json` drift kontrolleri.
+- `scripts/security-audit.mjs`: public-readiness dosyaları, iki dilli docs,
+  güvenli Codex default'ları, shell environment policy, disabled authenticated
+  MCP'ler ve secret/state kontrolleri.
 
 Ek release kontrolleri:
 
 ```bash
 git status --short
-git diff --cached --check
+git diff --check
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
-Kurulabilir skill'ler değiştiğinde network destekli resolver kontrolünü de
-çalıştır:
+Installable skill'ler değiştiğinde network-backed resolver kontrolünü de çalıştır:
 
 ```bash
 npm run verify:skills:online
 ```
 
-Tam lokal setup smoke testi için, mevcut kullanıcının Codex ve Git guard
-dosyalarını güncellemenin güvenli olduğunu doğruladıktan sonra installer'ı
-çalıştır:
+Online dogrulayici, Windows kontrollerini kullanicinin global npm cache
+izinlerine baglamamak icin yok sayilan `tmp/npm-cache` calisma alani cache'ini
+kullanir.
+
+## Syntax Kontrolleri
+
+Lokal ortamda mümkün olan parser kontrolleri:
+
+```bash
+node --check scripts/validate-repo.mjs
+node --check scripts/validate-docs.mjs
+node --check scripts/verify-skill-sources.mjs
+node --check scripts/security-audit.mjs
+```
+
+Bash olan sistemlerde:
+
+```bash
+bash -n scripts/install.sh
+```
+
+Windows'ta:
+
+```powershell
+$errors = $null
+$tokens = $null
+[System.Management.Automation.Language.Parser]::ParseFile("scripts/install.ps1", [ref]$tokens, [ref]$errors) | Out-Null
+$errors
+```
+
+## Installer Smoke Testleri
+
+PowerShell dry run:
+
+```powershell
+.\scripts\install.ps1 -All -Force -WhatIf
+```
+
+Bash dry run:
+
+```bash
+./scripts/install.sh --all --force --dry-run
+```
+
+Temporary-home smoke testleri sadece bilerek ignored `tmp/` path'leri altında
+dosya oluşturmak istediğinde kullanılmalı:
+
+```powershell
+$env:CODEX_HOME = "$PWD\tmp\codex-home"
+$env:AGENTS_HOME = "$PWD\tmp\agents-home"
+.\scripts\install.ps1 -Force
+```
+
+Oluşan `tmp/` klasörü ignored durumdadır ve commit edilmemelidir.
+
+## Gerçek Install Doğrulaması
+
+Gerçek installer yalnızca kullanıcı mevcut Codex/Git setup'ına yazmayı açıkça
+onayladıktan sonra çalıştırılır:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Force
@@ -47,27 +100,16 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 
 Beklenen skill davranışı idempotent ve sessizdir: kurulu skill'ler `Skill
 already installed`, başarılı yeni kurulumlar `Installed skill` olarak görünür;
-ham Skills CLI çıktısı yalnız clone, installation veya write hatasını teşhis
-etmek gerektiğinde basılır.
+raw Skills CLI çıktısı yalnızca clone, installation veya write hatasında basılır.
 
-Push sonrası remote doğrulama:
+## Remote Doğrulama
+
+Onaylı push sonrası:
 
 ```bash
 git rev-parse HEAD
 git -c http.sslBackend=openssl ls-remote origin refs/heads/main
 ```
 
-İki hash aynı olmalı.
-
-## Installer Smoke Test
-
-Gerçek kullanıcı setup'ına dokunmadan PowerShell testi:
-
-```powershell
-$env:CODEX_HOME = "$PWD\tmp\codex-home"
-$env:AGENTS_HOME = "$PWD\tmp\agents-home"
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Force
-node -e "const fs=require('fs'); JSON.parse(fs.readFileSync('tmp/agents-home/plugins/marketplace.json','utf8')); console.log('marketplace ok')"
-```
-
-Üretilen `tmp/` klasörü ignore edilir ve commit edilmemelidir.
+İki hash aynı olmalıdır. Ardından release notes yayınlamadan önce GitHub Actions
+run durumunu doğrula.

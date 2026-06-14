@@ -1,7 +1,7 @@
 # Kurulum Rehberi
 
 Bu rehber starter paketini mevcut kullanıcının Codex home dizinine kurar.
-Varsayılan konum `~/.codex` dizinidir. `CODEX_HOME` tanımlıysa installer bu
+Varsayılan konum `~/.codex` dizinidir. `CODEX_HOME` tanımlıysa installer o
 dizini kullanır.
 
 ## Gereksinimler
@@ -16,6 +16,14 @@ dizini kullanır.
 
 ## PowerShell Kurulumu
 
+Yazmadan önce ön izle:
+
+```powershell
+.\scripts\install.ps1 -All -Force -WhatIf
+```
+
+Ön izleme doğruysa kur:
+
 ```powershell
 git clone https://github.com/ucsahinn/codex-enterprise-starter.git
 cd codex-enterprise-starter
@@ -29,13 +37,23 @@ Kullanışlı parametreler:
   guard'larını birlikte kurar.
 - `-InstallSkills`: `catalog/skills.json` içinde `install: true` olan,
   `owner/repo` formatında doğrulanmış `package` ve eşleşen `skill` adı taşıyan
-  kayıtları kurar. Installer `npx skills add <package> --skill <skill> --yes
-  --global` çağırır; düz skill adını Git repository gibi clone etmeye çalışmaz.
+  kayıtları kurar. Installer `npx.cmd skills add <package> --skill <skill>
+  --agent codex --yes --global` çağırır.
 - `-InstallGitGuards`: global Git ignore ve pre-commit hook kurar.
 - `-Force`: yedek aldıktan sonra yönetilen Codex dosyalarının üzerine yazar.
 - `-NoBackup`: yedeklemeyi kapatır. Tavsiye edilmez.
+- `-WhatIf`: gerçek setup'a dokunmadan dosya, Git ve skill operasyonlarını ön
+  izler.
 
-## Bash veya WSL Kurulumu
+## Bash Veya WSL Kurulumu
+
+Yazmadan önce ön izle:
+
+```bash
+./scripts/install.sh --all --force --dry-run
+```
+
+Ön izleme doğruysa kur:
 
 ```bash
 git clone https://github.com/ucsahinn/codex-enterprise-starter.git
@@ -51,6 +69,7 @@ Kullanışlı flagler:
 - `--install-git-guards`
 - `--force`
 - `--no-backup`
+- `--dry-run`
 
 ## Neler Yedeklenir?
 
@@ -60,13 +79,17 @@ Mevcut dosyalar şu klasöre kopyalanır:
 ~/.codex/backups/codex-enterprise-starter-YYYYMMDD-HHMMSS/
 ```
 
-Yedeklenen başlıca dosyalar:
+Installer şu managed target'ları replace etmeden önce yedekler:
 
 - `AGENTS.md`
 - `config.toml`
 - `rules/default.rules`
 - `agents/*.toml`
 - kişisel plugin marketplace dosyası
+- bundled local plugin dizini
+
+Dizin replacement sadece yönetilen Codex veya Agents home altında yapılır.
+Installer unmanaged directory target'larını reddeder.
 
 ## Kurulum Sonrası Kontrol
 
@@ -93,17 +116,18 @@ PowerShell:
 ```powershell
 $env:CODEX_HOME = "$PWD\tmp\codex-home"
 $env:AGENTS_HOME = "$PWD\tmp\agents-home"
-.\scripts\install.ps1 -Force
+.\scripts\install.ps1 -Force -WhatIf
 ```
 
 Bash:
 
 ```bash
 CODEX_HOME="$PWD/tmp/codex-home" AGENTS_HOME="$PWD/tmp/agents-home" \
-  ./scripts/install.sh --force
+  ./scripts/install.sh --force --dry-run
 ```
 
-Testten sonra `tmp/` klasörünü silebilirsin.
+Non-dry-run temp home'ları yalnızca bilerek smoke install yapmak istiyorsan
+kullan. `tmp/` klasörünü de sadece bilerek oluşturduysan temizle.
 
 ## Geri Dönüş
 

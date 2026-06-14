@@ -17,5 +17,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm run validate
-      - run: npm run audit:security
+      - run: node --check scripts/validate-repo.mjs
+      - run: node --check scripts/validate-docs.mjs
+      - run: node --check scripts/verify-skill-sources.mjs
+      - run: node --check scripts/security-audit.mjs
+      - run: bash -n scripts/install.sh
+      - shell: pwsh
+        run: |
+          $errors = $null
+          $tokens = $null
+          [System.Management.Automation.Language.Parser]::ParseFile("scripts/install.ps1", [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+      - run: npm run check

@@ -1,0 +1,81 @@
+{
+  "version": "0.1.0",
+  "generatedFrom": "catalog/skills.json",
+  "dateChecked": "2026-06-14",
+  "status": "offline-validated",
+  "onlineVerificationCommand": "npm run verify:skills:online",
+  "entries": [
+    {
+      "name": "dependency-upgrade",
+      "package": "wshobson/agents",
+      "skill": "dependency-upgrade",
+      "source": "wshobson/agents@dependency-upgrade",
+      "sourceUrl": "https://github.com/wshobson/agents",
+      "installCommand": "npx skills add wshobson/agents --skill dependency-upgrade --agent codex --yes --global"
+    },
+    {
+      "name": "frontend-skill",
+      "package": "nexu-io/open-design",
+      "skill": "frontend-skill",
+      "source": "nexu-io/open-design@frontend-skill",
+      "sourceUrl": "https://github.com/nexu-io/open-design",
+      "installCommand": "npx skills add nexu-io/open-design --skill frontend-skill --agent codex --yes --global"
+    },
+    {
+      "name": "impeccable",
+      "package": "pbakaus/impeccable",
+      "skill": "impeccable",
+      "source": "pbakaus/impeccable@impeccable",
+      "sourceUrl": "https://github.com/pbakaus/impeccable",
+      "installCommand": "npx skills add pbakaus/impeccable --skill impeccable --agent codex --yes --global"
+    },
+    {
+      "name": "design-taste-frontend",
+      "package": "leonxlnx/taste-skill",
+      "skill": "design-taste-frontend",
+      "source": "leonxlnx/taste-skill@design-taste-frontend",
+      "sourceUrl": "https://github.com/leonxlnx/taste-skill",
+      "installCommand": "npx skills add leonxlnx/taste-skill --skill design-taste-frontend --agent codex --yes --global"
+    },
+    {
+      "name": "image-to-code",
+      "package": "leonxlnx/taste-skill",
+      "skill": "image-to-code",
+      "source": "leonxlnx/taste-skill@image-to-code",
+      "sourceUrl": "https://github.com/leonxlnx/taste-skill",
+      "installCommand": "npx skills add leonxlnx/taste-skill --skill image-to-code --agent codex --yes --global"
+    },
+    {
+      "name": "high-end-visual-design",
+      "package": "leonxlnx/taste-skill",
+      "skill": "high-end-visual-design",
+      "source": "leonxlnx/taste-skill@high-end-visual-design",
+      "sourceUrl": "https://github.com/leonxlnx/taste-skill",
+      "installCommand": "npx skills add leonxlnx/taste-skill --skill high-end-visual-design --agent codex --yes --global"
+    },
+    {
+      "name": "web-design-guidelines",
+      "package": "vercel-labs/agent-skills",
+      "skill": "web-design-guidelines",
+      "source": "vercel-labs/agent-skills@web-design-guidelines",
+      "sourceUrl": "https://github.com/vercel-labs/agent-skills",
+      "installCommand": "npx skills add vercel-labs/agent-skills --skill web-design-guidelines --agent codex --yes --global"
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "package": "vercel-labs/agent-skills",
+      "skill": "vercel-react-best-practices",
+      "source": "vercel-labs/agent-skills@vercel-react-best-practices",
+      "sourceUrl": "https://github.com/vercel-labs/agent-skills",
+      "installCommand": "npx skills add vercel-labs/agent-skills --skill vercel-react-best-practices --agent codex --yes --global"
+    },
+    {
+      "name": "vercel-optimize",
+      "package": "vercel-labs/agent-skills",
+      "skill": "vercel-optimize",
+      "source": "vercel-labs/agent-skills@vercel-optimize",
+      "sourceUrl": "https://github.com/vercel-labs/agent-skills",
+      "installCommand": "npx skills add vercel-labs/agent-skills --skill vercel-optimize --agent codex --yes --global"
+    }
+  ]
+}

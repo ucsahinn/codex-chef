@@ -1,5 +1,7 @@
 {
   "version": "0.1.0",
+  "dateChecked": "2026-06-14",
+  "sourcePolicy": "Authenticated account, database, and broad filesystem connectors stay disabled by default. Each server records sourceUrl, risk, auth, approval, and why it is enabled or disabled.",
   "servers": [
     {
       "name": "openaiDeveloperDocs",
@@ -9,6 +11,9 @@
       "url": "https://developers.openai.com/mcp",
       "auth": "none",
       "approval": "approve",
+      "risk": "low",
+      "sourceUrl": "https://developers.openai.com/mcp",
+      "defaultReason": "Official read-only documentation source.",
       "notes": "Official OpenAI developer documentation."
     },
     {
@@ -19,6 +24,9 @@
       "package": "@upstash/context7-mcp",
       "auth": "none",
       "approval": "approve",
+      "risk": "low",
+      "sourceUrl": "https://github.com/upstash/context7",
+      "defaultReason": "Documentation lookup only; no project mutation.",
       "notes": "Current library and framework docs."
     },
     {
@@ -29,6 +37,9 @@
       "package": "@modelcontextprotocol/server-sequential-thinking",
       "auth": "none",
       "approval": "prompt",
+      "risk": "low",
+      "sourceUrl": "https://github.com/modelcontextprotocol/servers",
+      "defaultReason": "Reasoning helper with prompted tool approval.",
       "notes": "Structured decomposition helper."
     },
     {
@@ -39,6 +50,9 @@
       "package": "@playwright/mcp@latest",
       "auth": "none",
       "approval": "prompt",
+      "risk": "medium",
+      "sourceUrl": "https://github.com/microsoft/playwright-mcp",
+      "defaultReason": "Useful for UI evidence; browser actions must prompt.",
       "notes": "Browser automation and UI verification."
     },
     {
@@ -49,6 +63,9 @@
       "package": "chrome-devtools-mcp@latest",
       "auth": "none",
       "approval": "prompt",
+      "risk": "medium",
+      "sourceUrl": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "defaultReason": "Browser inspection only with isolated mode and redacted headers.",
       "notes": "Chrome inspection with isolated mode and redacted network headers."
     },
     {
@@ -59,6 +76,9 @@
       "command": "uvx",
       "auth": "none",
       "approval": "prompt",
+      "risk": "medium",
+      "sourceUrl": "https://github.com/oraios/serena",
+      "defaultReason": "Semantic local code navigation; prompts before write-capable tools.",
       "notes": "Semantic code navigation. Disable if uvx is unavailable."
     },
     {
@@ -69,6 +89,9 @@
       "package": "@modelcontextprotocol/server-memory",
       "auth": "none",
       "approval": "prompt",
+      "risk": "medium",
+      "sourceUrl": "https://github.com/modelcontextprotocol/servers",
+      "defaultReason": "Local memory can be useful but must not store secrets.",
       "notes": "Local memory graph. Do not store secrets."
     },
     {
@@ -79,6 +102,9 @@
       "package": "@modelcontextprotocol/server-filesystem",
       "auth": "none",
       "approval": "prompt",
+      "risk": "high",
+      "sourceUrl": "https://github.com/modelcontextprotocol/servers",
+      "defaultReason": "Disabled because broad filesystem access is too powerful for a starter default.",
       "notes": "Enable only for intentional local paths."
     },
     {
@@ -89,6 +115,9 @@
       "url": "https://api.githubcopilot.com/mcp/readonly",
       "auth": "oauth",
       "approval": "prompt",
+      "risk": "high",
+      "sourceUrl": "https://docs.github.com/en/copilot",
+      "defaultReason": "Disabled because it requires account authorization.",
       "notes": "Repository and PR context. Keep disabled until needed."
     },
     {
@@ -99,6 +128,9 @@
       "url": "https://mcp.figma.com/mcp",
       "auth": "oauth",
       "approval": "prompt",
+      "risk": "high",
+      "sourceUrl": "https://help.figma.com",
+      "defaultReason": "Disabled because it requires private design-account authorization.",
       "notes": "Design context. Requires user or workspace auth."
     },
     {
@@ -109,6 +141,9 @@
       "url": "https://mcp.linear.app/mcp",
       "auth": "oauth",
       "approval": "prompt",
+      "risk": "high",
+      "sourceUrl": "https://linear.app/docs",
+      "defaultReason": "Disabled because it can expose private issue/project data.",
       "notes": "Issue and project workflows."
     },
     {
@@ -119,6 +154,9 @@
       "url": "https://mcp.notion.com/mcp",
       "auth": "oauth",
       "approval": "prompt",
+      "risk": "high",
+      "sourceUrl": "https://developers.notion.com",
+      "defaultReason": "Disabled because it can expose private workspace docs and databases.",
       "notes": "Private docs and databases."
     },
     {
@@ -129,6 +167,9 @@
       "url": "https://mcp.sentry.dev/mcp",
       "auth": "oauth",
       "approval": "prompt",
+      "risk": "high",
+      "sourceUrl": "https://docs.sentry.io",
+      "defaultReason": "Disabled because it can expose production error data.",
       "notes": "Production errors and operational telemetry."
     },
     {
@@ -139,6 +180,9 @@
       "url": "https://mcp.vercel.com",
       "auth": "oauth",
       "approval": "prompt",
+      "risk": "high",
+      "sourceUrl": "https://vercel.com/docs",
+      "defaultReason": "Disabled because it can expose project and deployment data.",
       "notes": "Project, deployment, and platform data."
     },
     {
@@ -149,6 +193,9 @@
       "package": "@modelcontextprotocol/server-postgres",
       "auth": "env:SUPABASE_DB_URL",
       "approval": "prompt",
+      "risk": "critical",
+      "sourceUrl": "https://github.com/modelcontextprotocol/servers",
+      "defaultReason": "Disabled because database access must be task-specific and explicit.",
       "notes": "Database access. Enable only with explicit task need."
     }
   ]

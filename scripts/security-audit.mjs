@@ -19,10 +19,17 @@ const requiredPublicFiles = [
   "CHANGELOG.md",
   "docs/how-to.md",
   "docs/how-to.tr.md",
+  "docs/troubleshooting.md",
+  "docs/troubleshooting.tr.md",
+  "docs/upgrade.md",
+  "docs/upgrade.tr.md",
+  "docs/expected-output.md",
+  "docs/expected-output.tr.md",
   "docs/completion-audit.md",
   "docs/completion-audit.tr.md",
   "assets/banner.svg",
   "assets/workflow-overview.svg",
+  "catalog/skills-lock.json",
   ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/docs_improvement.yml",
@@ -131,6 +138,9 @@ for (const configFile of ["templates/codex/config.windows.toml", "templates/code
   }
   if (!/network_access\s*=\s*false/.test(config)) {
     failures.push(`${configFile} must keep workspace network access disabled`);
+  }
+  if (!/\[shell_environment_policy\]/.test(config) || !/ignore_default_excludes\s*=\s*false/.test(config)) {
+    failures.push(`${configFile} must define a shell_environment_policy that keeps default secret exclusions`);
   }
   for (const server of externalMcpServers) {
     const block = config.match(new RegExp(`\\[mcp_servers\\.${server}\\]([\\s\\S]*?)(?=\\n\\[|$)`));

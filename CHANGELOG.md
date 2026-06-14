@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.2.0 - 2026-06-14
+
+- Added PowerShell `-WhatIf` and Bash `--dry-run` installer previews, including
+  safer managed-directory assertions and no-write skill previews.
+- Added a locked installable skill catalog and online source verification that
+  uses an ignored workspace-local npm cache for Windows-safe checks.
+- Added Markdown/workflow validation, expanded security validation, and CI
+  coverage for Node, PowerShell, Bash, and repo checks.
+- Rebuilt the English and Turkish README experience with icon-rich quick starts,
+  setup boundaries, trust signals, and official reference links.
+- Added bilingual troubleshooting, upgrade, and expected-output docs.
+- Added shell environment policy defaults to Codex config templates so common
+  token, password, key, and secret environment names stay excluded.
 - Clarified global and template subagent routing so task-shape automation uses
   deliberate specialist delegation instead of implying hidden background
   spawning.

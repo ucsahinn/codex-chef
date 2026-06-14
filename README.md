@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/ucsahinn/codex-enterprise-starter/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-enterprise-starter/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-enterprise-starter?color=0f766e" /></a>
-  <a href="README.tr.md"><img alt="Turkish documentation" src="https://img.shields.io/badge/docs-English%20%2B%20T%C3%BCrk%C3%A7e-0f766e" /></a>
+  <a href="README.tr.md"><img alt="English and Turkish docs" src="https://img.shields.io/badge/docs-English%20%2B%20T%C3%BCrk%C3%A7e-0f766e" /></a>
   <img alt="Windows and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
 </p>
 
@@ -15,53 +15,74 @@
   <a href="README.md">🇬🇧 English</a> | <a href="README.tr.md">🇹🇷 Türkçe</a>
 </p>
 
-A security-first Codex setup kit for Windows-first power users and small teams.
-It turns a mature local Codex configuration into a clean, shareable repository:
-global instructions, MCP defaults, specialist agents, approval rules, skill
-catalogs, plugin packaging, validation scripts, and bilingual how-to docs.
+Security-first Codex setup for Windows-first power users and small teams. It packages a repeatable local Codex baseline: durable instructions, conservative config, specialist agents, approval rules, MCP defaults, curated skill metadata, plugin packaging, validation scripts, and bilingual docs.
 
-Türkçe kısa özet: Bu repo Codex'i tek kurulumla uzman ajanları, MCP kaynakları,
-güvenli onay/sandbox varsayılanları ve iki dilli kullanım rehberleri olan güçlü
-bir çalışma alanına çevirir.
+This is an unofficial community starter, not an OpenAI product. It is mapped to current official Codex documentation and keeps risky actions approval-gated by default.
 
-This is an unofficial community starter. It is not an OpenAI product, but it is
-designed from official Codex documentation and keeps links to the official
-source pages in the docs.
+## ⚡ Start Here
 
-This repository does not include tokens, auth files, memories, sessions, local
-project paths, private keys, cookies, or machine-specific state.
-
-## ⚡ Start Fast
-
-| I want to... | Go here |
+| Goal | Link |
 | --- | --- |
-| Install the full setup | [Quick Start](#-quick-start) |
-| Understand the senior operating model | [docs/best-practices.md](docs/best-practices.md) |
-| Decide whether something belongs in a prompt, AGENTS.md, config, skill, plugin, MCP, rule, or hook | [docs/codex-surfaces.md](docs/codex-surfaces.md) |
-| Verify before push or release | [docs/verification.md](docs/verification.md) |
-| Check public-safe readiness | [docs/public-readiness.md](docs/public-readiness.md) |
+| Install safely | [Quick Start](#-quick-start) |
+| Preview changes before writing anything | [Dry Run](#-dry-run-first) |
+| See what gets installed | [Install Surface](#-install-surface) |
+| Verify before publishing | [Verification](docs/verification.md) |
+| Troubleshoot Windows/Codex issues | [Troubleshooting](docs/troubleshooting.md) |
+| Upgrade an existing setup | [Upgrade Guide](docs/upgrade.md) |
 
-## 🧩 What It Installs
+## 🧭 What This Repo Is
 
-- `~/.codex/AGENTS.md` durable working agreements.
-- `~/.codex/config.toml` with safe defaults, MCP servers, feature flags, and
-  specialist agent registrations.
-- `~/.codex/agents/*.toml` for focused code mapping, docs research, review,
-  frontend verification, security audit, test verification, and release
-  verification.
-- `~/.codex/rules/default.rules` with narrow command approval rules.
-- Optional global Git hygiene: ignore file plus a pre-commit hook that blocks
-  obvious secrets and runs Gitleaks when available.
-- Optional skill installation from verified public packages in
-  `catalog/skills.json`.
-- Offline and optional online skill-source verification so installable skills
-  resolve as package/skill pairs, not plain repository names.
-- A local plugin marketplace entry for the bundled
-  `codex-enterprise-workflows` plugin.
+Codex Enterprise Starter turns scattered local setup knowledge into a public, reviewable starter repository. It helps users answer:
+
+- What should live in `AGENTS.md`, config, skills, plugins, MCP, rules, or hooks?
+- Which connectors are safe by default?
+- Which global files are touched by setup?
+- How do I verify this before trusting it?
+- How do I extend it without leaking secrets or weakening approvals?
+
+## 🧩 Install Surface
+
+The installers copy these managed templates:
+
+- `~/.codex/AGENTS.md`
+- `~/.codex/config.toml`
+- `~/.codex/agents/*.toml`
+- `~/.codex/rules/default.rules`
+- `~/.codex/plugins/codex-enterprise-workflows`
+- `~/.agents/plugins/marketplace.json`
+
+Optional switches can also install:
+
+- Global Git ignore rules at `~/.gitignore_global`
+- A global Git pre-commit hook under `~/.githooks`
+- Curated public Codex skills from `catalog/skills.json`
+
+## 🚫 What It Does Not Do
+
+The installer does not:
+
+- Store tokens, cookies, auth files, private keys, memories, sessions, or local project state.
+- Enable authenticated account, database, production, or broad filesystem MCP connectors by default.
+- Commit, push, create releases, deploy, publish packages, rotate secrets, or change GitHub settings.
+- Delete user data without first backing up managed targets, unless the user explicitly chooses `-NoBackup` or `--no-backup`.
+
+## 🔎 Dry Run First
+
+PowerShell:
+
+```powershell
+.\scripts\install.ps1 -All -Force -WhatIf
+```
+
+Bash or WSL:
+
+```bash
+./scripts/install.sh --all --force --dry-run
+```
+
+Dry runs print the target Codex/Agents homes and the changes that would happen without touching real files, Git settings, or global skills.
 
 ## ⚡ Quick Start
-
-Clone the repository anywhere, then run the installer from the repository root.
 
 PowerShell:
 
@@ -88,23 +109,17 @@ codex doctor --summary
 codex --strict-config "Summarize the active Codex setup."
 ```
 
-Use `-InstallSkills` / `--install-skills` or `-InstallGitGuards` /
-`--install-git-guards` when you want only one part of the full setup.
+Use `-InstallSkills` / `--install-skills` or `-InstallGitGuards` / `--install-git-guards` when you only want one optional part of the setup.
 
-## 🧭 How To Use It
-
-Start with [docs/how-to.md](docs/how-to.md) for the day-to-day operating
-model. The intended flow is:
+## 🧠 Operating Model
 
 1. Map unfamiliar code with `code_mapper`.
 2. Verify current APIs and product behavior with `docs_researcher`.
 3. Implement in the main thread with repo instructions and selected skills.
-4. Run `test_verifier`, `frontend_verifier`, or `security_auditor` when the
-   task shape calls for deeper evidence.
-5. Use `release_verifier` before any push, tag, release, package, or deploy.
+4. Use `test_verifier`, `frontend_verifier`, or `security_auditor` when the task needs deeper evidence.
+5. Use `release_verifier` before push, tag, release, package, deploy, or publication.
 
-This makes the setup behave like a small specialist software team while keeping
-the main Codex thread focused on decisions, implementation, and final evidence.
+The result is a small specialist-team workflow inside Codex while the main thread stays focused on decisions, implementation, and final evidence.
 
 ## 🎬 Visual Overview
 
@@ -116,106 +131,83 @@ the main Codex thread focused on decisions, implementation, and final evidence.
 
 - Sandbox stays enabled.
 - Approval policy stays interactive.
-- Agent network access stays off unless a profile or explicit approval enables it.
-- Matching skills, specialist agents, MCPs, and config flags are required when
-  the task shape calls for them.
-- Authenticated remote connectors are disabled by default.
-- MCPs that can touch external systems should prompt before risky tools.
-- Delete, cleanup, prune, uninstall, overwrite, drop, and truncate actions stay
-  approval-gated while safe non-destructive work can continue.
-- GitHub push, release creation, deployment, secret rotation, package publishing,
-  destructive file operations, and credential access remain approval-gated.
+- Workspace command network access stays off.
+- Shell subprocesses inherit only a trimmed environment with default secret exclusions.
+- Authenticated remote connectors stay disabled until a task needs them.
+- MCP tools that can touch external systems prompt before risky actions.
+- Skills are installed only from package/skill pairs in the catalog and lock file.
+- Deletion, cleanup, overwrite, credential access, publish, push, and release operations remain approval-gated.
 
 ## ✅ Trust Signals
 
 | Signal | Evidence |
 | --- | --- |
 | 🛡️ Public-safe by design | No tokens, auth files, sessions, memories, cookies, private keys, or machine-specific state are included. |
-| ✅ Real validation | `npm run check` runs repository validation and security audit scripts. |
-| 🌐 Bilingual docs | English and Turkish docs are paired and enforced by validation. |
-| 🎬 Accessible animated visuals | SVG assets include `title`, `desc`, lightweight motion, reduced-motion fallback, and README alt text. |
-| 🧪 Skill source gate | `npm run verify:skills` checks installable package/skill pairs before users hit installer failures. |
-| 🔒 Conservative connectors | Authenticated account, database, and filesystem MCPs stay disabled until needed. |
-| 🧭 Mandatory routing | Applicable skills, specialist agents, MCPs, and config flags must be used or the skipped route must be explained. |
-| 🤝 Community flow | Issue and PR templates include public-safe reminders. |
-| ♻️ Dependency hygiene | Dependabot tracks GitHub Actions and npm manifest updates. |
+| 🧪 Real validation | `npm run check` runs repository, docs, skill-source, and security checks. |
+| 🔐 Secret scanning ready | Gitleaks command is documented and the Git hook runs it when available. |
+| 🌐 Bilingual docs | English and Turkish doc pairs are enforced by validation. |
+| 🎬 Accessible visuals | SVG assets include title, description, motion, reduced-motion fallback, and README alt text. |
+| 🧩 Skill source gate | `catalog/skills-lock.json` is checked against installable skill metadata. |
+| 🔌 Conservative MCPs | Authenticated account, database, and broad filesystem connectors stay disabled. |
+| 🧭 Source-backed guidance | Research notes record source type, confidence, support, and outdated-risk. |
+| ♻️ CI alignment | GitHub Actions runs the same `npm run check` path plus shell parser checks. |
 
 ## 📁 Repository Layout
 
 ```text
-.github/                 Validation workflow plus issue and PR templates
-assets/                  Public-safe README visuals and diagrams
-catalog/                 MCP and skill catalogs
+.github/                 CI workflow plus issue and PR templates
+assets/                  Public-safe README visuals
+catalog/                 Skill and MCP source metadata
 docs/                    English and Turkish setup guides
-plugins/                 Optional local Codex plugin package
+plugins/                 Bundled local Codex plugin
 scripts/                 Install and validation scripts
 templates/codex/         Files copied into ~/.codex
 templates/git/           Optional global Git hygiene files
 ```
 
-## 🔎 What Was Found Locally
-
-The previous global Codex work changed the live user setup, not a new Desktop
-repository. The important current-state locations were:
-
-- `~/.codex/AGENTS.md`
-- `~/.codex/config.toml`
-- `~/.codex/SECURITY_OPERATIONS.md`
-- `~/.codex/agents/*.toml`
-- `~/.codex/rules/default.rules`
-- `~/.agents/skills/*`
-- `~/.gitignore_global`
-- `~/.githooks/pre-commit`
-
-See [docs/local-audit.md](docs/local-audit.md) for the normalized audit.
-
-## 🚀 Publishing To GitHub
-
-This repository is designed to be pushed after validation, but the installer's
-job is local setup only. It does not create remotes, commit, push, publish,
-deploy, or open pull requests.
-
-Before pushing:
+## 🧾 Verify Locally
 
 ```bash
 npm run check
-git status --short
-git diff --cached
-```
-
-If Gitleaks is installed:
-
-```bash
+git diff --check
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
+Optional online skill-source check:
+
+```bash
+npm run verify:skills:online
+```
+
+Online skill verification uses the network and the Skills CLI. It is intentionally separate from the default offline gate.
+
+## 📚 Documentation
+
+- [Install](docs/install.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Expected output](docs/expected-output.md)
+- [Upgrade guide](docs/upgrade.md)
+- [Codex surfaces](docs/codex-surfaces.md)
+- [Skills and agents](docs/skills-and-agents.md)
+- [MCP catalog](docs/mcp-catalog.md)
+- [Security model](docs/security-model.md)
+- [Verification](docs/verification.md)
+- [Public readiness](docs/public-readiness.md)
+- [Research notes](docs/research-notes.md)
+- [Publishing](docs/publish.md)
+
 ## 📚 Official Codex References
 
-The docs in this repo are based on the current Codex manual fetched on
-2026-06-11 and local configuration evidence. Start with:
+Primary source: https://developers.openai.com/codex/codex-manual.md
 
-- Codex CLI reference: https://developers.openai.com/codex/cli/reference
-- AGENTS.md guidance: https://developers.openai.com/codex/guides/agents-md
+Focused docs:
+
 - Skills: https://developers.openai.com/codex/skills
-- MCP: https://developers.openai.com/codex/mcp
-- Rules: https://developers.openai.com/codex/rules
-- Hooks: https://developers.openai.com/codex/hooks
-- Permissions: https://developers.openai.com/codex/permissions
 - Plugins: https://developers.openai.com/codex/plugins
+- MCP and connectors: https://developers.openai.com/api/docs/guides/tools-connectors-mcp
 - Windows: https://developers.openai.com/codex/windows
+- Config, permissions, rules, hooks, and AGENTS.md are mapped in [docs/research-notes.md](docs/research-notes.md).
 
-## 🧾 Public Readiness
+## 🚀 Publishing Boundary
 
-See:
-
-- [docs/how-to.md](docs/how-to.md)
-- [docs/best-practices.md](docs/best-practices.md)
-- [docs/completion-audit.md](docs/completion-audit.md)
-- [docs/verification.md](docs/verification.md)
-- [docs/public-readiness.md](docs/public-readiness.md)
-- [SECURITY.md](SECURITY.md)
-- [SUPPORT.md](SUPPORT.md)
-- [CONTRIBUTING.md](CONTRIBUTING.md)
-
-Issue and PR templates are included under `.github/` so bug reports,
-documentation suggestions, and pull requests start with public-safe checks.
+This repo is built to be public-ready after validation, but the installer is local-only. Commit, push, tag, release, package publishing, deployments, and GitHub settings changes must be explicit human decisions after local verification.

@@ -1,4 +1,4 @@
-[CmdletBinding()]
+[CmdletBinding(SupportsShouldProcess, ConfirmImpact="Medium")]
 param(
   [switch]$All,
   [switch]$InstallSkills,
@@ -8,6 +8,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$ScriptCmdlet = $PSCmdlet
 
 if ($All) {
   $InstallSkills = $true
@@ -19,9 +20,24 @@ $CodexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".c
 $AgentsHome = if ($env:AGENTS_HOME) { $env:AGENTS_HOME } else { Join-Path $HOME ".agents" }
 $BackupRoot = Join-Path $CodexHome ("backups\codex-enterprise-starter-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
 
+function Invoke-Change {
+  param(
+    [Parameter(Mandatory=$true)][string]$Target,
+    [Parameter(Mandatory=$true)][string]$Action,
+    [Parameter(Mandatory=$true)][scriptblock]$ScriptBlock
+  )
+  if ($ScriptCmdlet.ShouldProcess($Target, $Action)) {
+    & $ScriptBlock
+    return $true
+  }
+  return $false
+}
+
 function Ensure-Dir {
   param([Parameter(Mandatory=$true)][string]$Path)
-  New-Item -ItemType Directory -Force -Path $Path | Out-Null
+  Invoke-Change -Target $Path -Action "Ensure directory exists" -ScriptBlock {
+    New-Item -ItemType Directory -Force -Path $Path | Out-Null
+  } | Out-Null
 }
 
 function Get-RelativePathSafe {
@@ -37,6 +53,22 @@ function Get-RelativePathSafe {
   return Split-Path -Leaf $Path
 }
 
+function Assert-ManagedDirectoryTarget {
+  param([Parameter(Mandatory=$true)][string]$Path)
+  $targetFull = [System.IO.Path]::GetFullPath($Path).TrimEnd('\', '/')
+  $codexFull = [System.IO.Path]::GetFullPath($CodexHome).TrimEnd('\', '/')
+  $agentsFull = [System.IO.Path]::GetFullPath($AgentsHome).TrimEnd('\', '/')
+  $allowedRoots = @($codexFull, $agentsFull)
+
+  foreach ($root in $allowedRoots) {
+    if ($targetFull.StartsWith($root + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+      return
+    }
+  }
+
+  throw "Refusing to replace unmanaged directory target: $Path"
+}
+
 function Backup-Target {
   param([Parameter(Mandatory=$true)][string]$Path)
   if ($NoBackup -or -not (Test-Path -LiteralPath $Path)) {
@@ -50,7 +82,9 @@ function Backup-Target {
   }
   $destination = Join-Path $BackupRoot $relative
   Ensure-Dir (Split-Path -Parent $destination)
-  Copy-Item -LiteralPath $Path -Destination $destination -Recurse -Force
+  Invoke-Change -Target $destination -Action "Back up $Path" -ScriptBlock {
+    Copy-Item -LiteralPath $Path -Destination $destination -Recurse -Force
+  } | Out-Null
 }
 
 function Install-File {
@@ -66,8 +100,12 @@ function Install-File {
 
   Ensure-Dir (Split-Path -Parent $Destination)
   Backup-Target $Destination
-  Copy-Item -LiteralPath $Source -Destination $Destination -Force
-  Write-Host "Installed $Destination"
+  $changed = Invoke-Change -Target $Destination -Action "Install file from $Source" -ScriptBlock {
+    Copy-Item -LiteralPath $Source -Destination $Destination -Force
+  }
+  if ($changed) {
+    Write-Host "Installed $Destination"
+  }
 }
 
 function Install-Directory {
@@ -83,11 +121,24 @@ function Install-Directory {
 
   Ensure-Dir (Split-Path -Parent $Destination)
   Backup-Target $Destination
+  Assert-ManagedDirectoryTarget $Destination
   if (Test-Path -LiteralPath $Destination) {
-    Remove-Item -LiteralPath $Destination -Recurse -Force
+    Invoke-Change -Target $Destination -Action "Replace existing managed directory" -ScriptBlock {
+      Remove-Item -LiteralPath $Destination -Recurse -Force
+    } | Out-Null
   }
-  Copy-Item -LiteralPath $Source -Destination $Destination -Recurse -Force
-  Write-Host "Installed $Destination"
+  $changed = Invoke-Change -Target $Destination -Action "Install directory from $Source" -ScriptBlock {
+    Copy-Item -LiteralPath $Source -Destination $Destination -Recurse -Force
+  }
+  if ($changed) {
+    Write-Host "Installed $Destination"
+  }
+}
+
+Write-Host "Codex home: $CodexHome"
+Write-Host "Agents home: $AgentsHome"
+if ($WhatIfPreference) {
+  Write-Host "Dry run: no files, Git settings, or skills will be changed."
 }
 
 Ensure-Dir $CodexHome
@@ -139,8 +190,12 @@ if ((Test-Path -LiteralPath $MarketplacePath) -and -not $Force) {
   }
   $json = $marketplace | ConvertTo-Json -Depth 10
   $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-  [System.IO.File]::WriteAllText($MarketplacePath, $json + [Environment]::NewLine, $utf8NoBom)
-  Write-Host "Installed $MarketplacePath"
+  $changed = Invoke-Change -Target $MarketplacePath -Action "Install plugin marketplace" -ScriptBlock {
+    [System.IO.File]::WriteAllText($MarketplacePath, $json + [Environment]::NewLine, $utf8NoBom)
+  }
+  if ($changed) {
+    Write-Host "Installed $MarketplacePath"
+  }
 }
 
 if ($InstallGitGuards) {
@@ -153,66 +208,89 @@ if ($InstallGitGuards) {
   Ensure-Dir $HooksDir
   Install-File -Source (Join-Path $RepoRoot "templates\git\pre-commit") -Destination $HookTarget
 
-  git config --global core.excludesfile $GitIgnoreTarget
-  if ($LASTEXITCODE -ne 0) {
-    throw "git config core.excludesfile failed with code $LASTEXITCODE"
+  $configuredExcludes = Invoke-Change -Target "global Git config core.excludesfile" -Action "Set to $GitIgnoreTarget" -ScriptBlock {
+      git config --global core.excludesfile $GitIgnoreTarget
+    }
+  if ($configuredExcludes) {
+    if ($LASTEXITCODE -ne 0) {
+      throw "git config core.excludesfile failed with code $LASTEXITCODE"
+    }
   }
-  git config --global core.hooksPath $HooksDir
-  if ($LASTEXITCODE -ne 0) {
-    throw "git config core.hooksPath failed with code $LASTEXITCODE"
+  $configuredHooks = Invoke-Change -Target "global Git config core.hooksPath" -Action "Set to $HooksDir" -ScriptBlock {
+      git config --global core.hooksPath $HooksDir
+    }
+  if ($configuredHooks) {
+    if ($LASTEXITCODE -ne 0) {
+      throw "git config core.hooksPath failed with code $LASTEXITCODE"
+    }
   }
-  Write-Host "Configured global Git excludesfile and hooksPath."
+  if ($configuredExcludes -and $configuredHooks) {
+    Write-Host "Configured global Git excludesfile and hooksPath."
+  }
 }
 
 if ($InstallSkills) {
-  $CatalogPath = Join-Path $RepoRoot "catalog\skills.json"
-  $Catalog = Get-Content -Path $CatalogPath -Raw | ConvertFrom-Json
-  $env:GIT_CONFIG_COUNT = "1"
-  $env:GIT_CONFIG_KEY_0 = "http.sslBackend"
-  $env:GIT_CONFIG_VALUE_0 = "openssl"
-  $env:CI = "1"
-  $env:NO_COLOR = "1"
-  $env:FORCE_COLOR = "0"
-  $env:TERM = "dumb"
-  $InstalledSkills = @{}
-  try {
-    $InstalledJson = & npx.cmd skills list --global --json 2>$null
-    if ($LASTEXITCODE -eq 0 -and $InstalledJson) {
-      foreach ($Installed in ($InstalledJson | ConvertFrom-Json)) {
-        $InstalledSkills[$Installed.name] = $true
+  if ($WhatIfPreference) {
+    $CatalogPath = Join-Path $RepoRoot "catalog\skills.json"
+    $Catalog = Get-Content -Path $CatalogPath -Raw | ConvertFrom-Json
+    foreach ($Skill in $Catalog.skills | Where-Object { $_.install -eq $true }) {
+      Write-Host "Would install skill: $($Skill.name) from $($Skill.package) --skill $($Skill.skill)"
+    }
+    Write-Host "Skipped skill installation because -WhatIf is active."
+  } else {
+    $CatalogPath = Join-Path $RepoRoot "catalog\skills.json"
+    $Catalog = Get-Content -Path $CatalogPath -Raw | ConvertFrom-Json
+    $env:GIT_CONFIG_COUNT = "1"
+    $env:GIT_CONFIG_KEY_0 = "http.sslBackend"
+    $env:GIT_CONFIG_VALUE_0 = "openssl"
+    $env:CI = "1"
+    $env:NO_COLOR = "1"
+    $env:FORCE_COLOR = "0"
+    $env:TERM = "dumb"
+    $InstalledSkills = @{}
+    try {
+      $InstalledJson = & npx.cmd skills list --global --json 2>$null
+      if ($LASTEXITCODE -eq 0 -and $InstalledJson) {
+        foreach ($Installed in ($InstalledJson | ConvertFrom-Json)) {
+          $InstalledSkills[$Installed.name] = $true
+        }
       }
-    }
-  } catch {
-    Write-Warning "Could not list existing global skills; installer will attempt verified installs."
-  }
-
-  foreach ($Skill in $Catalog.skills | Where-Object { $_.install -eq $true }) {
-    if (-not $Skill.package -or -not $Skill.skill) {
-      Write-Warning "Skipped skill without verified package and skill fields: $($Skill.name)"
-      continue
-    }
-    if ($InstalledSkills.ContainsKey($Skill.name)) {
-      Write-Host "Skill already installed: $($Skill.name)"
-      continue
+    } catch {
+      Write-Warning "Could not list existing global skills; installer will attempt verified installs."
     }
 
-    Write-Host "Installing skill: $($Skill.name) from $($Skill.package) --skill $($Skill.skill)"
-    $Output = & npx.cmd skills add $Skill.package --skill $Skill.skill --agent codex --yes --global 2>&1
-    $ExitCode = $LASTEXITCODE
-    $OutputText = ($Output -join [Environment]::NewLine)
-    if ($ExitCode -ne 0 -or $OutputText -match "Failed to install|Installation failed|Failed to clone") {
-      $Output | ForEach-Object { Write-Host $_ }
-      throw "Skill install failed for $($Skill.name)"
+    foreach ($Skill in $Catalog.skills | Where-Object { $_.install -eq $true }) {
+      if (-not $Skill.package -or -not $Skill.skill) {
+        Write-Warning "Skipped skill without verified package and skill fields: $($Skill.name)"
+        continue
+      }
+      if ($InstalledSkills.ContainsKey($Skill.name)) {
+        Write-Host "Skill already installed: $($Skill.name)"
+        continue
+      }
+
+      Write-Host "Installing skill: $($Skill.name) from $($Skill.package) --skill $($Skill.skill)"
+      $Output = & npx.cmd skills add $Skill.package --skill $Skill.skill --agent codex --yes --global 2>&1
+      $ExitCode = $LASTEXITCODE
+      $OutputText = ($Output -join [Environment]::NewLine)
+      if ($ExitCode -ne 0 -or $OutputText -match "Failed to install|Installation failed|Failed to clone") {
+        $Output | ForEach-Object { Write-Host $_ }
+        throw "Skill install failed for $($Skill.name)"
+      }
+      Write-Host "Installed skill: $($Skill.name)"
     }
-    Write-Host "Installed skill: $($Skill.name)"
   }
 }
 
 Write-Host ""
-Write-Host "Codex Enterprise Starter installed."
-Write-Host "Restart Codex, then run:"
-Write-Host "  codex doctor --summary"
-Write-Host "  codex --strict-config `"Summarize the active Codex setup.`""
+if ($WhatIfPreference) {
+  Write-Host "Codex Enterprise Starter dry run completed."
+} else {
+  Write-Host "Codex Enterprise Starter installed."
+  Write-Host "Restart Codex, then run:"
+  Write-Host "  codex doctor --summary"
+  Write-Host "  codex --strict-config `"Summarize the active Codex setup.`""
+}
 if (-not $NoBackup -and (Test-Path -LiteralPath $BackupRoot)) {
   Write-Host "Backup: $BackupRoot"
 }

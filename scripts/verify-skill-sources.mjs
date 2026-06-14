@@ -5,6 +5,8 @@ import { spawnSync } from "node:child_process";
 
 const root = path.resolve(process.cwd());
 const catalogPath = path.join(root, "catalog", "skills.json");
+const lockPath = path.join(root, "catalog", "skills-lock.json");
+const onlineCacheDir = path.join(root, "tmp", "npm-cache");
 const online = process.argv.includes("--online");
 const failures = [];
 
@@ -24,19 +26,28 @@ function runSkillsUse(entry) {
           "$env:GIT_CONFIG_COUNT='1'",
           "$env:GIT_CONFIG_KEY_0='http.sslBackend'",
           "$env:GIT_CONFIG_VALUE_0='openssl'",
-          `npx.cmd skills use ${entry.package} --skill ${entry.skill}`
+          `npx.cmd --yes skills use ${entry.package} --skill ${entry.skill}`
         ].join("; ")
       ]
-    : ["skills", "use", entry.package, "--skill", entry.skill];
+    : ["--yes", "skills", "use", entry.package, "--skill", entry.skill];
   const result = spawnSync(executable, args, {
     cwd: root,
     encoding: "utf8",
     env: {
       ...process.env,
+      CI: "1",
+      FORCE_COLOR: "0",
       GIT_CONFIG_COUNT: process.env.GIT_CONFIG_COUNT || "1",
       GIT_CONFIG_KEY_0: process.env.GIT_CONFIG_KEY_0 || "http.sslBackend",
       GIT_CONFIG_VALUE_0: process.env.GIT_CONFIG_VALUE_0 || "openssl",
-      GIT_SSL_BACKEND: process.env.GIT_SSL_BACKEND || "openssl"
+      GIT_SSL_BACKEND: process.env.GIT_SSL_BACKEND || "openssl",
+      NO_COLOR: "1",
+      NPM_CONFIG_CACHE: onlineCacheDir,
+      TERM: "dumb",
+      npm_config_cache: onlineCacheDir,
+      npm_config_loglevel: "error",
+      npm_config_update_notifier: "false",
+      npm_config_yes: "true"
     },
     stdio: ["ignore", "pipe", "pipe"]
   });
@@ -56,6 +67,10 @@ if (!fs.existsSync(catalogPath)) {
   fail("Missing catalog/skills.json");
 } else {
   const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
+  const lock = fs.existsSync(lockPath)
+    ? JSON.parse(fs.readFileSync(lockPath, "utf8"))
+    : null;
+  const lockEntries = new Map((lock?.entries || []).map((entry) => [entry.name, entry]));
   const names = new Set();
   const installable = [];
 
@@ -90,12 +105,36 @@ if (!fs.existsSync(catalogPath)) {
         if (entry.source !== `${entry.package}@${entry.skill}`) {
           fail(`Installable skill ${entry.name} source must equal package@skill`);
         }
+        for (const key of ["sourceUrl", "license", "risk", "lastChecked"]) {
+          if (!entry[key]) {
+            fail(`Installable skill ${entry.name} must declare ${key}`);
+          }
+        }
+        const locked = lockEntries.get(entry.name);
+        if (!locked) {
+          fail(`catalog/skills-lock.json missing installable skill ${entry.name}`);
+        } else {
+          for (const key of ["package", "skill", "source", "sourceUrl"]) {
+            if (locked[key] !== entry[key]) {
+              fail(`Skill lock mismatch for ${entry.name}: ${key}`);
+            }
+          }
+          const expectedInstallCommand = `npx skills add ${entry.package} --skill ${entry.skill} --agent codex --yes --global`;
+          if (locked.installCommand !== expectedInstallCommand) {
+            fail(`Skill lock installCommand mismatch for ${entry.name}`);
+          }
+        }
         installable.push(entry);
       }
     }
   }
 
+  if (!lock) {
+    fail("Missing catalog/skills-lock.json");
+  }
+
   if (online && failures.length === 0) {
+    fs.mkdirSync(onlineCacheDir, { recursive: true });
     for (const entry of installable) {
       runSkillsUse(entry);
     }

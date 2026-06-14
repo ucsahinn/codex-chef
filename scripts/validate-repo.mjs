@@ -18,6 +18,12 @@ const requiredFiles = [
   "package.json",
   "docs/how-to.md",
   "docs/how-to.tr.md",
+  "docs/troubleshooting.md",
+  "docs/troubleshooting.tr.md",
+  "docs/upgrade.md",
+  "docs/upgrade.tr.md",
+  "docs/expected-output.md",
+  "docs/expected-output.tr.md",
   "docs/best-practices.md",
   "docs/best-practices.tr.md",
   "docs/completion-audit.md",
@@ -31,6 +37,7 @@ const requiredFiles = [
   ".github/dependabot.yml",
   "catalog/mcp-servers.json",
   "catalog/skills.json",
+  "catalog/skills-lock.json",
   "templates/codex/config.windows.toml",
   "templates/codex/config.unix.toml",
   "templates/codex/AGENTS.md",
@@ -96,6 +103,7 @@ for (const file of requiredFiles) {
 }
 
 const files = walk(root);
+const mojibakePattern = new RegExp("[\\u00c3\\u00c4\\u00c5][^\\s/]|\\u00f0\\u0178|\\u00e2[\\u20ac\\u0153\\u201e\\u2122\\u0161\\u017e\\u0178]");
 
 const docsDir = path.join(root, "docs");
 if (fs.existsSync(docsDir)) {
@@ -128,6 +136,10 @@ for (const file of files) {
   }
 
   const text = fs.readFileSync(file, "utf8");
+
+  if (mojibakePattern.test(text)) {
+    failures.push(`Likely mojibake or corrupted UTF-8 text in ${rel}`);
+  }
 
   const forbiddenLocalPaths = [
     /C:\\Users\\ulasc/i,
@@ -247,6 +259,23 @@ if (fs.existsSync(skillCatalog)) {
       }
       if (skill.source !== `${skill.package}@${skill.skill}`) {
         failures.push(`Installable skill source must equal package@skill for ${skill.name}`);
+      }
+      for (const key of ["sourceUrl", "license", "risk", "lastChecked"]) {
+        if (!skill[key]) {
+          failures.push(`Installable skill ${skill.name} must declare ${key}`);
+        }
+      }
+    }
+  }
+}
+
+const mcpCatalog = path.join(root, "catalog/mcp-servers.json");
+if (fs.existsSync(mcpCatalog)) {
+  const catalog = JSON.parse(fs.readFileSync(mcpCatalog, "utf8"));
+  for (const server of catalog.servers || []) {
+    for (const key of ["sourceUrl", "risk", "defaultReason"]) {
+      if (!server[key]) {
+        failures.push(`MCP server ${server.name} must declare ${key}`);
       }
     }
   }

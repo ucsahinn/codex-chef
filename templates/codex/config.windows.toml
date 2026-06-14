@@ -12,9 +12,15 @@ approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
 [features]
+apps = true
 memories = true
 hooks = true
 multi_agent = true
+
+[shell_environment_policy]
+inherit = "core"
+ignore_default_excludes = false
+exclude = ["AWS_*", "AZURE_*", "OPENAI_*", "CODEX_API_KEY", "GITHUB_TOKEN", "GH_TOKEN", "*_TOKEN", "*_SECRET", "*_PASSWORD", "*_KEY"]
 
 [memories]
 disable_on_external_context = true

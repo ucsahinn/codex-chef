@@ -6,6 +6,7 @@ INSTALL_GIT_GUARDS=0
 ALL=0
 FORCE=0
 NO_BACKUP=0
+DRY_RUN=0
 
 for arg in "$@"; do
   case "$arg" in
@@ -14,6 +15,7 @@ for arg in "$@"; do
     --install-git-guards) INSTALL_GIT_GUARDS=1 ;;
     --force) FORCE=1 ;;
     --no-backup) NO_BACKUP=1 ;;
+    --dry-run) DRY_RUN=1 ;;
     *)
       echo "Unknown argument: $arg" >&2
       exit 2
@@ -31,8 +33,30 @@ CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
 AGENTS_HOME_DIR="${AGENTS_HOME:-$HOME/.agents}"
 BACKUP_ROOT="$CODEX_HOME_DIR/backups/codex-enterprise-starter-$(date +%Y%m%d-%H%M%S)"
 
+run_change() {
+  local target="$1"
+  local action="$2"
+  shift 2
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "Would $action: $target"
+    return 1
+  fi
+  "$@"
+}
+
 ensure_dir() {
-  mkdir -p "$1"
+  run_change "$1" "ensure directory exists" mkdir -p "$1" || true
+}
+
+assert_managed_directory_target() {
+  local target="$1"
+  case "$target" in
+    "$CODEX_HOME_DIR"/*|"$AGENTS_HOME_DIR"/*) return 0 ;;
+    *)
+      echo "Refusing to replace unmanaged directory target: $target" >&2
+      exit 1
+      ;;
+  esac
 }
 
 backup_target() {
@@ -47,7 +71,7 @@ backup_target() {
     *) rel="$(basename "$target")" ;;
   esac
   ensure_dir "$(dirname "$BACKUP_ROOT/$rel")"
-  cp -R "$target" "$BACKUP_ROOT/$rel"
+  run_change "$BACKUP_ROOT/$rel" "back up $target" cp -R "$target" "$BACKUP_ROOT/$rel" || true
 }
 
 install_file() {
@@ -59,8 +83,9 @@ install_file() {
   fi
   ensure_dir "$(dirname "$destination")"
   backup_target "$destination"
-  cp "$source" "$destination"
-  echo "Installed $destination"
+  if run_change "$destination" "install file from $source" cp "$source" "$destination"; then
+    echo "Installed $destination"
+  fi
 }
 
 install_directory() {
@@ -72,10 +97,20 @@ install_directory() {
   fi
   ensure_dir "$(dirname "$destination")"
   backup_target "$destination"
-  rm -rf "$destination"
-  cp -R "$source" "$destination"
-  echo "Installed $destination"
+  assert_managed_directory_target "$destination"
+  if [ -e "$destination" ]; then
+    run_change "$destination" "replace existing managed directory" rm -rf "$destination" || true
+  fi
+  if run_change "$destination" "install directory from $source" cp -R "$source" "$destination"; then
+    echo "Installed $destination"
+  fi
 }
+
+echo "Codex home: $CODEX_HOME_DIR"
+echo "Agents home: $AGENTS_HOME_DIR"
+if [ "$DRY_RUN" -eq 1 ]; then
+  echo "Dry run: no files, Git settings, or skills will be changed."
+fi
 
 ensure_dir "$CODEX_HOME_DIR"
 ensure_dir "$CODEX_HOME_DIR/agents"
@@ -107,26 +142,33 @@ if [ -e "$MARKETPLACE_PATH" ] && [ "$FORCE" -ne 1 ]; then
   echo "Skipped existing marketplace: $MARKETPLACE_PATH (use --force to replace after backup)" >&2
 else
   backup_target "$MARKETPLACE_PATH"
-  cat > "$MARKETPLACE_PATH" <<JSON
-{
-  "name": "codex-enterprise-starter",
-  "plugins": [
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "Would install plugin marketplace: $MARKETPLACE_PATH"
+  else
+    node - "$MARKETPLACE_PATH" "$PLUGIN_TARGET" <<'NODE'
+const fs = require("fs");
+const [marketplacePath, pluginTarget] = process.argv.slice(2);
+const marketplace = {
+  name: "codex-enterprise-starter",
+  plugins: [
     {
-      "name": "codex-enterprise-workflows",
-      "source": {
-        "source": "local",
-        "path": "$PLUGIN_TARGET"
+      name: "codex-enterprise-workflows",
+      source: {
+        source: "local",
+        path: pluginTarget
       },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "NONE"
+      policy: {
+        installation: "AVAILABLE",
+        authentication: "NONE"
       },
-      "category": "Productivity"
+      category: "Productivity"
     }
   ]
-}
-JSON
-  echo "Installed $MARKETPLACE_PATH"
+};
+fs.writeFileSync(marketplacePath, `${JSON.stringify(marketplace, null, 2)}\n`, "utf8");
+NODE
+    echo "Installed $MARKETPLACE_PATH"
+  fi
 fi
 
 if [ "$INSTALL_GIT_GUARDS" -eq 1 ]; then
@@ -135,13 +177,28 @@ if [ "$INSTALL_GIT_GUARDS" -eq 1 ]; then
   install_file "$REPO_ROOT/templates/git/.gitignore_global" "$GITIGNORE_TARGET"
   ensure_dir "$HOOKS_DIR"
   install_file "$REPO_ROOT/templates/git/pre-commit" "$HOOKS_DIR/pre-commit"
-  chmod +x "$HOOKS_DIR/pre-commit"
-  git config --global core.excludesfile "$GITIGNORE_TARGET"
-  git config --global core.hooksPath "$HOOKS_DIR"
-  echo "Configured global Git excludesfile and hooksPath."
+  run_change "$HOOKS_DIR/pre-commit" "mark hook executable" chmod +x "$HOOKS_DIR/pre-commit" || true
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "Would set global Git config core.excludesfile: $GITIGNORE_TARGET"
+    echo "Would set global Git config core.hooksPath: $HOOKS_DIR"
+  else
+    git config --global core.excludesfile "$GITIGNORE_TARGET"
+    git config --global core.hooksPath "$HOOKS_DIR"
+    echo "Configured global Git excludesfile and hooksPath."
+  fi
 fi
 
 if [ "$INSTALL_SKILLS" -eq 1 ]; then
+  if [ "$DRY_RUN" -eq 1 ]; then
+    node - "$REPO_ROOT/catalog/skills.json" <<'NODE'
+const fs = require("fs");
+const catalog = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+for (const skill of catalog.skills.filter((item) => item.install)) {
+  console.log(`Would install skill: ${skill.name} from ${skill.package} --skill ${skill.skill}`);
+}
+NODE
+    echo "Skipped skill installation because --dry-run is active."
+  else
   node - "$REPO_ROOT/catalog/skills.json" <<'NODE'
 const fs = require("fs");
 const { spawnSync } = require("child_process");
@@ -193,13 +250,18 @@ for (const skill of catalog.skills.filter((item) => item.install)) {
   console.log(`Installed skill: ${skill.name}`);
 }
 NODE
+  fi
 fi
 
 echo ""
-echo "Codex Enterprise Starter installed."
-echo "Restart Codex, then run:"
-echo "  codex doctor --summary"
-echo '  codex --strict-config "Summarize the active Codex setup."'
+if [ "$DRY_RUN" -eq 1 ]; then
+  echo "Codex Enterprise Starter dry run completed."
+else
+  echo "Codex Enterprise Starter installed."
+  echo "Restart Codex, then run:"
+  echo "  codex doctor --summary"
+  echo '  codex --strict-config "Summarize the active Codex setup."'
+fi
 if [ "$NO_BACKUP" -ne 1 ] && [ -d "$BACKUP_ROOT" ]; then
   echo "Backup: $BACKUP_ROOT"
 fi

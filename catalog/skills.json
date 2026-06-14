@@ -1,6 +1,8 @@
 {
   "version": "0.1.0",
-  "installCommand": "npx skills add <package> --skill <skill> --yes --global",
+  "dateChecked": "2026-06-14",
+  "installCommand": "npx skills add <package> --skill <skill> --agent codex --yes --global",
+  "sourcePolicy": "Installable entries must declare package, skill, source, sourceUrl, license, risk, and lastChecked. Online resolution is verified separately with npm run verify:skills:online.",
   "skills": [
     {
       "name": "mcp-connectors",
@@ -45,6 +47,12 @@
       "package": "wshobson/agents",
       "skill": "dependency-upgrade",
       "source": "wshobson/agents@dependency-upgrade",
+      "sourceUrl": "https://github.com/wshobson/agents",
+      "license": "source-repository",
+      "risk": "medium",
+      "networkRequired": true,
+      "authRequired": false,
+      "lastChecked": "2026-06-14",
       "reason": "Upgrade dependencies safely."
     },
     {
@@ -126,6 +134,12 @@
       "package": "nexu-io/open-design",
       "skill": "frontend-skill",
       "source": "nexu-io/open-design@frontend-skill",
+      "sourceUrl": "https://github.com/nexu-io/open-design",
+      "license": "source-repository",
+      "risk": "medium",
+      "networkRequired": true,
+      "authRequired": false,
+      "lastChecked": "2026-06-14",
       "reason": "Build visually strong frontend experiences."
     },
     {
@@ -135,6 +149,12 @@
       "package": "pbakaus/impeccable",
       "skill": "impeccable",
       "source": "pbakaus/impeccable@impeccable",
+      "sourceUrl": "https://github.com/pbakaus/impeccable",
+      "license": "source-repository",
+      "risk": "medium",
+      "networkRequired": true,
+      "authRequired": false,
+      "lastChecked": "2026-06-14",
       "reason": "Audit and polish frontend interfaces."
     },
     {
@@ -144,6 +164,12 @@
       "package": "leonxlnx/taste-skill",
       "skill": "design-taste-frontend",
       "source": "leonxlnx/taste-skill@design-taste-frontend",
+      "sourceUrl": "https://github.com/leonxlnx/taste-skill",
+      "license": "source-repository",
+      "risk": "medium",
+      "networkRequired": true,
+      "authRequired": false,
+      "lastChecked": "2026-06-14",
       "reason": "Apply senior UI/UX engineering standards."
     },
     {
@@ -153,6 +179,12 @@
       "package": "leonxlnx/taste-skill",
       "skill": "image-to-code",
       "source": "leonxlnx/taste-skill@image-to-code",
+      "sourceUrl": "https://github.com/leonxlnx/taste-skill",
+      "license": "source-repository",
+      "risk": "medium",
+      "networkRequired": true,
+      "authRequired": false,
+      "lastChecked": "2026-06-14",
       "reason": "Translate visual references into frontend code."
     },
     {
@@ -162,6 +194,12 @@
       "package": "leonxlnx/taste-skill",
       "skill": "high-end-visual-design",
       "source": "leonxlnx/taste-skill@high-end-visual-design",
+      "sourceUrl": "https://github.com/leonxlnx/taste-skill",
+      "license": "source-repository",
+      "risk": "medium",
+      "networkRequired": true,
+      "authRequired": false,
+      "lastChecked": "2026-06-14",
       "reason": "Avoid generic AI-looking design output."
     },
     {
@@ -171,6 +209,12 @@
       "package": "vercel-labs/agent-skills",
       "skill": "web-design-guidelines",
       "source": "vercel-labs/agent-skills@web-design-guidelines",
+      "sourceUrl": "https://github.com/vercel-labs/agent-skills",
+      "license": "source-repository",
+      "risk": "medium",
+      "networkRequired": true,
+      "authRequired": false,
+      "lastChecked": "2026-06-14",
       "reason": "Review accessibility and UX quality."
     },
     {
@@ -180,6 +224,12 @@
       "package": "vercel-labs/agent-skills",
       "skill": "vercel-react-best-practices",
       "source": "vercel-labs/agent-skills@vercel-react-best-practices",
+      "sourceUrl": "https://github.com/vercel-labs/agent-skills",
+      "license": "source-repository",
+      "risk": "medium",
+      "networkRequired": true,
+      "authRequired": false,
+      "lastChecked": "2026-06-14",
       "reason": "Optimize React and Next.js patterns."
     },
     {
@@ -189,6 +239,12 @@
       "package": "vercel-labs/agent-skills",
       "skill": "vercel-optimize",
       "source": "vercel-labs/agent-skills@vercel-optimize",
+      "sourceUrl": "https://github.com/vercel-labs/agent-skills",
+      "license": "source-repository",
+      "risk": "medium",
+      "networkRequired": true,
+      "authRequired": false,
+      "lastChecked": "2026-06-14",
       "reason": "Investigate Vercel cost and performance."
     },
     {

@@ -10,6 +10,9 @@ Codex safety model.
 - `approval_policy = "on-request"` keeps escalations interactive.
 - Network access stays disabled in the workspace-write sandbox unless a trusted
   profile or explicit approval changes that.
+- `shell_environment_policy` uses `inherit = "core"` and keeps default secret
+  exclusions active so subprocesses do not inherit broad local token variables
+  by default.
 - Authenticated remote connectors are present as disabled examples.
 - Global command rules are narrow and biased toward read-only discovery and
   local verification.
@@ -36,8 +39,18 @@ Rules used in this starter:
 - New MCP servers should prefer narrow config flags such as `enabled_tools`,
   `disabled_tools`, `startup_timeout_sec`, and `tool_timeout_sec` over broad
   prose-only instructions.
+- `catalog/mcp-servers.json` records source URL, auth mode, risk, approval mode,
+  and default-enable rationale for each starter connector.
 
 Official reference: https://developers.openai.com/codex/mcp
+
+## Skill Sources
+
+Installable skills must be represented in both `catalog/skills.json` and
+`catalog/skills-lock.json`. The lock file records the exact package/skill pair
+and install command used by the installer. The default gate checks this offline;
+`npm run verify:skills:online` performs network-backed resolution when a
+maintainer is preparing publication.
 
 ## Rules
 

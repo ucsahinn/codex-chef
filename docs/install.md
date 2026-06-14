@@ -16,6 +16,14 @@ Codex uses `~/.codex`; if `CODEX_HOME` is set, the installer uses that path.
 
 ## PowerShell Install
 
+Preview without writing:
+
+```powershell
+.\scripts\install.ps1 -All -Force -WhatIf
+```
+
+Install after the preview is correct:
+
 ```powershell
 git clone https://github.com/ucsahinn/codex-enterprise-starter.git
 cd codex-enterprise-starter
@@ -29,13 +37,23 @@ Useful switches:
   guards.
 - `-InstallSkills`: install `catalog/skills.json` entries that have
   `install: true`, a verified `package` in `owner/repo` format, and a matching
-  `skill` name. The installer calls `npx skills add <package> --skill <skill>
-  --yes --global`, so plain skill names are never treated as Git repositories.
+  `skill` name. The installer calls `npx.cmd skills add <package> --skill
+  <skill> --agent codex --yes --global`.
 - `-InstallGitGuards`: install global Git ignore and pre-commit hook.
 - `-Force`: overwrite managed Codex files after creating backups.
 - `-NoBackup`: skip backups. Not recommended.
+- `-WhatIf`: preview file, Git, and skill operations without changing the real
+  setup.
 
-## Bash or WSL Install
+## Bash Or WSL Install
+
+Preview without writing:
+
+```bash
+./scripts/install.sh --all --force --dry-run
+```
+
+Install after the preview is correct:
 
 ```bash
 git clone https://github.com/ucsahinn/codex-enterprise-starter.git
@@ -51,6 +69,7 @@ Useful flags:
 - `--install-git-guards`
 - `--force`
 - `--no-backup`
+- `--dry-run`
 
 ## What Gets Backed Up
 
@@ -67,6 +86,10 @@ The installer backs up managed targets before replacing them:
 - `rules/default.rules`
 - `agents/*.toml`
 - personal plugin marketplace file
+- bundled local plugin directory
+
+Directory replacement is allowed only under the managed Codex or Agents home.
+The installer refuses unmanaged directory targets.
 
 ## Post-Install Checks
 
@@ -93,17 +116,18 @@ PowerShell:
 ```powershell
 $env:CODEX_HOME = "$PWD\tmp\codex-home"
 $env:AGENTS_HOME = "$PWD\tmp\agents-home"
-.\scripts\install.ps1 -Force
+.\scripts\install.ps1 -Force -WhatIf
 ```
 
 Bash:
 
 ```bash
 CODEX_HOME="$PWD/tmp/codex-home" AGENTS_HOME="$PWD/tmp/agents-home" \
-  ./scripts/install.sh --force
+  ./scripts/install.sh --force --dry-run
 ```
 
-Remove the `tmp/` folder after testing.
+Use non-dry-run temp homes only when you intentionally want a smoke install.
+Remove `tmp/` only when you created it intentionally.
 
 ## Rollback
 
