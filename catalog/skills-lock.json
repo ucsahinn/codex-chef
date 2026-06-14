@@ -3,6 +3,8 @@
   "generatedFrom": "catalog/skills.json",
   "dateChecked": "2026-06-14",
   "status": "offline-validated",
+  "lockSemantics": "source-allowlist",
+  "immutability": "Skills CLI installation uses owner/repo plus skill name; this lock verifies reviewed package/skill/source metadata but does not pin upstream commits.",
   "onlineVerificationCommand": "npm run verify:skills:online",
   "entries": [
     {

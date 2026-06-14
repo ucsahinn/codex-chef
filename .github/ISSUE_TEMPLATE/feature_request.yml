@@ -1,0 +1,55 @@
+name: Feature request
+description: Propose a bounded Codex starter capability. / Sınırlı bir Codex starter özelliği önerin.
+title: "Feature: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep requests scoped to this starter's public-safe install, docs, validation, security, MCP, skills, or plugin surface.
+
+        İstekleri bu starter'ın public-safe kurulum, doküman, doğrulama, güvenlik, MCP, skill veya plugin yüzeyiyle sınırlı tutun.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Sorun
+      description: What user problem would this solve? / Bu hangi kullanıcı sorununu çözer?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal / Öneri
+      description: What should change in the starter? / Starter içinde ne değişmeli?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area / Alan
+      options:
+        - Installer
+        - Codex config
+        - MCP catalog
+        - Skills catalog
+        - Plugin
+        - Validation
+        - Security
+        - Documentation
+        - GitHub/public repo readiness
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence / Kanıt
+      description: Link official docs, mature public examples, or public-safe issue signals if relevant. / Gerekliyse resmi doküman, olgun public örnek veya public-safe issue sinyali linkleyin.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety boundary / Güvenlik sınırı
+      options:
+        - label: This request does not require secrets, credentials, private logs, private paths, or account-specific data.
+          required: true
+        - label: Bu istek secret, credential, private log, private path veya hesaba özel veri gerektirmiyor.
+          required: true

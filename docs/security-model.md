@@ -48,9 +48,42 @@ Official reference: https://developers.openai.com/codex/mcp
 
 Installable skills must be represented in both `catalog/skills.json` and
 `catalog/skills-lock.json`. The lock file records the exact package/skill pair
-and install command used by the installer. The default gate checks this offline;
+and install command used by the installer. It is a reviewed source allowlist,
+not an immutable upstream commit lock, because the current Skills CLI install
+flow resolves owner/repo plus skill name. The default gate checks this offline;
 `npm run verify:skills:online` performs network-backed resolution when a
-maintainer is preparing publication.
+maintainer is preparing publication or changing skill sources.
+
+Default command approval rules do not auto-allow global skill installation.
+Read-only Skills CLI discovery can be allowlisted, but `skills add` and broad
+Skills CLI invocations prompt because they change the agent instruction supply
+chain.
+
+## Specialist Agent Boundaries
+
+Specialist agents are tracked in `catalog/agents.json` and validated against
+both Codex config templates and the role TOML files under
+`templates/codex/agents/`.
+
+Agent templates must not use `danger-full-access`,
+`approval_policy = "never"`, or embedded token environment variable names.
+Read-only specialists stay read-only, while verifier/release roles can use
+`workspace-write` only for local evidence such as smoke-test output.
+
+## Install Planning And Collision Policy
+
+`manifests/install-plan.json` records the managed install surface, risk level,
+backup expectation, required flags, and collision policy for each operation.
+`node scripts/plan-install.mjs --all --json` prints this plan without invoking
+installers or mutating global state.
+
+The manifest intentionally keeps ECC-inspired improvements narrow: plan/apply
+separation and collision metadata are allowed; broad external config, MCP,
+hook, telemetry, or skill catalogs are not imported by default.
+`scripts/validate-install-plan.mjs` also keeps destinations inside reviewed
+Codex, Agents, and optional Git-guard targets so adjacent harness homes such as
+`.claude`, `.cursor`, `.opencode`, `.zed`, and `.vscode` cannot drift into the
+install surface silently.
 
 ## Rules
 
@@ -61,6 +94,7 @@ project-native verification commands. It prompts for:
 - deletion, cleanup, pruning, overwrite, and uninstall actions
 - broad shell wrappers
 - dependency installation
+- global skill installation
 - package publishing
 - GitHub API operations
 - git commit, push, reset, checkout, and restore
@@ -74,6 +108,17 @@ Hooks are useful for lifecycle checks, but they are not a primary security
 boundary. Non-managed hooks should be reviewed and trusted by the user before
 they run.
 
+This starter does not import ECC-style lifecycle hook runtimes, automatic
+`SessionStart` context injection, or `hookSpecificOutput.additionalContext`
+patterns. `scripts/security-audit.mjs` fails if hook runtimes appear through
+root hook folders, nested `hooks/` paths, `scripts/hooks`, `.cursor/hooks`,
+`.kiro/hooks`, `.opencode` hook plugins, templates, or plugin bundles without
+an explicit reviewed change.
+
+Plugin manifests are also kept narrow by default. Repo validation rejects
+plugin-bundled `hooks`, `mcpServers`, `apps`, `Write` capabilities, and
+marketplace authentication modes other than `NONE`.
+
 Official reference: https://developers.openai.com/codex/hooks
 
 ## Git Hygiene
@@ -85,7 +130,14 @@ When installed, they:
 - run Gitleaks when available
 - block staged secret-like files such as `.env`, `.pem`, `.key`, `.pfx`
 
+The repository `.gitleaks.toml` extends the default Gitleaks rules and only
+excludes local scratch, dependency, build, and cache directories such as `tmp/`,
+`node_modules/`, `dist/`, and `.next/`.
+
 The hook is intentionally conservative and does not delete files.
+
+Security validation also fails if tracked source files appear under ignored
+scratch, dependency, build, coverage, or release-output directories.
 
 ## What Must Never Be Included
 

@@ -17,6 +17,7 @@ or public-facing document.
 | Add a reusable workflow | A skill first; package it as a plugin only when it should be installed as a bundle |
 | Add live external context | An MCP server or connector, disabled by default when it needs auth |
 | Add mechanical enforcement | A hook or validation script, not prose alone |
+| Inspect the managed install surface | `node scripts/plan-install.mjs --all --json` |
 | Prepare for push or release | [docs/verification.md](verification.md), then the release gate |
 
 ## Source Quality
@@ -69,11 +70,51 @@ make it a skill. If it needs tools or distribution, package it as a plugin.
   package/skill pairs.
 - Every installable skill must declare `package`, `skill`, and
   `source = package@skill`.
+- `catalog/skills-lock.json` is a reviewed source allowlist, not an immutable
+  upstream commit lock. The current Skills CLI install path resolves owner/repo
+  plus skill name, so release preparation must re-run online source
+  verification.
 - The installer must call `npx skills add <package> --skill <skill> --yes --global`.
 - Default checks stay offline and deterministic. Network checks are explicit:
   `npm run verify:skills:online`.
 - Skills that are already local and not safely installable from a public package
   should remain `install: false` with a clear reason.
+
+## Specialist Agent Rules
+
+- `catalog/agents.json` is the reviewed source of truth for bundled specialist
+  agents.
+- Every cataloged agent must have matching `[agents.<name>]` blocks in both
+  Windows and Unix Codex config templates.
+- Every `config_file` must point at a reviewed
+  `templates/codex/agents/*.toml` role file.
+- Agent templates must not use `danger-full-access`,
+  `approval_policy = "never"`, or embedded token variable names.
+- Keep write-heavy implementation in the main thread unless the user explicitly
+  asks to split write scopes.
+
+## External Starter And ECC Import Rules
+
+Large agent starter repos can provide useful patterns, but they should not be
+imported wholesale. The current ECC-informed policy is in
+[docs/ecc-compatibility.md](ecc-compatibility.md).
+
+Allowed adaptations:
+
+- manifest-backed planning
+- dependency-free validation
+- target/collision metadata
+- plugin and MCP documentation honesty
+- personal-path and permissive-config checks
+
+Blocked adaptations:
+
+- implicit installer dependency installation
+- broad global hook or Git config mutations outside explicit flags
+- permissive `approval_policy = "never"` or `profiles.yolo` defaults
+- active authenticated MCP connector catalogs
+- raw prompt/tool telemetry hooks
+- imported credential-shaped examples
 
 ## Verification Gate
 
@@ -81,6 +122,7 @@ Before a maintainer tells another user that the setup is ready:
 
 ```bash
 npm run check
+node scripts/plan-install.mjs --all --json
 git status --short
 git diff --cached --check
 gitleaks detect --redact --no-banner --no-git --verbose

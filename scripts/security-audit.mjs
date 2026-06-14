@@ -1,14 +1,20 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 
 const root = path.resolve(process.cwd());
 const failures = [];
 const warnings = [];
 
 const ignoredDirs = new Set([".git", ".serena", "node_modules", "dist", "build", "coverage", ".next", "tmp", "temp"]);
+const ignoredSourceDirs = new Set(["tmp", "temp", "node_modules", "dist", "build", "coverage", ".next", "out"]);
 const requiredPublicFiles = [
   "README.md",
+  "README.de.md",
+  "README.es.md",
+  "README.fr.md",
+  "README.pt-BR.md",
   "README.tr.md",
   "SECURITY.md",
   "PRIVACY.md",
@@ -21,21 +27,48 @@ const requiredPublicFiles = [
   "docs/how-to.tr.md",
   "docs/troubleshooting.md",
   "docs/troubleshooting.tr.md",
+  "docs/github-settings.md",
+  "docs/github-settings.tr.md",
   "docs/upgrade.md",
   "docs/upgrade.tr.md",
+  "docs/release-notes.md",
+  "docs/release-notes.tr.md",
   "docs/expected-output.md",
   "docs/expected-output.tr.md",
+  "docs/ecc-compatibility.md",
+  "docs/ecc-compatibility.tr.md",
+  "docs/advisory-sources.md",
+  "docs/advisory-sources.tr.md",
   "docs/completion-audit.md",
   "docs/completion-audit.tr.md",
   "assets/banner.svg",
   "assets/workflow-overview.svg",
+  "catalog/agents.json",
   "catalog/skills-lock.json",
+  "manifests/install-plan.json",
+  "schemas/install-plan.schema.json",
+  "schemas/install-state-preview.schema.json",
+  "scripts/plan-install.mjs",
+  "scripts/validate-readme-locales.mjs",
+  "scripts/validate-workflow-security.mjs",
+  "scripts/validate-install-plan.mjs",
+  "scripts/validate-install-state-preview.mjs",
+  "scripts/validate-installer-alignment.mjs",
+  "scripts/validate-agent-config.mjs",
+  "scripts/validate-mcp-config.mjs",
+  "scripts/validate-package-surface.mjs",
+  "scripts/validate-release-readiness.mjs",
+  "scripts/scan-supply-chain-iocs.mjs",
   ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/docs_improvement.yml",
+  ".github/ISSUE_TEMPLATE/feature_request.yml",
+  ".github/ISSUE_TEMPLATE/question.yml",
   ".github/pull_request_template.md",
+  ".github/CODEOWNERS",
   ".github/dependabot.yml",
-  ".github/workflows/validate.yml"
+  ".github/workflows/validate.yml",
+  ".gitleaks.toml"
 ];
 
 const externalMcpServers = ["github", "figma", "linear", "notion", "sentry", "vercel", "supabase", "filesystem"];
@@ -50,6 +83,19 @@ function read(rel) {
 
 function exists(rel) {
   return fs.existsSync(path.join(root, rel));
+}
+
+function isPinnedPackageSpec(spec) {
+  return /^@[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+@[0-9][A-Za-z0-9_.+~-]*$/.test(spec)
+    || /^[A-Za-z0-9_.-]+@[0-9][A-Za-z0-9_.+~-]*$/.test(spec);
+}
+
+function isHookSurfacePath(rel) {
+  if (rel === "templates/git/pre-commit") return false;
+  return /(?:^|\/)hooks(?:\/|$)/i.test(rel)
+    || /(?:^|\/)hooks\.json$/i.test(rel)
+    || /^scripts\/hooks\//i.test(rel)
+    || /^\.opencode\/plugins\/.*hook/i.test(rel);
 }
 
 function walk(dir) {
@@ -69,6 +115,17 @@ function walk(dir) {
 
 for (const file of requiredPublicFiles) {
   if (!exists(file)) failures.push(`Missing public-readiness file: ${file}`);
+}
+
+if (exists(".github/ISSUE_TEMPLATE/config.yml")) {
+  const issueConfig = read(".github/ISSUE_TEMPLATE/config.yml");
+  if (!/blank_issues_enabled:\s*false/.test(issueConfig)) {
+    failures.push("Blank GitHub issues must stay disabled to guide users through public-safe templates.");
+  }
+}
+
+if (exists(".github/CODEOWNERS") && !read(".github/CODEOWNERS").includes("@ucsahinn")) {
+  failures.push(".github/CODEOWNERS must keep @ucsahinn as the default public owner.");
 }
 
 const docsDir = path.join(root, "docs");
@@ -102,6 +159,10 @@ const secretPatterns = [
 
 const forbiddenStatePatterns = [
   { name: "local Windows user path", pattern: /C:\\Users\\ulasc|C:\/Users\/ulasc/i },
+  { name: "non-placeholder drive user path", pattern: /[A-Za-z]:[\\/]Users[\\/](?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i },
+  { name: "non-placeholder Windows user path", pattern: /C:\\Users\\(?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i },
+  { name: "non-placeholder macOS user path", pattern: /\/Users\/(?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i },
+  { name: "non-placeholder Linux home path", pattern: /\/home\/(?!user\b|username\b|you\b|yourname\b|yourusername\b|runner\b)[A-Za-z0-9._-]+/i },
   { name: "Codex sessions", pattern: /(?:^|[\\/])\.codex[\\/]sessions[\\/]/i },
   { name: "Codex memories", pattern: /(?:^|[\\/])\.codex[\\/]memories[\\/]/i },
   { name: "auth file", pattern: /(?:^|[\\/])(?:auth|credentials|cookies)\.(?:json|toml|txt)$/i }
@@ -111,12 +172,58 @@ for (const file of files) {
   const rel = posix(path.relative(root, file));
   const text = fs.readFileSync(file, "utf8");
 
+  if (isHookSurfacePath(rel)) {
+    failures.push(`Codex lifecycle hook runtime must not be introduced without explicit review: ${rel}`);
+  }
+
+  if (/^plugins\/.+\/\.codex-plugin\/plugin\.json$/i.test(rel)) {
+    try {
+      const plugin = JSON.parse(text);
+      for (const forbiddenKey of ["hooks", "mcpServers", "apps"]) {
+        if (Object.prototype.hasOwnProperty.call(plugin, forbiddenKey)) {
+          failures.push(`Plugin manifest must not declare ${forbiddenKey} by default: ${rel}`);
+        }
+      }
+      const capabilities = plugin?.interface?.capabilities;
+      if (Array.isArray(capabilities) && capabilities.some((capability) => String(capability).toLowerCase() === "write")) {
+        failures.push(`Plugin manifest must not declare Write interface capability by default: ${rel}`);
+      }
+    } catch (error) {
+      failures.push(`Plugin manifest must be parseable JSON: ${rel} (${error.message})`);
+    }
+  }
+
+  if (/^(?:templates|plugins)\//.test(rel)) {
+    const hookInjectionPatterns = [
+      /\b(?:SessionStart|PreCompact|SessionEnd)\b/,
+      /\bhookSpecificOutput\b/,
+      /\badditionalContext\b/,
+      /\bECC_SESSION_START_CONTEXT\b/,
+      /(?:^|[\\/])instincts[\\/]/i,
+      /\blearned skills?\b/i
+    ];
+    for (const pattern of hookInjectionPatterns) {
+      if (pattern.test(text)) {
+        failures.push(`Automatic hook/session context injection pattern found in ${rel}: ${pattern}`);
+      }
+    }
+  }
+
   for (const { name, pattern } of secretPatterns) {
     if (pattern.test(text)) failures.push(`${name} pattern found in ${rel}`);
   }
 
   for (const { name, pattern } of forbiddenStatePatterns) {
     if (pattern.test(rel) || pattern.test(text)) failures.push(`${name} pattern found in ${rel}`);
+  }
+}
+
+if (exists(".agents/plugins/marketplace.json")) {
+  const marketplace = JSON.parse(read(".agents/plugins/marketplace.json"));
+  for (const plugin of marketplace.plugins || []) {
+    if (plugin?.policy?.authentication !== "NONE") {
+      failures.push(`Marketplace plugin ${plugin.name} must keep authentication NONE by default`);
+    }
   }
 }
 
@@ -130,6 +237,21 @@ if (!/official Codex documentation/i.test(readme)) {
 
 for (const configFile of ["templates/codex/config.windows.toml", "templates/codex/config.unix.toml"]) {
   const config = read(configFile);
+  if (/approval_policy\s*=\s*"never"/.test(config)) {
+    failures.push(`${configFile} must not set approval_policy = "never"`);
+  }
+  if (/\[profiles\.yolo\]/.test(config) || /profile\s*=\s*"yolo"/.test(config)) {
+    failures.push(`${configFile} must not define or select a yolo profile`);
+  }
+  if (/@latest/.test(config)) {
+    failures.push(`${configFile} must not use @latest package specs in active config`);
+  }
+  for (const match of config.matchAll(/"-y",\s*"([^"]+)"/g)) {
+    const packageSpec = match[1];
+    if (!isPinnedPackageSpec(packageSpec)) {
+      failures.push(`${configFile} must pin npx MCP package specs to exact versions: ${packageSpec}`);
+    }
+  }
   if (!/approval_policy\s*=\s*"on-request"/.test(config)) {
     failures.push(`${configFile} must keep approval_policy = "on-request"`);
   }
@@ -167,6 +289,51 @@ for (const server of catalog.servers || []) {
 const packageJson = JSON.parse(read("package.json"));
 if (packageJson.private !== true) {
   failures.push("package.json must keep private=true to prevent accidental npm publish.");
+}
+
+for (const installer of ["scripts/install.ps1", "scripts/install.sh"]) {
+  const text = read(installer);
+  if (/\bnpm(?:\.cmd)?\s+(?:install|ci)\b/i.test(text)) {
+    failures.push(`${installer} must not run implicit npm install or npm ci`);
+  }
+}
+
+const defaultRules = read("templates/codex/rules/default.rules");
+if (/prefix_rule\(pattern\s*=\s*\["npx\.cmd",\s*"-y",\s*"[^"]+@latest"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
+  failures.push("templates/codex/rules/default.rules must not auto-allow floating @latest npx packages");
+}
+if (/prefix_rule\(pattern\s*=\s*\["npm\.cmd",\s*"run",\s*"clean"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
+  failures.push("templates/codex/rules/default.rules must not auto-allow cleanup scripts");
+}
+if (/prefix_rule\(pattern\s*=\s*\["npx\.cmd",\s*"skills",\s*"add"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
+  failures.push("templates/codex/rules/default.rules must not auto-allow global skill installation");
+}
+if (/prefix_rule\(pattern\s*=\s*\["npx\.cmd",\s*"skills"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
+  failures.push("templates/codex/rules/default.rules must not auto-allow broad Skills CLI commands");
+}
+
+const installPlan = JSON.parse(read("manifests/install-plan.json"));
+for (const operation of installPlan.operations || []) {
+  if (operation.risk === "high" && !operation.requiresFlag) {
+    failures.push(`High-risk install plan operation must require an explicit flag: ${operation.id}`);
+  }
+  if (operation.kind === "skill-install" && operation.collision !== "skip-if-already-installed") {
+    failures.push(`Skill install operation must skip existing skills: ${operation.id}`);
+  }
+}
+
+if (fs.existsSync(path.join(root, ".git"))) {
+  const result = spawnSync("git", ["ls-files"], { cwd: root, encoding: "utf8", windowsHide: true });
+  if (result.status !== 0) {
+    warnings.push(`Could not inspect tracked files under ignored directories: ${result.stderr || result.stdout || "git ls-files failed"}`);
+  } else {
+    for (const file of result.stdout.split(/\r?\n/).filter(Boolean)) {
+      const firstPart = file.split("/")[0];
+      if (ignoredSourceDirs.has(firstPart)) {
+        failures.push(`Tracked file must not live under ignored source/output directory: ${file}`);
+      }
+    }
+  }
 }
 
 if (!read(".gitignore").includes("tmp/")) warnings.push(".gitignore should ignore tmp/ smoke-test output.");

@@ -3,6 +3,49 @@
 Installer başarılı olduğunda bilinçli olarak sessiz ve okunabilir kalır; hata
 olduğunda debug için daha fazla detay gösterir.
 
+## Install Plan Ön İzleme
+
+Discovery ciktisi no-write ve okunabilir kalir:
+
+```text
+Codex Enterprise Starter install profiles
+Package: codex-enterprise-starter@0.3.0
+Platform: windows
+
+Profile | Operations | High risk | Optional flags
+--- | ---: | ---: | ---
+all | 12 | 4 | InstallGitGuards, InstallSkills
+default | 7 | 0 | none
+```
+
+```text
+Codex Enterprise Starter install plan
+Platform: windows
+Operations: ...
+
+[file] codex-agents-md
+  source: templates/codex/AGENTS.md
+  target: .../.codex/AGENTS.md
+  collision: skip-unless-force-backup-before-replace
+  backup: yes
+  force: no
+  risk: medium
+```
+
+JSON çıktı `schemaVersion:
+codex-enterprise-starter.install-state-preview.v1` kullanır ve global Codex,
+Agents veya Git lokasyonlarına yazmaz.
+
+JSON sozlesmesi `schemas/install-state-preview.schema.json` icinde dokumante
+edilir ve `scripts/validate-install-state-preview.mjs` ile dogrulanir.
+
+Publish-safe kanit icin `--redact-paths` ekle; boylece lokal home path'leri
+placeholder olarak gorunur:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+```
+
 ## PowerShell Dry Run
 
 ```text

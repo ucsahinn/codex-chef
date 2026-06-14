@@ -1,0 +1,17 @@
+title = "codex-enterprise-starter secret scan"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore local scratch, dependency, build, and cache directories."
+paths = [
+  '''(^|[\\/])tmp[\\/]''',
+  '''(^|[\\/])temp[\\/]''',
+  '''(^|[\\/])node_modules[\\/]''',
+  '''(^|[\\/])dist[\\/]''',
+  '''(^|[\\/])build[\\/]''',
+  '''(^|[\\/])coverage[\\/]''',
+  '''(^|[\\/])\.next[\\/]''',
+  '''(^|[\\/])out[\\/]'''
+]

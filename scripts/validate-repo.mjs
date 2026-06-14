@@ -7,6 +7,10 @@ const failures = [];
 
 const requiredFiles = [
   "README.md",
+  "README.de.md",
+  "README.es.md",
+  "README.fr.md",
+  "README.pt-BR.md",
   "README.tr.md",
   "SECURITY.md",
   "PRIVACY.md",
@@ -20,10 +24,18 @@ const requiredFiles = [
   "docs/how-to.tr.md",
   "docs/troubleshooting.md",
   "docs/troubleshooting.tr.md",
+  "docs/github-settings.md",
+  "docs/github-settings.tr.md",
   "docs/upgrade.md",
   "docs/upgrade.tr.md",
+  "docs/release-notes.md",
+  "docs/release-notes.tr.md",
   "docs/expected-output.md",
   "docs/expected-output.tr.md",
+  "docs/ecc-compatibility.md",
+  "docs/ecc-compatibility.tr.md",
+  "docs/advisory-sources.md",
+  "docs/advisory-sources.tr.md",
   "docs/best-practices.md",
   "docs/best-practices.tr.md",
   "docs/completion-audit.md",
@@ -33,18 +45,38 @@ const requiredFiles = [
   ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/docs_improvement.yml",
+  ".github/ISSUE_TEMPLATE/feature_request.yml",
+  ".github/ISSUE_TEMPLATE/question.yml",
   ".github/pull_request_template.md",
+  ".github/CODEOWNERS",
   ".github/dependabot.yml",
+  ".github/workflows/validate.yml",
+  ".gitleaks.toml",
   "catalog/mcp-servers.json",
+  "catalog/agents.json",
   "catalog/skills.json",
   "catalog/skills-lock.json",
+  "manifests/install-plan.json",
+  "schemas/install-plan.schema.json",
+  "schemas/install-state-preview.schema.json",
   "templates/codex/config.windows.toml",
   "templates/codex/config.unix.toml",
   "templates/codex/AGENTS.md",
   "templates/codex/rules/default.rules",
   "scripts/install.ps1",
   "scripts/install.sh",
+  "scripts/plan-install.mjs",
+  "scripts/validate-readme-locales.mjs",
+  "scripts/validate-workflow-security.mjs",
+  "scripts/validate-install-plan.mjs",
+  "scripts/validate-install-state-preview.mjs",
+  "scripts/validate-installer-alignment.mjs",
+  "scripts/validate-agent-config.mjs",
+  "scripts/validate-mcp-config.mjs",
+  "scripts/validate-package-surface.mjs",
+  "scripts/validate-release-readiness.mjs",
   "scripts/verify-skill-sources.mjs",
+  "scripts/scan-supply-chain-iocs.mjs",
   "scripts/security-audit.mjs",
   "plugins/codex-enterprise-workflows/.codex-plugin/plugin.json",
   ".agents/plugins/marketplace.json"
@@ -102,6 +134,19 @@ for (const file of requiredFiles) {
   }
 }
 
+const issueConfigPath = path.join(root, ".github/ISSUE_TEMPLATE/config.yml");
+if (fs.existsSync(issueConfigPath)) {
+  const issueConfig = fs.readFileSync(issueConfigPath, "utf8");
+  if (!/blank_issues_enabled:\s*false/.test(issueConfig)) {
+    failures.push(".github/ISSUE_TEMPLATE/config.yml must keep blank issues disabled so reporters use public-safe templates.");
+  }
+}
+
+const codeownersPath = path.join(root, ".github/CODEOWNERS");
+if (fs.existsSync(codeownersPath) && !fs.readFileSync(codeownersPath, "utf8").includes("@ucsahinn")) {
+  failures.push(".github/CODEOWNERS must include the public repository owner @ucsahinn.");
+}
+
 const files = walk(root);
 const mojibakePattern = new RegExp("[\\u00c3\\u00c4\\u00c5][^\\s/]|\\u00f0\\u0178|\\u00e2[\\u20ac\\u0153\\u201e\\u2122\\u0161\\u017e\\u0178]");
 
@@ -144,6 +189,10 @@ for (const file of files) {
   const forbiddenLocalPaths = [
     /C:\\Users\\ulasc/i,
     /C:\/Users\/ulasc/i,
+    /[A-Za-z]:[\\/]Users[\\/](?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i,
+    /C:\\Users\\(?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i,
+    /\/Users\/(?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i,
+    /\/home\/(?!user\b|username\b|you\b|yourname\b|yourusername\b|runner\b)[A-Za-z0-9._-]+/i,
     /\\\.codex\\sessions\\/i,
     /\/\.codex\/sessions\//i,
     /\\\.codex\\memories\\/i,
@@ -203,17 +252,72 @@ for (const file of files) {
   }
 }
 
+const installPlanPath = path.join(root, "manifests/install-plan.json");
+if (fs.existsSync(installPlanPath)) {
+  const installPlan = JSON.parse(fs.readFileSync(installPlanPath, "utf8"));
+  const operationIds = new Set((installPlan.operations || []).map((operation) => operation.id));
+  for (const profileName of ["default", "all"]) {
+    const profile = installPlan.profiles?.[profileName];
+    if (!Array.isArray(profile)) {
+      failures.push(`Install plan missing ${profileName} profile.`);
+      continue;
+    }
+    for (const operationId of profile) {
+      if (!operationIds.has(operationId)) {
+        failures.push(`Install plan profile ${profileName} references unknown operation: ${operationId}`);
+      }
+    }
+  }
+}
+
+const packageJsonPath = path.join(root, "package.json");
+if (fs.existsSync(packageJsonPath)) {
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  if (!/^\d+\.\d+\.\d+$/.test(packageJson.version || "")) {
+    failures.push("package.json version must be a plain semver release version.");
+  } else {
+    const version = packageJson.version;
+    const changelog = fs.readFileSync(path.join(root, "CHANGELOG.md"), "utf8");
+    const releaseNotes = fs.readFileSync(path.join(root, "docs/release-notes.md"), "utf8");
+    const releaseNotesTr = fs.readFileSync(path.join(root, "docs/release-notes.tr.md"), "utf8");
+    if (!changelog.includes(`## ${version} - `)) {
+      failures.push(`CHANGELOG.md must include a dated section for ${version}.`);
+    }
+    if (!releaseNotes.includes(`## v${version} - `)) {
+      failures.push(`docs/release-notes.md must include a dated section for v${version}.`);
+    }
+    if (!releaseNotesTr.includes(`## v${version} - `)) {
+      failures.push(`docs/release-notes.tr.md must include a dated section for v${version}.`);
+    }
+  }
+}
+
 const readmeText = [
-  fs.readFileSync(path.join(root, "README.md"), "utf8"),
-  fs.readFileSync(path.join(root, "README.tr.md"), "utf8")
-].join("\n");
+  "README.md",
+  "README.de.md",
+  "README.es.md",
+  "README.fr.md",
+  "README.pt-BR.md",
+  "README.tr.md"
+].map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 for (const requiredPattern of [
+  /README\.de\.md/,
+  /README\.es\.md/,
+  /README\.fr\.md/,
+  /README\.pt-BR\.md/,
   /README\.tr\.md/,
+  /Deutsch/,
+  /Espa/,
+  /Portugu/,
+  /Fran/,
   /Türkçe/,
+  /docs-6%20languages/,
   /assets\/banner\.svg/,
   /assets\/workflow-overview\.svg/,
   /Trust Signals/,
-  /Güven Sinyalleri/
+  /Güven Sinyalleri/,
+  /Advisory sources/,
+  /Advisory kaynakları/
 ]) {
   if (!requiredPattern.test(readmeText)) {
     failures.push(`README.md missing required storefront signal: ${requiredPattern}`);
@@ -221,17 +325,28 @@ for (const requiredPattern of [
 }
 
 const marketplacePath = path.join(root, ".agents/plugins/marketplace.json");
+let marketplacePlugins = [];
 if (fs.existsSync(marketplacePath)) {
   const marketplace = JSON.parse(fs.readFileSync(marketplacePath, "utf8"));
-  for (const plugin of marketplace.plugins || []) {
+  marketplacePlugins = marketplace.plugins || [];
+  for (const plugin of marketplacePlugins) {
     const pluginPath = plugin?.source?.path;
     if (!pluginPath || !pluginPath.startsWith("./")) {
       failures.push(`Marketplace plugin ${plugin.name} must use a repo-relative ./ path`);
       continue;
     }
+    if (!pluginPath.startsWith("./plugins/")) {
+      failures.push(`Marketplace plugin ${plugin.name} must point at a concrete ./plugins/ subdirectory`);
+    }
     const resolved = path.join(root, pluginPath.slice(2));
     if (!fs.existsSync(resolved)) {
       failures.push(`Marketplace plugin path does not exist: ${pluginPath}`);
+    }
+    if (!plugin?.interface?.displayName || !plugin?.interface?.shortDescription) {
+      failures.push(`Marketplace plugin ${plugin.name} must include displayName and shortDescription metadata`);
+    }
+    if (plugin?.policy?.authentication !== "NONE") {
+      failures.push(`Marketplace plugin ${plugin.name} must keep authentication NONE by default`);
     }
   }
 }
@@ -239,10 +354,37 @@ if (fs.existsSync(marketplacePath)) {
 const pluginManifest = path.join(root, "plugins/codex-enterprise-workflows/.codex-plugin/plugin.json");
 if (fs.existsSync(pluginManifest)) {
   const plugin = JSON.parse(fs.readFileSync(pluginManifest, "utf8"));
+  for (const forbiddenKey of ["hooks", "mcpServers", "apps"]) {
+    if (Object.prototype.hasOwnProperty.call(plugin, forbiddenKey)) {
+      failures.push(`Plugin manifest must not declare ${forbiddenKey}; authenticated or lifecycle surfaces stay disabled by default.`);
+    }
+  }
+  const capabilities = plugin?.interface?.capabilities;
+  if (Array.isArray(capabilities) && capabilities.some((capability) => String(capability).toLowerCase() === "write")) {
+    failures.push("Plugin manifest must not declare Write interface capability by default.");
+  }
   for (const key of ["name", "version", "description", "skills"]) {
     if (!plugin[key]) {
       failures.push(`Plugin manifest missing key: ${key}`);
     }
+  }
+  const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+  if (plugin.version !== packageJson.version) {
+    failures.push(`Plugin manifest version must match package.json version: ${plugin.version} !== ${packageJson.version}`);
+  }
+  if (typeof plugin.skills !== "string") {
+    failures.push("Plugin manifest skills entry must be a string path.");
+  } else {
+    const skillsPath = path.resolve(path.dirname(pluginManifest), "..", plugin.skills);
+    if (!fs.existsSync(skillsPath)) {
+      failures.push(`Plugin manifest skills path does not exist: ${plugin.skills}`);
+    }
+  }
+  const marketplacePlugin = marketplacePlugins.find((entry) => entry.name === plugin.name);
+  if (!marketplacePlugin) {
+    failures.push(`Plugin manifest ${plugin.name} must be listed in .agents/plugins/marketplace.json`);
+  } else if (marketplacePlugin.source?.path !== "./plugins/codex-enterprise-workflows") {
+    failures.push(`Marketplace path for ${plugin.name} must stay ./plugins/codex-enterprise-workflows`);
   }
 }
 
@@ -251,7 +393,7 @@ if (fs.existsSync(skillCatalog)) {
   const catalog = JSON.parse(fs.readFileSync(skillCatalog, "utf8"));
   for (const skill of catalog.skills || []) {
     if (skill.install === true) {
-      if (!skill.package || !/^[^/\s]+\/[^@\s]+$/.test(skill.package)) {
+      if (!skill.package || !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(skill.package)) {
         failures.push(`Installable skill must declare package as owner/repo: ${skill.name}`);
       }
       if (!skill.skill || /\s/.test(skill.skill)) {

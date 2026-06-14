@@ -3,12 +3,17 @@
 The repository is designed to be public, but publishing is a separate user
 decision.
 
-## Before First Push
+## Before Push Or Release
 
 ```bash
-npm run validate
+npm run check
+npm run validate:release
+npm run verify:skills:online
+node scripts/plan-install.mjs --all --json --redact-paths
+npm run validate:install-state
 git status --short
-git diff --cached
+git diff --check
+git diff --cached --check
 ```
 
 If Gitleaks is installed:
@@ -16,6 +21,17 @@ If Gitleaks is installed:
 ```bash
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
+
+For a release, also confirm:
+
+- `package.json` version matches the intended tag.
+- `CHANGELOG.md` has a dated version section.
+- [docs/release-notes.md](release-notes.md) matches the release.
+- [docs/github-settings.md](github-settings.md) has the intended repository
+  description, topics, and release metadata.
+- `git diff --cached` contains only reviewed source/docs/config files.
+- ignored `.serena/`, `tmp/`, logs, caches, screenshots, and generated archives
+  are not staged.
 
 ## Create A Repository
 
@@ -31,6 +47,28 @@ Manual remote setup:
 ```bash
 git remote add origin https://github.com/<owner>/codex-enterprise-starter.git
 git push -u origin main
+```
+
+## Existing Repository Release Flow
+
+After explicit commit/push/release approval:
+
+```bash
+git add <reviewed files>
+git diff --cached
+git commit -m "Release Codex starter upgrade v0.3.0"
+git push origin main
+git tag v0.3.0
+git push origin v0.3.0
+gh release create v0.3.0 --title "Codex Enterprise Starter v0.3.0" --notes-file docs/release-notes.md
+```
+
+After pushing, verify remote equality and CI:
+
+```bash
+git rev-parse HEAD
+git -c http.sslBackend=openssl ls-remote origin refs/heads/main
+gh run list --workflow validate --branch main --limit 1
 ```
 
 ## Do Not Publish

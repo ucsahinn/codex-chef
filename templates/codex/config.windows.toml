@@ -80,7 +80,7 @@ tool_timeout_sec = 120
 [mcp_servers.context7]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@upstash/context7-mcp"]
+args = ["/c", "npx", "-y", "@upstash/context7-mcp@3.2.1"]
 default_tools_approval_mode = "approve"
 startup_timeout_sec = 20
 tool_timeout_sec = 120
@@ -88,7 +88,7 @@ tool_timeout_sec = 120
 [mcp_servers.sequential-thinking]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking@2025.12.18"]
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 120
@@ -96,7 +96,7 @@ tool_timeout_sec = 120
 [mcp_servers.playwright]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@playwright/mcp@latest"]
+args = ["/c", "npx", "-y", "@playwright/mcp@0.0.76"]
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 180
@@ -104,7 +104,7 @@ tool_timeout_sec = 180
 [mcp_servers.chrome-devtools]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "chrome-devtools-mcp@latest", "--isolated", "--no-usage-statistics", "--redactNetworkHeaders", "--viewport", "1366x900"]
+args = ["/c", "npx", "-y", "chrome-devtools-mcp@1.2.0", "--isolated", "--no-usage-statistics", "--redactNetworkHeaders", "--viewport", "1366x900"]
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 180
@@ -112,7 +112,7 @@ tool_timeout_sec = 180
 [mcp_servers.serena]
 enabled = true
 command = "uvx"
-args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "codex"]
+args = ["--from", "git+https://github.com/oraios/serena.git@22c135a881aaf17485e54ef0ccaedeaf51a202c0", "serena", "start-mcp-server", "--context", "codex"]
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 30
 tool_timeout_sec = 180
@@ -120,7 +120,7 @@ tool_timeout_sec = 180
 [mcp_servers.memory]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-memory"]
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-memory@2026.1.26"]
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 60
@@ -130,7 +130,7 @@ tool_timeout_sec = 60
 [mcp_servers.filesystem]
 enabled = false
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "%USERPROFILE%\\Desktop"]
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "%USERPROFILE%\\Desktop"]
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 60
@@ -169,5 +169,5 @@ default_tools_approval_mode = "prompt"
 [mcp_servers.supabase]
 enabled = false
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-postgres", "%SUPABASE_DB_URL%"]
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-postgres@0.6.2", "%SUPABASE_DB_URL%"]
 default_tools_approval_mode = "prompt"

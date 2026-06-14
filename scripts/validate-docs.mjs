@@ -72,7 +72,15 @@ function validateWorkflow(file) {
   if (/\t/.test(text)) failures.push(`YAML workflow contains tab indentation: ${rel}`);
   if (/permissions:\s*write-all/.test(text)) failures.push(`Workflow uses broad write-all permissions: ${rel}`);
   if (rel === ".github/workflows/validate.yml") {
-    for (const required of ["permissions:", "contents: read", "npm run check", "bash -n scripts/install.sh"]) {
+    for (const required of [
+      "permissions:",
+      "contents: read",
+      "persist-credentials: false",
+      "npm run check",
+      "bash -n scripts/install.sh",
+      "bash scripts/install.sh --all --force --dry-run",
+      "./scripts/install.ps1 -All -Force -WhatIf"
+    ]) {
       if (!text.includes(required)) failures.push(`validate workflow missing ${required}`);
     }
   }

@@ -2,6 +2,8 @@
 
 This starter keeps high-signal MCP servers documented and mostly safe by
 default. See `catalog/mcp-servers.json` for machine-readable metadata.
+`npm run check` validates that this catalog stays aligned with both Windows and
+Unix Codex config templates.
 
 Official Codex MCP reference:
 
@@ -16,6 +18,12 @@ capability boundary: documentation servers are low-risk context providers, while
 browser, filesystem, database, account, production, billing, or deployment
 servers need stronger approval defaults and narrower tool exposure.
 
+All npm-based MCP package specs are exact-version pinned in both
+`catalog/mcp-servers.json` and `templates/codex/config.*.toml`. Floating
+`@latest` specs and unversioned `npx -y` MCP packages are rejected by
+`npm run check`. Git-based MCP launchers, such as Serena through `uvx --from`,
+must include a full commit SHA and matching catalog `sourceRef`.
+
 ## Enabled By Default
 
 | Server | Purpose | Notes |
@@ -25,7 +33,7 @@ servers need stronger approval defaults and narrower tool exposure.
 | `sequential-thinking` | Structured decomposition | Local stdio helper |
 | `playwright` | Browser automation and UI verification | Local browser control |
 | `chrome-devtools` | Chrome inspection and Lighthouse-style checks | Runs isolated and redacts network headers |
-| `serena` | Semantic code navigation | Uses `uvx`; can be disabled if unavailable |
+| `serena` | Semantic code navigation | Uses `uvx` with a pinned git source ref; can be disabled if unavailable |
 | `memory` | Local MCP memory graph | Optional; avoid storing secrets |
 
 ## Disabled Until Needed

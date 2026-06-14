@@ -1,6 +1,8 @@
 # MCP Kataloğu
 
 Makine tarafından okunabilir liste için `catalog/mcp-servers.json` dosyasına bak.
+`npm run check`, bu katalog ile Windows/Unix Codex config template'lerinin
+aynı hizada kaldığını doğrular.
 
 Resmi kaynak:
 
@@ -15,6 +17,12 @@ boundary olarak dusun: dokumantasyon server'lari dusuk riskli context saglar;
 browser, filesystem, database, hesap, production, billing veya deploy server'lari
 daha guclu approval default'u ve daha dar tool exposure ister.
 
+Npm tabanli tum MCP package spec'leri hem `catalog/mcp-servers.json` hem de
+`templates/codex/config.*.toml` icinde exact version ile pinlenir. Floating
+`@latest` spec'leri ve unversioned `npx -y` MCP package'lari `npm run check`
+tarafindan reddedilir. Serena gibi `uvx --from` kullanan git-based MCP
+launcher'lar full commit SHA ve matching catalog `sourceRef` icermelidir.
+
 ## Varsayılan Açık
 
 | Server | Amaç | Not |
@@ -24,7 +32,7 @@ daha guclu approval default'u ve daha dar tool exposure ister.
 | `sequential-thinking` | Yapılandırılmış düşünme/decomposition | Lokal stdio helper |
 | `playwright` | Browser otomasyonu ve UI doğrulama | Lokal browser kontrolü |
 | `chrome-devtools` | Chrome inspection ve audit | Isolated, network header redacted |
-| `serena` | Semantic code navigation | `uvx` gerekir |
+| `serena` | Semantic code navigation | Pinned git source ref ile `uvx` kullanir |
 | `memory` | Lokal memory graph | Secret yazma |
 
 ## Gerektiğinde Aç

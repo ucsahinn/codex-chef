@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "codex-enterprise-starter.install-plan.v1",
+  "description": "Codex-only install surface used for dry-run planning, validation, and collision review.",
+  "profiles": {
+    "default": [
+      "codex-agents-md",
+      "codex-config",
+      "codex-rules",
+      "codex-agents",
+      "codex-profiles",
+      "codex-plugin",
+      "plugin-marketplace"
+    ],
+    "all": [
+      "codex-agents-md",
+      "codex-config",
+      "codex-rules",
+      "codex-agents",
+      "codex-profiles",
+      "codex-plugin",
+      "plugin-marketplace",
+      "git-ignore-global",
+      "git-pre-commit-hook",
+      "git-config-excludesfile",
+      "git-config-hooks-path",
+      "curated-skills"
+    ]
+  },
+  "operations": [
+    {
+      "id": "codex-agents-md",
+      "kind": "copy-file",
+      "summary": "Install durable global Codex guidance.",
+      "source": "templates/codex/AGENTS.md",
+      "destination": "${CODEX_HOME}/AGENTS.md",
+      "platforms": ["windows", "unix"],
+      "collision": "skip-unless-force-backup-before-replace",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "Global guidance can affect every repo. External repos keep precedence through repo-local AGENTS.md files."
+    },
+    {
+      "id": "codex-config",
+      "kind": "copy-file",
+      "summary": "Install Codex config template for the current platform.",
+      "sourceByPlatform": {
+        "windows": "templates/codex/config.windows.toml",
+        "unix": "templates/codex/config.unix.toml"
+      },
+      "destination": "${CODEX_HOME}/config.toml",
+      "platforms": ["windows", "unix"],
+      "collision": "skip-unless-force-backup-before-replace",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "Keeps authenticated MCP connectors disabled by default and should not import broad external repo connector defaults."
+    },
+    {
+      "id": "codex-rules",
+      "kind": "copy-file",
+      "summary": "Install conservative default command-approval rules.",
+      "source": "templates/codex/rules/default.rules",
+      "destination": "${CODEX_HOME}/rules/default.rules",
+      "platforms": ["windows", "unix"],
+      "collision": "skip-unless-force-backup-before-replace",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "Rules allow narrow verification commands and keep destructive/publish actions approval-gated."
+    },
+    {
+      "id": "codex-agents",
+      "kind": "copy-glob",
+      "summary": "Install specialist subagent definitions.",
+      "sourceGlob": "templates/codex/agents/*.toml",
+      "destinationDir": "${CODEX_HOME}/agents",
+      "platforms": ["windows", "unix"],
+      "collision": "skip-unless-force-backup-before-replace",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "Specialists stay narrow; do not import external repo-specific agent fleets into global defaults."
+    },
+    {
+      "id": "codex-profiles",
+      "kind": "copy-glob",
+      "summary": "Install named Codex profile files.",
+      "sourceGlob": "templates/codex/profiles/*.toml",
+      "destinationDir": "${CODEX_HOME}",
+      "platforms": ["windows", "unix"],
+      "collision": "skip-unless-force-backup-before-replace",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "Profiles stay separate files and avoid mixing beta permission profiles with legacy sandbox settings."
+    },
+    {
+      "id": "codex-plugin",
+      "kind": "copy-directory",
+      "summary": "Install the local workflow plugin bundle.",
+      "source": "plugins/codex-enterprise-workflows",
+      "destination": "${CODEX_HOME}/plugins/codex-enterprise-workflows",
+      "platforms": ["windows", "unix"],
+      "collision": "managed-directory-replace-with-backup-when-force",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "Only the starter-managed plugin directory may be replaced; unrelated plugin directories are out of scope."
+    },
+    {
+      "id": "plugin-marketplace",
+      "kind": "write-marketplace",
+      "summary": "Register the local workflow plugin in the personal marketplace file.",
+      "destination": "${AGENTS_HOME}/plugins/marketplace.json",
+      "platforms": ["windows", "unix"],
+      "collision": "skip-unless-force-backup-before-replace",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The marketplace points at the starter-managed local plugin and does not claim official OpenAI publication."
+    },
+    {
+      "id": "git-ignore-global",
+      "kind": "copy-file",
+      "summary": "Optionally install global Git ignore rules.",
+      "source": "templates/git/.gitignore_global",
+      "destination": "${HOME}/.gitignore_global",
+      "requiresFlag": "InstallGitGuards",
+      "platforms": ["windows", "unix"],
+      "collision": "skip-unless-force-backup-before-replace",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "Optional because it changes global Git behavior."
+    },
+    {
+      "id": "git-pre-commit-hook",
+      "kind": "copy-file",
+      "summary": "Optionally install a global pre-commit hook.",
+      "source": "templates/git/pre-commit",
+      "destination": "${HOME}/.githooks/pre-commit",
+      "requiresFlag": "InstallGitGuards",
+      "platforms": ["windows", "unix"],
+      "collision": "skip-unless-force-backup-before-replace",
+      "backup": true,
+      "risk": "high",
+      "conflictPolicy": "Optional because it changes global Git hook behavior and can affect every repo."
+    },
+    {
+      "id": "git-config-excludesfile",
+      "kind": "git-config",
+      "summary": "Optionally set global Git core.excludesfile.",
+      "key": "core.excludesfile",
+      "value": "${HOME}/.gitignore_global",
+      "requiresFlag": "InstallGitGuards",
+      "platforms": ["windows", "unix"],
+      "collision": "global-setting-change",
+      "backup": false,
+      "risk": "high",
+      "conflictPolicy": "Requires explicit install flag because it updates global Git config."
+    },
+    {
+      "id": "git-config-hooks-path",
+      "kind": "git-config",
+      "summary": "Optionally set global Git core.hooksPath.",
+      "key": "core.hooksPath",
+      "value": "${HOME}/.githooks",
+      "requiresFlag": "InstallGitGuards",
+      "platforms": ["windows", "unix"],
+      "collision": "global-setting-change",
+      "backup": false,
+      "risk": "high",
+      "conflictPolicy": "Requires explicit install flag because it updates global Git config."
+    },
+    {
+      "id": "curated-skills",
+      "kind": "skill-install",
+      "summary": "Optionally install curated global Codex skills from the locked catalog.",
+      "catalog": "catalog/skills.json",
+      "lock": "catalog/skills-lock.json",
+      "requiresFlag": "InstallSkills",
+      "platforms": ["windows", "unix"],
+      "collision": "skip-if-already-installed",
+      "backup": false,
+      "risk": "high",
+      "conflictPolicy": "Only locked package/skill pairs are allowed; broad external skill catalogs are not imported by default."
+    }
+  ]
+}

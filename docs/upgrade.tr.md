@@ -17,6 +17,7 @@ PowerShell:
 ```powershell
 git pull
 npm run check
+node scripts/plan-install.mjs --all --json
 .\scripts\install.ps1 -All -Force -WhatIf
 .\scripts\install.ps1 -All -Force
 ```
@@ -26,6 +27,7 @@ Bash veya WSL:
 ```bash
 git pull
 npm run check
+node scripts/plan-install.mjs --all --json
 ./scripts/install.sh --all --force --dry-run
 ./scripts/install.sh --all --force
 ```
@@ -50,7 +52,10 @@ Upgrade öncesi şu dosyaları incele:
 - `templates/codex/rules/default.rules`
 - `catalog/skills.json`
 - `catalog/skills-lock.json`
+- `catalog/agents.json`
 - `catalog/mcp-servers.json`
+- `manifests/install-plan.json`
+- `schemas/install-plan.schema.json`
 
 ## Upgrade Sonrası
 

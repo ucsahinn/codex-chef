@@ -24,6 +24,8 @@ This repo includes:
 
 - `catalog/skills.json`: curated skill references, categories, and verified
   public `package` plus `skill` install targets where available.
+- `catalog/agents.json`: reviewed specialist-agent metadata, risk notes,
+  intended use, and drift expectations for the Codex config templates.
 - `plugins/codex-enterprise-workflows/skills/enterprise-codex-operator`: a
   small local skill for maintaining this setup.
 
@@ -48,6 +50,12 @@ a verified `package` value such as `owner/repo`, and a matching `skill` name. It
 uses `npx skills add <package> --skill <skill> --yes --global`, which avoids
 treating a plain skill name as a Git repository.
 
+`catalog/skills-lock.json` mirrors the reviewed installable entries and their
+installer command, but it is a source allowlist rather than an immutable
+upstream commit lock. Run `npm run verify:skills:online` before releases and
+after any source change so the current Skills CLI can resolve every package and
+skill pair.
+
 ## Specialist Agents
 
 This starter registers focused agents:
@@ -61,6 +69,17 @@ This starter registers focused agents:
 - `release_verifier`: git hygiene, artifacts, secret scan, and publish gates.
 
 Official reference: https://developers.openai.com/codex/subagents
+
+Agent catalog rule:
+
+- `catalog/agents.json` is the reviewed source for the seven bundled
+  specialist agents.
+- `scripts/validate-agent-config.mjs` checks that every cataloged agent exists
+  in both Windows and Unix config templates and that each `config_file` points
+  at a matching `templates/codex/agents/*.toml` role file.
+- The gate also keeps dangerous defaults out of agent templates: no
+  `danger-full-access`, no `approval_policy = "never"`, and no token variable
+  names embedded in role files.
 
 Routing rule:
 

@@ -13,15 +13,34 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
       - run: node --check scripts/validate-repo.mjs
       - run: node --check scripts/validate-docs.mjs
+      - run: node --check scripts/validate-readme-locales.mjs
+      - run: node --check scripts/validate-workflow-security.mjs
+      - run: node --check scripts/validate-content-safety.mjs
+      - run: node --check scripts/validate-install-plan.mjs
+      - run: node --check scripts/validate-install-state-preview.mjs
+      - run: node --check scripts/validate-installer-alignment.mjs
+      - run: node --check scripts/plan-install.mjs
+      - run: node --check scripts/validate-agent-config.mjs
+      - run: node --check scripts/validate-mcp-config.mjs
+      - run: node --check scripts/scan-supply-chain-iocs.mjs
+      - run: node --check scripts/validate-package-surface.mjs
       - run: node --check scripts/verify-skill-sources.mjs
+      - run: node --check scripts/validate-release-readiness.mjs
       - run: node --check scripts/security-audit.mjs
       - run: bash -n scripts/install.sh
+      - run: |
+          CODEX_HOME="$PWD/tmp/ci-codex-home" \
+          AGENTS_HOME="$PWD/tmp/ci-agents-home" \
+          HOME="$PWD/tmp/ci-home" \
+          bash scripts/install.sh --all --force --dry-run
       - shell: pwsh
         run: |
           $errors = $null
@@ -31,4 +50,9 @@ jobs:
             $errors | ForEach-Object { Write-Error $_.Message }
             exit 1
           }
+      - shell: pwsh
+        run: |
+          $env:CODEX_HOME = Join-Path (Get-Location) "tmp/ci-codex-home"
+          $env:AGENTS_HOME = Join-Path (Get-Location) "tmp/ci-agents-home"
+          ./scripts/install.ps1 -All -Force -WhatIf
       - run: npm run check

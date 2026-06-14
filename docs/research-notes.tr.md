@@ -1,6 +1,6 @@
 # Araştırma Notları
 
-Kontrol tarihi: 2026-06-14.
+Kontrol tarihi: 2026-06-14. Codex config reference icin 2026-06-15'te guncellendi.
 
 Aşağıdaki bilgiler resmi dokümanlardan, standartlardan, olgun public
 repolardan, araştırma makalelerinden ve practitioner issue sinyallerinden
@@ -12,10 +12,13 @@ otoritesi resmi dokümanların yerini almaz.
 | Başlık | URL | Tip | Güven | Neyi destekler | Eskime riski |
 | --- | --- | --- | --- | --- | --- |
 | Codex Manual | https://developers.openai.com/codex/codex-manual.md | Resmi OpenAI docs | High | surfaces, config, AGENTS.md, skills, plugins, MCP, hooks, rules, approvals, sandboxing, auth, Windows, noninteractive use, subagents | Medium |
+| Codex Config Reference | https://developers.openai.com/codex/config-reference#configtoml | Resmi OpenAI docs | High | `agents.<name>.description`, `agents.<name>.config_file`, agent thread/depth/runtime default'lari ve config guvenlik sinirlari | Medium |
+| Enterprise Context Core (ECC) | https://github.com/affaan-m/ecc | Public starter/toolkit repo | Medium/High | manifest-driven install planning, target adapter'ları, install-state preview, schema validation, MCP drift check'leri | High |
 | Agent Skills - Codex | https://developers.openai.com/codex/skills | Resmi OpenAI docs | High | skill discovery, progressive disclosure, skill lokasyonları, plugin dağıtımı | Medium |
 | Agent Skills Specification | https://agentskills.io/specification | Açık specification | High | `SKILL.md` alanları, opsiyonel dizinler, metadata, validation | Medium |
 | openai/skills | https://github.com/openai/skills | Resmi public repo | High | curated skill örnekleri ve install beklentileri | Medium |
 | Plugins - Codex | https://developers.openai.com/codex/plugins | Resmi OpenAI docs | High | skills, apps ve MCP metadata için plugin dağıtımı | Medium |
+| Ajv JSON Schema Validator | https://ajv.js.org/ | Resmi proje dokümanı | Medium/High | JSON Schema validation tradeoff'ları ve bu starter'ın install-plan check'lerini npm install öncesi dependency-free tutması | Medium |
 | MCP Security Best Practices | https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices | Resmi MCP guidance | High | consent, token/audience validation, SSRF, connector riski | Medium |
 | GitHub Secret Scanning | https://docs.github.com/en/code-security/concepts/secret-security/secret-scanning | Resmi GitHub docs | High | current-tree ve history secret scanning | Low/Medium |
 | GitHub Actions Secure Use | https://docs.github.com/en/actions/reference/security/secure-use | Resmi GitHub docs | High | least-privilege workflow token'ları ve secret handling | Low/Medium |
@@ -42,8 +45,19 @@ otoritesi resmi dokümanların yerini almaz.
   offline validation'dan ayrı tutulur.
 - Third-party skill kaynakları review edilebilsin diye `catalog/skills-lock.json`
   ve daha zengin catalog metadata'sı eklenir.
+- Paketlenen uzman ajan config'i incelenebilir olsun ve Windows/Unix
+  template'leriyle karsilastirilabilsin diye `catalog/agents.json` eklenir.
 - MCP config explicit source, risk, auth ve approval metadata'sı olan bir trust
   boundary olarak ele alınır.
+- ECC'nin manifest/plan/state fikri alınır; geniş global sync, otomatik
+  dependency install veya default açık connector kapsamı içeri taşınmaz.
+- Fresh clone üzerinde `npm run check` çalışabilsin diye install-plan validation
+  dependency-free tutulur.
+- Dokumante edilen connector inventory ile gercek Codex template'leri sessizce
+  ayrismasin diye MCP catalog/config drift kontrolu eklenir.
+- Remote shell pipe, download-execute, guvensiz destructive shell snippet,
+  floating active package spec ve implicit installer dependency install
+  desenleri icin bounded supply-chain IOC taramasi eklenir.
 - README kısa ve taranabilir tutulur; troubleshooting, upgrade ve expected
   output detayları odaklı docs dosyalarına taşınır.
 - Public issue tracker sinyalleri troubleshooting'i iyileştirmek için kullanılır,

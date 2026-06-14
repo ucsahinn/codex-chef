@@ -1,0 +1,112 @@
+{
+  "version": "0.1.0",
+  "dateChecked": "2026-06-15",
+  "officialReference": "https://developers.openai.com/codex/config-reference#configtoml",
+  "sourcePolicy": "Specialist agents are declared in config.toml with description and config_file, then backed by reviewed TOML role files under templates/codex/agents.",
+  "defaults": {
+    "model": "gpt-5.5",
+    "maxThreads": 6,
+    "maxDepth": 1,
+    "jobMaxRuntimeSeconds": 1800
+  },
+  "agents": [
+    {
+      "name": "code_mapper",
+      "category": "code-intelligence",
+      "description": "Read-only explorer that maps files, call paths, and existing patterns.",
+      "templateDescription": "Read-only explorer that maps relevant files, call paths, ownership boundaries, and existing patterns before implementation.",
+      "configFile": "agents/code_mapper.toml",
+      "sandboxMode": "read-only",
+      "modelReasoningEffort": "high",
+      "webSearch": false,
+      "risk": "low",
+      "defaultReason": "Keeps broad repository exploration read-only before implementation.",
+      "primaryUse": "Map unfamiliar repositories, file ownership, data flow, and existing conventions.",
+      "mustNot": "Modify files or invent implementation details without repository evidence."
+    },
+    {
+      "name": "docs_researcher",
+      "category": "documentation",
+      "description": "Primary-source researcher for current docs, APIs, and version-sensitive facts.",
+      "templateDescription": "Current-docs researcher for APIs, libraries, OpenAI/Codex behavior, standards, and version-sensitive facts.",
+      "configFile": "agents/docs_researcher.toml",
+      "sandboxMode": "read-only",
+      "modelReasoningEffort": "high",
+      "webSearch": true,
+      "risk": "low",
+      "defaultReason": "Uses live primary-source research while staying read-only.",
+      "primaryUse": "Check official docs, standards, release notes, and source repositories.",
+      "mustNot": "Make code changes or rely on non-authoritative sources for current product behavior."
+    },
+    {
+      "name": "code_reviewer",
+      "category": "review",
+      "description": "Fresh-context senior review for diffs, PRs, and risky changes.",
+      "templateDescription": "Fresh-context senior code reviewer for diffs, PRs, and risky changes.",
+      "configFile": "agents/code_reviewer.toml",
+      "sandboxMode": "read-only",
+      "modelReasoningEffort": "high",
+      "webSearch": true,
+      "risk": "low",
+      "defaultReason": "Separates review from implementation and stays read-only.",
+      "primaryUse": "Review correctness, regressions, security, maintainability, and missing tests.",
+      "mustNot": "Rewrite code or praise changes instead of leading with findings."
+    },
+    {
+      "name": "frontend_verifier",
+      "category": "browser-verification",
+      "description": "Browser-oriented verifier for UI changes and visual regressions.",
+      "templateDescription": "Browser-oriented verifier for UI changes, visual regressions, responsive layout, and user flows.",
+      "configFile": "agents/frontend_verifier.toml",
+      "sandboxMode": "workspace-write",
+      "modelReasoningEffort": "high",
+      "webSearch": false,
+      "risk": "medium",
+      "defaultReason": "Browser evidence can require local screenshots or reports, but file edits remain discouraged.",
+      "primaryUse": "Verify rendered UI, responsive layout, interaction states, overlap, overflow, and console errors.",
+      "mustNot": "Replace browser evidence with code-only inspection."
+    },
+    {
+      "name": "security_auditor",
+      "category": "security",
+      "description": "Read-only security auditor for auth, secrets, API routes, data access, permissions, and abuse paths.",
+      "templateDescription": "Read-only security auditor for auth, secrets, API routes, data access, permissions, cryptography, and abuse paths.",
+      "configFile": "agents/security_auditor.toml",
+      "sandboxMode": "read-only",
+      "modelReasoningEffort": "high",
+      "webSearch": true,
+      "risk": "low",
+      "defaultReason": "Security review stays read-only and avoids printing credential material.",
+      "primaryUse": "Audit auth, authorization, input validation, secrets, data access, dependencies, and abuse paths.",
+      "mustNot": "Print secrets, tokens, private keys, cookies, or credential material."
+    },
+    {
+      "name": "test_verifier",
+      "category": "verification",
+      "description": "Validation specialist for tests, lint/typecheck/build, smoke checks, and failure evidence.",
+      "templateDescription": "Validation specialist for lint, typecheck, tests, build, smoke checks, and failure evidence.",
+      "configFile": "agents/test_verifier.toml",
+      "sandboxMode": "workspace-write",
+      "modelReasoningEffort": "medium",
+      "webSearch": false,
+      "risk": "medium",
+      "defaultReason": "Verification can write local test/build outputs while avoiding production edits.",
+      "primaryUse": "Run and summarize project-native checks and smoke tests with exact pass/fail evidence.",
+      "mustNot": "Install dependencies, edit production files, or run destructive cleanup without explicit approval."
+    },
+    {
+      "name": "release_verifier",
+      "category": "release",
+      "description": "Release readiness verifier for git hygiene, changelog/version checks, artifacts, secret scans, and publish gates.",
+      "templateDescription": "Release readiness verifier for git hygiene, changelog/version checks, artifacts, secret scans, and publish gates.",
+      "configFile": "agents/release_verifier.toml",
+      "sandboxMode": "workspace-write",
+      "modelReasoningEffort": "high",
+      "webSearch": false,
+      "risk": "medium",
+      "defaultReason": "Release checks can inspect local artifacts while keeping publish actions approval-gated.",
+      "primaryUse": "Check git status, release notes, package metadata, artifacts, secret scans, and publish blockers.",
+      "mustNot": "Commit, push, tag, create releases, deploy, publish, delete, or rotate credentials without explicit approval."
+    }
+  ]
+}

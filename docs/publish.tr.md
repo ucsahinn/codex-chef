@@ -2,12 +2,17 @@
 
 Bu repo public push için tasarlandı, fakat publish ayrı bir kullanıcı kararıdır.
 
-## İlk Push Öncesi
+## Push Veya Release Öncesi
 
 ```bash
-npm run validate
+npm run check
+npm run validate:release
+npm run verify:skills:online
+node scripts/plan-install.mjs --all --json --redact-paths
+npm run validate:install-state
 git status --short
-git diff --cached
+git diff --check
+git diff --cached --check
 ```
 
 Gitleaks varsa:
@@ -15,6 +20,18 @@ Gitleaks varsa:
 ```bash
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
+
+Release için ayrıca şunları doğrula:
+
+- `package.json` version hedef tag ile aynı olmalı.
+- `CHANGELOG.md` içinde tarihli version bölümü olmalı.
+- [docs/release-notes.tr.md](release-notes.tr.md) release ile aynı olmalı.
+- [docs/github-settings.tr.md](github-settings.tr.md) hedef repo açıklaması,
+  topic'leri ve release metadata'sı ile aynı olmalı.
+- `git diff --cached` yalnızca review edilmiş source/docs/config dosyalarını
+  içermeli.
+- ignored `.serena/`, `tmp/`, log, cache, screenshot ve generated archive
+  dosyaları stage edilmemeli.
 
 ## GitHub Repo Oluşturma
 
@@ -30,6 +47,28 @@ Manuel remote:
 ```bash
 git remote add origin https://github.com/<owner>/codex-enterprise-starter.git
 git push -u origin main
+```
+
+## Mevcut Repo Release Akışı
+
+Açık commit/push/release onayından sonra:
+
+```bash
+git add <review edilmiş dosyalar>
+git diff --cached
+git commit -m "Release Codex starter upgrade v0.3.0"
+git push origin main
+git tag v0.3.0
+git push origin v0.3.0
+gh release create v0.3.0 --title "Codex Enterprise Starter v0.3.0" --notes-file docs/release-notes.md
+```
+
+Push sonrasında remote eşitliği ve CI durumunu doğrula:
+
+```bash
+git rev-parse HEAD
+git -c http.sslBackend=openssl ls-remote origin refs/heads/main
+gh run list --workflow validate --branch main --limit 1
 ```
 
 ## Public Etme

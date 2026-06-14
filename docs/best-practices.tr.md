@@ -17,6 +17,7 @@ eklerken burayi kullan.
 | Tekrar kullanilabilir workflow ekle | Once skill; bundle olarak dagitilacaksa plugin |
 | Canli dis baglam ekle | Auth gerekiyorsa varsayilan disabled MCP veya connector |
 | Mekanik zorunluluk ekle | Sadece prose degil; hook veya validation script |
+| Managed install yuzeyini incele | `node scripts/plan-install.mjs --all --json` |
 | Push ya da release hazirla | [docs/verification.tr.md](verification.tr.md), sonra release gate |
 
 ## Kaynak Kalitesi
@@ -65,11 +66,51 @@ gerektiriyorsa skill yap. Tool veya dagitim gerekiyorsa plugin olarak paketle.
 - `catalog/skills.json` istek listesi degildir. Kurulabilir kayitlar bilinen
   package/skill ciftleri olmalidir.
 - Her kurulabilir skill `package`, `skill` ve `source = package@skill` tanimlar.
+- `catalog/skills-lock.json` incelenmis kaynak allowlist'idir; upstream
+  commit'i degistirilemez sekilde pinleyen bir lock dosyasi degildir. Mevcut
+  Skills CLI kurulumu owner/repo + skill adi cozdurdugu icin release hazirliginda
+  online kaynak dogrulamasi yeniden calistirilmalidir.
 - Installer `npx skills add <package> --skill <skill> --yes --global` cagirir.
 - Varsayilan kontroller offline ve deterministik kalir. Network kontrolleri
   aciktir: `npm run verify:skills:online`.
 - Zaten lokal olan veya public package'tan guvenle kurulamayan skill'ler
   `install: false` kalmali ve nedeni yazmalidir.
+
+## Uzman Ajan Kurallari
+
+- `catalog/agents.json`, paketlenen uzman ajanlar icin incelenmis source of
+  truth'tur.
+- Katalogdaki her ajan hem Windows hem Unix Codex config template'inde eslesen
+  `[agents.<name>]` bloklarina sahip olmalidir.
+- Her `config_file`, incelenmis bir `templates/codex/agents/*.toml` role
+  dosyasina gitmelidir.
+- Agent template'leri `danger-full-access`, `approval_policy = "never"` veya
+  gomulu token environment variable adlari kullanmamalidir.
+- Yazma agirlikli uygulama, kullanici acikca bolmeyi istemedigi surece ana
+  thread'de kalmalidir.
+
+## Harici Starter Ve ECC Import Kurallari
+
+Buyuk agent starter repolari faydali desenler verebilir, ama toptan import
+edilmemelidir. Guncel ECC kaynakli politika
+[docs/ecc-compatibility.tr.md](ecc-compatibility.tr.md) icindedir.
+
+Alinabilecekler:
+
+- manifest-backed planlama
+- dependency-free validation
+- target/collision metadata
+- plugin ve MCP limitlerini acik anlatan dokumantasyon
+- personal-path ve permissive-config kontrolleri
+
+Engellenenler:
+
+- installer icinde implicit dependency installation
+- explicit flag disinda genis global hook veya Git config mutasyonu
+- `approval_policy = "never"` veya `profiles.yolo` default'lari
+- aktif authenticated MCP connector kataloglari
+- raw prompt/tool telemetry hook'lari
+- credential sekilli ornek import'u
 
 ## Dogrulama Gate'i
 
@@ -77,6 +118,7 @@ Bir maintainer baska kullaniciya setup hazir demeden once:
 
 ```bash
 npm run check
+node scripts/plan-install.mjs --all --json
 git status --short
 git diff --cached --check
 gitleaks detect --redact --no-banner --no-git --verbose

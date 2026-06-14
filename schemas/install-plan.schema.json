@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Codex Enterprise Starter install plan manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "description", "profiles", "operations"],
+  "properties": {
+    "schemaVersion": {
+      "const": "codex-enterprise-starter.install-plan.v1"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "summary",
+          "platforms",
+          "collision",
+          "backup",
+          "risk",
+          "conflictPolicy"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "kind": {
+            "enum": [
+              "copy-file",
+              "copy-directory",
+              "copy-glob",
+              "write-marketplace",
+              "git-config",
+              "skill-install"
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceByPlatform": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "sourceGlob": {
+            "type": "string",
+            "minLength": 1
+          },
+          "destination": {
+            "type": "string",
+            "minLength": 1
+          },
+          "destinationDir": {
+            "type": "string",
+            "minLength": 1
+          },
+          "catalog": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lock": {
+            "type": "string",
+            "minLength": 1
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requiresFlag": {
+            "enum": ["InstallSkills", "InstallGitGuards"]
+          },
+          "platforms": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "enum": ["windows", "unix"]
+            }
+          },
+          "collision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "backup": {
+            "type": "boolean"
+          },
+          "risk": {
+            "enum": ["low", "medium", "high"]
+          },
+          "conflictPolicy": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

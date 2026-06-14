@@ -24,6 +24,8 @@ Bu repo şunları içerir:
 
 - `catalog/skills.json`: seçilmiş skill referansları, kategorileri ve varsa
   doğrulanmış public `package` + `skill` kurulum hedefleri.
+- `catalog/agents.json`: Codex config template'leri icin incelenmis uzman ajan
+  metadata'si, risk notlari, kullanim amaci ve drift beklentileri.
 - `plugins/codex-enterprise-workflows/skills/enterprise-codex-operator`: bu
   kurulumu bakımda tutmak için küçük bir yerel skill.
 
@@ -49,6 +51,12 @@ Kullandığı format `npx skills add <package> --skill <skill> --yes --global`
 olduğu için düz skill ismi yanlışlıkla Git repository gibi clone edilmeye
 çalışılmaz.
 
+`catalog/skills-lock.json` incelenmis kurulabilir kayitlari ve installer
+komutlarini yansitir; fakat degistirilemez upstream commit lock'u degil, kaynak
+allowlist'idir. Release oncesinde ve kaynak degisikliginden sonra `npm run
+verify:skills:online` calistirilarak mevcut Skills CLI'in her package + skill
+ciftini cozdugu tekrar kanitlanmalidir.
+
 ## Uzman Ajanlar
 
 Bu starter odaklı ajanlar kaydeder:
@@ -63,6 +71,16 @@ Bu starter odaklı ajanlar kaydeder:
 - `release_verifier`: Git hijyeni, artifact, secret scan ve publish gate'leri.
 
 Resmi kaynak: https://developers.openai.com/codex/subagents
+
+Agent katalog kurali:
+
+- `catalog/agents.json`, paketlenen yedi uzman ajan icin incelenmis kaynaktir.
+- `scripts/validate-agent-config.mjs`, katalogdaki her ajanin hem Windows hem
+  Unix config template'inde yer aldigini ve her `config_file` alaninin eslesen
+  `templates/codex/agents/*.toml` role dosyasina gittigini kontrol eder.
+- Gate ayrica agent template'lerinde tehlikeli default'lari engeller:
+  `danger-full-access`, `approval_policy = "never"` ve role dosyalari icinde
+  token environment variable adlari yoktur.
 
 Routing kurali:
 

@@ -1,23 +1,42 @@
 # Codex Enterprise Starter
 
 <p align="center">
-  <img src="assets/banner.svg" alt="Codex Enterprise Starter banner showing agents, MCPs, skills, verification, and bilingual docs" width="100%" />
+  <img src="assets/banner.svg" alt="Codex Enterprise Starter banner showing agents, MCPs, skills, verification, and multilingual docs" width="100%" />
 </p>
 
 <p align="center">
   <a href="https://github.com/ucsahinn/codex-enterprise-starter/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-enterprise-starter/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-enterprise-starter?color=0f766e" /></a>
-  <a href="README.tr.md"><img alt="English and Turkish docs" src="https://img.shields.io/badge/docs-English%20%2B%20T%C3%BCrk%C3%A7e-0f766e" /></a>
+  <a href="README.md"><img alt="Documentation languages" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
   <img alt="Windows and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
 </p>
 
 <p align="center">
-  <a href="README.md">🇬🇧 English</a> | <a href="README.tr.md">🇹🇷 Türkçe</a>
+  🌐 <strong>Docs:</strong>
+  <a href="README.de.md">🇩🇪 Deutsch</a> |
+  <a href="README.es.md">🇪🇸 Español</a> |
+  <a href="README.md">🇬🇧 English</a> |
+  <a href="README.pt-BR.md">🇧🇷 Português (Brasil)</a> |
+  <a href="README.tr.md">🇹🇷 Türkçe</a> |
+  <a href="README.fr.md">🇫🇷 French / Français</a>
+  <br />
+  <sub>Deutsch · Español · English · Português (Brasil) · Türkçe · French</sub>
 </p>
 
-Security-first Codex setup for Windows-first power users and small teams. It packages a repeatable local Codex baseline: durable instructions, conservative config, specialist agents, approval rules, MCP defaults, curated skill metadata, plugin packaging, validation scripts, and bilingual docs.
+Security-first Codex setup for Windows-first power users and small teams. It packages a repeatable local Codex baseline: durable instructions, conservative config, specialist agents, approval rules, MCP defaults, curated skill metadata, plugin packaging, validation scripts, multilingual README entry points, and English/Turkish deep docs.
 
 This is an unofficial community starter, not an OpenAI product. It is mapped to current official Codex documentation and keeps risky actions approval-gated by default.
+
+## &#127760; Language Entry Points
+
+| Language | README |
+| --- | --- |
+| &#127465;&#127466; Deutsch | [README.de.md](README.de.md) |
+| &#127466;&#127480; Español | [README.es.md](README.es.md) |
+| &#127468;&#127463; English | [README.md](README.md) |
+| &#127463;&#127479; Português (Brasil) | [README.pt-BR.md](README.pt-BR.md) |
+| &#127481;&#127479; Türkçe | [README.tr.md](README.tr.md) |
+| &#127467;&#127479; French / Français | [README.fr.md](README.fr.md) |
 
 ## ⚡ Start Here
 
@@ -25,8 +44,12 @@ This is an unofficial community starter, not an OpenAI product. It is mapped to 
 | --- | --- |
 | Install safely | [Quick Start](#-quick-start) |
 | Preview changes before writing anything | [Dry Run](#-dry-run-first) |
+| Inspect the full install plan | [Install Plan](#-install-plan) |
 | See what gets installed | [Install Surface](#-install-surface) |
 | Verify before publishing | [Verification](docs/verification.md) |
+| Read release notes | [Release Notes](docs/release-notes.md) |
+| Prepare GitHub metadata | [GitHub Settings](docs/github-settings.md) |
+| Review advisory inputs | [Advisory Sources](docs/advisory-sources.md) |
 | Troubleshoot Windows/Codex issues | [Troubleshooting](docs/troubleshooting.md) |
 | Upgrade an existing setup | [Upgrade Guide](docs/upgrade.md) |
 
@@ -81,6 +104,27 @@ Bash or WSL:
 ```
 
 Dry runs print the target Codex/Agents homes and the changes that would happen without touching real files, Git settings, or global skills.
+
+## 🧾 Install Plan
+
+For a machine-readable no-write plan:
+
+```bash
+node scripts/plan-install.mjs --all --json
+```
+
+For quick discovery before reading the full JSON:
+
+```bash
+node scripts/plan-install.mjs --list-profiles
+node scripts/plan-install.mjs --list-operations
+```
+
+The plan is backed by `manifests/install-plan.json` and records each managed
+operation, collision policy, backup behavior, risk level, and required flag.
+It is inspired by ECC's manifest-driven install architecture, but remains
+Codex-only and does not import ECC's global config, hooks, MCPs, or skill
+catalog. See [ECC Compatibility](docs/ecc-compatibility.md).
 
 ## ⚡ Quick Start
 
@@ -143,13 +187,16 @@ The result is a small specialist-team workflow inside Codex while the main threa
 | Signal | Evidence |
 | --- | --- |
 | 🛡️ Public-safe by design | No tokens, auth files, sessions, memories, cookies, private keys, or machine-specific state are included. |
-| 🧪 Real validation | `npm run check` runs repository, docs, skill-source, and security checks. |
+| 🧪 Real validation | `npm run check` runs repo, docs, install-plan, agent drift, MCP drift, skill-source, supply-chain, and security checks. |
 | 🔐 Secret scanning ready | Gitleaks command is documented and the Git hook runs it when available. |
-| 🌐 Bilingual docs | English and Turkish doc pairs are enforced by validation. |
+| 🌐 Multilingual entry points | Deutsch, Español, English, Português (Brasil), Türkçe, and Français README files are present; English and Turkish deep doc pairs are enforced by validation. |
 | 🎬 Accessible visuals | SVG assets include title, description, motion, reduced-motion fallback, and README alt text. |
 | 🧩 Skill source gate | `catalog/skills-lock.json` is checked against installable skill metadata. |
+| 🤖 Agent drift gate | `catalog/agents.json` is checked against Windows/Unix config blocks and role TOML files. |
+| 🧾 Install plan gate | `manifests/install-plan.json` and the install-state preview schema are validated before installer execution. |
 | 🔌 Conservative MCPs | Authenticated account, database, and broad filesystem connectors stay disabled. |
 | 🧭 Source-backed guidance | Research notes record source type, confidence, support, and outdated-risk. |
+| 📣 Public-safe triage | CODEOWNERS and issue templates route bugs, features, questions, and security reports without private data. |
 | ♻️ CI alignment | GitHub Actions runs the same `npm run check` path plus shell parser checks. |
 
 ## 📁 Repository Layout
@@ -158,8 +205,11 @@ The result is a small specialist-team workflow inside Codex while the main threa
 .github/                 CI workflow plus issue and PR templates
 assets/                  Public-safe README visuals
 catalog/                 Skill and MCP source metadata
+README*.md               Multilingual public entry points
 docs/                    English and Turkish setup guides
+manifests/               No-write install plan metadata
 plugins/                 Bundled local Codex plugin
+schemas/                 Lightweight validation schemas
 scripts/                 Install and validation scripts
 templates/codex/         Files copied into ~/.codex
 templates/git/           Optional global Git hygiene files
@@ -194,6 +244,7 @@ Online skill verification uses the network and the Skills CLI. It is intentional
 - [Verification](docs/verification.md)
 - [Public readiness](docs/public-readiness.md)
 - [Research notes](docs/research-notes.md)
+- [Advisory sources](docs/advisory-sources.md)
 - [Publishing](docs/publish.md)
 
 ## 📚 Official Codex References

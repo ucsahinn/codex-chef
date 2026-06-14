@@ -2,11 +2,81 @@
 
 ## Unreleased
 
+## 0.3.0 - 2026-06-14
+
+- Added an ECC-informed manifest-backed install plan with a dependency-free
+  `npm run plan:install` preview command.
+- Added no-write install discovery commands for profiles and operations:
+  `node scripts/plan-install.mjs --list-profiles` and
+  `node scripts/plan-install.mjs --list-operations`.
+- Added install-plan schema documentation and validation so managed files,
+  collision policies, backups, platforms, risk levels, and explicit flags stay
+  reviewable before installer execution.
+- Added an install-state preview schema and validator so machine-readable plan
+  output has a stable, dependency-free contract.
+- Added `--redact-paths` for publish-safe install-state preview evidence.
+- Documented ECC compatibility boundaries in English and Turkish: adapt
+  manifest/plan/state patterns, but do not import broad global sync, implicit
+  dependency installation, or enabled-by-default authenticated connectors.
+- Expanded security and public-readiness gates to reject unsafe install-plan
+  operations, implicit installer dependency installs, yolo Codex profiles, and
+  active `@latest` package specs.
+- Pinned all npm-based MCP package specs in Codex config templates and MCP
+  catalog metadata instead of allowing unversioned or floating package
+  resolution.
+- Tightened command-approval rules so cleanup scripts prompt instead of being
+  auto-allowed.
+- Tightened command-approval rules so global skill installation and broad Skills
+  CLI commands prompt instead of being auto-allowed.
+- Hardened online skill-source verification to use argv-based invocation and a
+  temporary Windows wrapper instead of an interpolated PowerShell command
+  string.
+- Clarified that the skill lock file is a reviewed source allowlist rather than
+  an immutable upstream commit lock, and made this expectation machine-gated.
+- Added MCP catalog/config drift validation and supply-chain IOC scanning to
+  the default check pipeline.
+- Added release-readiness validation for source-controlled release notes,
+  GitHub metadata docs, workflow hardening, Gitleaks gates, and artifact hygiene.
+- Added manifest-to-installer alignment validation so PowerShell and Bash setup
+  surfaces stay synchronized with the install plan.
+- Added a specialist-agent catalog and validator so bundled agent metadata,
+  Windows/Unix config blocks, and role TOML files stay synchronized.
+- Added install-plan output smoke coverage for parseable JSON, Windows UNC and
+  extended-length paths, `--force`, and `--no-backup`.
+- Added versioned release notes and GitHub repository settings guidance for the
+  v0.3.0 publication path.
+- Added CODEOWNERS, feature/question issue templates, disabled blank issues,
+  and advisory-source docs so public triage stays owned and public-safe.
+- Added German, Spanish, Brazilian Portuguese, and French root README entry
+  points, plus a six-language README switcher and validation gate.
+- Added README locale validation and workflow-security validation so language
+  links, checkout credential persistence, workflow permissions, and
+  no-publish/no-auth workflow boundaries stay machine-gated.
+- Pinned GitHub Actions workflow dependencies to full commit SHAs and extended
+  workflow validation so future tag-based action refs fail locally and in CI.
+- Extended ECC drift gates to reject plugin-bundled hooks, MCP/apps surfaces,
+  write-capable plugin manifests, marketplace auth requirements, broad hook
+  runtime paths, workflow write permissions, unpinned git MCP launchers, plugin
+  `.mcp.json` drift, and install-plan destinations outside reviewed
+  Codex/Agents/Git-guard targets.
+- Added dangerous invisible Unicode character validation for text source files
+  while preserving legitimate README emoji/icon usage.
+- Expanded local-path leak detection to catch non-placeholder Windows, macOS,
+  and Linux home paths, not only one maintainer machine path.
+- Added security validation that blocks imported ECC-style lifecycle hook
+  runtimes and automatic session/additional-context injection patterns unless a
+  future change explicitly reviews and documents them.
+- Added package-surface dry-run validation with a repo-local npm cache and
+  `--ignore-scripts`, plus bounded online skill-source resolution timeouts.
+- Added an explicit `package.json` source package allowlist and validation so
+  package dry-runs stay deterministic and exclude local agent state, scratch
+  folders, archives, and auth material.
+
 ## 0.2.0 - 2026-06-14
 
 - Added PowerShell `-WhatIf` and Bash `--dry-run` installer previews, including
   safer managed-directory assertions and no-write skill previews.
-- Added a locked installable skill catalog and online source verification that
+- Added a reviewed installable skill catalog and online source verification that
   uses an ignored workspace-local npm cache for Windows-safe checks.
 - Added Markdown/workflow validation, expanded security validation, and CI
   coverage for Node, PowerShell, Bash, and repo checks.

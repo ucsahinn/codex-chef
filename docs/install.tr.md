@@ -22,6 +22,22 @@ Yazmadan önce ön izle:
 .\scripts\install.ps1 -All -Force -WhatIf
 ```
 
+Installer'lari cagirmadan manifest-backed operasyon planini incele:
+
+```bash
+node scripts/plan-install.mjs --all --json
+```
+
+Tam JSON'i incelemeden once manifest profil ve operasyonlarini listele:
+
+```bash
+node scripts/plan-install.mjs --list-profiles
+node scripts/plan-install.mjs --list-operations
+```
+
+Plan managed target'lari, opsiyonel global Git degisikliklerini, curated skill
+komutlarini, collision policy'yi, backup davranisini ve risk seviyesini listeler.
+
 Ön izleme doğruysa kur:
 
 ```powershell

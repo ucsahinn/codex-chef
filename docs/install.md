@@ -22,6 +22,22 @@ Preview without writing:
 .\scripts\install.ps1 -All -Force -WhatIf
 ```
 
+Inspect the manifest-backed operation plan without invoking either installer:
+
+```bash
+node scripts/plan-install.mjs --all --json
+```
+
+List available manifest profiles and operations before reviewing the full JSON:
+
+```bash
+node scripts/plan-install.mjs --list-profiles
+node scripts/plan-install.mjs --list-operations
+```
+
+The plan lists managed targets, optional global Git changes, curated skill
+commands, collision policy, backup behavior, and risk level.
+
 Install after the preview is correct:
 
 ```powershell

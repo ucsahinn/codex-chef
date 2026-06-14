@@ -7,28 +7,37 @@ const root = path.resolve(process.cwd());
 const catalogPath = path.join(root, "catalog", "skills.json");
 const lockPath = path.join(root, "catalog", "skills-lock.json");
 const onlineCacheDir = path.join(root, "tmp", "npm-cache");
+const windowsNpxWrapper = path.join(onlineCacheDir, "npx-openssl.cmd");
 const online = process.argv.includes("--online");
+const timeoutArg = process.argv.find((arg) => arg.startsWith("--timeout-ms="));
+const onlineTimeoutMs = timeoutArg ? Number(timeoutArg.split("=")[1]) : 90000;
 const failures = [];
 
 function fail(message) {
   failures.push(message);
 }
 
+function ensureWindowsNpxWrapper() {
+  if (process.platform !== "win32") return null;
+  fs.mkdirSync(onlineCacheDir, { recursive: true });
+  // npm can drop GIT_CONFIG_* before the Skills CLI invokes git. Keep the
+  // TLS override in a repo-local wrapper and pass catalog values as argv.
+  fs.writeFileSync(windowsNpxWrapper, [
+    "@echo off",
+    "set \"GIT_CONFIG_COUNT=1\"",
+    "set \"GIT_CONFIG_KEY_0=http.sslBackend\"",
+    "set \"GIT_CONFIG_VALUE_0=openssl\"",
+    "set \"GIT_SSL_BACKEND=openssl\"",
+    "call npx.cmd %*",
+    ""
+  ].join("\r\n"), "utf8");
+  return windowsNpxWrapper;
+}
+
 function runSkillsUse(entry) {
-  const executable = process.platform === "win32" ? "powershell.exe" : "npx";
+  const executable = process.platform === "win32" ? "cmd.exe" : "npx";
   const args = process.platform === "win32"
-    ? [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-Command",
-        [
-          "$env:GIT_CONFIG_COUNT='1'",
-          "$env:GIT_CONFIG_KEY_0='http.sslBackend'",
-          "$env:GIT_CONFIG_VALUE_0='openssl'",
-          `npx.cmd --yes skills use ${entry.package} --skill ${entry.skill}`
-        ].join("; ")
-      ]
+    ? ["/d", "/s", "/c", ensureWindowsNpxWrapper(), "--yes", "skills", "use", entry.package, "--skill", entry.skill]
     : ["--yes", "skills", "use", entry.package, "--skill", entry.skill];
   const result = spawnSync(executable, args, {
     cwd: root,
@@ -49,7 +58,9 @@ function runSkillsUse(entry) {
       npm_config_update_notifier: "false",
       npm_config_yes: "true"
     },
-    stdio: ["ignore", "pipe", "pipe"]
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: onlineTimeoutMs,
+    windowsHide: true
   });
 
   if (result.error) {
@@ -74,6 +85,13 @@ if (!fs.existsSync(catalogPath)) {
   const names = new Set();
   const installable = [];
 
+  if (catalog.lockSemantics !== "source-allowlist") {
+    fail("catalog/skills.json must declare lockSemantics=source-allowlist.");
+  }
+  if (!String(catalog.immutability || "").includes("not a commit-pinned lock")) {
+    fail("catalog/skills.json must state that Skills CLI sources are not commit-pinned locks.");
+  }
+
   if (!Array.isArray(catalog.skills)) {
     fail("catalog/skills.json must contain a skills array");
   } else {
@@ -96,7 +114,7 @@ if (!fs.existsSync(catalogPath)) {
       }
 
       if (entry.install === true) {
-        if (!entry.package || !/^[^/\s]+\/[^@\s]+$/.test(entry.package)) {
+        if (!entry.package || !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(entry.package)) {
           fail(`Installable skill ${entry.name} must declare package as owner/repo`);
         }
         if (!entry.skill || typeof entry.skill !== "string" || !/^[A-Za-z0-9._-]+$/.test(entry.skill)) {
@@ -131,13 +149,21 @@ if (!fs.existsSync(catalogPath)) {
 
   if (!lock) {
     fail("Missing catalog/skills-lock.json");
+  } else {
+    if (lock.lockSemantics !== "source-allowlist") {
+      fail("catalog/skills-lock.json must declare lockSemantics=source-allowlist.");
+    }
+    if (!String(lock.immutability || "").includes("does not pin upstream commits")) {
+      fail("catalog/skills-lock.json must state that it does not pin upstream commits.");
+    }
   }
 
   if (online && failures.length === 0) {
     fs.mkdirSync(onlineCacheDir, { recursive: true });
-    for (const entry of installable) {
+    installable.forEach((entry, index) => {
+      console.log(`Checking installable skill ${index + 1}/${installable.length}: ${entry.name}`);
       runSkillsUse(entry);
-    }
+    });
   }
 
   if (failures.length === 0) {

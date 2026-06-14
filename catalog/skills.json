@@ -3,6 +3,8 @@
   "dateChecked": "2026-06-14",
   "installCommand": "npx skills add <package> --skill <skill> --agent codex --yes --global",
   "sourcePolicy": "Installable entries must declare package, skill, source, sourceUrl, license, risk, and lastChecked. Online resolution is verified separately with npm run verify:skills:online.",
+  "lockSemantics": "source-allowlist",
+  "immutability": "Skills CLI installation uses owner/repo plus skill name; this catalog is an allowlist, not a commit-pinned lock. Re-run online verification before release or after changing skill sources.",
   "skills": [
     {
       "name": "mcp-connectors",

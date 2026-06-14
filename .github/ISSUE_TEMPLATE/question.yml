@@ -1,0 +1,48 @@
+name: Question
+description: Ask a public-safe setup or usage question. / Public-safe setup veya kullanım sorusu sorun.
+title: "Question: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste tokens, auth files, private local paths, session logs, cookies, private keys, or private repository data.
+
+        Token, auth dosyası, private local path, session log, cookie, private key veya private repo verisi paylaşmayın.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question / Soru
+      description: What do you need help understanding? / Neyi anlamak için yardıma ihtiyacınız var?
+    validations:
+      required: true
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic / Konu
+      options:
+        - Windows install
+        - Bash or WSL install
+        - Codex config
+        - AGENTS.md
+        - MCP connector
+        - Skill install
+        - Verification
+        - Security model
+        - Publishing or release prep
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Public-safe context / Public-safe bağlam
+      description: Include commands and redacted output only. / Sadece komutları ve redacted çıktıyı ekleyin.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check / Güvenlik kontrolü
+      options:
+        - label: I removed secrets, tokens, cookies, private keys, auth files, sessions, and private local paths.
+          required: true
+        - label: Secret, token, cookie, private key, auth dosyası, session ve private local path'leri kaldırdım.
+          required: true

@@ -1,6 +1,6 @@
 # Research Notes
 
-Date checked: 2026-06-14.
+Date checked: 2026-06-14. Updated for Codex config reference on 2026-06-15.
 
 Facts below come from official docs, standards, mature public repos, research
 papers, and practitioner issue signals. Practitioner feedback is used only as a
@@ -11,10 +11,13 @@ risk pattern, not as the source of truth.
 | Title | URL | Type | Confidence | Supports | Outdated risk |
 | --- | --- | --- | --- | --- | --- |
 | Codex Manual | https://developers.openai.com/codex/codex-manual.md | Official OpenAI docs | High | surfaces, config, AGENTS.md, skills, plugins, MCP, hooks, rules, approvals, sandboxing, auth, Windows, noninteractive use, subagents | Medium |
+| Codex Config Reference | https://developers.openai.com/codex/config-reference#configtoml | Official OpenAI docs | High | `agents.<name>.description`, `agents.<name>.config_file`, agent thread/depth/runtime defaults, and config safety boundaries | Medium |
+| Enterprise Context Core (ECC) | https://github.com/affaan-m/ecc | Public starter/toolkit repo | Medium/High | manifest-driven install planning, target adapters, install-state preview, schema validation, MCP drift checks | High |
 | Agent Skills - Codex | https://developers.openai.com/codex/skills | Official OpenAI docs | High | skill discovery, progressive disclosure, skill locations, plugin distribution | Medium |
 | Agent Skills Specification | https://agentskills.io/specification | Open specification | High | `SKILL.md` fields, optional directories, metadata, validation | Medium |
 | openai/skills | https://github.com/openai/skills | Official public repo | High | curated skill examples and installation expectations | Medium |
 | Plugins - Codex | https://developers.openai.com/codex/plugins | Official OpenAI docs | High | plugin distribution for skills, apps, and MCP metadata | Medium |
+| Ajv JSON Schema Validator | https://ajv.js.org/ | Official project docs | Medium/High | JSON Schema validation tradeoffs and why this starter keeps install-plan checks dependency-free before npm install | Medium |
 | MCP Security Best Practices | https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices | Official MCP guidance | High | user consent, token/audience validation, SSRF, connector risk | Medium |
 | GitHub Secret Scanning | https://docs.github.com/en/code-security/concepts/secret-security/secret-scanning | Official GitHub docs | High | current-tree and history secret scanning | Low/Medium |
 | GitHub Actions Secure Use | https://docs.github.com/en/actions/reference/security/secure-use | Official GitHub docs | High | least-privilege workflow tokens and secret handling | Low/Medium |
@@ -41,8 +44,20 @@ risk pattern, not as the source of truth.
   network and external package resolution.
 - Add `catalog/skills-lock.json` and richer catalog metadata so third-party
   skill sources are reviewable.
+- Add `catalog/agents.json` so bundled specialist-agent config is reviewable
+  and can be checked against Windows/Unix templates.
 - Treat MCP configuration as a trust boundary with explicit source, risk, auth,
   and approval metadata.
+- Adapt ECC's manifest/plan/state pattern, but do not import its broad global
+  sync behavior, implicit dependency installation, or enabled-by-default
+  connector scope.
+- Keep install-plan validation dependency-free so a fresh clone can run
+  `npm run check` without first running `npm install`.
+- Add MCP catalog/config drift checks so the documented connector inventory and
+  the actual Codex templates cannot silently diverge.
+- Add a bounded supply-chain IOC scan for remote shell pipes, download-execute
+  patterns, unsafe destructive shell snippets, floating active package specs,
+  and implicit installer dependency installs.
 - Keep README concise and move deep troubleshooting, upgrade, and expected
   output details into focused docs.
 - Use public issue tracker signals to improve troubleshooting, not to override

@@ -1,0 +1,214 @@
+#!/usr/bin/env node
+import fs from "node:fs";
+import path from "node:path";
+
+const root = path.resolve(process.cwd());
+const failures = [];
+
+const catalogPath = path.join(root, "catalog", "agents.json");
+const configFiles = [
+  "templates/codex/config.windows.toml",
+  "templates/codex/config.unix.toml"
+];
+const agentDir = path.join(root, "templates", "codex", "agents");
+const allowedSandboxModes = new Set(["read-only", "workspace-write"]);
+const allowedReasoningEfforts = new Set(["medium", "high"]);
+
+function fail(message) {
+  failures.push(message);
+}
+
+function read(rel) {
+  return fs.readFileSync(path.join(root, rel), "utf8");
+}
+
+function parseAgentBlocks(text) {
+  const blocks = new Map();
+  const lines = text.split(/\r?\n/);
+  let currentName = null;
+  let currentLines = [];
+
+  function flush() {
+    if (currentName) {
+      blocks.set(currentName, `${currentLines.join("\n")}\n`);
+    }
+  }
+
+  for (const line of lines) {
+    const heading = line.match(/^\[agents\.([A-Za-z0-9_.-]+)\]\s*$/);
+    if (heading) {
+      flush();
+      currentName = heading[1];
+      currentLines = [];
+      continue;
+    }
+    if (currentName && /^\[/.test(line)) {
+      flush();
+      currentName = null;
+      currentLines = [];
+      continue;
+    }
+    if (currentName) currentLines.push(line);
+  }
+  flush();
+
+  return blocks;
+}
+
+function readTomlString(block, key) {
+  const match = block.match(new RegExp(`^${key}\\s*=\\s*"([^"]*)"\\s*$`, "m"));
+  return match ? match[1] : null;
+}
+
+function readAgentTemplate(rel) {
+  const full = path.join(root, "templates", "codex", rel);
+  if (!fs.existsSync(full)) {
+    fail(`Agent template missing: templates/codex/${rel}`);
+    return null;
+  }
+  return fs.readFileSync(full, "utf8");
+}
+
+function validateTextContains(label, text, needle) {
+  if (!text.includes(needle)) {
+    fail(`${label} must include: ${needle}`);
+  }
+}
+
+if (!fs.existsSync(catalogPath)) {
+  fail("Missing catalog/agents.json");
+} else {
+  let catalog;
+  try {
+    catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
+  } catch (error) {
+    fail(`catalog/agents.json must be parseable JSON: ${error.message}`);
+  }
+
+  if (catalog) {
+    if (!catalog.officialReference?.startsWith("https://developers.openai.com/codex/config-reference")) {
+      fail("catalog/agents.json must point at the official Codex config reference.");
+    }
+    if (catalog.defaults?.model !== "gpt-5.5") fail("catalog/agents.json defaults.model must stay gpt-5.5.");
+    if (catalog.defaults?.maxThreads !== 6) fail("catalog/agents.json defaults.maxThreads must stay 6.");
+    if (catalog.defaults?.maxDepth !== 1) fail("catalog/agents.json defaults.maxDepth must stay 1.");
+    if (catalog.defaults?.jobMaxRuntimeSeconds !== 1800) {
+      fail("catalog/agents.json defaults.jobMaxRuntimeSeconds must stay 1800.");
+    }
+    if (!Array.isArray(catalog.agents) || catalog.agents.length === 0) {
+      fail("catalog/agents.json must define a non-empty agents array.");
+    }
+
+    const catalogNames = new Set();
+    for (const agent of catalog.agents || []) {
+      if (!agent.name || !/^[A-Za-z0-9_.-]+$/.test(agent.name)) {
+        fail(`Agent must declare a valid name: ${agent.name}`);
+        continue;
+      }
+      if (catalogNames.has(agent.name)) fail(`Duplicate agent name: ${agent.name}`);
+      catalogNames.add(agent.name);
+      for (const key of [
+        "category",
+        "description",
+        "templateDescription",
+        "configFile",
+        "sandboxMode",
+        "modelReasoningEffort",
+        "risk",
+        "defaultReason",
+        "primaryUse",
+        "mustNot"
+      ]) {
+        if (!agent[key]) fail(`Agent ${agent.name} must declare ${key}.`);
+      }
+      if (agent.configFile !== `agents/${agent.name}.toml`) {
+        fail(`Agent ${agent.name} configFile must be agents/${agent.name}.toml.`);
+      }
+      if (!allowedSandboxModes.has(agent.sandboxMode)) {
+        fail(`Agent ${agent.name} has unsupported sandboxMode: ${agent.sandboxMode}`);
+      }
+      if (!allowedReasoningEfforts.has(agent.modelReasoningEffort)) {
+        fail(`Agent ${agent.name} has unsupported modelReasoningEffort: ${agent.modelReasoningEffort}`);
+      }
+      if (agent.sandboxMode === "read-only" && /modify|edit|write/i.test(agent.defaultReason || "")) {
+        fail(`Agent ${agent.name} read-only defaultReason must not imply writes.`);
+      }
+
+      const template = readAgentTemplate(agent.configFile);
+      if (template) {
+        if (readTomlString(template, "name") !== agent.name) {
+          fail(`Agent template name drift for ${agent.name}.`);
+        }
+        if (readTomlString(template, "description") !== agent.templateDescription) {
+          fail(`Agent template description drift for ${agent.name}.`);
+        }
+        if (readTomlString(template, "model") !== catalog.defaults.model) {
+          fail(`Agent template model drift for ${agent.name}.`);
+        }
+        if (readTomlString(template, "sandbox_mode") !== agent.sandboxMode) {
+          fail(`Agent template sandbox_mode drift for ${agent.name}.`);
+        }
+        if (readTomlString(template, "model_reasoning_effort") !== agent.modelReasoningEffort) {
+          fail(`Agent template model_reasoning_effort drift for ${agent.name}.`);
+        }
+        const webSearch = readTomlString(template, "web_search") === "live";
+        if (webSearch !== Boolean(agent.webSearch)) {
+          fail(`Agent template web_search drift for ${agent.name}.`);
+        }
+        if (!/developer_instructions\s*=\s*"""/.test(template)) {
+          fail(`Agent template must include developer_instructions for ${agent.name}.`);
+        }
+        if (/danger-full-access|approval_policy\s*=\s*"never"|GITHUB_TOKEN|GH_TOKEN|OPENAI_API_KEY/.test(template)) {
+          fail(`Agent template contains forbidden unsafe setting or token name: ${agent.name}.`);
+        }
+      }
+    }
+
+    const templateNames = fs.existsSync(agentDir)
+      ? fs.readdirSync(agentDir).filter((file) => file.endsWith(".toml")).map((file) => path.basename(file, ".toml"))
+      : [];
+    for (const name of templateNames) {
+      if (!catalogNames.has(name)) fail(`Agent template missing from catalog: ${name}`);
+    }
+    for (const name of catalogNames) {
+      if (!templateNames.includes(name)) fail(`Catalog agent missing template file: ${name}`);
+    }
+
+    for (const configFile of configFiles) {
+      const text = read(configFile);
+      const blocks = parseAgentBlocks(text);
+      const configNames = new Set(blocks.keys());
+
+      validateTextContains(configFile, text, "multi_agent = true");
+      validateTextContains(configFile, text, "max_threads = 6");
+      validateTextContains(configFile, text, "max_depth = 1");
+      validateTextContains(configFile, text, "job_max_runtime_seconds = 1800");
+
+      for (const name of catalogNames) {
+        if (!configNames.has(name)) fail(`${configFile} missing agent block for ${name}.`);
+      }
+      for (const name of configNames) {
+        if (!catalogNames.has(name)) fail(`${configFile} has agent block not present in catalog: ${name}.`);
+      }
+      for (const agent of catalog.agents || []) {
+        const block = blocks.get(agent.name);
+        if (!block) continue;
+        if (readTomlString(block, "description") !== agent.description) {
+          fail(`${configFile} description drift for ${agent.name}.`);
+        }
+        if (readTomlString(block, "config_file") !== agent.configFile) {
+          fail(`${configFile} config_file drift for ${agent.name}.`);
+        }
+      }
+    }
+  }
+}
+
+if (failures.length > 0) {
+  console.error("Agent config validation failed:");
+  for (const failure of failures) console.error(`- ${failure}`);
+  process.exit(1);
+}
+
+const count = JSON.parse(fs.readFileSync(catalogPath, "utf8")).agents.length;
+console.log(`Agent config validation passed. Checked ${count} agents across ${configFiles.length} configs.`);
