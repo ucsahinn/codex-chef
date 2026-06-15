@@ -4,6 +4,15 @@
 
 - No changes yet.
 
+## 0.5.3 - 2026-06-15
+
+- Published the final README render fix so release/tag views no longer show the
+  older long agent table text.
+- Converted the English and Turkish agent/skill catalogs to short bullet-style
+  summaries that stay readable in GitHub's narrow README layout.
+- Kept install behavior, agent templates, MCP defaults, skill sources, and
+  security gates unchanged.
+
 ## 0.5.2 - 2026-06-15
 
 - Removed duplicated first-screen README messaging by keeping the install

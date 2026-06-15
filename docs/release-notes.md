@@ -1,5 +1,35 @@
 # Release Notes
 
+## v0.5.3 - 2026-06-15
+
+This patch publishes the final README render fix so the release/tag view matches
+the current main branch README.
+
+## Highlights
+
+- Replaced the older long agent table text with short bullet-style agent
+  summaries in English and Turkish.
+- Replaced the skill tables with short bullet-style skill summaries in English
+  and Turkish.
+- Kept behavior unchanged: installer, templates, MCP defaults, skill sources,
+  validation, and security gates are identical to the verified setup model.
+
+## Upgrade Notes
+
+No installer behavior changed in this patch. Existing users only need to pull
+the latest docs if they already installed Codex Chef.
+
+## Verification
+
+Release readiness for this patch should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.2 - 2026-06-15
 
 This patch is the final README polish pass after reviewing the rendered first

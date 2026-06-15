@@ -1,5 +1,33 @@
 # Release Notları
 
+## v0.5.3 - 2026-06-15
+
+Bu patch final README render duzeltmesini release/tag gorunumune de tasir.
+
+## One Cikanlar
+
+- Ingilizce ve Turkce README'de eski uzun ajan tablo metinleri kisa bullet
+  listelere cevrildi.
+- Skill tabloları da kisa bullet listelere cevrildi.
+- Installer, template'ler, MCP default'lari, skill kaynaklari, validation ve
+  security gate'leri degismedi.
+
+## Upgrade Notlari
+
+Installer davranisi degismedi. Codex Chef zaten kuruluysa sadece en guncel docs
+icin repoyu cekmek yeterlidir.
+
+## Dogrulama
+
+Bu patch icin release readiness su kontrolleri icermelidir:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.2 - 2026-06-15
 
 Bu patch render edilen ilk ekran incelendikten sonra yapilan final README polish
