@@ -43,6 +43,7 @@ References:
 | `/plan-devex-review` | `devex_auditor` subagent | `devex_auditor` | Use safe local smoke tests; no global setup writes. |
 | `/autoplan` | Chain of `product_strategist`, `design_reviewer`, and `engineering_planner` | All three agents | The main thread decides; no hidden automatic orchestration. |
 | `/spec` | `spec_author` subagent or spec skill | `spec_author` | Spec only unless implementation is separately requested. |
+| Context-heavy repo or research task | `context-budget-planner` skill | `context-budget-planner` | Plan source loading, token budget, and compaction handoff before broad work. |
 | `/review` | `code_reviewer` subagent | `code_reviewer` | Lead with bugs, regressions, security, and missing tests. |
 | `/investigate` | `root_cause_debugger` subagent | `root_cause_debugger` | Reproduce and test hypotheses before fixes. |
 | `/qa` | `qa_lead` plus `test_verifier` | `qa_lead`, `test_verifier` | Distinguish report-only from auto-fix scope. |
@@ -52,13 +53,14 @@ References:
 | `/canary` | Release/performance monitoring workflow | `release_verifier`, `performance_auditor` | Production monitoring and external account access require approval. |
 | `/document-release` | `docs_author` subagent | `docs_author` | Do not claim remote release state without verification. |
 | `/document-generate` | `docs_author` subagent or docs skill | `docs_author` | Match docs to code and commands. |
+| `/codex` / cross-model review | Explicit review workflow | `code_reviewer`, manual Codex CLI use | Do not auto-invoke another agent or CLI; the user must ask for the cross-model check. |
 | `/browse` | Browser MCP plus `frontend_verifier` | `frontend_verifier`, Playwright/Chrome MCP entries | Browser tools are prompt-gated. |
 | `/setup-browser-cookies` | Auth/session connector workflow | Not enabled by default | Cookie/session import is sensitive and explicit only. |
 | `/pair-agent` | External-agent collaboration service | Not imported | Tunnels, scoped tokens, and external agents need a separate reviewed design. |
 | `/ship` | Release verification workflow | `release_verifier` | Commit, push, PR, tag, release, and deploy still need explicit approval. |
 | `/land-and-deploy` | Release/deploy workflow | `release_verifier` | Merge, deploy, and production verification are never automatic defaults. |
 | `/learn` | Memory workflow | Memory MCP is available when enabled | Never store secrets, sessions, cookies, or private auth material. |
-| `/make-pdf` | Future offline document-export skill | Not implemented by default | Avoid large implicit dependency installs. |
+| `/make-pdf` | Future offline document-export skill | Not implemented by default | Avoid large implicit dependency installs; offline diagram assets are already produced by `offline-diagram-triplet`. |
 | `/diagram` | Offline diagram skill | `offline-diagram-triplet` | Zero network; generated artifacts are not committed unless requested. |
 
 ## ECC Pattern Mapping
@@ -72,16 +74,39 @@ References:
 | Legacy command compatibility | Documentation that maps slash-like names to Codex surfaces. | 80+ command shims or deprecated prompt wrappers. |
 | Security/runtime hardening | Gitleaks, workflow hardening, MCP least privilege, install backups. | Auto-cleanup, auto-publish, token scraping, or broad command allow rules. |
 
+## Evidence-Based Exclusions
+
+The public GStack repo demonstrates useful workflows such as browser pairing,
+cookie import, deploy automation, continuous checkpoint commits, domain memory,
+and raw CDP access. Those are intentionally not default Codex Chef installs
+because they introduce tokens, tunnels, persistent browser state, production
+systems, or auto-commit behavior. Codex Chef keeps the matching safe primitives:
+browser MCP entries are prompt-gated, release verification is separate from
+push/deploy, memory is secret-aware, and reusable workflows are packaged as
+skills rather than broad command shims.
+
+The public ECC repo demonstrates a much larger cross-harness operating-system
+surface. Codex Chef adopts manifest/state previews, catalogs, doctor checks,
+plugin packaging, and validation gates, but blocks wholesale cross-harness
+sync, hook prompt injection, enabled authenticated connectors, and unreviewed
+large skill catalogs.
+
+High star counts are treated as prioritization signals, not trust decisions.
+The transfer rule is: inspect the pattern, map it to the smallest Codex-native
+surface, document the safety boundary, and add validation when the behavior can
+change a user's machine.
+
 ## Recommended Starter Chain
 
 Use this sequence for serious work:
 
 1. `product_strategist` or `spec_author` clarifies the target.
-2. `engineering_planner` maps architecture, data flow, and tests.
-3. `code_mapper` gathers repo evidence before broad edits.
-4. Main thread implements the scoped change.
-5. `code_reviewer`, `security_auditor`, `qa_lead`, or `test_verifier` verifies the risky surface.
-6. `release_verifier` checks publish readiness only when a push/release is requested.
+2. `context-budget-planner` budgets sources and handoff when the task is broad.
+3. `engineering_planner` maps architecture, data flow, and tests.
+4. `code_mapper` gathers repo evidence before broad edits.
+5. Main thread implements the scoped change.
+6. `code_reviewer`, `security_auditor`, `qa_lead`, or `test_verifier` verifies the risky surface.
+7. `release_verifier` checks publish readiness only when a push/release is requested.
 
 The main thread remains responsible for synthesis, edits, user-visible
 decisions, and final evidence. Subagents are not a way to bypass approvals,

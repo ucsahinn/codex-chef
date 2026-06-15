@@ -44,7 +44,9 @@ Este arquivo localizado acompanha as seções do arquivo fonte em inglês. Sourc
 - Global Flags
 - Common Commands
 - MCP Config Fields
+- App And Connector Defaults
 - Recommended Local Defaults
+- Advanced Features To Keep Explicit
 
 ## Manter sincronizado
 

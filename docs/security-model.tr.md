@@ -13,6 +13,8 @@ için tasarlandı.
   exclusion'ları açık tutar. Böylece subprocess'ler geniş lokal token
   environment'ını varsayılan olarak devralmaz.
 - Auth isteyen remote connector'lar disabled örnekler olarak bulunur.
+- App/connector default'lari, review edilmis app-specific override yoksa
+  destructive ve open-world tool'lari kapali tutar.
 - Global command rule'ları dar kapsamlıdır ve read-only discovery ile lokal
   verification komutlarına ağırlık verir.
 - Delete, cleanup, prune, uninstall, overwrite, database drop/truncate ve benzer
@@ -34,6 +36,9 @@ Bu starter'ın kuralları:
 - Read-only documentation MCP'leri `default_tools_approval_mode = "approve"`
   kullanabilir; browser, account, filesystem, database, production ve mutating
   tool'lar `"prompt"` kullanmalıdır.
+- Apps/connectors icin ayri bir `[apps._default]` kapisi vardir:
+  `destructive_enabled = false` ve `open_world_enabled = false` incelenmis
+  template'lerin parcasidir.
 - Yeni MCP server eklerken `enabled_tools`, `disabled_tools`,
   `startup_timeout_sec` ve `tool_timeout_sec` gibi dar config flag'leri prose-only
   talimatlara tercih edilmelidir.

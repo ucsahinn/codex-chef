@@ -44,7 +44,9 @@ Ce fichier localisé suit les sections du fichier source anglais. Source: [codex
 - Global Flags
 - Common Commands
 - MCP Config Fields
+- App And Connector Defaults
 - Recommended Local Defaults
+- Advanced Features To Keep Explicit
 
 ## Garder synchronisé
 

@@ -44,6 +44,7 @@ Diese lokalisierte Datei folgt den Abschnitten der englischen Quelldatei. Source
 - Surface Rule
 - GStack-Style Workflow Mapping
 - ECC Pattern Mapping
+- Evidence-Based Exclusions
 - Recommended Starter Chain
 
 ## Synchron halten

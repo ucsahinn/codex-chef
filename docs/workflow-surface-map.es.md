@@ -44,6 +44,7 @@ Este archivo localizado sigue las secciones del archivo fuente en inglés. Sourc
 - Surface Rule
 - GStack-Style Workflow Mapping
 - ECC Pattern Mapping
+- Evidence-Based Exclusions
 - Recommended Starter Chain
 
 ## Mantener sincronizado

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Offline Diagram Triplet"
+  short_description: "Mermaid, Excalidraw, SVG, PNG."
+  default_prompt: "Use $offline-diagram-triplet to turn this diagram brief into Mermaid, editable Excalidraw, SVG, PNG, and a Markdown snippet."
+
+policy:
+  allow_implicit_invocation: true

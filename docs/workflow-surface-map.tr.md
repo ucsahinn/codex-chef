@@ -42,6 +42,7 @@ Kaynaklar:
 | `/plan-devex-review` | `devex_auditor` subagent | `devex_auditor` | Safe local smoke test; global setup write yok. |
 | `/autoplan` | `product_strategist`, `design_reviewer`, `engineering_planner` zinciri | Ucu de var | Ana thread karar verir; gizli otomatik orkestrasyon yok. |
 | `/spec` | `spec_author` veya spec skill | `spec_author` | Ayrica istenmedikce sadece spec. |
+| Context-heavy repo veya arastirma isi | `context-budget-planner` skill'i | `context-budget-planner` | Genis isten once kaynak yukleme, token butcesi ve compaction handoff'u planlanir. |
 | `/review` | `code_reviewer` subagent | `code_reviewer` | Bug, regression, security ve missing test onde gelir. |
 | `/investigate` | `root_cause_debugger` subagent | `root_cause_debugger` | Fix oncesi reproduce ve hypothesis test. |
 | `/qa` | `qa_lead` + `test_verifier` | `qa_lead`, `test_verifier` | Report-only ile fix scope ayrilir. |
@@ -51,13 +52,14 @@ Kaynaklar:
 | `/canary` | Release/performance izleme workflow'u | `release_verifier`, `performance_auditor` | Production monitoring ve external account onay ister. |
 | `/document-release` | `docs_author` subagent | `docs_author` | Remote release state kanitsiz iddia edilmez. |
 | `/document-generate` | `docs_author` veya docs skill | `docs_author` | Docs kod ve komutlarla eslesir. |
+| `/codex` / cross-model review | Acik review workflow'u | `code_reviewer`, manuel Codex CLI kullanimi | Baska agent veya CLI otomatik calistirilmaz; cross-model kontrolu kullanici istemelidir. |
 | `/browse` | Browser MCP + `frontend_verifier` | `frontend_verifier`, Playwright/Chrome MCP entries | Browser tool'lari prompt-gated. |
 | `/setup-browser-cookies` | Auth/session connector workflow | Default acik degil | Cookie/session import hassastir ve acik onay ister. |
 | `/pair-agent` | External-agent collaboration service | Import edilmedi | Tunnel, scoped token ve external agent icin ayri design gerekir. |
 | `/ship` | Release verification workflow | `release_verifier` | Commit, push, PR, tag, release ve deploy icin acik onay gerekir. |
 | `/land-and-deploy` | Release/deploy workflow | `release_verifier` | Merge, deploy ve production verification otomatik default olmaz. |
 | `/learn` | Memory workflow | Memory MCP uygun durumda kullanilir | Secret, session, cookie veya auth materyali saklanmaz. |
-| `/make-pdf` | Gelecekte offline doc-export skill | Default uygulanmadi | Buyuk implicit dependency install yok. |
+| `/make-pdf` | Gelecekte offline doc-export skill | Default uygulanmadi | Buyuk implicit dependency install yok; offline diagram asset'leri zaten `offline-diagram-triplet` ile uretilir. |
 | `/diagram` | Offline diagram skill | `offline-diagram-triplet` | Zero network; artifact'ler istenmeden commit edilmez. |
 
 ## ECC Pattern Mapping
@@ -71,16 +73,38 @@ Kaynaklar:
 | Legacy command uyumlulugu | Slash-like adlari Codex yuzeylerine map eden dokuman. | 80+ command shim veya deprecated prompt wrapper yok. |
 | Security/runtime hardening | Gitleaks, workflow hardening, MCP least privilege, install backup. | Auto-cleanup, auto-publish, token scraping veya genis command allow rule yok. |
 
+## Kanita Dayali Disarida Birakilanlar
+
+Public GStack reposu browser pairing, cookie import, deploy automation,
+continuous checkpoint commit, domain memory ve raw CDP gibi faydali workflow'lar
+gosteriyor. Bunlar Codex Chef'te default kurulum degil; cunku token, tunnel,
+kalici browser state, production sistemi veya auto-commit davranisi getiriyor.
+Codex Chef guvenli esdegerleri korur: browser MCP entry'leri prompt-gated,
+release verification push/deploy'dan ayridir, memory secret-aware calisir ve
+tekrar kullanilabilir workflow'lar genis command shim yerine skill olarak gelir.
+
+Public ECC reposu cok daha buyuk bir cross-harness operating-system yuzeyi
+gosteriyor. Codex Chef manifest/state preview, katalog, doctor check, plugin
+paketleme ve validation gate fikirlerini alir; fakat wholesale cross-harness
+sync, hook prompt injection, varsayilan acik authenticated connector ve
+review edilmemis dev skill kataloglarini bloke eder.
+
+Yuksek star sayisi guven karari degil, oncelik sinyalidir. Transfer kurali:
+pattern'i incele, en kucuk Codex-native yuzeye map et, safety boundary'yi
+dokumante et ve davranis kullanicinin makinesini degistirebiliyorsa validation
+ekle.
+
 ## Onerilen Starter Zinciri
 
 Ciddi islerde bu sirayi kullan:
 
 1. `product_strategist` veya `spec_author` hedefi netlestirir.
-2. `engineering_planner` mimariyi, data flow'u ve testleri map eder.
-3. `code_mapper` genis edit oncesi repo kaniti toplar.
-4. Ana thread scoped degisikligi uygular.
-5. `code_reviewer`, `security_auditor`, `qa_lead` veya `test_verifier` riskli yuzeyi dogrular.
-6. Push/release istenirse `release_verifier` publish readiness kontrol eder.
+2. Is genisse `context-budget-planner` kaynaklari ve handoff'u butceler.
+3. `engineering_planner` mimariyi, data flow'u ve testleri map eder.
+4. `code_mapper` genis edit oncesi repo kaniti toplar.
+5. Ana thread scoped degisikligi uygular.
+6. `code_reviewer`, `security_auditor`, `qa_lead` veya `test_verifier` riskli yuzeyi dogrular.
+7. Push/release istenirse `release_verifier` publish readiness kontrol eder.
 
 Ana thread sentez, editler, kullaniciya gorunen kararlar ve final kanittan
 sorumludur. Subagent'lar approval, sandbox, credential veya external-state

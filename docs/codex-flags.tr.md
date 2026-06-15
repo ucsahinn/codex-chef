@@ -65,3 +65,31 @@ policy, tool exposure, timeout veya auth source sadece prose'a birakilmaz.
 | `required` | Enabled server baslamazsa Codex startup'i fail eder; opsiyonel lokal tool'larda dikkatli kullan. |
 | `bearer_token_env_var`, `env_vars`, `env_http_headers` | Secret'lari dosyadan degil environment variable'dan okur. |
 | `mcp_oauth_callback_port`, `mcp_oauth_callback_url` | OAuth provider sabit callback istediginde kullan. |
+
+## App Ve Connector Default'lari
+
+ChatGPT Apps/connectors kendi `apps.*` config yuzeyini kullanir. Bunu MCP
+server ayarlarindan ayri tut; boylece connector tool exposure review edilebilir
+kalir.
+
+| Alan | Starter default'u | Kullanim |
+| --- | --- | --- |
+| `apps._default.enabled` | `true` | Belirli auth isteyen servisi acmadan connector taramasina izin verir. |
+| `apps._default.default_tools_enabled` | `true` | Belirli app override etmedikce normal connector tool'lari gorunur kalir. |
+| `apps._default.destructive_enabled` | `false` | Destructive davranis bildiren tool'lari default olarak kapatir. |
+| `apps._default.open_world_enabled` | `false` | Genis open-world davranis bildiren tool'lari default olarak kapatir. |
+| `apps.<id>.tools.<tool>.approval_mode` | unset | Sadece belirli bir connector tool'u review edildiyse kullan. |
+
+## Acik Tutulmasi Gereken Gelismis Ozellikler
+
+- `approval_policy = { granular = { ... } }` ileri operatorler icin faydalidir;
+  bu starter daha kolay aciklanir ve audit edilir oldugu icin `on-request`
+  kullanir.
+- `default_permissions` ve `[permissions.*]` beta permission-profile yuzeyidir.
+  Ayni starter template'inde `sandbox_mode` ve `[sandbox_workspace_write]` ile
+  karistirma.
+- `[features].network_proxy` scoped sandbox networking saglayabilir; default
+  yine network-off kalir. Allowlisted domain'leri sadece review edilmis profile
+  icin ekle.
+- `[features].undo` opt-in kolayliktir; backup, dry-run ve Git review yerine
+  gecmez.

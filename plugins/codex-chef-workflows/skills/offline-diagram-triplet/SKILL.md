@@ -30,6 +30,12 @@ node plugins/codex-chef-workflows/skills/offline-diagram-triplet/scripts/render-
 5. Return the created file paths and include the Mermaid block in the response
    or target Markdown file.
 
+## Reference Routing
+
+Read `references/diagram-contract.md` before extending the renderer, handling
+unsupported Mermaid syntax, changing output formats, or validating Excalidraw
+compatibility. For ordinary small diagrams, follow the subset below.
+
 ## Mermaid Subset
 
 Use this subset for predictable offline rendering:
@@ -50,6 +56,9 @@ Supported node forms:
 - `D{Decision}`
 - `A --> B`
 - `A -->|edge label| B`
+- `A -.-> B`
+- `A ==> B`
+- `A --- B`
 
 Avoid unsupported Mermaid features such as subgraphs, HTML labels, icons,
 classDefs, click handlers, remote images, and sequence diagrams unless you

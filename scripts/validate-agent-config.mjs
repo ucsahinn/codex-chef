@@ -13,6 +13,8 @@ const configFiles = [
 const agentDir = path.join(root, "templates", "codex", "agents");
 const allowedSandboxModes = new Set(["read-only", "workspace-write"]);
 const allowedReasoningEfforts = new Set(["medium", "high"]);
+const minimumSourceBackedItems = 100;
+const minimumDistinctSourceMarkers = 20;
 
 function fail(message) {
   failures.push(message);
@@ -73,6 +75,20 @@ function validateTextContains(label, text, needle) {
   if (!text.includes(needle)) {
     fail(`${label} must include: ${needle}`);
   }
+}
+
+function countOccurrences(text, needle) {
+  return text.split(needle).length - 1;
+}
+
+function collectSourceMarkers(text) {
+  const markers = new Set();
+  for (const match of text.matchAll(/\[Source: ([^\]]+)\]/g)) {
+    for (const marker of match[1].split(";").map((item) => item.trim()).filter(Boolean)) {
+      markers.add(marker);
+    }
+  }
+  return markers;
 }
 
 if (!fs.existsSync(catalogPath)) {
@@ -158,7 +174,32 @@ if (!fs.existsSync(catalogPath)) {
         if (!/developer_instructions\s*=\s*"""/.test(template)) {
           fail(`Agent template must include developer_instructions for ${agent.name}.`);
         }
-        if (/danger-full-access|approval_policy\s*=\s*"never"|GITHUB_TOKEN|GH_TOKEN|OPENAI_API_KEY/.test(template)) {
+        const requiredRoleSections = [
+          ["Authority metadata contract:", "authority metadata contract"],
+          ["Expertise signal contract:", "expertise signal contract"],
+          ["Source refresh protocol:", "source refresh protocol"],
+          ["Cross-repo transfer protocol:", "cross-repo transfer protocol"],
+          ["Research synthesis protocol:", "research synthesis protocol"],
+          ["Adversarial validation protocol:", "adversarial validation protocol"],
+          ["Source currency protocol:", "source currency protocol"],
+          ["Corpus expansion protocol:", "corpus expansion protocol"],
+          ["Expert calibration protocol:", "expert calibration protocol"]
+        ];
+        for (const [needle, label] of requiredRoleSections) {
+          const occurrences = countOccurrences(template, needle);
+          if (occurrences !== 1) {
+            fail(`Agent template must include exactly one ${label} for ${agent.name}; found ${occurrences}.`);
+          }
+        }
+        const sourceBackedItems = countOccurrences(template, "[Source:");
+        if (sourceBackedItems < minimumSourceBackedItems) {
+          fail(`Agent template ${agent.name} must include at least ${minimumSourceBackedItems} source-backed instruction items; found ${sourceBackedItems}.`);
+        }
+        const distinctSourceMarkers = collectSourceMarkers(template);
+        if (distinctSourceMarkers.size < minimumDistinctSourceMarkers) {
+          fail(`Agent template ${agent.name} must include at least ${minimumDistinctSourceMarkers} distinct source markers; found ${distinctSourceMarkers.size}.`);
+        }
+        if (/danger-full-access|approval_policy\s*=\s*"never"|GITHUB_TOKEN|GH_TOKEN|OPENAI_API_KEY|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_API_KEY|GOOGLE_CLIENT_SECRET|GOOGLE_CLIENT_ID/.test(template)) {
           fail(`Agent template contains forbidden unsafe setting or token name: ${agent.name}.`);
         }
       }

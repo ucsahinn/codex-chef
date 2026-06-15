@@ -32,9 +32,9 @@ base local de Codex que puedas entender, verificar y extender:
 
 | Área | Resultado |
 | --- | --- |
-| 🤖 Equipo de agentes | 20 roles con nombre, como Code Mapper, Docs Researcher, Context Architect, Security Auditor y Release Verifier. |
-| 🧩 Skills locales | `codex-chef-operator` y `offline-diagram-triplet` vienen dentro del plugin local. |
-| 🎨 Skills opcionales | 9 skills globales revisadas para frontend, diseño, dependencias y Vercel se pueden instalar con `-All`. |
+| 🤖 Equipo de agentes | 21 roles con nombre, como Code Mapper, Docs Researcher, Google SEO Auditor, Security Auditor y Release Verifier. |
+| 🧩 Skills locales | `codex-chef-operator`, `offline-diagram-triplet` y `context-budget-planner` vienen dentro del plugin local. |
+| 🎨 Skills opcionales | 16 skills globales public/first-party revisadas para mantenimiento, debugging, planificación de refactor, seguridad, testing, verificación de navegador, SEO, calidad web, docs, CI, MCP, context engineering, prompt architecture, skill authoring y un workflow amplio de frontend se pueden instalar con `-All`. |
 | 🔌 MCP por defecto | Los MCP locales y de investigación quedan listos; los conectores autenticados siguen desactivados hasta que los necesites. |
 | 🛡️ Red de seguridad | Dry-run, backups, secret scan, validación y approval gates siguen dentro del flujo normal. |
 
@@ -60,7 +60,7 @@ Los installers gestionan:
 - `~/.codex/plugins/codex-chef-workflows`
 - `~/.agents/plugins/marketplace.json`
 
-Opcionalmente pueden instalar Git guards globales y skills de Codex curadas.
+`-All` instala las skills curadas de Codex, pero no cambia la configuración global de Git. Los Git guards globales quedan como opt-in separado con `-InstallGitGuards` o `--install-git-guards`.
 
 ## 🚫 Lo Que No Hace
 

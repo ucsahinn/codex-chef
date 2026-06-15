@@ -37,6 +37,12 @@ const dangerousCodePoints = new Map([
   [0xfeff, "ZERO WIDTH NO-BREAK SPACE"]
 ]);
 
+const mojibakePatterns = [
+  { label: "UTF-8 decoded as Windows-1252/Latin-1", pattern: /[\u00c3\u00c4\u00c5][^\s/]/ },
+  { label: "mojibake emoji lead", pattern: /\u00f0\u0178/ },
+  { label: "mojibake punctuation or symbol lead", pattern: /\u00e2[\u20ac\u0153\u201e\u2122\u0161\u017e\u0178]/ }
+];
+
 function posix(filePath) {
   return filePath.split(path.sep).join("/");
 }
@@ -71,6 +77,12 @@ function locationForIndex(text, index) {
 for (const file of walk(root).filter(isTextFile)) {
   const rel = posix(path.relative(root, file));
   const text = fs.readFileSync(file, "utf8");
+  for (const { label, pattern } of mojibakePatterns) {
+    const match = pattern.exec(text);
+    if (!match) continue;
+    const location = locationForIndex(text, match.index);
+    failures.push(`${rel}:${location.line}:${location.column} contains likely mojibake (${label})`);
+  }
   for (const [index, char] of [...text].entries()) {
     const codePoint = char.codePointAt(0);
     if (!dangerousCodePoints.has(codePoint)) continue;

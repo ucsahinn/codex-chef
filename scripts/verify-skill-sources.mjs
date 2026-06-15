@@ -7,6 +7,7 @@ const root = path.resolve(process.cwd());
 const catalogPath = path.join(root, "catalog", "skills.json");
 const lockPath = path.join(root, "catalog", "skills-lock.json");
 const onlineCacheDir = path.join(root, "tmp", "npm-cache");
+const onlineWorkDir = path.join(root, "tmp", "skill-source-check");
 const windowsNpxWrapper = path.join(onlineCacheDir, "npx-openssl.cmd");
 const online = process.argv.includes("--online");
 const timeoutArg = process.argv.find((arg) => arg.startsWith("--timeout-ms="));
@@ -34,13 +35,28 @@ function ensureWindowsNpxWrapper() {
   return windowsNpxWrapper;
 }
 
+function safePathSegment(value) {
+  return String(value).replace(/[^A-Za-z0-9_.-]/g, "_");
+}
+
+function prepareOnlineWorkDir(entry) {
+  const dir = path.join(onlineWorkDir, safePathSegment(entry.name));
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
 function runSkillsUse(entry) {
   const executable = process.platform === "win32" ? "cmd.exe" : "npx";
+  const cwd = prepareOnlineWorkDir(entry);
+  const skillArgs = entry.fullDepth
+    ? [entry.package, "--skill", entry.skill, "--full-depth"]
+    : [entry.package, "--skill", entry.skill];
   const args = process.platform === "win32"
-    ? ["/d", "/s", "/c", ensureWindowsNpxWrapper(), "--yes", "skills", "use", entry.package, "--skill", entry.skill]
-    : ["--yes", "skills", "use", entry.package, "--skill", entry.skill];
+    ? ["/d", "/s", "/c", ensureWindowsNpxWrapper(), "--yes", "skills", "use", ...skillArgs]
+    : ["--yes", "skills", "use", ...skillArgs];
   const result = spawnSync(executable, args, {
-    cwd: root,
+    cwd,
     encoding: "utf8",
     env: {
       ...process.env,
@@ -137,7 +153,12 @@ if (!fs.existsSync(catalogPath)) {
               fail(`Skill lock mismatch for ${entry.name}: ${key}`);
             }
           }
-          const expectedInstallCommand = `npx skills add ${entry.package} --skill ${entry.skill} --agent codex --yes --global`;
+          if (Boolean(locked.fullDepth) !== Boolean(entry.fullDepth)) {
+            fail(`Skill lock mismatch for ${entry.name}: fullDepth`);
+          }
+          const expectedInstallCommand = entry.fullDepth
+            ? `npx skills add ${entry.package} --skill ${entry.skill} --full-depth --agent codex --yes --global`
+            : `npx skills add ${entry.package} --skill ${entry.skill} --agent codex --yes --global`;
           if (locked.installCommand !== expectedInstallCommand) {
             fail(`Skill lock installCommand mismatch for ${entry.name}`);
           }

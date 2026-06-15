@@ -84,7 +84,7 @@ assets/social-preview.svg
 Iyi:
 
 - "Windows-first Codex setup kit"
-- "20 reviewed specialist agents"
+- "21 reviewed specialist agents"
 - "dry-run ve backup davranisli safe installers"
 - "MCP connectors least-privilege; auth isteyen connector'lar default kapali"
 - "six-language docs"

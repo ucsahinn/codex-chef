@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "generatedFrom": "catalog/skills.json",
-  "dateChecked": "2026-06-14",
+  "dateChecked": "2026-06-15",
   "status": "offline-validated",
   "lockSemantics": "source-allowlist",
   "immutability": "Skills CLI installation uses owner/repo plus skill name; this lock verifies reviewed package/skill/source metadata but does not pin upstream commits.",
@@ -16,6 +16,38 @@
       "installCommand": "npx skills add wshobson/agents --skill dependency-upgrade --agent codex --yes --global"
     },
     {
+      "name": "gh-fix-ci",
+      "package": "openai/skills",
+      "skill": "gh-fix-ci",
+      "source": "openai/skills@gh-fix-ci",
+      "sourceUrl": "https://github.com/openai/skills",
+      "installCommand": "npx skills add openai/skills --skill gh-fix-ci --agent codex --yes --global"
+    },
+    {
+      "name": "security-best-practices",
+      "package": "openai/skills",
+      "skill": "security-best-practices",
+      "source": "openai/skills@security-best-practices",
+      "sourceUrl": "https://github.com/openai/skills",
+      "installCommand": "npx skills add openai/skills --skill security-best-practices --agent codex --yes --global"
+    },
+    {
+      "name": "systematic-debugging",
+      "package": "obra/superpowers",
+      "skill": "systematic-debugging",
+      "source": "obra/superpowers@systematic-debugging",
+      "sourceUrl": "https://github.com/obra/superpowers",
+      "installCommand": "npx skills add obra/superpowers --skill systematic-debugging --agent codex --yes --global"
+    },
+    {
+      "name": "request-refactor-plan",
+      "package": "mattpocock/skills",
+      "skill": "request-refactor-plan",
+      "source": "mattpocock/skills@request-refactor-plan",
+      "sourceUrl": "https://github.com/mattpocock/skills",
+      "installCommand": "npx skills add mattpocock/skills --skill request-refactor-plan --agent codex --yes --global"
+    },
+    {
       "name": "frontend-skill",
       "package": "nexu-io/open-design",
       "skill": "frontend-skill",
@@ -24,60 +56,85 @@
       "installCommand": "npx skills add nexu-io/open-design --skill frontend-skill --agent codex --yes --global"
     },
     {
-      "name": "impeccable",
-      "package": "pbakaus/impeccable",
-      "skill": "impeccable",
-      "source": "pbakaus/impeccable@impeccable",
-      "sourceUrl": "https://github.com/pbakaus/impeccable",
-      "installCommand": "npx skills add pbakaus/impeccable --skill impeccable --agent codex --yes --global"
+      "name": "webapp-testing",
+      "package": "anthropics/skills",
+      "skill": "webapp-testing",
+      "source": "anthropics/skills@webapp-testing",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "installCommand": "npx skills add anthropics/skills --skill webapp-testing --agent codex --yes --global"
     },
     {
-      "name": "design-taste-frontend",
-      "package": "leonxlnx/taste-skill",
-      "skill": "design-taste-frontend",
-      "source": "leonxlnx/taste-skill@design-taste-frontend",
-      "sourceUrl": "https://github.com/leonxlnx/taste-skill",
-      "installCommand": "npx skills add leonxlnx/taste-skill --skill design-taste-frontend --agent codex --yes --global"
+      "name": "web-quality-audit",
+      "package": "addyosmani/web-quality-skills",
+      "skill": "web-quality-audit",
+      "source": "addyosmani/web-quality-skills@web-quality-audit",
+      "sourceUrl": "https://github.com/addyosmani/web-quality-skills",
+      "installCommand": "npx skills add addyosmani/web-quality-skills --skill web-quality-audit --agent codex --yes --global"
     },
     {
-      "name": "image-to-code",
-      "package": "leonxlnx/taste-skill",
-      "skill": "image-to-code",
-      "source": "leonxlnx/taste-skill@image-to-code",
-      "sourceUrl": "https://github.com/leonxlnx/taste-skill",
-      "installCommand": "npx skills add leonxlnx/taste-skill --skill image-to-code --agent codex --yes --global"
+      "name": "seo",
+      "package": "addyosmani/web-quality-skills",
+      "skill": "seo",
+      "source": "addyosmani/web-quality-skills@seo",
+      "sourceUrl": "https://github.com/addyosmani/web-quality-skills",
+      "installCommand": "npx skills add addyosmani/web-quality-skills --skill seo --agent codex --yes --global"
     },
     {
-      "name": "high-end-visual-design",
-      "package": "leonxlnx/taste-skill",
-      "skill": "high-end-visual-design",
-      "source": "leonxlnx/taste-skill@high-end-visual-design",
-      "sourceUrl": "https://github.com/leonxlnx/taste-skill",
-      "installCommand": "npx skills add leonxlnx/taste-skill --skill high-end-visual-design --agent codex --yes --global"
+      "name": "accessibility",
+      "package": "addyosmani/web-quality-skills",
+      "skill": "accessibility",
+      "source": "addyosmani/web-quality-skills@accessibility",
+      "sourceUrl": "https://github.com/addyosmani/web-quality-skills",
+      "installCommand": "npx skills add addyosmani/web-quality-skills --skill accessibility --agent codex --yes --global"
     },
     {
-      "name": "web-design-guidelines",
-      "package": "vercel-labs/agent-skills",
-      "skill": "web-design-guidelines",
-      "source": "vercel-labs/agent-skills@web-design-guidelines",
-      "sourceUrl": "https://github.com/vercel-labs/agent-skills",
-      "installCommand": "npx skills add vercel-labs/agent-skills --skill web-design-guidelines --agent codex --yes --global"
+      "name": "test-driven-development",
+      "package": "obra/superpowers",
+      "skill": "test-driven-development",
+      "source": "obra/superpowers@test-driven-development",
+      "sourceUrl": "https://github.com/obra/superpowers",
+      "installCommand": "npx skills add obra/superpowers --skill test-driven-development --agent codex --yes --global"
     },
     {
-      "name": "vercel-react-best-practices",
-      "package": "vercel-labs/agent-skills",
-      "skill": "vercel-react-best-practices",
-      "source": "vercel-labs/agent-skills@vercel-react-best-practices",
-      "sourceUrl": "https://github.com/vercel-labs/agent-skills",
-      "installCommand": "npx skills add vercel-labs/agent-skills --skill vercel-react-best-practices --agent codex --yes --global"
+      "name": "documentation-and-adrs",
+      "package": "addyosmani/agent-skills",
+      "skill": "documentation-and-adrs",
+      "source": "addyosmani/agent-skills@documentation-and-adrs",
+      "sourceUrl": "https://github.com/addyosmani/agent-skills",
+      "installCommand": "npx skills add addyosmani/agent-skills --skill documentation-and-adrs --agent codex --yes --global"
     },
     {
-      "name": "vercel-optimize",
-      "package": "vercel-labs/agent-skills",
-      "skill": "vercel-optimize",
-      "source": "vercel-labs/agent-skills@vercel-optimize",
-      "sourceUrl": "https://github.com/vercel-labs/agent-skills",
-      "installCommand": "npx skills add vercel-labs/agent-skills --skill vercel-optimize --agent codex --yes --global"
+      "name": "mcp-builder",
+      "package": "anthropics/skills",
+      "skill": "mcp-builder",
+      "source": "anthropics/skills@mcp-builder",
+      "sourceUrl": "https://github.com/anthropics/skills",
+      "installCommand": "npx skills add anthropics/skills --skill mcp-builder --agent codex --yes --global"
+    },
+    {
+      "name": "context-engineering-project-starter",
+      "package": "ucsahinn/context-engineering-project-starter",
+      "skill": "context-engineering-project-starter",
+      "source": "ucsahinn/context-engineering-project-starter@context-engineering-project-starter",
+      "sourceUrl": "https://github.com/ucsahinn/context-engineering-project-starter",
+      "installCommand": "npx skills add ucsahinn/context-engineering-project-starter --skill context-engineering-project-starter --agent codex --yes --global"
+    },
+    {
+      "name": "codex-enterprise-prompt-architect",
+      "package": "ucsahinn/codex-enterprise-prompt-architect",
+      "skill": "codex-enterprise-prompt-architect",
+      "source": "ucsahinn/codex-enterprise-prompt-architect@codex-enterprise-prompt-architect",
+      "sourceUrl": "https://github.com/ucsahinn/codex-enterprise-prompt-architect",
+      "installCommand": "npx skills add ucsahinn/codex-enterprise-prompt-architect --skill codex-enterprise-prompt-architect --agent codex --yes --global"
+    },
+    {
+      "name": "codex-skill-forge",
+      "package": "ucsahinn/codex-skill-forge",
+      "skill": "codex-skill-forge",
+      "source": "ucsahinn/codex-skill-forge@codex-skill-forge",
+      "sourceUrl": "https://github.com/ucsahinn/codex-skill-forge",
+      "fullDepth": true,
+      "installCommand": "npx skills add ucsahinn/codex-skill-forge --skill codex-skill-forge --full-depth --agent codex --yes --global"
     }
   ]
 }

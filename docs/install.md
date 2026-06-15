@@ -49,13 +49,16 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 
 Useful switches:
 
-- `-All`: install Codex templates, verified public skills, and global Git
-  guards.
+- `-All`: install Codex templates, the local Codex Chef plugin, specialist
+  agents, profiles, rules, and verified public/first-party skills. It does not
+  change global Git config.
 - `-InstallSkills`: install `catalog/skills.json` entries that have
   `install: true`, a verified `package` in `owner/repo` format, and a matching
   `skill` name. The installer calls `npx.cmd skills add <package> --skill
   <skill> --agent codex --yes --global`.
-- `-InstallGitGuards`: install global Git ignore and pre-commit hook.
+- `-InstallGitGuards`: install global Git ignore, global pre-commit hook, and
+  set `core.excludesfile` plus `core.hooksPath`. This is intentionally separate
+  because it affects every Git repository for the current user.
 - `-Force`: overwrite managed Codex files after creating backups.
 - `-NoBackup`: skip backups. Not recommended.
 - `-WhatIf`: preview file, Git, and skill operations without changing the real
@@ -80,9 +83,9 @@ chmod +x scripts/install.sh
 
 Useful flags:
 
-- `--all`
+- `--all`: recommended full Codex Chef setup without global Git config changes.
 - `--install-skills`
-- `--install-git-guards`
+- `--install-git-guards`: opt in to global Git ignore and hook settings.
 - `--force`
 - `--no-backup`
 - `--dry-run`

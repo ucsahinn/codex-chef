@@ -44,6 +44,7 @@ Ce fichier localisé suit les sections du fichier source anglais. Source: [workf
 - Surface Rule
 - GStack-Style Workflow Mapping
 - ECC Pattern Mapping
+- Evidence-Based Exclusions
 - Recommended Starter Chain
 
 ## Garder synchronisé

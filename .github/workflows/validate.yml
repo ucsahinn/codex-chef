@@ -32,6 +32,7 @@ jobs:
       - run: node --check scripts/codex-doctor.mjs
       - run: node --check scripts/sync-doc-locales.mjs
       - run: node --check scripts/validate-agent-config.mjs
+      - run: node --check scripts/validate-agent-research-corpus.mjs
       - run: node --check scripts/validate-mcp-config.mjs
       - run: node --check scripts/validate-codex-doctor.mjs
       - run: node --check scripts/validate-diagram-triplet.mjs

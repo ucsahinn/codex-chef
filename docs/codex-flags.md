@@ -61,6 +61,19 @@ source.
 | `bearer_token_env_var`, `env_vars`, `env_http_headers` | Read secrets from environment variables instead of files. |
 | `mcp_oauth_callback_port`, `mcp_oauth_callback_url` | Configure OAuth callbacks only when a provider requires it. |
 
+## App And Connector Defaults
+
+ChatGPT Apps/connectors use their own `apps.*` config surface. Keep this
+separate from MCP server settings so connector tool exposure is reviewable.
+
+| Field | Starter default | Use |
+| --- | --- | --- |
+| `apps._default.enabled` | `true` | Allow connector browsing without enabling a specific authenticated service. |
+| `apps._default.default_tools_enabled` | `true` | Keep normal connector tools visible unless a specific app overrides them. |
+| `apps._default.destructive_enabled` | `false` | Block tools that advertise destructive behavior by default. |
+| `apps._default.open_world_enabled` | `false` | Block tools that advertise broad open-world behavior by default. |
+| `apps.<id>.tools.<tool>.approval_mode` | unset | Use only when a specific connector tool has been reviewed. |
+
 ## Recommended Local Defaults
 
 Interactive work:
@@ -83,3 +96,16 @@ codex --strict-config "Summarize the active setup."
 
 Avoid `danger-full-access` and bypass flags unless the environment is
 externally sandboxed and disposable.
+
+## Advanced Features To Keep Explicit
+
+- `approval_policy = { granular = { ... } }` is useful for advanced operators,
+  but this starter keeps `on-request` because it is easier to explain and audit.
+- `default_permissions` and `[permissions.*]` are beta permission-profile
+  surfaces. Do not mix them with `sandbox_mode` and
+  `[sandbox_workspace_write]` in the same starter template.
+- `[features].network_proxy` can create scoped sandbox networking, but the
+  default remains network-off; add allowlisted domains only for a reviewed
+  profile.
+- `[features].undo` is available as an opt-in convenience, not a replacement
+  for backups, dry runs, and Git review.

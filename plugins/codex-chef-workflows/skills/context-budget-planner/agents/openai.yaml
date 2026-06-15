@@ -1,0 +1,7 @@
+interface:
+  display_name: "Context Budget Planner"
+  short_description: "Plan context and token use."
+  default_prompt: "Use $context-budget-planner to plan context, sources, compaction handoff, and verification for this broad task."
+
+policy:
+  allow_implicit_invocation: true

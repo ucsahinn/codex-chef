@@ -22,15 +22,15 @@ Resmi kaynaklar:
 | `AGENTS.md` | Kalici repo/global calisma anlasmalari | Repo-local onceligi koruyan incelenmis global rehber | `npm run validate` |
 | `config.toml` | Model, sandbox, approval, MCP, feature ve profile ayarlari | Workspace-write sandbox ve on-request approval | `npm run validate:mcp` |
 | Rules | Dar komut approval varsayilanlari | Sadece dogrulama komutlari; destructive/publish aksiyonlari gated | `npm run validate:content` |
-| Skills | Progressive disclosure ile yeniden kullanilabilir workflow'lar | Curated install allowlist, local enterprise operator ve offline diagram skill | `npm run verify:skills` |
+| Skills | Progressive disclosure ile yeniden kullanilabilir workflow'lar | Curated install allowlist ve uc yerel plugin skill'i: operator, offline diagram ve context budget planner | `npm run verify:skills` |
 | Plugins | Paylasilabilir skill ve gelecekte bundled yuzey paketi | Tek local plugin, default hook/MCP/app yok | `npm run validate` |
 | MCP/connectors | Canli docs, browser, code navigation ve dis sistemler | Docs/code/browser yardimcilari acik; auth isteyenler kapali | `npm run validate:mcp` |
-| Subagents | Evidence-heavy uzman delegasyonu | Sandbox'li role dosyalariyla 20 incelenmis uzman ajan | `npm run validate:agents` |
+| Subagents | Evidence-heavy uzman delegasyonu | Sandbox'li role dosyalariyla 21 incelenmis uzman ajan | `npm run validate:agents` |
 | Doctor/status | No-write saglik ve drift ozeti | Default repo-only; opsiyonel global varlik kontrolu | `npm run codex:doctor` |
 
 ## Uzman Ajan Seti
 
-Starter artik 20 uzman ajan tasir:
+Starter artik 21 uzman ajan tasir:
 
 - `code_mapper`: buyuk degisikliklerden once read-only repo haritalama.
 - `docs_researcher`: resmi/guncel dokuman ve version-sensitive bilgi.
@@ -53,6 +53,9 @@ Starter artik 20 uzman ajan tasir:
   re-verification planlari.
 - `performance_auditor`: page speed, Core Web Vitals, resource budget, trace ve
   degisiklik sonrasi regression kaniti.
+- `google_seo_auditor`: Google Search Central destekli crawlability, indexing,
+  metadata, structured data, Core Web Vitals ve Search Console'a hazir
+  kontroller.
 - `docs_author`: Diataxis coverage, stale-doc tespiti, release docs ve eksik
   rehber uretimi.
 - `spec_author`: non-goal, evidence, edge case ve quality gate iceren scoped
@@ -63,6 +66,62 @@ Starter artik 20 uzman ajan tasir:
 - `test_verifier`: lint, typecheck, test, build, smoke ve CI kaniti.
 - `release_verifier`: git hygiene, artifact, secret scan, changelog/version ve publish gate.
 - `codex_doctor`: starter sagligi, katalog drift'i, install-plan, docs ve MCP kontrolu.
+
+Her rol dosyasi yedi ek guardrail blogu tasir:
+
+- Source refresh kurallari: gorev mevcut state'e bagliyken her rol lokal
+  dosyalari, guncel docs'u, runtime kanitini ve verification ciktisini yeniden
+  kontrol eder.
+- Cross-repo transfer kurallari: benzer bir repo fikir verebilir, ama asil
+  degisikligi bu repodaki executable path'ler, install yuzeyi, auth siniri ve
+  testler belirler.
+- Research synthesis kurallari: kaynak materyal uzun arka plan metni olarak
+  kopyalanmaz; uygulanabilir action contract, harita, verification plan veya
+  risk karari haline getirilir.
+- Adversarial validation kurallari: her rol ana thread'e donmeden once kendi
+  sonucunu counterexample, eksik kanit, guvensiz varsayim veya daha guclu lokal
+  test acisindan zorlar.
+- Source currency kurallari: her rol version-sensitive docs, lokal repo kaniti,
+  test ciktisi, rendered artifact ve release/security bilgisini; alttaki kaynak
+  degistiyse veya mevcut gorev icin kontrol edilmediyse stale kabul eder.
+- Corpus expansion kurallari: her rol kendi bilgi tabanini lokal repolar,
+  resmi docs, standartlar, vendor guide'lar ve uzman handoff'lari uzerinden
+  nasil genisletecegini bilir; sonra bu malzemeyi gizli prompt kalabaligi
+  yerine kisa calisma kurallarina sikistirir.
+- Expert calibration kurallari: her rol ana thread'e donmeden once ciktisini
+  role ozel senior-quality gate'lere vurur; kanit gucu, eksik risk aciklamasi
+  ve gereken sonraki net kanit bu kontrole dahildir.
+
+`scripts/validate-agent-config.mjs`, her rol dosyasinda her runtime contract ve
+guardrail blogundan tam bir tane bulunmasini, ayrica en az 100 source-backed
+instruction item'i olmasini zorunlu tutar. `scripts/validate-agent-research-corpus.mjs`
+rol basina en az 20 distinct source marker'i da zorunlu tutar. Boylece
+genisletilmis research corpus sonraki edit'lerde ayni kaynak ailesine daralan
+bir checklist'e donusmez.
+
+`catalog/agent-research-corpus.json`, her ajanin domain focus, primary source
+type, refresh trigger, specialist handoff hedefleri ve expertise signal'lari
+icin machine-readable indextir. `scripts/validate-agent-research-corpus.mjs`
+bu index'i `catalog/agents.json` ve role TOML dosyalariyla ayni hizada tutar.
+
+Ayni manifest URL, source type, staleness risk, review cadence ve TOML source
+marker tasiyan reviewed `authorityRefs` registry'si de tasir; Codex docs,
+Context7, OWASP, NIST, Google Search Central, Playwright, WCAG ve GitHub
+rehberleri her role dosyasinda farkli yazilmak yerine stable key'lerle
+referanslanir. Validator her ajan icin authority key'in o ajanin TOML source
+marker'larinda da gecmesini zorunlu tutar, her staleness-risk sinifi icin
+cadence limitini uygular ve corpus `dateChecked` en siki authority-source
+cadence'inden eskiyse fail eder.
+
+Her rol dosyasi `developer_instructions` basina yakin `Authority metadata
+contract` ve `Expertise signal contract` bloklari tasir; bu bloklar cagrilan
+ajana source marker'larini ve expertise signal'larini kopuk bibliyografya
+degil runtime guidance olarak kullanmasini soyler.
+
+Corpus ayrica her ajan icin decision heuristic, failure mode ve verification
+signal gruplarindan olusan `expertiseSignals` tasir. Bu kisa listeler
+arastirmayi operasyonel hale getirir: sonraki edit'ler her uzmanda role ozel
+karar kalitesi, bilinen tuzaklar ve kanit beklentisi kaldigini kanitlayabilir.
 
 Agent katalogu bilerek devasa tutulmadi. ECC ve wshobson/agents gibi yuksek
 sinyalli repolar buyuk agent/skill kataloglarinin kataloglu, izole ve
@@ -115,11 +174,11 @@ Resmi plugin rehberi, iterasyon sirasinda local skill ile baslamayi; workflow
 paylasilacak veya MCP/app/hook/asset paketlenecekse plugin kullanmayi onerir.
 Bu repo bu ayrimi korur:
 
-- Curated public skill'ler `catalog/skills.json` icinde kalir.
+- Curated public ve first-party skill'ler `catalog/skills.json` icinde kalir.
 - Installable skill'ler reviewed `package`, `skill`, `sourceUrl`, `license`,
   `risk` ve `lastChecked` alanlarini tasimalidir.
-- Local plugin default olarak enterprise operator skill'ini ve zero-network
-  offline diagram triplet skill'ini sunar.
+- Local plugin default olarak enterprise operator, zero-network offline diagram
+  triplet ve context budget planner skill'lerini sunar.
 - Plugin hook, MCP server ve app yuzeyleri ayri review olmadan manifest'e girmez.
 
 `/diagram` benzeri cikti gerektiğinde local renderer'i dogrudan calistir:
@@ -140,6 +199,7 @@ Bu starter gelecekte ayri review ve dokumantasyon olmadan sunlari import etmez:
 - Varsayilan acik authenticated connector'lar.
 - Plugin-bundled lifecycle hook'lar.
 - Otomatik memory/session injection.
+- Her turn'e gizli research corpus injection.
 - Destructive cleanup, push, release, publish veya deploy otomasyonu.
 
 ## Dogrulama

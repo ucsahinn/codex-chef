@@ -8,12 +8,12 @@ Discovery output stays no-write and human-readable:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.0
+Package: codex-chef@0.5.4
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
 --- | ---: | ---: | ---
-all | 12 | 4 | InstallGitGuards, InstallSkills
+all | 8 | 1 | InstallSkills
 default | 7 | 0 | none
 ```
 

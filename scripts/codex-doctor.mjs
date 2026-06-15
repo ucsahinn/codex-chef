@@ -185,7 +185,7 @@ function inspectSkills() {
   return {
     catalogCount: skills.length,
     installableCount: skills.filter((skill) => skill.install === true).length,
-    lockEntries: Array.isArray(lock.skills) ? lock.skills.length : 0,
+    lockEntries: Array.isArray(lock.entries) ? lock.entries.length : 0,
     highRiskInstallableCount: skills.filter((skill) => skill.install === true && skill.risk === "high").length
   };
 }

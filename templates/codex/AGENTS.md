@@ -71,6 +71,9 @@
   reports, and re-verification plans.
 - Prefer `performance_auditor` for page speed, Core Web Vitals, build/resource
   budgets, hot paths, and post-change regressions.
+- Prefer `google_seo_auditor` for Google Search visibility, crawlability,
+  indexing, metadata, structured data, sitemaps, hreflang, canonical URLs,
+  Core Web Vitals, and Search Console-ready checks.
 - Prefer `docs_author` for Diataxis coverage, stale docs, release docs, and
   missing guide generation.
 - Prefer `spec_author` for turning vague intent into scoped, executable specs

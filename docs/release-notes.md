@@ -1,5 +1,106 @@
 # Release Notes
 
+## Unreleased
+
+- Agent research corpus entries now include per-agent `expertiseSignals` for
+  decision heuristics, failure modes, and verification signals. The corpus
+  validator requires every bundled specialist to keep all three groups.
+- Every specialist role file now includes an `Expertise signal contract`, and
+  validation requires exactly one copy so the structured expertise metadata is
+  consumed at runtime.
+- Agent research corpus authority references now include source freshness
+  cadence metadata. `scripts/validate-agent-research-corpus.mjs` rejects
+  cadence values that are too loose for the source staleness risk and fails
+  when `dateChecked` is older than the strictest cadence.
+
+## v0.5.4 - 2026-06-15
+
+This patch finishes the Codex Chef hardening pass after v0.5.3. It keeps the
+installer safety model intact while adding explicit app connector guardrails,
+mojibake validation, stronger bundled skill documentation, and a clearer
+GStack/ECC comparison for users who want agent-like workflows without unsafe
+default automation.
+
+## Highlights
+
+- Added the bundled local `context-budget-planner` skill for token/context
+  budgeting, source prioritization, compaction handoff, and verification gates.
+- Kept `impeccable`, extra design-taste, Vercel, prompt, context, memory, and
+  token-related skills visible as manual opt-in catalog references while
+  expanding the reviewed install set to sixteen public/first-party global
+  skills.
+- Documented that public `token` skill search results skew toward
+  auth/deployment/crypto-token workflows, so LLM context budgeting is handled
+  by the local bundled skill instead of an external default install.
+- Made all bundled local plugin skills reference-backed with `references/*.md`
+  and `agents/openai.yaml`, then added `npm run validate:plugin-skills` to keep
+  `SKILL.md`, references, UI metadata, and catalog entries aligned.
+- Documented the exact offline diagram contract so Mermaid, Excalidraw, SVG,
+  PNG, and Markdown claims match the deterministic local renderer.
+- Added the first-party ecosystem skills
+  `context-engineering-project-starter`, `codex-enterprise-prompt-architect`,
+  and `codex-skill-forge` to the reviewed `-All` / `-InstallSkills` set in
+  `catalog/skills.json`, `catalog/skills-lock.json`, and the skills docs.
+- Kept global Git ignore, hook, and Git config changes out of `-All`; users
+  must opt in with `-InstallGitGuards` / `--install-git-guards`.
+- Added explicit app/connector safety defaults:
+  `apps._default.destructive_enabled = false` and
+  `apps._default.open_world_enabled = false`.
+- Added a content-safety gate for likely mojibake so localized READMEs and docs
+  do not regress silently.
+- Sandboxed online skill-source checks under ignored `tmp/skill-source-check`
+  so source validation can resolve public skills without letting Skills CLI
+  side effects touch tracked templates.
+- Expanded the GStack/ECC comparison notes to document which workflow ideas were
+  adopted and which were kept out of default install for safety.
+- Added research-synthesis and adversarial-validation guidance to all
+  twenty-one specialist agent role files so high-signal external repos can
+  inform work without becoming hidden prompt bulk or unsafe copied automation.
+- Added source-refresh, source-currency, and corpus-expansion guidance to all
+  twenty-one specialist agent role files so each agent refreshes stale evidence
+  and knows how to widen domain knowledge into compact operating rules.
+- Added expert-calibration guidance to all twenty-one specialist agent role
+  files so each agent checks its output against a role-specific senior-quality
+  bar before handing work back.
+- Strengthened agent validation so each specialist role file must keep exactly
+  one copy of each required guardrail block, at least 100 source-backed
+  instruction items, and at least 20 distinct source markers.
+- Added `catalog/agent-research-corpus.json` and
+  `scripts/validate-agent-research-corpus.mjs` so specialist-agent research
+  domains, source types, refresh triggers, and handoffs are machine-checkable.
+- Added reviewed `authorityRefs` metadata to the agent research corpus so each
+  specialist can point at stable official, vendor, standard, and tool-source
+  families with URL, source type, staleness risk, and source markers; the
+  validator now confirms those keys are represented in the matching agent TOML
+  source markers.
+- Added an `Authority metadata contract` block to every specialist TOML so
+  invoked agents use source markers as runtime guidance.
+- Added explicit workflow mapping for cross-model review patterns: Codex Chef
+  can support them through `code_reviewer` and manual Codex CLI use, but it does
+  not auto-launch another agent or external review flow.
+
+## Upgrade Notes
+
+- `-All` still installs the core Codex Chef setup and reviewed skill set, but
+  global Git guard changes remain opt-in through `-InstallGitGuards` /
+  `--install-git-guards`.
+- Existing global Codex files are backed up before replacement when users run a
+  real install with force.
+- Authenticated MCP/app connectors remain disabled or least-privilege by
+  default; destructive and open-world connector tools require a reviewed
+  override.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.3 - 2026-06-15
 
 This patch publishes the final README render fix so the release/tag view matches
@@ -84,7 +185,7 @@ Codex Chef release posture. It does not change installer behavior.
   Brazilian Portuguese, and French README entry points.
 - Removed the duplicate language tagline from all six root README entry points:
   German, Spanish, English, Brazilian Portuguese, Turkish, and French.
-- Documented the installed 20-agent Codex team from the actual setup source:
+- Documented the then-current Codex Chef agent team from the actual setup source:
   `templates/codex/agents/*.toml` and the platform Codex config templates.
 - Documented the plugin-local skills and optional global skills without
   implying that broad external skill catalogs are imported by default.

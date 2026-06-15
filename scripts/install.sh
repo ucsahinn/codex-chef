@@ -25,7 +25,6 @@ done
 
 if [ "$ALL" -eq 1 ]; then
   INSTALL_SKILLS=1
-  INSTALL_GIT_GUARDS=1
 fi
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -194,7 +193,8 @@ if [ "$INSTALL_SKILLS" -eq 1 ]; then
 const fs = require("fs");
 const catalog = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 for (const skill of catalog.skills.filter((item) => item.install)) {
-  console.log(`Would install skill: ${skill.name} from ${skill.package} --skill ${skill.skill}`);
+  const depthFlag = skill.fullDepth ? " --full-depth" : "";
+  console.log(`Would install skill: ${skill.name} from ${skill.package} --skill ${skill.skill}${depthFlag}`);
 }
 NODE
     echo "Skipped skill installation because --dry-run is active."
@@ -234,10 +234,14 @@ for (const skill of catalog.skills.filter((item) => item.install)) {
     continue;
   }
 
-  console.log(`Installing skill: ${skill.name} from ${skill.package} --skill ${skill.skill}`);
+  const depthFlag = skill.fullDepth ? " --full-depth" : "";
+  console.log(`Installing skill: ${skill.name} from ${skill.package} --skill ${skill.skill}${depthFlag}`);
+  const args = ["skills", "add", skill.package, "--skill", skill.skill];
+  if (skill.fullDepth) args.push("--full-depth");
+  args.push("--agent", "codex", "--yes", "--global");
   const result = spawnSync(
     "npx",
-    ["skills", "add", skill.package, "--skill", skill.skill, "--agent", "codex", "--yes", "--global"],
+    args,
     { encoding: "utf8", env }
   );
   const output = `${result.stdout || ""}\n${result.stderr || ""}`;

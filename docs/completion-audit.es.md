@@ -44,6 +44,7 @@ Este archivo localizado sigue las secciones del archivo fuente en inglés. Sourc
 - Publication Note
 - 2026-06-11 Routing Addendum
 - 2026-06-14 ECC-Informed Addendum
+- 2026-06-15 Skill And Context-Budget Addendum
 
 ## Mantener sincronizado
 

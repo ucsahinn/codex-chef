@@ -2,8 +2,10 @@
 
 This starter is designed for a Codex user who wants a ready operating model,
 not just a copied config file. After installation, Codex should have durable
-instructions, safe MCP defaults, verified public skills, specialist agents, profiles,
-rules, a local plugin, repo-only doctor diagnostics, and Git hygiene guardrails.
+instructions, safe MCP defaults, verified public/first-party skills, specialist
+agents, profiles, rules, a local plugin, and repo-only doctor diagnostics. Git
+hygiene guardrails are available as a separate opt-in because they change
+global Git behavior.
 
 ## One-Shot Setup
 

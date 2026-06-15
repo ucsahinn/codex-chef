@@ -31,6 +31,9 @@ Bu komut şunları çalıştırır:
   yuzeyleri icin manifest-to-installer drift kontrolleri.
 - `scripts/validate-agent-config.mjs`: Windows ve Unix Codex template'leri icin
   uzman ajan catalog/config drift kontrolleri.
+- `scripts/validate-agent-research-corpus.mjs`: uzman ajan research corpus
+  drift'i, authority-reference source marker'lari, source freshness cadence ve
+  stale `dateChecked` kontrolleri ile agent basina expertise signal coverage.
 - `scripts/validate-mcp-config.mjs`: Windows ve Unix Codex template'leri icin
   MCP catalog/config drift kontrolleri.
 - `scripts/verify-skill-sources.mjs`: offline skill catalog validation ve
@@ -84,6 +87,7 @@ node --check scripts/validate-install-state-preview.mjs
 node --check scripts/validate-installer-alignment.mjs
 node --check scripts/plan-install.mjs
 node --check scripts/validate-agent-config.mjs
+node --check scripts/validate-agent-research-corpus.mjs
 node --check scripts/validate-mcp-config.mjs
 node --check scripts/verify-skill-sources.mjs
 node --check scripts/scan-supply-chain-iocs.mjs

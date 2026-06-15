@@ -43,8 +43,20 @@ const requiredPublicFiles = [
   "docs/completion-audit.tr.md",
   "assets/banner.svg",
   "assets/workflow-overview.svg",
+  "catalog/agent-research-corpus.json",
   "catalog/agents.json",
+  "catalog/skills.json",
   "catalog/skills-lock.json",
+  "plugins/codex-chef-workflows/.codex-plugin/plugin.json",
+  "plugins/codex-chef-workflows/skills/codex-chef-operator/SKILL.md",
+  "plugins/codex-chef-workflows/skills/codex-chef-operator/references/repo-maintenance.md",
+  "plugins/codex-chef-workflows/skills/codex-chef-operator/agents/openai.yaml",
+  "plugins/codex-chef-workflows/skills/context-budget-planner/SKILL.md",
+  "plugins/codex-chef-workflows/skills/context-budget-planner/references/context-strategy.md",
+  "plugins/codex-chef-workflows/skills/context-budget-planner/agents/openai.yaml",
+  "plugins/codex-chef-workflows/skills/offline-diagram-triplet/SKILL.md",
+  "plugins/codex-chef-workflows/skills/offline-diagram-triplet/references/diagram-contract.md",
+  "plugins/codex-chef-workflows/skills/offline-diagram-triplet/agents/openai.yaml",
   "manifests/install-plan.json",
   "schemas/install-plan.schema.json",
   "schemas/install-state-preview.schema.json",
@@ -57,7 +69,9 @@ const requiredPublicFiles = [
   "scripts/validate-install-state-preview.mjs",
   "scripts/validate-installer-alignment.mjs",
   "scripts/validate-agent-config.mjs",
+  "scripts/validate-agent-research-corpus.mjs",
   "scripts/validate-mcp-config.mjs",
+  "scripts/validate-plugin-skills.mjs",
   "scripts/validate-package-surface.mjs",
   "scripts/validate-release-readiness.mjs",
   "scripts/scan-supply-chain-iocs.mjs",
@@ -270,6 +284,17 @@ for (const configFile of ["templates/codex/config.windows.toml", "templates/code
   }
   if (!/\[shell_environment_policy\]/.test(config) || !/ignore_default_excludes\s*=\s*false/.test(config)) {
     failures.push(`${configFile} must define a shell_environment_policy that keeps default secret exclusions`);
+  }
+  const appDefaults = config.match(/\[apps\._default\]([\s\S]*?)(?=\n\[|$)/);
+  if (!appDefaults) {
+    failures.push(`${configFile} must define [apps._default] connector defaults`);
+  } else {
+    if (!/destructive_enabled\s*=\s*false/.test(appDefaults[1])) {
+      failures.push(`${configFile} must keep apps._default.destructive_enabled = false`);
+    }
+    if (!/open_world_enabled\s*=\s*false/.test(appDefaults[1])) {
+      failures.push(`${configFile} must keep apps._default.open_world_enabled = false`);
+    }
   }
   for (const server of externalMcpServers) {
     const block = config.match(new RegExp(`\\[mcp_servers\\.${server}\\]([\\s\\S]*?)(?=\\n\\[|$)`));

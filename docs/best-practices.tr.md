@@ -70,7 +70,7 @@ gerektiriyorsa skill yap. Tool veya dagitim gerekiyorsa plugin olarak paketle.
   commit'i degistirilemez sekilde pinleyen bir lock dosyasi degildir. Mevcut
   Skills CLI kurulumu owner/repo + skill adi cozdurdugu icin release hazirliginda
   online kaynak dogrulamasi yeniden calistirilmalidir.
-- Installer `npx skills add <package> --skill <skill> --yes --global` cagirir.
+- Installer `npx skills add <package> --skill <skill> --agent codex --yes --global` cagirir.
 - Varsayilan kontroller offline ve deterministik kalir. Network kontrolleri
   aciktir: `npm run verify:skills:online`.
 - Zaten lokal olan veya public package'tan guvenle kurulamayan skill'ler
@@ -80,10 +80,25 @@ gerektiriyorsa skill yap. Tool veya dagitim gerekiyorsa plugin olarak paketle.
 
 - `catalog/agents.json`, paketlenen uzman ajanlar icin incelenmis source of
   truth'tur.
+- `catalog/agent-research-corpus.json`, her ajanin research domain, source
+  type, refresh trigger, handoff ve authority-reference metadata kaydi icin
+  incelenmis source index'tir.
+- Her authority reference bir source freshness cadence tasimalidir. Corpus
+  `dateChecked` degeri en siki cadence icinde kalmali; stale resmi docs,
+  standart veya vendor guidance release oncesi lokal validation'da fail etmelidir.
+- Her ajan decision heuristic, failure mode ve verification evidence icin
+  reviewed expertise signal tasimalidir. Bu sinyaller corpus'u bibliyografya
+  degil operasyonel calisma rehberi olarak tutar.
+- Her role dosyasi `Authority metadata contract` ve `Expertise signal contract`
+  runtime bloklarini tasimalidir; boylece katalog metadata'si sadece offline
+  validation'da degil, cagrilan ajanin davranisinda da etkili olur.
 - Katalogdaki her ajan hem Windows hem Unix Codex config template'inde eslesen
   `[agents.<name>]` bloklarina sahip olmalidir.
 - Her `config_file`, incelenmis bir `templates/codex/agents/*.toml` role
   dosyasina gitmelidir.
+- Her role dosyasi her zorunlu runtime contract ve guardrail blogundan bir
+  tane, ayrica en az 100 source-backed instruction item'i ve 20 distinct source
+  marker tasimalidir.
 - Agent template'leri `danger-full-access`, `approval_policy = "never"` veya
   gomulu token environment variable adlari kullanmamalidir.
 - Yazma agirlikli uygulama, kullanici acikca bolmeyi istemedigi surece ana

@@ -76,10 +76,13 @@ requireText(ps, "core.excludesfile", "PowerShell installer");
 requireText(ps, "core.hooksPath", "PowerShell installer");
 requireText(ps, "catalog\\skills.json", "PowerShell installer");
 requireText(ps, "skills list --global --json", "PowerShell installer");
-requireText(ps, "--agent codex --yes --global", "PowerShell installer");
-requireRegex(ps, /if\s*\(\$All\)\s*\{[\s\S]*\$InstallSkills\s*=\s*\$true[\s\S]*\$InstallGitGuards\s*=\s*\$true[\s\S]*\}/, "PowerShell installer");
+requireText(ps, '"--agent", "codex", "--yes", "--global"', "PowerShell installer");
+requireRegex(ps, /if\s*\(\$All\)\s*\{[\s\S]*\$InstallSkills\s*=\s*\$true[\s\S]*\}/, "PowerShell installer");
+if (/if\s*\(\$All\)\s*\{[\s\S]*\$InstallGitGuards\s*=\s*\$true[\s\S]*\}/.test(ps)) {
+  fail("PowerShell -All must not enable InstallGitGuards; global Git guards require the explicit InstallGitGuards flag.");
+}
 requireRegex(ps, /if\s*\(\$InstallGitGuards\)\s*\{[\s\S]*core\.excludesfile[\s\S]*core\.hooksPath[\s\S]*\}/, "PowerShell installer");
-requireRegex(ps, /if\s*\(\$InstallSkills\)\s*\{[\s\S]*skills add[\s\S]*--agent codex[\s\S]*--yes[\s\S]*--global[\s\S]*\}/, "PowerShell installer");
+requireRegex(ps, /if\s*\(\$InstallSkills\)\s*\{[\s\S]*"skills",\s*"add"[\s\S]*"--agent",\s*"codex"[\s\S]*"--yes"[\s\S]*"--global"[\s\S]*\}/, "PowerShell installer");
 
 requireText(sh, "INSTALL_SKILLS=0", "Bash installer");
 requireText(sh, "INSTALL_GIT_GUARDS=0", "Bash installer");
@@ -106,9 +109,19 @@ requireText(sh, "core.hooksPath", "Bash installer");
 requireText(sh, "catalog/skills.json", "Bash installer");
 requireText(sh, "\"skills\", \"list\", \"--global\", \"--json\"", "Bash installer");
 requireText(sh, "\"--agent\", \"codex\", \"--yes\", \"--global\"", "Bash installer");
-requireRegex(sh, /if \[ "\$ALL" -eq 1 \]; then[\s\S]*INSTALL_SKILLS=1[\s\S]*INSTALL_GIT_GUARDS=1[\s\S]*fi/, "Bash installer");
+requireRegex(sh, /if \[ "\$ALL" -eq 1 \]; then[\s\S]*INSTALL_SKILLS=1[\s\S]*fi/, "Bash installer");
+if (/if \[ "\$ALL" -eq 1 \]; then[\s\S]*INSTALL_GIT_GUARDS=1[\s\S]*fi/.test(sh)) {
+  fail("Bash --all must not enable INSTALL_GIT_GUARDS; global Git guards require the explicit --install-git-guards flag.");
+}
 requireRegex(sh, /if \[ "\$INSTALL_GIT_GUARDS" -eq 1 \]; then[\s\S]*core\.excludesfile[\s\S]*core\.hooksPath[\s\S]*fi/, "Bash installer");
 requireRegex(sh, /if \[ "\$INSTALL_SKILLS" -eq 1 \]; then[\s\S]*"skills", "add"[\s\S]*"--agent", "codex"[\s\S]*"--yes", "--global"[\s\S]*fi/, "Bash installer");
+
+const allProfile = new Set(manifest.profiles.all || []);
+for (const id of ["git-ignore-global", "git-pre-commit-hook", "git-config-excludesfile", "git-config-hooks-path"]) {
+  if (allProfile.has(id)) {
+    fail(`All profile must not include ${id}; global Git guards require the explicit InstallGitGuards flag.`);
+  }
+}
 
 for (const op of manifest.operations) {
   if (op.requiresFlag === "InstallSkills" && op.id !== "curated-skills") {

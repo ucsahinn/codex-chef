@@ -59,7 +59,6 @@ function parseArgs(argv) {
 
   if (parsed.all) {
     parsed.installSkills = true;
-    parsed.installGitGuards = true;
   }
 
   return parsed;
@@ -69,7 +68,7 @@ function printHelp() {
   console.log(`Usage: node scripts/plan-install.mjs [options]
 
 Options:
-  --all                  Include optional Git guards and curated skills
+  --all                  Include the recommended full setup and curated skills
   --install-skills       Include reviewed curated skill installation operations
   --install-git-guards   Include optional global Git guard operations
   --list-profiles        List manifest profiles without planning writes
@@ -218,7 +217,9 @@ function skillOperations(operation, options) {
       componentId: operation.id,
       kind: "skill-install",
       summary: `Install curated skill ${skill.name}`,
-      command: `npx skills add ${skill.package} --skill ${skill.skill} --agent codex --yes --global`,
+      command: skill.fullDepth
+        ? `npx skills add ${skill.package} --skill ${skill.skill} --full-depth --agent codex --yes --global`
+        : `npx skills add ${skill.package} --skill ${skill.skill} --agent codex --yes --global`,
       source: skill.source,
       sourceUrl: skill.sourceUrl,
       risk: operation.risk,

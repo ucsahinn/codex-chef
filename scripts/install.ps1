@@ -12,7 +12,6 @@ $ScriptCmdlet = $PSCmdlet
 
 if ($All) {
   $InstallSkills = $true
-  $InstallGitGuards = $true
 }
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
@@ -234,7 +233,8 @@ if ($InstallSkills) {
     $CatalogPath = Join-Path $RepoRoot "catalog\skills.json"
     $Catalog = Get-Content -Path $CatalogPath -Raw | ConvertFrom-Json
     foreach ($Skill in $Catalog.skills | Where-Object { $_.install -eq $true }) {
-      Write-Host "Would install skill: $($Skill.name) from $($Skill.package) --skill $($Skill.skill)"
+      $DepthFlag = if ($Skill.fullDepth -eq $true) { " --full-depth" } else { "" }
+      Write-Host "Would install skill: $($Skill.name) from $($Skill.package) --skill $($Skill.skill)$DepthFlag"
     }
     Write-Host "Skipped skill installation because -WhatIf is active."
   } else {
@@ -269,8 +269,14 @@ if ($InstallSkills) {
         continue
       }
 
-      Write-Host "Installing skill: $($Skill.name) from $($Skill.package) --skill $($Skill.skill)"
-      $Output = & npx.cmd skills add $Skill.package --skill $Skill.skill --agent codex --yes --global 2>&1
+      $SkillArgs = @("skills", "add", $Skill.package, "--skill", $Skill.skill)
+      if ($Skill.fullDepth -eq $true) {
+        $SkillArgs += "--full-depth"
+      }
+      $SkillArgs += @("--agent", "codex", "--yes", "--global")
+      $DepthFlag = if ($Skill.fullDepth -eq $true) { " --full-depth" } else { "" }
+      Write-Host "Installing skill: $($Skill.name) from $($Skill.package) --skill $($Skill.skill)$DepthFlag"
+      $Output = & npx.cmd @SkillArgs 2>&1
       $ExitCode = $LASTEXITCODE
       $OutputText = ($Output -join [Environment]::NewLine)
       if ($ExitCode -ne 0 -or $OutputText -match "Failed to install|Installation failed|Failed to clone") {

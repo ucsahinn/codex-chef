@@ -1,6 +1,6 @@
 {
   "name": "codex-chef",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "private": true,
   "description": "Codex Chef: Windows-first Codex setup kit with agents, skills, MCPs, safe installers, and validation gates.",
   "files": [
@@ -43,9 +43,11 @@
     "validate:install-state": "node scripts/validate-install-state-preview.mjs",
     "validate:installer": "node scripts/validate-installer-alignment.mjs",
     "validate:agents": "node scripts/validate-agent-config.mjs",
+    "validate:agent-corpus": "node scripts/validate-agent-research-corpus.mjs",
     "validate:mcp": "node scripts/validate-mcp-config.mjs",
     "validate:doctor": "node scripts/validate-codex-doctor.mjs",
     "validate:diagram": "node scripts/validate-diagram-triplet.mjs",
+    "validate:plugin-skills": "node scripts/validate-plugin-skills.mjs",
     "validate:package-surface": "node scripts/validate-package-surface.mjs",
     "validate:release": "node scripts/validate-release-readiness.mjs",
     "plan:install": "node scripts/plan-install.mjs",
@@ -56,7 +58,7 @@
     "scan:supply-chain": "node scripts/scan-supply-chain-iocs.mjs",
     "audit:security": "node scripts/security-audit.mjs",
     "sync:doc-locales": "node scripts/sync-doc-locales.mjs",
-    "check": "node scripts/validate-repo.mjs && node scripts/validate-doc-locales.mjs && node scripts/validate-docs.mjs && node scripts/validate-readme-locales.mjs && node scripts/validate-workflow-security.mjs && node scripts/validate-content-safety.mjs && node scripts/validate-install-plan.mjs && node scripts/validate-install-state-preview.mjs && node scripts/validate-installer-alignment.mjs && node scripts/validate-agent-config.mjs && node scripts/validate-mcp-config.mjs && node scripts/validate-codex-doctor.mjs && node scripts/validate-diagram-triplet.mjs && node scripts/verify-skill-sources.mjs && node scripts/scan-supply-chain-iocs.mjs && node scripts/security-audit.mjs && node scripts/validate-package-surface.mjs && node scripts/validate-release-readiness.mjs"
+    "check": "node scripts/validate-repo.mjs && node scripts/validate-doc-locales.mjs && node scripts/validate-docs.mjs && node scripts/validate-readme-locales.mjs && node scripts/validate-workflow-security.mjs && node scripts/validate-content-safety.mjs && node scripts/validate-install-plan.mjs && node scripts/validate-install-state-preview.mjs && node scripts/validate-installer-alignment.mjs && node scripts/validate-agent-config.mjs && node scripts/validate-agent-research-corpus.mjs && node scripts/validate-mcp-config.mjs && node scripts/validate-codex-doctor.mjs && node scripts/validate-diagram-triplet.mjs && node scripts/validate-plugin-skills.mjs && node scripts/verify-skill-sources.mjs && node scripts/scan-supply-chain-iocs.mjs && node scripts/security-audit.mjs && node scripts/validate-package-surface.mjs && node scripts/validate-release-readiness.mjs"
   },
   "engines": {
     "node": ">=18"

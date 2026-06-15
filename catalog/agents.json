@@ -2,7 +2,7 @@
   "version": "0.1.0",
   "dateChecked": "2026-06-15",
   "officialReference": "https://developers.openai.com/codex/config-reference#configtoml",
-  "sourcePolicy": "Specialist agents are declared in config.toml with description and config_file, then backed by reviewed TOML role files under templates/codex/agents.",
+  "sourcePolicy": "Specialist agents are declared in config.toml with description and config_file, then backed by reviewed TOML role files under templates/codex/agents. Each role file must keep source-refresh, cross-repo transfer, research-synthesis, adversarial-validation, source-currency, corpus-expansion, and expert-calibration guidance explicit, exactly once, with at least 100 source-backed instruction items and 20 distinct source markers so high-signal external patterns are converted into evidence-backed operating rules, not copied as hidden behavior. catalog/agent-research-corpus.json owns reviewed authority references, source freshness cadence, and per-agent expertise signals so stale source metadata and shallow role knowledge fail validation before runtime prompts drift.",
   "defaults": {
     "model": "gpt-5.5",
     "maxThreads": 6,
@@ -177,6 +177,20 @@
       "defaultReason": "Can collect local performance evidence while keeping deploys and production load approval-gated.",
       "primaryUse": "Measure build size, web vitals, traces, resource budgets, expensive paths, and before/after regression evidence.",
       "mustNot": "Deploy, run production load, use external accounts, or optimize without a measured bottleneck."
+    },
+    {
+      "name": "google_seo_auditor",
+      "category": "search-discoverability",
+      "description": "Google SEO auditor for crawlability, indexing, metadata, structured data, Core Web Vitals, and Search Console-ready fixes.",
+      "templateDescription": "Google SEO auditor for crawlability, indexing, metadata, structured data, Core Web Vitals, and Search Console-ready fixes.",
+      "configFile": "agents/google_seo_auditor.toml",
+      "sandboxMode": "read-only",
+      "modelReasoningEffort": "high",
+      "webSearch": true,
+      "risk": "low",
+      "defaultReason": "Keeps SEO and Search Console guidance evidence-based and read-only before any site change.",
+      "primaryUse": "Audit crawlability, indexability, metadata, structured data, sitemaps, canonicalization, hreflang, internal links, Core Web Vitals, and Search Console-ready verification steps.",
+      "mustNot": "Promise rankings, keyword-stuff content, invent analytics, automate backlinks, or use credentialed Search Console access without explicit approval."
     },
     {
       "name": "docs_author",

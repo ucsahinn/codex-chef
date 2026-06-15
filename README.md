@@ -57,10 +57,10 @@ manifest-backed install plan.
 
 | Surface | What lands on your machine |
 | --- | --- |
-| 🤖 Agent team | 20 registered Codex subagent role files under `~/.codex/agents/*.toml`. |
+| 🤖 Agent team | 21 registered Codex subagent role files under `~/.codex/agents/*.toml`. |
 | 🧠 Durable guidance | Global `~/.codex/AGENTS.md` with safe routing, verification, and approval rules. |
 | 🔌 MCP defaults | 7 useful MCP servers enabled and 8 authenticated/high-risk connectors parked disabled. |
-| 🧩 Plugin + skills | Local `codex-chef-workflows` plugin, two bundled skills, and nine optional curated global skills. |
+| 🧩 Plugin + skills | Local `codex-chef-workflows` plugin, three bundled skills, and sixteen optional curated global skills. |
 | 🛡️ Safety gates | Backups, dry-run planning, secret scanning, validation, and approval-gated risky actions. |
 
 ## 🤖 Installed Agent Team
@@ -80,6 +80,7 @@ Codex uses their names, descriptions, and TOML role files when routing a task.
 - 🕵️ **Root-Cause Debugger** (`root_cause_debugger`) - investigation
 - ✅ **QA Lead** (`qa_lead`) - user flows
 - ⚡ **Performance Auditor** (`performance_auditor`) - speed
+- 🔎 **Google SEO Auditor** (`google_seo_auditor`) - search visibility
 - 📝 **Docs Author** (`docs_author`) - docs coverage
 - 📐 **Spec Author** (`spec_author`) - executable specs
 - 🔍 **Code Reviewer** (`code_reviewer`) - fresh review
@@ -91,21 +92,60 @@ Codex uses their names, descriptions, and TOML role files when routing a task.
 
 ## 🧩 Skills Included
 
-Codex Chef ships two local plugin skills. With `-All` or `-InstallSkills`, it
-can also install nine reviewed public skills for frontend, design, dependency,
-and Vercel workflows.
+Codex Chef ships three local plugin skills. They are bundled with the
+`codex-chef-workflows` plugin and are checked by `npm run validate:plugin-skills`
+so they cannot quietly drift out of the repo. With `-All` or `-InstallSkills`,
+the installer can also add sixteen reviewed public and first-party skills for maintenance,
+debugging, refactoring, security, testing, browser verification, SEO, web
+quality, docs, MCP building, context engineering, prompt architecture, skill
+authoring, and one broad frontend workflow.
 
 - 🍳 **Chef Operator** (`codex-chef-operator`) - plugin-local
 - 📐 **Offline Diagram Triplet** (`offline-diagram-triplet`) - plugin-local
+- 🧮 **Context Budget Planner** (`context-budget-planner`) - plugin-local
 - ⬆️ **Dependency Upgrade** (`dependency-upgrade`) - optional global
 - 🖼️ **Frontend Builder** (`frontend-skill`) - optional global
-- 💎 **Interface Polish** (`impeccable`) - optional global
-- 🎨 **Design Taste** (`design-taste-frontend`) - optional global
-- 🧱 **Image To Code** (`image-to-code`) - optional global
-- ✨ **High-End Visual Design** (`high-end-visual-design`) - optional global
-- ♿ **Web Guidelines** (`web-design-guidelines`) - optional global
-- ⚛️ **React Best Practices** (`vercel-react-best-practices`) - optional global
-- ▲ **Vercel Optimize** (`vercel-optimize`) - optional global
+- 🛡️ **Security Best Practices** (`security-best-practices`) - optional global
+- 🧯 **GitHub CI Fixer** (`gh-fix-ci`) - optional global
+- 🕵️ **Systematic Debugging** (`systematic-debugging`) - optional global
+- 🧱 **Refactor Planner** (`request-refactor-plan`) - optional global
+- 🧭 **Webapp Testing** (`webapp-testing`) - optional global
+- 🧪 **Test-Driven Development** (`test-driven-development`) - optional global
+- 🔎 **SEO** (`seo`) - optional global
+- ♿ **Accessibility** (`accessibility`) - optional global
+- 📊 **Web Quality Audit** (`web-quality-audit`) - optional global
+- 📝 **Documentation And ADRs** (`documentation-and-adrs`) - optional global
+- 🔌 **MCP Builder** (`mcp-builder`) - optional global
+- 🧱 **Context Starter** (`context-engineering-project-starter`) - optional global, first-party
+- ✍️ **Prompt Architect Skill** (`codex-enterprise-prompt-architect`) - optional global, first-party
+- 🛠️ **Skill Forge** (`codex-skill-forge`) - optional global, first-party
+
+Extra design, React/Vercel, prompt, memory, token, and context skills stay in
+`catalog/skills.json` as manual opt-ins instead of default installs. That keeps
+the starter broad without losing references such as `impeccable`,
+`design-taste-frontend`, `image-to-code`, `high-end-visual-design`,
+`web-design-guidelines`, `vercel-react-best-practices`, `vercel-optimize`,
+`vercel-cli-with-tokens`, `context-map`, and `what-context-needed`.
+
+The key distinction: Codex Chef solves LLM token/context planning with the
+bundled local `context-budget-planner`; deployment-token or vendor-auth skills
+remain opt-in because they can touch accounts or duplicate existing triggers.
+
+First-party ecosystem skills are part of the reviewed `-All` / `-InstallSkills`
+set:
+
+- 🧱 `context-engineering-project-starter` - project context foundations,
+  starter docs, agent instruction files, and vibe-coding guardrails.
+- ✍️ `codex-enterprise-prompt-architect` - plan-first, approval-gated Codex
+  prompt packages and prompt audits.
+- 🛠️ `codex-skill-forge` - create, validate, forward-test, and package Codex
+  skills and plugins.
+
+Manual opt-in example:
+
+```bash
+npx skills add pbakaus/impeccable --skill impeccable --agent codex --yes --global
+```
 
 ## 🔌 MCP Defaults
 
@@ -243,6 +283,8 @@ codex --strict-config "Summarize the active Codex setup."
 ```
 
 Use `-InstallSkills` / `--install-skills` or `-InstallGitGuards` / `--install-git-guards` when you only want one optional part of the setup.
+`-All` includes the reviewed skill set, but it does not change global Git
+config unless you also opt in to Git guards.
 
 ## 🧠 Operating Model
 
@@ -284,8 +326,10 @@ The result is a small specialist-team workflow inside Codex while the main threa
 | 🌐 Multilingual docs | Deutsch, Español, English, Português (Brasil), Türkçe, and Français README and deep documentation files are present; six-language deep docs are enforced by validation. |
 | 🎬 Accessible visuals | SVG assets include title, description, motion, reduced-motion fallback, and README alt text. |
 | 🧩 Skill source gate | `catalog/skills-lock.json` is checked against installable skill metadata. |
+| 🧩 Local skill gate | `npm run validate:plugin-skills` checks every bundled skill, reference file, UI metadata file, and catalog entry. |
 | 📐 Offline diagrams | Bundled `offline-diagram-triplet` emits Mermaid, editable Excalidraw, SVG, PNG, and Markdown with zero network. |
-| 🤖 Agent drift gate | `catalog/agents.json` is checked against Windows/Unix config blocks and role TOML files. |
+| 🧮 Context budget | Bundled `context-budget-planner` keeps large tasks focused with source priority, token budgeting, and compaction handoff. |
+| 🤖 Agent drift gate | `catalog/agents.json` and `catalog/agent-research-corpus.json` are checked against Windows/Unix config blocks, role TOML files, required guardrail blocks, and source-backed item counts. |
 | 🩺 Doctor gate | `npm run codex:doctor` summarizes repo-only Codex starter health without global writes. |
 | 🧾 Install plan gate | `manifests/install-plan.json` and the install-state preview schema are validated before installer execution. |
 | 🔌 Conservative MCPs | Authenticated account, database, and broad filesystem connectors stay disabled. |

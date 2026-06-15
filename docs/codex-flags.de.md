@@ -44,7 +44,9 @@ Diese lokalisierte Datei folgt den Abschnitten der englischen Quelldatei. Source
 - Global Flags
 - Common Commands
 - MCP Config Fields
+- App And Connector Defaults
 - Recommended Local Defaults
+- Advanced Features To Keep Explicit
 
 ## Synchron halten
 

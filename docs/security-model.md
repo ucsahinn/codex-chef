@@ -14,6 +14,8 @@ Codex safety model.
   exclusions active so subprocesses do not inherit broad local token variables
   by default.
 - Authenticated remote connectors are present as disabled examples.
+- App/connector defaults keep destructive and open-world tools disabled unless
+  a reviewed app-specific override changes them.
 - Global command rules are narrow and biased toward read-only discovery and
   local verification.
 - Deletion, cleanup, pruning, uninstall, overwrite, database drop/truncate, and
@@ -36,6 +38,9 @@ Rules used in this starter:
 - Read-only documentation MCPs may use `default_tools_approval_mode =
   "approve"`; browser, account, filesystem, database, production, and mutating
   tools should use `"prompt"`.
+- Apps/connectors also have a separate `[apps._default]` gate:
+  `destructive_enabled = false` and `open_world_enabled = false` are part of
+  the reviewed templates.
 - New MCP servers should prefer narrow config flags such as `enabled_tools`,
   `disabled_tools`, `startup_timeout_sec`, and `tool_timeout_sec` over broad
   prose-only instructions.

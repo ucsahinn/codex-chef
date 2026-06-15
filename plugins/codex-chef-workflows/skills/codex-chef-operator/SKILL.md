@@ -1,12 +1,19 @@
 ---
 name: codex-chef-operator
-description: Maintain, audit, and improve this Codex Chef setup without weakening security, leaking local state, or changing external systems.
+description: Maintain, audit, and improve Codex Chef setup repositories. Use for README/docs/template/catalog/installer/validation updates, release-readiness work, and safe Codex starter maintenance without weakening security, leaking local state, or changing external systems.
 ---
 
-# Enterprise Codex Operator
+# Codex Chef Operator
 
 Use this skill when maintaining the Codex Chef repository or a
 derived local setup.
+
+## Reference Routing
+
+Read `references/repo-maintenance.md` before broad setup, installer, README,
+catalog, docs, verification, release-readiness, or public-repo changes. Keep
+`SKILL.md` as the routing entry point and put detailed repo policy in that
+reference.
 
 ## Workflow
 
@@ -38,13 +45,14 @@ derived local setup.
    - `docs/install.tr.md`
    - `docs/security-model.md`
    - every English doc in `docs/` should have a matching `.tr.md` pair
-   - `plugins/codex-chef-workflows/skills/offline-diagram-triplet`
-     should stay zero-network and should emit Mermaid, Excalidraw, SVG, PNG,
-     and Markdown snippet artifacts from local files
+   - bundled local skills should stay reference-backed, zero-network unless
+     their own script or workflow explicitly says otherwise, and validated by
+     repo checks
    - public README visuals under `assets/` should stay purposeful, accessible,
      lightly animated with reduced-motion fallback, and public-safe
 4. Validate after edits:
    - `npm run validate`
+   - `npm run validate:plugin-skills`
    - `git status --short`
    - Gitleaks when available
 5. Do not commit, push, tag, release, deploy, publish, rotate credentials, or

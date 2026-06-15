@@ -2,7 +2,85 @@
 
 ## Unreleased
 
-- No changes yet.
+- Added per-agent expertise-signal metadata and validation so each specialist
+  has machine-checkable decision heuristics, failure modes, and verification
+  signals, not just source references.
+- Added an `Expertise signal contract` to every specialist role file so the
+  reviewed expertise signals change runtime behavior instead of living only in
+  the corpus manifest.
+- Added authority-reference source freshness cadence metadata and validation so
+  stale official docs, standards, vendor guidance, and tool-source references
+  fail `validate-agent-research-corpus.mjs` before specialist role prompts
+  drift.
+
+## 0.5.4 - 2026-06-15
+
+- Added a read-only `google_seo_auditor` specialist for Google Search
+  visibility, crawlability, metadata, structured data, Core Web Vitals, and
+  Search Console-ready checks.
+- Rebalanced the optional installable skill catalog away from Vercel/design
+  overlap toward maintenance, security, testing, SEO, accessibility, web
+  quality, docs, CI, and one broad frontend workflow.
+- Expanded the optional installable skill allowlist from nine to sixteen
+  verified sources by adding `systematic-debugging`,
+  `request-refactor-plan`, `webapp-testing`, `mcp-builder`, and the
+  first-party `context-engineering-project-starter`,
+  `codex-enterprise-prompt-architect`, and `codex-skill-forge` skills.
+- Added the bundled local `context-budget-planner` skill for token/context
+  budgeting, source prioritization, compaction handoff, and verification gates.
+- Added reference-backed bundled skill guidance with `references/*.md`,
+  `agents/openai.yaml`, and `npm run validate:plugin-skills` so local plugin
+  skills cannot silently lose instructions, UI metadata, or catalog coverage.
+- Documented the exact offline diagram contract for the supported Mermaid
+  subset, editable Excalidraw scene shape, and SVG/PNG/Markdown outputs.
+- Moved the first-party ecosystem skills
+  `context-engineering-project-starter`, `codex-enterprise-prompt-architect`,
+  and `codex-skill-forge` into the reviewed `-All` / `-InstallSkills` set.
+- Kept global Git ignore, hook, and Git config changes out of `-All`; they now
+  require the explicit `-InstallGitGuards` / `--install-git-guards` opt-in.
+- Kept `impeccable`, extra design-taste, Vercel, prompt, context, memory, and
+  token-related skills visible as manual opt-in catalog references without
+  adding duplicate default triggers.
+- Fixed Codex Chef doctor skill lock counting and added a guard that keeps
+  lock entries aligned with installable skills.
+- Added agent-template validation against Google credential environment names.
+- Added explicit app/connector safety defaults that keep destructive and
+  open-world connector tools disabled unless a reviewed override changes them.
+- Added content-safety validation for likely UTF-8/Windows-1252 mojibake
+  regressions in tracked text files.
+- Sandboxed online skill-source checks under ignored `tmp/skill-source-check`
+  so `npm run verify:skills:online` cannot treat the repo root as its working
+  project and mutate tracked templates.
+- Expanded GStack/ECC research notes to document adopted role, manifest,
+  doctor, and diagram patterns while excluding default cookie, tunnel, deploy,
+  raw-CDP, hook-injection, and cross-harness sync behavior.
+- Added role-specific research-synthesis and adversarial-validation guidance to
+  all twenty-one specialist agent templates so external starter patterns become
+  compact evidence-backed decisions instead of copied hidden behavior.
+- Added role-specific source-refresh, source-currency, and corpus-expansion
+  guidance to all twenty-one specialist agent templates so stale evidence is
+  refreshed and broader local, official, standards, vendor, and specialist
+  sources become compact operating rules.
+- Added role-specific expert-calibration guidance to all twenty-one specialist
+  agent templates so each role checks its output against senior-quality gates
+  before handing work back.
+- Strengthened `validate-agent-config.mjs` so every specialist agent template
+  must keep exactly one copy of each required guardrail block, at least 100
+  source-backed instruction items, and at least 20 distinct source markers.
+- Added `catalog/agent-research-corpus.json` plus
+  `validate-agent-research-corpus.mjs` so each specialist agent's research
+  domains, source types, refresh triggers, and handoffs are machine-checkable.
+- Added reviewed authority-reference metadata to the agent research corpus so
+  specialist source families, URLs, source types, staleness risk, and source
+  markers are centralized instead of repeated differently across roles. The
+  corpus validator now ties those keys back to source markers in each role TOML
+  file.
+- Added an `Authority metadata contract` block to every specialist TOML so the
+  reviewed corpus metadata changes agent runtime behavior when the role is
+  invoked, not only offline validation.
+- Mapped cross-model review workflows explicitly to `code_reviewer` and manual
+  Codex CLI use while keeping automatic external-agent launch out of the
+  default setup.
 
 ## 0.5.3 - 2026-06-15
 

@@ -1,9 +1,10 @@
 # Kurulum Nasıl Kullanılır?
 
 Bu starter sadece bir `config.toml` kopyası değildir. Kurulumdan sonra Codex'in
-kalıcı talimatları, güvenli MCP varsayılanları, doğrulanmış public skill'leri, uzman
-ajanları, profilleri, kuralları, yerel plugin'i, repo-only doctor tanılaması ve
-Git hijyen guard'ları hazır olmalıdır.
+kalıcı talimatları, güvenli MCP varsayılanları, doğrulanmış public/first-party
+skill'leri, uzman ajanları, profilleri, kuralları, yerel plugin'i ve repo-only
+doctor tanılaması hazır olur. Git hijyen guard'ları ayrı opt-in olarak durur
+çünkü global Git davranışını değiştirir.
 
 ## Tek Seferlik Kurulum
 

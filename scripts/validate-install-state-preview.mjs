@@ -356,7 +356,7 @@ validatePlan(runPlan(["--all", "--json"], "All plan"), "All plan", {
   options: {
     all: true,
     installSkills: true,
-    installGitGuards: true
+    installGitGuards: false
   }
 });
 

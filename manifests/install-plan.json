@@ -19,10 +19,6 @@
       "codex-profiles",
       "codex-plugin",
       "plugin-marketplace",
-      "git-ignore-global",
-      "git-pre-commit-hook",
-      "git-config-excludesfile",
-      "git-config-hooks-path",
       "curated-skills"
     ]
   },

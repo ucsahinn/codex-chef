@@ -31,6 +31,21 @@ Bu repo şunları içerir:
 - `plugins/codex-chef-workflows/skills/offline-diagram-triplet`: Mermaid
   kaynağından editable Excalidraw, SVG, PNG ve Markdown snippet üreten
   zero-network yerel diagram workflow'u.
+- `plugins/codex-chef-workflows/skills/context-budget-planner`: büyük işlerde
+  token/context planı, kaynak önceliği, compaction handoff'u ve verification
+  gate'leri çıkaran yerel workflow.
+
+## Bundled Skill Yapisi
+
+Repo icindeki yerel skill'ler ayni iskeleti kullanir:
+
+- `SKILL.md`: kisa tetik ve workflow talimati.
+- `references/*.md`: sadece gerektiginde yuklenen detayli alan rehberi.
+- `agents/openai.yaml`: Codex skill listeleri icin UI metadata ve default
+  prompt.
+
+`npm run validate:plugin-skills`, bu yapiyi, plugin manifestini ve
+`catalog/skills.json` kaydini ayni hizada tutar.
 
 ## Plugin'ler
 
@@ -48,18 +63,20 @@ Bu repo şunları içerir:
 Installer yerel marketplace kaydını kurar. Codex'i yeniden başlatıp `/plugins`
 ile plugin'i inceleyebilir veya kurabilirsin.
 
-Bundled plugin şu anda iki yerel skill sunar:
+Bundled plugin şu anda üç yerel skill sunar:
 
 - `codex-chef-operator`: güvenlik sınırlarını zayıflatmadan bu starter'ı
   bakımda tutar.
 - `offline-diagram-triplet`: network kullanmadan Mermaid source'u editable
   diagram triplet'ine çevirir.
+- `context-budget-planner`: büyük repo, araştırma, çok ajanlı, dokümantasyon
+  ağırlıklı veya uzun sürecek Codex işlerinde token/context kullanımını planlar.
 
 Installer sadece `install: true`, `owner/repo` formatında doğrulanmış `package`
 ve eşleşen `skill` adı taşıyan katalog kayıtları için Skills CLI çağırır.
-Kullandığı format `npx skills add <package> --skill <skill> --yes --global`
+Kullandığı format `npx skills add <package> --skill <skill> --agent codex --yes --global`
 olduğu için düz skill ismi yanlışlıkla Git repository gibi clone edilmeye
-çalışılmaz.
+çalışılmaz ve hedef ajan açıkça Codex olarak kalır.
 
 `catalog/skills-lock.json` incelenmis kurulabilir kayitlari ve installer
 komutlarini yansitir; fakat degistirilemez upstream commit lock'u degil, kaynak
@@ -67,10 +84,64 @@ allowlist'idir. Release oncesinde ve kaynak degisikliginden sonra `npm run
 verify:skills:online` calistirilarak mevcut Skills CLI'in her package + skill
 ciftini cozdugu tekrar kanitlanmalidir.
 
+Varsayilan kurulabilir public ve first-party skill seti:
+
+- `dependency-upgrade`: guvenli dependency bakimi.
+- `gh-fix-ci`: resmi OpenAI GitHub Actions hata cozme workflow'u.
+- `security-best-practices`: resmi OpenAI secure-defaults workflow'u.
+- `systematic-debugging`: fix oncesi kok neden arastirmasi.
+- `request-refactor-plan`: genis rewrite yerine kucuk adimli refactor planlama.
+- `frontend-skill`: tek genis frontend uretim workflow'u.
+- `webapp-testing`: Playwright kanitiyla local web-app dogrulamasi.
+- `web-quality-audit`: Lighthouse tarzi web quality genel denetimi.
+- `seo`: teknik SEO ve search discoverability.
+- `accessibility`: keyboard, focus, form, ARIA ve semantic HTML kontrolleri.
+- `test-driven-development`: davranis-oncelikli implementation workflow'u.
+- `documentation-and-adrs`: README, ADR ve kalici docs workflow'u.
+- `mcp-builder`: kaliteli MCP server tasarimi, tool schema'lari, transport ve
+  evaluation akisi.
+- `context-engineering-project-starter`: first-party proje context temeli,
+  starter docs, agent instruction dosyalari ve vibe-coding guardrail'leri.
+- `codex-enterprise-prompt-architect`: first-party plan-first, approval-gated,
+  security-aware Codex prompt paketleri ve prompt audit'leri.
+- `codex-skill-forge`: first-party skill authoring, validation,
+  forward-testing, plugin packaging ve marketplace hazirligi.
+
+Manuel opt-in referansları, daha özel workflow isteyen kullanıcılar için
+katalogda görünür kalır:
+
+- `impeccable`, `design-taste-frontend`, `image-to-code` ve
+  `high-end-visual-design`: ekstra tasarım polish ve image-to-code workflow'ları.
+- `web-design-guidelines`, `vercel-react-best-practices`, `vercel-optimize` ve
+  `vercel-cli-with-tokens`: Vercel, React/Next.js, hosting ve deployment-token
+  workflow'ları.
+- `context-map` ve `what-context-needed`: ek context seçimi pattern'leri.
+- `prompt-engineering-patterns` ve
+  `ai-prompt-engineering-safety-review`: ek prompt tasarımı ve prompt safety
+  review'ları.
+- `memory-safety-patterns`: memory workflow güvenliği.
+
+Manuel kurulum örneği:
+
+```bash
+npx skills add pbakaus/impeccable --skill impeccable --agent codex --yes --global
+```
+
 Offline diagram smoke doğrulaması online skill-source resolution'dan ayrıdır:
 
 ```bash
 npm run validate:diagram
+```
+
+Token/context ayrimi onemlidir: bundled `context-budget-planner`, LLM context
+butcesi ve compaction handoff isini cozer. `vercel-cli-with-tokens` gibi
+deployment-token veya vendor-auth skill'leri hesap credential'i ve deployment
+davranisi gerektirebildigi icin manual kalir.
+
+Bundled yerel skill dogrulamasi public skill-source resolution'dan ayridir:
+
+```bash
+npm run validate:plugin-skills
 ```
 
 ## Uzman Ajanlar
@@ -99,6 +170,9 @@ Bu starter odaklı ajanlar kaydeder:
   dogrulama yapar.
 - `performance_auditor`: page speed, Core Web Vitals, resource budget, trace ve
   degisiklik sonrasi regression kaniti toplar.
+- `google_seo_auditor`: crawlability, indexing, metadata, structured data, Core
+  Web Vitals ve Search Console'a hazir fix'leri Google Search Central ve
+  Lighthouse kanitiyla denetler.
 - `docs_author`: Diataxis coverage, stale docs, release docs ve eksik rehber
   uretimi icin dokumanlari inceler.
 - `spec_author`: belirsiz istegi non-goal, evidence, edge case ve quality gate
@@ -116,10 +190,39 @@ Resmi kaynak: https://developers.openai.com/codex/subagents
 
 Agent katalog kurali:
 
-- `catalog/agents.json`, paketlenen yirmi uzman ajan icin incelenmis kaynaktir.
+- `catalog/agents.json`, paketlenen yirmi bir uzman ajan icin incelenmis
+  kaynaktir.
+- `catalog/agent-research-corpus.json`, her uzman ajanin domain focus, primary
+  source type, refresh trigger, handoff hedefi ve reviewed authority-reference
+  metadata'sini kaydeder.
+- Her agent rol dosyasi acik source-refresh, cross-repo transfer,
+  research-synthesis, adversarial-validation, source-currency ve
+  corpus-expansion guidance ile expert-calibration gate'leri tasimalidir;
+  boylece disaridan alinan pattern'ler gizli global davranisa degil, kanita
+  dayali aksiyona donusur ve rol ciktilari senior-quality cizgisine vurulur.
+- Her rol dosyasi ayrica `Authority metadata contract` ve
+  `Expertise signal contract` bloklarini tasir; boylece ajan cagrildiginda
+  kendi source marker'larini ve expertise signal'larini reviewed corpus
+  metadata'sinin runtime formu olarak kullanir.
+- Her authority reference ayrica `reviewCadenceDays` tasir; corpus validator
+  global `dateChecked` degeri resmi docs, standart, vendor guide ve tool
+  kaynaklari icindeki en siki cadence'den eskiyse fail eder.
+- Her ajan ayrica `decisionHeuristics`, `failureModes` ve
+  `verificationSignals` icin `expertiseSignals` tasir. Bunlar source corpus'un
+  ajanin davranisini nasil degistirecegini gosteren kisa runtime sinyalleridir.
 - `scripts/validate-agent-config.mjs`, katalogdaki her ajanin hem Windows hem
   Unix config template'inde yer aldigini ve her `config_file` alaninin eslesen
-  `templates/codex/agents/*.toml` role dosyasina gittigini kontrol eder.
+  `templates/codex/agents/*.toml` role dosyasina gittigini kontrol eder. Ayrica
+  her zorunlu runtime contract ve guardrail blogundan bir tane bulunmasini,
+  ayrica rol dosyasi basina en az 100 source-backed instruction item'i ve 20
+  distinct source marker olmasini zorunlu tutar.
+- `scripts/validate-agent-research-corpus.mjs`, machine-readable corpus index'i
+  `catalog/agents.json`, reviewed authority metadata'si ve role TOML
+  dosyalariyla karsilastirir. Ayrica her ajan icin authority key'in o ajanin
+  TOML promptunda bir source marker'a denk gelmesini zorunlu tutar, her source
+  freshness cadence'ini staleness-risk sinifina gore kontrol eder ve stale
+  corpus `dateChecked` degerlerini reddeder. Ayrica her bundled ajan icin her
+  reviewed grupta en az uc expertise signal ister.
 - Gate ayrica agent template'lerinde tehlikeli default'lari engeller:
   `danger-full-access`, `approval_policy = "never"` ve role dosyalari icinde
   token environment variable adlari yoktur.

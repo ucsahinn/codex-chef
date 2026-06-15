@@ -44,6 +44,7 @@ Ce fichier localisé suit les sections du fichier source anglais. Source: [compl
 - Publication Note
 - 2026-06-11 Routing Addendum
 - 2026-06-14 ECC-Informed Addendum
+- 2026-06-15 Skill And Context-Budget Addendum
 
 ## Garder synchronisé
 

@@ -74,7 +74,7 @@ make it a skill. If it needs tools or distribution, package it as a plugin.
   upstream commit lock. The current Skills CLI install path resolves owner/repo
   plus skill name, so release preparation must re-run online source
   verification.
-- The installer must call `npx skills add <package> --skill <skill> --yes --global`.
+- The installer must call `npx skills add <package> --skill <skill> --agent codex --yes --global`.
 - Default checks stay offline and deterministic. Network checks are explicit:
   `npm run verify:skills:online`.
 - Skills that are already local and not safely installable from a public package
@@ -84,10 +84,25 @@ make it a skill. If it needs tools or distribution, package it as a plugin.
 
 - `catalog/agents.json` is the reviewed source of truth for bundled specialist
   agents.
+- `catalog/agent-research-corpus.json` is the reviewed source index for each
+  agent's research domains, source types, refresh triggers, handoffs, and
+  authority-reference metadata.
+- Every authority reference must declare a source freshness cadence. The corpus
+  `dateChecked` value must remain inside the strictest cadence so stale official
+  docs, standards, or vendor guidance fail local validation before release.
+- Every agent must have reviewed expertise signals for decision heuristics,
+  failure modes, and verification evidence. These signals keep the corpus
+  operational instead of turning it into a bibliography.
+- Every role file must carry the `Authority metadata contract` and
+  `Expertise signal contract` runtime blocks so catalog metadata affects
+  invoked-agent behavior, not only offline validation.
 - Every cataloged agent must have matching `[agents.<name>]` blocks in both
   Windows and Unix Codex config templates.
 - Every `config_file` must point at a reviewed
   `templates/codex/agents/*.toml` role file.
+- Every role file must keep one copy of each required runtime contract and
+  guardrail block, plus at least 100 source-backed instruction items and 20
+  distinct source markers.
 - Agent templates must not use `danger-full-access`,
   `approval_policy = "never"`, or embedded token variable names.
 - Keep write-heavy implementation in the main thread unless the user explicitly

@@ -85,7 +85,7 @@ assets/social-preview.svg
 Good:
 
 - "Windows-first Codex setup kit"
-- "20 reviewed specialist agents"
+- "21 reviewed specialist agents"
 - "safe installers with dry-run and backup behavior"
 - "MCP connectors are least-privilege and authenticated connectors stay disabled by default"
 - "six-language docs"

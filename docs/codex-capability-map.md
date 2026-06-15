@@ -22,15 +22,15 @@ Official references:
 | `AGENTS.md` | Durable repo/global working agreements | Installed as reviewed global guidance with repo-local precedence | `npm run validate` |
 | `config.toml` | Models, sandbox, approvals, MCP, features, profiles | Conservative workspace-write sandbox and on-request approvals | `npm run validate:mcp` |
 | Rules | Narrow command approval defaults | Verification commands only; destructive/publish actions stay gated | `npm run validate:content` |
-| Skills | Reusable workflows with progressive disclosure | Curated installable allowlist plus local enterprise operator and offline diagram skills | `npm run verify:skills` |
+| Skills | Reusable workflows with progressive disclosure | Curated installable allowlist plus three local plugin skills: operator, offline diagram, and context budget planner | `npm run verify:skills` |
 | Plugins | Shareable packages for skills and future bundled surfaces | One local plugin, no default hooks/MCP/apps | `npm run validate` |
 | MCP/connectors | Live docs, browser, code navigation, external systems | Docs/code/browser helpers enabled; authenticated connectors disabled | `npm run validate:mcp` |
-| Subagents | Delegated evidence-heavy specialist work | Twenty reviewed specialist agents with sandboxed role files | `npm run validate:agents` |
+| Subagents | Delegated evidence-heavy specialist work | Twenty-one reviewed specialist agents with sandboxed role files | `npm run validate:agents` |
 | Doctor/status | No-write health and drift summary | Repo-only by default; optional global existence checks | `npm run codex:doctor` |
 
 ## Specialist Agent Set
 
-The starter now ships twenty specialist agents:
+The starter now ships twenty-one specialist agents:
 
 - `code_mapper`: read-only repository mapping before broad changes.
 - `docs_researcher`: official/current documentation and version-sensitive facts.
@@ -53,6 +53,8 @@ The starter now ships twenty specialist agents:
   re-verification plans.
 - `performance_auditor`: page speed, Core Web Vitals, resource budgets, traces,
   and post-change regression evidence.
+- `google_seo_auditor`: Google Search Central-backed crawlability, indexing,
+  metadata, structured data, Core Web Vitals, and Search Console-ready checks.
 - `docs_author`: Diataxis coverage, stale-doc detection, release docs, and
   missing-guide generation.
 - `spec_author`: scoped executable specs with non-goals, evidence, edge cases,
@@ -63,6 +65,63 @@ The starter now ships twenty specialist agents:
 - `test_verifier`: lint, typecheck, test, build, smoke, and CI evidence.
 - `release_verifier`: git hygiene, artifacts, secret scans, changelog/version, and publish gates.
 - `codex_doctor`: starter health, catalog drift, install-plan, docs, and MCP checks.
+
+Every role file also carries seven guardrail blocks:
+
+- Source refresh rules: each role re-checks local files, current docs, runtime
+  evidence, and verification output when the task depends on current state.
+- Cross-repo transfer rules: a similar repo can suggest patterns, but the
+  current repo's executable paths, install surface, auth boundary, and tests
+  decide what actually changes.
+- Research synthesis rules: source material must be compressed into action
+  contracts, maps, verification plans, or risk decisions instead of copied as
+  long background prose.
+- Adversarial validation rules: each role must challenge its own conclusion
+  with counterexamples, missing evidence, unsafe assumptions, or stronger local
+  tests before handing work back to the main thread.
+- Source currency rules: each role treats version-sensitive docs, local repo
+  evidence, test output, rendered artifacts, and release/security facts as
+  stale when the underlying source changed or was not checked for the current
+  task.
+- Corpus expansion rules: each role knows how to widen its own knowledge base
+  across local repos, official docs, standards, vendor guides, and specialist
+  handoffs, then compress that material into short operating rules instead of
+  hidden prompt bulk.
+- Expert calibration rules: each role checks its output against role-specific
+  senior-quality gates before handing work back, including evidence strength,
+  missing-risk disclosure, and the exact next proof needed.
+
+`scripts/validate-agent-config.mjs` enforces that each role file carries exactly
+one copy of every runtime contract and guardrail block, plus at least 100
+source-backed instruction items. `scripts/validate-agent-research-corpus.mjs`
+also enforces at least 20 distinct source markers per role. This keeps the
+expanded research corpus from quietly shrinking into a same-source checklist
+during future edits.
+
+`catalog/agent-research-corpus.json` is the machine-readable index for each
+agent's domain focus, primary source types, refresh triggers, specialist
+handoff targets, and expertise signals. `scripts/validate-agent-research-corpus.mjs`
+keeps that index aligned with `catalog/agents.json` and the role TOML files.
+
+The same manifest also keeps a reviewed `authorityRefs` registry with URL,
+source type, staleness risk, review cadence, and TOML source markers. Source
+families such as Codex docs, Context7, OWASP, NIST, Google Search Central,
+Playwright, WCAG, and GitHub guidance are referenced by stable keys rather than
+being repeated differently in each role. The validator also requires each
+per-agent authority key to appear in that agent's TOML source markers, enforces
+cadence limits for each staleness-risk class, and fails when corpus
+`dateChecked` is older than the strictest authority-source cadence.
+
+Each role file also includes `Authority metadata contract` and
+`Expertise signal contract` near the top of `developer_instructions`, which
+tells the invoked agent how to treat source markers and expertise signals as
+runtime guidance instead of detached bibliography.
+
+The corpus also carries per-agent `expertiseSignals` for decision heuristics,
+failure modes, and verification signals. These compact lists make the research
+operational: a future edit can prove that each specialist keeps role-specific
+judgment, known traps, and evidence expectations rather than just a list of
+links.
 
 The agent catalog is intentionally smaller than broad public marketplaces. High
 star repos such as ECC and wshobson/agents show that large agent/skill catalogs
@@ -117,11 +176,11 @@ Official plugin guidance says to start with local skills while iterating and use
 plugins when sharing reusable workflows or bundling MCP, apps, hooks, or assets.
 This repo follows that split:
 
-- Curated public skills stay in `catalog/skills.json`.
+- Curated public and first-party skills stay in `catalog/skills.json`.
 - Installable skills must have reviewed `package`, `skill`, `sourceUrl`,
   `license`, `risk`, and `lastChecked` fields.
-- The local plugin exposes the enterprise operator skill and a zero-network
-  offline diagram triplet skill by default.
+- The local plugin exposes the enterprise operator, zero-network offline
+  diagram triplet, and context budget planner skills by default.
 - Plugin hooks, MCP servers, and apps remain absent from the default manifest
   until separately reviewed.
 
@@ -144,6 +203,7 @@ and documents them:
 - Enabled-by-default authenticated connectors.
 - Plugin-bundled lifecycle hooks.
 - Automatic memory/session injection.
+- Hidden research-corpus injection into every turn.
 - Destructive cleanup, push, release, publish, or deploy automation.
 
 ## Verification

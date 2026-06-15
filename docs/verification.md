@@ -30,6 +30,9 @@ This runs:
   checks for PowerShell and Bash install surfaces.
 - `scripts/validate-agent-config.mjs`: specialist-agent catalog/config drift
   checks across Windows and Unix Codex templates.
+- `scripts/validate-agent-research-corpus.mjs`: specialist-agent research
+  corpus drift, authority-reference source markers, source freshness cadence,
+  stale `dateChecked` checks, and per-agent expertise signal coverage.
 - `scripts/validate-mcp-config.mjs`: MCP catalog/config drift checks across
   Windows and Unix Codex templates.
 - `scripts/verify-skill-sources.mjs`: offline skill catalog validation and
@@ -83,6 +86,7 @@ node --check scripts/validate-install-state-preview.mjs
 node --check scripts/validate-installer-alignment.mjs
 node --check scripts/plan-install.mjs
 node --check scripts/validate-agent-config.mjs
+node --check scripts/validate-agent-research-corpus.mjs
 node --check scripts/validate-mcp-config.mjs
 node --check scripts/verify-skill-sources.mjs
 node --check scripts/scan-supply-chain-iocs.mjs

@@ -1,5 +1,110 @@
 # Release Notları
 
+## Unreleased
+
+- Agent research corpus kayitlari artik agent basina decision heuristic,
+  failure mode ve verification signal iceren `expertiseSignals` tasir. Corpus
+  validator her bundled specialist icin uc grubun da korunmasini zorunlu tutar.
+- Her specialist role dosyasi artik `Expertise signal contract` tasir ve
+  validation tam bir kopyayi zorunlu tutar; boylece structured expertise
+  metadata runtime'da tuketilir.
+- Agent research corpus authority reference'lari artik source freshness cadence
+  metadata'si tasir. `scripts/validate-agent-research-corpus.mjs`,
+  staleness-risk icin fazla gevsek cadence degerlerini reddeder ve
+  `dateChecked` en siki cadence'den eskiyse fail eder.
+
+## v0.5.4 - 2026-06-15
+
+Bu patch, v0.5.3 sonrasindaki Codex Chef hardening gecisini tamamlar.
+Installer'in guvenli davranisini korur; uzerine app connector guardrail'leri,
+mojibake validation'i, daha guclu bundled skill dokumantasyonu ve GStack/ECC
+karsilastirmasini ekler. Amac, agent benzeri workflow'lari guvenli default'lari
+bozmadan sunmaktir.
+
+## One Cikanlar
+
+- Token/context butcesi, kaynak onceligi, compaction handoff'u ve verification
+  gate'leri icin bundled yerel `context-budget-planner` skill'i eklendi.
+- `impeccable`, ekstra design-taste, Vercel, prompt, context, memory ve
+  token-related skill'ler manuel opt-in katalog referansi olarak gorunur kaldi;
+  incelenmis kurulum seti on alti public/first-party global skill'e genisledi.
+- Public `token` skill aramalarinin daha cok auth/deployment/crypto-token
+  workflow'larina kaydigi dokumante edildi; bu nedenle LLM context butcesi
+  external default kurulum yerine yerel bundled skill ile cozulur.
+- Tum bundled yerel plugin skill'leri `references/*.md` ve
+  `agents/openai.yaml` ile reference-backed hale getirildi; `SKILL.md`,
+  reference, UI metadata ve catalog kaydi ayni hizada kalsin diye
+  `npm run validate:plugin-skills` eklendi.
+- Mermaid, Excalidraw, SVG, PNG ve Markdown iddialari deterministik yerel
+  renderer ile ayni hizada kalsin diye offline diagram sozlesmesi dokumante
+  edildi.
+- First-party ekosistem skill'leri `context-engineering-project-starter`,
+  `codex-enterprise-prompt-architect` ve `codex-skill-forge`, `catalog/skills.json`,
+  `catalog/skills-lock.json` ve skill dokumantasyonunda incelenmis `-All` /
+  `-InstallSkills` setine eklendi.
+- Global Git ignore, hook ve Git config degisiklikleri `-All` disinda tutuldu;
+  kullanici bunlari `-InstallGitGuards` / `--install-git-guards` ile ayrica acar.
+- App/connector guvenligi acik default'larla netlestirildi:
+  `apps._default.destructive_enabled = false` ve
+  `apps._default.open_world_enabled = false`.
+- Localized README ve docs dosyalarinda mojibake sessizce geri gelmesin diye
+  content-safety gate'i eklendi.
+- Online skill-source kontrolleri ignored `tmp/skill-source-check` altinda
+  sandbox edildi; boylece source validation public skill'leri cozerken Skills
+  CLI yan etkileri tracked template'lere dokunamaz.
+- GStack/ECC karsilastirma notlari genisletildi; hangi workflow fikirlerinin
+  alindigi ve hangilerinin guvenlik icin default kurulum disinda kaldigi
+  dokumante edildi.
+- Yirmi bir specialist agent rol dosyasina research-synthesis ve
+  adversarial-validation guidance eklendi; boylece yuksek sinyalli dis repolar
+  ise yarar karar uretebilir ama gizli prompt kalabaligina veya guvensiz kopya
+  automation'a donusmez.
+- Yirmi bir specialist agent rol dosyasina source-refresh, source-currency ve
+  corpus-expansion guidance eklendi; boylece her ajan stale kaniti tazeler ve
+  alan bilgisini kisa calisma kurallarina genisletmeyi bilir.
+- Yirmi bir specialist agent rol dosyasina expert-calibration guidance
+  eklendi; boylece her ajan ana thread'e donmeden once ciktisini role ozel
+  senior-quality cizgisine vurur.
+- Agent validation sikilastirildi; her specialist role dosyasi her zorunlu
+  guardrail blogundan tam bir tane, en az 100 source-backed instruction item'i
+  ve en az 20 distinct source marker tasimalidir.
+- `catalog/agent-research-corpus.json` ve
+  `scripts/validate-agent-research-corpus.mjs` eklendi; boylece specialist
+  agent research domain, source type, refresh trigger ve handoff kayitlari
+  makine tarafindan kontrol edilebilir.
+- Agent research corpus'a reviewed `authorityRefs` metadata'si eklendi; her
+  uzman ajan stable resmi, vendor, standart ve tool-source ailelerine URL,
+  source type, staleness risk ve source marker ile isaret edebilir; validator bu
+  key'lerin eslesen agent TOML source marker'larinda temsil edildigini de
+  dogrular.
+- Her specialist TOML'e `Authority metadata contract` blogu eklendi; boylece
+  cagrilan ajanlar source marker'larini runtime guidance olarak kullanir.
+- Cross-model review pattern'i acikca map edildi: Codex Chef bunu
+  `code_reviewer` ve manuel Codex CLI kullanimi uzerinden destekleyebilir, ama
+  baska agent veya external review flow'u otomatik baslatmaz.
+
+## Upgrade Notlari
+
+- `-All` halen core Codex Chef setup'ini ve incelenmis skill setini kurar;
+  global Git guard degisiklikleri `-InstallGitGuards` /
+  `--install-git-guards` ile ayri opt-in kalir.
+- Kullanici gercek install'i force ile calistirirsa mevcut global Codex
+  dosyalari degistirilmeden once backup alinir.
+- Authenticated MCP/app connector'lari default olarak disabled veya
+  least-privilege kalir; destructive ve open-world connector araclari reviewed
+  override olmadan acilmaz.
+
+## Dogrulama
+
+Bu version icin release readiness su kontrolleri icermelidir:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.3 - 2026-06-15
 
 Bu patch final README render duzeltmesini release/tag gorunumune de tasir.
@@ -81,7 +186,7 @@ durusu ile ayni hizaya getirir. Installer davranisi degismez.
   dogal "kurulumdan sonra ne hazir olur" ozeti eklendi.
 - Alti kok README girisindeki tekrar eden dil satiri kaldirildi: German,
   Spanish, English, Brazilian Portuguese, Turkish ve French.
-- Kurulan 20 ajanlik Codex Chef ekibi gercek kurulum kaynagindan dokumante
+- O donemdeki Codex Chef ajan ekibi gercek kurulum kaynagindan dokumante
   edildi: `templates/codex/agents/*.toml` ve platform Codex config
   template'leri.
 - Plugin-local skill'ler ve opsiyonel global skill'ler, genis external skill

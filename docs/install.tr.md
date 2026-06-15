@@ -49,13 +49,16 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 
 Kullanışlı parametreler:
 
-- `-All`: Codex template'lerini, doğrulanmış public skill'leri ve global Git
-  guard'larını birlikte kurar.
+- `-All`: Codex template'lerini, yerel Codex Chef plugin'ini, uzman ajanları,
+  profilleri, kuralları ve doğrulanmış public/first-party skill'leri kurar.
+  Global Git config'i değiştirmez.
 - `-InstallSkills`: `catalog/skills.json` içinde `install: true` olan,
   `owner/repo` formatında doğrulanmış `package` ve eşleşen `skill` adı taşıyan
   kayıtları kurar. Installer `npx.cmd skills add <package> --skill <skill>
   --agent codex --yes --global` çağırır.
-- `-InstallGitGuards`: global Git ignore ve pre-commit hook kurar.
+- `-InstallGitGuards`: global Git ignore, global pre-commit hook kurar ve
+  `core.excludesfile` ile `core.hooksPath` ayarlar. Bunu ayrı tutuyoruz çünkü
+  mevcut kullanıcıdaki bütün Git repolarını etkiler.
 - `-Force`: yedek aldıktan sonra yönetilen Codex dosyalarının üzerine yazar.
 - `-NoBackup`: yedeklemeyi kapatır. Tavsiye edilmez.
 - `-WhatIf`: gerçek setup'a dokunmadan dosya, Git ve skill operasyonlarını ön
@@ -80,9 +83,9 @@ chmod +x scripts/install.sh
 
 Kullanışlı flagler:
 
-- `--all`
+- `--all`: global Git config'i değiştirmeyen önerilen tam Codex Chef kurulumu.
 - `--install-skills`
-- `--install-git-guards`
+- `--install-git-guards`: global Git ignore ve hook ayarlarına ayrıca opt-in.
 - `--force`
 - `--no-backup`
 - `--dry-run`
