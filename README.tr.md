@@ -64,28 +64,28 @@ repo içindeki `templates/codex/config.*.toml`, `templates/codex/agents/*.toml`,
 Codex Chef'in kurduğu ajanlar ayrı arka plan servisleri değildir. Bunlar Codex'in
 task routing sırasında kullanacağı isim, açıklama ve TOML rol dosyalarıdır.
 
-| Rol | Config ID | Ne zaman işe yarar? |
-| --- | --- | --- |
-| 🗺️ Kod Haritacısı | `code_mapper` | Bilmediğin repoyu okumaya başlamadan önce dosyaları, ownership sınırlarını ve data flow'u çıkarır. |
-| 📚 Doküman Araştırmacısı | `docs_researcher` | Güncel resmi doküman, standart, API ve sürüm hassas bilgiyi kontrol eder. |
-| 🧭 Context Mimarı | `context_architect` | Bir davranış prompt'a mı, `AGENTS.md`ye mi, skill/plugin/MCP/rule/config tarafına mı ait karar verir. |
-| ✍️ Prompt Mimarı | `prompt_architect` | Belirsiz isteği güvenilir prompt, görev brief'i, başarı kriteri ve tekrar kullanılabilir talimata çevirir. |
-| 🔌 MCP Entegratörü | `mcp_integrator` | MCP connector, auth sınırı, izinli tool listesi ve troubleshooting planını least-privilege tasarlar. |
-| 🎯 Ürün Stratejisti | `product_strategist` | Ürün framing'ini, scope'u, alternatifleri ve en küçük faydalı sürümü sorgular. |
-| 🏗️ Mühendislik Planlayıcısı | `engineering_planner` | Mimariyi, data flow'u, diagramı, edge case'leri ve test stratejisini netleştirir. |
-| 🎨 Tasarım İnceleyicisi | `design_reviewer` | UX, accessibility, görsel kalite, design-system uyumu ve AI-slop riskini inceler. |
-| 🧰 DevEx Denetçisi | `devex_auditor` | Onboarding sürtünmesini, doküman netliğini, ilk çalıştırma akışını ve time-to-hello-world deneyimini test eder. |
-| 🕵️ Kök Neden Dedektifi | `root_cause_debugger` | Fix yazmadan önce hatayı yeniden üretir, data flow izler, hipotez test eder ve root cause bulur. |
-| ✅ QA Lideri | `qa_lead` | Kullanıcı akışlarını dener, regresyon arar, coverage planlar ve fix'i tekrar doğrular. |
-| ⚡ Performans Denetçisi | `performance_auditor` | Page speed, Core Web Vitals, trace, resource budget ve performans regresyonlarını ölçer. |
-| 📝 Doküman Yazarı | `docs_author` | Eksik rehberleri, stale claim'leri, release note boşluklarını ve docs coverage'ı yakalar. |
-| 📐 Spec Yazarı | `spec_author` | Dağınık isteği non-goal, edge case ve quality gate içeren uygulanabilir spec'e dönüştürür. |
-| 🔍 Kod İnceleyicisi | `code_reviewer` | Fresh-context doğruluk, regresyon, güvenlik, maintainability ve eksik test review'u yapar. |
-| 🖥️ Frontend Doğrulayıcısı | `frontend_verifier` | Render edilmiş UI, screenshot, responsive layout, interaction state ve console error kontrol eder. |
-| 🛡️ Güvenlik Denetçisi | `security_auditor` | Auth, secret, permission, API route, data access, dependency ve abuse path inceler. |
-| 🧪 Test Doğrulayıcısı | `test_verifier` | Lint, typecheck, test, build, smoke check ve failure evidence toplar. |
-| 🚢 Release Doğrulayıcısı | `release_verifier` | Git hijyeni, changelog/version, artifact, secret scan, CI ve publish gate kontrol eder. |
-| 🩺 Codex Doktoru | `codex_doctor` | Starter sağlığı, catalog drift, install-plan coverage, docs, MCP default'ları ve güvenli sonraki kontrolleri teşhis eder. |
+| Ajan | Ne zaman kullanılır? |
+| --- | --- |
+| 🗺️ Kod Haritacısı (`code_mapper`) | Bilmediğin repoyu okumaya başlamadan önce dosyaları, ownership sınırlarını ve data flow'u çıkarmak için. |
+| 📚 Doküman Araştırmacısı (`docs_researcher`) | Güncel resmi doküman, standart, API veya sürüm hassas bilgi gerektiğinde. |
+| 🧭 Context Mimarı (`context_architect`) | Bir davranış prompt'a mı, `AGENTS.md`ye mi, skill/plugin/MCP/rule/config tarafına mı ait karar vermek için. |
+| ✍️ Prompt Mimarı (`prompt_architect`) | Belirsiz isteği güvenilir prompt, görev brief'i, başarı kriteri veya tekrar kullanılabilir talimata çevirmek için. |
+| 🔌 MCP Entegratörü (`mcp_integrator`) | MCP connector, auth sınırı, izinli tool listesi veya troubleshooting planı gerektiğinde. |
+| 🎯 Ürün Stratejisti (`product_strategist`) | Ürün framing'i, scope, alternatifler veya en küçük faydalı sürüm kararları sorgulanacaksa. |
+| 🏗️ Mühendislik Planlayıcısı (`engineering_planner`) | Mimari, data flow, diagram, edge case ve test stratejisi netleşmeden build'e geçilmemesi gerektiğinde. |
+| 🎨 Tasarım İnceleyicisi (`design_reviewer`) | UX, accessibility, görsel kalite, design-system uyumu veya AI-slop riski incelenecekse. |
+| 🧰 DevEx Denetçisi (`devex_auditor`) | Onboarding sürtünmesi, doküman netliği, ilk çalıştırma akışı veya time-to-hello-world test edilecekse. |
+| 🕵️ Kök Neden Dedektifi (`root_cause_debugger`) | Hata fix'ten önce reproduce, data-flow tracing, hipotez testi ve root cause istiyorsa. |
+| ✅ QA Lideri (`qa_lead`) | Kullanıcı akışları, regresyonlar, coverage ve fix doğrulaması elde test edilecekse. |
+| ⚡ Performans Denetçisi (`performance_auditor`) | Page speed, Core Web Vitals, trace, resource budget veya performans regresyonu önemliyse. |
+| 📝 Doküman Yazarı (`docs_author`) | Eksik rehber, stale claim, release note boşluğu veya docs coverage sorunu varsa. |
+| 📐 Spec Yazarı (`spec_author`) | Dağınık istek non-goal, edge case ve quality gate içeren uygulanabilir spec'e dönüşecekse. |
+| 🔍 Kod İnceleyicisi (`code_reviewer`) | Fresh-context doğruluk, regresyon, güvenlik, maintainability ve eksik test review'u gerektiğinde. |
+| 🖥️ Frontend Doğrulayıcısı (`frontend_verifier`) | Render edilmiş UI, screenshot, responsive layout, interaction state veya console error kontrol edilecekse. |
+| 🛡️ Güvenlik Denetçisi (`security_auditor`) | Auth, secret, permission, API route, data access, dependency veya abuse path incelenecekse. |
+| 🧪 Test Doğrulayıcısı (`test_verifier`) | Lint, typecheck, test, build, smoke check veya failure evidence toplanacaksa. |
+| 🚢 Release Doğrulayıcısı (`release_verifier`) | Git hijyeni, changelog/version, artifact, secret scan, CI veya publish gate kontrol edilecekse. |
+| 🩺 Codex Doktoru (`codex_doctor`) | Starter sağlığı, catalog drift, install-plan coverage, docs, MCP default'ları veya güvenli sonraki kontroller teşhis edilecekse. |
 
 ## 🧩 Skill'ler
 
@@ -93,19 +93,19 @@ Codex Chef iki yerel plugin skill'iyle gelir. `-All` veya `-InstallSkills`
 verirsen incelenmiş katalogdaki dokuz public skill'i de global Codex skill'i
 olarak kurabilir.
 
-| Skill | ID | Kurulum şekli | Ne zaman kullanırsın? |
-| --- | --- | --- | --- |
-| 🍳 Chef Operatörü | `codex-chef-operator` | Plugin-local | Bu starter'ı güvenlik ve install safety kapılarını zayıflatmadan bakımda tutmak için. |
-| 📐 Offline Diagram Triplet | `offline-diagram-triplet` | Plugin-local | Mermaid'den editable Excalidraw, SVG, PNG ve Markdown üretmek için; network gerekmez. |
-| ⬆️ Dependency Upgrade | `dependency-upgrade` | Opsiyonel global | Paket yükseltmelerini daha kontrollü review ve doğrulamayla yapmak için. |
-| 🖼️ Frontend Builder | `frontend-skill` | Opsiyonel global | Görsel olarak güçlü frontend deneyimleri üretmek için. |
-| 💎 Interface Polish | `impeccable` | Opsiyonel global | Frontend arayüzlerini audit, polish ve harden etmek için. |
-| 🎨 Design Taste | `design-taste-frontend` | Opsiyonel global | Senior UI/UX taste uygulamak ve generic AI çıktısını azaltmak için. |
-| 🧱 Image To Code | `image-to-code` | Opsiyonel global | Görsel referansları frontend koda çevirmek için. |
-| ✨ High-End Visual Design | `high-end-visual-design` | Opsiyonel global | Hierarchy, spacing, görsel yön ve polish kalitesini yükseltmek için. |
-| ♿ Web Guidelines | `web-design-guidelines` | Opsiyonel global | Accessibility, UX kalitesi ve interface standartlarını incelemek için. |
-| ⚛️ React Best Practices | `vercel-react-best-practices` | Opsiyonel global | React ve Next.js implementation pattern'lerini iyileştirmek için. |
-| ▲ Vercel Optimize | `vercel-optimize` | Opsiyonel global | Vercel cost, performance ve platform kullanımını incelemek için. |
+| Skill | Kurulum şekli | Ne zaman kullanırsın? |
+| --- | --- | --- |
+| 🍳 Chef Operatörü (`codex-chef-operator`) | Plugin-local | Bu starter'ı güvenlik ve install safety kapılarını zayıflatmadan bakımda tutmak için. |
+| 📐 Offline Diagram Triplet (`offline-diagram-triplet`) | Plugin-local | Mermaid'den editable Excalidraw, SVG, PNG ve Markdown üretmek için; network gerekmez. |
+| ⬆️ Dependency Upgrade (`dependency-upgrade`) | Opsiyonel global | Paket yükseltmelerini daha kontrollü review ve doğrulamayla yapmak için. |
+| 🖼️ Frontend Builder (`frontend-skill`) | Opsiyonel global | Görsel olarak güçlü frontend deneyimleri üretmek için. |
+| 💎 Interface Polish (`impeccable`) | Opsiyonel global | Frontend arayüzlerini audit, polish ve harden etmek için. |
+| 🎨 Design Taste (`design-taste-frontend`) | Opsiyonel global | Senior UI/UX taste uygulamak ve generic AI çıktısını azaltmak için. |
+| 🧱 Image To Code (`image-to-code`) | Opsiyonel global | Görsel referansları frontend koda çevirmek için. |
+| ✨ High-End Visual Design (`high-end-visual-design`) | Opsiyonel global | Hierarchy, spacing, görsel yön ve polish kalitesini yükseltmek için. |
+| ♿ Web Guidelines (`web-design-guidelines`) | Opsiyonel global | Accessibility, UX kalitesi ve interface standartlarını incelemek için. |
+| ⚛️ React Best Practices (`vercel-react-best-practices`) | Opsiyonel global | React ve Next.js implementation pattern'lerini iyileştirmek için. |
+| ▲ Vercel Optimize (`vercel-optimize`) | Opsiyonel global | Vercel cost, performance ve platform kullanımını incelemek için. |
 
 ## 🔌 MCP Varsayılanları
 

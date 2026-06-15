@@ -68,28 +68,28 @@ manifest-backed install plan.
 These are Codex subagent role definitions, not separate background services.
 Codex uses their names, descriptions, and TOML role files when routing a task.
 
-| Role | Config ID | Best for |
-| --- | --- | --- |
-| 🗺️ Code Mapper | `code_mapper` | Reads an unfamiliar repo before implementation: files, ownership, boundaries, and data flow. |
-| 📚 Docs Researcher | `docs_researcher` | Checks official docs, standards, APIs, and version-sensitive behavior before the answer hardens. |
-| 🧭 Context Architect | `context_architect` | Decides whether behavior belongs in a prompt, `AGENTS.md`, skill, plugin, MCP, hook, rule, memory, or config. |
-| ✍️ Prompt Architect | `prompt_architect` | Turns vague work into reliable prompts, task briefs, success criteria, and reusable instructions. |
-| 🔌 MCP Integrator | `mcp_integrator` | Plans least-privilege MCP connectors, auth boundaries, enabled tools, and troubleshooting. |
-| 🎯 Product Strategist | `product_strategist` | Pushes on framing, scope, alternatives, and the smallest useful version. |
-| 🏗️ Engineering Planner | `engineering_planner` | Locks architecture, data flow, diagrams, edge cases, and test strategy before build work starts. |
-| 🎨 Design Reviewer | `design_reviewer` | Reviews UX, accessibility, visual polish, design-system fit, and generic AI output risk. |
-| 🧰 DevEx Auditor | `devex_auditor` | Tests onboarding friction, docs clarity, first-run flow, and time-to-hello-world. |
-| 🕵️ Root-Cause Debugger | `root_cause_debugger` | Reproduces failures, traces data flow, tests hypotheses, and finds the cause before fixes. |
-| ✅ QA Lead | `qa_lead` | Exercises user flows, hunts regressions, plans coverage, and re-verifies fixes. |
-| ⚡ Performance Auditor | `performance_auditor` | Measures page speed, Core Web Vitals, traces, resource budgets, and regressions. |
-| 📝 Docs Author | `docs_author` | Catches stale claims, release-note gaps, missing guides, and weak documentation coverage. |
-| 📐 Spec Author | `spec_author` | Converts fuzzy intent into an executable spec with non-goals, edge cases, and quality gates. |
-| 🔍 Code Reviewer | `code_reviewer` | Reviews correctness, regressions, security, maintainability, and missing tests with fresh context. |
-| 🖥️ Frontend Verifier | `frontend_verifier` | Checks rendered UI, screenshots, responsive layout, interaction states, and console errors. |
-| 🛡️ Security Auditor | `security_auditor` | Reviews auth, secrets, permissions, API routes, data access, dependencies, and abuse paths. |
-| 🧪 Test Verifier | `test_verifier` | Runs lint, typecheck, tests, builds, smoke checks, and collects failure evidence. |
-| 🚢 Release Verifier | `release_verifier` | Checks git hygiene, version/changelog state, artifacts, secret scans, CI, and publish gates. |
-| 🩺 Codex Doctor | `codex_doctor` | Diagnoses starter health, catalog drift, install-plan coverage, docs, MCP defaults, and next checks. |
+| Agent | Use when... |
+| --- | --- |
+| 🗺️ Code Mapper (`code_mapper`) | You need to understand an unfamiliar repo before implementation: files, ownership, boundaries, and data flow. |
+| 📚 Docs Researcher (`docs_researcher`) | The answer depends on official docs, standards, APIs, or version-sensitive behavior. |
+| 🧭 Context Architect (`context_architect`) | You need to decide whether behavior belongs in a prompt, `AGENTS.md`, skill, plugin, MCP, hook, rule, memory, or config. |
+| ✍️ Prompt Architect (`prompt_architect`) | A vague request needs a reliable prompt, task brief, success criteria, or reusable instruction. |
+| 🔌 MCP Integrator (`mcp_integrator`) | You are planning MCP connectors, auth boundaries, enabled tools, or troubleshooting. |
+| 🎯 Product Strategist (`product_strategist`) | Scope, framing, alternatives, or the smallest useful version need pressure testing. |
+| 🏗️ Engineering Planner (`engineering_planner`) | Architecture, data flow, diagrams, edge cases, and test strategy need to be locked before build work. |
+| 🎨 Design Reviewer (`design_reviewer`) | UX, accessibility, visual polish, design-system fit, or generic AI output risk needs review. |
+| 🧰 DevEx Auditor (`devex_auditor`) | Onboarding friction, docs clarity, first-run flow, or time-to-hello-world needs testing. |
+| 🕵️ Root-Cause Debugger (`root_cause_debugger`) | A failure needs reproduction, data-flow tracing, hypotheses, and root cause before fixes. |
+| ✅ QA Lead (`qa_lead`) | User flows, regressions, coverage, and fix re-verification need hands-on QA. |
+| ⚡ Performance Auditor (`performance_auditor`) | Page speed, Core Web Vitals, traces, resource budgets, or performance regressions matter. |
+| 📝 Docs Author (`docs_author`) | Stale claims, release-note gaps, missing guides, or weak documentation coverage need cleanup. |
+| 📐 Spec Author (`spec_author`) | Fuzzy intent needs an executable spec with non-goals, edge cases, and quality gates. |
+| 🔍 Code Reviewer (`code_reviewer`) | Correctness, regressions, security, maintainability, and missing tests need fresh-context review. |
+| 🖥️ Frontend Verifier (`frontend_verifier`) | Rendered UI, screenshots, responsive layout, interaction states, and console errors need checking. |
+| 🛡️ Security Auditor (`security_auditor`) | Auth, secrets, permissions, API routes, data access, dependencies, or abuse paths need review. |
+| 🧪 Test Verifier (`test_verifier`) | Lint, typecheck, tests, builds, smoke checks, or failure evidence need to be collected. |
+| 🚢 Release Verifier (`release_verifier`) | Git hygiene, version/changelog state, artifacts, secret scans, CI, or publish gates need verification. |
+| 🩺 Codex Doctor (`codex_doctor`) | Starter health, catalog drift, install-plan coverage, docs, MCP defaults, or next checks need diagnosis. |
 
 ## 🧩 Skills Included
 
@@ -97,19 +97,19 @@ Codex Chef ships two local plugin skills. With `-All` or `-InstallSkills`, it
 can also install nine reviewed public skills for frontend, design, dependency,
 and Vercel workflows.
 
-| Skill | ID | Install mode | Why you would use it |
-| --- | --- | --- | --- |
-| 🍳 Chef Operator | `codex-chef-operator` | Plugin-local | Keeps this starter maintained without weakening install safety or security gates. |
-| 📐 Offline Diagram Triplet | `offline-diagram-triplet` | Plugin-local | Turns Mermaid into editable Excalidraw, SVG, PNG, and Markdown without network access. |
-| ⬆️ Dependency Upgrade | `dependency-upgrade` | Optional global | Handles dependency upgrades with safer review and verification habits. |
-| 🖼️ Frontend Builder | `frontend-skill` | Optional global | Builds visually stronger frontend experiences. |
-| 💎 Interface Polish | `impeccable` | Optional global | Audits, sharpens, and hardens frontend interfaces. |
-| 🎨 Design Taste | `design-taste-frontend` | Optional global | Adds senior UI/UX taste and reduces generic AI output. |
-| 🧱 Image To Code | `image-to-code` | Optional global | Converts visual references into frontend code. |
-| ✨ High-End Visual Design | `high-end-visual-design` | Optional global | Improves hierarchy, spacing, visual direction, and polish. |
-| ♿ Web Guidelines | `web-design-guidelines` | Optional global | Reviews accessibility, UX quality, and interface standards. |
-| ⚛️ React Best Practices | `vercel-react-best-practices` | Optional global | Optimizes React and Next.js implementation patterns. |
-| ▲ Vercel Optimize | `vercel-optimize` | Optional global | Investigates Vercel cost, performance, and platform usage. |
+| Skill | Install mode | Use when... |
+| --- | --- | --- |
+| 🍳 Chef Operator (`codex-chef-operator`) | Plugin-local | This starter needs maintenance without weakening install safety or security gates. |
+| 📐 Offline Diagram Triplet (`offline-diagram-triplet`) | Plugin-local | You want Mermaid, editable Excalidraw, SVG, PNG, and Markdown without network access. |
+| ⬆️ Dependency Upgrade (`dependency-upgrade`) | Optional global | Dependencies need safer review and verification habits. |
+| 🖼️ Frontend Builder (`frontend-skill`) | Optional global | You want visually stronger frontend experiences. |
+| 💎 Interface Polish (`impeccable`) | Optional global | A frontend interface needs audit, polish, or hardening. |
+| 🎨 Design Taste (`design-taste-frontend`) | Optional global | UI/UX work needs stronger taste and less generic AI output. |
+| 🧱 Image To Code (`image-to-code`) | Optional global | A visual reference needs to become frontend code. |
+| ✨ High-End Visual Design (`high-end-visual-design`) | Optional global | Hierarchy, spacing, visual direction, and polish need improvement. |
+| ♿ Web Guidelines (`web-design-guidelines`) | Optional global | Accessibility, UX quality, or interface standards need review. |
+| ⚛️ React Best Practices (`vercel-react-best-practices`) | Optional global | React or Next.js implementation patterns need optimization. |
+| ▲ Vercel Optimize (`vercel-optimize`) | Optional global | Vercel cost, performance, or platform usage needs investigation. |
 
 ## 🔌 MCP Defaults
 
