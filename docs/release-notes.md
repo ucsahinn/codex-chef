@@ -1,5 +1,55 @@
 # Release Notes
 
+## v0.5.1 - 2026-06-15
+
+This patch aligns the public README storefront and CI workflow with the final
+Codex Chef release posture. It does not change installer behavior.
+
+## Highlights
+
+- Polished README onboarding so users can see the one-shot install path,
+  installed agent team, bundled skills, optional global skills, and MCP
+  defaults at a glance.
+- Reworked the English and Turkish agent/skill tables with icons, friendly role
+  names, and clearer use-case language while keeping the actual Codex config IDs
+  visible.
+- Added natural-language install-outcome summaries to the German, Spanish,
+  Brazilian Portuguese, and French README entry points.
+- Removed the duplicate language tagline from all six root README entry points:
+  German, Spanish, English, Brazilian Portuguese, Turkish, and French.
+- Documented the installed 20-agent Codex team from the actual setup source:
+  `templates/codex/agents/*.toml` and the platform Codex config templates.
+- Documented the plugin-local skills and optional global skills without
+  implying that broad external skill catalogs are imported by default.
+- Updated the validation workflow to Node 24-era pinned GitHub Actions:
+  `actions/checkout` v6.0.3 and `actions/setup-node` v6.4.0.
+- Kept security posture unchanged: no default authenticated connectors, no
+  automatic publish/deploy automation, and no hidden global writes.
+
+## Upgrade Notes
+
+No installer behavior changed in this patch. Existing users can pull `main` or
+use the release source archive, then preview before replacing any global files:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+.\\scripts\\install.ps1 -All -Force -WhatIf
+```
+
+The agent list shown in the README is the installable Codex Chef agent set, not
+the maintainer's current global agent state.
+
+## Verification
+
+Release readiness for this patch should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.0 - 2026-06-15
 
 This release rebrands the project as Codex Chef and improves public

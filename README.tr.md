@@ -23,7 +23,7 @@
   <a href="README.fr.md">🇫🇷 French / Français</a>
 </p>
 
-Codex Chef, Windows agirlikli calisan guclu kullanicilar ve kucuk ekipler icin guvenlik oncelikli Codex setup kitidir. Tekrar edilebilir bir yerel Codex temeli kurar: kalici talimatlar, konservatif config, uzman ajanlar, onay kurallari, MCP varsayilanlari, secilmis skill metadata'lari, plugin paketi, dogrulama scriptleri ve alti dilli dokumantasyon.
+Codex Chef, Windows tarafında güçlü ama güvenli bir Codex başlangıcı isteyenler için hazırlanmış bir setup kitidir. Sana tek tek uğraşmadan kurulabilen bir temel verir: kalıcı talimatlar, kontrollü config, isimlendirilmiş uzman ajanlar, MCP varsayılanları, seçilmiş skill'ler, yerel plugin akışları ve kurulmadan önce doğrulanabilen güvenlik kapıları.
 
 Bu resmi OpenAI ürünü değildir; community starter paketidir. Güncel resmi Codex dokümanlarıyla eşleştirilmiştir ve riskli aksiyonlar varsayılan olarak onaya bağlı kalır.
 
@@ -47,10 +47,11 @@ node scripts/plan-install.mjs --all --json --redact-paths
 
 ## 🍳 Kurulumdan Sonra Ne Gelir?
 
-Codex Chef sadece doküman koymaz; gerçek bir Codex çalışma mutfağı kurar.
-Aşağıdaki ajan listesi `templates/codex/config.windows.toml`,
+Codex Chef sadece doküman koymaz; Codex için gerçekten kullanılabilir bir çalışma mutfağı kurar.
+Aşağıdaki ajan listesi benim global ortamımdan çekilmiş bir liste değil.
+Kaynağı `templates/codex/config.windows.toml`,
 `templates/codex/config.unix.toml` ve `templates/codex/agents/*.toml`
-dosyalarından gelir. Yani installer bu kayıtları `~/.codex` içine kopyalar.
+dosyalarıdır; installer bu kayıtları `~/.codex` içine kopyalar.
 
 | Yüzey | Makineye ne kurulur? |
 | --- | --- |
@@ -64,50 +65,52 @@ dosyalarından gelir. Yani installer bu kayıtları `~/.codex` içine kopyalar.
 
 ## 🤖 Kurulan Ajan Ekibi
 
-Codex Chef'in Codex config içine kaydettiği ve role dosyası olarak kurduğu
-ajanlar:
+Codex Chef'in kurduğu ajanlar arka planda gizli bir otomasyon değil; her biri
+Codex config içinde kayıtlı, `~/.codex/agents` altında rol dosyası olan net bir
+uzmanlık alanıdır.
 
-| Ajan | Ne işe yarar? |
+| Kurulan rol | Ne zaman işe yarar? |
 | --- | --- |
-| `code_mapper` | Bilinmeyen repoyu, dosyaları, ownership sınırlarını ve data flow'u haritalar. |
-| `docs_researcher` | Güncel resmi dokümanları, standartları, API'leri ve sürüm hassas bilgileri kontrol eder. |
-| `context_architect` | Davranışın prompt, `AGENTS.md`, skill, plugin, MCP, hook, rule, memory veya config tarafına mı ait olduğunu belirler. |
-| `prompt_architect` | Güvenilir prompt, görev brief'i, başarı kriteri ve reusable instruction sistemi tasarlar. |
-| `mcp_integrator` | Least-privilege MCP connector setup'ı, auth sınırları ve troubleshooting planlar. |
-| `product_strategist` | Ürün framing'i, scope, alternatifler ve en küçük faydalı sürüm kararlarını sorgular. |
-| `engineering_planner` | Mimari, data flow, diagram, edge case ve test stratejisini netleştirir. |
-| `design_reviewer` | UX kalitesi, accessibility, görsel polish, design-system uyumu ve AI-slop risklerini inceler. |
-| `devex_auditor` | Onboarding friction, docs netliği, first-run flow ve time-to-hello-world deneyimini test eder. |
-| `root_cause_debugger` | Fix öncesi hatayı reproduce eder, data flow izler, hipotez test eder ve root cause bulur. |
-| `qa_lead` | Kullanıcı akışlarını dener, regresyon arar, coverage planlar ve fix'i tekrar doğrular. |
-| `performance_auditor` | Page speed, Core Web Vitals, trace, resource budget ve regression ölçer. |
-| `docs_author` | Docs coverage, stale claim, release notes ve eksik rehberleri denetler. |
-| `spec_author` | Belirsiz isteği non-goal, edge case ve quality gate içeren uygulanabilir spec'e çevirir. |
-| `code_reviewer` | Fresh-context doğruluk, regresyon, güvenlik, maintainability ve eksik test review'u yapar. |
-| `frontend_verifier` | Render edilmiş UI, screenshot, responsive layout, interaction state ve console error kontrol eder. |
-| `security_auditor` | Auth, secret, permission, API route, data access, dependency ve abuse path inceler. |
-| `test_verifier` | Lint, typecheck, test, build, smoke check ve failure evidence toplar. |
-| `release_verifier` | Git hijyeni, changelog/version, artifact, secret scan ve publish gate kontrol eder. |
-| `codex_doctor` | Starter sağlığı, catalog drift, install-plan coverage, docs, MCP default'ları ve güvenli sonraki kontrolleri teşhis eder. |
+| 🗺️ **Kod Haritacısı**<br />`code_mapper` | Bilmediğin repoyu okumaya başlamadan önce dosyaları, ownership sınırlarını ve data flow'u çıkarır. |
+| 📚 **Doküman Araştırmacısı**<br />`docs_researcher` | Güncel resmi doküman, standart, API ve sürüm hassas bilgiyi kontrol eder. |
+| 🧭 **Context Mimarı**<br />`context_architect` | Bir davranış prompt'a mı, `AGENTS.md`ye mi, skill/plugin/MCP/rule/config tarafına mı ait karar verir. |
+| ✍️ **Prompt Mimarı**<br />`prompt_architect` | Belirsiz isteği güvenilir prompt, görev brief'i, başarı kriteri ve tekrar kullanılabilir talimata çevirir. |
+| 🔌 **MCP Entegratörü**<br />`mcp_integrator` | MCP connector, auth sınırı, izinli tool listesi ve troubleshooting planını least-privilege tasarlar. |
+| 🎯 **Ürün Stratejisti**<br />`product_strategist` | Ürün framing'ini, scope'u, alternatifleri ve en küçük faydalı sürümü sorgular. |
+| 🏗️ **Mühendislik Planlayıcısı**<br />`engineering_planner` | Mimariyi, data flow'u, diagramı, edge case'leri ve test stratejisini netleştirir. |
+| 🎨 **Tasarım İnceleyicisi**<br />`design_reviewer` | UX, accessibility, görsel kalite, design-system uyumu ve AI-slop riskini inceler. |
+| 🧰 **DevEx Denetçisi**<br />`devex_auditor` | Onboarding sürtünmesini, doküman netliğini, ilk çalıştırma akışını ve time-to-hello-world deneyimini test eder. |
+| 🕵️ **Kök Neden Dedektifi**<br />`root_cause_debugger` | Fix yazmadan önce hatayı yeniden üretir, data flow izler, hipotez test eder ve root cause bulur. |
+| ✅ **QA Lideri**<br />`qa_lead` | Kullanıcı akışlarını dener, regresyon arar, coverage planlar ve fix'i tekrar doğrular. |
+| ⚡ **Performans Denetçisi**<br />`performance_auditor` | Page speed, Core Web Vitals, trace, resource budget ve performans regresyonlarını ölçer. |
+| 📝 **Doküman Yazarı**<br />`docs_author` | Eksik rehberleri, stale claim'leri, release note boşluklarını ve docs coverage'ı yakalar. |
+| 📐 **Spec Yazarı**<br />`spec_author` | Dağınık isteği non-goal, edge case ve quality gate içeren uygulanabilir spec'e dönüştürür. |
+| 🔍 **Kod İnceleyicisi**<br />`code_reviewer` | Fresh-context doğruluk, regresyon, güvenlik, maintainability ve eksik test review'u yapar. |
+| 🖥️ **Frontend Doğrulayıcısı**<br />`frontend_verifier` | Render edilmiş UI, screenshot, responsive layout, interaction state ve console error kontrol eder. |
+| 🛡️ **Güvenlik Denetçisi**<br />`security_auditor` | Auth, secret, permission, API route, data access, dependency ve abuse path inceler. |
+| 🧪 **Test Doğrulayıcısı**<br />`test_verifier` | Lint, typecheck, test, build, smoke check ve failure evidence toplar. |
+| 🚢 **Release Doğrulayıcısı**<br />`release_verifier` | Git hijyeni, changelog/version, artifact, secret scan, CI ve publish gate kontrol eder. |
+| 🩺 **Codex Doktoru**<br />`codex_doctor` | Starter sağlığı, catalog drift, install-plan coverage, docs, MCP default'ları ve güvenli sonraki kontrolleri teşhis eder. |
 
 ## 🧩 Skill'ler
 
-Codex Chef iki yerel plugin skill'iyle gelir; ayrıca incelenmiş katalogdan dokuz
-opsiyonel global skill kurabilir.
+Codex Chef iki yerel plugin skill'iyle gelir. `-All` veya `-InstallSkills`
+verirsen incelenmiş katalogdaki dokuz public skill'i de global Codex skill'i
+olarak kurabilir.
 
-| Skill | Varsayılan kurulum | Ne işe yarar? |
+| Skill | Kurulum şekli | Ne zaman kullanırsın? |
 | --- | --- | --- |
-| `codex-chef-operator` | Plugin-local | Bu starter'ı güvenlik ve install safety kapılarını zayıflatmadan bakımda tutar. |
-| `offline-diagram-triplet` | Plugin-local | Mermaid'i zero-network şekilde editable Excalidraw, SVG, PNG ve Markdown'a çevirir. |
-| `dependency-upgrade` | Opsiyonel global | Dependency upgrade işlerini daha güvenli yapar. |
-| `frontend-skill` | Opsiyonel global | Görsel olarak güçlü frontend deneyimleri üretir. |
-| `impeccable` | Opsiyonel global | Frontend arayüzlerini audit, polish ve harden eder. |
-| `design-taste-frontend` | Opsiyonel global | Senior UI/UX taste uygular, generic AI çıktısını azaltır. |
-| `image-to-code` | Opsiyonel global | Görsel referansları frontend koda çevirir. |
-| `high-end-visual-design` | Opsiyonel global | Görsel yön, hierarchy, spacing ve polish kalitesini yükseltir. |
-| `web-design-guidelines` | Opsiyonel global | Accessibility, UX kalitesi ve interface standartlarını review eder. |
-| `vercel-react-best-practices` | Opsiyonel global | React ve Next.js implementation pattern'lerini optimize eder. |
-| `vercel-optimize` | Opsiyonel global | Vercel cost, performance ve platform kullanımını inceler. |
+| 🍳 **Chef Operatörü**<br />`codex-chef-operator` | Plugin-local | Bu starter'ı güvenlik ve install safety kapılarını zayıflatmadan bakımda tutmak için. |
+| 📐 **Offline Diagram Triplet**<br />`offline-diagram-triplet` | Plugin-local | Mermaid'den editable Excalidraw, SVG, PNG ve Markdown üretmek için; network gerekmez. |
+| ⬆️ **Dependency Upgrade**<br />`dependency-upgrade` | Opsiyonel global | Paket yükseltmelerini daha kontrollü review ve doğrulamayla yapmak için. |
+| 🖼️ **Frontend Builder**<br />`frontend-skill` | Opsiyonel global | Görsel olarak güçlü frontend deneyimleri üretmek için. |
+| 💎 **Interface Polish**<br />`impeccable` | Opsiyonel global | Frontend arayüzlerini audit, polish ve harden etmek için. |
+| 🎨 **Design Taste**<br />`design-taste-frontend` | Opsiyonel global | Senior UI/UX taste uygulamak ve generic AI çıktısını azaltmak için. |
+| 🧱 **Image To Code**<br />`image-to-code` | Opsiyonel global | Görsel referansları frontend koda çevirmek için. |
+| ✨ **High-End Visual Design**<br />`high-end-visual-design` | Opsiyonel global | Hierarchy, spacing, görsel yön ve polish kalitesini yükseltmek için. |
+| ♿ **Web Guidelines**<br />`web-design-guidelines` | Opsiyonel global | Accessibility, UX kalitesi ve interface standartlarını incelemek için. |
+| ⚛️ **React Best Practices**<br />`vercel-react-best-practices` | Opsiyonel global | React ve Next.js implementation pattern'lerini iyileştirmek için. |
+| ▲ **Vercel Optimize**<br />`vercel-optimize` | Opsiyonel global | Vercel cost, performance ve platform kullanımını incelemek için. |
 
 ## 🔌 MCP Varsayılanları
 

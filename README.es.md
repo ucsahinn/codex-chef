@@ -21,9 +21,22 @@
   <a href="README.fr.md">🇫🇷 French / Français</a>
 </p>
 
-Setup de Codex con prioridad en seguridad para usuarios avanzados Windows-first y equipos pequenos. Empaqueta una base local repetible para Codex: instrucciones duraderas, configuracion conservadora, agents especializados, reglas de aprobacion, defaults de MCP, metadata de skills curadas, plugin local, scripts de validacion y entradas multilingues.
+Codex Chef le da a tu setup de Codex en Windows un punto de partida claro: defaults seguros, un equipo de agentes con nombre, skills curadas, MCPs preconfigurados, workflows locales de plugin y validación que puedes revisar antes de tocar tu máquina.
 
 Este es un starter comunitario no oficial, no un producto de OpenAI. Los README y la documentación profunda existen en seis idiomas; esta página es la entrada en español.
+
+## 🍳 Qué queda listo después de instalar
+
+Codex Chef no intenta ser un volcado de configuración. La idea es dejarte una
+base local de Codex que puedas entender, verificar y extender:
+
+| Área | Resultado |
+| --- | --- |
+| 🤖 Equipo de agentes | 20 roles con nombre, como Code Mapper, Docs Researcher, Context Architect, Security Auditor y Release Verifier. |
+| 🧩 Skills locales | `codex-chef-operator` y `offline-diagram-triplet` vienen dentro del plugin local. |
+| 🎨 Skills opcionales | 9 skills globales revisadas para frontend, diseño, dependencias y Vercel se pueden instalar con `-All`. |
+| 🔌 MCP por defecto | Los MCP locales y de investigación quedan listos; los conectores autenticados siguen desactivados hasta que los necesites. |
+| 🛡️ Red de seguridad | Dry-run, backups, secret scan, validación y approval gates siguen dentro del flujo normal. |
 
 ## ⚡ Inicio Rapido
 

@@ -4,6 +4,22 @@
 
 - No changes yet.
 
+## 0.5.1 - 2026-06-15
+
+- Polished root README onboarding so users can see install commands, the
+  bundled agent team, skills, and MCP defaults at a glance.
+- Reworked the English and Turkish agent/skill tables with icons, friendly role
+  names, and clearer explanations while keeping the actual Codex config IDs
+  visible.
+- Added natural-language install-outcome summaries to the German, Spanish,
+  Brazilian Portuguese, and French README entry points.
+- Removed the duplicate language tagline from all six root README entry
+  points.
+- Updated the validation workflow to Node 24-era pinned GitHub Actions:
+  `actions/checkout` v6.0.3 and `actions/setup-node` v6.4.0.
+- Kept installer behavior, global-write boundaries, skill allowlists, and
+  disabled-by-default authenticated connectors unchanged.
+
 ## 0.5.0 - 2026-06-15
 
 - Rebranded the project as Codex Chef with the public package slug

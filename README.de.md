@@ -21,9 +21,22 @@
   <a href="README.fr.md">🇫🇷 French / Français</a>
 </p>
 
-Sicherheitsorientiertes Codex-Setup fuer Windows-first Power-User und kleine Teams. Dieses Starter-Repo paketiert eine wiederholbare lokale Codex-Basis: dauerhafte Anweisungen, konservative Konfiguration, spezialisierte Agents, Approval Rules, MCP-Defaults, kuratierte Skill-Metadaten, Plugin-Paket, Validierungsskripte und mehrsprachige Einstiegspunkte.
+Codex Chef gibt deinem Windows-first Codex-Setup einen klaren Startpunkt: sichere Defaults, ein benanntes Agent-Team, kuratierte Skills, MCP-Vorgaben, lokale Plugin-Workflows und Validierung, die du vor echten Aenderungen pruefen kannst.
 
 Dies ist ein inoffizieller Community-Starter, kein OpenAI-Produkt. README und tiefe Dokumentationsdateien sind in sechs Sprachen vorhanden; diese Seite ist der deutsche Einstieg.
+
+## 🍳 Was nach der Installation bereitsteht
+
+Codex Chef soll sich nicht wie ein Konfigurations-Dump anfuehlen. Nach der
+Installation liegt eine kleine, nachvollziehbare Codex-Arbeitsumgebung bereit:
+
+| Bereich | Ergebnis |
+| --- | --- |
+| 🤖 Agent-Team | 20 benannte Codex-Rollen wie Code Mapper, Docs Researcher, Context Architect, Security Auditor und Release Verifier. |
+| 🧩 Lokale Skills | `codex-chef-operator` und `offline-diagram-triplet` kommen direkt mit dem Plugin. |
+| 🎨 Optionale Skills | 9 gepruefte globale Skills fuer Frontend, Design, Dependencies und Vercel koennen mit `-All` installiert werden. |
+| 🔌 MCP-Defaults | Lokale und Recherche-MCPs sind nutzbar; authentifizierte Connectoren bleiben deaktiviert, bis du sie bewusst brauchst. |
+| 🛡️ Sicherheitsnetz | Dry-run, Backups, Secret Scan, Validierung und Approval Gates bleiben Teil des normalen Flows. |
 
 ## ⚡ Schnellstart
 

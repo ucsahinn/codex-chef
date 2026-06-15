@@ -1,5 +1,56 @@
 # Release Notları
 
+## v0.5.1 - 2026-06-15
+
+Bu patch public README vitrini ve CI workflow'unu final Codex Chef release
+durusu ile ayni hizaya getirir. Installer davranisi degismez.
+
+## One Cikanlar
+
+- README onboarding'i tek bakista okunacak hale getirildi: tek komutla kurulum,
+  kurulan ajan takimi, paketlenen skill'ler, opsiyonel global skill'ler ve MCP
+  varsayilanlari ayni yerde gorunur.
+- Ingilizce ve Turkce ajan/skill tablolari ikonlu, isimli ve daha dogal use-case
+  diliyle yeniden duzenlendi; gercek Codex config ID'leri gorunur kalir.
+- Almanca, Ispanyolca, Brezilya Portekizcesi ve Fransizca README girislerine
+  dogal "kurulumdan sonra ne hazir olur" ozeti eklendi.
+- Alti kok README girisindeki tekrar eden dil satiri kaldirildi: German,
+  Spanish, English, Brazilian Portuguese, Turkish ve French.
+- Kurulan 20 ajanlik Codex Chef ekibi gercek kurulum kaynagindan dokumante
+  edildi: `templates/codex/agents/*.toml` ve platform Codex config
+  template'leri.
+- Plugin-local skill'ler ve opsiyonel global skill'ler, genis external skill
+  kataloglari default import ediliyormus gibi gostermeden anlatildi.
+- Validation workflow Node 24 donemi icin pinned GitHub Actions'a guncellendi:
+  `actions/checkout` v6.0.3 ve `actions/setup-node` v6.4.0.
+- Guvenlik durusu degismedi: default auth connector yok, otomatik
+  publish/deploy yok, gizli global write yok.
+
+## Upgrade Notlari
+
+Bu patch installer davranisini degistirmez. Mevcut kullanicilar `main`i cekip
+veya release source archive'i kullanip global dosya degistirmeden once preview
+calistirmali:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+.\\scripts\\install.ps1 -All -Force -WhatIf
+```
+
+README'de gorunen ajan listesi maintainer'in mevcut global agent state'i degil,
+Codex Chef'in kurulabilir ajan setidir.
+
+## Dogrulama
+
+Bu patch icin release readiness su kontrolleri icermelidir:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.0 - 2026-06-15
 
 Bu release projeyi Codex Chef olarak rebrand eder ve guvenli installer modelini

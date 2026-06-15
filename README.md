@@ -23,9 +23,12 @@
   <a href="README.fr.md">🇫🇷 French / Français</a>
 </p>
 
-Codex Chef is a Windows-first Codex setup kit for power users and small teams. It packages a repeatable local Codex baseline: durable instructions, conservative config, specialist agents, approval rules, MCP defaults, curated skill metadata, plugin packaging, validation scripts, multilingual README entry points, and six-language deep docs.
+Codex Chef gives a Windows-first Codex setup a clean starting point: safer defaults, a named specialist team, curated skills, MCP defaults, local plugin workflows, and validation that users can inspect before anything touches their machine.
 
 This is an unofficial community starter, not an OpenAI product. It is mapped to current official Codex documentation and keeps risky actions approval-gated by default.
+
+The multilingual README entry points and six-language deep docs coverage are part
+of the release surface, so users do not have to start from English-only docs.
 
 ## 🚀 Copy-Paste Install
 
@@ -64,50 +67,52 @@ are the files copied into `~/.codex` by the installer.
 
 ## 🤖 Installed Agent Team
 
-These are the agents Codex Chef registers in Codex config and installs as role
-files:
+These are not pulled from the maintainer's current global setup. Codex Chef
+registers these friendly roles in Codex config and installs the matching role
+files under `~/.codex/agents`.
 
-| Agent | What it does |
+| Installed role | Best for |
 | --- | --- |
-| `code_mapper` | Maps unfamiliar repositories, files, ownership, and data flow before implementation. |
-| `docs_researcher` | Checks official/current docs, standards, APIs, and version-sensitive facts. |
-| `context_architect` | Decides whether behavior belongs in prompts, `AGENTS.md`, skills, plugins, MCP, hooks, rules, memory, or config. |
-| `prompt_architect` | Designs reliable prompts, task briefs, success criteria, and reusable instruction systems. |
-| `mcp_integrator` | Plans least-privilege MCP connector setup, auth boundaries, and troubleshooting. |
-| `product_strategist` | Challenges product framing, scope, alternatives, and smallest useful version. |
-| `engineering_planner` | Locks architecture, data flow, diagrams, edge cases, and test strategy. |
-| `design_reviewer` | Reviews UX quality, accessibility, visual polish, design-system fit, and AI-slop risks. |
-| `devex_auditor` | Tests onboarding friction, docs clarity, first-run flow, and time-to-hello-world. |
-| `root_cause_debugger` | Reproduces failures, traces data flow, tests hypotheses, and finds root cause before fixes. |
-| `qa_lead` | Exercises workflows, finds regressions, plans coverage, and re-verifies fixes. |
-| `performance_auditor` | Measures page speed, Core Web Vitals, traces, resource budgets, and regressions. |
-| `docs_author` | Audits docs coverage, stale claims, release notes, and missing guides. |
-| `spec_author` | Turns vague intent into scoped executable specs with non-goals, edge cases, and quality gates. |
-| `code_reviewer` | Runs fresh-context correctness, regression, security, maintainability, and missing-test review. |
-| `frontend_verifier` | Verifies rendered UI, screenshots, responsive layout, interaction states, and console errors. |
-| `security_auditor` | Reviews auth, secrets, permissions, API routes, data access, dependencies, and abuse paths. |
-| `test_verifier` | Runs lint, typecheck, tests, builds, smoke checks, and failure evidence collection. |
-| `release_verifier` | Checks git hygiene, changelog/version state, artifacts, secret scans, and publish gates. |
-| `codex_doctor` | Diagnoses starter health, catalog drift, install-plan coverage, docs, MCP defaults, and safe next checks. |
+| 🗺️ **Code Mapper**<br />`code_mapper` | Reads an unfamiliar repo before implementation: files, ownership, boundaries, and data flow. |
+| 📚 **Docs Researcher**<br />`docs_researcher` | Checks official docs, standards, APIs, and version-sensitive behavior before the answer hardens. |
+| 🧭 **Context Architect**<br />`context_architect` | Decides whether a behavior belongs in a prompt, `AGENTS.md`, skill, plugin, MCP, hook, rule, memory, or config. |
+| ✍️ **Prompt Architect**<br />`prompt_architect` | Turns vague work into reliable prompts, task briefs, success criteria, and reusable instructions. |
+| 🔌 **MCP Integrator**<br />`mcp_integrator` | Plans least-privilege MCP connectors, auth boundaries, enabled tools, and troubleshooting. |
+| 🎯 **Product Strategist**<br />`product_strategist` | Pushes on framing, scope, alternatives, and the smallest useful version. |
+| 🏗️ **Engineering Planner**<br />`engineering_planner` | Locks architecture, data flow, diagrams, edge cases, and test strategy before build work starts. |
+| 🎨 **Design Reviewer**<br />`design_reviewer` | Reviews UX, accessibility, visual polish, design-system fit, and generic AI output risk. |
+| 🧰 **DevEx Auditor**<br />`devex_auditor` | Tests onboarding friction, docs clarity, first-run flow, and time-to-hello-world. |
+| 🕵️ **Root-Cause Debugger**<br />`root_cause_debugger` | Reproduces failures, traces data flow, tests hypotheses, and finds the cause before fixes. |
+| ✅ **QA Lead**<br />`qa_lead` | Exercises user flows, hunts regressions, plans coverage, and re-verifies fixes. |
+| ⚡ **Performance Auditor**<br />`performance_auditor` | Measures page speed, Core Web Vitals, traces, resource budgets, and regressions. |
+| 📝 **Docs Author**<br />`docs_author` | Catches stale claims, release-note gaps, missing guides, and weak documentation coverage. |
+| 📐 **Spec Author**<br />`spec_author` | Converts fuzzy intent into an executable spec with non-goals, edge cases, and quality gates. |
+| 🔍 **Code Reviewer**<br />`code_reviewer` | Reviews correctness, regressions, security, maintainability, and missing tests with fresh context. |
+| 🖥️ **Frontend Verifier**<br />`frontend_verifier` | Checks rendered UI, screenshots, responsive layout, interaction states, and console errors. |
+| 🛡️ **Security Auditor**<br />`security_auditor` | Reviews auth, secrets, permissions, API routes, data access, dependencies, and abuse paths. |
+| 🧪 **Test Verifier**<br />`test_verifier` | Runs lint, typecheck, tests, builds, smoke checks, and collects failure evidence. |
+| 🚢 **Release Verifier**<br />`release_verifier` | Checks git hygiene, version/changelog state, artifacts, secret scans, CI, and publish gates. |
+| 🩺 **Codex Doctor**<br />`codex_doctor` | Diagnoses starter health, catalog drift, install-plan coverage, docs, MCP defaults, and next checks. |
 
 ## 🧩 Skills Included
 
-Codex Chef ships two local plugin skills and can optionally install nine curated
-global skills from the reviewed catalog.
+Codex Chef ships two local plugin skills. With `-All` or `-InstallSkills`, it
+can also install nine reviewed public skills for frontend, design, dependency,
+and Vercel workflows.
 
-| Skill | Installed by default? | What it is for |
+| Skill | Install mode | Why you would use it |
 | --- | --- | --- |
-| `codex-chef-operator` | Plugin-local | Maintain this starter without weakening install safety or security gates. |
-| `offline-diagram-triplet` | Plugin-local | Turn Mermaid into editable Excalidraw, SVG, PNG, and Markdown with zero network. |
-| `dependency-upgrade` | Optional global | Upgrade dependencies safely. |
-| `frontend-skill` | Optional global | Build visually strong frontend experiences. |
-| `impeccable` | Optional global | Audit, polish, and harden frontend interfaces. |
-| `design-taste-frontend` | Optional global | Apply senior UI/UX taste and avoid generic AI output. |
-| `image-to-code` | Optional global | Translate visual references into frontend code. |
-| `high-end-visual-design` | Optional global | Improve visual direction, hierarchy, spacing, and polish. |
-| `web-design-guidelines` | Optional global | Review accessibility, UX quality, and interface standards. |
-| `vercel-react-best-practices` | Optional global | Optimize React and Next.js implementation patterns. |
-| `vercel-optimize` | Optional global | Investigate Vercel cost, performance, and platform usage. |
+| 🍳 **Chef Operator**<br />`codex-chef-operator` | Plugin-local | Keeps this starter maintained without weakening install safety or security gates. |
+| 📐 **Offline Diagram Triplet**<br />`offline-diagram-triplet` | Plugin-local | Turns Mermaid into editable Excalidraw, SVG, PNG, and Markdown without network access. |
+| ⬆️ **Dependency Upgrade**<br />`dependency-upgrade` | Optional global | Handles dependency upgrades with safer review and verification habits. |
+| 🖼️ **Frontend Builder**<br />`frontend-skill` | Optional global | Builds visually stronger frontend experiences. |
+| 💎 **Interface Polish**<br />`impeccable` | Optional global | Audits, sharpens, and hardens frontend interfaces. |
+| 🎨 **Design Taste**<br />`design-taste-frontend` | Optional global | Adds senior UI/UX taste and reduces generic AI output. |
+| 🧱 **Image To Code**<br />`image-to-code` | Optional global | Converts visual references into frontend code. |
+| ✨ **High-End Visual Design**<br />`high-end-visual-design` | Optional global | Improves hierarchy, spacing, visual direction, and polish. |
+| ♿ **Web Guidelines**<br />`web-design-guidelines` | Optional global | Reviews accessibility, UX quality, and interface standards. |
+| ⚛️ **React Best Practices**<br />`vercel-react-best-practices` | Optional global | Optimizes React and Next.js implementation patterns. |
+| ▲ **Vercel Optimize**<br />`vercel-optimize` | Optional global | Investigates Vercel cost, performance, and platform usage. |
 
 ## 🔌 MCP Defaults
 
