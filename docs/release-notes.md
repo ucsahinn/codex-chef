@@ -1,5 +1,42 @@
 # Release Notes
 
+## v0.5.2 - 2026-06-15
+
+This patch is the final README polish pass after reviewing the rendered first
+screen. It keeps the install behavior unchanged.
+
+## Highlights
+
+- Removed repeated first-screen messaging by keeping the install outcome summary
+  short and moving agent/skill detail into dedicated catalogs.
+- Reworked the English and Turkish agent tables so icon, friendly role name,
+  config ID, and use case are separate columns.
+- Reworked the English and Turkish skill tables so skill name, ID, install mode,
+  and use case are separate columns.
+- Clarified that Codex Chef installs Codex subagent role definitions; it does
+  not spawn separate background services or copy the maintainer's global state.
+
+## Upgrade Notes
+
+No installer behavior changed in this patch. Existing users can use the same
+preview commands before any global write:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+.\\scripts\\install.ps1 -All -Force -WhatIf
+```
+
+## Verification
+
+Release readiness for this patch should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.1 - 2026-06-15
 
 This patch aligns the public README storefront and CI workflow with the final

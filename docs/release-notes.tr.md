@@ -1,5 +1,42 @@
 # Release Notları
 
+## v0.5.2 - 2026-06-15
+
+Bu patch render edilen ilk ekran incelendikten sonra yapilan final README polish
+gecisidir. Installer davranisi degismez.
+
+## One Cikanlar
+
+- Ilk ekrandaki tekrar hissi azaltildi; kurulum ozeti kisa tutuldu, ajan ve
+  skill detaylari kendi katalog bolumlerine tasindi.
+- Ingilizce ve Turkce ajan tablolarinda ikon, okunur rol adi, config ID ve
+  kullanim amaci ayri sutunlara ayrildi.
+- Ingilizce ve Turkce skill tablolarinda skill adi, ID, kurulum sekli ve
+  kullanim amaci ayri sutunlara ayrildi.
+- Codex Chef'in ayri background servisleri degil, Codex subagent role
+  definition'lari kurdugu netlestirildi.
+
+## Upgrade Notlari
+
+Bu patch installer davranisini degistirmez. Global write oncesi ayni preview
+komutlari kullanilir:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+.\\scripts\\install.ps1 -All -Force -WhatIf
+```
+
+## Dogrulama
+
+Bu patch icin release readiness su kontrolleri icermelidir:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.1 - 2026-06-15
 
 Bu patch public README vitrini ve CI workflow'unu final Codex Chef release

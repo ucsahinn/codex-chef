@@ -4,6 +4,17 @@
 
 - No changes yet.
 
+## 0.5.2 - 2026-06-15
+
+- Removed duplicated first-screen README messaging by keeping the install
+  outcome summary short and moving detailed agent/skill descriptions into
+  dedicated catalogs.
+- Reworked the English and Turkish agent/skill tables so friendly names, icons,
+  config IDs, install modes, and use cases live in separate columns instead of
+  stacked duplicate labels.
+- Clarified that Codex Chef installs Codex subagent role definitions, not
+  separate background services.
+
 ## 0.5.1 - 2026-06-15
 
 - Polished root README onboarding so users can see install commands, the
