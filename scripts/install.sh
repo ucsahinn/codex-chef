@@ -31,7 +31,7 @@ fi
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
 AGENTS_HOME_DIR="${AGENTS_HOME:-$HOME/.agents}"
-BACKUP_ROOT="$CODEX_HOME_DIR/backups/codex-enterprise-starter-$(date +%Y%m%d-%H%M%S)"
+BACKUP_ROOT="$CODEX_HOME_DIR/backups/codex-chef-$(date +%Y%m%d-%H%M%S)"
 
 run_change() {
   local target="$1"
@@ -131,8 +131,8 @@ for file in "$TEMPLATE_ROOT"/profiles/*.toml; do
   install_file "$file" "$CODEX_HOME_DIR/$(basename "$file")"
 done
 
-PLUGIN_SOURCE="$REPO_ROOT/plugins/codex-enterprise-workflows"
-PLUGIN_TARGET="$CODEX_HOME_DIR/plugins/codex-enterprise-workflows"
+PLUGIN_SOURCE="$REPO_ROOT/plugins/codex-chef-workflows"
+PLUGIN_TARGET="$CODEX_HOME_DIR/plugins/codex-chef-workflows"
 install_directory "$PLUGIN_SOURCE" "$PLUGIN_TARGET"
 
 MARKETPLACE_DIR="$AGENTS_HOME_DIR/plugins"
@@ -149,10 +149,10 @@ else
 const fs = require("fs");
 const [marketplacePath, pluginTarget] = process.argv.slice(2);
 const marketplace = {
-  name: "codex-enterprise-starter",
+  name: "codex-chef",
   plugins: [
     {
-      name: "codex-enterprise-workflows",
+      name: "codex-chef-workflows",
       source: {
         source: "local",
         path: pluginTarget
@@ -255,9 +255,9 @@ fi
 
 echo ""
 if [ "$DRY_RUN" -eq 1 ]; then
-  echo "Codex Enterprise Starter dry run completed."
+  echo "Codex Chef dry run completed."
 else
-  echo "Codex Enterprise Starter installed."
+  echo "Codex Chef installed."
   echo "Restart Codex, then run:"
   echo "  codex doctor --summary"
   echo '  codex --strict-config "Summarize the active Codex setup."'

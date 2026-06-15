@@ -11,7 +11,7 @@ Bu repo oluşturulmadan önce Masaüstü'nde yalnızca bir eşleşen dizin bulun
 ~/Desktop/codex-cli-best-practice-main
 ```
 
-Mevcut `codex-enterprise-starter` repo'su yoktu.
+Mevcut `codex-chef` repo'su yoktu.
 
 ## Güncel Global Codex Dosyaları
 

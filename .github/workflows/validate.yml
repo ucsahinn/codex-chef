@@ -35,7 +35,7 @@ jobs:
       - run: node --check scripts/validate-mcp-config.mjs
       - run: node --check scripts/validate-codex-doctor.mjs
       - run: node --check scripts/validate-diagram-triplet.mjs
-      - run: node --check plugins/codex-enterprise-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs
+      - run: node --check plugins/codex-chef-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs
       - run: node --check scripts/scan-supply-chain-iocs.mjs
       - run: node --check scripts/validate-package-surface.mjs
       - run: node --check scripts/verify-skill-sources.mjs

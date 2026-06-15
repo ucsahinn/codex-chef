@@ -41,8 +41,8 @@ komutlarini, collision policy'yi, backup davranisini ve risk seviyesini listeler
 Ön izleme doğruysa kur:
 
 ```powershell
-git clone https://github.com/ucsahinn/codex-enterprise-starter.git
-cd codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install.ps1 -All -Force
 ```
@@ -72,8 +72,8 @@ Yazmadan önce ön izle:
 Ön izleme doğruysa kur:
 
 ```bash
-git clone https://github.com/ucsahinn/codex-enterprise-starter.git
-cd codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --force
 ```
@@ -92,7 +92,7 @@ Kullanışlı flagler:
 Mevcut dosyalar şu klasöre kopyalanır:
 
 ```text
-~/.codex/backups/codex-enterprise-starter-YYYYMMDD-HHMMSS/
+~/.codex/backups/codex-chef-YYYYMMDD-HHMMSS/
 ```
 
 Installer şu managed target'ları replace etmeden önce yedekler:

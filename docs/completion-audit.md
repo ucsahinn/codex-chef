@@ -25,10 +25,10 @@ This audit maps the requested end state to current repository evidence.
 | Browser/UI verification should be available. | Playwright and Chrome DevTools MCPs are enabled by default; `frontend_verifier` is registered and documented. | Complete |
 | Security must remain strong. | Sandbox and approval defaults stay conservative, external account/database/filesystem MCPs stay disabled, Git guards are optional, and Gitleaks is part of release verification. | Complete |
 | Public repository must not include local state or secrets. | Validation blocks local user paths, Codex session/memory paths, private key markers, common token patterns, denied secret filenames, databases, and packaged artifacts. | Complete |
-| Release notes should be source-controlled and aligned with public release posture. | `docs/release-notes.md` and `docs/release-notes.tr.md` document the v0.3.0 change set and are required by repository and security validation. | Complete |
-| GitHub metadata should be ready before public release claims. | `docs/github-settings.md` and `docs/github-settings.tr.md` define the recommended description, topics, feature toggles, branch/actions posture, and v0.3.0 release metadata. | Complete |
+| Release notes should be source-controlled and aligned with public release posture. | `docs/release-notes.md` and `docs/release-notes.tr.md` document the v0.5.0 Codex Chef change set and are required by repository and security validation. | Complete |
+| GitHub metadata should be ready before public release claims. | `docs/github-settings.md` and `docs/github-settings.tr.md` define the recommended description, topics, feature toggles, branch/actions posture, and v0.5.0 release metadata. | Complete |
 | Advisory inputs should be reviewable before release. | `docs/advisory-sources.md` and `docs/advisory-sources.tr.md` list the official Codex, OpenAI skill, MCP security, GitHub, PowerShell, and ECC comparison sources maintainers should re-check before publishing. | Complete |
-| Maintenance should stay aligned later. | The bundled `enterprise-codex-operator` skill requires README/install/how-to docs alignment and bilingual doc pairing. | Complete |
+| Maintenance should stay aligned later. | The bundled `codex-chef-operator` skill requires README/install/how-to docs alignment and bilingual doc pairing. | Complete |
 
 ## Verification Evidence
 

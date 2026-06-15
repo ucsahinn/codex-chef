@@ -1,12 +1,12 @@
-# Codex Enterprise Starter
+# Codex Chef
 
 <p align="center">
-  <img src="assets/banner.svg" alt="Codex Enterprise Starter Banner mit Agents, MCPs, Skills, Verifikation und mehrsprachiger Dokumentation" width="100%" />
+  <img src="assets/banner.svg" alt="Codex Chef Banner mit Agents, MCPs, Skills, Verifikation und mehrsprachiger Dokumentation" width="100%" />
 </p>
 
 <p align="center">
-  <a href="https://github.com/ucsahinn/codex-enterprise-starter/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-enterprise-starter/actions/workflows/validate.yml/badge.svg" /></a>
-  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-enterprise-starter?color=0f766e" /></a>
+  <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Dokumentationssprachen" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
   <img alt="Windows and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
 </p>
@@ -46,7 +46,7 @@ Die Installer verwalten:
 - `~/.codex/config.toml`
 - `~/.codex/agents/*.toml`
 - `~/.codex/rules/default.rules`
-- `~/.codex/plugins/codex-enterprise-workflows`
+- `~/.codex/plugins/codex-chef-workflows`
 - `~/.agents/plugins/marketplace.json`
 
 Optional koennen globale Git-Guards und kuratierte Codex-Skills installiert werden.
@@ -84,8 +84,8 @@ Der Plan kommt aus `manifests/install-plan.json` und beschreibt jede Operation, 
 PowerShell:
 
 ```powershell
-git clone https://github.com/ucsahinn/codex-enterprise-starter.git
-cd codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install.ps1 -All -Force
 ```
@@ -93,8 +93,8 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 Bash oder WSL:
 
 ```bash
-git clone https://github.com/ucsahinn/codex-enterprise-starter.git
-cd codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --force
 ```
@@ -126,6 +126,7 @@ codex --strict-config "Summarize the active Codex setup."
 - [Security model](docs/security-model.de.md)
 - [Public readiness](docs/public-readiness.de.md)
 - [ECC compatibility](docs/ecc-compatibility.de.md)
+- [SEO und Discoverability](docs/seo.de.md)
 - [Advisory sources](docs/advisory-sources.de.md)
 
 ## 🚀 Publishing Boundary

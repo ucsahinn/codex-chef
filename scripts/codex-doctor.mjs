@@ -237,7 +237,7 @@ let report;
 try {
   const packageJson = readJson("package.json");
   report = {
-    schemaVersion: "codex-enterprise-starter.doctor.v1",
+    schemaVersion: "codex-chef.doctor.v1",
     generatedAt: new Date().toISOString(),
     repo: {
       root: redact(root),
@@ -264,7 +264,7 @@ try {
 } catch (error) {
   failures.push(error.message);
   report = {
-    schemaVersion: "codex-enterprise-starter.doctor.v1",
+    schemaVersion: "codex-chef.doctor.v1",
     generatedAt: new Date().toISOString(),
     repo: { root: redact(root) },
     warnings,
@@ -279,7 +279,7 @@ report.status = failures.length === 0 ? "ok" : "fail";
 if (jsonOutput) {
   console.log(JSON.stringify(report, null, 2));
 } else {
-  console.log("Codex Enterprise Starter doctor");
+  console.log("Codex Chef doctor");
   console.log(`Status: ${report.status}`);
   console.log(`Version: ${report.repo.packageVersion || "unknown"}`);
   if (report.agents) {

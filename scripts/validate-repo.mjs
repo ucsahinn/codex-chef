@@ -30,6 +30,8 @@ const requiredFiles = [
   "docs/upgrade.tr.md",
   "docs/release-notes.md",
   "docs/release-notes.tr.md",
+  "docs/seo.md",
+  "docs/seo.tr.md",
   "docs/expected-output.md",
   "docs/expected-output.tr.md",
   "docs/ecc-compatibility.md",
@@ -40,7 +42,9 @@ const requiredFiles = [
   "docs/best-practices.tr.md",
   "docs/completion-audit.md",
   "docs/completion-audit.tr.md",
+  "assets/icon.svg",
   "assets/banner.svg",
+  "assets/social-preview.svg",
   "assets/workflow-overview.svg",
   ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -83,9 +87,9 @@ const requiredFiles = [
   "scripts/verify-skill-sources.mjs",
   "scripts/scan-supply-chain-iocs.mjs",
   "scripts/security-audit.mjs",
-  "plugins/codex-enterprise-workflows/.codex-plugin/plugin.json",
-  "plugins/codex-enterprise-workflows/skills/offline-diagram-triplet/SKILL.md",
-  "plugins/codex-enterprise-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs",
+  "plugins/codex-chef-workflows/.codex-plugin/plugin.json",
+  "plugins/codex-chef-workflows/skills/offline-diagram-triplet/SKILL.md",
+  "plugins/codex-chef-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs",
   ".agents/plugins/marketplace.json"
 ];
 
@@ -364,7 +368,7 @@ if (fs.existsSync(marketplacePath)) {
   }
 }
 
-const pluginManifest = path.join(root, "plugins/codex-enterprise-workflows/.codex-plugin/plugin.json");
+const pluginManifest = path.join(root, "plugins/codex-chef-workflows/.codex-plugin/plugin.json");
 if (fs.existsSync(pluginManifest)) {
   const plugin = JSON.parse(fs.readFileSync(pluginManifest, "utf8"));
   for (const forbiddenKey of ["hooks", "mcpServers", "apps"]) {
@@ -396,8 +400,8 @@ if (fs.existsSync(pluginManifest)) {
   const marketplacePlugin = marketplacePlugins.find((entry) => entry.name === plugin.name);
   if (!marketplacePlugin) {
     failures.push(`Plugin manifest ${plugin.name} must be listed in .agents/plugins/marketplace.json`);
-  } else if (marketplacePlugin.source?.path !== "./plugins/codex-enterprise-workflows") {
-    failures.push(`Marketplace path for ${plugin.name} must stay ./plugins/codex-enterprise-workflows`);
+  } else if (marketplacePlugin.source?.path !== "./plugins/codex-chef-workflows") {
+    failures.push(`Marketplace path for ${plugin.name} must stay ./plugins/codex-chef-workflows`);
   }
 }
 

@@ -1,4 +1,4 @@
-# Unix/WSL Codex enterprise starter.
+# Unix/WSL Codex Chef.
 # Copy to ~/.codex/config.toml with scripts/install.sh.
 
 model = "gpt-5.5"

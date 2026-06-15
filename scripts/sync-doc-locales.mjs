@@ -227,6 +227,7 @@ const categories = {
   "publish": "release",
   "release-notes": "release",
   "research-notes": "security",
+  "seo": "release",
   "security-model": "security",
   "skills-and-agents": "codex",
   "troubleshooting": "install",
@@ -338,6 +339,12 @@ const titles = {
     es: "Notas De Investigación",
     "pt-BR": "Notas De Pesquisa",
     fr: "Notes De Recherche"
+  },
+  "seo": {
+    de: "Codex Chef SEO Und Discoverability",
+    es: "Codex Chef SEO Y Descubrimiento",
+    "pt-BR": "Codex Chef SEO E Descoberta",
+    fr: "Codex Chef SEO Et Decouvrabilite"
   },
   "security-model": {
     de: "Sicherheitsmodell",

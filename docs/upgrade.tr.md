@@ -37,7 +37,7 @@ node scripts/plan-install.mjs --all --json
 Varsayılan olarak overwrite edilen yönetilen dosyalar şuraya yedeklenir:
 
 ```text
-~/.codex/backups/codex-enterprise-starter-YYYYMMDD-HHMMSS/
+~/.codex/backups/codex-chef-YYYYMMDD-HHMMSS/
 ```
 
 Başka backup'ın yoksa `-NoBackup` veya `--no-backup` kullanma.

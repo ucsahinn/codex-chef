@@ -126,7 +126,7 @@ function validatePlanOutputSmoke() {
   if (jsonOutput) {
     const plan = parsePlan(jsonOutput, "Install plan JSON smoke");
     if (plan) {
-      if (plan.schemaVersion !== "codex-enterprise-starter.install-state-preview.v1") {
+      if (plan.schemaVersion !== "codex-chef.install-state-preview.v1") {
         fail("Install plan JSON smoke returned unexpected schemaVersion");
       }
       if (!Array.isArray(plan.operations) || plan.operations.length === 0) {
@@ -202,7 +202,7 @@ if (!schema) {
   fail("Missing or invalid schemas/install-plan.schema.json");
 }
 
-if (manifest.schemaVersion !== "codex-enterprise-starter.install-plan.v1") {
+if (manifest.schemaVersion !== "codex-chef.install-plan.v1") {
   fail("Install plan manifest has unexpected schemaVersion");
 }
 

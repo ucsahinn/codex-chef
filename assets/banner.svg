@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
-  <title id="title">Codex Enterprise Starter banner</title>
-  <desc id="desc">An animated public-safe banner showing a Codex setup package with icons for agents, MCP connectors, skills, verification gates, security checks, and bilingual documentation.</desc>
+  <title id="title">Codex Chef banner</title>
+  <desc id="desc">An animated public-safe Codex Chef banner showing a chef-hat terminal setup kit with agents, MCP connectors, skills, verification gates, security checks, and multilingual documentation.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#0f172a"/>
@@ -76,9 +76,9 @@
   </g>
 
   <g font-family="Segoe UI, Arial, sans-serif" fill="#ecfeff">
-    <text x="600" y="104" font-size="46" font-weight="800">Codex Enterprise Starter</text>
-    <text x="604" y="150" font-size="22" fill="#ccfbf1">Agents, MCPs, skills, rules, and release checks in one install.</text>
-    <text x="604" y="184" font-size="22" fill="#dbeafe">Uzman ajanlı, güvenli ve iki dilli Codex çalışma alanı.</text>
+    <text x="600" y="104" font-size="46" font-weight="800">Codex Chef</text>
+    <text x="604" y="150" font-size="22" fill="#ccfbf1">A safe recipe for agents, MCPs, skills, rules, and release checks.</text>
+    <text x="604" y="184" font-size="22" fill="#dbeafe">Windows-first Codex setup kit with multilingual docs.</text>
   </g>
 
   <g font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="750">

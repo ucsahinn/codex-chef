@@ -1,4 +1,4 @@
-title = "codex-enterprise-starter secret scan"
+title = "codex-chef secret scan"
 
 [extend]
 useDefault = true

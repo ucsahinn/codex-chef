@@ -42,6 +42,7 @@ Diese lokalisierte Datei folgt den Abschnitten der englischen Quelldatei. Source
 - Recommended Description
 - Recommended Topics
 - Website
+- Social Preview
 - Features
 - Branch And Actions
 - Release Metadata

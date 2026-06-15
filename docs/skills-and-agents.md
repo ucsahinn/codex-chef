@@ -26,9 +26,9 @@ This repo includes:
   public `package` plus `skill` install targets where available.
 - `catalog/agents.json`: reviewed specialist-agent metadata, risk notes,
   intended use, and drift expectations for the Codex config templates.
-- `plugins/codex-enterprise-workflows/skills/enterprise-codex-operator`: a
+- `plugins/codex-chef-workflows/skills/codex-chef-operator`: a
   small local skill for maintaining this setup.
-- `plugins/codex-enterprise-workflows/skills/offline-diagram-triplet`: a local
+- `plugins/codex-chef-workflows/skills/offline-diagram-triplet`: a local
   zero-network diagram workflow that emits Mermaid, editable Excalidraw, SVG,
   PNG, and a Markdown snippet.
 
@@ -42,7 +42,7 @@ Official reference: https://developers.openai.com/codex/plugins
 
 This repo includes:
 
-- `plugins/codex-enterprise-workflows/.codex-plugin/plugin.json`
+- `plugins/codex-chef-workflows/.codex-plugin/plugin.json`
 - `.agents/plugins/marketplace.json`
 
 The installer registers the local marketplace. Restart Codex, then open
@@ -50,7 +50,7 @@ The installer registers the local marketplace. Restart Codex, then open
 
 The bundled plugin currently exposes two local skills:
 
-- `enterprise-codex-operator`: maintain this starter without weakening safety
+- `codex-chef-operator`: maintain this starter without weakening safety
   boundaries.
 - `offline-diagram-triplet`: turn Mermaid source into an editable diagram
   triplet with no network access.

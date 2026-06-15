@@ -7,8 +7,8 @@ Installer output is intentionally quiet on success and detailed on failure.
 Discovery output stays no-write and human-readable:
 
 ```text
-Codex Enterprise Starter install profiles
-Package: codex-enterprise-starter@0.3.0
+Codex Chef install profiles
+Package: codex-chef@0.5.0
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -18,7 +18,7 @@ default | 7 | 0 | none
 ```
 
 ```text
-Codex Enterprise Starter install plan
+Codex Chef install plan
 Platform: windows
 Operations: ...
 
@@ -32,7 +32,7 @@ Operations: ...
 ```
 
 JSON output uses `schemaVersion:
-codex-enterprise-starter.install-state-preview.v1` and does not write to global
+codex-chef.install-state-preview.v1` and does not write to global
 Codex, Agents, or Git locations.
 
 The JSON contract is documented in
@@ -53,7 +53,7 @@ Codex home: ...
 Agents home: ...
 Dry run: no files, Git settings, or skills will be changed.
 What if: Performing the operation ...
-Codex Enterprise Starter dry run completed.
+Codex Chef dry run completed.
 ```
 
 ## PowerShell Success
@@ -62,7 +62,7 @@ Codex Enterprise Starter dry run completed.
 Codex home: ...
 Agents home: ...
 Installed ...
-Codex Enterprise Starter installed.
+Codex Chef installed.
 Restart Codex, then run:
   codex doctor --summary
   codex --strict-config "Summarize the active Codex setup."
@@ -78,7 +78,7 @@ Codex home: ...
 Agents home: ...
 Dry run: no files, Git settings, or skills will be changed.
 Would install file from ...
-Codex Enterprise Starter dry run completed.
+Codex Chef dry run completed.
 ```
 
 ## Bash Success
@@ -87,7 +87,7 @@ Codex Enterprise Starter dry run completed.
 Codex home: ...
 Agents home: ...
 Installed ...
-Codex Enterprise Starter installed.
+Codex Chef installed.
 Restart Codex, then run:
   codex doctor --summary
   codex --strict-config "Summarize the active Codex setup."

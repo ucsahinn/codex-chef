@@ -41,8 +41,8 @@ commands, collision policy, backup behavior, and risk level.
 Install after the preview is correct:
 
 ```powershell
-git clone https://github.com/ucsahinn/codex-enterprise-starter.git
-cd codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install.ps1 -All -Force
 ```
@@ -72,8 +72,8 @@ Preview without writing:
 Install after the preview is correct:
 
 ```bash
-git clone https://github.com/ucsahinn/codex-enterprise-starter.git
-cd codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --force
 ```
@@ -92,7 +92,7 @@ Useful flags:
 Existing files are copied into:
 
 ```text
-~/.codex/backups/codex-enterprise-starter-YYYYMMDD-HHMMSS/
+~/.codex/backups/codex-chef-YYYYMMDD-HHMMSS/
 ```
 
 The installer backs up managed targets before replacing them:

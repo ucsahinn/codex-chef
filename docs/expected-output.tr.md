@@ -8,8 +8,8 @@ olduğunda debug için daha fazla detay gösterir.
 Discovery ciktisi no-write ve okunabilir kalir:
 
 ```text
-Codex Enterprise Starter install profiles
-Package: codex-enterprise-starter@0.3.0
+Codex Chef install profiles
+Package: codex-chef@0.5.0
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -19,7 +19,7 @@ default | 7 | 0 | none
 ```
 
 ```text
-Codex Enterprise Starter install plan
+Codex Chef install plan
 Platform: windows
 Operations: ...
 
@@ -33,7 +33,7 @@ Operations: ...
 ```
 
 JSON çıktı `schemaVersion:
-codex-enterprise-starter.install-state-preview.v1` kullanır ve global Codex,
+codex-chef.install-state-preview.v1` kullanır ve global Codex,
 Agents veya Git lokasyonlarına yazmaz.
 
 JSON sozlesmesi `schemas/install-state-preview.schema.json` icinde dokumante
@@ -53,7 +53,7 @@ Codex home: ...
 Agents home: ...
 Dry run: no files, Git settings, or skills will be changed.
 What if: Performing the operation ...
-Codex Enterprise Starter dry run completed.
+Codex Chef dry run completed.
 ```
 
 ## PowerShell Başarılı Kurulum
@@ -62,7 +62,7 @@ Codex Enterprise Starter dry run completed.
 Codex home: ...
 Agents home: ...
 Installed ...
-Codex Enterprise Starter installed.
+Codex Chef installed.
 Restart Codex, then run:
   codex doctor --summary
   codex --strict-config "Summarize the active Codex setup."
@@ -78,7 +78,7 @@ Codex home: ...
 Agents home: ...
 Dry run: no files, Git settings, or skills will be changed.
 Would install file from ...
-Codex Enterprise Starter dry run completed.
+Codex Chef dry run completed.
 ```
 
 ## Bash Başarılı Kurulum
@@ -87,7 +87,7 @@ Codex Enterprise Starter dry run completed.
 Codex home: ...
 Agents home: ...
 Installed ...
-Codex Enterprise Starter installed.
+Codex Chef installed.
 Restart Codex, then run:
   codex doctor --summary
   codex --strict-config "Summarize the active Codex setup."

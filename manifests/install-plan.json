@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "codex-enterprise-starter.install-plan.v1",
+  "schemaVersion": "codex-chef.install-plan.v1",
   "description": "Codex-only install surface used for dry-run planning, validation, and collision review.",
   "profiles": {
     "default": [
@@ -94,8 +94,8 @@
       "id": "codex-plugin",
       "kind": "copy-directory",
       "summary": "Install the local workflow plugin bundle.",
-      "source": "plugins/codex-enterprise-workflows",
-      "destination": "${CODEX_HOME}/plugins/codex-enterprise-workflows",
+      "source": "plugins/codex-chef-workflows",
+      "destination": "${CODEX_HOME}/plugins/codex-chef-workflows",
       "platforms": ["windows", "unix"],
       "collision": "managed-directory-replace-with-backup-when-force",
       "backup": true,

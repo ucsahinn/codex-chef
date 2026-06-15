@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="520" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
-  <title id="title">Codex Enterprise Starter workflow overview</title>
-  <desc id="desc">An animated workflow diagram showing install, route, research, implement, verify, and release readiness steps for the Codex Enterprise Starter.</desc>
+  <title id="title">Codex Chef workflow overview</title>
+  <desc id="desc">An animated workflow diagram showing install, route, research, implement, verify, and release readiness steps for Codex Chef.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L10,5 L0,10 Z" fill="#0f766e"/>
@@ -34,7 +34,7 @@
   <rect x="32" y="32" width="1056" height="456" rx="20" fill="#f8fafc" stroke="#cbd5e1"/>
   <path d="M58 456 C220 405 286 468 452 426 C624 382 684 306 858 342 C972 366 1028 326 1064 282" fill="none" stroke="#0f766e" stroke-opacity="0.14" stroke-width="3"/>
 
-  <text x="72" y="86" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800" fill="#0f172a">One-shot Codex setup flow</text>
+  <text x="72" y="86" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800" fill="#0f172a">Codex Chef setup flow</text>
   <text x="72" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#475569">Tek kurulumdan sonra Codex uzman ajanlar, MCP kaynakları ve güvenli doğrulama kapılarıyla çalışır.</text>
 
   <g fill="none" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow)">

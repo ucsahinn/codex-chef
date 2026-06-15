@@ -90,7 +90,7 @@ function runPlannerJson(args, label) {
 }
 
 function validateSchemaDocument() {
-  if (schema.title !== "Codex Enterprise Starter install-state preview") {
+  if (schema.title !== "Codex Chef install-state preview") {
     fail("Install-state preview schema has unexpected title");
   }
   const required = new Set(schema.required || []);
@@ -107,7 +107,7 @@ function validateSchemaDocument() {
   ]) {
     if (!required.has(key)) fail(`Install-state preview schema missing required key: ${key}`);
   }
-  if (schema.properties?.schemaVersion?.const !== "codex-enterprise-starter.install-state-preview.v1") {
+  if (schema.properties?.schemaVersion?.const !== "codex-chef.install-state-preview.v1") {
     fail("Install-state preview schema has unexpected schemaVersion const");
   }
   if (schema.properties?.dryRunOnly?.const !== true) {
@@ -129,7 +129,7 @@ function validateDiscovery(discovery, label) {
     "profiles",
     "operations"
   ], label);
-  if (discovery.schemaVersion !== "codex-enterprise-starter.install-plan-discovery.v1") {
+  if (discovery.schemaVersion !== "codex-chef.install-plan-discovery.v1") {
     fail(`${label} has unexpected schemaVersion`);
   }
   if (discovery.dryRunOnly !== true) fail(`${label} must be dryRunOnly=true`);
@@ -189,7 +189,7 @@ function validatePlan(plan, label, expected = {}) {
     "operations"
   ], label);
 
-  if (plan.schemaVersion !== "codex-enterprise-starter.install-state-preview.v1") {
+  if (plan.schemaVersion !== "codex-chef.install-state-preview.v1") {
     fail(`${label} has unexpected schemaVersion`);
   }
   if (!nonEmptyString(plan.generatedAt) || Number.isNaN(Date.parse(plan.generatedAt))) {

@@ -7,29 +7,37 @@ the installer must not apply them automatically.
 ## Recommended Description
 
 ```text
-Windows-first Codex setup starter with safe installers, MCP/skill catalogs, validation gates, and multilingual docs.
+Codex Chef: Windows-first Codex setup kit with agents, skills, MCP connectors, safe installers, validation gates, and multilingual docs.
 ```
 
 ## Recommended Topics
 
 ```text
 codex
+codex-chef
 openai
 codex-cli
 ai-agents
 mcp
+model-context-protocol
 agent-skills
 windows
 powershell
 developer-tools
 security
 starter-template
+setup
+automation
 ```
 
 ## Website
 
 Leave blank unless a stable project page exists. Do not use a local file path,
 temporary preview URL, or private workspace URL.
+
+## Social Preview
+
+Use `assets/social-preview.svg` as the GitHub social preview image.
 
 ## Features
 
@@ -51,11 +59,11 @@ temporary preview URL, or private workspace URL.
 
 ## Release Metadata
 
-For v0.4.0, use:
+For v0.5.0, use:
 
 ```text
-Title: Codex Enterprise Starter v0.4.0
-Tag: v0.4.0
+Title: Codex Chef v0.5.0
+Tag: v0.5.0
 Notes: docs/release-notes.md
 ```
 

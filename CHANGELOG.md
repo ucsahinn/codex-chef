@@ -4,6 +4,19 @@
 
 - No changes yet.
 
+## 0.5.0 - 2026-06-15
+
+- Rebranded the project as Codex Chef with the public package slug
+  `codex-chef`.
+- Added Codex Chef visual identity assets: `assets/icon.svg` and
+  `assets/social-preview.svg`.
+- Added SEO/discoverability guidance for GitHub description, topics, social
+  preview, search-safe claims, and post-publication measurement.
+- Renamed the local plugin surface to `codex-chef-workflows` and the bundled
+  maintenance skill to `codex-chef-operator`.
+- Updated README, GitHub metadata guidance, release notes, install paths,
+  validators, and package metadata for the rebrand.
+
 ## 0.4.0 - 2026-06-15
 
 - Added four Codex specialist agents: `context_architect`,

@@ -129,7 +129,7 @@ function createDiscovery(options) {
   }).sort((left, right) => left.id.localeCompare(right.id));
 
   return {
-    schemaVersion: "codex-enterprise-starter.install-plan-discovery.v1",
+    schemaVersion: "codex-chef.install-plan-discovery.v1",
     generatedAt: new Date().toISOString(),
     dryRunOnly: true,
     source: {
@@ -274,7 +274,7 @@ function expandOperation(operation, options) {
       id: operation.id,
       kind: operation.kind,
       destination: resolveVars(operation.destination, options),
-      pluginTarget: resolveVars("${CODEX_HOME}/plugins/codex-enterprise-workflows", options)
+      pluginTarget: resolveVars("${CODEX_HOME}/plugins/codex-chef-workflows", options)
     }];
   }
 
@@ -304,7 +304,7 @@ function createPlan(options) {
   const operations = selected.flatMap((operation) => expandOperation(operation, outputOptions));
 
   return {
-    schemaVersion: "codex-enterprise-starter.install-state-preview.v1",
+    schemaVersion: "codex-chef.install-state-preview.v1",
     generatedAt: new Date().toISOString(),
     dryRunOnly: true,
     source: {
@@ -334,7 +334,7 @@ function createPlan(options) {
 }
 
 function printPlan(plan) {
-  console.log("Codex Enterprise Starter install plan\n");
+  console.log("Codex Chef install plan\n");
   console.log(`Package: ${plan.source.packageName}@${plan.source.packageVersion}`);
   console.log(`Platform: ${plan.target.platform}`);
   console.log(`Codex home: ${plan.target.codexHome}`);
@@ -368,7 +368,7 @@ function printPlan(plan) {
 }
 
 function printProfiles(discovery) {
-  console.log("Codex Enterprise Starter install profiles\n");
+  console.log("Codex Chef install profiles\n");
   console.log(`Package: ${discovery.source.packageName}@${discovery.source.packageVersion}`);
   console.log(`Platform: ${discovery.target.platform}`);
   console.log("");
@@ -380,7 +380,7 @@ function printProfiles(discovery) {
 }
 
 function printOperations(discovery) {
-  console.log("Codex Enterprise Starter install operations\n");
+  console.log("Codex Chef install operations\n");
   console.log(`Package: ${discovery.source.packageName}@${discovery.source.packageVersion}`);
   console.log(`Platform: ${discovery.target.platform}`);
   console.log("");

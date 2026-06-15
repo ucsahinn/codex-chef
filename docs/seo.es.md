@@ -1,8 +1,8 @@
-# Notas De Release
+# Codex Chef SEO Y Descubrimiento
 
-[Deutsch](release-notes.de.md) | [Español](release-notes.es.md) | [English](release-notes.md) | [Português (Brasil)](release-notes.pt-BR.md) | [Türkçe](release-notes.tr.md) | [Français](release-notes.fr.md)
+[Deutsch](seo.de.md) | [Español](seo.es.md) | [English](seo.md) | [Português (Brasil)](seo.pt-BR.md) | [Türkçe](seo.tr.md) | [Français](seo.fr.md)
 
-> Esta guía en español forma parte del conjunto de documentación en seis idiomas para `release-notes.md`. Mantiene el mismo límite de seguridad: previsualizar primero, no guardar secretos y verificar localmente cada cambio de setup.
+> Esta guía en español forma parte del conjunto de documentación en seis idiomas para `seo.md`. Mantiene el mismo límite de seguridad: previsualizar primero, no guardar secretos y verificar localmente cada cambio de setup.
 
 ## Qué cubre esta página
 
@@ -36,25 +36,14 @@ npm run verify:skills:online
 
 ## Secciones fuente
 
-Este archivo localizado sigue las secciones del archivo fuente en inglés. Source: [release-notes.md](release-notes.md).
+Este archivo localizado sigue las secciones del archivo fuente en inglés. Source: [seo.md](seo.md).
 
-- Release Notes
-- v0.5.0 - 2026-06-15
-- Highlights
-- Upgrade Notes
-- Verification
-- v0.4.0 - 2026-06-15
-- Highlights
-- Upgrade Notes
-- Verification
-- v0.3.1 - 2026-06-15
-- Highlights
-- Upgrade Notes
-- Verification
-- v0.3.0 - 2026-06-14
-- Highlights
-- Upgrade Notes
-- Verification
+- Codex Chef SEO And Discoverability
+- Target Query Cluster
+- Recommended GitHub Metadata
+- README Requirements
+- Search-Safe Claims
+- Measurement
 
 ## Mantener sincronizado
 

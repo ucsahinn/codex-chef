@@ -1,4 +1,4 @@
-# Windows-first Codex enterprise starter.
+# Windows-first Codex Chef.
 # Copy to ~/.codex/config.toml with scripts/install.ps1.
 
 model = "gpt-5.5"

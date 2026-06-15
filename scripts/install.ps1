@@ -18,7 +18,7 @@ if ($All) {
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $CodexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".codex" }
 $AgentsHome = if ($env:AGENTS_HOME) { $env:AGENTS_HOME } else { Join-Path $HOME ".agents" }
-$BackupRoot = Join-Path $CodexHome ("backups\codex-enterprise-starter-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
+$BackupRoot = Join-Path $CodexHome ("backups\codex-chef-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
 
 function Invoke-Change {
   param(
@@ -160,8 +160,8 @@ Get-ChildItem -Path (Join-Path $TemplateRoot "profiles") -Filter "*.toml" | ForE
   Install-File -Source $_.FullName -Destination (Join-Path $CodexHome $_.Name)
 }
 
-$PluginSource = Join-Path $RepoRoot "plugins\codex-enterprise-workflows"
-$PluginTarget = Join-Path $CodexHome "plugins\codex-enterprise-workflows"
+$PluginSource = Join-Path $RepoRoot "plugins\codex-chef-workflows"
+$PluginTarget = Join-Path $CodexHome "plugins\codex-chef-workflows"
 Install-Directory -Source $PluginSource -Destination $PluginTarget
 
 $MarketplaceDir = Join-Path $AgentsHome "plugins"
@@ -172,10 +172,10 @@ if ((Test-Path -LiteralPath $MarketplacePath) -and -not $Force) {
 } else {
   Backup-Target $MarketplacePath
   $marketplace = [ordered]@{
-    name = "codex-enterprise-starter"
+    name = "codex-chef"
     plugins = @(
       [ordered]@{
-        name = "codex-enterprise-workflows"
+        name = "codex-chef-workflows"
         source = [ordered]@{
           source = "local"
           path = $PluginTarget
@@ -284,9 +284,9 @@ if ($InstallSkills) {
 
 Write-Host ""
 if ($WhatIfPreference) {
-  Write-Host "Codex Enterprise Starter dry run completed."
+  Write-Host "Codex Chef dry run completed."
 } else {
-  Write-Host "Codex Enterprise Starter installed."
+  Write-Host "Codex Chef installed."
   Write-Host "Restart Codex, then run:"
   Write-Host "  codex doctor --summary"
   Write-Host "  codex --strict-config `"Summarize the active Codex setup.`""

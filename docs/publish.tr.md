@@ -38,14 +38,14 @@ Release için ayrıca şunları doğrula:
 GitHub CLI ile, açık onaydan sonra:
 
 ```bash
-gh repo create codex-enterprise-starter --public --source . --remote origin
+gh repo create codex-chef --public --source . --remote origin
 git push -u origin main
 ```
 
 Manuel remote:
 
 ```bash
-git remote add origin https://github.com/<owner>/codex-enterprise-starter.git
+git remote add origin https://github.com/<owner>/codex-chef.git
 git push -u origin main
 ```
 
@@ -56,11 +56,11 @@ Açık commit/push/release onayından sonra:
 ```bash
 git add <review edilmiş dosyalar>
 git diff --cached
-git commit -m "Release Codex starter workflow upgrade v0.4.0"
+git commit -m "Release Codex Chef rebrand v0.5.0"
 git push origin main
-git tag v0.4.0
-git push origin v0.4.0
-gh release create v0.4.0 --title "Codex Enterprise Starter v0.4.0" --notes-file docs/release-notes.md
+git tag v0.5.0
+git push origin v0.5.0
+gh release create v0.5.0 --title "Codex Chef v0.5.0" --notes-file docs/release-notes.md
 ```
 
 Push sonrasında remote eşitliği ve CI durumunu doğrula:

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Codex Enterprise Starter install-state preview",
+  "title": "Codex Chef install-state preview",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -16,7 +16,7 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": "codex-enterprise-starter.install-state-preview.v1"
+      "const": "codex-chef.install-state-preview.v1"
     },
     "generatedAt": {
       "type": "string",
@@ -42,7 +42,7 @@
           "const": "manifests/install-plan.json"
         },
         "manifestVersion": {
-          "const": "codex-enterprise-starter.install-plan.v1"
+          "const": "codex-chef.install-plan.v1"
         }
       }
     },

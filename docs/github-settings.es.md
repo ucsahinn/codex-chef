@@ -42,6 +42,7 @@ Este archivo localizado sigue las secciones del archivo fuente en inglés. Sourc
 - Recommended Description
 - Recommended Topics
 - Website
+- Social Preview
 - Features
 - Branch And Actions
 - Release Metadata

@@ -25,10 +25,10 @@ Bu denetim istenen final durumu mevcut repo kanıtlarıyla eşleştirir.
 | Tarayıcı/UI doğrulaması hazır olmalı. | Playwright ve Chrome DevTools MCP'leri varsayılan açık; `frontend_verifier` kayıtlı ve dokümante. | Tamam |
 | Güvenlik güçlü kalmalı. | Sandbox ve onay varsayılanları konservatif, dış hesap/database/filesystem MCP'leri kapalı, Git guard'ları opsiyonel, Gitleaks release doğrulamasının parçası. | Tamam |
 | Public repo yerel state veya secret içermemeli. | Validasyon yerel kullanıcı yollarını, Codex session/memory yollarını, private key marker'larını, yaygın token pattern'lerini, yasak secret dosya adlarını, database'leri ve paket artifact'lerini engelliyor. | Tamam |
-| Release notları source-controlled ve public release duruşuyla hizalı olmalı. | `docs/release-notes.md` ve `docs/release-notes.tr.md` v0.3.0 değişiklik setini dokümante eder ve repo/security validation tarafından zorunlu tutulur. | Tamam |
-| GitHub metadata public release iddiasından önce hazır olmalı. | `docs/github-settings.md` ve `docs/github-settings.tr.md` önerilen açıklama, topic'ler, feature toggle'ları, branch/actions duruşu ve v0.3.0 release metadata'sını tanımlar. | Tamam |
+| Release notları source-controlled ve public release duruşuyla hizalı olmalı. | `docs/release-notes.md` ve `docs/release-notes.tr.md` v0.5.0 Codex Chef değişiklik setini dokümante eder ve repo/security validation tarafından zorunlu tutulur. | Tamam |
+| GitHub metadata public release iddiasından önce hazır olmalı. | `docs/github-settings.md` ve `docs/github-settings.tr.md` önerilen açıklama, topic'ler, feature toggle'ları, branch/actions duruşu ve v0.5.0 release metadata'sını tanımlar. | Tamam |
 | Advisory girdileri release öncesi incelenebilir olmalı. | `docs/advisory-sources.md` ve `docs/advisory-sources.tr.md`, maintainer'ların publish öncesi tekrar kontrol etmesi gereken resmi Codex, OpenAI skill, MCP security, GitHub, PowerShell ve ECC karşılaştırma kaynaklarını listeler. | Tamam |
-| Sonraki bakım aynı hizada kalmalı. | Paketlenen `enterprise-codex-operator` skill'i README/install/how-to doküman hizasını ve iki dilli docs eşleşmesini zorunlu tutuyor. | Tamam |
+| Sonraki bakım aynı hizada kalmalı. | Paketlenen `codex-chef-operator` skill'i README/install/how-to doküman hizasını ve iki dilli docs eşleşmesini zorunlu tutuyor. | Tamam |
 
 ## Doğrulama Kanıtı
 

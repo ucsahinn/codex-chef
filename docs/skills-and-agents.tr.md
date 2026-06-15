@@ -26,9 +26,9 @@ Bu repo şunları içerir:
   doğrulanmış public `package` + `skill` kurulum hedefleri.
 - `catalog/agents.json`: Codex config template'leri icin incelenmis uzman ajan
   metadata'si, risk notlari, kullanim amaci ve drift beklentileri.
-- `plugins/codex-enterprise-workflows/skills/enterprise-codex-operator`: bu
+- `plugins/codex-chef-workflows/skills/codex-chef-operator`: bu
   kurulumu bakımda tutmak için küçük bir yerel skill.
-- `plugins/codex-enterprise-workflows/skills/offline-diagram-triplet`: Mermaid
+- `plugins/codex-chef-workflows/skills/offline-diagram-triplet`: Mermaid
   kaynağından editable Excalidraw, SVG, PNG ve Markdown snippet üreten
   zero-network yerel diagram workflow'u.
 
@@ -42,7 +42,7 @@ Resmi kaynak: https://developers.openai.com/codex/plugins
 
 Bu repo şunları içerir:
 
-- `plugins/codex-enterprise-workflows/.codex-plugin/plugin.json`
+- `plugins/codex-chef-workflows/.codex-plugin/plugin.json`
 - `.agents/plugins/marketplace.json`
 
 Installer yerel marketplace kaydını kurar. Codex'i yeniden başlatıp `/plugins`
@@ -50,7 +50,7 @@ ile plugin'i inceleyebilir veya kurabilirsin.
 
 Bundled plugin şu anda iki yerel skill sunar:
 
-- `enterprise-codex-operator`: güvenlik sınırlarını zayıflatmadan bu starter'ı
+- `codex-chef-operator`: güvenlik sınırlarını zayıflatmadan bu starter'ı
   bakımda tutar.
 - `offline-diagram-triplet`: network kullanmadan Mermaid source'u editable
   diagram triplet'ine çevirir.

@@ -37,7 +37,7 @@ node scripts/plan-install.mjs --all --json
 By default, overwritten managed files are backed up under:
 
 ```text
-~/.codex/backups/codex-enterprise-starter-YYYYMMDD-HHMMSS/
+~/.codex/backups/codex-chef-YYYYMMDD-HHMMSS/
 ```
 
 Do not use `-NoBackup` or `--no-backup` unless you already have another backup.

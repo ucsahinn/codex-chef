@@ -1,12 +1,14 @@
-# Codex Enterprise Starter
+# Codex Chef
 
 <p align="center">
-  <img src="assets/banner.svg" alt="Codex Enterprise Starter banner showing agents, MCPs, skills, verification, and multilingual docs" width="100%" />
+  <img src="assets/icon.svg" alt="Codex Chef icon" width="120" />
+  <br />
+  <img src="assets/banner.svg" alt="Codex Chef banner showing agents, MCPs, skills, verification, and multilingual docs" width="100%" />
 </p>
 
 <p align="center">
-  <a href="https://github.com/ucsahinn/codex-enterprise-starter/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-enterprise-starter/actions/workflows/validate.yml/badge.svg" /></a>
-  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-enterprise-starter?color=0f766e" /></a>
+  <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Documentation languages" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
   <img alt="Windows and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
 </p>
@@ -23,7 +25,7 @@
   <sub>Deutsch · Español · English · Português (Brasil) · Türkçe · French</sub>
 </p>
 
-Security-first Codex setup for Windows-first power users and small teams. It packages a repeatable local Codex baseline: durable instructions, conservative config, specialist agents, approval rules, MCP defaults, curated skill metadata, plugin packaging, validation scripts, multilingual README entry points, and six-language deep docs.
+Codex Chef is a Windows-first Codex setup kit for power users and small teams. It packages a repeatable local Codex baseline: durable instructions, conservative config, specialist agents, approval rules, MCP defaults, curated skill metadata, plugin packaging, validation scripts, multilingual README entry points, and six-language deep docs.
 
 This is an unofficial community starter, not an OpenAI product. It is mapped to current official Codex documentation and keeps risky actions approval-gated by default.
 
@@ -57,7 +59,7 @@ This is an unofficial community starter, not an OpenAI product. It is mapped to 
 
 ## 🧭 What This Repo Is
 
-Codex Enterprise Starter turns scattered local setup knowledge into a public, reviewable starter repository. It helps users answer:
+Codex Chef turns scattered local setup knowledge into a public, reviewable starter repository. It helps users answer:
 
 - What should live in `AGENTS.md`, config, skills, plugins, MCP, rules, or hooks?
 - Which connectors are safe by default?
@@ -73,7 +75,7 @@ The installers copy these managed templates:
 - `~/.codex/config.toml`
 - `~/.codex/agents/*.toml`
 - `~/.codex/rules/default.rules`
-- `~/.codex/plugins/codex-enterprise-workflows`
+- `~/.codex/plugins/codex-chef-workflows`
 - `~/.agents/plugins/marketplace.json`
 
 Optional switches can also install:
@@ -133,8 +135,8 @@ catalog. See [ECC Compatibility](docs/ecc-compatibility.md).
 PowerShell:
 
 ```powershell
-git clone https://github.com/ucsahinn/codex-enterprise-starter.git
-cd codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install.ps1 -All -Force
 ```
@@ -142,8 +144,8 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 Bash or WSL:
 
 ```bash
-git clone https://github.com/ucsahinn/codex-enterprise-starter.git
-cd codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --force
 ```
@@ -254,6 +256,7 @@ Every deep guide has English, German, Spanish, Brazilian Portuguese, Turkish, an
 - [Security model](docs/security-model.md)
 - [Verification](docs/verification.md)
 - [Public readiness](docs/public-readiness.md)
+- [SEO and discoverability](docs/seo.md)
 - [Research notes](docs/research-notes.md)
 - [Advisory sources](docs/advisory-sources.md)
 - [Publishing](docs/publish.md)

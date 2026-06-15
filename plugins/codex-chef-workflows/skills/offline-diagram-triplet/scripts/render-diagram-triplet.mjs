@@ -71,7 +71,7 @@ function main() {
     fs.writeFileSync(mdPath, toMarkdown(baseName, normalized, svgPath, pngPath, excalidrawPath), "utf8");
 
     console.log(JSON.stringify({
-      schemaVersion: "codex-enterprise-starter.diagram-triplet.v1",
+      schemaVersion: "codex-chef.diagram-triplet.v1",
       files: {
         mermaid: mmdPath,
         excalidraw: excalidrawPath,
@@ -416,7 +416,7 @@ function toExcalidraw(layout) {
   return {
     type: "excalidraw",
     version: 2,
-    source: "codex-enterprise-starter/offline-diagram-triplet",
+    source: "codex-chef/offline-diagram-triplet",
     elements,
     appState: {
       gridSize: null,
@@ -458,7 +458,7 @@ function toSvg(layout) {
   const parts = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${layout.width}" height="${layout.height}" viewBox="0 0 ${layout.width} ${layout.height}" role="img" aria-labelledby="title desc">`,
     "<title id=\"title\">Offline diagram triplet render</title>",
-    "<desc id=\"desc\">Diagram rendered from Mermaid source by the Codex Enterprise Starter offline diagram skill.</desc>",
+    "<desc id=\"desc\">Diagram rendered from Mermaid source by the Codex Chef offline diagram skill.</desc>",
     "<defs><marker id=\"arrow\" markerWidth=\"10\" markerHeight=\"10\" refX=\"8\" refY=\"3\" orient=\"auto\" markerUnits=\"strokeWidth\"><path d=\"M0,0 L0,6 L9,3 z\" fill=\"#374151\" /></marker></defs>",
     "<rect width=\"100%\" height=\"100%\" fill=\"#ffffff\" />"
   ];

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-echo "[codex-enterprise] pre-commit guard"
+echo "[codex-chef] pre-commit guard"
 
 blocked_paths="$(git diff --cached --name-only --diff-filter=ACMR | grep -Ei '(^|/)(\.env(\.|$)|.*\.(pem|key|p12|pfx|kdbx|sqlite|db|dump)$)' || true)"
 if [ -n "$blocked_paths" ]; then

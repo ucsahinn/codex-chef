@@ -7,29 +7,37 @@ installer bunları otomatik uygulamamalıdır.
 ## Önerilen Açıklama
 
 ```text
-Windows-first Codex setup starter with safe installers, MCP/skill catalogs, validation gates, and multilingual docs.
+Codex Chef: Windows-first Codex setup kit with agents, skills, MCP connectors, safe installers, validation gates, and multilingual docs.
 ```
 
 ## Önerilen Topic'ler
 
 ```text
 codex
+codex-chef
 openai
 codex-cli
 ai-agents
 mcp
+model-context-protocol
 agent-skills
 windows
 powershell
 developer-tools
 security
 starter-template
+setup
+automation
 ```
 
 ## Website
 
 Stabil bir proje sayfası yoksa boş bırak. Lokal dosya yolu, geçici preview URL
 veya private workspace URL kullanma.
+
+## Social Preview
+
+GitHub social preview image olarak `assets/social-preview.svg` kullan.
 
 ## Özellikler
 
@@ -50,11 +58,11 @@ veya private workspace URL kullanma.
 
 ## Release Metadata
 
-v0.4.0 için:
+v0.5.0 icin:
 
 ```text
-Title: Codex Enterprise Starter v0.4.0
-Tag: v0.4.0
+Title: Codex Chef v0.5.0
+Tag: v0.5.0
 Notes: docs/release-notes.md
 ```
 

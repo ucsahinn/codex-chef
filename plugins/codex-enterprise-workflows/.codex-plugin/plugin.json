@@ -1,6 +1,0 @@
-{
-  "name": "codex-enterprise-workflows",
-  "version": "0.4.0",
-  "description": "Security-first Codex setup maintenance workflows.",
-  "skills": "./skills/"
-}

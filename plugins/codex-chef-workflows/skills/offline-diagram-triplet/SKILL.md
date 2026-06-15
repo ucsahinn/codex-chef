@@ -24,7 +24,7 @@ in docs. Keep everything local and offline.
 4. Run the bundled renderer:
 
 ```bash
-node plugins/codex-enterprise-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs --mermaid path/to/diagram.mmd --out-dir artifacts/diagrams --name diagram-name
+node plugins/codex-chef-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs --mermaid path/to/diagram.mmd --out-dir artifacts/diagrams --name diagram-name
 ```
 
 5. Return the created file paths and include the Mermaid block in the response

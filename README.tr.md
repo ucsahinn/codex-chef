@@ -1,12 +1,14 @@
-# Codex Enterprise Starter
+# Codex Chef
 
 <p align="center">
-  <img src="assets/banner.svg" alt="Uzman ajanlar, MCP kaynakları, skill'ler, doğrulama ve iki dilli dokümanları gösteren Codex Enterprise Starter banner görseli" width="100%" />
+  <img src="assets/icon.svg" alt="Codex Chef ikon" width="120" />
+  <br />
+  <img src="assets/banner.svg" alt="Uzman ajanlar, MCP kaynakları, skill'ler, doğrulama ve iki dilli dokümanları gösteren Codex Chef banner görseli" width="100%" />
 </p>
 
 <p align="center">
-  <a href="https://github.com/ucsahinn/codex-enterprise-starter/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-enterprise-starter/actions/workflows/validate.yml/badge.svg" /></a>
-  <a href="LICENSE"><img alt="MIT lisansı" src="https://img.shields.io/github/license/ucsahinn/codex-enterprise-starter?color=0f766e" /></a>
+  <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
+  <a href="LICENSE"><img alt="MIT lisansı" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Dokumantasyon dilleri" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
   <img alt="Windows ve WSL uyumlu" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
 </p>
@@ -23,7 +25,7 @@
   <sub>Deutsch · Español · English · Português (Brasil) · Türkçe · French</sub>
 </p>
 
-Windows ağırlıklı çalışan güçlü kullanıcılar ve küçük ekipler için güvenlik öncelikli Codex setup paketi. Tekrar edilebilir bir yerel Codex temeli kurar: kalıcı talimatlar, konservatif config, uzman ajanlar, onay kuralları, MCP varsayılanları, seçilmiş skill metadata'ları, plugin paketi, doğrulama scriptleri ve altı dilli dokümantasyon.
+Codex Chef, Windows agirlikli calisan guclu kullanicilar ve kucuk ekipler icin guvenlik oncelikli Codex setup kitidir. Tekrar edilebilir bir yerel Codex temeli kurar: kalici talimatlar, konservatif config, uzman ajanlar, onay kurallari, MCP varsayilanlari, secilmis skill metadata'lari, plugin paketi, dogrulama scriptleri ve alti dilli dokumantasyon.
 
 Bu resmi OpenAI ürünü değildir; community starter paketidir. Güncel resmi Codex dokümanlarıyla eşleştirilmiştir ve riskli aksiyonlar varsayılan olarak onaya bağlı kalır.
 
@@ -57,7 +59,7 @@ Bu resmi OpenAI ürünü değildir; community starter paketidir. Güncel resmi C
 
 ## 🧭 Bu Repo Ne?
 
-Codex Enterprise Starter, dağınık yerel setup bilgisini public, okunabilir ve doğrulanabilir bir starter repoya çevirir. Şu sorulara net cevap verir:
+Codex Chef, dağınık yerel setup bilgisini public, okunabilir ve doğrulanabilir bir starter repoya çevirir. Şu sorulara net cevap verir:
 
 - Ne `AGENTS.md` içinde olmalı, ne config/skill/plugin/MCP/rule/hook tarafına gitmeli?
 - Hangi connector'lar varsayılan olarak güvenli?
@@ -73,7 +75,7 @@ Installer şu yönetilen template'leri kopyalar:
 - `~/.codex/config.toml`
 - `~/.codex/agents/*.toml`
 - `~/.codex/rules/default.rules`
-- `~/.codex/plugins/codex-enterprise-workflows`
+- `~/.codex/plugins/codex-chef-workflows`
 - `~/.agents/plugins/marketplace.json`
 
 Opsiyonel switch'lerle şunlar da kurulabilir:
@@ -133,8 +135,8 @@ import etmez. Bkz. [ECC Uyumluluk](docs/ecc-compatibility.tr.md).
 PowerShell:
 
 ```powershell
-git clone https://github.com/ucsahinn/codex-enterprise-starter.git
-cd codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install.ps1 -All -Force
 ```
@@ -142,8 +144,8 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 Bash veya WSL:
 
 ```bash
-git clone https://github.com/ucsahinn/codex-enterprise-starter.git
-cd codex-enterprise-starter
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --force
 ```
@@ -254,6 +256,7 @@ Her derin rehberin İngilizce, Almanca, İspanyolca, Brezilya Portekizcesi, Tür
 - [Güvenlik modeli](docs/security-model.tr.md)
 - [Doğrulama](docs/verification.tr.md)
 - [Public hazırlık](docs/public-readiness.tr.md)
+- [SEO ve keşfedilebilirlik](docs/seo.tr.md)
 - [Araştırma notları](docs/research-notes.tr.md)
 - [Advisory kaynakları](docs/advisory-sources.tr.md)
 - [Publish](docs/publish.tr.md)

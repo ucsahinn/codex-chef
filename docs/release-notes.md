@@ -1,5 +1,49 @@
 # Release Notes
 
+## v0.5.0 - 2026-06-15
+
+This release rebrands the project as Codex Chef and improves public
+discoverability without weakening the safe installer model.
+
+## Highlights
+
+- Renamed the public product and package surface to Codex Chef / `codex-chef`.
+- Added Codex Chef visual identity assets: `assets/icon.svg` and
+  `assets/social-preview.svg`.
+- Reworked the README hero and public metadata around the source-backed phrase
+  `Windows-first Codex setup kit`.
+- Added SEO and discoverability guidance for GitHub description, topics,
+  social preview, search-safe claims, and post-publication measurement.
+- Renamed the local plugin surface to `codex-chef-workflows` and the bundled
+  maintenance skill to `codex-chef-operator`.
+- Kept safety posture unchanged: authenticated connectors stay disabled by
+  default, installers still preview/backup, and release/publish actions remain
+  explicit approval gates.
+
+## Upgrade Notes
+
+Existing users should run a dry-run before installing the renamed plugin path:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+.\\scripts\\install.ps1 -All -Force -WhatIf
+```
+
+The new managed plugin target is `codex-chef-workflows`. If an older checkout
+was installed under the former plugin name, review the dry-run output before
+deciding whether to remove old global plugin copies.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.4.0 - 2026-06-15
 
 This release expands the starter from a safe installer/docs kit into a fuller

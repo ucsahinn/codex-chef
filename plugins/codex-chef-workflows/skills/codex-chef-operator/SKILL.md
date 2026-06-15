@@ -1,11 +1,11 @@
 ---
-name: enterprise-codex-operator
-description: Maintain, audit, and improve this Codex enterprise starter setup without weakening security, leaking local state, or changing external systems.
+name: codex-chef-operator
+description: Maintain, audit, and improve this Codex Chef setup without weakening security, leaking local state, or changing external systems.
 ---
 
 # Enterprise Codex Operator
 
-Use this skill when maintaining the Codex Enterprise Starter repository or a
+Use this skill when maintaining the Codex Chef repository or a
 derived local setup.
 
 ## Workflow
@@ -38,7 +38,7 @@ derived local setup.
    - `docs/install.tr.md`
    - `docs/security-model.md`
    - every English doc in `docs/` should have a matching `.tr.md` pair
-   - `plugins/codex-enterprise-workflows/skills/offline-diagram-triplet`
+   - `plugins/codex-chef-workflows/skills/offline-diagram-triplet`
      should stay zero-network and should emit Mermaid, Excalidraw, SVG, PNG,
      and Markdown snippet artifacts from local files
    - public README visuals under `assets/` should stay purposeful, accessible,

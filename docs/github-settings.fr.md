@@ -42,6 +42,7 @@ Ce fichier localisé suit les sections du fichier source anglais. Source: [githu
 - Recommended Description
 - Recommended Topics
 - Website
+- Social Preview
 - Features
 - Branch And Actions
 - Release Metadata

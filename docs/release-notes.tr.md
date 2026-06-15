@@ -1,5 +1,48 @@
 # Release Notları
 
+## v0.5.0 - 2026-06-15
+
+Bu release projeyi Codex Chef olarak rebrand eder ve guvenli installer modelini
+zayiflatmadan public kesfedilebilirligi guclendirir.
+
+## One Cikanlar
+
+- Public urun ve package yuzeyi Codex Chef / `codex-chef` olarak yenilendi.
+- Codex Chef gorsel kimlik asset'leri eklendi: `assets/icon.svg` ve
+  `assets/social-preview.svg`.
+- README hero ve public metadata, source-backed `Windows-first Codex setup kit`
+  ifadesi etrafinda yeniden duzenlendi.
+- GitHub description, topics, social preview, search-safe claim ve yayin sonrasi
+  olcum icin SEO/discoverability rehberi eklendi.
+- Local plugin yuzeyi `codex-chef-workflows`, maintenance skill'i
+  `codex-chef-operator` olarak yeniden adlandirildi.
+- Guvenlik durusu degismedi: auth connector'lar default kapali, installer
+  preview/backup davranisini korur, release/publish aksiyonlari acik onay ister.
+
+## Upgrade Notlari
+
+Rename edilen plugin path'i kurulmadan once dry-run calistir:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+.\\scripts\\install.ps1 -All -Force -WhatIf
+```
+
+Yeni managed plugin hedefi `codex-chef-workflows` adidir. Onceki checkout eski
+isimle kurulmustuysa global plugin kopyalarini silmeye karar vermeden once
+dry-run ciktisini incele.
+
+## Dogrulama
+
+Bu version icin release readiness su kontrolleri icermelidir:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.4.0 - 2026-06-15
 
 Bu release starter'i sadece guvenli installer/docs kiti olmaktan cikarip daha

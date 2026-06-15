@@ -10,7 +10,7 @@ Only one matching Desktop directory was found before this repo was created:
 ~/Desktop/codex-cli-best-practice-main
 ```
 
-No existing `codex-enterprise-starter` repo was present.
+No existing `codex-chef` repo was present.
 
 ## Current Global Codex Files
 
