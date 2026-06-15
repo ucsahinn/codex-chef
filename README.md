@@ -68,26 +68,26 @@ manifest-backed install plan.
 These are Codex subagent role definitions, not separate background services.
 Codex uses their names, descriptions, and TOML role files when routing a task.
 
-- 🗺️ **Code Mapper** (`code_mapper`) - Maps unfamiliar repositories before implementation: files, ownership, boundaries, and data flow.
-- 📚 **Docs Researcher** (`docs_researcher`) - Checks official docs, standards, APIs, and version-sensitive behavior.
-- 🧭 **Context Architect** (`context_architect`) - Decides whether behavior belongs in a prompt, `AGENTS.md`, skill, plugin, MCP, hook, rule, memory, or config.
-- ✍️ **Prompt Architect** (`prompt_architect`) - Turns vague work into reliable prompts, task briefs, success criteria, and reusable instructions.
-- 🔌 **MCP Integrator** (`mcp_integrator`) - Plans MCP connectors, auth boundaries, enabled tools, and troubleshooting.
-- 🎯 **Product Strategist** (`product_strategist`) - Pressure-tests scope, framing, alternatives, and the smallest useful version.
-- 🏗️ **Engineering Planner** (`engineering_planner`) - Locks architecture, data flow, diagrams, edge cases, and test strategy before build work.
-- 🎨 **Design Reviewer** (`design_reviewer`) - Reviews UX, accessibility, visual polish, design-system fit, and generic AI output risk.
-- 🧰 **DevEx Auditor** (`devex_auditor`) - Tests onboarding friction, docs clarity, first-run flow, and time-to-hello-world.
-- 🕵️ **Root-Cause Debugger** (`root_cause_debugger`) - Reproduces failures, traces data flow, tests hypotheses, and finds root cause before fixes.
-- ✅ **QA Lead** (`qa_lead`) - Exercises user flows, hunts regressions, plans coverage, and re-verifies fixes.
-- ⚡ **Performance Auditor** (`performance_auditor`) - Measures page speed, Core Web Vitals, traces, resource budgets, and regressions.
-- 📝 **Docs Author** (`docs_author`) - Fixes stale claims, release-note gaps, missing guides, and weak documentation coverage.
-- 📐 **Spec Author** (`spec_author`) - Converts fuzzy intent into executable specs with non-goals, edge cases, and quality gates.
-- 🔍 **Code Reviewer** (`code_reviewer`) - Reviews correctness, regressions, security, maintainability, and missing tests with fresh context.
-- 🖥️ **Frontend Verifier** (`frontend_verifier`) - Checks rendered UI, screenshots, responsive layout, interaction states, and console errors.
-- 🛡️ **Security Auditor** (`security_auditor`) - Reviews auth, secrets, permissions, API routes, data access, dependencies, and abuse paths.
-- 🧪 **Test Verifier** (`test_verifier`) - Runs lint, typecheck, tests, builds, smoke checks, and failure-evidence collection.
-- 🚢 **Release Verifier** (`release_verifier`) - Checks git hygiene, version/changelog state, artifacts, secret scans, CI, and publish gates.
-- 🩺 **Codex Doctor** (`codex_doctor`) - Diagnoses starter health, catalog drift, install-plan coverage, docs, MCP defaults, and next checks.
+- 🗺️ **Code Mapper** (`code_mapper`) - repo map
+- 📚 **Docs Researcher** (`docs_researcher`) - official docs
+- 🧭 **Context Architect** (`context_architect`) - routing surface
+- ✍️ **Prompt Architect** (`prompt_architect`) - prompt system
+- 🔌 **MCP Integrator** (`mcp_integrator`) - connectors
+- 🎯 **Product Strategist** (`product_strategist`) - scope
+- 🏗️ **Engineering Planner** (`engineering_planner`) - architecture
+- 🎨 **Design Reviewer** (`design_reviewer`) - UX polish
+- 🧰 **DevEx Auditor** (`devex_auditor`) - onboarding
+- 🕵️ **Root-Cause Debugger** (`root_cause_debugger`) - investigation
+- ✅ **QA Lead** (`qa_lead`) - user flows
+- ⚡ **Performance Auditor** (`performance_auditor`) - speed
+- 📝 **Docs Author** (`docs_author`) - docs coverage
+- 📐 **Spec Author** (`spec_author`) - executable specs
+- 🔍 **Code Reviewer** (`code_reviewer`) - fresh review
+- 🖥️ **Frontend Verifier** (`frontend_verifier`) - rendered UI
+- 🛡️ **Security Auditor** (`security_auditor`) - threat paths
+- 🧪 **Test Verifier** (`test_verifier`) - test evidence
+- 🚢 **Release Verifier** (`release_verifier`) - publish gates
+- 🩺 **Codex Doctor** (`codex_doctor`) - setup health
 
 ## 🧩 Skills Included
 
@@ -95,17 +95,17 @@ Codex Chef ships two local plugin skills. With `-All` or `-InstallSkills`, it
 can also install nine reviewed public skills for frontend, design, dependency,
 and Vercel workflows.
 
-- 🍳 **Chef Operator** (`codex-chef-operator`) - Plugin-local; maintains this starter without weakening install safety or security gates.
-- 📐 **Offline Diagram Triplet** (`offline-diagram-triplet`) - Plugin-local; creates Mermaid, editable Excalidraw, SVG, PNG, and Markdown without network access.
-- ⬆️ **Dependency Upgrade** (`dependency-upgrade`) - Optional global; reviews and verifies dependency upgrades.
-- 🖼️ **Frontend Builder** (`frontend-skill`) - Optional global; builds visually stronger frontend experiences.
-- 💎 **Interface Polish** (`impeccable`) - Optional global; audits, polishes, and hardens frontend interfaces.
-- 🎨 **Design Taste** (`design-taste-frontend`) - Optional global; improves UI/UX taste and reduces generic AI output.
-- 🧱 **Image To Code** (`image-to-code`) - Optional global; converts visual references into frontend code.
-- ✨ **High-End Visual Design** (`high-end-visual-design`) - Optional global; improves hierarchy, spacing, visual direction, and polish.
-- ♿ **Web Guidelines** (`web-design-guidelines`) - Optional global; reviews accessibility, UX quality, and interface standards.
-- ⚛️ **React Best Practices** (`vercel-react-best-practices`) - Optional global; optimizes React and Next.js implementation patterns.
-- ▲ **Vercel Optimize** (`vercel-optimize`) - Optional global; investigates Vercel cost, performance, and platform usage.
+- 🍳 **Chef Operator** (`codex-chef-operator`) - plugin-local
+- 📐 **Offline Diagram Triplet** (`offline-diagram-triplet`) - plugin-local
+- ⬆️ **Dependency Upgrade** (`dependency-upgrade`) - optional global
+- 🖼️ **Frontend Builder** (`frontend-skill`) - optional global
+- 💎 **Interface Polish** (`impeccable`) - optional global
+- 🎨 **Design Taste** (`design-taste-frontend`) - optional global
+- 🧱 **Image To Code** (`image-to-code`) - optional global
+- ✨ **High-End Visual Design** (`high-end-visual-design`) - optional global
+- ♿ **Web Guidelines** (`web-design-guidelines`) - optional global
+- ⚛️ **React Best Practices** (`vercel-react-best-practices`) - optional global
+- ▲ **Vercel Optimize** (`vercel-optimize`) - optional global
 
 ## 🔌 MCP Defaults
 
