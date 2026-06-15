@@ -51,11 +51,11 @@ temporary preview URL, or private workspace URL.
 
 ## Release Metadata
 
-For v0.3.1, use:
+For v0.4.0, use:
 
 ```text
-Title: Codex Enterprise Starter v0.3.1
-Tag: v0.3.1
+Title: Codex Enterprise Starter v0.4.0
+Tag: v0.4.0
 Notes: docs/release-notes.md
 ```
 

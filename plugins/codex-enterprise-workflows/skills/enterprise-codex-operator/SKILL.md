@@ -38,6 +38,9 @@ derived local setup.
    - `docs/install.tr.md`
    - `docs/security-model.md`
    - every English doc in `docs/` should have a matching `.tr.md` pair
+   - `plugins/codex-enterprise-workflows/skills/offline-diagram-triplet`
+     should stay zero-network and should emit Mermaid, Excalidraw, SVG, PNG,
+     and Markdown snippet artifacts from local files
    - public README visuals under `assets/` should stay purposeful, accessible,
      lightly animated with reduced-motion fallback, and public-safe
 4. Validate after edits:

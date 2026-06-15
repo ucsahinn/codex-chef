@@ -28,6 +28,9 @@ Bu repo şunları içerir:
   metadata'si, risk notlari, kullanim amaci ve drift beklentileri.
 - `plugins/codex-enterprise-workflows/skills/enterprise-codex-operator`: bu
   kurulumu bakımda tutmak için küçük bir yerel skill.
+- `plugins/codex-enterprise-workflows/skills/offline-diagram-triplet`: Mermaid
+  kaynağından editable Excalidraw, SVG, PNG ve Markdown snippet üreten
+  zero-network yerel diagram workflow'u.
 
 ## Plugin'ler
 
@@ -45,6 +48,13 @@ Bu repo şunları içerir:
 Installer yerel marketplace kaydını kurar. Codex'i yeniden başlatıp `/plugins`
 ile plugin'i inceleyebilir veya kurabilirsin.
 
+Bundled plugin şu anda iki yerel skill sunar:
+
+- `enterprise-codex-operator`: güvenlik sınırlarını zayıflatmadan bu starter'ı
+  bakımda tutar.
+- `offline-diagram-triplet`: network kullanmadan Mermaid source'u editable
+  diagram triplet'ine çevirir.
+
 Installer sadece `install: true`, `owner/repo` formatında doğrulanmış `package`
 ve eşleşen `skill` adı taşıyan katalog kayıtları için Skills CLI çağırır.
 Kullandığı format `npx skills add <package> --skill <skill> --yes --global`
@@ -57,24 +67,56 @@ allowlist'idir. Release oncesinde ve kaynak degisikliginden sonra `npm run
 verify:skills:online` calistirilarak mevcut Skills CLI'in her package + skill
 ciftini cozdugu tekrar kanitlanmalidir.
 
+Offline diagram smoke doğrulaması online skill-source resolution'dan ayrıdır:
+
+```bash
+npm run validate:diagram
+```
+
 ## Uzman Ajanlar
 
 Bu starter odaklı ajanlar kaydeder:
 
 - `code_mapper`: büyük değişikliklerden önce read-only proje haritalama.
 - `docs_researcher`: güncel doküman, API ve sürüm hassas bilgileri.
+- `context_architect`: kalıcı davranışın prompt, `AGENTS.md`, skill, plugin,
+  MCP, hook, memory, rule veya config profiline mi ait olduğunu belirleme.
+- `prompt_architect`: güvenilir brief, başarı kriteri, prompt sistemi ve
+  tekrar kullanılabilir instruction contract tasarımı.
+- `mcp_integrator`: dış tool erişimi açılmadan veya debug edilmeden önce
+  least-privilege MCP ve connector planlama.
+- `product_strategist`: implementasyon oncesi urun framing'i, scope, basari
+  kriteri ve en kucuk faydali surum kararlarini sorgular.
+- `engineering_planner`: genis kod degisikliklerinden once mimari, data flow,
+  diagram, edge case, invariant ve test stratejisini netlestirir.
+- `design_reviewer`: UX kalitesi, accessibility, design-system uyumu, gorsel
+  tradeoff ve AI-slop risklerini inceler.
+- `devex_auditor`: onboarding friction, docs netligi, first-run flow ve
+  time-to-hello-world deneyimini test eder.
+- `root_cause_debugger`: fix oncesi hatayi reproduce eder, data flow izler,
+  hypothesis test eder ve root cause cikarir.
+- `qa_lead`: end-to-end workflow testleri, regression plani ve tekrar
+  dogrulama yapar.
+- `performance_auditor`: page speed, Core Web Vitals, resource budget, trace ve
+  degisiklik sonrasi regression kaniti toplar.
+- `docs_author`: Diataxis coverage, stale docs, release docs ve eksik rehber
+  uretimi icin dokumanlari inceler.
+- `spec_author`: belirsiz istegi non-goal, evidence, edge case ve quality gate
+  iceren scoped executable spec'e cevirir.
 - `code_reviewer`: doğruluk, regresyon ve eksik test review geçişi.
 - `frontend_verifier`: tarayıcı, screenshot, layout ve etkileşim kontrolleri.
 - `security_auditor`: auth, secret, API route, veri erişimi, izin ve abuse-path
   denetimi.
 - `test_verifier`: lint, typecheck, test, build ve smoke kanıtı.
 - `release_verifier`: Git hijyeni, artifact, secret scan ve publish gate'leri.
+- `codex_doctor`: no-write starter sağlığı, catalog drift, install-plan, docs
+  ve MCP tanılaması.
 
 Resmi kaynak: https://developers.openai.com/codex/subagents
 
 Agent katalog kurali:
 
-- `catalog/agents.json`, paketlenen yedi uzman ajan icin incelenmis kaynaktir.
+- `catalog/agents.json`, paketlenen yirmi uzman ajan icin incelenmis kaynaktir.
 - `scripts/validate-agent-config.mjs`, katalogdaki her ajanin hem Windows hem
   Unix config template'inde yer aldigini ve her `config_file` alaninin eslesen
   `templates/codex/agents/*.toml` role dosyasina gittigini kontrol eder.
@@ -90,7 +132,8 @@ Routing kurali:
 - Non-trivial is kayitli bir uzmana denk geliyorsa o uzman kullanilir ve sonucu
   kullanmadan once ozetlenir.
 - En iyi alanlari gurultulu okuma ve kanit toplama isleridir: kesif, guncel
-  docs, review, UI dogrulama, security audit, test/build kaniti ve release
+  docs, context yerlestirme, prompt tasarimi, MCP planlama, review, UI
+  dogrulama, security audit, test/build kaniti, setup tanilama ve release
   hazirligi.
 - Yazma agirlikli uygulama ana thread'de kalir. Kullanici acikca bolmeyi
   istemediyse birden fazla ajan ayni dosyalari edit etmemelidir.
@@ -99,5 +142,6 @@ Routing kurali:
   icin kullanilmaz.
 
 Güvenlik notu: subagent'lar onayları, sandbox'ı veya connector auth sınırlarını
-atlamaz. En iyi kullanım alanları okuma ağırlıklı keşif, log/test inceleme,
-UI doğrulama, güvenlik audit'i ve release öncesi kanıt toplamadır.
+atlamaz. En iyi kullanım alanları okuma ağırlıklı keşif, context/prompt/MCP
+planlama, log/test inceleme, UI doğrulama, güvenlik audit'i ve release öncesi
+kanıt toplamadır.

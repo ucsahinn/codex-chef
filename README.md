@@ -46,6 +46,8 @@ This is an unofficial community starter, not an OpenAI product. It is mapped to 
 | Preview changes before writing anything | [Dry Run](#-dry-run-first) |
 | Inspect the full install plan | [Install Plan](#-install-plan) |
 | See what gets installed | [Install Surface](#-install-surface) |
+| Understand Codex capabilities | [Capability Map](docs/codex-capability-map.md) |
+| Map ECC/GStack-style workflows | [Workflow Surface Map](docs/workflow-surface-map.md) |
 | Verify before publishing | [Verification](docs/verification.md) |
 | Read release notes | [Release Notes](docs/release-notes.md) |
 | Prepare GitHub metadata | [GitHub Settings](docs/github-settings.md) |
@@ -158,10 +160,13 @@ Use `-InstallSkills` / `--install-skills` or `-InstallGitGuards` / `--install-gi
 ## 🧠 Operating Model
 
 1. Map unfamiliar code with `code_mapper`.
-2. Verify current APIs and product behavior with `docs_researcher`.
-3. Implement in the main thread with repo instructions and selected skills.
-4. Use `test_verifier`, `frontend_verifier`, or `security_auditor` when the task needs deeper evidence.
-5. Use `release_verifier` before push, tag, release, package, deploy, or publication.
+2. Use `context_architect` when you need to decide whether behavior belongs in prompts, `AGENTS.md`, skills, plugins, MCP, hooks, memory, rules, or config.
+3. Verify current APIs and product behavior with `docs_researcher`; use `prompt_architect` for reusable prompts, briefs, and instruction systems.
+4. Use `mcp_integrator` before enabling or troubleshooting connectors and MCP tool exposure.
+5. Implement in the main thread with repo instructions and selected skills.
+6. Use `test_verifier`, `frontend_verifier`, or `security_auditor` when the task needs deeper evidence.
+7. Use `codex_doctor` for starter health and drift checks.
+8. Use `release_verifier` before push, tag, release, package, deploy, or publication.
 
 The result is a small specialist-team workflow inside Codex while the main thread stays focused on decisions, implementation, and final evidence.
 
@@ -192,7 +197,9 @@ The result is a small specialist-team workflow inside Codex while the main threa
 | 🌐 Multilingual docs | Deutsch, Español, English, Português (Brasil), Türkçe, and Français README and deep documentation files are present; six-language deep docs are enforced by validation. |
 | 🎬 Accessible visuals | SVG assets include title, description, motion, reduced-motion fallback, and README alt text. |
 | 🧩 Skill source gate | `catalog/skills-lock.json` is checked against installable skill metadata. |
+| 📐 Offline diagrams | Bundled `offline-diagram-triplet` emits Mermaid, editable Excalidraw, SVG, PNG, and Markdown with zero network. |
 | 🤖 Agent drift gate | `catalog/agents.json` is checked against Windows/Unix config blocks and role TOML files. |
+| 🩺 Doctor gate | `npm run codex:doctor` summarizes repo-only Codex starter health without global writes. |
 | 🧾 Install plan gate | `manifests/install-plan.json` and the install-state preview schema are validated before installer execution. |
 | 🔌 Conservative MCPs | Authenticated account, database, and broad filesystem connectors stay disabled. |
 | 🧭 Source-backed guidance | Research notes record source type, confidence, support, and outdated-risk. |
@@ -210,7 +217,7 @@ docs/                    Six-language setup and verification guides
 manifests/               No-write install plan metadata
 plugins/                 Bundled local Codex plugin
 schemas/                 Lightweight validation schemas
-scripts/                 Install and validation scripts
+scripts/                 Install, doctor, and validation scripts
 templates/codex/         Files copied into ~/.codex
 templates/git/           Optional global Git hygiene files
 ```
@@ -239,6 +246,8 @@ Every deep guide has English, German, Spanish, Brazilian Portuguese, Turkish, an
 - [Troubleshooting](docs/troubleshooting.md)
 - [Expected output](docs/expected-output.md)
 - [Upgrade guide](docs/upgrade.md)
+- [Codex capability map](docs/codex-capability-map.md)
+- [Workflow surface map](docs/workflow-surface-map.md)
 - [Codex surfaces](docs/codex-surfaces.md)
 - [Skills and agents](docs/skills-and-agents.md)
 - [MCP catalog](docs/mcp-catalog.md)

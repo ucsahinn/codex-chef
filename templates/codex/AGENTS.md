@@ -49,6 +49,32 @@
   repositories, or architecture questions.
 - Prefer `docs_researcher` for current/version-sensitive APIs, Codex behavior,
   libraries, standards, and external documentation.
+- Prefer `context_architect` when a task is about where behavior should live:
+  prompt context, `AGENTS.md`, skills, plugins, MCP, hooks, memory, rules, or
+  config profiles.
+- Prefer `prompt_architect` for reusable prompts, instruction systems, success
+  criteria, mode contracts, skill briefs, and context-engineering packages.
+- Prefer `mcp_integrator` before enabling, disabling, adding, or
+  troubleshooting MCP servers, app connectors, plugin-bundled integrations, or
+  tool allowlists.
+- Prefer `product_strategist` before implementation when the product framing,
+  scope, success criteria, or "smallest useful version" is uncertain.
+- Prefer `engineering_planner` when architecture, data flow, state transitions,
+  edge cases, diagrams, or test strategy need to be locked before code changes.
+- Prefer `design_reviewer` for UX quality, design-system fit, accessibility,
+  AI-slop detection, and visual tradeoff reviews.
+- Prefer `devex_auditor` for onboarding friction, docs clarity, first-run
+  flows, time-to-hello-world, and developer-experience audits.
+- Prefer `root_cause_debugger` when a failure needs reproduction, hypothesis
+  testing, or data-flow tracing before any fix.
+- Prefer `qa_lead` for end-to-end workflow testing, regression coverage, QA
+  reports, and re-verification plans.
+- Prefer `performance_auditor` for page speed, Core Web Vitals, build/resource
+  budgets, hot paths, and post-change regressions.
+- Prefer `docs_author` for Diataxis coverage, stale docs, release docs, and
+  missing guide generation.
+- Prefer `spec_author` for turning vague intent into scoped, executable specs
+  with non-goals, evidence, edge cases, and quality gates.
 - Prefer `code_reviewer` for risky diffs, PR review, security-sensitive
   patches, regressions, and missing-test checks.
 - Prefer `frontend_verifier` for UI/browser behavior, screenshots, responsive
@@ -59,10 +85,20 @@
   failing CI/test investigation.
 - Prefer `release_verifier` before push, tag, release, deploy, package,
   artifact cleanup, or public publication.
+- Prefer `codex_doctor` for starter health, Codex setup drift, install-plan
+  coverage, MCP/agent catalog alignment, and safe no-write diagnostics.
 - Pair specialists with the narrowest useful tool surface: `docs_researcher`
-  with official docs or Context7, `frontend_verifier` with browser MCPs,
+  with official docs or Context7, `context_architect` with current Codex surface
+  references, `mcp_integrator` with official MCP docs/specs,
+  `product_strategist` with product briefs, `engineering_planner` with code
+  maps and diagrams, `design_reviewer` with design evidence,
+  `devex_auditor` with onboarding smoke tests, `root_cause_debugger` with
+  repro commands, `qa_lead` with user workflows, `performance_auditor` with
+  traces or measurements, `docs_author` with repository evidence, `spec_author`
+  with scoped requirements, `frontend_verifier` with browser MCPs,
   `security_auditor` with read-only evidence, `test_verifier` with verification
-  commands, and `release_verifier` with git, artifact, and secret-scan gates.
+  commands, `codex_doctor` with repo-native status scripts, and
+  `release_verifier` with git, artifact, and secret-scan gates.
 - For large tasks, use at most 2-4 focused subagents, keep write scopes
   separate, and summarize results before editing.
 - Keep write-heavy implementation in the main thread unless the user explicitly

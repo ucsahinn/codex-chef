@@ -53,6 +53,11 @@ Gorev enabled bir MCP server ile eslesiyorsa stale memory veya tahmin yerine o
 server kullanilir. Eslesen server disabled veya unavailable ise nedeni soylenir
 ve en guvenli fallback ile devam edilir.
 
+Connector state degismeden once `mcp_integrator` uzmani kullanilmalidir. Bu
+uzman server adini, auth sinirini, approval mode'u, tool allowlist veya
+denylist'ini, startup/tool timeout'unu, dogrulama komutunu ve rollback notunu
+config degismeden once netlestirmelidir.
+
 ## Tercih Edilecek Config Flagleri
 
 | Config alani | Kullanim |

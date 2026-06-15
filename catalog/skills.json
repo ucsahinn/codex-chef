@@ -254,6 +254,12 @@
       "category": "browser-testing",
       "install": false,
       "reason": "Automate browser verification from the terminal."
+    },
+    {
+      "name": "offline-diagram-triplet",
+      "category": "documentation-diagrams",
+      "install": false,
+      "reason": "Bundled local plugin skill that converts Mermaid source into editable Excalidraw plus SVG/PNG artifacts with zero network."
     }
   ]
 }

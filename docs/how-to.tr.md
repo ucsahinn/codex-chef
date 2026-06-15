@@ -2,8 +2,8 @@
 
 Bu starter sadece bir `config.toml` kopyası değildir. Kurulumdan sonra Codex'in
 kalıcı talimatları, güvenli MCP varsayılanları, doğrulanmış public skill'leri, uzman
-ajanları, profilleri, kuralları, yerel plugin'i ve Git hijyen guard'ları hazır
-olmalıdır.
+ajanları, profilleri, kuralları, yerel plugin'i, repo-only doctor tanılaması ve
+Git hijyen guard'ları hazır olmalıdır.
 
 ## Tek Seferlik Kurulum
 
@@ -40,6 +40,7 @@ edilir.
 Kurulumdan sonra Codex'i yeniden başlat ve çalıştır:
 
 ```bash
+npm run codex:doctor
 codex doctor --summary
 codex --strict-config "Summarize the active Codex setup."
 ```
@@ -59,17 +60,25 @@ Bu kurulumu uzman bir yazılım ekibi gibi kullan:
 
 1. Bilmediğin repo, büyük değişiklik veya mimari soru varsa `code_mapper` ile
    başla.
-2. Güncel Codex, API, kütüphane, framework veya cloud davranışı için
+2. Davranışın prompt, `AGENTS.md`, skill, plugin, MCP, hook, memory, rule veya
+   config profiline mi ait olduğunu belirlemek için `context_architect` kullan.
+3. Güncel Codex, API, kütüphane, framework veya cloud davranışı için
    `docs_researcher` kullan.
-3. Kararlar ve dosya değişiklikleri dağılmasın diye uygulamayı ana thread'de
+4. Tekrar kullanılabilir prompt, başarı kriteri, skill brief'i ve instruction
+   sistemi için `prompt_architect` kullan.
+5. MCP server, app connector veya tool allowlist açmadan, kapatmadan veya debug
+   etmeden önce `mcp_integrator` kullan.
+6. Kararlar ve dosya değişiklikleri dağılmasın diye uygulamayı ana thread'de
    tut.
-4. Lint, typecheck, test, build, smoke veya CI sorunu için `test_verifier`
+7. Lint, typecheck, test, build, smoke veya CI sorunu için `test_verifier`
    kullan.
-5. Tarayıcıda UI kontrolü, screenshot, responsive layout, console hatası ve
+8. Tarayıcıda UI kontrolü, screenshot, responsive layout, console hatası ve
    etkileşim durumları için `frontend_verifier` kullan.
-6. Auth, secret, izinler, veri erişimi, API route, kriptografi veya abuse path
+9. Auth, secret, izinler, veri erişimi, API route, kriptografi veya abuse path
    için `security_auditor` kullan.
-7. Push, tag, release, paket, deploy veya public yayın öncesi
+10. Starter sağlığı, catalog drift, install-plan, docs, MCP ve safe no-write
+    tanılama için `codex_doctor` kullan.
+11. Push, tag, release, paket, deploy veya public yayın öncesi
    `release_verifier` kullan.
 
 Resmi Codex dokümanları subagent akışını açıkça tetiklenen paralel çalışma
@@ -99,7 +108,8 @@ Varsayılan açık gelenler:
 - Filesystem
 
 Kimlik doğrulama veya veri erişimi isteyen connector'ları sadece somut görev
-için ve hesap kapsamını onayladıktan sonra aç.
+için ve hesap kapsamını onayladıktan sonra aç. Connector private data okuyabiliyor
+veya aksiyon alabiliyorsa önce `mcp_integrator` kullan.
 
 ## Profiller
 
@@ -116,9 +126,17 @@ Ana config'i bozmak yerine farklı güvenlik duruşu gerektiğinde profil kullan
 Repo denetimi:
 
 ```text
-Use code_mapper and test_verifier. Map this repository, identify the highest-risk
-areas, run the narrowest meaningful checks, and report blockers with file
-references before editing.
+Use code_mapper, context_architect, and test_verifier. Map this repository,
+identify which Codex surface each improvement belongs in, run the narrowest
+meaningful checks, and report blockers with file references before editing.
+```
+
+Codex setup tanılaması:
+
+```text
+Use codex_doctor. Run the repo-only doctor and relevant validators, summarize
+agent/MCP/docs/install-plan drift, and do not inspect or mutate user-global
+Codex, Agents, or Git state unless I explicitly approve.
 ```
 
 İçerik eklemeden UI/UX iyileştirme:

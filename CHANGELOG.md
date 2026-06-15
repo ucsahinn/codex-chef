@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- No changes yet.
+
+## 0.4.0 - 2026-06-15
+
+- Added four Codex specialist agents: `context_architect`,
+  `prompt_architect`, `mcp_integrator`, and `codex_doctor`.
+- Expanded the bundled specialist set to twenty agents with product strategy,
+  engineering planning, design review, DevEx audit, root-cause debugging, QA,
+  performance, docs authoring, and spec authoring roles.
+- Added `npm run codex:doctor` and `npm run validate:doctor` for no-write
+  starter health, catalog drift, docs matrix, MCP, skills, and install-plan
+  diagnostics.
+- Added a six-language Codex capability map documenting prompts, AGENTS.md,
+  config, rules, skills, plugins, MCP, subagents, and doctor/status boundaries.
+- Added a six-language workflow surface map that converts ECC/GStack-style
+  slash workflows into Codex-native skills, subagents, MCP, plugins, and
+  approval gates.
+- Added a bundled `offline-diagram-triplet` skill plus a zero-network renderer
+  that emits Mermaid, editable Excalidraw, SVG, PNG, and Markdown artifacts.
+- Added `npm run diagram:triplet` and `npm run validate:diagram` so the diagram
+  workflow is executable and smoke-tested locally.
+- Hardened the offline diagram renderer with cyclic-graph rejection, graph size
+  limits, pixel budget checks, PNG initialization ordering, and temp cleanup in
+  validation.
+- Expanded README and setup docs so the starter presents a fuller Codex
+  operating model without enabling broad connectors, hooks, or global writes.
+
 ## 0.3.1 - 2026-06-15
 
 - Added German, Spanish, Brazilian Portuguese, and French deep documentation

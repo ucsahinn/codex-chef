@@ -1,5 +1,56 @@
 # Release Notları
 
+## v0.4.0 - 2026-06-15
+
+Bu release starter'i sadece guvenli installer/docs kiti olmaktan cikarip daha
+tam bir Codex calisma setup'ina yaklastirir: daha guclu uzman routing'i, lokal
+diagnostic ve offline workflow araci ekler.
+
+## One Cikanlar
+
+- Paketlenen uzman seti 20 Codex agent'a genisledi: product strategy,
+  engineering planning, design review, DevEx audit, root-cause debugging, QA,
+  performance, docs authoring ve spec authoring rolleri eklendi.
+- No-write starter health, catalog drift, docs matrix, MCP, skills ve
+  install-plan diagnostic icin `npm run codex:doctor` eklendi.
+- Prompt, `AGENTS.md`, skill, plugin, MCP, subagent, rule, hook ve release gate
+  sinirlarini gosteren alti dilli Codex capability map ve workflow surface map
+  eklendi.
+- Zero-network `offline-diagram-triplet` skill'i eklendi; Mermaid, editable
+  Excalidraw, SVG, PNG ve Markdown ciktisi uretir.
+- Diagram validator cycle reject, graph size limit, pixel budget, PNG coverage
+  ve temp cleanup ile sertlestirildi.
+- Installer konservatif kalir: default auth connector yok, genis hook yok,
+  gizli global write yok, publish/deploy otomasyonu yok.
+
+## Upgrade Notlari
+
+Mevcut kullanicilar global dosya degistirmeden once preview calistirmali:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+.\\scripts\\install.ps1 -All -Force -WhatIf
+```
+
+Yeni ajanlar ve local diagram skill sadece incelenmis starter install flow'u ile
+kurulur. Doctor komutu default repo-only'dir ve user-global dosya iceriklerini
+okumaz:
+
+```bash
+npm run codex:doctor
+```
+
+## Dogrulama
+
+Bu version icin release readiness su kontrolleri icermelidir:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.3.1 - 2026-06-15
 
 Bu patch, v0.3.0 ile eklenen çok dilli dokümantasyon yüzeyini tamamlar. Kök

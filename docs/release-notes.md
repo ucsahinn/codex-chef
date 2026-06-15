@@ -1,5 +1,56 @@
 # Release Notes
 
+## v0.4.0 - 2026-06-15
+
+This release expands the starter from a safe installer/docs kit into a fuller
+Codex operating setup with stronger specialist routing, local diagnostics, and
+offline workflow tooling.
+
+## Highlights
+
+- Expanded the bundled specialist set to 20 Codex agents, including product
+  strategy, engineering planning, design review, DevEx audit, root-cause
+  debugging, QA, performance, docs authoring, and spec authoring roles.
+- Added `npm run codex:doctor` for no-write starter health, catalog drift, docs
+  matrix, MCP, skills, and install-plan diagnostics.
+- Added a six-language Codex capability map and workflow surface map so users
+  can see where prompts, `AGENTS.md`, skills, plugins, MCP, subagents, rules,
+  hooks, and release gates belong.
+- Added the bundled `offline-diagram-triplet` skill with a zero-network
+  renderer that emits Mermaid, editable Excalidraw, SVG, PNG, and Markdown.
+- Hardened diagram validation with cyclic-graph rejection, graph size limits,
+  pixel budget checks, PNG generation coverage, and temp cleanup.
+- Kept the installer conservative: no default authenticated connectors, no
+  broad hooks, no hidden global writes, and no publish/deploy automation.
+
+## Upgrade Notes
+
+Existing users should preview before replacing any global files:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+.\\scripts\\install.ps1 -All -Force -WhatIf
+```
+
+The new agents and local diagram skill are installed only through the reviewed
+starter install flow. The doctor command is repo-only by default and does not
+read user-global file contents:
+
+```bash
+npm run codex:doctor
+```
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.3.1 - 2026-06-15
 
 This patch completes the multilingual documentation surface that was introduced

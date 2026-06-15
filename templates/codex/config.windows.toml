@@ -43,6 +43,54 @@ config_file = "agents/code_mapper.toml"
 description = "Primary-source researcher for current docs, APIs, and version-sensitive facts."
 config_file = "agents/docs_researcher.toml"
 
+[agents.context_architect]
+description = "Context strategist that decides what belongs in prompts, AGENTS.md, skills, plugins, MCP, hooks, memory, or config."
+config_file = "agents/context_architect.toml"
+
+[agents.prompt_architect]
+description = "Prompt and instruction designer for reliable task briefs, mode contracts, and reusable workflows."
+config_file = "agents/prompt_architect.toml"
+
+[agents.mcp_integrator]
+description = "MCP and connector planner for least-privilege tool exposure, auth boundaries, and troubleshooting."
+config_file = "agents/mcp_integrator.toml"
+
+[agents.product_strategist]
+description = "Product strategist for forcing questions, scope decisions, and 10-star alternatives before implementation."
+config_file = "agents/product_strategist.toml"
+
+[agents.engineering_planner]
+description = "Engineering planner for architecture, data flow, diagrams, edge cases, and test strategy."
+config_file = "agents/engineering_planner.toml"
+
+[agents.design_reviewer]
+description = "Design reviewer for UX quality, AI-slop detection, design-system gaps, and visual decision tradeoffs."
+config_file = "agents/design_reviewer.toml"
+
+[agents.devex_auditor]
+description = "Developer-experience auditor for onboarding friction, TTHW, docs clarity, and magical-moment checks."
+config_file = "agents/devex_auditor.toml"
+
+[agents.root_cause_debugger]
+description = "Systematic debugger that investigates failures, traces data flow, and tests hypotheses before fixes."
+config_file = "agents/root_cause_debugger.toml"
+
+[agents.qa_lead]
+description = "QA lead for end-to-end bug finding, regression coverage, and re-verification plans."
+config_file = "agents/qa_lead.toml"
+
+[agents.performance_auditor]
+description = "Performance auditor for page speed, Core Web Vitals, resource budgets, and post-change regressions."
+config_file = "agents/performance_auditor.toml"
+
+[agents.docs_author]
+description = "Documentation author for Diataxis coverage, stale docs, release docs, and missing guide generation."
+config_file = "agents/docs_author.toml"
+
+[agents.spec_author]
+description = "Spec author for turning vague intent into executable specs with scope, evidence, and quality gates."
+config_file = "agents/spec_author.toml"
+
 [agents.code_reviewer]
 description = "Fresh-context senior review for diffs, PRs, and risky changes."
 config_file = "agents/code_reviewer.toml"
@@ -62,6 +110,10 @@ config_file = "agents/test_verifier.toml"
 [agents.release_verifier]
 description = "Release readiness verifier for git hygiene, changelog/version checks, artifacts, secret scans, and publish gates."
 config_file = "agents/release_verifier.toml"
+
+[agents.codex_doctor]
+description = "Setup diagnostician for starter health, catalog drift, install-plan coverage, and safe next checks."
+config_file = "agents/codex_doctor.toml"
 
 [sandbox_workspace_write]
 network_access = false

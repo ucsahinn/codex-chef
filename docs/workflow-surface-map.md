@@ -1,0 +1,88 @@
+# Workflow Surface Map
+
+This page maps ECC and GStack-style workflow names to the Codex-native surface
+this starter should use. The rule is intentionally conservative: do not turn
+every slash-like entry into a subagent. In Codex, reusable workflows usually
+belong in skills, delegated specialist work belongs in subagents, live external
+context belongs in MCP/connectors, and publish/deploy actions stay behind
+explicit approval gates.
+
+Date checked: 2026-06-15
+
+References:
+
+- Official Codex customization: https://developers.openai.com/codex/concepts/customization
+- Official Codex skills: https://developers.openai.com/codex/skills
+- Official Codex subagents: https://developers.openai.com/codex/subagents
+- Official Codex plugins: https://developers.openai.com/codex/plugins/build
+- Official Codex CLI slash commands: https://developers.openai.com/codex/cli/slash-commands
+- ECC source pattern: https://github.com/affaan-m/ECC
+- GStack source pattern: https://github.com/garrytan/gstack
+
+## Surface Rule
+
+| Pattern | Codex surface | Starter decision |
+| --- | --- | --- |
+| One-off task instruction | Prompt/thread context | Keep in the current prompt. |
+| Durable working agreement | `AGENTS.md` | Install reviewed global guidance; repo-local files still win. |
+| Reusable slash-like workflow | Skill | Prefer `SKILL.md`; package in a plugin when distributing the bundle. |
+| Specialist critique or evidence work | Subagent | Use explicit delegation, then summarize the result before relying on it. |
+| Live docs, browser, code navigation, or private service access | MCP/connectors | Keep authenticated or broad connectors disabled until a task needs them. |
+| Command approval exception | Rule | Keep narrow; never auto-allow destructive, credential, publish, or release actions. |
+| Lifecycle automation | Hook | Use only for reviewed guardrails, not as the primary security boundary. |
+| Push, release, deploy, external upload | Approval gate | `release_verifier` can verify readiness; the action still needs explicit approval. |
+
+## GStack-Style Workflow Mapping
+
+| Workflow | Good Codex mapping | Bundled starter support | Safety boundary |
+| --- | --- | --- | --- |
+| `/office-hours` | Skill or `product_strategist` subagent | `product_strategist` | No file edits; challenge scope before implementation. |
+| `/plan-ceo-review` | Skill or `product_strategist` subagent | `product_strategist` | Avoid hype; return scope tradeoffs and smallest useful version. |
+| `/plan-eng-review` | `engineering_planner` subagent | `engineering_planner` | Read code before architecture claims. |
+| `/plan-design-review` | `design_reviewer` subagent, then `frontend_verifier` when UI exists | `design_reviewer`, `frontend_verifier` | Browser evidence is still required for rendered UI. |
+| `/plan-devex-review` | `devex_auditor` subagent | `devex_auditor` | Use safe local smoke tests; no global setup writes. |
+| `/autoplan` | Chain of `product_strategist`, `design_reviewer`, and `engineering_planner` | All three agents | The main thread decides; no hidden automatic orchestration. |
+| `/spec` | `spec_author` subagent or spec skill | `spec_author` | Spec only unless implementation is separately requested. |
+| `/review` | `code_reviewer` subagent | `code_reviewer` | Lead with bugs, regressions, security, and missing tests. |
+| `/investigate` | `root_cause_debugger` subagent | `root_cause_debugger` | Reproduce and test hypotheses before fixes. |
+| `/qa` | `qa_lead` plus `test_verifier` | `qa_lead`, `test_verifier` | Distinguish report-only from auto-fix scope. |
+| `/qa-only` | `qa_lead` report-only | `qa_lead` | No edits unless the user asks. |
+| `/cso` | `security_auditor` subagent | `security_auditor` | Never print secrets or use credentials. |
+| `/benchmark` | `performance_auditor` subagent | `performance_auditor` | Measure first; no production load without approval. |
+| `/canary` | Release/performance monitoring workflow | `release_verifier`, `performance_auditor` | Production monitoring and external account access require approval. |
+| `/document-release` | `docs_author` subagent | `docs_author` | Do not claim remote release state without verification. |
+| `/document-generate` | `docs_author` subagent or docs skill | `docs_author` | Match docs to code and commands. |
+| `/browse` | Browser MCP plus `frontend_verifier` | `frontend_verifier`, Playwright/Chrome MCP entries | Browser tools are prompt-gated. |
+| `/setup-browser-cookies` | Auth/session connector workflow | Not enabled by default | Cookie/session import is sensitive and explicit only. |
+| `/pair-agent` | External-agent collaboration service | Not imported | Tunnels, scoped tokens, and external agents need a separate reviewed design. |
+| `/ship` | Release verification workflow | `release_verifier` | Commit, push, PR, tag, release, and deploy still need explicit approval. |
+| `/land-and-deploy` | Release/deploy workflow | `release_verifier` | Merge, deploy, and production verification are never automatic defaults. |
+| `/learn` | Memory workflow | Memory MCP is available when enabled | Never store secrets, sessions, cookies, or private auth material. |
+| `/make-pdf` | Future offline document-export skill | Not implemented by default | Avoid large implicit dependency installs. |
+| `/diagram` | Offline diagram skill | `offline-diagram-triplet` | Zero network; generated artifacts are not committed unless requested. |
+
+## ECC Pattern Mapping
+
+| ECC pattern | What this starter adopts | What this starter avoids |
+| --- | --- | --- |
+| Large skills and agents catalog | Reviewed `catalog/skills.json` and `catalog/agents.json` with validation gates. | Importing broad cross-harness catalogs wholesale. |
+| Manifest-driven install | `manifests/install-plan.json` plus `scripts/plan-install.mjs`. | Hidden global writes or install behavior not shown in the plan preview. |
+| Doctor/status commands | `npm run codex:doctor` and JSON output. | Reading user secrets or mutating global Codex state during diagnostics. |
+| Plugin distribution | Local `codex-enterprise-workflows` plugin. | Enabled-by-default plugin hooks, broad MCP, or external auth. |
+| Legacy command compatibility | Documentation that maps slash-like names to Codex surfaces. | 80+ command shims or deprecated prompt wrappers. |
+| Security/runtime hardening | Gitleaks, workflow hardening, MCP least privilege, install backups. | Auto-cleanup, auto-publish, token scraping, or broad command allow rules. |
+
+## Recommended Starter Chain
+
+Use this sequence for serious work:
+
+1. `product_strategist` or `spec_author` clarifies the target.
+2. `engineering_planner` maps architecture, data flow, and tests.
+3. `code_mapper` gathers repo evidence before broad edits.
+4. Main thread implements the scoped change.
+5. `code_reviewer`, `security_auditor`, `qa_lead`, or `test_verifier` verifies the risky surface.
+6. `release_verifier` checks publish readiness only when a push/release is requested.
+
+The main thread remains responsible for synthesis, edits, user-visible
+decisions, and final evidence. Subagents are not a way to bypass approvals,
+sandboxing, credentials, or external-state controls.

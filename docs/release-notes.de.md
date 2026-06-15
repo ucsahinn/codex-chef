@@ -39,6 +39,10 @@ npm run verify:skills:online
 Diese lokalisierte Datei folgt den Abschnitten der englischen Quelldatei. Source: [release-notes.md](release-notes.md).
 
 - Release Notes
+- v0.4.0 - 2026-06-15
+- Highlights
+- Upgrade Notes
+- Verification
 - v0.3.1 - 2026-06-15
 - Highlights
 - Upgrade Notes

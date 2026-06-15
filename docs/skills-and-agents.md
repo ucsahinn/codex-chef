@@ -28,6 +28,9 @@ This repo includes:
   intended use, and drift expectations for the Codex config templates.
 - `plugins/codex-enterprise-workflows/skills/enterprise-codex-operator`: a
   small local skill for maintaining this setup.
+- `plugins/codex-enterprise-workflows/skills/offline-diagram-triplet`: a local
+  zero-network diagram workflow that emits Mermaid, editable Excalidraw, SVG,
+  PNG, and a Markdown snippet.
 
 ## Plugins
 
@@ -45,6 +48,13 @@ This repo includes:
 The installer registers the local marketplace. Restart Codex, then open
 `/plugins` to inspect or install the plugin.
 
+The bundled plugin currently exposes two local skills:
+
+- `enterprise-codex-operator`: maintain this starter without weakening safety
+  boundaries.
+- `offline-diagram-triplet`: turn Mermaid source into an editable diagram
+  triplet with no network access.
+
 The installer only calls the Skills CLI for catalog entries with `install: true`,
 a verified `package` value such as `owner/repo`, and a matching `skill` name. It
 uses `npx skills add <package> --skill <skill> --yes --global`, which avoids
@@ -56,23 +66,56 @@ upstream commit lock. Run `npm run verify:skills:online` before releases and
 after any source change so the current Skills CLI can resolve every package and
 skill pair.
 
+Offline diagram smoke validation is separate from online skill-source
+resolution:
+
+```bash
+npm run validate:diagram
+```
+
 ## Specialist Agents
 
 This starter registers focused agents:
 
 - `code_mapper`: read-only project mapping before broad changes.
 - `docs_researcher`: current official docs and version-sensitive facts.
+- `context_architect`: decide whether durable behavior belongs in a prompt,
+  `AGENTS.md`, skill, plugin, MCP, hook, memory, rule, or config profile.
+- `prompt_architect`: design reliable briefs, success criteria, prompt systems,
+  and reusable instruction contracts.
+- `mcp_integrator`: plan least-privilege MCP and connector changes before
+  enabling or troubleshooting external tool access.
+- `product_strategist`: challenge product framing, scope, success criteria, and
+  smallest-useful-version choices before implementation.
+- `engineering_planner`: lock architecture, data flow, diagrams, edge cases,
+  invariants, and test strategy before broad code changes.
+- `design_reviewer`: review UX quality, accessibility, design-system fit,
+  visual tradeoffs, and AI-slop risks.
+- `devex_auditor`: test onboarding friction, docs clarity, first-run flows, and
+  time-to-hello-world.
+- `root_cause_debugger`: reproduce failures, trace data flow, test hypotheses,
+  and identify root cause before fixes.
+- `qa_lead`: run end-to-end workflow testing, regression planning, and
+  re-verification.
+- `performance_auditor`: measure page speed, Core Web Vitals, resource budgets,
+  traces, and post-change regressions.
+- `docs_author`: audit Diataxis coverage, stale docs, release docs, and missing
+  guide generation.
+- `spec_author`: turn vague intent into scoped executable specs with non-goals,
+  evidence, edge cases, and quality gates.
 - `code_reviewer`: fresh-context correctness, regression, and test review.
 - `frontend_verifier`: browser, screenshot, layout, and interaction checks.
 - `security_auditor`: read-only security risk and abuse-path review.
 - `test_verifier`: lint, typecheck, test, build, and smoke evidence.
 - `release_verifier`: git hygiene, artifacts, secret scan, and publish gates.
+- `codex_doctor`: no-write starter health, catalog drift, install-plan, docs,
+  and MCP diagnostics.
 
 Official reference: https://developers.openai.com/codex/subagents
 
 Agent catalog rule:
 
-- `catalog/agents.json` is the reviewed source for the seven bundled
+- `catalog/agents.json` is the reviewed source for the twenty bundled
   specialist agents.
 - `scripts/validate-agent-config.mjs` checks that every cataloged agent exists
   in both Windows and Unix config templates and that each `config_file` points
@@ -89,8 +132,9 @@ Routing rule:
 - For non-trivial work that maps to a registered specialist, use that specialist
   and summarize the result before relying on it.
 - Use them for noisy, read-heavy, or evidence-heavy side work: exploration,
-  current docs, review, UI verification, security audit, test/build evidence,
-  and release readiness.
+  current docs, context placement, prompt design, MCP planning, review, UI
+  verification, security audit, test/build evidence, setup diagnostics, and
+  release readiness.
 - Keep write-heavy implementation in the main thread unless the user explicitly
   asks to split write scopes. If multiple agents edit, assign non-overlapping
   files and reconcile before verification.

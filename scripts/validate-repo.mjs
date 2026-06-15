@@ -66,6 +66,7 @@ const requiredFiles = [
   "scripts/install.ps1",
   "scripts/install.sh",
   "scripts/plan-install.mjs",
+  "scripts/codex-doctor.mjs",
   "scripts/sync-doc-locales.mjs",
   "scripts/validate-doc-locales.mjs",
   "scripts/validate-readme-locales.mjs",
@@ -75,12 +76,16 @@ const requiredFiles = [
   "scripts/validate-installer-alignment.mjs",
   "scripts/validate-agent-config.mjs",
   "scripts/validate-mcp-config.mjs",
+  "scripts/validate-codex-doctor.mjs",
+  "scripts/validate-diagram-triplet.mjs",
   "scripts/validate-package-surface.mjs",
   "scripts/validate-release-readiness.mjs",
   "scripts/verify-skill-sources.mjs",
   "scripts/scan-supply-chain-iocs.mjs",
   "scripts/security-audit.mjs",
   "plugins/codex-enterprise-workflows/.codex-plugin/plugin.json",
+  "plugins/codex-enterprise-workflows/skills/offline-diagram-triplet/SKILL.md",
+  "plugins/codex-enterprise-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs",
   ".agents/plugins/marketplace.json"
 ];
 

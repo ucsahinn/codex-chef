@@ -213,6 +213,7 @@ const categories = {
   "advisory-sources": "security",
   "best-practices": "security",
   "codex-flags": "codex",
+  "codex-capability-map": "codex",
   "codex-surfaces": "codex",
   "completion-audit": "release",
   "ecc-compatibility": "security",
@@ -231,6 +232,7 @@ const categories = {
   "troubleshooting": "install",
   "upgrade": "install",
   "verification": "release",
+  "workflow-surface-map": "codex",
   "windows": "install"
 };
 
@@ -252,6 +254,12 @@ const titles = {
     es: "Flags Y Comandos De Codex CLI",
     "pt-BR": "Flags E Comandos Do Codex CLI",
     fr: "Flags Et Commandes Codex CLI"
+  },
+  "codex-capability-map": {
+    de: "Codex Capability Map",
+    es: "Mapa De Capacidades De Codex",
+    "pt-BR": "Mapa De Capacidades Do Codex",
+    fr: "Carte Des Capacites Codex"
   },
   "codex-surfaces": {
     de: "Codex-Oberflächen",
@@ -360,6 +368,12 @@ const titles = {
     es: "Verificación",
     "pt-BR": "Verificação",
     fr: "Vérification"
+  },
+  "workflow-surface-map": {
+    de: "Workflow Surface Map",
+    es: "Mapa De Superficies De Workflow",
+    "pt-BR": "Mapa De Superficies De Workflow",
+    fr: "Carte Des Surfaces De Workflow"
   },
   "windows": {
     de: "Windows-Hinweise",

@@ -34,6 +34,7 @@ Este es un starter comunitario no oficial, no un producto de OpenAI. Los README 
 | Instalar de forma segura | [Quick Start](#-quick-start) |
 | Previsualizar sin escribir | [Dry Run](#-dry-run-first) |
 | Ver el plan completo | [Install Plan](#-install-plan) |
+| Entender capacidades de Codex | [Capability Map](docs/codex-capability-map.es.md) |
 | Revisar seguridad | [Modelo de seguridad](docs/security-model.es.md) |
 | Preparar publicacion | [Publishing](docs/publish.es.md) |
 
@@ -112,12 +113,16 @@ codex --strict-config "Summarize the active Codex setup."
 | 🛡️ Public-safe | Sin secretos, auth files, sessions, memories ni estado especifico de maquina. |
 | 🧪 Validacion real | `npm run check` cubre repo, docs, install-plan, MCP drift, skills, supply-chain y security. |
 | 🔌 MCPs conservadores | Los conectores autenticados quedan desactivados por defecto. |
+| 🩺 Doctor | `npm run codex:doctor` resume health repo-only sin escrituras globales. |
+| 📐 Diagramas offline | `offline-diagram-triplet` emite Mermaid, Excalidraw editable, SVG, PNG y Markdown sin red. |
 | 📣 Triage public-safe | CODEOWNERS e issue templates enrutan bugs, features, preguntas y security reports sin datos privados. |
 
 ## 📚 Documentacion
 
 - [Install](docs/install.es.md)
 - [Verification](docs/verification.es.md)
+- [Codex capability map](docs/codex-capability-map.es.md)
+- [Workflow surface map](docs/workflow-surface-map.es.md)
 - [Security model](docs/security-model.es.md)
 - [Public readiness](docs/public-readiness.es.md)
 - [ECC compatibility](docs/ecc-compatibility.es.md)

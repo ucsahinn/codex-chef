@@ -46,6 +46,8 @@ Bu resmi OpenAI ürünü değildir; community starter paketidir. Güncel resmi C
 | Yazmadan önce ön izleme almak | [Önce Dry Run](#-önce-dry-run) |
 | Tüm install planını incelemek | [Install Planı](#-install-planı) |
 | Nelerin kurulduğunu görmek | [Kurulum Yüzeyi](#-kurulum-yüzeyi) |
+| Codex kapasitesini anlamak | [Kapasite Haritası](docs/codex-capability-map.tr.md) |
+| ECC/GStack workflow yuzeylerini anlamak | [Workflow Yuzey Haritasi](docs/workflow-surface-map.tr.md) |
 | Publish öncesi doğrulamak | [Doğrulama](docs/verification.tr.md) |
 | Release notlarını okumak | [Release Notları](docs/release-notes.tr.md) |
 | GitHub metadata hazırlamak | [GitHub Ayarları](docs/github-settings.tr.md) |
@@ -158,10 +160,13 @@ Sadece tek bir parça istiyorsan `-InstallSkills` / `--install-skills` veya `-In
 ## 🧠 Çalışma Modeli
 
 1. Bilmediğin kodu önce `code_mapper` ile haritalat.
-2. Güncel API ve ürün davranışını `docs_researcher` ile doğrulat.
-3. Ana thread içinde repo talimatları ve doğru skill'lerle uygula.
-4. İşin şekline göre `test_verifier`, `frontend_verifier` veya `security_auditor` ile kanıtı güçlendir.
-5. Push, tag, release, paket, deploy veya yayın öncesi `release_verifier` kullan.
+2. Davranış prompt, `AGENTS.md`, skill, plugin, MCP, hook, memory, rule veya config tarafına mı ait karar vermek için `context_architect` kullan.
+3. Güncel API ve ürün davranışını `docs_researcher` ile doğrulat; tekrar kullanılabilir prompt, brief ve instruction sistemi için `prompt_architect` kullan.
+4. Connector veya MCP tool exposure açmadan ya da debug etmeden önce `mcp_integrator` kullan.
+5. Ana thread içinde repo talimatları ve doğru skill'lerle uygula.
+6. İşin şekline göre `test_verifier`, `frontend_verifier` veya `security_auditor` ile kanıtı güçlendir.
+7. Starter sağlığı ve drift kontrolü için `codex_doctor` kullan.
+8. Push, tag, release, paket, deploy veya yayın öncesi `release_verifier` kullan.
 
 Böylece Codex tek bir sohbet gibi değil, uzman rolleri olan küçük bir yazılım ekibi gibi çalışır; ana thread karar, uygulama ve final kanıtına odaklanır.
 
@@ -192,7 +197,9 @@ Böylece Codex tek bir sohbet gibi değil, uzman rolleri olan küçük bir yazı
 | 🌐 Çok dilli docs | Deutsch, Español, English, Português (Brasil), Türkçe ve Français README ve derin dokümantasyon dosyaları bulunur; altı dilli deep docs validation ile zorunlu tutulur. |
 | 🎬 Erişilebilir görseller | SVG'lerde title, description, motion, reduced-motion fallback ve README alt text vardır. |
 | 🧩 Skill kaynak gate'i | `catalog/skills-lock.json` installable skill metadata'sıyla karşılaştırılır. |
+| 📐 Offline diagram | Bundled `offline-diagram-triplet` Mermaid, editable Excalidraw, SVG, PNG ve Markdown çıktısını network kullanmadan üretir. |
 | 🤖 Agent drift gate'i | `catalog/agents.json` Windows/Unix config bloklari ve role TOML dosyalariyla karsilastirilir. |
+| 🩺 Doctor gate'i | `npm run codex:doctor` global write yapmadan repo-only Codex starter sagligini ozetler. |
 | 🧾 Install plan gate'i | `manifests/install-plan.json` ve install-state preview schema installer çalışmadan önce doğrulanır. |
 | 🔌 Konservatif MCP'ler | Auth isteyen hesap, database ve geniş filesystem connector'ları disabled kalır. |
 | 🧭 Kaynaklı rehberlik | Research notes kaynak tipi, confidence, neyi desteklediği ve outdated-risk içerir. |
@@ -210,7 +217,7 @@ docs/                    Altı dilli kurulum ve doğrulama rehberleri
 manifests/               No-write install plan metadata'sı
 plugins/                 Bundled yerel Codex plugin'i
 schemas/                 Hafif validation schema'ları
-scripts/                 Kurulum ve doğrulama scriptleri
+scripts/                 Kurulum, doctor ve doğrulama scriptleri
 templates/codex/         ~/.codex içine kopyalanan dosyalar
 templates/git/           Opsiyonel global Git hijyen dosyaları
 ```
@@ -239,6 +246,8 @@ Her derin rehberin İngilizce, Almanca, İspanyolca, Brezilya Portekizcesi, Tür
 - [Troubleshooting](docs/troubleshooting.tr.md)
 - [Beklenen çıktı](docs/expected-output.tr.md)
 - [Upgrade rehberi](docs/upgrade.tr.md)
+- [Codex kapasite haritası](docs/codex-capability-map.tr.md)
+- [Workflow yuzey haritasi](docs/workflow-surface-map.tr.md)
 - [Codex yüzeyleri](docs/codex-surfaces.tr.md)
 - [Skills ve ajanlar](docs/skills-and-agents.tr.md)
 - [MCP kataloğu](docs/mcp-catalog.tr.md)

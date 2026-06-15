@@ -56,6 +56,11 @@ When a task matches an enabled MCP server, use that server instead of guessing
 from stale memory. If the matching server is disabled or unavailable, state the
 reason and continue with the safest fallback.
 
+Use the `mcp_integrator` specialist before changing connector state. It should
+name the server, auth boundary, approval mode, tool allowlist or denylist,
+startup/tool timeout, verification command, and rollback note before any config
+change is made.
+
 ## Config Flags To Prefer
 
 | Config field | Use |
