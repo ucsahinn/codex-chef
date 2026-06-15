@@ -19,8 +19,6 @@
   <a href="README.pt-BR.md">🇧🇷 Português (Brasil)</a> |
   <a href="README.tr.md">🇹🇷 Türkçe</a> |
   <a href="README.fr.md">🇫🇷 French / Français</a>
-  <br />
-  <sub>Deutsch · Español · English · Português (Brasil) · Türkçe · French</sub>
 </p>
 
 Setup Codex oriente securite pour les utilisateurs Windows-first et les petites equipes. Il fournit une base locale repetable pour Codex: instructions durables, configuration conservative, agents specialises, regles d'approbation, defaults MCP, metadata de skills curates, plugin local, scripts de validation et entrees multilingues.

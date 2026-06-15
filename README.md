@@ -21,13 +21,100 @@
   <a href="README.pt-BR.md">🇧🇷 Português (Brasil)</a> |
   <a href="README.tr.md">🇹🇷 Türkçe</a> |
   <a href="README.fr.md">🇫🇷 French / Français</a>
-  <br />
-  <sub>Deutsch · Español · English · Português (Brasil) · Türkçe · French</sub>
 </p>
 
 Codex Chef is a Windows-first Codex setup kit for power users and small teams. It packages a repeatable local Codex baseline: durable instructions, conservative config, specialist agents, approval rules, MCP defaults, curated skill metadata, plugin packaging, validation scripts, multilingual README entry points, and six-language deep docs.
 
 This is an unofficial community starter, not an OpenAI product. It is mapped to current official Codex documentation and keeps risky actions approval-gated by default.
+
+## 🚀 Copy-Paste Install
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
+Set-ExecutionPolicy -Scope Process Bypass -Force
+.\scripts\install.ps1 -All -Force
+```
+
+Safe preview first:
+
+```powershell
+.\scripts\install.ps1 -All -Force -WhatIf
+node scripts/plan-install.mjs --all --json --redact-paths
+```
+
+## 🍳 What You Get After Install
+
+Codex Chef installs a real Codex working kitchen, not just docs. The agent list
+below comes from `templates/codex/config.windows.toml`,
+`templates/codex/config.unix.toml`, and `templates/codex/agents/*.toml`; these
+are the files copied into `~/.codex` by the installer.
+
+| Surface | What lands on your machine |
+| --- | --- |
+| 🤖 Specialist agents | 20 registered Codex subagents under `~/.codex/agents/*.toml`. |
+| 🧠 Durable guidance | Global `~/.codex/AGENTS.md` with safe routing, verification, and approval rules. |
+| 🔌 MCP defaults | 7 useful MCP servers enabled and 8 authenticated/high-risk connectors parked disabled. |
+| 🧩 Local plugin | `codex-chef-workflows` registered in the local personal plugin marketplace. |
+| 🛠️ Local skills | `codex-chef-operator` and `offline-diagram-triplet` bundled with zero external auth. |
+| 🎨 Optional skills | 9 curated public skills installable with `-All` or `-InstallSkills`. |
+| 🛡️ Safety gates | Backups, dry-run planning, secret scanning, validation, and approval-gated risky actions. |
+
+## 🤖 Installed Agent Team
+
+These are the agents Codex Chef registers in Codex config and installs as role
+files:
+
+| Agent | What it does |
+| --- | --- |
+| `code_mapper` | Maps unfamiliar repositories, files, ownership, and data flow before implementation. |
+| `docs_researcher` | Checks official/current docs, standards, APIs, and version-sensitive facts. |
+| `context_architect` | Decides whether behavior belongs in prompts, `AGENTS.md`, skills, plugins, MCP, hooks, rules, memory, or config. |
+| `prompt_architect` | Designs reliable prompts, task briefs, success criteria, and reusable instruction systems. |
+| `mcp_integrator` | Plans least-privilege MCP connector setup, auth boundaries, and troubleshooting. |
+| `product_strategist` | Challenges product framing, scope, alternatives, and smallest useful version. |
+| `engineering_planner` | Locks architecture, data flow, diagrams, edge cases, and test strategy. |
+| `design_reviewer` | Reviews UX quality, accessibility, visual polish, design-system fit, and AI-slop risks. |
+| `devex_auditor` | Tests onboarding friction, docs clarity, first-run flow, and time-to-hello-world. |
+| `root_cause_debugger` | Reproduces failures, traces data flow, tests hypotheses, and finds root cause before fixes. |
+| `qa_lead` | Exercises workflows, finds regressions, plans coverage, and re-verifies fixes. |
+| `performance_auditor` | Measures page speed, Core Web Vitals, traces, resource budgets, and regressions. |
+| `docs_author` | Audits docs coverage, stale claims, release notes, and missing guides. |
+| `spec_author` | Turns vague intent into scoped executable specs with non-goals, edge cases, and quality gates. |
+| `code_reviewer` | Runs fresh-context correctness, regression, security, maintainability, and missing-test review. |
+| `frontend_verifier` | Verifies rendered UI, screenshots, responsive layout, interaction states, and console errors. |
+| `security_auditor` | Reviews auth, secrets, permissions, API routes, data access, dependencies, and abuse paths. |
+| `test_verifier` | Runs lint, typecheck, tests, builds, smoke checks, and failure evidence collection. |
+| `release_verifier` | Checks git hygiene, changelog/version state, artifacts, secret scans, and publish gates. |
+| `codex_doctor` | Diagnoses starter health, catalog drift, install-plan coverage, docs, MCP defaults, and safe next checks. |
+
+## 🧩 Skills Included
+
+Codex Chef ships two local plugin skills and can optionally install nine curated
+global skills from the reviewed catalog.
+
+| Skill | Installed by default? | What it is for |
+| --- | --- | --- |
+| `codex-chef-operator` | Plugin-local | Maintain this starter without weakening install safety or security gates. |
+| `offline-diagram-triplet` | Plugin-local | Turn Mermaid into editable Excalidraw, SVG, PNG, and Markdown with zero network. |
+| `dependency-upgrade` | Optional global | Upgrade dependencies safely. |
+| `frontend-skill` | Optional global | Build visually strong frontend experiences. |
+| `impeccable` | Optional global | Audit, polish, and harden frontend interfaces. |
+| `design-taste-frontend` | Optional global | Apply senior UI/UX taste and avoid generic AI output. |
+| `image-to-code` | Optional global | Translate visual references into frontend code. |
+| `high-end-visual-design` | Optional global | Improve visual direction, hierarchy, spacing, and polish. |
+| `web-design-guidelines` | Optional global | Review accessibility, UX quality, and interface standards. |
+| `vercel-react-best-practices` | Optional global | Optimize React and Next.js implementation patterns. |
+| `vercel-optimize` | Optional global | Investigate Vercel cost, performance, and platform usage. |
+
+## 🔌 MCP Defaults
+
+Enabled by default for useful local/research work: OpenAI Developer Docs,
+Context7, sequential thinking, Playwright, Chrome DevTools, Serena, and memory.
+Disabled by default until explicitly needed: filesystem, GitHub, Figma, Linear,
+Notion, Sentry, Vercel, and Supabase.
 
 ## &#127760; Language Entry Points
 

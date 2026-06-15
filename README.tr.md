@@ -21,13 +21,100 @@
   <a href="README.pt-BR.md">🇧🇷 Português (Brasil)</a> |
   <a href="README.tr.md">🇹🇷 Türkçe</a> |
   <a href="README.fr.md">🇫🇷 French / Français</a>
-  <br />
-  <sub>Deutsch · Español · English · Português (Brasil) · Türkçe · French</sub>
 </p>
 
 Codex Chef, Windows agirlikli calisan guclu kullanicilar ve kucuk ekipler icin guvenlik oncelikli Codex setup kitidir. Tekrar edilebilir bir yerel Codex temeli kurar: kalici talimatlar, konservatif config, uzman ajanlar, onay kurallari, MCP varsayilanlari, secilmis skill metadata'lari, plugin paketi, dogrulama scriptleri ve alti dilli dokumantasyon.
 
 Bu resmi OpenAI ürünü değildir; community starter paketidir. Güncel resmi Codex dokümanlarıyla eşleştirilmiştir ve riskli aksiyonlar varsayılan olarak onaya bağlı kalır.
+
+## 🚀 Tek Seferde İndir Ve Kur
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
+Set-ExecutionPolicy -Scope Process Bypass -Force
+.\scripts\install.ps1 -All -Force
+```
+
+Önce güvenli ön izleme:
+
+```powershell
+.\scripts\install.ps1 -All -Force -WhatIf
+node scripts/plan-install.mjs --all --json --redact-paths
+```
+
+## 🍳 Kurulumdan Sonra Ne Gelir?
+
+Codex Chef sadece doküman koymaz; gerçek bir Codex çalışma mutfağı kurar.
+Aşağıdaki ajan listesi `templates/codex/config.windows.toml`,
+`templates/codex/config.unix.toml` ve `templates/codex/agents/*.toml`
+dosyalarından gelir. Yani installer bu kayıtları `~/.codex` içine kopyalar.
+
+| Yüzey | Makineye ne kurulur? |
+| --- | --- |
+| 🤖 Uzman ajanlar | `~/.codex/agents/*.toml` altında 20 kayıtlı Codex subagent. |
+| 🧠 Kalıcı rehberlik | Güvenli routing, doğrulama ve onay kuralları içeren global `~/.codex/AGENTS.md`. |
+| 🔌 MCP varsayılanları | 7 faydalı MCP açık, 8 auth/high-risk connector kapalı bekler. |
+| 🧩 Yerel plugin | Kişisel plugin marketplace'e kayıtlı `codex-chef-workflows`. |
+| 🛠️ Yerel skill'ler | Dış auth istemeyen `codex-chef-operator` ve `offline-diagram-triplet`. |
+| 🎨 Opsiyonel skill'ler | `-All` veya `-InstallSkills` ile kurulabilen 9 seçilmiş public skill. |
+| 🛡️ Güvenlik kapıları | Backup, dry-run plan, secret scan, validation ve onaylı riskli aksiyon modeli. |
+
+## 🤖 Kurulan Ajan Ekibi
+
+Codex Chef'in Codex config içine kaydettiği ve role dosyası olarak kurduğu
+ajanlar:
+
+| Ajan | Ne işe yarar? |
+| --- | --- |
+| `code_mapper` | Bilinmeyen repoyu, dosyaları, ownership sınırlarını ve data flow'u haritalar. |
+| `docs_researcher` | Güncel resmi dokümanları, standartları, API'leri ve sürüm hassas bilgileri kontrol eder. |
+| `context_architect` | Davranışın prompt, `AGENTS.md`, skill, plugin, MCP, hook, rule, memory veya config tarafına mı ait olduğunu belirler. |
+| `prompt_architect` | Güvenilir prompt, görev brief'i, başarı kriteri ve reusable instruction sistemi tasarlar. |
+| `mcp_integrator` | Least-privilege MCP connector setup'ı, auth sınırları ve troubleshooting planlar. |
+| `product_strategist` | Ürün framing'i, scope, alternatifler ve en küçük faydalı sürüm kararlarını sorgular. |
+| `engineering_planner` | Mimari, data flow, diagram, edge case ve test stratejisini netleştirir. |
+| `design_reviewer` | UX kalitesi, accessibility, görsel polish, design-system uyumu ve AI-slop risklerini inceler. |
+| `devex_auditor` | Onboarding friction, docs netliği, first-run flow ve time-to-hello-world deneyimini test eder. |
+| `root_cause_debugger` | Fix öncesi hatayı reproduce eder, data flow izler, hipotez test eder ve root cause bulur. |
+| `qa_lead` | Kullanıcı akışlarını dener, regresyon arar, coverage planlar ve fix'i tekrar doğrular. |
+| `performance_auditor` | Page speed, Core Web Vitals, trace, resource budget ve regression ölçer. |
+| `docs_author` | Docs coverage, stale claim, release notes ve eksik rehberleri denetler. |
+| `spec_author` | Belirsiz isteği non-goal, edge case ve quality gate içeren uygulanabilir spec'e çevirir. |
+| `code_reviewer` | Fresh-context doğruluk, regresyon, güvenlik, maintainability ve eksik test review'u yapar. |
+| `frontend_verifier` | Render edilmiş UI, screenshot, responsive layout, interaction state ve console error kontrol eder. |
+| `security_auditor` | Auth, secret, permission, API route, data access, dependency ve abuse path inceler. |
+| `test_verifier` | Lint, typecheck, test, build, smoke check ve failure evidence toplar. |
+| `release_verifier` | Git hijyeni, changelog/version, artifact, secret scan ve publish gate kontrol eder. |
+| `codex_doctor` | Starter sağlığı, catalog drift, install-plan coverage, docs, MCP default'ları ve güvenli sonraki kontrolleri teşhis eder. |
+
+## 🧩 Skill'ler
+
+Codex Chef iki yerel plugin skill'iyle gelir; ayrıca incelenmiş katalogdan dokuz
+opsiyonel global skill kurabilir.
+
+| Skill | Varsayılan kurulum | Ne işe yarar? |
+| --- | --- | --- |
+| `codex-chef-operator` | Plugin-local | Bu starter'ı güvenlik ve install safety kapılarını zayıflatmadan bakımda tutar. |
+| `offline-diagram-triplet` | Plugin-local | Mermaid'i zero-network şekilde editable Excalidraw, SVG, PNG ve Markdown'a çevirir. |
+| `dependency-upgrade` | Opsiyonel global | Dependency upgrade işlerini daha güvenli yapar. |
+| `frontend-skill` | Opsiyonel global | Görsel olarak güçlü frontend deneyimleri üretir. |
+| `impeccable` | Opsiyonel global | Frontend arayüzlerini audit, polish ve harden eder. |
+| `design-taste-frontend` | Opsiyonel global | Senior UI/UX taste uygular, generic AI çıktısını azaltır. |
+| `image-to-code` | Opsiyonel global | Görsel referansları frontend koda çevirir. |
+| `high-end-visual-design` | Opsiyonel global | Görsel yön, hierarchy, spacing ve polish kalitesini yükseltir. |
+| `web-design-guidelines` | Opsiyonel global | Accessibility, UX kalitesi ve interface standartlarını review eder. |
+| `vercel-react-best-practices` | Opsiyonel global | React ve Next.js implementation pattern'lerini optimize eder. |
+| `vercel-optimize` | Opsiyonel global | Vercel cost, performance ve platform kullanımını inceler. |
+
+## 🔌 MCP Varsayılanları
+
+Varsayılan açık gelenler: OpenAI Developer Docs, Context7, sequential thinking,
+Playwright, Chrome DevTools, Serena ve memory. Açıkça ihtiyaç olana kadar kapalı
+bekleyenler: filesystem, GitHub, Figma, Linear, Notion, Sentry, Vercel ve
+Supabase.
 
 ## &#127760; Dil Girişleri
 

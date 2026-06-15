@@ -19,8 +19,6 @@
   <a href="README.pt-BR.md">🇧🇷 Português (Brasil)</a> |
   <a href="README.tr.md">🇹🇷 Türkçe</a> |
   <a href="README.fr.md">🇫🇷 French / Français</a>
-  <br />
-  <sub>Deutsch · Español · English · Português (Brasil) · Türkçe · French</sub>
 </p>
 
 Setup de Codex con prioridad en seguridad para usuarios avanzados Windows-first y equipos pequenos. Empaqueta una base local repetible para Codex: instrucciones duraderas, configuracion conservadora, agents especializados, reglas de aprobacion, defaults de MCP, metadata de skills curadas, plugin local, scripts de validacion y entradas multilingues.

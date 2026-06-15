@@ -19,8 +19,6 @@
   <a href="README.pt-BR.md">🇧🇷 Português (Brasil)</a> |
   <a href="README.tr.md">🇹🇷 Türkçe</a> |
   <a href="README.fr.md">🇫🇷 French / Français</a>
-  <br />
-  <sub>Deutsch · Español · English · Português (Brasil) · Türkçe · French</sub>
 </p>
 
 Sicherheitsorientiertes Codex-Setup fuer Windows-first Power-User und kleine Teams. Dieses Starter-Repo paketiert eine wiederholbare lokale Codex-Basis: dauerhafte Anweisungen, konservative Konfiguration, spezialisierte Agents, Approval Rules, MCP-Defaults, kuratierte Skill-Metadaten, Plugin-Paket, Validierungsskripte und mehrsprachige Einstiegspunkte.
