@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  🌐 <strong>Doküman dilleri:</strong>
+  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> <strong>Doküman dilleri:</strong>
   <a href="README.de.md"><img src="https://flagcdn.com/w20/de.png" alt="Deutsch" width="20"></a> |
   <a href="README.es.md"><img src="https://flagcdn.com/w20/es.png" alt="Español" width="20"></a> |
   <a href="README.md"><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"></a> |
@@ -27,7 +27,7 @@ Codex Chef, Windows tarafında güçlü ama güvenli bir Codex başlangıcı ist
 
 Bu resmi OpenAI ürünü değildir; community starter paketidir. Güncel resmi Codex dokümanlarıyla eşleştirilmiştir ve riskli aksiyonlar varsayılan olarak onaya bağlı kalır.
 
-## 🚀 Tek Seferde İndir Ve Kur
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Tek Seferde İndir Ve Kur
 
 Windows PowerShell:
 
@@ -58,7 +58,7 @@ Soru sormayan otomasyon dostu tek komut:
 .\scripts\install.ps1 -All
 ```
 
-## 🍳 Kurulumdan Sonra Ne Gelir?
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> Kurulumdan Sonra Ne Gelir?
 
 Codex Chef başka bir makinenin global ayarlarını kopyalamaz. Kurulum kaynağı bu
 repo içindeki `templates/codex/config.*.toml`, `templates/codex/agents/*.toml`,
@@ -66,11 +66,11 @@ repo içindeki `templates/codex/config.*.toml`, `templates/codex/agents/*.toml`,
 
 | Yüzey | Makineye ne kurulur? |
 | --- | --- |
-| 🤖 Ajan ekibi | `~/.codex/agents/*.toml` altında 21 kayıtlı Codex subagent rol dosyası. |
-| 🧠 Kalıcı rehberlik | Güvenli routing, doğrulama ve onay kuralları içeren global `~/.codex/AGENTS.md`. |
-| 🔌 MCP varsayılanları | 7 faydalı MCP açık, 8 auth/high-risk connector kapalı bekler. |
-| 🧩 Plugin + skill'ler | Yerel `codex-chef-workflows` plugin'i, üç bundled skill ve on altı opsiyonel global skill. |
-| 🛡️ Güvenlik kapıları | Backup, dry-run plan, secret scan, validation ve onaylı riskli aksiyon modeli. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Ajan ekibi | `~/.codex/agents/*.toml` altında 21 kayıtlı Codex subagent rol dosyası. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Kalıcı rehberlik | Güvenli routing, doğrulama ve onay kuralları içeren global `~/.codex/AGENTS.md`. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP varsayılanları | 7 faydalı MCP açık, 8 auth/high-risk connector kapalı bekler. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skill'ler | Yerel `codex-chef-workflows` plugin'i, üç bundled skill ve on altı opsiyonel global skill. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Güvenlik kapıları | Backup, dry-run plan, secret scan, validation ve onaylı riskli aksiyon modeli. |
 
 Installer en sonda bir capability board basar: ajan ekibi, varsayilan hazir
 MCP'ler, disabled/opt-in MCP'ler, local plugin skill'leri ve reviewed global
@@ -79,7 +79,7 @@ skill'ler tek ekranda gorunur. Tooling, OAuth, filesystem path ve
 bittiginde "bana ne geldi ve ne eksik input ister?" sorusunun cevabini direkt
 gorursun.
 
-### 🔌 MCP Panosu
+### <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP Panosu
 
 Codex Chef MCP'leri gizli hesap senkronizasyonu gibi kullanmaz; hepsi açık
 yüzeylerdir. Lokal/araştırma odaklı olanlar hazır gelir. Hesap, database,
@@ -87,8 +87,8 @@ production ve geniş filesystem tarafı ise sen gerçekten istemeden kapalı kal
 
 | Durum | MCP'ler | Neden |
 | --- | --- | --- |
-| ✅ Varsayılan hazır | 📚 OpenAI Docs · 🧭 Context7 · 🧠 Sequential Thinking · 🎭 Playwright · 🧰 Chrome DevTools · 🗺️ Serena · 🧩 Memory | Güvenli araştırma, kod gezme, browser kanıtı ve secret içermeyen lokal context. |
-| 🔒 Varsayılan kapalı | 📁 Filesystem · 🐙 GitHub · 🎨 Figma · 📌 Linear · 🗒️ Notion · 🚨 Sentry · ▲ Vercel · 🗄️ Supabase | Private dosya, hesap, telemetry, deploy veya database açabileceği için sadece ihtiyaç olunca açılır. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Varsayılan hazır | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> OpenAI Docs · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ed.svg" alt="" aria-hidden="true" width="20"> Context7 · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Sequential Thinking · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ad.svg" alt="" aria-hidden="true" width="20"> Playwright · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f0.svg" alt="" aria-hidden="true" width="20"> Chrome DevTools · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5fa.svg" alt="" aria-hidden="true" width="20"> Serena · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Memory | Güvenli araştırma, kod gezme, browser kanıtı ve secret içermeyen lokal context. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f512.svg" alt="" aria-hidden="true" width="20"> Varsayılan kapalı | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c1.svg" alt="" aria-hidden="true" width="20"> Filesystem · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f419.svg" alt="" aria-hidden="true" width="20"> GitHub · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" alt="" aria-hidden="true" width="20"> Figma · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4cc.svg" alt="" aria-hidden="true" width="20"> Linear · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5d2.svg" alt="" aria-hidden="true" width="20"> Notion · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a8.svg" alt="" aria-hidden="true" width="20"> Sentry · ▲ Vercel · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5c4.svg" alt="" aria-hidden="true" width="20"> Supabase | Private dosya, hesap, telemetry, deploy veya database açabileceği için sadece ihtiyaç olunca açılır. |
 
 Kurulumdan sonra `npm run codex:status` calistirarak canli MCP setup panosunu,
 etkili routing kontrollerini ve global Codex state'ini degistirmeden runtime
@@ -118,34 +118,34 @@ uydugunda dogru ajan, skill, MCP ve flag zorunlu hale gelir; ama destructive,
 credential, publish, deploy, database ve genis filesystem aksiyonlari yine
 onay kapisinda kalir.
 
-## 🤖 Kurulan Ajan Ekibi
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Kurulan Ajan Ekibi
 
 Codex Chef'in kurduğu ajanlar ayrı arka plan servisleri değildir. Bunlar Codex'in
 task routing sırasında kullanacağı isim, açıklama ve TOML rol dosyalarıdır.
 
-- 🗺️ **Kod Haritacısı** (`code_mapper`) - repo haritası
-- 📚 **Doküman Araştırmacısı** (`docs_researcher`) - resmi docs
-- 🧭 **Context Mimarı** (`context_architect`) - routing yüzeyi
-- ✍️ **Prompt Mimarı** (`prompt_architect`) - prompt sistemi
-- 🔌 **MCP Entegratörü** (`mcp_integrator`) - connector'lar
-- 🎯 **Ürün Stratejisti** (`product_strategist`) - scope
-- 🏗️ **Mühendislik Planlayıcısı** (`engineering_planner`) - mimari
-- 🎨 **Tasarım İnceleyicisi** (`design_reviewer`) - UX polish
-- 🧰 **DevEx Denetçisi** (`devex_auditor`) - onboarding
-- 🕵️ **Kök Neden Dedektifi** (`root_cause_debugger`) - araştırma
-- ✅ **QA Lideri** (`qa_lead`) - kullanıcı akışları
-- ⚡ **Performans Denetçisi** (`performance_auditor`) - hız
-- 🔎 **Google SEO Denetçisi** (`google_seo_auditor`) - arama görünürlüğü
-- 📝 **Doküman Yazarı** (`docs_author`) - docs coverage
-- 📐 **Spec Yazarı** (`spec_author`) - uygulanabilir spec
-- 🔍 **Kod İnceleyicisi** (`code_reviewer`) - fresh review
-- 🖥️ **Frontend Doğrulayıcısı** (`frontend_verifier`) - render UI
-- 🛡️ **Güvenlik Denetçisi** (`security_auditor`) - threat path
-- 🧪 **Test Doğrulayıcısı** (`test_verifier`) - test kanıtı
-- 🚢 **Release Doğrulayıcısı** (`release_verifier`) - publish gate
-- 🩺 **Codex Doktoru** (`codex_doctor`) - setup sağlığı
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5fa.svg" alt="" aria-hidden="true" width="20"> **Kod Haritacısı** (`code_mapper`) - repo haritası
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> **Doküman Araştırmacısı** (`docs_researcher`) - resmi docs
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ed.svg" alt="" aria-hidden="true" width="20"> **Context Mimarı** (`context_architect`) - routing yüzeyi
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/270d.svg" alt="" aria-hidden="true" width="20"> **Prompt Mimarı** (`prompt_architect`) - prompt sistemi
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> **MCP Entegratörü** (`mcp_integrator`) - connector'lar
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3af.svg" alt="" aria-hidden="true" width="20"> **Ürün Stratejisti** (`product_strategist`) - scope
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3d7.svg" alt="" aria-hidden="true" width="20"> **Mühendislik Planlayıcısı** (`engineering_planner`) - mimari
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" alt="" aria-hidden="true" width="20"> **Tasarım İnceleyicisi** (`design_reviewer`) - UX polish
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f0.svg" alt="" aria-hidden="true" width="20"> **DevEx Denetçisi** (`devex_auditor`) - onboarding
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f575.svg" alt="" aria-hidden="true" width="20"> **Kök Neden Dedektifi** (`root_cause_debugger`) - araştırma
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> **QA Lideri** (`qa_lead`) - kullanıcı akışları
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> **Performans Denetçisi** (`performance_auditor`) - hız
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50e.svg" alt="" aria-hidden="true" width="20"> **Google SEO Denetçisi** (`google_seo_auditor`) - arama görünürlüğü
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4dd.svg" alt="" aria-hidden="true" width="20"> **Doküman Yazarı** (`docs_author`) - docs coverage
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d0.svg" alt="" aria-hidden="true" width="20"> **Spec Yazarı** (`spec_author`) - uygulanabilir spec
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50d.svg" alt="" aria-hidden="true" width="20"> **Kod İnceleyicisi** (`code_reviewer`) - fresh review
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5a5.svg" alt="" aria-hidden="true" width="20"> **Frontend Doğrulayıcısı** (`frontend_verifier`) - render UI
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> **Güvenlik Denetçisi** (`security_auditor`) - threat path
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> **Test Doğrulayıcısı** (`test_verifier`) - test kanıtı
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a2.svg" alt="" aria-hidden="true" width="20"> **Release Doğrulayıcısı** (`release_verifier`) - publish gate
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa7a.svg" alt="" aria-hidden="true" width="20"> **Codex Doktoru** (`codex_doctor`) - setup sağlığı
 
-## 🧩 Skill'ler
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skill'ler
 
 Codex Chef üç yerel plugin skill'iyle gelir. Bunlar `codex-chef-workflows`
 plugin'iyle birlikte gelir ve `npm run validate:plugin-skills` ile kontrol
@@ -156,25 +156,25 @@ prompt mimarisi, skill üretimi ve tek bir geniş frontend workflow'u için
 seçilmiş on altı public/first-party skill'i de global Codex skill'i olarak
 kurabilir.
 
-- 🍳 **Chef Operatörü** (`codex-chef-operator`) - plugin-local
-- 📐 **Offline Diagram Triplet** (`offline-diagram-triplet`) - plugin-local
-- 🧮 **Context Budget Planner** (`context-budget-planner`) - plugin-local
-- ⬆️ **Dependency Upgrade** (`dependency-upgrade`) - opsiyonel global
-- 🖼️ **Frontend Builder** (`frontend-skill`) - opsiyonel global
-- 🛡️ **Security Best Practices** (`security-best-practices`) - opsiyonel global
-- 🧯 **GitHub CI Fixer** (`gh-fix-ci`) - opsiyonel global
-- 🕵️ **Systematic Debugging** (`systematic-debugging`) - opsiyonel global
-- 🧱 **Refactor Planner** (`request-refactor-plan`) - opsiyonel global
-- 🧭 **Webapp Testing** (`webapp-testing`) - opsiyonel global
-- 🧪 **Test-Driven Development** (`test-driven-development`) - opsiyonel global
-- 🔎 **SEO** (`seo`) - opsiyonel global
-- ♿ **Accessibility** (`accessibility`) - opsiyonel global
-- 📊 **Web Quality Audit** (`web-quality-audit`) - opsiyonel global
-- 📝 **Documentation And ADRs** (`documentation-and-adrs`) - opsiyonel global
-- 🔌 **MCP Builder** (`mcp-builder`) - opsiyonel global
-- 🧱 **Context Starter** (`ai-project-starter`) - opsiyonel global, first-party
-- ✍️ **Prompt Architect Skill** (`prompt-architect`) - opsiyonel global, first-party
-- 🛠️ **Skill Forge** (`ai-skill-create`) - opsiyonel global, first-party
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> **Chef Operatörü** (`codex-chef-operator`) - plugin-local
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d0.svg" alt="" aria-hidden="true" width="20"> **Offline Diagram Triplet** (`offline-diagram-triplet`) - plugin-local
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> **Context Budget Planner** (`context-budget-planner`) - plugin-local
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2b06.svg" alt="" aria-hidden="true" width="20"> **Dependency Upgrade** (`dependency-upgrade`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5bc.svg" alt="" aria-hidden="true" width="20"> **Frontend Builder** (`frontend-skill`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> **Security Best Practices** (`security-best-practices`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ef.svg" alt="" aria-hidden="true" width="20"> **GitHub CI Fixer** (`gh-fix-ci`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f575.svg" alt="" aria-hidden="true" width="20"> **Systematic Debugging** (`systematic-debugging`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f1.svg" alt="" aria-hidden="true" width="20"> **Refactor Planner** (`request-refactor-plan`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ed.svg" alt="" aria-hidden="true" width="20"> **Webapp Testing** (`webapp-testing`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> **Test-Driven Development** (`test-driven-development`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50e.svg" alt="" aria-hidden="true" width="20"> **SEO** (`seo`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/267f.svg" alt="" aria-hidden="true" width="20"> **Accessibility** (`accessibility`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4ca.svg" alt="" aria-hidden="true" width="20"> **Web Quality Audit** (`web-quality-audit`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4dd.svg" alt="" aria-hidden="true" width="20"> **Documentation And ADRs** (`documentation-and-adrs`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> **MCP Builder** (`mcp-builder`) - opsiyonel global
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f1.svg" alt="" aria-hidden="true" width="20"> **Context Starter** (`ai-project-starter`) - opsiyonel global, first-party
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/270d.svg" alt="" aria-hidden="true" width="20"> **Prompt Architect Skill** (`prompt-architect`) - opsiyonel global, first-party
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e0.svg" alt="" aria-hidden="true" width="20"> **Skill Forge** (`ai-skill-create`) - opsiyonel global, first-party
 
 Ek tasarım, React/Vercel, prompt, memory, token ve context skill'leri
 `catalog/skills.json` içinde manuel opt-in olarak durur; default kurulumun içine
@@ -192,11 +192,11 @@ manual opt-in kalır.
 Bizim first-party ekosistem skill'leri artık gözden geçirilmiş `-All` /
 `-InstallSkills` setinin içinde gelir:
 
-- 🧱 `ai-project-starter` - proje context temeli, starter docs,
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f1.svg" alt="" aria-hidden="true" width="20"> `ai-project-starter` - proje context temeli, starter docs,
   ajan instruction dosyaları ve vibe-coding guardrail'leri.
-- ✍️ `prompt-architect` - plan-first, onay kapılı Codex prompt
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/270d.svg" alt="" aria-hidden="true" width="20"> `prompt-architect` - plan-first, onay kapılı Codex prompt
   paketleri ve prompt audit'leri.
-- 🛠️ `ai-skill-create` - Codex skill/plugin oluşturma, doğrulama,
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e0.svg" alt="" aria-hidden="true" width="20"> `ai-skill-create` - Codex skill/plugin oluşturma, doğrulama,
   forward-test ve paketleme.
 
 Manuel kurulum örneği:
@@ -205,7 +205,7 @@ Manuel kurulum örneği:
 npx skills add pbakaus/impeccable --skill impeccable --agent codex --yes --global
 ```
 
-## 🔌 MCP Varsayılanları
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP Varsayılanları
 
 Codex Chef MCP config kayıtları kurar; gizli hesap bağlantısı açmaz. Lokal ve
 araştırma odaklı kaynaklar açık gelir. Auth, database, production ve geniş
@@ -213,24 +213,24 @@ filesystem connector'ları ise gerçekten ihtiyaç olana kadar kapalı kalır.
 
 Varsayılan açık:
 
-- 📚 **OpenAI Developer Docs** (`openaiDeveloperDocs`) - resmi OpenAI/Codex dokümanları.
-- 🧭 **Context7** (`context7`) - güncel kütüphane ve framework dokümanları.
-- 🧠 **Sequential Thinking** (`sequential-thinking`) - karmaşık işleri parçalara ayırma.
-- 🎭 **Playwright** (`playwright`) - browser snapshot, console/network kanıtı ve UI kontrolü.
-- 🧰 **Chrome DevTools** (`chrome-devtools`) - izole Chrome inceleme ve redacted network headers.
-- 🗺️ **Serena** (`serena`) - semantic code navigation ve repo symbol araması.
-- 🧩 **Memory** (`memory`) - secret içermeyen lokal proje context hafızası.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> **OpenAI Developer Docs** (`openaiDeveloperDocs`) - resmi OpenAI/Codex dokümanları.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ed.svg" alt="" aria-hidden="true" width="20"> **Context7** (`context7`) - güncel kütüphane ve framework dokümanları.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> **Sequential Thinking** (`sequential-thinking`) - karmaşık işleri parçalara ayırma.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ad.svg" alt="" aria-hidden="true" width="20"> **Playwright** (`playwright`) - browser snapshot, console/network kanıtı ve UI kontrolü.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f0.svg" alt="" aria-hidden="true" width="20"> **Chrome DevTools** (`chrome-devtools`) - izole Chrome inceleme ve redacted network headers.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5fa.svg" alt="" aria-hidden="true" width="20"> **Serena** (`serena`) - semantic code navigation ve repo symbol araması.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> **Memory** (`memory`) - secret içermeyen lokal proje context hafızası.
 
 İhtiyaç olana kadar kapalı:
 
-- 📁 **Filesystem** (`filesystem`) - geniş lokal dosya erişimi; açmadan önce bilinçli path seç.
-- 🐙 **GitHub** (`github`) - auth isteyen private repo/PR context'i.
-- 🎨 **Figma** (`figma`) - private tasarım dosyaları ve workspace context'i.
-- 📌 **Linear** (`linear`) - issue, proje ve takım planlama context'i.
-- 🗒️ **Notion** (`notion`) - private docs ve database'ler.
-- 🚨 **Sentry** (`sentry`) - production hata ve telemetry context'i.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c1.svg" alt="" aria-hidden="true" width="20"> **Filesystem** (`filesystem`) - geniş lokal dosya erişimi; açmadan önce bilinçli path seç.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f419.svg" alt="" aria-hidden="true" width="20"> **GitHub** (`github`) - auth isteyen private repo/PR context'i.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" alt="" aria-hidden="true" width="20"> **Figma** (`figma`) - private tasarım dosyaları ve workspace context'i.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4cc.svg" alt="" aria-hidden="true" width="20"> **Linear** (`linear`) - issue, proje ve takım planlama context'i.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5d2.svg" alt="" aria-hidden="true" width="20"> **Notion** (`notion`) - private docs ve database'ler.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a8.svg" alt="" aria-hidden="true" width="20"> **Sentry** (`sentry`) - production hata ve telemetry context'i.
 - ▲ **Vercel** (`vercel`) - proje ve deployment platform context'i.
-- 🗄️ **Supabase** (`supabase`) - `SUPABASE_DB_URL` üzerinden database erişimi.
+- <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5c4.svg" alt="" aria-hidden="true" width="20"> **Supabase** (`supabase`) - `SUPABASE_DB_URL` üzerinden database erişimi.
 
 Kullanıcıda zaten `~/.codex/config.toml` varsa installer artık onu korur ve
 sadece eksik Codex Chef agent/MCP/safety tablolarını ekler. Mevcut MCP
@@ -247,7 +247,7 @@ ile preview ve backup sonrası bilinçli replace seçilmedikçe değiştirilmez.
 | <img src="https://flagcdn.com/w20/br.png" alt="Português (Brasil)" width="20"> | [README.pt-BR.md](README.pt-BR.md) |
 | <img src="https://flagcdn.com/w20/tr.png" alt="Türkçe" width="20"> | [README.tr.md](README.tr.md) |
 | <img src="https://flagcdn.com/w20/fr.png" alt="Français" width="20"> | [README.fr.md](README.fr.md) |
-## ⚡ Buradan Başla
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> Buradan Başla
 
 | Hedef | Link |
 | --- | --- |
@@ -264,7 +264,7 @@ ile preview ve backup sonrası bilinçli replace seçilmedikçe değiştirilmez.
 | Windows/Codex sorunlarını çözmek | [Troubleshooting](docs/troubleshooting.tr.md) |
 | Mevcut setup'ı yükseltmek | [Upgrade Rehberi](docs/upgrade.tr.md) |
 
-## 🧭 Bu Repo Ne?
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ed.svg" alt="" aria-hidden="true" width="20"> Bu Repo Ne?
 
 Codex Chef, dağınık yerel setup bilgisini public, okunabilir ve doğrulanabilir bir starter repoya çevirir. Şu sorulara net cevap verir:
 
@@ -274,7 +274,7 @@ Codex Chef, dağınık yerel setup bilgisini public, okunabilir ve doğrulanabil
 - Bu repoya güvenmeden önce nasıl doğrularım?
 - Güvenliği zayıflatmadan nasıl genişletirim?
 
-## 🧩 Kurulum Yüzeyi
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Kurulum Yüzeyi
 
 Installer şu yönetilen template'leri kopyalar:
 
@@ -291,7 +291,7 @@ Opsiyonel switch'lerle şunlar da kurulabilir:
 - Global Git pre-commit hook: `~/.githooks`
 - `catalog/skills.json` içindeki seçilmiş public Codex skill'leri
 
-## 🚫 Ne Yapmaz?
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> Ne Yapmaz?
 
 Installer şunları yapmaz:
 
@@ -300,7 +300,7 @@ Installer şunları yapmaz:
 - Commit, push, release, deploy, package publish, secret rotation veya GitHub settings değişikliği yapmaz.
 - Kullanıcı açıkça `-NoBackup` veya `--no-backup` seçmedikçe yönetilen hedefleri backup almadan değiştirmez.
 
-## 🔎 Önce Dry Run
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50e.svg" alt="" aria-hidden="true" width="20"> Önce Dry Run
 
 PowerShell:
 
@@ -316,7 +316,7 @@ Bash veya WSL:
 
 Dry run gerçek dosyalara, Git ayarlarına veya global skill'lere dokunmadan hedef Codex/Agents klasörlerini ve yapılacak değişiklikleri gösterir.
 
-## 🧾 Install Planı
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install Planı
 
 Makine-okunur no-write plan için:
 
@@ -337,7 +337,7 @@ tutar. Bu fikir ECC'nin manifest tabanlı install mimarisinden esinlenir, ama
 Codex-only kalır ve ECC'nin global config, hook, MCP veya skill kataloglarını
 import etmez. Bkz. [ECC Uyumluluk](docs/ecc-compatibility.tr.md).
 
-## ⚡ Hızlı Kurulum
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> Hızlı Kurulum
 
 PowerShell:
 
@@ -384,7 +384,7 @@ eksik config bloklarını merge eder, plugin marketplace kaydını başka plugin
 düşürmeden yeniler ve fazla ya da duplicate global skill'leri silmeden cleanup
 adayı olarak raporlar.
 
-## 🧠 Çalışma Modeli
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Çalışma Modeli
 
 1. Bilmediğin kodu önce `code_mapper` ile haritalat.
 2. Davranış prompt, `AGENTS.md`, skill, plugin, MCP, hook, memory, rule veya config tarafına mı ait karar vermek için `context_architect` kullan.
@@ -397,13 +397,13 @@ adayı olarak raporlar.
 
 Böylece Codex tek bir sohbet gibi değil, uzman rolleri olan küçük bir yazılım ekibi gibi çalışır; ana thread karar, uygulama ve final kanıtına odaklanır.
 
-## 🎬 Görsel Akış
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ac.svg" alt="" aria-hidden="true" width="20"> Görsel Akış
 
 <p align="center">
   <img src="assets/workflow-overview.svg" alt="Kurulum, routing, araştırma, uygulama ve doğrulama adımlarını gösteren workflow diyagramı" width="100%" />
 </p>
 
-## 🛡️ Güvenli Varsayılanlar
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Güvenli Varsayılanlar
 
 - Sandbox açık kalır.
 - Onay politikası interaktif kalır.
@@ -414,31 +414,31 @@ Böylece Codex tek bir sohbet gibi değil, uzman rolleri olan küçük bir yazı
 - Skill kurulumu sadece catalog ve lock dosyasındaki package/skill çiftlerinden yapılır.
 - Delete, cleanup, overwrite, credential access, publish, push ve release aksiyonları onay ister.
 
-## ✅ Güven Sinyalleri
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Güven Sinyalleri
 
 | Sinyal | Kanıt |
 | --- | --- |
-| 🛡️ Public-safe tasarım | Token, auth dosyası, session, memory, cookie, private key veya makineye özel state içermez. |
-| 🧪 Gerçek doğrulama | `npm run check` repo, docs, install-plan, agent drift, MCP drift, skill-source, supply-chain ve security kontrollerini çalıştırır. |
-| 🔐 Secret scan hazır | Gitleaks komutu dokümante edilir; Git hook varsa Gitleaks çalıştırır. |
-| 🌐 Çok dilli docs | Deutsch, Español, English, Português (Brasil), Türkçe ve Français README ve derin dokümantasyon dosyaları bulunur; altı dilli deep docs validation ile zorunlu tutulur. |
-| 🎬 Erişilebilir görseller | SVG'lerde title, description, motion, reduced-motion fallback ve README alt text vardır. |
-| 🧩 Skill kaynak gate'i | `catalog/skills-lock.json` installable skill metadata'sıyla karşılaştırılır. |
-| 🧩 Yerel skill gate'i | `npm run validate:plugin-skills` bundled skill'leri, reference dosyalarını, UI metadata'sını ve catalog kaydını kontrol eder. |
-| 📐 Offline diagram | Bundled `offline-diagram-triplet` Mermaid, editable Excalidraw, SVG, PNG ve Markdown çıktısını network kullanmadan üretir. |
-| 🧮 Context bütçesi | Bundled `context-budget-planner` büyük işleri kaynak önceliği, token bütçesi ve compaction handoff'u ile odaklı tutar. |
-| 🤖 Agent drift gate'i | `catalog/agents.json` ve `catalog/agent-research-corpus.json` Windows/Unix config bloklari, role TOML dosyalari, zorunlu guardrail bloklari ve source-backed item sayilariyla karsilastirilir. |
-| 🩺 Doctor gate'i | `npm run codex:doctor` global write yapmadan repo-only Codex starter sagligini ozetler. |
-| 📟 Status panosu | `npm run codex:status` repo sagligini, kurulu runtime drift'ini, Codex doctor check'lerini ve skill context-budget warning'lerini tek yerde toplar. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Public-safe tasarım | Token, auth dosyası, session, memory, cookie, private key veya makineye özel state içermez. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Gerçek doğrulama | `npm run check` repo, docs, install-plan, agent drift, MCP drift, skill-source, supply-chain ve security kontrollerini çalıştırır. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f510.svg" alt="" aria-hidden="true" width="20"> Secret scan hazır | Gitleaks komutu dokümante edilir; Git hook varsa Gitleaks çalıştırır. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> Çok dilli docs | Deutsch, Español, English, Português (Brasil), Türkçe ve Français README ve derin dokümantasyon dosyaları bulunur; altı dilli deep docs validation ile zorunlu tutulur. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ac.svg" alt="" aria-hidden="true" width="20"> Erişilebilir görseller | SVG'lerde title, description, motion, reduced-motion fallback ve README alt text vardır. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skill kaynak gate'i | `catalog/skills-lock.json` installable skill metadata'sıyla karşılaştırılır. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Yerel skill gate'i | `npm run validate:plugin-skills` bundled skill'leri, reference dosyalarını, UI metadata'sını ve catalog kaydını kontrol eder. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d0.svg" alt="" aria-hidden="true" width="20"> Offline diagram | Bundled `offline-diagram-triplet` Mermaid, editable Excalidraw, SVG, PNG ve Markdown çıktısını network kullanmadan üretir. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context bütçesi | Bundled `context-budget-planner` büyük işleri kaynak önceliği, token bütçesi ve compaction handoff'u ile odaklı tutar. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent drift gate'i | `catalog/agents.json` ve `catalog/agent-research-corpus.json` Windows/Unix config bloklari, role TOML dosyalari, zorunlu guardrail bloklari ve source-backed item sayilariyla karsilastirilir. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa7a.svg" alt="" aria-hidden="true" width="20"> Doctor gate'i | `npm run codex:doctor` global write yapmadan repo-only Codex starter sagligini ozetler. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4df.svg" alt="" aria-hidden="true" width="20"> Status panosu | `npm run codex:status` repo sagligini, kurulu runtime drift'ini, Codex doctor check'lerini ve skill context-budget warning'lerini tek yerde toplar. |
 | Repair modu | `npm run repair:install -- --apply` ve installer `-Repair` / `--repair`, managed drift'i backup sonrası düzeltir; başka marketplace plugin'lerini ve user skill'lerini silmez. |
-| 🧾 Install plan gate'i | `manifests/install-plan.json` ve install-state preview schema installer çalışmadan önce doğrulanır. |
-| 🔌 Konservatif MCP'ler | Auth isteyen hesap, database ve geniş filesystem connector'ları disabled kalır. |
-| 🧭 Kaynaklı rehberlik | Research notes kaynak tipi, confidence, neyi desteklediği ve outdated-risk içerir. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install plan gate'i | `manifests/install-plan.json` ve install-state preview schema installer çalışmadan önce doğrulanır. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> Konservatif MCP'ler | Auth isteyen hesap, database ve geniş filesystem connector'ları disabled kalır. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ed.svg" alt="" aria-hidden="true" width="20"> Kaynaklı rehberlik | Research notes kaynak tipi, confidence, neyi desteklediği ve outdated-risk içerir. |
 | Ajan-okunur indeks | `llms.txt`, kodlama ajanlari icin kurulum hedeflerini, docs haritasini, guvenlik sinirlarini ve yuksek sinyalli karsilastirma kaynaklarini kisa anlatir. |
-| 📣 Public-safe triage | CODEOWNERS ve issue template'leri bug, feature, soru ve güvenlik raporlarını private data paylaşmadan yönlendirir. |
-| ♻️ CI eşleşmesi | GitHub Actions aynı `npm run check` yolunu ve shell parser kontrollerini çalıştırır. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4e3.svg" alt="" aria-hidden="true" width="20"> Public-safe triage | CODEOWNERS ve issue template'leri bug, feature, soru ve güvenlik raporlarını private data paylaşmadan yönlendirir. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/267b.svg" alt="" aria-hidden="true" width="20"> CI eşleşmesi | GitHub Actions aynı `npm run check` yolunu ve shell parser kontrollerini çalıştırır. |
 
-## 📁 Repo Yapısı
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c1.svg" alt="" aria-hidden="true" width="20"> Repo Yapısı
 
 ```text
 .github/                 CI workflow, issue ve PR template'leri
@@ -454,7 +454,7 @@ templates/codex/         ~/.codex içine kopyalanan dosyalar
 templates/git/           Opsiyonel global Git hijyen dosyaları
 ```
 
-## 🧾 Lokal Doğrulama
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Lokal Doğrulama
 
 ```bash
 npm run check
@@ -470,7 +470,7 @@ npm run verify:skills:online
 
 Online skill doğrulaması network ve Skills CLI kullanır. Bu yüzden default offline gate'ten ayrı tutulur.
 
-## 📚 Dokümantasyon
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Dokümantasyon
 
 Her derin rehberin İngilizce, Almanca, İspanyolca, Brezilya Portekizcesi, Türkçe ve Fransızca dosyası vardır. Örneğin `docs/install.md`, `docs/install.de.md`, `docs/install.es.md`, `docs/install.pt-BR.md`, `docs/install.tr.md` ve `docs/install.fr.md` ile eşleşir.
 
@@ -492,7 +492,7 @@ Her derin rehberin İngilizce, Almanca, İspanyolca, Brezilya Portekizcesi, Tür
 - [Publish](docs/publish.tr.md)
 - [Ajan-okunur indeks](llms.txt)
 
-## 📚 Resmi Codex Kaynakları
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Resmi Codex Kaynakları
 
 Ana kaynak: https://developers.openai.com/codex/codex-manual.md
 
@@ -504,6 +504,6 @@ Odaklı dokümanlar:
 - Windows: https://developers.openai.com/codex/windows
 - Config, permissions, rules, hooks ve AGENTS.md eşlemesi için [docs/research-notes.tr.md](docs/research-notes.tr.md).
 
-## 🚀 Yayınlama Sınırı
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Yayınlama Sınırı
 
 Bu repo validation sonrası public-ready olacak şekilde hazırlanır, fakat installer sadece lokal setup yapar. Commit, push, tag, release, package publish, deploy ve GitHub settings değişiklikleri local verification sonrası açık insan kararı olmalıdır.

@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  🌐 <strong>Documentación:</strong>
+  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> <strong>Documentación:</strong>
   <a href="README.de.md"><img src="https://flagcdn.com/w20/de.png" alt="Deutsch" width="20"></a> |
   <a href="README.es.md"><img src="https://flagcdn.com/w20/es.png" alt="Español" width="20"></a> |
   <a href="README.md"><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"></a> |
@@ -25,20 +25,20 @@ Codex Chef le da a tu setup de Codex en Windows un punto de partida claro: defau
 
 Este es un starter comunitario no oficial, no un producto de OpenAI. Los README y la documentación profunda existen en seis idiomas; esta página es la entrada en español.
 
-## 🍳 Qué queda listo después de instalar
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> Qué queda listo después de instalar
 
 Codex Chef no intenta ser un volcado de configuración. La idea es dejarte una
 base local de Codex que puedas entender, verificar y extender:
 
 | Área | Resultado |
 | --- | --- |
-| 🤖 Equipo de agentes | 21 roles con nombre, como Code Mapper, Docs Researcher, Google SEO Auditor, Security Auditor y Release Verifier. |
-| 🧩 Skills locales | `codex-chef-operator`, `offline-diagram-triplet` y `context-budget-planner` vienen dentro del plugin local. |
-| 🎨 Skills opcionales | 16 skills globales public/first-party revisadas para mantenimiento, debugging, planificación de refactor, seguridad, testing, verificación de navegador, SEO, calidad web, docs, CI, MCP, context engineering, prompt architecture, skill authoring y un workflow amplio de frontend se pueden instalar con `-All`. |
-| 🔌 MCP por defecto | Los MCP locales y de investigación quedan listos; los conectores autenticados siguen desactivados hasta que los necesites. |
-| 🛡️ Red de seguridad | Dry-run, backups, secret scan, validación y approval gates siguen dentro del flujo normal. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Equipo de agentes | 21 roles con nombre, como Code Mapper, Docs Researcher, Google SEO Auditor, Security Auditor y Release Verifier. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skills locales | `codex-chef-operator`, `offline-diagram-triplet` y `context-budget-planner` vienen dentro del plugin local. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" alt="" aria-hidden="true" width="20"> Skills opcionales | 16 skills globales public/first-party revisadas para mantenimiento, debugging, planificación de refactor, seguridad, testing, verificación de navegador, SEO, calidad web, docs, CI, MCP, context engineering, prompt architecture, skill authoring y un workflow amplio de frontend se pueden instalar con `-All`. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP por defecto | Los MCP locales y de investigación quedan listos; los conectores autenticados siguen desactivados hasta que los necesites. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Red de seguridad | Dry-run, backups, secret scan, validación y approval gates siguen dentro del flujo normal. |
 
-## ⚡ Inicio Rapido
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> Inicio Rapido
 
 | Objetivo | Link |
 | --- | --- |
@@ -49,7 +49,7 @@ base local de Codex que puedas entender, verificar y extender:
 | Revisar seguridad | [Modelo de seguridad](docs/security-model.es.md) |
 | Preparar publicacion | [Publishing](docs/publish.es.md) |
 
-## 🧩 Superficie De Instalacion
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Superficie De Instalacion
 
 Los installers gestionan:
 
@@ -62,13 +62,13 @@ Los installers gestionan:
 
 `-All` instala las skills curadas de Codex, pero no cambia la configuración global de Git. Los Git guards globales quedan como opt-in separado con `-InstallGitGuards` o `--install-git-guards`.
 
-## 🚫 Lo Que No Hace
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> Lo Que No Hace
 
 - No guarda tokens, cookies, auth files, memories, sessions ni rutas locales privadas.
 - No activa por defecto conectores de cuenta, base de datos, produccion o filesystem amplio.
 - No hace commit, push, release, deploy, package publish ni secret rotation.
 
-## 🔎 Dry Run First
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50e.svg" alt="" aria-hidden="true" width="20"> Dry Run First
 
 PowerShell:
 
@@ -82,7 +82,7 @@ Bash o WSL:
 ./scripts/install.sh --all --dry-run
 ```
 
-## 🧾 Install Plan
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install Plan
 
 ```bash
 node scripts/plan-install.mjs --all --json
@@ -90,7 +90,7 @@ node scripts/plan-install.mjs --all --json
 
 El plan viene de `manifests/install-plan.json` y describe cada operacion, politica de colision, backup, riesgo y flag requerido. ECC inspiro el patron de manifests, pero este repo sigue siendo Codex-only.
 
-## 🚀 Quick Start
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Quick Start
 
 PowerShell:
 
@@ -121,19 +121,19 @@ npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
 
-## ✅ Senales De Confianza
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Senales De Confianza
 
 | Senal | Evidencia |
 | --- | --- |
-| 🛡️ Public-safe | Sin secretos, auth files, sessions, memories ni estado especifico de maquina. |
-| 🧪 Validacion real | `npm run check` cubre repo, docs, install-plan, MCP drift, skills, supply-chain y security. |
-| 🔌 MCPs conservadores | Los conectores autenticados quedan desactivados por defecto. |
-| 🩺 Doctor | `npm run codex:doctor` resume health repo-only sin escrituras globales. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Public-safe | Sin secretos, auth files, sessions, memories ni estado especifico de maquina. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Validacion real | `npm run check` cubre repo, docs, install-plan, MCP drift, skills, supply-chain y security. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCPs conservadores | Los conectores autenticados quedan desactivados por defecto. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa7a.svg" alt="" aria-hidden="true" width="20"> Doctor | `npm run codex:doctor` resume health repo-only sin escrituras globales. |
 | Indice para agents | `llms.txt` resume destinos de instalacion, docs, limites de seguridad y fuentes comparadas para coding agents. |
-| 📐 Diagramas offline | `offline-diagram-triplet` emite Mermaid, Excalidraw editable, SVG, PNG y Markdown sin red. |
-| 📣 Triage public-safe | CODEOWNERS e issue templates enrutan bugs, features, preguntas y security reports sin datos privados. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d0.svg" alt="" aria-hidden="true" width="20"> Diagramas offline | `offline-diagram-triplet` emite Mermaid, Excalidraw editable, SVG, PNG y Markdown sin red. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4e3.svg" alt="" aria-hidden="true" width="20"> Triage public-safe | CODEOWNERS e issue templates enrutan bugs, features, preguntas y security reports sin datos privados. |
 
-## 📚 Documentacion
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Documentacion
 
 - [Install](docs/install.es.md)
 - [Verification](docs/verification.es.md)
@@ -146,6 +146,6 @@ codex --strict-config "Summarize the active Codex setup."
 - [Advisory sources](docs/advisory-sources.es.md)
 - [Indice para agents](llms.txt)
 
-## 🚀 Limite De Publicacion
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Limite De Publicacion
 
 El repo queda public-ready despues de validacion, pero el installer solo hace setup local. Commit, push, tag, release, deploy y GitHub settings siguen siendo decisiones humanas explicitas.
