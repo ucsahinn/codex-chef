@@ -1,12 +1,13 @@
-# MCP Kataloğu
+# MCP Katalogu
 
-Makine tarafından okunabilir liste için `catalog/mcp-servers.json` dosyasına bak.
-`npm run check`, bu katalog ile Windows/Unix Codex config template'lerinin
-aynı hizada kaldığını doğrular.
+Makine tarafindan okunabilir liste icin `catalog/mcp-servers.json` dosyasina
+bak. `npm run check`, bu katalog ile Windows/Unix Codex config template'lerinin
+ayni hizada kaldigini dogrular.
 
-Katalog `setupKind` ve `setupHint` alanlarini da tutar. Installer ve
-`npm run codex:status`, local tooling, OAuth, filesystem path veya environment
-variable isteyen MCP'leri bu notlarla gosterir.
+Katalog `setupKind` ve `setupHint` alanlarini da tutar. Installer,
+`npm run codex:status` ve `npm run chef -- --mcp`, lokal tooling, OAuth,
+filesystem path veya environment variable isteyen MCP'leri bu notlarla
+gosterir.
 
 Resmi kaynak:
 
@@ -18,8 +19,8 @@ https://modelcontextprotocol.io/specification
 
 MCP server'lar tool, resource ve prompt sunabilir. Her server'i bir capability
 boundary olarak dusun: dokumantasyon server'lari dusuk riskli context saglar;
-browser, filesystem, database, hesap, production, billing veya deploy server'lari
-daha guclu approval default'u ve daha dar tool exposure ister.
+browser, filesystem, database, hesap, production, billing veya deploy
+server'lari daha guclu approval default'u ve daha dar tool exposure ister.
 
 Npm tabanli tum MCP package spec'leri hem `catalog/mcp-servers.json` hem de
 `templates/codex/config.*.toml` icinde exact version ile pinlenir. Floating
@@ -27,19 +28,19 @@ Npm tabanli tum MCP package spec'leri hem `catalog/mcp-servers.json` hem de
 tarafindan reddedilir. Serena gibi `uvx --from` kullanan git-based MCP
 launcher'lar full commit SHA ve matching catalog `sourceRef` icermelidir.
 
-## Varsayılan Açık
+## Varsayilan Acik
 
-| Server | Amaç | Not |
+| Server | Amac | Not |
 | --- | --- | --- |
 | `openaiDeveloperDocs` | Resmi OpenAI developer docs | Streamable HTTP |
-| `context7` | Güncel library/framework dokümanları | `npx` üzerinden stdio |
-| `sequential-thinking` | Yapılandırılmış düşünme/decomposition | Lokal stdio helper |
-| `playwright` | Browser otomasyonu ve UI doğrulama | Lokal browser kontrolü |
+| `context7` | Guncel library/framework dokumanlari | `npx` uzerinden stdio |
+| `sequential-thinking` | Yapilandirilmis dusunme/decomposition | Lokal stdio helper |
+| `playwright` | Browser otomasyonu ve UI dogrulama | Lokal browser kontrolu |
 | `chrome-devtools` | Chrome inspection ve audit | Isolated, network header redacted |
 | `serena` | Semantic code navigation | Pinned git source ref ile `uvx` kullanir |
 | `memory` | Lokal memory graph | Secret yazma |
 
-## Gerektiğinde Aç
+## Gerektiginde Ac
 
 | Server | Amac | Acmadan once gereken setup |
 | --- | --- | --- |
@@ -83,11 +84,11 @@ $env:SUPABASE_DB_URL = "<repo disinda ayarla; commit etme>"
 Sonra sadece database inspection gereken task icin ac. Kalici workflow olarak
 bilerek secmedikce is bitince tekrar disabled hale getir.
 
-Kural: Dokümantasyon MCP'leri iyi varsayılandır. Auth isteyen MCP'ler görev
-gerektirmeden ve kullanıcı onayı olmadan açılmamalıdır.
-Gorev enabled bir MCP server ile eslesiyorsa stale memory veya tahmin yerine o
-server kullanilir. Eslesen server disabled veya unavailable ise nedeni soylenir
-ve en guvenli fallback ile devam edilir.
+Kural: Dokumantasyon MCP'leri iyi varsayilandir. Auth isteyen MCP'ler gorev
+gerektirmeden ve kullanici onayi olmadan acilmamalidir. Gorev enabled bir MCP
+server ile eslesiyorsa stale memory veya tahmin yerine o server kullanilir.
+Eslesen server disabled veya unavailable ise nedeni soylenir ve en guvenli
+fallback ile devam edilir.
 
 Connector state degismeden once `mcp_integrator` uzmani kullanilmalidir. Bu
 uzman server adini, auth sinirini, approval mode'u, tool allowlist veya

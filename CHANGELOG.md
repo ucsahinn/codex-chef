@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.5.17 - 2026-06-17
+
+- Added `--no-log` to the Codex Chef CLI for strict audit runs that should not
+  create repo-local `tmp/chef-cli/logs` files.
+- Expanded the MCP operator view with transport, endpoint/package, source, and
+  config-detail guidance so connector choices are safer from the CLI alone.
+- Strengthened `validate:chef-cli` with no-log runtime smoke checks for help,
+  MCP, skills, and reset preview flows.
+- Repaired the Turkish MCP catalog encoding with ASCII-safe Turkish text.
+
 ## 0.5.16 - 2026-06-16
 
 - Completed the Codex Chef CLI operator flow with `--reset` for backup-backed

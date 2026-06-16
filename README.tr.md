@@ -71,18 +71,21 @@ npm run chef -- --skills
 npm run chef -- --mcp
 npm run chef -- --auth
 npm run chef -- --logs
+npm run chef -- --status --no-log
 ```
 
 Menu her aksiyonun write sinirini gosterir. `--status`, `--doctor`,
 `--preview`, `--skills`, `--mcp`, `--auth` ve `--logs` varsayilan olarak
-read-only rehberlik veya dogrulama akislari olur. `--reset --apply`,
-`--repair --apply` ve `--install --apply` global dosyalara yazabilen
-path'lerdir; user state silmek yerine backup alan installer/repair scriptlerine
-giderler. Interactive terminalde `--skills` numarayla tek reviewed skill
-sectirir ve sadece `--apply` ile kurar. `--mcp` numarayla connector sectirip
-setup, auth, dogrulama ve rollback notlarini gosterir; account connector'larini
-kendiliginden acmaz. CLI loglari `tmp/chef-cli/logs` altina yazilir; bu klasor
-ignore edilir ve source package'a girmez.
+global/user state icin read-only rehberlik veya dogrulama akislari olur.
+Normalde `tmp/chef-cli/logs` altina ignored lokal audit log'u yazarlar; strict
+audit icin `--no-log` ekle. `--reset --apply`, `--repair --apply` ve
+`--install --apply` global dosyalara yazabilen path'lerdir; user state silmek
+yerine backup alan installer/repair scriptlerine giderler. Interactive
+terminalde `--skills` numarayla tek reviewed skill sectirir ve sadece `--apply`
+ile kurar. `--mcp` numarayla connector sectirip transport, endpoint veya
+package, setup, auth, dogrulama, source ve rollback notlarini gosterir; account
+connector'larini kendiliginden acmaz. CLI loglari ignored kalir ve source
+package'a girmez.
 
 GitHub CLI release veya push kontrollerinde `401 Unauthorized` ya da eksik
 workflow scope gorursen GitHub CLI ve Git Credential Manager'i bir kez kalici

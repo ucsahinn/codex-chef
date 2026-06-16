@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+## v0.5.17 - 2026-06-17
+
+Bu patch Codex Chef operator CLI icin son audit bulgularini kapatir.
+
+## One cikanlar
+
+- Strict audit calismalarinda ignored repo-local CLI log'u olusmasin diye
+  `npm run chef -- --status --no-log` ve genel `--no-log` flag'i eklendi.
+- Daha guvenli connector secimi icin `npm run chef -- --mcp` ciktisi transport,
+  endpoint/package, source ve config-detail rehberiyle genisletildi.
+- `npm run validate:chef-cli`, help, MCP, skills ve reset preview path'leri icin
+  gercek no-log CLI smoke check'leriyle guclendirildi.
+- Turkce MCP katalog encoding'i onarildi.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run check
+npm run chef -- --status --plain --no-log
+npm run chef -- --preview --plain --no-log
+npm run chef -- --reset --plain --no-log
+npm run chef -- --skills --plain --no-log
+npm run chef -- --mcp --plain --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.16 - 2026-06-16
 
 Bu patch orijinal Codex Chef operator hedefinde kalan CLI bosluklarini kapatir:

@@ -32,6 +32,31 @@ function runNodeCheck(relativePath) {
   }
 }
 
+function runCliSmoke(name, cliArgs, expectedSnippets) {
+  const result = spawnSync(process.execPath, ["scripts/chef-cli.mjs", ...cliArgs], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true,
+    timeout: 180000
+  });
+  const output = `${result.stdout || ""}\n${result.stderr || ""}`;
+  if (result.error) {
+    fail(`chef-cli smoke ${name} failed: ${result.error.message}`);
+    return;
+  }
+  if (result.status !== 0) {
+    fail(`chef-cli smoke ${name} exited ${result.status}: ${output.trim()}`);
+    return;
+  }
+  for (const snippet of expectedSnippets) {
+    if (!output.includes(snippet)) fail(`chef-cli smoke ${name} missing output snippet: ${snippet}`);
+  }
+  if (output.includes("Log: tmp/chef-cli/logs")) {
+    fail(`chef-cli smoke ${name} should not create logs when --no-log is used`);
+  }
+}
+
 const cliPath = "scripts/chef-cli.mjs";
 if (!exists(cliPath)) {
   fail(`Missing ${cliPath}`);
@@ -43,6 +68,7 @@ if (!exists(cliPath)) {
     "--help",
     "--json",
     "--plain",
+    "--no-log",
     "--status",
     "--doctor",
     "--preview",
@@ -73,6 +99,7 @@ if (!exists(cliPath)) {
     "selectSkill",
     "installSelectedSkill",
     "explainMcpServer",
+    "mcpTarget",
     "redactLocalPaths",
     "redactSensitiveOutput",
     "[REDACTED_GITHUB_TOKEN]",
@@ -128,6 +155,31 @@ if (!String(scripts.check || "").includes("node scripts/validate-chef-cli.mjs"))
   fail("package.json check script must include validate-chef-cli.mjs");
 }
 
+runCliSmoke("help", ["--help", "--plain", "--no-log"], [
+  "Codex Chef CLI",
+  "--no-log",
+  "--reset [--apply]",
+  "tmp/chef-cli/logs"
+]);
+runCliSmoke("mcp", ["--mcp", "--plain", "--no-log"], [
+  "MCP servers: 15",
+  "transport",
+  "target",
+  "Timeouts and per-tool exposure live in templates/codex/config.windows.toml",
+  "Authenticated account, database, and broad filesystem MCP connectors stay disabled by default."
+]);
+runCliSmoke("skills", ["--skills", "--plain", "--no-log"], [
+  "Curated installable skills: 16",
+  "Skill source verification passed",
+  "Log disabled by --no-log"
+]);
+runCliSmoke("reset-preview", ["--reset", "--plain", "--no-log"], [
+  "Reset preview first",
+  "--force",
+  "What if:",
+  "Log disabled by --no-log"
+]);
+
 for (const [file, snippets] of Object.entries({
   "README.md": [
     "npm run chef",
@@ -140,6 +192,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --mcp",
     "npm run chef -- --auth",
     "npm run chef -- --logs",
+    "npm run chef -- --status --no-log",
     "gh auth login --hostname github.com --git-protocol https --web --scopes repo,workflow",
     "gh auth setup-git --hostname github.com"
   ],
@@ -154,6 +207,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --mcp",
     "npm run chef -- --auth",
     "npm run chef -- --logs",
+    "npm run chef -- --status --no-log",
     "gh auth login --hostname github.com --git-protocol https --web --scopes repo,workflow",
     "gh auth setup-git --hostname github.com"
   ],

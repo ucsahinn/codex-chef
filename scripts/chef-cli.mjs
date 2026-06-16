@@ -14,6 +14,7 @@ const options = {
   help: false,
   json: false,
   plain: false,
+  noLog: false,
   apply: false,
   action: null
 };
@@ -35,6 +36,7 @@ for (const arg of args) {
   if (arg === "--help" || arg === "-h") options.help = true;
   else if (arg === "--json") options.json = true;
   else if (arg === "--plain") options.plain = true;
+  else if (arg === "--no-log") options.noLog = true;
   else if (arg === "--apply") options.apply = true;
   else if (ACTION_FLAGS.has(arg)) options.action = ACTION_FLAGS.get(arg);
   else throw new Error(`Unknown argument: ${arg}`);
@@ -150,6 +152,7 @@ Usage:
 Options:
   --json     Emit JSON where supported
   --plain    Use ASCII labels instead of icons
+  --no-log   Do not create repo-local CLI log files for strict audits
   --apply    Allow write actions for install, reset, repair, or selected skill install
   --help     Show this help
 
@@ -175,6 +178,7 @@ function toPosix(value) {
 }
 
 function makeLogPath(action) {
+  if (options.noLog) return null;
   ensureLogRoot();
   return path.join(logRoot, `${timestamp()}-${action}.log`);
 }
@@ -222,7 +226,7 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
     `command=${commandForDisplay(command, commandArgs)}`,
     ""
   ].join("\n");
-  fs.appendFileSync(logPath, header, "utf8");
+  if (logPath) fs.appendFileSync(logPath, header, "utf8");
   console.log(`${ICONS.run} ${commandForDisplay(command, commandArgs)}`);
 
   const result = spawnSync(executable, argsForSpawn, {
@@ -242,18 +246,22 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
 
   const output = redactSensitiveOutput([result.stdout, result.stderr].filter(Boolean).join("\n"));
   if (output.trim()) process.stdout.write(output.endsWith("\n") ? output : `${output}\n`);
-  fs.appendFileSync(logPath, output, "utf8");
-  fs.appendFileSync(logPath, `\nexitCode=${result.status ?? "error"}\n`, "utf8");
+  if (logPath) {
+    fs.appendFileSync(logPath, output, "utf8");
+    fs.appendFileSync(logPath, `\nexitCode=${result.status ?? "error"}\n`, "utf8");
+  }
 
   if (result.error) {
     console.error(`${ICONS.warn} ${result.error.message}`);
     return { ok: false, status: null, logPath, error: result.error.message };
   }
   if (result.status !== 0) {
-    console.error(`${ICONS.warn} Command failed with exit ${result.status}. Log: ${toPosix(path.relative(root, logPath))}`);
+    const logNote = logPath ? ` Log: ${toPosix(path.relative(root, logPath))}` : " Logging disabled by --no-log.";
+    console.error(`${ICONS.warn} Command failed with exit ${result.status}.${logNote}`);
     return { ok: false, status: result.status, logPath };
   }
-  console.log(`${ICONS.ok} Log: ${toPosix(path.relative(root, logPath))}`);
+  if (logPath) console.log(`${ICONS.ok} Log: ${toPosix(path.relative(root, logPath))}`);
+  else console.log(`${ICONS.ok} Log disabled by --no-log`);
   return { ok: true, status: result.status, logPath };
 }
 
@@ -459,14 +467,24 @@ function explainMcpServer(server) {
   console.log("");
   console.log(`${server.name}`);
   console.log(`- status: ${server.defaultEnabled ? "ready_by_default" : "disabled_by_default"}`);
+  console.log(`- transport: ${server.transport}`);
+  console.log(`- target: ${mcpTarget(server)}`);
   console.log(`- auth: ${server.auth}`);
   console.log(`- approval: ${server.approval}`);
   console.log(`- risk: ${server.risk}`);
   console.log(`- setup: ${server.setupKind} - ${server.setupHint}`);
   console.log(`- reason: ${server.defaultReason}`);
   console.log(`- source: ${server.sourceUrl}`);
+  console.log("- config details: see templates/codex/config.windows.toml and templates/codex/config.unix.toml for timeouts and per-tool exposure.");
   console.log("- verified: not_checked until /mcp, codex mcp, or a safe read-only probe succeeds.");
   console.log("- rollback: set this connector's enabled flag to false and restart Codex.");
+}
+
+function mcpTarget(server) {
+  if (server.url) return server.url;
+  if (server.package) return server.package;
+  if (server.command) return server.sourceRef ? `${server.command} @ ${server.sourceRef}` : server.command;
+  return "configured in template";
 }
 
 async function runMcp() {
@@ -480,10 +498,14 @@ async function runMcp() {
     documented: server.defaultEnabled ? "ready_by_default" : "disabled_by_default",
     configured: "configured_unverified",
     verified: "not_checked",
+    transport: server.transport,
+    target: mcpTarget(server),
     auth: server.auth,
     approval: server.approval,
-    setup: server.setupKind
+    setup: server.setupKind,
+    source: server.sourceUrl
   })));
+  console.log("Timeouts and per-tool exposure live in templates/codex/config.windows.toml and templates/codex/config.unix.toml.");
   for (const server of servers.filter((item) => item.setupHint)) {
     console.log(`- ${server.name}: ${server.setupHint}`);
   }
@@ -522,7 +544,10 @@ function runAuth() {
 }
 
 function runLogs() {
-  ensureLogRoot();
+  if (!fs.existsSync(logRoot)) {
+    console.log(`${ICONS.info} No logs yet.`);
+    return { ok: true };
+  }
   const logs = fs.readdirSync(logRoot, { withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith(".log"))
     .map((entry) => {

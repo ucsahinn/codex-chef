@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+## v0.5.17 - 2026-06-17
+
+This patch closes the final audit findings on the Codex Chef operator CLI.
+
+## Highlights
+
+- Added `npm run chef -- --status --no-log` and the general `--no-log` flag for
+  strict audits that should not create ignored repo-local CLI logs.
+- Expanded `npm run chef -- --mcp` output with transport, endpoint/package,
+  source, and config-detail guidance for safer connector selection.
+- Strengthened `npm run validate:chef-cli` with real no-log CLI smoke checks for
+  help, MCP, skills, and reset preview paths.
+- Repaired the Turkish MCP catalog encoding.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run chef -- --status --plain --no-log
+npm run chef -- --preview --plain --no-log
+npm run chef -- --reset --plain --no-log
+npm run chef -- --skills --plain --no-log
+npm run chef -- --mcp --plain --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.16 - 2026-06-16
 
 This patch closes the remaining CLI completion gaps from the original Codex
