@@ -331,6 +331,7 @@ After installation, restart Codex and run:
 
 ```bash
 codex doctor --summary
+npm run codex:status
 npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
@@ -392,6 +393,7 @@ The result is a small specialist-team workflow inside Codex while the main threa
 | 🧮 Context budget | Bundled `context-budget-planner` keeps large tasks focused with source priority, token budgeting, and compaction handoff. |
 | 🤖 Agent drift gate | `catalog/agents.json` and `catalog/agent-research-corpus.json` are checked against Windows/Unix config blocks, role TOML files, required guardrail blocks, and source-backed item counts. |
 | 🩺 Doctor gate | `npm run codex:doctor` summarizes repo-only Codex starter health without global writes. |
+| 📟 Status board | `npm run codex:status` combines repo health, installed runtime drift, Codex doctor checks, and skill context-budget warnings. |
 | 🧾 Install plan gate | `manifests/install-plan.json` and the install-state preview schema are validated before installer execution. |
 | 🔌 Conservative MCPs | Authenticated account, database, and broad filesystem connectors stay disabled. |
 | 🧭 Source-backed guidance | Research notes record source type, confidence, support, and outdated-risk. |

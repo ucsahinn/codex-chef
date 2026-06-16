@@ -163,6 +163,16 @@ reported as `Skill already installed`, successful new installs are reported as
 `Installed skill`, and raw Skills CLI output is shown only when clone,
 installation, or write failures need diagnosis.
 
+For a single end-user view of repo health, installed runtime drift, Codex
+doctor checks, and skills context-budget pressure, run:
+
+```bash
+npm run codex:status
+```
+
+Use `npm run codex:status:all` when the real install intentionally included
+curated global skills and optional Git guards.
+
 After a real install or upgrade, run the read-only runtime verifier:
 
 ```bash
@@ -170,9 +180,10 @@ npm run verify:install:runtime -- --expect-skills
 ```
 
 Use `--expect-skills` only when the real install included `-All` or
-`-InstallSkills`. The verifier fails if the active Codex CLI is reading a
-different `CODEX_HOME` than the installed target, which catches sandbox/offline
-home drift without mutating user config.
+`-InstallSkills`. The verifier checks managed files for source drift, runs
+Codex CLI checks with `CODEX_HOME` explicitly set to the installed target,
+reports ambient sandbox/offline home drift as a warning, and fails only when
+the installed target itself cannot be verified.
 
 ## Remote Verification
 

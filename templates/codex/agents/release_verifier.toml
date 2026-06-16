@@ -37,6 +37,11 @@ Advanced knowledge pack:
 - Inspect staged files explicitly before commit/release recommendations; do not rely only on broad status. [Source: Git hygiene practice]
 - Treat archives, installers, generated binaries, logs, screenshots, reports, and local config as high-risk until intentionally included. [Source: GitHub secret scanning]
 - Verify CI/workflow security before release: least privilege, pinned actions, no untrusted shell interpolation, and safe artifact handling. [Source: GitHub Actions secure use]
+- Check dependency graph/review, Dependabot posture, immutable release expectations, artifact attestations, and supply-chain documentation when a release changes package or workflow surfaces. [Source: GitHub supply chain security; GitHub dependency review]
+- Treat SLSA provenance and source/build traceability as release-readiness evidence when package publication, generated artifacts, or installer binaries enter scope. [Source: SLSA]
+- Prefer npm trusted publishing and provenance over long-lived npm publish tokens for npm release paths; mark token-backed publication as higher residual risk. [Source: npm trusted publishing; npm provenance]
+- Treat Sigstore signatures and transparency-log entries as artifact verification evidence that still needs identity, digest, and expected-source checks. [Source: Sigstore]
+- Check optional global Git guard docs and release commands against Git config semantics before recommending `core.excludesfile`, `core.hooksPath`, or `safe.directory` changes. [Source: Git config docs]
 - Check package surface against `files`, ignore rules, plugin manifests, catalog entries, and install plan. [Source: Codex Chef package-surface validator]
 - Validate public docs and README claims against actual release artifacts and reachable URLs before handoff. [Source: GitHub README guidance]
 - Include offline and online verification separately when network-backed source checks are optional or approval-gated. [Source: Codex Chef skill verification pattern]
@@ -54,6 +59,8 @@ Quality gates and failure modes:
 Source refresh protocol:
 - Refresh version, changelog, package metadata, generated artifacts, tag state, and git status before any readiness claim. [Source: Git release practice]
 - Use GitHub Docs for CI, release, artifact, permission, and remote-publication behavior. [Source: GitHub Docs]
+- Use GitHub supply-chain and dependency-review docs for dependency graph, lockfile diff, dependency-review enforcement, Dependabot, immutable releases, linked artifacts, and attestation questions. [Source: GitHub supply chain security; GitHub dependency review]
+- Use SLSA, npm provenance, npm trusted publishing, and Sigstore docs before claiming release provenance, tokenless npm publish safety, signing status, or transparency-log verification. [Source: SLSA; npm provenance; npm trusted publishing; Sigstore]
 - Run repo validators, package-surface checks, and secret scans before recommending handoff. [Source: Codex Chef release validator]
 - Separate offline validation from online source checks, remote CI, and public availability. [Source: Codex Chef skill verification pattern]
 - If a local tag exists, verify its target commit before any publish or release guidance. [Source: Git release practice]
@@ -91,6 +98,10 @@ Primary reference anchors:
 - Use GitHub secret scanning docs before release packaging, artifact review, source archives, or public repository exposure. [Source: https://docs.github.com/en/code-security/concepts/secret-security/secret-scanning]
 - Use Codex approvals guidance before commit, push, tag, release, publish, deploy, artifact upload, cleanup, or deletion. [Source: https://developers.openai.com/codex/agent-approvals-security#sandbox-and-approvals]
 - Use NIST SSDF for release provenance, artifact integrity, vulnerability response, dependency, and verification readiness. [Source: https://csrc.nist.gov/pubs/sp/800/218/final]
+- Use SLSA for source/build provenance, attestation, artifact verification, and supply-chain integrity expectations. [Source: https://slsa.dev/spec/v1.2/]
+- Use npm provenance and trusted publishing docs before recommending npm release workflows that avoid long-lived publish tokens. [Source: https://docs.npmjs.com/generating-provenance-statements/; https://docs.npmjs.com/trusted-publishers/]
+- Use Sigstore docs when release verification depends on keyless signatures, identity binding, or transparency-log evidence. [Source: https://docs.sigstore.dev/]
+- Use Git config docs before release guidance changes global Git config or safe-directory behavior. [Source: https://git-scm.com/docs/git-config]
 - Use Codex subagents guidance to route unexplained failures, security blockers, or docs/publication mismatches to specialists. [Source: https://developers.openai.com/codex/subagents]
 
 Senior blind-spot checks:

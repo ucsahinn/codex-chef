@@ -4,6 +4,9 @@ Kontrol tarihi: 2026-06-14. Codex config, skill catalog, SEO uzman kararlari,
 GStack/ECC workflow kararlari, research-synthesis kurallari, specialist
 source-freshness cadence kararlari, agent basina expertise-signal coverage ve
 supplemental research-reference validation icin 2026-06-15'te guncellendi.
+PowerShell execution policy, Git config, GitHub supply-chain, SLSA, npm
+provenance, npm trusted publishing ve Sigstore kaynak kapsami icin
+2026-06-16'da guncellendi.
 
 Aşağıdaki bilgiler resmi dokümanlardan, standartlardan, olgun public
 repolardan, araştırma makalelerinden ve practitioner issue sinyallerinden
@@ -42,6 +45,14 @@ otoritesi resmi dokümanların yerini almaz.
 | GitHub Actions Secure Use | https://docs.github.com/en/actions/reference/security/secure-use | Resmi GitHub docs | High | least-privilege workflow token'ları ve secret handling | Low/Medium |
 | GitHub README guidance | https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes | Resmi GitHub docs | High | README içeriği, yardım linkleri, contribution beklentisi, relative links | Low |
 | PowerShell ShouldProcess | https://learn.microsoft.com/en-us/powershell/scripting/learn/deep-dives/everything-about-shouldprocess | Resmi Microsoft Learn | High | `-WhatIf`, `-Confirm`, daha güvenli mutating scriptler | Low/Medium |
+| PowerShell execution policies | https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies | Resmi Microsoft Learn | High | process-scoped execution policy, `Unblock-File`, Windows policy davranisi | Medium |
+| Git config | https://git-scm.com/docs/git-config | Resmi Git proje dokumani | High | `core.excludesfile`, `core.hooksPath`, `safe.directory`, protected config semantigi | Medium |
+| GitHub supply chain security | https://docs.github.com/en/code-security/concepts/supply-chain-security/about-supply-chain-security | Resmi GitHub docs | High | dependency graph, dependency review, Dependabot, immutable release, artifact attestation | Medium |
+| GitHub dependency review | https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-review | Resmi GitHub docs | High | PR dependency diff'i, lockfile review, vulnerable dependency engelleme | Medium |
+| SLSA v1.2 | https://slsa.dev/spec/v1.2/ | Open specification | High | source/build provenance, attestation, artifact verification, supply-chain integrity | Medium |
+| npm provenance | https://docs.npmjs.com/generating-provenance-statements/ | Resmi npm docs | High | provenance attestation, Sigstore-backed publish kaniti, provenance sinirlari | Medium |
+| npm trusted publishing | https://docs.npmjs.com/trusted-publishers/ | Resmi npm docs | High | OIDC trusted publishing, tokenless npm publish, automatic provenance | Medium |
+| Sigstore docs | https://docs.sigstore.dev/ | Resmi proje docs | High | keyless signing, identity binding, transparency-log verification, artifact signing | Medium |
 | OpenSSF Scorecard | https://github.com/ossf/scorecard | Olgun public security projesi | Medium/High | public repo security-health gate fikirleri | Medium |
 | ReAct | https://arxiv.org/abs/2210.03629 | Araştırma makalesi | Medium/High | reasoning ve tool-use birlikteliği | Low/Medium |
 | Reflexion | https://arxiv.org/abs/2303.11366 | Araştırma makalesi | Medium/High | feedback, retry ve reflection loop'ları | Medium |

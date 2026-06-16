@@ -143,15 +143,23 @@ Codex'i yeniden başlat ve çalıştır:
 
 ```bash
 codex doctor --summary
+npm run codex:status
 npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
 
+`npm run codex:status` son kullanici status panosudur. Repo-only starter
+sagligini, kurulu runtime drift'ini, direkt Codex doctor check ozetlerini ve
+skill context-budget warning'lerini tek yerde toplar. Gercek kurulumda curated
+skill'ler ve opsiyonel Git guard'lar bilerek dahil edildiyse
+`npm run codex:status:all` kullan.
+
 `npm run verify:install:runtime` read-only çalışır. Kurulan `~/.codex` ve
-`~/.agents` hedeflerini kontrol eder, sonra bunları `codex doctor --json`
-tarafından bildirilen aktif Codex runtime home ile karşılaştırır. Codex bir
-sandbox veya farklı `CODEX_HOME` okuyorsa MCP'ler yokmuş gibi davranmak yerine
-bu farkı açıkça raporlar.
+`~/.agents` hedeflerini kontrol eder; managed agent, rule, profile ve plugin
+dosyalarında source drift olup olmadığına bakar; sonra Codex CLI kontrollerini
+`CODEX_HOME` açıkça kurulu hedefe ayarlanmış şekilde çalıştırır. Ambient shell
+bir sandbox veya farklı `CODEX_HOME` okuyorsa bu drift warning olarak raporlanır;
+verifier yine de kurulu hedefin beklenen MCP config'ini verdiğini kanıtlar.
 
 Codex içinde:
 

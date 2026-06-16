@@ -84,6 +84,29 @@ function normalizePath(filePath) {
   return path.resolve(filePath || "");
 }
 
+function posixPath(filePath) {
+  return filePath.split(path.sep).join("/");
+}
+
+function listFilesRecursive(directory) {
+  const files = [];
+  if (!fs.existsSync(directory)) return files;
+
+  function walk(current) {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const fullPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath);
+      } else if (entry.isFile()) {
+        files.push(posixPath(path.relative(directory, fullPath)));
+      }
+    }
+  }
+
+  walk(directory);
+  return files.sort();
+}
+
 function run(command, commandArgs, extra = {}) {
   const executable = process.platform === "win32" && command.endsWith(".cmd") ? "cmd.exe" : command;
   const args = process.platform === "win32" && command.endsWith(".cmd")
@@ -100,6 +123,39 @@ function run(command, commandArgs, extra = {}) {
 
 function codexCommand() {
   return process.platform === "win32" ? "codex.cmd" : "codex";
+}
+
+function parseCodexDoctorRuntime(doctor, warnings, label) {
+  let activeCodexHome = null;
+  let activeConfig = null;
+  try {
+    const parsed = JSON.parse(doctor.stdout || "{}");
+    const rootSection = parsed.root || parsed.config || parsed;
+    const configDetails = parsed.checks?.["config.load"]?.details || {};
+    activeCodexHome = rootSection.codex_home
+      || rootSection.codexHome
+      || parsed.codex_home
+      || parsed.codexHome
+      || configDetails.CODEX_HOME
+      || null;
+    activeConfig = rootSection.config_file
+      || rootSection.configFile
+      || parsed.config_file
+      || parsed.configFile
+      || configDetails["config.toml"]
+      || null;
+  } catch {
+    warnings.push(`${label} did not emit parseable JSON.`);
+  }
+
+  return {
+    doctorExitCode: doctor.status,
+    activeCodexHome: redact(activeCodexHome),
+    activeConfig: redact(activeConfig),
+    activeHomeMatchesInstall: activeCodexHome
+      ? normalizePath(activeCodexHome).toLowerCase() === normalizePath(options.codexHome).toLowerCase()
+      : null
+  };
 }
 
 function pushMissing(failures, label, expected, actual) {
@@ -169,58 +225,127 @@ function inspectInstalledFiles(failures) {
   };
 }
 
+function inspectManagedFileDrift(failures) {
+  const mismatched = [];
+  const missing = [];
+  const extra = [];
+  let expectedFiles = 0;
+  let matchedFiles = 0;
+
+  function recordMissing(sourceLabel, targetPath) {
+    missing.push({ source: sourceLabel, target: redact(targetPath) });
+    failures.push(`Installed managed file is missing: ${sourceLabel} -> ${redact(targetPath)}`);
+  }
+
+  function recordMismatch(sourceLabel, targetPath) {
+    mismatched.push({ source: sourceLabel, target: redact(targetPath) });
+    failures.push(`Installed managed file drifted from source: ${sourceLabel} -> ${redact(targetPath)}`);
+  }
+
+  function compareFile(sourceRel, targetPath) {
+    expectedFiles += 1;
+    const sourcePath = path.join(root, sourceRel);
+    if (!fs.existsSync(sourcePath) || !fs.existsSync(targetPath)) {
+      recordMissing(sourceRel, targetPath);
+      return;
+    }
+    const source = fs.readFileSync(sourcePath);
+    const target = fs.readFileSync(targetPath);
+    if (!source.equals(target)) {
+      recordMismatch(sourceRel, targetPath);
+      return;
+    }
+    matchedFiles += 1;
+  }
+
+  compareFile("templates/codex/AGENTS.md", path.join(options.codexHome, "AGENTS.md"));
+  compareFile("templates/codex/rules/default.rules", path.join(options.codexHome, "rules", "default.rules"));
+
+  for (const file of listFilesRecursive(path.join(root, "templates", "codex", "agents"))) {
+    compareFile(
+      posixPath(path.join("templates", "codex", "agents", file)),
+      path.join(options.codexHome, "agents", file)
+    );
+  }
+
+  for (const file of listFilesRecursive(path.join(root, "templates", "codex", "profiles"))) {
+    compareFile(
+      posixPath(path.join("templates", "codex", "profiles", file)),
+      path.join(options.codexHome, file)
+    );
+  }
+
+  const pluginSourceRel = "plugins/codex-chef-workflows";
+  const pluginSource = path.join(root, pluginSourceRel);
+  const pluginTarget = path.join(options.codexHome, "plugins", "codex-chef-workflows");
+  const pluginSourceFiles = listFilesRecursive(pluginSource);
+  const pluginTargetFiles = listFilesRecursive(pluginTarget);
+  const pluginSourceSet = new Set(pluginSourceFiles);
+
+  for (const file of pluginSourceFiles) {
+    compareFile(posixPath(path.join(pluginSourceRel, file)), path.join(pluginTarget, file));
+  }
+
+  for (const file of pluginTargetFiles) {
+    if (!pluginSourceSet.has(file)) {
+      const extraPath = path.join(pluginTarget, file);
+      extra.push(redact(extraPath));
+      failures.push(`Installed managed plugin has an extra file not present in source: ${redact(extraPath)}`);
+    }
+  }
+
+  return {
+    expected: expectedFiles,
+    matched: matchedFiles,
+    mismatched,
+    missing,
+    extra
+  };
+}
+
 function inspectCodexRuntime(failures, warnings) {
   if (options.skipCodexCli) {
     return { inspected: false, note: "Skipped by --skip-codex-cli." };
   }
 
-  const doctor = run(codexCommand(), ["doctor", "--json"]);
-  if (doctor.error) {
-    warnings.push(`Could not run codex doctor --json: ${doctor.error.message}`);
-    return { inspected: false, error: doctor.error.message };
+  const ambientDoctor = run(codexCommand(), ["doctor", "--json"]);
+  let ambient = { inspected: false };
+  if (ambientDoctor.error) {
+    warnings.push(`Could not run ambient codex doctor --json: ${ambientDoctor.error.message}`);
+    ambient = { inspected: false, error: ambientDoctor.error.message };
+  } else {
+    ambient = {
+      inspected: true,
+      ...parseCodexDoctorRuntime(ambientDoctor, warnings, "ambient codex doctor --json")
+    };
+    if (ambient.activeHomeMatchesInstall === false) {
+      warnings.push(
+        `Ambient Codex runtime home differs from installed target; verifying with explicit CODEX_HOME=${redact(options.codexHome)}.`
+      );
+    }
   }
 
-  let activeCodexHome = null;
-  let activeConfig = null;
-  let doctorStatus = doctor.status;
-  try {
-    const parsed = JSON.parse(doctor.stdout || "{}");
-    const rootSection = parsed.root || parsed.config || parsed;
-    const configDetails = parsed.checks?.["config.load"]?.details || {};
-    activeCodexHome = rootSection.codex_home
-      || rootSection.codexHome
-      || parsed.codex_home
-      || parsed.codexHome
-      || configDetails.CODEX_HOME
-      || null;
-    activeConfig = rootSection.config_file
-      || rootSection.configFile
-      || parsed.config_file
-      || parsed.configFile
-      || configDetails["config.toml"]
-      || null;
-  } catch {
-    warnings.push("codex doctor --json did not emit parseable JSON.");
+  const installedEnv = { ...process.env, CODEX_HOME: options.codexHome };
+  const doctor = run(codexCommand(), ["doctor", "--json"], { env: installedEnv });
+  if (doctor.error) {
+    warnings.push(`Could not run codex doctor --json with installed CODEX_HOME: ${doctor.error.message}`);
+    return { inspected: false, error: doctor.error.message, ambient };
   }
 
   const runtime = {
     inspected: true,
-    doctorExitCode: doctorStatus,
-    activeCodexHome: redact(activeCodexHome),
-    activeConfig: redact(activeConfig),
-    activeHomeMatchesInstall: activeCodexHome
-      ? normalizePath(activeCodexHome).toLowerCase() === normalizePath(options.codexHome).toLowerCase()
-      : null
+    ...parseCodexDoctorRuntime(doctor, warnings, "codex doctor --json with installed CODEX_HOME"),
+    ambient
   };
 
   if (runtime.activeHomeMatchesInstall === false) {
     failures.push(
-      `Active Codex runtime home differs from installed Codex home: active=${redact(activeCodexHome)} installed=${redact(options.codexHome)}`
+      `Codex doctor with installed CODEX_HOME differs from installed Codex home: active=${runtime.activeCodexHome} installed=${redact(options.codexHome)}`
     );
   }
 
   const mcpList = run(codexCommand(), ["mcp", "list", "--json"], {
-    env: { ...process.env, CODEX_HOME: options.codexHome }
+    env: installedEnv
   });
   if (mcpList.error) {
     warnings.push(`Could not run codex mcp list --json with installed CODEX_HOME: ${mcpList.error.message}`);
@@ -325,6 +450,7 @@ const report = {
   schemaVersion: "codex-chef.install-runtime.v1",
   generatedAt: new Date().toISOString(),
   installed: inspectInstalledFiles(failures),
+  managedFiles: inspectManagedFileDrift(failures),
   runtime: inspectCodexRuntime(failures, warnings),
   skills: inspectSkills(failures, warnings),
   gitGuards: inspectGitGuards(failures),
@@ -343,9 +469,13 @@ if (options.json) {
   console.log(`Agents home: ${report.installed.agentsHome}`);
   console.log(`Agents: ${report.installed.agents.installed}/${report.installed.agents.expected}`);
   console.log(`MCP config: ${report.installed.mcp.installed}/${report.installed.mcp.expected}`);
+  console.log(`Managed files: ${report.managedFiles.matched}/${report.managedFiles.expected} current`);
   if (report.runtime.inspected) {
-    console.log(`Active Codex home: ${report.runtime.activeCodexHome || "unknown"}`);
-    console.log(`Active home matches install: ${report.runtime.activeHomeMatchesInstall}`);
+    console.log(`Codex doctor home under test: ${report.runtime.activeCodexHome || "unknown"}`);
+    console.log(`Installed CODEX_HOME matches target: ${report.runtime.activeHomeMatchesInstall}`);
+    if (report.runtime.ambient?.inspected && report.runtime.ambient.activeHomeMatchesInstall === false) {
+      console.log(`Ambient Codex home: ${report.runtime.ambient.activeCodexHome || "unknown"}`);
+    }
     if (report.runtime.mcpList?.inspected) {
       console.log(`Runtime MCP list with installed CODEX_HOME: ${report.runtime.mcpList.servers} servers`);
     }

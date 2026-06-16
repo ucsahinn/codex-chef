@@ -330,6 +330,7 @@ Kurulumdan sonra Codex'i yeniden başlat ve şunları çalıştır:
 
 ```bash
 codex doctor --summary
+npm run codex:status
 npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
@@ -391,6 +392,7 @@ Böylece Codex tek bir sohbet gibi değil, uzman rolleri olan küçük bir yazı
 | 🧮 Context bütçesi | Bundled `context-budget-planner` büyük işleri kaynak önceliği, token bütçesi ve compaction handoff'u ile odaklı tutar. |
 | 🤖 Agent drift gate'i | `catalog/agents.json` ve `catalog/agent-research-corpus.json` Windows/Unix config bloklari, role TOML dosyalari, zorunlu guardrail bloklari ve source-backed item sayilariyla karsilastirilir. |
 | 🩺 Doctor gate'i | `npm run codex:doctor` global write yapmadan repo-only Codex starter sagligini ozetler. |
+| 📟 Status panosu | `npm run codex:status` repo sagligini, kurulu runtime drift'ini, Codex doctor check'lerini ve skill context-budget warning'lerini tek yerde toplar. |
 | 🧾 Install plan gate'i | `manifests/install-plan.json` ve install-state preview schema installer çalışmadan önce doğrulanır. |
 | 🔌 Konservatif MCP'ler | Auth isteyen hesap, database ve geniş filesystem connector'ları disabled kalır. |
 | 🧭 Kaynaklı rehberlik | Research notes kaynak tipi, confidence, neyi desteklediği ve outdated-risk içerir. |

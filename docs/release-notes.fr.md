@@ -40,6 +40,10 @@ Ce fichier localisé suit les sections du fichier source anglais. Source: [relea
 
 - Release Notes
 - Unreleased
+- v0.5.11 - 2026-06-16
+- Highlights
+- Upgrade Notes
+- Verification
 - v0.5.10 - 2026-06-16
 - Highlights
 - Upgrade Notes

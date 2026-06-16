@@ -15,6 +15,12 @@ kalır.
 | GitHub secret scanning | https://docs.github.com/en/code-security/concepts/secret-security/secret-scanning | Current-tree ve history-secret rehberliğini doğrula. |
 | GitHub Actions güvenliği | https://docs.github.com/en/actions/reference/security/secure-use | Workflow permission ve token exposure alanını dar tut. |
 | Windows PowerShell güvenliği | https://learn.microsoft.com/en-us/powershell/scripting/learn/deep-dives/everything-about-shouldprocess | `-WhatIf` ve `SupportsShouldProcess` installer davranışını koru. |
+| PowerShell execution policy | https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies | Kurulum anlatimini process-scoped tut; varsayilan olarak kalici policy gevsetme onermeme. |
+| Git global config | https://git-scm.com/docs/git-config | Opsiyonel global Git guard davranisini ve `safe.directory` rehberini tekrar kontrol et. |
+| GitHub supply chain | https://docs.github.com/en/code-security/concepts/supply-chain-security/about-supply-chain-security | Dependency graph, dependency review, Dependabot, immutable release ve attestation rehberini kontrol et. |
+| SLSA provenance | https://slsa.dev/spec/v1.2/ | Source/build provenance ve artifact verification beklentilerini kontrol et. |
+| npm provenance ve trusted publishing | https://docs.npmjs.com/generating-provenance-statements/ ve https://docs.npmjs.com/trusted-publishers/ | Long-lived publish token yerine provenance ve tokenless OIDC publishing rehberini tercih et. |
+| Sigstore | https://docs.sigstore.dev/ | Keyless signing, identity binding ve transparency-log verification iddialarini kontrol et. |
 | Public starter karşılaştırması | https://github.com/affaan-m/ecc | Sadece bu Codex-only scope'a uyan manifest, validation, docs ve release-gate pattern'lerini al. |
 
 ## Varsayılan Olarak Otomatikleştirme

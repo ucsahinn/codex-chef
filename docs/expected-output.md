@@ -10,7 +10,7 @@ Discovery output stays no-write and human-readable:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.10
+Package: codex-chef@0.5.11
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -120,6 +120,7 @@ What if: Performing the operation ...
   ✓ completed: Codex Chef install
   • Restart Codex, then run:
     codex doctor --summary
+    npm run codex:status
     npm run verify:install:runtime
     codex --strict-config "Summarize the active Codex setup."
   • Backup: ...
@@ -186,6 +187,7 @@ Would install file from ...
   - completed: Codex Chef install
   - Restart Codex, then run:
     codex doctor --summary
+    npm run codex:status
     npm run verify:install:runtime
     codex --strict-config "Summarize the active Codex setup."
   - Backup: ...

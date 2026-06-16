@@ -2,6 +2,65 @@
 
 ## Unreleased
 
+## v0.5.11 - 2026-06-16
+
+Bu patch installer'in guvenli varsayilanlarini degistirmeden enterprise
+hazirlik seviyesini yukseltir. Ana kazanim kaynak destekli calisma hafizasi:
+paketlenen uzman ajanlar artik PowerShell, Git, GitHub supply-chain, SLSA, npm
+provenance, npm trusted publishing ve Sigstore konularinda genel best-practice
+hafizasina degil resmi kaynaklara dayanan runtime talimatlari tasir.
+
+## One Cikanlar
+
+- PowerShell execution policy ve Git config kaynaklari research corpus'a
+  eklendi; Windows setup ve opsiyonel global Git guard'lari process-scoped,
+  acik ve geri alinabilir kalir.
+- GitHub supply-chain security ve dependency review kaynaklari eklendi;
+  package manifest, lockfile, workflow ve dependency-review degisiklikleri
+  release/security kaniti olarak ele alinir.
+- SLSA, npm provenance, npm trusted publishing ve Sigstore kaynaklari eklendi;
+  release verification artik source/build traceability, tokenless npm publish,
+  signing, transparency-log kaniti ve kalan riski ayirabilir.
+- DevEx, doctor, security, release ve code-review uzman ajanlarina bu alanlar
+  icin runtime source marker'lari eklendi.
+- Mevcut install guvenligi korundu: `-All` global Git config degistirmez,
+  mevcut `config.toml` ezilmez, eksik bloklar merge edilir ve authenticated MCP
+  connector'lari opt-in kalir.
+- Runtime verifier genisledi; kurulu managed dosyalari guncel repo template'leri
+  ile karsilastirir ve ambient `CODEX_HOME` drift'ini explicit install target
+  kontrolunden ayri raporlar.
+
+## Upgrade Notlari
+
+Onerilen rehberli Windows kurulumu:
+
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
+Soru sormayan otomasyon dostu kurulum:
+
+```powershell
+.\scripts\install.ps1 -All
+```
+
+Kurulumdan sonra read-only runtime dogrulama:
+
+```bash
+npm run verify:install:runtime -- --expect-skills
+```
+
+## Dogrulama
+
+Bu surum icin release oncesi su kontroller calismali:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.10 - 2026-06-16
 
 Bu patch installer'i daha anlasilir bir rehberli onboarding akisina cevirir
@@ -181,8 +240,15 @@ ayırt eder.
   eklendi.
 - Verifier kurulu Codex Chef dosyalarını, MCP config block'larını, uzman ajan
   dosyalarını, plugin marketplace'i, opsiyonel skill'leri, opsiyonel Git
-  guard'larını ve aktif `CODEX_HOME` drift'ini kullanıcı config'ine yazmadan
-  kontrol eder.
+  guard'larını ve kurulu hedefin Codex runtime tarafından görülebildiğini
+  kullanıcı config'ine yazmadan kontrol eder.
+- Ambient sandbox/offline `CODEX_HOME` drift'i artık warning olarak raporlanır;
+  verifier Codex CLI kontrollerini explicit kurulu hedefe karşı tekrar koşturur.
+- Managed file drift artık kurulu agent, rule, profile ve plugin dosyalarında
+  yakalanır; stale install sadece isim sayısı doğru diye geçemez.
+- Repo sagligi, kurulu runtime drift'i, Codex doctor check'leri ve skills
+  context-budget warning'leri icin son kullanici status panosu olarak
+  `npm run codex:status` ve `npm run codex:status:all` eklendi.
 - İlk kurulum komutları artık `-Force` / `--force` kullanmaz; mevcut kullanıcı
   config'i varsayılan olarak korunur.
 - Force akışının normal ilk kurulum değil, preview ve backup sonrası bilinçli

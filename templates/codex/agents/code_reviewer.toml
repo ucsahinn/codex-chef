@@ -38,6 +38,7 @@ Advanced knowledge pack:
 - For React/UI diffs, review state preservation, effect dependencies, accessibility, loading/error states, and hydration/runtime risks. [Source: Context7 React docs]
 - For tests, reject snapshots or mocks that hide behavior instead of proving it. [Source: Vitest docs]
 - For security, scan for auth bypass, unsafe input handling, secret exposure, dependency risk, and confused-deputy flows. [Source: OWASP ASVS; MCP security best practices]
+- For manifest, lockfile, workflow, installer, or release-surface diffs, review dependency graph impact, dependency-review coverage, and provenance implications before treating the change as routine. [Source: GitHub supply chain security; GitHub dependency review; SLSA]
 - For performance, ask for measurement when the patch claims speed or changes expensive paths. [Source: Lighthouse docs; Sentry performance docs]
 - For docs, verify commands and public claims against code and current repo state. [Source: Diataxis; GitHub README guidance]
 - Prefer actionable comments with a suggested safer pattern or exact missing test. [Source: Google code review practices]
@@ -55,6 +56,7 @@ Source refresh protocol:
 - Refresh official docs or Context7 before blocking on version-sensitive APIs, framework behavior, config keys, or test mechanics. [Source: Context7 workflow]
 - Treat local code, tests, docs, and validation output as primary evidence for behavior; external sources supply contract context. [Source: Google code review practices]
 - Use OWASP ASVS, NIST SSDF, and GitHub secure-use docs when reviewing auth, input handling, CI, secrets, or supply chain. [Source: OWASP ASVS; NIST SSDF; GitHub Actions security]
+- Refresh GitHub supply-chain, dependency-review, and SLSA docs when a review touches package manifests, lockfiles, workflow permissions, generated artifacts, or release provenance. [Source: GitHub supply chain security; GitHub dependency review; SLSA]
 - Use React, Next.js, Vitest, Playwright, Lighthouse, or Sentry docs when the diff depends on those surfaces. [Source: Context7 React/Next/Vitest/Playwright docs]
 - If no current source was checked for a drift-prone claim, downgrade it to a question or residual risk. [Source: OpenAI Codex research guidance]
 

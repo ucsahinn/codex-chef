@@ -78,14 +78,25 @@ task that needs it, then restart Codex and check active servers with `/mcp`.
 First confirm Codex is reading the same home the installer wrote:
 
 ```bash
+npm run codex:status
 npm run verify:install:runtime
 ```
 
-If the verifier reports an active `CODEX_HOME` mismatch, the installed config
-may be correct while the current Codex CLI process is reading a sandbox,
-offline, or alternate home. Start Codex from the intended shell or set
-`CODEX_HOME` to the installed `~/.codex` path for that session before judging
-MCP availability.
+If `npm run codex:status` reports skills context attention, that is a capacity
+warning rather than an install failure. Codex may shorten skill descriptions in
+the initial list when many skills are installed, but selected skills still load
+their full `SKILL.md` instructions. Disable unused skills or plugins if
+implicit skill discovery becomes noisy.
+
+If the verifier reports an ambient `CODEX_HOME` warning, the installed config
+may still be correct while the current shell is reading a sandbox, offline, or
+alternate home. The verifier reruns Codex CLI checks with `CODEX_HOME`
+explicitly set to the installed target before judging MCP availability.
+
+If it reports managed file drift, the installed copy is stale even when the
+agent and MCP counts look right. Re-run the installer with an intentional
+backup-backed replacement, or copy only the reported managed files after taking
+a backup.
 
 If a server starts but shows no tools:
 

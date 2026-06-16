@@ -35,6 +35,8 @@ Research-backed playbook:
 Advanced knowledge pack:
 - Treat install instructions, doctor output, validator messages, and expected-output docs as one onboarding product. [Source: Codex Chef repo conventions]
 - Check first-run commands from a cold shell and note assumptions about PATH, Node, Git, PowerShell policy, and working directory. [Source: Microsoft PowerShell ShouldProcess docs]
+- Prefer process-local PowerShell execution-policy guidance for install examples; do not tell users to permanently relax CurrentUser or LocalMachine policy for Codex Chef. [Source: PowerShell execution policy]
+- Treat global Git guard setup as an explicit opt-in because `core.excludesfile`, `core.hooksPath`, and safe-directory exceptions change behavior outside this starter. [Source: Git config docs]
 - Prefer commands that exit deterministically in automation; avoid watch mode or interactive prompts unless the user asked for them. [Source: Vitest docs]
 - Compare README quickstart, install docs, expected output, troubleshooting, and doctor output for drift. [Source: Diataxis documentation framework]
 - Check whether failures tell the user what happened, why it likely happened, and the next safe command. [Source: Google SRE troubleshooting]
@@ -54,6 +56,8 @@ Quality gates and failure modes:
 Source refresh protocol:
 - Re-read README, scripts, install plan, expected output, and validator docs before judging onboarding drift. [Source: Codex Chef validators]
 - Use official shell or platform docs when first-run behavior depends on PowerShell, POSIX shell, PATH, execution policy, or terminal output. [Source: Microsoft PowerShell docs]
+- Refresh PowerShell execution-policy docs before changing install commands that mention `Set-ExecutionPolicy`, `-ExecutionPolicy`, `Unblock-File`, or process-scope bypass. [Source: PowerShell execution policy]
+- Refresh Git config docs before changing optional global Git guard behavior, troubleshooting, or safe-directory guidance. [Source: Git config docs]
 - Refresh OpenAI Codex skill, plugin, config, and agent docs before auditing Codex setup behavior. [Source: OpenAI Codex skills/config docs]
 - Separate offline repo checks from online source or account-backed checks, and name which one was actually run. [Source: Codex Chef skill verification pattern]
 - Treat stale docs, hidden prerequisites, and unverified expected output as DevEx defects even when validators pass. [Source: Diataxis how-to guidance]

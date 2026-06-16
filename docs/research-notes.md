@@ -4,6 +4,9 @@ Date checked: 2026-06-14. Updated for Codex config, skill catalog, SEO
 specialist, GStack/ECC workflow, research-synthesis decisions,
 specialist source-freshness cadence decisions, per-agent expertise-signal
 coverage, and supplemental research-reference validation on 2026-06-15.
+Updated for PowerShell execution policy, Git config, GitHub supply-chain,
+SLSA, npm provenance, npm trusted publishing, and Sigstore source coverage on
+2026-06-16.
 
 Facts below come from official docs, standards, mature public repos, research
 papers, and practitioner issue signals. Practitioner feedback is used only as a
@@ -41,7 +44,15 @@ risk pattern, not as the source of truth.
 | GitHub Actions Secure Use | https://docs.github.com/en/actions/reference/security/secure-use | Official GitHub docs | High | least-privilege workflow tokens and secret handling | Low/Medium |
 | GitHub README guidance | https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes | Official GitHub docs | High | README content, help links, contribution expectations, relative links | Low |
 | PowerShell ShouldProcess | https://learn.microsoft.com/en-us/powershell/scripting/learn/deep-dives/everything-about-shouldprocess | Official Microsoft Learn | High | `-WhatIf`, `-Confirm`, safer mutating scripts | Low/Medium |
+| PowerShell execution policies | https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies | Official Microsoft Learn | High | process-scoped execution-policy guidance, `Unblock-File`, Windows-only policy behavior | Medium |
+| Git config | https://git-scm.com/docs/git-config | Official Git project docs | High | `core.excludesfile`, `core.hooksPath`, `safe.directory`, protected config semantics | Medium |
+| GitHub supply chain security | https://docs.github.com/en/code-security/concepts/supply-chain-security/about-supply-chain-security | Official GitHub docs | High | dependency graph, dependency review, Dependabot, immutable releases, artifact attestations | Medium |
+| GitHub dependency review | https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-review | Official GitHub docs | High | pull-request dependency diffs, lockfile review, vulnerable dependency prevention | Medium |
 | OpenSSF Scorecard | https://github.com/ossf/scorecard | Mature public security project | Medium/High | public repo security-health gate ideas | Medium |
+| SLSA v1.2 | https://slsa.dev/spec/v1.2/ | Open specification | High | source/build provenance, attestation, artifact verification, supply-chain integrity | Medium |
+| npm provenance | https://docs.npmjs.com/generating-provenance-statements/ | Official npm docs | High | provenance attestations, Sigstore-backed publish evidence, provenance limitations | Medium |
+| npm trusted publishing | https://docs.npmjs.com/trusted-publishers/ | Official npm docs | High | OIDC trusted publishing, tokenless npm publish, automatic provenance generation | Medium |
+| Sigstore docs | https://docs.sigstore.dev/ | Official project docs | High | keyless signing, identity binding, transparency-log verification, artifact signing | Medium |
 | ReAct | https://arxiv.org/abs/2210.03629 | Research paper | Medium/High | interleaved reasoning and tool use | Low/Medium |
 | Reflexion | https://arxiv.org/abs/2303.11366 | Research paper | Medium/High | feedback, retry, and reflection loops | Medium |
 | Lost in the Middle | https://arxiv.org/abs/2307.03172 | Research paper | Medium/High | progressive disclosure and context placement discipline | Medium |
@@ -161,6 +172,13 @@ risk pattern, not as the source of truth.
   examples, local command snapshots, official project docs, and research papers
   that should inform heuristics but not become default runtime authority until
   promoted into agent `authorityRefs`.
+- Promote official PowerShell execution-policy and Git config docs into
+  authority references for DevEx and doctor checks so Windows setup and
+  optional global Git guards stay process-scoped, explicit, and reversible.
+- Promote GitHub supply-chain/dependency-review, SLSA, npm provenance, npm
+  trusted publishing, and Sigstore docs into authority references for security,
+  release, and review agents so dependency, package, provenance, and artifact
+  claims are checked against current primary sources.
 - Add explicit `apps._default.destructive_enabled = false` and
   `apps._default.open_world_enabled = false` to the Codex templates because the
   current OpenAI config reference exposes those app/connector gates separately

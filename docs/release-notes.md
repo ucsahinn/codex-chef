@@ -2,6 +2,65 @@
 
 ## Unreleased
 
+## v0.5.11 - 2026-06-16
+
+This patch raises the enterprise-readiness bar without changing the safe
+installer defaults. The main improvement is source-backed operating knowledge:
+the bundled specialist agents now know when to use official PowerShell, Git,
+GitHub supply-chain, SLSA, npm provenance, npm trusted publishing, and Sigstore
+guidance instead of relying on generic best-practice memory.
+
+## Highlights
+
+- Added official PowerShell execution-policy and Git config sources to the
+  research corpus so Windows setup and optional global Git guards stay explicit,
+  process-scoped, and reversible.
+- Added GitHub supply-chain security and dependency-review sources so package
+  manifest, lockfile, workflow, and dependency-review changes are treated as
+  release/security evidence.
+- Added SLSA, npm provenance, npm trusted publishing, and Sigstore sources so
+  release verification can distinguish source/build traceability, tokenless npm
+  publishing, signing, transparency-log evidence, and residual risk.
+- Updated the DevEx, doctor, security, release, and code-review specialist
+  agents with runtime source markers for those areas.
+- Preserved the existing install safety model: `-All` still avoids global Git
+  config changes, existing `config.toml` is merged instead of overwritten, and
+  authenticated MCP connectors remain opt-in.
+- Expanded the runtime verifier so it checks installed managed file drift
+  against the current repo templates while reporting ambient `CODEX_HOME` drift
+  separately from the explicit install target.
+
+## Upgrade Notes
+
+Recommended guided Windows install:
+
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
+Automation-friendly install without questions:
+
+```powershell
+.\scripts\install.ps1 -All
+```
+
+Read-only runtime verification after install:
+
+```bash
+npm run verify:install:runtime -- --expect-skills
+```
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.10 - 2026-06-16
 
 This patch turns the installer into a clearer guided onboarding flow while
@@ -185,7 +244,14 @@ process is reading the same home."
   `scripts/verify-install-runtime.mjs`.
 - The verifier checks installed Codex Chef files, MCP config blocks, specialist
   agent files, the plugin marketplace, optional skills, optional Git guards,
-  and active `CODEX_HOME` drift without writing to user config.
+  and installed-target Codex runtime visibility without writing to user config.
+- Ambient sandbox/offline `CODEX_HOME` drift is now reported as a warning while
+  the verifier reruns Codex CLI checks against the explicit installed target.
+- Managed file drift is now detected for installed agent, rule, profile, and
+  plugin files so stale installs cannot pass by name count alone.
+- Added `npm run codex:status` and `npm run codex:status:all` as an end-user
+  status board for repo health, installed runtime drift, Codex doctor checks,
+  and skills context-budget warnings.
 - Changed first-install README and guide commands to omit `-Force` /
   `--force`, protecting existing user config by default.
 - Clarified that force is for deliberate upgrades after preview and backup, not

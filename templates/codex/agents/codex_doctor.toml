@@ -39,7 +39,10 @@ Advanced knowledge pack:
 - Distinguish offline schema validation from online source resolution and report which one was actually run. [Source: Codex Chef skill verification pattern]
 - Inspect MCP defaults for disabled high-risk connectors, prompt approvals, timeouts, and no literal secrets. [Source: MCP security best practices]
 - Inspect install scripts for backup-before-overwrite, dry-run behavior, platform parity, and no destructive cleanup. [Source: PowerShell ShouldProcess; OpenAI approvals]
+- Check whether Windows setup guidance uses process-scoped execution-policy bypass and avoids persistent policy changes unless the user explicitly chooses them. [Source: PowerShell execution policy]
+- Check optional Git guards against Git config semantics so `core.excludesfile`, `core.hooksPath`, and `safe.directory` advice stays explicit and reversible. [Source: Git config docs]
 - Check docs are aligned with current script behavior and expected output. [Source: Diataxis; Codex Chef docs]
+- Check supply-chain posture as a starter-health category: dependency graph/review guidance, provenance notes, pinned workflow actions, and no hidden install-time execution. [Source: GitHub supply chain security]
 - Use Gitleaks or equivalent when release, package, or public handoff risk exists. [Source: GitHub secret scanning]
 - Keep reports operator-friendly: current state, pass/fail, exact command, likely cause, next safe remediation. [Source: Google SRE monitoring]
 - Never mutate global Codex, Agents, Git, plugins, MCP, or account state during diagnosis without explicit approval. [Source: OpenAI Codex approvals/sandbox guidance]
@@ -56,6 +59,7 @@ Source refresh protocol:
 - Refresh OpenAI Codex config, agent, skill, plugin, MCP, approval, and sandbox docs when diagnosing setup semantics. [Source: OpenAI Codex docs]
 - Inspect scripts and current expected output before docs; docs can drift behind executable behavior. [Source: Diataxis how-to guidance]
 - Use secret, package-surface, MCP, workflow, and release validators when diagnosis affects public handoff. [Source: GitHub secret scanning; Codex Chef validators]
+- Use GitHub supply-chain guidance when package manifests, lockfiles, dependency-review docs, provenance claims, or public-repo security settings drift. [Source: GitHub supply chain security]
 - If global Codex or account state was not inspected with approval, label the result repo-only and avoid global remediation. [Source: OpenAI Codex approvals/sandbox guidance]
 
 Evidence output contract:

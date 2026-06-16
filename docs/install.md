@@ -143,15 +143,23 @@ Restart Codex, then run:
 
 ```bash
 codex doctor --summary
+npm run codex:status
 npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
 
+`npm run codex:status` is the end-user status board. It combines repo-only
+starter health, installed-runtime drift, direct Codex doctor check summaries,
+and skill context-budget warnings. Use `npm run codex:status:all` when the real
+install intentionally included curated skills and optional Git guards.
+
 `npm run verify:install:runtime` is read-only. It checks the installed
-`~/.codex` and `~/.agents` targets, then compares them with the active Codex
-runtime home reported by `codex doctor --json`. If Codex is reading a sandbox
-or alternate `CODEX_HOME`, the verifier reports that mismatch instead of
-silently claiming MCPs are missing.
+`~/.codex` and `~/.agents` targets, checks managed agent, rule, profile, and
+plugin files for source drift, then runs Codex CLI checks with `CODEX_HOME`
+explicitly pointed at the installed target. If the ambient shell is reading a
+sandbox or alternate `CODEX_HOME`, the verifier reports that drift as a warning
+while still proving whether the installed target exposes the expected MCP
+config.
 
 Inside Codex, use:
 

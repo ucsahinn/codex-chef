@@ -455,6 +455,7 @@ else
   action "completed" "Codex Chef install"
   note "Restart Codex, then run:"
   echo "    codex doctor --summary"
+  echo "    npm run codex:status"
   echo "    npm run verify:install:runtime"
   echo '    codex --strict-config "Summarize the active Codex setup."'
 fi

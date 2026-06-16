@@ -1,41 +1,14 @@
 {
   "schemaVersion": 1,
-  "dateChecked": "2026-06-15",
+  "dateChecked": "2026-06-16",
   "minimumSourceBackedItems": 100,
   "minimumDistinctSourceMarkers": 20,
-  "requiredGuardrailBlocks": [
-    "Source refresh protocol:",
-    "Cross-repo transfer protocol:",
-    "Research synthesis protocol:",
-    "Adversarial validation protocol:",
-    "Source currency protocol:",
-    "Corpus expansion protocol:",
-    "Expert calibration protocol:"
-  ],
-  "requiredRuntimeContracts": [
-    "Authority metadata contract:",
-    "Expertise signal contract:"
-  ],
-  "requiredExpertiseSignalGroups": [
-    "decisionHeuristics",
-    "failureModes",
-    "verificationSignals"
-  ],
+  "requiredGuardrailBlocks": ["Source refresh protocol:", "Cross-repo transfer protocol:", "Research synthesis protocol:", "Adversarial validation protocol:", "Source currency protocol:", "Corpus expansion protocol:", "Expert calibration protocol:"],
+  "requiredRuntimeContracts": ["Authority metadata contract:", "Expertise signal contract:"],
+  "requiredExpertiseSignalGroups": ["decisionHeuristics", "failureModes", "verificationSignals"],
   "minimumExpertiseSignalsPerGroup": 3,
   "minimumSupplementalResearchRefs": 20,
-  "sourceTiers": [
-    "local repo evidence",
-    "official docs",
-    "Context7 or official library docs",
-    "standards and vendor guidance",
-    "open specifications",
-    "official project docs",
-    "primary project repositories",
-    "research papers and evaluations",
-    "local command evidence",
-    "mature engineering guides",
-    "supporting community signals"
-  ],
+  "sourceTiers": ["local repo evidence", "official docs", "Context7 or official library docs", "standards and vendor guidance", "open specifications", "official project docs", "primary project repositories", "research papers and evaluations", "local command evidence", "mature engineering guides", "supporting community signals"],
   "authorityRefs": {
     "context7": {
       "url": "https://context7.com/",
@@ -225,6 +198,62 @@
       "stalenessRisk": "medium",
       "reviewCadenceDays": 45,
       "sourceMarkers": ["Web Vitals"]
+    },
+    "microsoft_powershell_execution_policy": {
+      "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies",
+      "sourceType": "official docs",
+      "stalenessRisk": "medium",
+      "reviewCadenceDays": 45,
+      "sourceMarkers": ["PowerShell execution policy", "Microsoft PowerShell execution policy"]
+    },
+    "git_config": {
+      "url": "https://git-scm.com/docs/git-config",
+      "sourceType": "official project docs",
+      "stalenessRisk": "medium",
+      "reviewCadenceDays": 45,
+      "sourceMarkers": ["Git config docs", "Git safe.directory"]
+    },
+    "github_supply_chain_security": {
+      "url": "https://docs.github.com/en/code-security/concepts/supply-chain-security/about-supply-chain-security",
+      "sourceType": "official docs",
+      "stalenessRisk": "medium",
+      "reviewCadenceDays": 45,
+      "sourceMarkers": ["GitHub supply chain security"]
+    },
+    "github_dependency_review": {
+      "url": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-review",
+      "sourceType": "official docs",
+      "stalenessRisk": "medium",
+      "reviewCadenceDays": 45,
+      "sourceMarkers": ["GitHub dependency review"]
+    },
+    "slsa_spec": {
+      "url": "https://slsa.dev/spec/v1.2/",
+      "sourceType": "open specifications",
+      "stalenessRisk": "medium",
+      "reviewCadenceDays": 45,
+      "sourceMarkers": ["SLSA"]
+    },
+    "npm_provenance": {
+      "url": "https://docs.npmjs.com/generating-provenance-statements/",
+      "sourceType": "official project docs",
+      "stalenessRisk": "medium",
+      "reviewCadenceDays": 45,
+      "sourceMarkers": ["npm provenance"]
+    },
+    "npm_trusted_publishing": {
+      "url": "https://docs.npmjs.com/trusted-publishers/",
+      "sourceType": "official project docs",
+      "stalenessRisk": "medium",
+      "reviewCadenceDays": 45,
+      "sourceMarkers": ["npm trusted publishing"]
+    },
+    "sigstore_docs": {
+      "url": "https://docs.sigstore.dev/",
+      "sourceType": "official project docs",
+      "stalenessRisk": "medium",
+      "reviewCadenceDays": 45,
+      "sourceMarkers": ["Sigstore"]
     }
   },
   "supplementalResearchRefs": {
@@ -482,29 +511,7 @@
       "defaultRuntimeAuthorityWarning": "Use only for Codex Chef's reviewed local synthesis, validators, completion audits, and repo-specific operating patterns; external behavior still needs the linked authority reference.",
       "relatedAuthorityRefs": ["openai_codex_subagents", "openai_codex_manual", "nist_ssdf"],
       "sourceMarkers": ["Codex Chef local synthesis"],
-      "appliesToAgents": [
-        "code_mapper",
-        "docs_researcher",
-        "context_architect",
-        "prompt_architect",
-        "mcp_integrator",
-        "product_strategist",
-        "engineering_planner",
-        "design_reviewer",
-        "devex_auditor",
-        "root_cause_debugger",
-        "qa_lead",
-        "performance_auditor",
-        "google_seo_auditor",
-        "docs_author",
-        "spec_author",
-        "code_reviewer",
-        "frontend_verifier",
-        "security_auditor",
-        "test_verifier",
-        "release_verifier",
-        "codex_doctor"
-      ]
+      "appliesToAgents": ["code_mapper", "docs_researcher", "context_architect", "prompt_architect", "mcp_integrator", "product_strategist", "engineering_planner", "design_reviewer", "devex_auditor", "root_cause_debugger", "qa_lead", "performance_auditor", "google_seo_auditor", "docs_author", "spec_author", "code_reviewer", "frontend_verifier", "security_auditor", "test_verifier", "release_verifier", "codex_doctor"]
     },
     "skills_cli_public_index_searches": {
       "sourceLocation": "docs/research-notes.md:37",
@@ -683,365 +690,120 @@
     "swe_agent_paper": ["SWE-agent research"],
     "vitest_docs": ["https://vitest.dev/guide/cli.html", "Vitest docs", "Vitest snapshot docs"],
     "wcag_22": ["https://www.w3.org/TR/WCAG22/", "WCAG 2.2", "WCAG-oriented UI practice"],
-    "web_vitals": ["https://web.dev/articles/vitals", "Web Vitals guidance"]
+    "web_vitals": ["https://web.dev/articles/vitals", "Web Vitals guidance"],
+    "git_config": ["Git global config", "https://git-scm.com/docs/git-config"],
+    "github_supply_chain_security": ["GitHub supply-chain security"],
+    "slsa_spec": ["SLSA specification", "https://slsa.dev/spec/v1.2/"],
+    "npm_provenance": ["https://docs.npmjs.com/generating-provenance-statements/"],
+    "npm_trusted_publishing": ["https://docs.npmjs.com/trusted-publishers/"],
+    "sigstore_docs": ["Sigstore docs", "https://docs.sigstore.dev/"],
+    "microsoft_powershell_execution_policy": ["PowerShell policy docs", "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies"]
   },
   "expertiseSignals": {
     "code_mapper": {
-      "decisionHeuristics": [
-        "Map entry points, ownership boundaries, generated files, and test surfaces before recommending edits.",
-        "Prefer executable evidence from package scripts, config files, route trees, and imports over folder-name guesses.",
-        "Escalate to a specialist when the map crosses security, release, UI, or version-sensitive documentation boundaries."
-      ],
-      "failureModes": [
-        "Treating a broad text search as a complete architecture map.",
-        "Missing generated, vendored, ignored, or artifact directories and then proposing unsafe edits.",
-        "Collapsing separate ownership areas into one implementation plan without handoff boundaries."
-      ],
-      "verificationSignals": [
-        "Relevant entry points and call paths are tied to concrete files.",
-        "Generated and ignored surfaces are explicitly included or excluded.",
-        "Open questions identify the next specialist or source needed before implementation."
-      ]
+      "decisionHeuristics": ["Map entry points, ownership boundaries, generated files, and test surfaces before recommending edits.", "Prefer executable evidence from package scripts, config files, route trees, and imports over folder-name guesses.", "Escalate to a specialist when the map crosses security, release, UI, or version-sensitive documentation boundaries."],
+      "failureModes": ["Treating a broad text search as a complete architecture map.", "Missing generated, vendored, ignored, or artifact directories and then proposing unsafe edits.", "Collapsing separate ownership areas into one implementation plan without handoff boundaries."],
+      "verificationSignals": ["Relevant entry points and call paths are tied to concrete files.", "Generated and ignored surfaces are explicitly included or excluded.", "Open questions identify the next specialist or source needed before implementation."]
     },
     "docs_researcher": {
-      "decisionHeuristics": [
-        "Use official docs, Context7, standards, and primary repositories before secondary articles.",
-        "Refresh sources for latest, current, version-sensitive, policy, pricing, API, or security claims.",
-        "Convert research into source-bounded decisions, constraints, and citations rather than long summaries."
-      ],
-      "failureModes": [
-        "Answering from memory when the fact is likely to have changed.",
-        "Mixing community advice with official behavior without labeling authority.",
-        "Returning citations without explaining the applicable decision or limitation."
-      ],
-      "verificationSignals": [
-        "Each claim is backed by a source type and date-sensitive freshness note when needed.",
-        "Conflicts between sources are surfaced instead of silently averaged.",
-        "The output names what should be rechecked before implementation or release."
-      ]
+      "decisionHeuristics": ["Use official docs, Context7, standards, and primary repositories before secondary articles.", "Refresh sources for latest, current, version-sensitive, policy, pricing, API, or security claims.", "Convert research into source-bounded decisions, constraints, and citations rather than long summaries."],
+      "failureModes": ["Answering from memory when the fact is likely to have changed.", "Mixing community advice with official behavior without labeling authority.", "Returning citations without explaining the applicable decision or limitation."],
+      "verificationSignals": ["Each claim is backed by a source type and date-sensitive freshness note when needed.", "Conflicts between sources are surfaced instead of silently averaged.", "The output names what should be rechecked before implementation or release."]
     },
     "context_architect": {
-      "decisionHeuristics": [
-        "Place durable behavior in the narrowest Codex surface that can enforce or load it.",
-        "Use skills for reusable workflows, config for tools and approvals, and AGENTS.md for working agreements.",
-        "Treat MCP, apps, hooks, rules, memory, and plugins as separate trust boundaries."
-      ],
-      "failureModes": [
-        "Putting reusable or enforceable behavior into a one-off prompt.",
-        "Enabling broad authenticated connectors as a default convenience.",
-        "Duplicating the same rule across surfaces until precedence becomes ambiguous."
-      ],
-      "verificationSignals": [
-        "The chosen surface has a clear owner, load path, and drift check.",
-        "Security-sensitive surfaces remain disabled or approval-gated by default.",
-        "Docs and templates describe the same routing rule."
-      ]
+      "decisionHeuristics": ["Place durable behavior in the narrowest Codex surface that can enforce or load it.", "Use skills for reusable workflows, config for tools and approvals, and AGENTS.md for working agreements.", "Treat MCP, apps, hooks, rules, memory, and plugins as separate trust boundaries."],
+      "failureModes": ["Putting reusable or enforceable behavior into a one-off prompt.", "Enabling broad authenticated connectors as a default convenience.", "Duplicating the same rule across surfaces until precedence becomes ambiguous."],
+      "verificationSignals": ["The chosen surface has a clear owner, load path, and drift check.", "Security-sensitive surfaces remain disabled or approval-gated by default.", "Docs and templates describe the same routing rule."]
     },
     "prompt_architect": {
-      "decisionHeuristics": [
-        "Turn vague requests into role, inputs, constraints, success criteria, and verification gates.",
-        "Separate durable reusable instructions from one-off task constraints.",
-        "Use explicit output contracts when the result will be passed to another agent or system."
-      ],
-      "failureModes": [
-        "Producing polished language that leaves execution scope ambiguous.",
-        "Hiding destructive, publish, or credentialed actions inside broad instructions.",
-        "Overloading one prompt with unrelated roles that should be delegated or split."
-      ],
-      "verificationSignals": [
-        "The prompt names required inputs, stopping conditions, and approval boundaries.",
-        "The output format is testable by a human or script.",
-        "Routing to skills, MCPs, or specialists is explicit when the task shape requires it."
-      ]
+      "decisionHeuristics": ["Turn vague requests into role, inputs, constraints, success criteria, and verification gates.", "Separate durable reusable instructions from one-off task constraints.", "Use explicit output contracts when the result will be passed to another agent or system."],
+      "failureModes": ["Producing polished language that leaves execution scope ambiguous.", "Hiding destructive, publish, or credentialed actions inside broad instructions.", "Overloading one prompt with unrelated roles that should be delegated or split."],
+      "verificationSignals": ["The prompt names required inputs, stopping conditions, and approval boundaries.", "The output format is testable by a human or script.", "Routing to skills, MCPs, or specialists is explicit when the task shape requires it."]
     },
     "mcp_integrator": {
-      "decisionHeuristics": [
-        "Start from least-privilege tool allowlists, approval modes, and disabled-by-default auth connectors.",
-        "Prefer environment-backed credentials and documented scopes over inline tokens or broad config.",
-        "Plan rollback, timeout, startup, and per-tool approval behavior before enabling a server."
-      ],
-      "failureModes": [
-        "Treating MCP as just a convenience wrapper around unrestricted account access.",
-        "Shipping connector config without auth, SSRF, or tool-mutation boundaries.",
-        "Documenting a server without validating that templates and catalog entries match."
-      ],
-      "verificationSignals": [
-        "Config, catalog, and docs agree on enabled state, tools, auth, and risk.",
-        "Secrets are referenced only by environment variable names where appropriate.",
-        "A no-write or read-only validation path exists before live use."
-      ]
+      "decisionHeuristics": ["Start from least-privilege tool allowlists, approval modes, and disabled-by-default auth connectors.", "Prefer environment-backed credentials and documented scopes over inline tokens or broad config.", "Plan rollback, timeout, startup, and per-tool approval behavior before enabling a server."],
+      "failureModes": ["Treating MCP as just a convenience wrapper around unrestricted account access.", "Shipping connector config without auth, SSRF, or tool-mutation boundaries.", "Documenting a server without validating that templates and catalog entries match."],
+      "verificationSignals": ["Config, catalog, and docs agree on enabled state, tools, auth, and risk.", "Secrets are referenced only by environment variable names where appropriate.", "A no-write or read-only validation path exists before live use."]
     },
     "product_strategist": {
-      "decisionHeuristics": [
-        "Reduce broad asks to user jobs, constraints, proof signals, and smallest useful version.",
-        "Separate product risk from engineering feasibility and route each to the right specialist.",
-        "Prefer measurable outcomes over feature lists when defining scope."
-      ],
-      "failureModes": [
-        "Optimizing for a large impressive scope before proving the core job.",
-        "Treating policy, pricing, market, or platform claims as stable without refresh.",
-        "Ignoring abuse, support, or release implications in product decisions."
-      ],
-      "verificationSignals": [
-        "The proposed scope names non-goals and tradeoffs.",
-        "Success criteria can be observed in user workflow evidence.",
-        "Security, release, and feasibility dependencies are handed off explicitly."
-      ]
+      "decisionHeuristics": ["Reduce broad asks to user jobs, constraints, proof signals, and smallest useful version.", "Separate product risk from engineering feasibility and route each to the right specialist.", "Prefer measurable outcomes over feature lists when defining scope."],
+      "failureModes": ["Optimizing for a large impressive scope before proving the core job.", "Treating policy, pricing, market, or platform claims as stable without refresh.", "Ignoring abuse, support, or release implications in product decisions."],
+      "verificationSignals": ["The proposed scope names non-goals and tradeoffs.", "Success criteria can be observed in user workflow evidence.", "Security, release, and feasibility dependencies are handed off explicitly."]
     },
     "engineering_planner": {
-      "decisionHeuristics": [
-        "Plan from current code maps, data flow, invariants, rollback risk, and test surfaces.",
-        "Use official framework docs when architecture depends on version-specific behavior.",
-        "Prefer staged migration paths with verification gates over broad rewrites."
-      ],
-      "failureModes": [
-        "Designing architecture before reading the repo's actual boundaries.",
-        "Skipping data, failure, rollback, or concurrency paths in the plan.",
-        "Adding abstractions that do not remove real complexity or match local patterns."
-      ],
-      "verificationSignals": [
-        "Affected files, data paths, and contracts are listed before implementation.",
-        "The plan includes narrow and broad verification commands.",
-        "Risky changes have rollback or compatibility notes."
-      ]
+      "decisionHeuristics": ["Plan from current code maps, data flow, invariants, rollback risk, and test surfaces.", "Use official framework docs when architecture depends on version-specific behavior.", "Prefer staged migration paths with verification gates over broad rewrites."],
+      "failureModes": ["Designing architecture before reading the repo's actual boundaries.", "Skipping data, failure, rollback, or concurrency paths in the plan.", "Adding abstractions that do not remove real complexity or match local patterns."],
+      "verificationSignals": ["Affected files, data paths, and contracts are listed before implementation.", "The plan includes narrow and broad verification commands.", "Risky changes have rollback or compatibility notes."]
     },
     "design_reviewer": {
-      "decisionHeuristics": [
-        "Review real rendered states, responsive behavior, accessibility, hierarchy, and workflow fit.",
-        "Judge design against the product domain and existing system rather than generic visual polish.",
-        "Prefer concrete UI fixes tied to user tasks, focus order, contrast, density, and state coverage."
-      ],
-      "failureModes": [
-        "Reviewing screenshots without considering keyboard, loading, empty, error, and long-content states.",
-        "Applying marketing-style composition to operational tools that need scanning and repeated use.",
-        "Calling a design polished while text, controls, or visual hierarchy break at common viewports."
-      ],
-      "verificationSignals": [
-        "Findings reference specific screens, states, or components.",
-        "Accessibility and responsive risks are tied to evidence.",
-        "Recommended fixes preserve the existing design system unless a reason is stated."
-      ]
+      "decisionHeuristics": ["Review real rendered states, responsive behavior, accessibility, hierarchy, and workflow fit.", "Judge design against the product domain and existing system rather than generic visual polish.", "Prefer concrete UI fixes tied to user tasks, focus order, contrast, density, and state coverage."],
+      "failureModes": ["Reviewing screenshots without considering keyboard, loading, empty, error, and long-content states.", "Applying marketing-style composition to operational tools that need scanning and repeated use.", "Calling a design polished while text, controls, or visual hierarchy break at common viewports."],
+      "verificationSignals": ["Findings reference specific screens, states, or components.", "Accessibility and responsive risks are tied to evidence.", "Recommended fixes preserve the existing design system unless a reason is stated."]
     },
     "devex_auditor": {
-      "decisionHeuristics": [
-        "Trace first-run setup from a clean user perspective before suggesting workflow changes.",
-        "Prefer quiet, idempotent, Windows-safe commands and clear failure messages.",
-        "Keep installer behavior aligned with docs, manifests, package scripts, and validation gates."
-      ],
-      "failureModes": [
-        "Declaring setup successful while logs are noisy, ambiguous, or non-repeatable.",
-        "Depending on global machine state without documenting or validating it.",
-        "Letting docs and installer flags drift apart."
-      ],
-      "verificationSignals": [
-        "The first-run path has a no-write preview or dry-run when mutating global state.",
-        "Expected success and failure outputs are documented.",
-        "Validation commands cover installer, docs, and package surface alignment."
-      ]
+      "decisionHeuristics": ["Trace first-run setup from a clean user perspective before suggesting workflow changes.", "Prefer quiet, idempotent, Windows-safe commands and clear failure messages.", "Keep installer behavior aligned with docs, manifests, package scripts, and validation gates."],
+      "failureModes": ["Declaring setup successful while logs are noisy, ambiguous, or non-repeatable.", "Depending on global machine state without documenting or validating it.", "Letting docs and installer flags drift apart."],
+      "verificationSignals": ["The first-run path has a no-write preview or dry-run when mutating global state.", "Expected success and failure outputs are documented.", "Validation commands cover installer, docs, and package surface alignment."]
     },
     "root_cause_debugger": {
-      "decisionHeuristics": [
-        "Establish reproduction, observed behavior, expected behavior, and the smallest falsifiable hypothesis.",
-        "Use logs, traces, recent diffs, environment state, and official docs to isolate mechanism.",
-        "Add or identify regression evidence before changing production behavior."
-      ],
-      "failureModes": [
-        "Fixing the first plausible symptom without proving the cause.",
-        "Ignoring cache, environment, dependency, or data-state changes.",
-        "Removing validation or error handling to make a failure disappear."
-      ],
-      "verificationSignals": [
-        "The root cause explains all observed symptoms.",
-        "A failing or diagnostic check becomes passing after the fix.",
-        "Residual uncertainty and untested paths are named."
-      ]
+      "decisionHeuristics": ["Establish reproduction, observed behavior, expected behavior, and the smallest falsifiable hypothesis.", "Use logs, traces, recent diffs, environment state, and official docs to isolate mechanism.", "Add or identify regression evidence before changing production behavior."],
+      "failureModes": ["Fixing the first plausible symptom without proving the cause.", "Ignoring cache, environment, dependency, or data-state changes.", "Removing validation or error handling to make a failure disappear."],
+      "verificationSignals": ["The root cause explains all observed symptoms.", "A failing or diagnostic check becomes passing after the fix.", "Residual uncertainty and untested paths are named."]
     },
     "qa_lead": {
-      "decisionHeuristics": [
-        "Build coverage from user workflows, risk, changed files, permissions, data states, and negative paths.",
-        "Prefer deterministic regression checks before broad exploratory testing.",
-        "Use browser, security, and test specialists when evidence needs their tool surface."
-      ],
-      "failureModes": [
-        "Testing only happy paths after a risky or cross-module change.",
-        "Counting a unit check as coverage for an untested end-to-end workflow.",
-        "Ignoring fixture, permission, empty, error, and long-content states."
-      ],
-      "verificationSignals": [
-        "Coverage maps requirements to concrete commands or browser flows.",
-        "Regression and negative paths are explicitly included or justified as out of scope.",
-        "Unverified risks are listed with the next test needed."
-      ]
+      "decisionHeuristics": ["Build coverage from user workflows, risk, changed files, permissions, data states, and negative paths.", "Prefer deterministic regression checks before broad exploratory testing.", "Use browser, security, and test specialists when evidence needs their tool surface."],
+      "failureModes": ["Testing only happy paths after a risky or cross-module change.", "Counting a unit check as coverage for an untested end-to-end workflow.", "Ignoring fixture, permission, empty, error, and long-content states."],
+      "verificationSignals": ["Coverage maps requirements to concrete commands or browser flows.", "Regression and negative paths are explicitly included or justified as out of scope.", "Unverified risks are listed with the next test needed."]
     },
     "performance_auditor": {
-      "decisionHeuristics": [
-        "Measure before optimizing and preserve the workload, viewport, build mode, and cache assumptions.",
-        "Prioritize Core Web Vitals, resource budgets, trace bottlenecks, and regression risk.",
-        "Use framework docs and current browser evidence for version-sensitive performance behavior."
-      ],
-      "failureModes": [
-        "Optimizing without a baseline or reproducible workload.",
-        "Improving one metric while worsening interaction, accessibility, or security.",
-        "Treating development-mode traces as production evidence without caveats."
-      ],
-      "verificationSignals": [
-        "Baseline and post-change measurements use comparable conditions.",
-        "The finding identifies the constrained resource or user-visible metric.",
-        "Remaining measurement gaps are documented."
-      ]
+      "decisionHeuristics": ["Measure before optimizing and preserve the workload, viewport, build mode, and cache assumptions.", "Prioritize Core Web Vitals, resource budgets, trace bottlenecks, and regression risk.", "Use framework docs and current browser evidence for version-sensitive performance behavior."],
+      "failureModes": ["Optimizing without a baseline or reproducible workload.", "Improving one metric while worsening interaction, accessibility, or security.", "Treating development-mode traces as production evidence without caveats."],
+      "verificationSignals": ["Baseline and post-change measurements use comparable conditions.", "The finding identifies the constrained resource or user-visible metric.", "Remaining measurement gaps are documented."]
     },
     "google_seo_auditor": {
-      "decisionHeuristics": [
-        "Use Google Search Central, structured data docs, rendered DOM, and Lighthouse evidence before SEO advice.",
-        "Separate crawlability, indexability, metadata, structured data eligibility, and performance signals.",
-        "Avoid ranking guarantees and credentialed Search Console actions unless explicitly authorized."
-      ],
-      "failureModes": [
-        "Making ranking promises or keyword claims without evidence.",
-        "Validating source HTML while ignoring client-rendered metadata or blocked resources.",
-        "Adding structured data that is ineligible, misleading, or unsupported by visible content."
-      ],
-      "verificationSignals": [
-        "Rendered canonical, robots, metadata, headings, links, and structured data are inspected.",
-        "Rich-result or schema recommendations cite the applicable Google guidance.",
-        "Performance and accessibility effects are handed off when they affect search quality."
-      ]
+      "decisionHeuristics": ["Use Google Search Central, structured data docs, rendered DOM, and Lighthouse evidence before SEO advice.", "Separate crawlability, indexability, metadata, structured data eligibility, and performance signals.", "Avoid ranking guarantees and credentialed Search Console actions unless explicitly authorized."],
+      "failureModes": ["Making ranking promises or keyword claims without evidence.", "Validating source HTML while ignoring client-rendered metadata or blocked resources.", "Adding structured data that is ineligible, misleading, or unsupported by visible content."],
+      "verificationSignals": ["Rendered canonical, robots, metadata, headings, links, and structured data are inspected.", "Rich-result or schema recommendations cite the applicable Google guidance.", "Performance and accessibility effects are handed off when they affect search quality."]
     },
     "docs_author": {
-      "decisionHeuristics": [
-        "Write from verified behavior, command output, public URLs, and release artifacts.",
-        "Use Diataxis to separate tutorials, how-to guides, explanations, and references.",
-        "Keep localized docs, README claims, changelog, and release notes aligned with validators."
-      ],
-      "failureModes": [
-        "Documenting intended behavior before it exists or is public.",
-        "Mixing how-to steps with conceptual explanation until the reader path is unclear.",
-        "Letting English and localized docs diverge on commands, safety, or scope."
-      ],
-      "verificationSignals": [
-        "Commands and links in docs are checked or clearly marked as examples.",
-        "Changed behavior appears in the right docs surface.",
-        "Locale and release-note gates pass after edits."
-      ]
+      "decisionHeuristics": ["Write from verified behavior, command output, public URLs, and release artifacts.", "Use Diataxis to separate tutorials, how-to guides, explanations, and references.", "Keep localized docs, README claims, changelog, and release notes aligned with validators."],
+      "failureModes": ["Documenting intended behavior before it exists or is public.", "Mixing how-to steps with conceptual explanation until the reader path is unclear.", "Letting English and localized docs diverge on commands, safety, or scope."],
+      "verificationSignals": ["Commands and links in docs are checked or clearly marked as examples.", "Changed behavior appears in the right docs surface.", "Locale and release-note gates pass after edits."]
     },
     "spec_author": {
-      "decisionHeuristics": [
-        "Turn intent into requirements, non-goals, constraints, edge cases, and acceptance evidence.",
-        "Use current code behavior and standards to avoid impossible or unsafe specs.",
-        "Define quality gates that can be verified without relying on intent."
-      ],
-      "failureModes": [
-        "Writing broad aspirational specs that cannot be tested.",
-        "Omitting security, data, rollback, or compatibility assumptions.",
-        "Changing scope without identifying impacted acceptance criteria."
-      ],
-      "verificationSignals": [
-        "Each requirement has a matching proof source or command.",
-        "Non-goals prevent accidental scope expansion.",
-        "Open decisions are explicit and routed to the right owner."
-      ]
+      "decisionHeuristics": ["Turn intent into requirements, non-goals, constraints, edge cases, and acceptance evidence.", "Use current code behavior and standards to avoid impossible or unsafe specs.", "Define quality gates that can be verified without relying on intent."],
+      "failureModes": ["Writing broad aspirational specs that cannot be tested.", "Omitting security, data, rollback, or compatibility assumptions.", "Changing scope without identifying impacted acceptance criteria."],
+      "verificationSignals": ["Each requirement has a matching proof source or command.", "Non-goals prevent accidental scope expansion.", "Open decisions are explicit and routed to the right owner."]
     },
     "code_reviewer": {
-      "decisionHeuristics": [
-        "Lead with correctness, regression, security, data loss, and missing-test risk.",
-        "Review the diff in the context of surrounding code, ownership, and runtime contracts.",
-        "Treat style comments as secondary unless they hide a real maintainability or behavior risk."
-      ],
-      "failureModes": [
-        "Summarizing the change before listing material findings.",
-        "Approving broad changes without checking affected tests and edge cases.",
-        "Conflating preference with a demonstrable bug or regression."
-      ],
-      "verificationSignals": [
-        "Findings include file and line references with impact.",
-        "Missing tests are tied to specific behavior risk.",
-        "No-issue reviews still state residual risk and verification coverage."
-      ]
+      "decisionHeuristics": ["Lead with correctness, regression, security, data loss, and missing-test risk.", "Review the diff in the context of surrounding code, ownership, and runtime contracts.", "Treat style comments as secondary unless they hide a real maintainability or behavior risk."],
+      "failureModes": ["Summarizing the change before listing material findings.", "Approving broad changes without checking affected tests and edge cases.", "Conflating preference with a demonstrable bug or regression."],
+      "verificationSignals": ["Findings include file and line references with impact.", "Missing tests are tied to specific behavior risk.", "No-issue reviews still state residual risk and verification coverage."]
     },
     "frontend_verifier": {
-      "decisionHeuristics": [
-        "Use a real browser or screenshot-capable flow for rendered UI, responsive layout, and interactions.",
-        "Check console errors, network failures, accessibility cues, and common viewport sizes.",
-        "Compare visible states against the product workflow, not only pixel appearance."
-      ],
-      "failureModes": [
-        "Trusting static code inspection for layout or browser behavior.",
-        "Verifying only desktop while mobile or narrow layouts break.",
-        "Ignoring console/network errors when the visual page looks acceptable."
-      ],
-      "verificationSignals": [
-        "Screenshots, snapshots, or browser logs show the inspected state.",
-        "Desktop and mobile or narrow viewport behavior are covered when relevant.",
-        "Interactive controls are exercised, not just rendered."
-      ]
+      "decisionHeuristics": ["Use a real browser or screenshot-capable flow for rendered UI, responsive layout, and interactions.", "Check console errors, network failures, accessibility cues, and common viewport sizes.", "Compare visible states against the product workflow, not only pixel appearance."],
+      "failureModes": ["Trusting static code inspection for layout or browser behavior.", "Verifying only desktop while mobile or narrow layouts break.", "Ignoring console/network errors when the visual page looks acceptable."],
+      "verificationSignals": ["Screenshots, snapshots, or browser logs show the inspected state.", "Desktop and mobile or narrow viewport behavior are covered when relevant.", "Interactive controls are exercised, not just rendered."]
     },
     "security_auditor": {
-      "decisionHeuristics": [
-        "Map assets, trust boundaries, identities, permissions, inputs, outputs, and abuse paths before judging risk.",
-        "Use OWASP, NIST, MCP security, and secret-scanning guidance for high-stakes claims.",
-        "Keep audits read-only and avoid printing or persisting secret material."
-      ],
-      "failureModes": [
-        "Treating authentication presence as authorization correctness.",
-        "Ignoring indirect data exposure through logs, errors, artifacts, or MCP tools.",
-        "Suggesting broad mitigations without tying them to a concrete abuse path."
-      ],
-      "verificationSignals": [
-        "Findings identify exploit path, affected asset, and practical mitigation.",
-        "Secret and credential surfaces are scanned or explicitly out of scope.",
-        "Residual risk is ranked by likelihood and impact."
-      ]
+      "decisionHeuristics": ["Map assets, trust boundaries, identities, permissions, inputs, outputs, and abuse paths before judging risk.", "Use OWASP, NIST, MCP security, and secret-scanning guidance for high-stakes claims.", "Keep audits read-only and avoid printing or persisting secret material."],
+      "failureModes": ["Treating authentication presence as authorization correctness.", "Ignoring indirect data exposure through logs, errors, artifacts, or MCP tools.", "Suggesting broad mitigations without tying them to a concrete abuse path."],
+      "verificationSignals": ["Findings identify exploit path, affected asset, and practical mitigation.", "Secret and credential surfaces are scanned or explicitly out of scope.", "Residual risk is ranked by likelihood and impact."]
     },
     "test_verifier": {
-      "decisionHeuristics": [
-        "Run the narrowest meaningful check first, then broader lint, typecheck, build, and smoke gates as risk grows.",
-        "Read package scripts and runner config before inventing verification commands.",
-        "Treat skipped, flaky, or environment-blocked checks as unverified risk."
-      ],
-      "failureModes": [
-        "Reporting pass based on a command that does not cover the changed behavior.",
-        "Ignoring warnings that indicate release, tag, or environment drift.",
-        "Rerunning failing checks without capturing the first actionable failure."
-      ],
-      "verificationSignals": [
-        "Commands, exit status, and relevant warnings are reported.",
-        "Coverage is mapped to the changed files or behavior.",
-        "Unrun checks include the exact blocker and remaining risk."
-      ]
+      "decisionHeuristics": ["Run the narrowest meaningful check first, then broader lint, typecheck, build, and smoke gates as risk grows.", "Read package scripts and runner config before inventing verification commands.", "Treat skipped, flaky, or environment-blocked checks as unverified risk."],
+      "failureModes": ["Reporting pass based on a command that does not cover the changed behavior.", "Ignoring warnings that indicate release, tag, or environment drift.", "Rerunning failing checks without capturing the first actionable failure."],
+      "verificationSignals": ["Commands, exit status, and relevant warnings are reported.", "Coverage is mapped to the changed files or behavior.", "Unrun checks include the exact blocker and remaining risk."]
     },
     "release_verifier": {
-      "decisionHeuristics": [
-        "Inspect git status, staged diff, artifacts, package surface, changelog, version, and secret scans before release actions.",
-        "Separate local readiness from remote, tag, CI, and publication state.",
-        "Require explicit user approval before push, tag, publish, deploy, or destructive cleanup."
-      ],
-      "failureModes": [
-        "Calling a release ready while local tags, artifacts, or staged files are ambiguous.",
-        "Publishing archives, installers, logs, screenshots, or local agent state accidentally.",
-        "Using green local validation as proof of remote publication."
-      ],
-      "verificationSignals": [
-        "Git status and diff are reviewed before staging or release.",
-        "Package dry-run and secret scan pass for the exact release surface.",
-        "Remote/tag/CI/public URL evidence is checked before public claims."
-      ]
+      "decisionHeuristics": ["Inspect git status, staged diff, artifacts, package surface, changelog, version, and secret scans before release actions.", "Separate local readiness from remote, tag, CI, and publication state.", "Require explicit user approval before push, tag, publish, deploy, or destructive cleanup."],
+      "failureModes": ["Calling a release ready while local tags, artifacts, or staged files are ambiguous.", "Publishing archives, installers, logs, screenshots, or local agent state accidentally.", "Using green local validation as proof of remote publication."],
+      "verificationSignals": ["Git status and diff are reviewed before staging or release.", "Package dry-run and secret scan pass for the exact release surface.", "Remote/tag/CI/public URL evidence is checked before public claims."]
     },
     "codex_doctor": {
-      "decisionHeuristics": [
-        "Report no-write health across config templates, agent catalog, MCP catalog, install plan, and validators.",
-        "Prefer actionable drift findings with file paths over broad setup advice.",
-        "Keep account, credential, and global-state checks read-only unless the user explicitly asks for repair."
-      ],
-      "failureModes": [
-        "Mutating global Codex setup during a diagnostic run.",
-        "Reporting healthy status while catalog/template drift is unchecked.",
-        "Printing sensitive environment, token, or auth-file material."
-      ],
-      "verificationSignals": [
-        "Doctor output cites the validator or file that proves each surface.",
-        "Drift findings include the smallest next repair action.",
-        "Credentialed or destructive repair steps remain approval-gated."
-      ]
+      "decisionHeuristics": ["Report no-write health across config templates, agent catalog, MCP catalog, install plan, and validators.", "Prefer actionable drift findings with file paths over broad setup advice.", "Keep account, credential, and global-state checks read-only unless the user explicitly asks for repair."],
+      "failureModes": ["Mutating global Codex setup during a diagnostic run.", "Reporting healthy status while catalog/template drift is unchecked.", "Printing sensitive environment, token, or auth-file material."],
+      "verificationSignals": ["Doctor output cites the validator or file that proves each surface.", "Drift findings include the smallest next repair action.", "Credentialed or destructive repair steps remain approval-gated."]
     }
   },
   "agents": [
@@ -1113,7 +875,7 @@
       "name": "devex_auditor",
       "domainFocus": ["onboarding", "installer behavior", "first-run recovery", "platform fit"],
       "primarySourceTypes": ["README and install docs", "installer scripts", "validator output", "official runtime docs"],
-      "authorityRefs": ["openai_codex_config", "openai_codex_skills", "diataxis", "github_secret_scanning", "context7"],
+      "authorityRefs": ["openai_codex_config", "openai_codex_skills", "diataxis", "github_secret_scanning", "context7", "microsoft_powershell_execution_policy", "git_config"],
       "refreshTriggers": ["script or lockfile change", "runtime version change", "platform change", "registry or network dependency"],
       "handoffTargets": ["docs_author", "security_auditor", "release_verifier"]
     },
@@ -1169,7 +931,7 @@
       "name": "code_reviewer",
       "domainFocus": ["correctness", "regression risk", "security-sensitive diffs", "missing tests"],
       "primarySourceTypes": ["git diff", "touched files", "tests and configs", "official docs for version-sensitive behavior"],
-      "authorityRefs": ["google_eng_practices", "owasp_asvs", "context7", "nist_ssdf", "openai_codex_subagents"],
+      "authorityRefs": ["google_eng_practices", "owasp_asvs", "context7", "nist_ssdf", "openai_codex_subagents", "github_supply_chain_security", "github_dependency_review", "slsa_spec"],
       "refreshTriggers": ["new commit", "dependency change", "security boundary change", "CI result change"],
       "handoffTargets": ["security_auditor", "test_verifier", "docs_researcher"]
     },
@@ -1185,7 +947,7 @@
       "name": "security_auditor",
       "domainFocus": ["auth", "permissions", "secrets", "data access", "abuse paths"],
       "primarySourceTypes": ["OWASP ASVS", "NIST SSDF", "GitHub secret scanning docs", "local trust-boundary evidence"],
-      "authorityRefs": ["owasp_asvs", "nist_ssdf", "github_secret_scanning", "mcp_security", "openai_codex_subagents"],
+      "authorityRefs": ["owasp_asvs", "nist_ssdf", "github_secret_scanning", "mcp_security", "openai_codex_subagents", "github_supply_chain_security", "github_dependency_review", "slsa_spec", "npm_provenance", "npm_trusted_publishing", "sigstore_docs"],
       "refreshTriggers": ["auth or permission change", "dependency advisory", "secret-scan surface change", "deployment or MCP change"],
       "handoffTargets": ["code_reviewer", "mcp_integrator", "release_verifier"]
     },
@@ -1201,7 +963,7 @@
       "name": "release_verifier",
       "domainFocus": ["git hygiene", "artifact readiness", "package surface", "publish gates"],
       "primarySourceTypes": ["git state", "release notes", "package dry-run", "GitHub and secret scanning docs"],
-      "authorityRefs": ["github_docs", "github_secret_scanning", "github_actions_security", "nist_ssdf", "openai_codex_subagents"],
+      "authorityRefs": ["github_docs", "github_secret_scanning", "github_actions_security", "nist_ssdf", "openai_codex_subagents", "github_supply_chain_security", "github_dependency_review", "slsa_spec", "npm_provenance", "npm_trusted_publishing", "sigstore_docs", "git_config"],
       "refreshTriggers": ["commit or tag change", "artifact rebuild", "docs edit", "workflow or package edit"],
       "handoffTargets": ["security_auditor", "test_verifier", "docs_author"]
     },
@@ -1209,7 +971,7 @@
       "name": "codex_doctor",
       "domainFocus": ["starter health", "config drift", "installer alignment", "MCP and agent diagnostics"],
       "primarySourceTypes": ["OpenAI Codex manual", "local config templates", "validator output", "installer scripts"],
-      "authorityRefs": ["openai_codex_manual", "openai_codex_config", "openai_codex_mcp", "openai_codex_subagents", "github_docs"],
+      "authorityRefs": ["openai_codex_manual", "openai_codex_config", "openai_codex_mcp", "openai_codex_subagents", "github_docs", "microsoft_powershell_execution_policy", "git_config", "github_supply_chain_security"],
       "refreshTriggers": ["Codex docs change", "template change", "validator change", "platform or session change"],
       "handoffTargets": ["context_architect", "mcp_integrator", "release_verifier"]
     }

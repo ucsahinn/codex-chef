@@ -164,6 +164,16 @@ Beklenen skill davranışı idempotent ve sessizdir: kurulu skill'ler `Skill
 already installed`, başarılı yeni kurulumlar `Installed skill` olarak görünür;
 raw Skills CLI çıktısı yalnızca clone, installation veya write hatasında basılır.
 
+Repo sagligi, kurulu runtime drift'i, Codex doctor check'leri ve skills
+context-budget baskisini tek son kullanici gorunumunde gormek icin:
+
+```bash
+npm run codex:status
+```
+
+Gercek kurulum curated global skill'leri ve opsiyonel Git guard'lari bilerek
+dahil ettiyse `npm run codex:status:all` kullan.
+
 Gerçek kurulum veya upgrade sonrası read-only runtime verifier çalıştır:
 
 ```bash
@@ -171,9 +181,10 @@ npm run verify:install:runtime -- --expect-skills
 ```
 
 `--expect-skills` flag'ini sadece gerçek kurulumda `-All` veya `-InstallSkills`
-kullandıysan ver. Verifier aktif Codex CLI'ın kurulan hedeften farklı bir
-`CODEX_HOME` okuduğunu görürse fail eder; böylece sandbox/offline home drift'i
-kullanıcı config'ini değiştirmeden yakalanır.
+kullandıysan ver. Verifier managed dosyalarda source drift olup olmadığını
+kontrol eder, Codex CLI kontrollerini `CODEX_HOME` açıkça kurulu hedefe
+ayarlanmış şekilde çalıştırır, ambient sandbox/offline home drift'ini warning
+olarak raporlar ve yalnızca kurulu hedefin kendisi doğrulanamazsa fail eder.
 
 ## Remote Doğrulama
 

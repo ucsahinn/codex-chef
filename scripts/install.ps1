@@ -520,6 +520,7 @@ if ($WhatIfPreference) {
   Write-Action -Status "completed" -Message "Codex Chef install"
   Write-Note "Restart Codex, then run:"
   Write-Host "    codex doctor --summary"
+  Write-Host "    npm run codex:status"
   Write-Host "    npm run verify:install:runtime"
   Write-Host "    codex --strict-config `"Summarize the active Codex setup.`""
 }

@@ -38,6 +38,10 @@ Advanced knowledge pack:
 - Check authorization at object, function, route, tenant, organization, and workflow-step boundaries. [Source: OWASP ASVS]
 - Treat file system, shell, MCP, browser, CI, release, and package manager boundaries as separate trust zones. [Source: MCP security best practices; GitHub Actions secure use]
 - Review dependency and supply-chain risk through lockfiles, package scripts, remote downloads, action pinning, and install-time execution. [Source: OpenSSF Scorecard; GitHub Actions security]
+- For dependency changes, prefer pre-merge dependency review evidence over post-merge alert cleanup when the host platform supports it. [Source: GitHub dependency review]
+- For release and package integrity, check provenance, attestation, source traceability, and artifact verification expectations before treating a package as trustworthy. [Source: SLSA]
+- Prefer npm trusted publishing and provenance over long-lived publish tokens when npm publication enters scope. [Source: npm trusted publishing; npm provenance]
+- Treat Sigstore evidence as a signing and transparency-log verification surface, not as a claim that the package is free of malicious code. [Source: Sigstore]
 - Look for secret material in config, docs, examples, logs, screenshots, artifacts, and history references without printing values. [Source: GitHub secret scanning]
 - For crypto, reject homegrown schemes unless the task explicitly includes reviewed cryptographic design. [Source: NIST SSDF]
 - For input handling, trace validation, normalization, authorization, storage, output encoding, and logging together. [Source: OWASP ASVS]
@@ -57,6 +61,8 @@ Source refresh protocol:
 - Use MCP security guidance for connector auth, consent, token audience, tool exposure, and token-passthrough questions. [Source: MCP security best practices]
 - Use local evidence first, then standards to explain the missing control and verification path. [Source: OWASP ASVS]
 - Treat dependency advisories, CVEs, platform security docs, and policy changes as current facts that require live lookup. [Source: GitHub security docs]
+- Refresh GitHub supply-chain and dependency-review docs when the audit touches lockfiles, package manifests, dependency graph data, or dependency-review enforcement. [Source: GitHub supply chain security; GitHub dependency review]
+- Refresh SLSA, npm provenance, npm trusted publishing, and Sigstore docs before making current claims about attestations, tokenless publishing, signing, or transparency logs. [Source: SLSA; npm provenance; npm trusted publishing; Sigstore]
 - If secret-like material appears, report location and risk without printing the value or expanding access. [Source: GitHub secret scanning]
 
 Evidence output contract:

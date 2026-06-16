@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+## 0.5.11 - 2026-06-16
+
+- Promoted additional official enterprise setup sources into the specialist
+  agent research corpus: PowerShell execution policy, Git config, GitHub
+  supply-chain/dependency review, SLSA, npm provenance/trusted publishing, and
+  Sigstore.
+- Strengthened `devex_auditor`, `codex_doctor`, `security_auditor`,
+  `release_verifier`, and `code_reviewer` so Windows setup, global Git guards,
+  dependency review, provenance, tokenless npm publishing, and artifact
+  signing are handled with source-backed runtime guidance.
+- Preserved the safe installer model: existing Codex config is merged, managed
+  files are preserved unless force is chosen, optional Git guards remain
+  explicit opt-in, and authenticated MCP connectors stay disabled by default.
+- Expanded read-only runtime verification so installed managed files are
+  compared against the current repo templates and ambient `CODEX_HOME` drift is
+  reported separately from the installed target under test.
+- Updated research notes, advisory-source docs, release notes, plugin metadata,
+  and release guidance for the new source-backed patch.
+
 ## 0.5.10 - 2026-06-16
 
 - Made the recommended Windows path a guided `.\scripts\install.ps1 -All

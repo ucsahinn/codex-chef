@@ -78,13 +78,24 @@ kontrol et.
 Önce Codex'in installer'ın yazdığı aynı home'u okuduğunu doğrula:
 
 ```bash
+npm run codex:status
 npm run verify:install:runtime
 ```
 
-Verifier aktif `CODEX_HOME` farkı raporlarsa kurulu config doğru olabilir ama
-mevcut Codex CLI süreci sandbox, offline veya alternatif bir home okuyor
-demektir. MCP durumuna karar vermeden önce Codex'i doğru shell'den başlat veya
-o oturum için `CODEX_HOME` değerini kurulu `~/.codex` path'ine ayarla.
+`npm run codex:status` skills context attention raporlarsa bu install hatasi
+degil, kapasite warning'idir. Cok skill kuruluyken Codex ilk listedeki skill
+description'larini kisaltabilir; secilen skill yine de tam `SKILL.md`
+talimatlarini yukler. Implicit skill secimi gurultulu hale gelirse kullanmadigin
+skill veya plugin'leri kapat.
+
+Verifier ambient `CODEX_HOME` warning'i raporlarsa kurulu config yine doğru
+olabilir; mevcut shell sandbox, offline veya alternatif bir home okuyor olabilir.
+Verifier MCP durumuna karar vermeden önce Codex CLI kontrollerini `CODEX_HOME`
+açıkça kurulu hedefe ayarlanmış şekilde tekrar çalıştırır.
+
+Managed file drift raporlanırsa agent ve MCP sayıları doğru görünse bile kurulu
+kopya eskidir. Bilinçli, backup destekli replacement ile installer'ı yeniden
+çalıştır veya sadece raporlanan managed dosyaları backup aldıktan sonra kopyala.
 
 Bir server açılıyor ama tool göstermiyorsa:
 
