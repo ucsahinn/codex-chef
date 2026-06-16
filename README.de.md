@@ -7,18 +7,18 @@
 <p align="center">
   <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
-  <a href="README.md"><img alt="Dokumentationssprachen" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
+  <a href="README.md"><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"></a>
   <img alt="Windows and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
 </p>
 
 <p align="center">
   🌐 <strong>Dokumentation:</strong>
-  <a href="README.de.md">Deutsch</a> |
-  <a href="README.es.md">Español</a> |
-  <a href="README.md">English</a> |
-  <a href="README.pt-BR.md">Português (Brasil)</a> |
-  <a href="README.tr.md">Türkçe</a> |
-  <a href="README.fr.md">Français</a>
+  <a href="README.de.md"><img src="https://flagcdn.com/w20/de.png" alt="Deutsch" width="20"></a> |
+  <a href="README.es.md"><img src="https://flagcdn.com/w20/es.png" alt="Español" width="20"></a> |
+  <a href="README.md"><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"></a> |
+  <a href="README.pt-BR.md"><img src="https://flagcdn.com/w20/br.png" alt="Português (Brasil)" width="20"></a> |
+  <a href="README.tr.md"><img src="https://flagcdn.com/w20/tr.png" alt="Türkçe" width="20"></a> |
+  <a href="README.fr.md"><img src="https://flagcdn.com/w20/fr.png" alt="Français" width="20"></a>
 </p>
 
 Codex Chef gibt deinem Windows-first Codex-Setup einen klaren Startpunkt: sichere Defaults, ein benanntes Agent-Team, kuratierte Skills, MCP-Vorgaben, lokale Plugin-Workflows und Validierung, die du vor echten Aenderungen pruefen kannst.

@@ -15,12 +15,12 @@
 
 <p align="center">
   🌐 <strong>Doküman dilleri:</strong>
-  <a href="README.de.md">Deutsch</a> |
-  <a href="README.es.md">Español</a> |
-  <a href="README.md">English</a> |
-  <a href="README.pt-BR.md">Português (Brasil)</a> |
-  <a href="README.tr.md">Türkçe</a> |
-  <a href="README.fr.md">Français</a>
+  <a href="README.de.md"><img src="https://flagcdn.com/w20/de.png" alt="Deutsch" width="20"></a> |
+  <a href="README.es.md"><img src="https://flagcdn.com/w20/es.png" alt="Español" width="20"></a> |
+  <a href="README.md"><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"></a> |
+  <a href="README.pt-BR.md"><img src="https://flagcdn.com/w20/br.png" alt="Português (Brasil)" width="20"></a> |
+  <a href="README.tr.md"><img src="https://flagcdn.com/w20/tr.png" alt="Türkçe" width="20"></a> |
+  <a href="README.fr.md"><img src="https://flagcdn.com/w20/fr.png" alt="Français" width="20"></a>
 </p>
 
 Codex Chef, Windows tarafında güçlü ama güvenli bir Codex başlangıcı isteyenler için hazırlanmış bir setup kitidir. Sana tek tek uğraşmadan kurulabilen bir temel verir: kalıcı talimatlar, kontrollü config, isimlendirilmiş uzman ajanlar, MCP varsayılanları, seçilmiş skill'ler, yerel plugin akışları ve kurulmadan önce doğrulanabilen güvenlik kapıları.
@@ -241,13 +241,12 @@ ile preview ve backup sonrası bilinçli replace seçilmedikçe değiştirilmez.
 
 | Dil | README |
 | --- | --- |
-| 🇩🇪 | [README.de.md](README.de.md) |
-| 🇪🇸 | [README.es.md](README.es.md) |
-| 🇬🇧 | [README.md](README.md) |
-| 🇧🇷 | [README.pt-BR.md](README.pt-BR.md) |
-| 🇹🇷 | [README.tr.md](README.tr.md) |
-| 🇫🇷 | [README.fr.md](README.fr.md) |
-
+| <img src="https://flagcdn.com/w20/de.png" alt="Deutsch" width="20"> | [README.de.md](README.de.md) |
+| <img src="https://flagcdn.com/w20/es.png" alt="Español" width="20"> | [README.es.md](README.es.md) |
+| <img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"> | [README.md](README.md) |
+| <img src="https://flagcdn.com/w20/br.png" alt="Português (Brasil)" width="20"> | [README.pt-BR.md](README.pt-BR.md) |
+| <img src="https://flagcdn.com/w20/tr.png" alt="Türkçe" width="20"> | [README.tr.md](README.tr.md) |
+| <img src="https://flagcdn.com/w20/fr.png" alt="Français" width="20"> | [README.fr.md](README.fr.md) |
 ## ⚡ Buradan Başla
 
 | Hedef | Link |
