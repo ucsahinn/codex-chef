@@ -105,16 +105,11 @@ one connector by number to see transport, endpoint or package, setup, auth,
 verification, source, and rollback notes without enabling account connectors.
 CLI logs are ignored and not part of the source package.
 
-If GitHub CLI release or push checks report `401 Unauthorized` or missing
-workflow scope, refresh GitHub CLI and Git Credential Manager once:
-
-```powershell
-gh auth login --hostname github.com --git-protocol https --web --scopes repo,workflow
-gh auth setup-git --hostname github.com
-gh auth status --hostname github.com
-git config --global credential.helper manager
-git ls-remote origin HEAD
-```
+If GitHub release, push, or workflow checks fail because local GitHub
+authentication is stale, refresh GitHub CLI or Git Credential Manager according
+to your organization policy. Keep account-scoped credential repair outside this
+repository and never paste tokens into repo files, logs, prompts, skills, rules,
+or shell history.
 
 Automation-friendly one-shot install without questions:
 

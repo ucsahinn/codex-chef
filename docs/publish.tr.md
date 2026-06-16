@@ -56,11 +56,11 @@ Açık commit/push/release onayından sonra:
 ```bash
 git add <review edilmiş dosyalar>
 git diff --cached
-git commit -m "Release Codex Chef v0.5.18"
+git commit -m "Release Codex Chef v0.5.19"
 git push origin main
-git tag v0.5.18
-git push origin v0.5.18
-gh release create v0.5.18 --title "Codex Chef v0.5.18" --notes-file docs/release-notes.md
+git tag v0.5.19
+git push origin v0.5.19
+gh release create v0.5.19 --title "Codex Chef v0.5.19" --notes-file docs/release-notes.md
 ```
 
 Push sonrasında remote eşitliği ve CI durumunu doğrula:

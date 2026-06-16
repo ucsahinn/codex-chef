@@ -41,7 +41,7 @@ Bu komut şunları çalıştırır:
   MCP catalog/config drift kontrolleri.
 - `scripts/validate-chef-cli.mjs`: tek menulu Codex Chef CLI sozlesmesi,
   guvenli komut routing'i, write-boundary etiketleri, log konumu, README
-  kullanim ornekleri ve GitHub CLI/Git Credential Manager auth rehberi.
+  kullanim ornekleri ve public-safe GitHub auth boundary rehberi.
 - `scripts/verify-skill-sources.mjs`: offline skill catalog validation ve
   `catalog/skills-lock.json` kaynak allowlist drift kontrolleri.
 - `scripts/scan-supply-chain-iocs.mjs`: remote execution, tehlikeli shell,

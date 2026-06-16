@@ -13,35 +13,17 @@ Bu repo oluşturulmadan önce Masaüstü'nde yalnızca bir eşleşen dizin bulun
 
 Mevcut `codex-chef` repo'su yoktu.
 
-## Güncel Global Codex Dosyaları
+## Global Codex Siniri
 
-Canlı kurulumda zaten ciddi bir global config vardı:
+Onceki workstation'da mevcut global Codex dosyalari, rol dosyalari, rule'lar,
+skill'ler, MCP config'i, hook'lar ve private operasyon notlari vardi. Bu
+detaylar public starter repo'ya degil, kullanicinin lokal setup'ina aittir.
 
-```text
-~/.codex/AGENTS.md
-~/.codex/config.toml
-~/.codex/SECURITY_OPERATIONS.md
-~/.codex/rules/default.rules
-~/.codex/agents/code_mapper.toml
-~/.codex/agents/code_reviewer.toml
-~/.codex/agents/docs_researcher.toml
-~/.codex/agents/frontend_verifier.toml
-~/.codex/agents/security_auditor.toml
-~/.codex/agents/test_verifier.toml
-~/.codex/agents/release_verifier.toml
-```
-
-Config şunları içeriyordu:
-
-- `model = "gpt-5.5"`
-- `approval_policy = "on-request"`
-- `sandbox_mode = "workspace-write"`
-- memories, hooks ve multi-agent davranışı için feature tabloları
-- OpenAI docs, Context7, Playwright, Chrome DevTools, Serena, sequential
-  thinking, memory, filesystem ve Supabase için MCP kayıtları
-- GitHub, Figma, Linear, Notion, Sentry ve Vercel için kapalı connector
-  presetleri
-- public starter repo'ya kopyalanmaması gereken project trust ve hook state'i
+Bu starter yalnizca reusable, incelenmis template ve validator'lari tasir.
+Private runbook'lar, exact lokal model varsayilanlari, enabled account
+connector'lari, project trust kayitlari, hook state'i, auth dosyalari,
+token'lar, session'lar, memory'ler veya makineye ozel path'ler public pakete
+kopyalanmamalidir.
 
 ## Güncel Skill Konumları
 

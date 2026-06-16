@@ -89,10 +89,10 @@ if (!exists(cliPath)) {
     "verify-skill-sources.mjs",
     "install.ps1",
     "install.sh",
-    "Git Credential Manager",
-    "gh auth login",
-    "gh auth setup-git",
-    "repo,workflow",
+    "GitHub authentication boundary",
+    "does not print account-scoped re-auth",
+    "organization policy",
+    "git ls-remote origin HEAD",
     "MENU_ITEMS",
     "runLoggedCommand",
     "confirmWriteAction",
@@ -179,6 +179,12 @@ runCliSmoke("reset-preview", ["--reset", "--plain", "--no-log"], [
   "completed: Codex Chef dry run",
   "Log disabled by --no-log"
 ]);
+runCliSmoke("auth", ["--auth", "--plain", "--no-log"], [
+  "GitHub authentication boundary",
+  "does not print account-scoped re-auth",
+  "organization policy",
+  "git ls-remote origin HEAD"
+]);
 
 for (const [file, snippets] of Object.entries({
   "README.md": [
@@ -193,8 +199,8 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --auth",
     "npm run chef -- --logs",
     "npm run chef -- --status --no-log",
-    "gh auth login --hostname github.com --git-protocol https --web --scopes repo,workflow",
-    "gh auth setup-git --hostname github.com"
+    "GitHub CLI or Git Credential Manager",
+    "organization policy"
   ],
   "README.tr.md": [
     "npm run chef",
@@ -208,8 +214,8 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --auth",
     "npm run chef -- --logs",
     "npm run chef -- --status --no-log",
-    "gh auth login --hostname github.com --git-protocol https --web --scopes repo,workflow",
-    "gh auth setup-git --hostname github.com"
+    "GitHub CLI veya Git Credential Manager",
+    "kendi kurum politikaniza"
   ],
   "docs/verification.md": [
     "npm run validate:chef-cli",

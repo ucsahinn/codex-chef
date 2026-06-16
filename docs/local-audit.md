@@ -12,36 +12,16 @@ Only one matching Desktop directory was found before this repo was created:
 
 No existing `codex-chef` repo was present.
 
-## Current Global Codex Files
+## Global Codex Boundary
 
-The live setup already had substantial global configuration:
+The previous workstation had existing global Codex files, role files, rules,
+skills, MCP configuration, hooks, and private operational notes. Those details
+belong to the user's local setup, not to a public starter repository.
 
-```text
-~/.codex/AGENTS.md
-~/.codex/config.toml
-~/.codex/SECURITY_OPERATIONS.md
-~/.codex/rules/default.rules
-~/.codex/agents/code_mapper.toml
-~/.codex/agents/code_reviewer.toml
-~/.codex/agents/docs_researcher.toml
-~/.codex/agents/frontend_verifier.toml
-~/.codex/agents/security_auditor.toml
-~/.codex/agents/test_verifier.toml
-~/.codex/agents/release_verifier.toml
-```
-
-The config included:
-
-- `model = "gpt-5.5"`
-- `approval_policy = "on-request"`
-- `sandbox_mode = "workspace-write"`
-- feature tables for memories, hooks, and multi-agent behavior
-- enabled MCPs for OpenAI docs, Context7, Playwright, Chrome DevTools, Serena,
-  sequential thinking, memory, filesystem, and Supabase
-- disabled connector presets for GitHub, Figma, Linear, Notion, Sentry, and
-  Vercel
-- project trust entries and hook state that should not be copied into a public
-  starter repo
+This starter therefore keeps only reusable, reviewed templates and validators.
+It must not copy private runbooks, exact local model defaults, enabled account
+connectors, project trust entries, hook state, auth files, tokens, sessions,
+memories, or machine-specific paths into the public package.
 
 ## Current Skill Locations
 

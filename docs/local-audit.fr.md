@@ -40,7 +40,7 @@ Ce fichier localisé suit les sections du fichier source anglais. Source: [local
 
 - Local Audit - 2026-06-10
 - Desktop Search
-- Current Global Codex Files
+- Global Codex Boundary
 - Current Skill Locations
 - Security Artifacts
 - Decision

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.5.19 - 2026-06-17
+
+- Replaced public README and CLI auth guidance that printed account-scoped
+  re-auth commands with safer GitHub authentication boundary guidance.
+- Added a `--auth` CLI smoke check so public-safe auth guidance stays covered
+  by `npm run validate:chef-cli`.
+
 ## 0.5.18 - 2026-06-17
 
 - Fixed the `validate:chef-cli` reset-preview smoke assertion so it works on
@@ -35,9 +42,9 @@
 - Added `scripts/validate-chef-cli.mjs` and wired it into `npm run check` so the
   CLI keeps write boundaries, redaction, log placement, and auth guidance under
   release validation.
-- Documented durable GitHub CLI and Git Credential Manager recovery commands for
-  invalid `gh` auth and missing `repo,workflow` scope without storing tokens in
-  repo files or config.
+- Replaced concrete GitHub CLI and Git Credential Manager recovery commands with
+  public-safe auth boundary guidance that keeps token scope decisions and global
+  credential setup outside repo files or config.
 
 ## 0.5.14 - 2026-06-16
 

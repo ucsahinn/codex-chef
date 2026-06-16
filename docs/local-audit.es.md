@@ -40,7 +40,7 @@ Este archivo localizado sigue las secciones del archivo fuente en inglés. Sourc
 
 - Local Audit - 2026-06-10
 - Desktop Search
-- Current Global Codex Files
+- Global Codex Boundary
 - Current Skill Locations
 - Security Artifacts
 - Decision

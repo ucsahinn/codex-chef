@@ -117,7 +117,7 @@ const MENU_ITEMS = [
     id: "auth",
     label: "Auth",
     writes: "none/account guidance",
-    description: "Show durable GitHub CLI and Git Credential Manager login commands."
+    description: "Show public-safe GitHub auth boundaries and verification notes."
   },
   {
     id: "logs",
@@ -525,20 +525,16 @@ async function runMcp() {
 }
 
 function runAuth() {
-  console.log(`${ICONS.lock} Durable GitHub CLI and Git Credential Manager login`);
+  console.log(`${ICONS.lock} GitHub authentication boundary`);
   console.log("");
-  console.log("Use these commands when gh reports 401, release creation fails, or HTTPS Git operations lack workflow scope:");
-  console.log("");
-  console.log("gh auth login --hostname github.com --git-protocol https --web --scopes repo,workflow");
-  console.log("gh auth setup-git --hostname github.com");
-  console.log("gh auth status --hostname github.com");
-  console.log("git config --global credential.helper manager");
-  console.log("git ls-remote origin HEAD");
+  console.log("This public CLI does not print account-scoped re-auth or global Git credential-helper commands.");
+  console.log("If GitHub release, push, or workflow checks fail because local auth is stale, refresh GitHub CLI or Git Credential Manager according to your organization policy.");
+  console.log("After refresh, use a read-only remote check such as `git ls-remote origin HEAD` from the target repository before retrying a publish step.");
   console.log("");
   console.log("Notes:");
   console.log("- Do not paste tokens into repo files, AGENTS.md, skills, rules, or shell history.");
-  console.log("- `repo,workflow` is required when a release flow may touch GitHub Actions workflow files or create releases.");
-  console.log("- Git Credential Manager keeps HTTPS push durable after browser login.");
+  console.log("- Keep personal account repair, token scope decisions, and global Git credential configuration outside this public repo.");
+  console.log("- Do not store workflow or release tokens in Codex Chef templates, examples, logs, or docs.");
   console.log("- Authenticated MCP connectors still remain disabled until a task needs them.");
   return { ok: true };
 }

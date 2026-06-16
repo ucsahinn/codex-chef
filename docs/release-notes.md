@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+## v0.5.19 - 2026-06-17
+
+This patch keeps Codex Chef's public auth guidance safer by treating GitHub
+account repair as an operator boundary instead of printing account-scoped
+re-auth commands in the public CLI and README.
+
+## Highlights
+
+- `npm run chef -- --auth` now explains the GitHub authentication boundary,
+  points operators to organization policy, and keeps token/scope decisions out
+  of repo files, logs, prompts, skills, rules, and examples.
+- README and Turkish README now describe stale GitHub auth recovery without
+  embedding account-scoped `gh auth login` or global credential-helper commands.
+- `npm run validate:chef-cli` now smoke-tests the public-safe `--auth` output.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run chef -- --status --plain --no-log
+npm run chef -- --auth --plain --no-log
+npm run chef -- --mcp --plain --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.18 - 2026-06-17
 
 This patch fixes the cross-platform CI assertion for the Codex Chef CLI
@@ -112,8 +142,8 @@ numbered menu while keeping write actions explicit.
   values before it reaches the terminal or `tmp/chef-cli/logs`.
 - Added `npm run validate:chef-cli` and wired it into `npm run check`,
   security audit, package surface, repo shape, and release readiness gates.
-- Documented durable `gh auth login --scopes repo,workflow` and Git Credential
-  Manager recovery commands for release and HTTPS Git auth failures.
+- Replaced concrete GitHub CLI and Git Credential Manager recovery commands with
+  public-safe auth boundary guidance for release and HTTPS Git auth failures.
 
 ## Verification
 

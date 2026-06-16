@@ -40,7 +40,7 @@ This runs:
   Windows and Unix Codex templates.
 - `scripts/validate-chef-cli.mjs`: one-menu Codex Chef CLI contract, safe
   command routing, write-boundary labels, log location, README usage snippets,
-  and GitHub CLI/Git Credential Manager auth guidance.
+  and public-safe GitHub auth boundary guidance.
 - `scripts/verify-skill-sources.mjs`: offline skill catalog validation and
   `catalog/skills-lock.json` source-allowlist drift checks.
 - `scripts/scan-supply-chain-iocs.mjs`: high-signal remote execution,

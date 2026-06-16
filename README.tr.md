@@ -87,17 +87,11 @@ package, setup, auth, dogrulama, source ve rollback notlarini gosterir; account
 connector'larini kendiliginden acmaz. CLI loglari ignored kalir ve source
 package'a girmez.
 
-GitHub CLI release veya push kontrollerinde `401 Unauthorized` ya da eksik
-workflow scope gorursen GitHub CLI ve Git Credential Manager'i bir kez kalici
-yenile:
-
-```powershell
-gh auth login --hostname github.com --git-protocol https --web --scopes repo,workflow
-gh auth setup-git --hostname github.com
-gh auth status --hostname github.com
-git config --global credential.helper manager
-git ls-remote origin HEAD
-```
+GitHub release, push veya workflow kontrolleri lokal GitHub auth eskidigi icin
+fail ederse GitHub CLI veya Git Credential Manager'i kendi kurum politikaniza
+gore yenileyin. Account-scoped credential repair bu public repo disinda kalmali;
+token'lari repo dosyalarina, loglara, promptlara, skill'lere, rule'lara veya
+shell history'ye yapistirmayin.
 
 Soru sormayan otomasyon dostu tek komut:
 

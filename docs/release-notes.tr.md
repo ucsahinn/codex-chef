@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+## v0.5.19 - 2026-06-17
+
+Bu patch GitHub account repair isini public CLI ve README icinde account-scoped
+re-auth komutlari basmak yerine operator boundary olarak anlatarak Codex Chef'in
+public auth rehberini daha guvenli hale getirir.
+
+## One cikanlar
+
+- `npm run chef -- --auth` artik GitHub authentication boundary'yi anlatir,
+  operator'u kurum politikasina yonlendirir ve token/scope kararlarini repo
+  dosyalari, loglar, promptlar, skill'ler, rule'lar ve orneklerin disinda tutar.
+- README ve Turkce README stale GitHub auth recovery konusunu account-scoped
+  `gh auth login` veya global credential-helper komutlarini gommeden anlatir.
+- `npm run validate:chef-cli`, public-safe `--auth` ciktisini smoke-test eder.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run check
+npm run chef -- --status --plain --no-log
+npm run chef -- --auth --plain --no-log
+npm run chef -- --mcp --plain --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.18 - 2026-06-17
 
 Bu patch Codex Chef CLI reset-preview smoke testindeki cross-platform CI
@@ -112,8 +142,8 @@ yonetebilir; yazan aksiyonlar yine acik `--apply` sinirinda kalir.
   once lokal path ve yaygin secret bicimleri icin redakte edilir.
 - `npm run validate:chef-cli` eklendi ve `npm run check`, security audit,
   package surface, repo shape ve release readiness gate'lerine baglandi.
-- Release ve HTTPS Git auth hatalari icin kalici `gh auth login --scopes
-  repo,workflow` ve Git Credential Manager recovery komutlari dokumante edildi.
+- Release ve HTTPS Git auth hatalari icin concrete GitHub CLI / Git Credential
+  Manager recovery komutlari yerine public-safe auth boundary rehberi kullanildi.
 
 ## Dogrulama
 
