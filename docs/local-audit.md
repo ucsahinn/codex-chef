@@ -4,11 +4,9 @@ This normalized audit explains where previous global Codex work landed.
 
 ## Desktop Search
 
-Only one matching Desktop directory was found before this repo was created:
-
-```text
-~/Desktop/codex-cli-best-practice-main
-```
+One prior local Codex setup directory was found on the workstation before this
+repo was created. The exact machine-specific path is intentionally omitted from
+the public package.
 
 No existing `codex-chef` repo was present.
 
