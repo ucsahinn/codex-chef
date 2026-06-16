@@ -20,6 +20,7 @@ npm run check
 node scripts/plan-install.mjs --all --json
 .\scripts\install.ps1 -All -Force -WhatIf
 .\scripts\install.ps1 -All -Force
+npm run verify:install:runtime -- --expect-skills
 ```
 
 Bash veya WSL:
@@ -30,7 +31,13 @@ npm run check
 node scripts/plan-install.mjs --all --json
 ./scripts/install.sh --all --force --dry-run
 ./scripts/install.sh --all --force
+npm run verify:install:runtime -- --expect-skills
 ```
+
+`-Force` / `--force` bilinçli upgrade içindir. Normal ilk kurulumda force
+verme; böylece mevcut kullanıcı config'i atlanır. Upgrade sırasında force ancak
+preview'i inceledikten ve bu repo template'lerinin managed hedefleri replace
+etmesini istediğinden emin olduktan sonra kullanılmalı.
 
 ## Backup'lar
 
@@ -63,6 +70,7 @@ Upgrade öncesi şu dosyaları incele:
 
 ```bash
 codex doctor --summary
+npm run verify:install:runtime -- --expect-skills
 codex --strict-config "Summarize the active Codex setup."
 ```
 

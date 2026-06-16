@@ -295,6 +295,7 @@ if ($WhatIfPreference) {
   Write-Host "Codex Chef installed."
   Write-Host "Restart Codex, then run:"
   Write-Host "  codex doctor --summary"
+  Write-Host "  npm run verify:install:runtime"
   Write-Host "  codex --strict-config `"Summarize the active Codex setup.`""
 }
 if (-not $NoBackup -and (Test-Path -LiteralPath $BackupRoot)) {

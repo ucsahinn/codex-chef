@@ -8,7 +8,7 @@ isteyen connector çalıştırmadan önce tanı komutlarını read-only tut.
 Önce ön izleme al:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 ```
 
 Temel kontroller:
@@ -34,7 +34,7 @@ Bash installer gerçek Bash ortamı ister:
 
 ```bash
 bash -n scripts/install.sh
-./scripts/install.sh --all --force --dry-run
+./scripts/install.sh --all --dry-run
 ```
 
 Windows'ta `bash` yoksa PowerShell kullan veya Bash yolunu WSL/Git Bash içinde
@@ -74,6 +74,17 @@ veya TLS workaround'larını repoya commit etme.
 Auth isteyen MCP connector'ları varsayılan olarak disabled kalır. Sadece görev
 ihtiyaç duyuyorsa aç, Codex'i yeniden başlat ve `/mcp` ile aktif server'ları
 kontrol et.
+
+Önce Codex'in installer'ın yazdığı aynı home'u okuduğunu doğrula:
+
+```bash
+npm run verify:install:runtime
+```
+
+Verifier aktif `CODEX_HOME` farkı raporlarsa kurulu config doğru olabilir ama
+mevcut Codex CLI süreci sandbox, offline veya alternatif bir home okuyor
+demektir. MCP durumuna karar vermeden önce Codex'i doğru shell'den başlat veya
+o oturum için `CODEX_HOME` değerini kurulu `~/.codex` path'ine ayarla.
 
 Bir server açılıyor ama tool göstermiyorsa:
 

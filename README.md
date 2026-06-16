@@ -38,13 +38,13 @@ Windows PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All
 ```
 
 Safe preview first:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
@@ -220,16 +220,16 @@ The installer does not:
 
 ## 🔎 Dry Run First
 
-PowerShell:
+PowerShell safe preview:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 ```
 
-Bash or WSL:
+Bash or WSL safe preview:
 
 ```bash
-./scripts/install.sh --all --force --dry-run
+./scripts/install.sh --all --dry-run
 ```
 
 Dry runs print the target Codex/Agents homes and the changes that would happen without touching real files, Git settings, or global skills.
@@ -263,7 +263,7 @@ PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All
 ```
 
 Bash or WSL:
@@ -272,19 +272,26 @@ Bash or WSL:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
-./scripts/install.sh --all --force
+./scripts/install.sh --all
 ```
 
 After installation, restart Codex and run:
 
 ```bash
 codex doctor --summary
+npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
 
 Use `-InstallSkills` / `--install-skills` or `-InstallGitGuards` / `--install-git-guards` when you only want one optional part of the setup.
 `-All` includes the reviewed skill set, but it does not change global Git
 config unless you also opt in to Git guards.
+
+Existing user config is protected by default: if `~/.codex/config.toml`,
+`~/.codex/AGENTS.md`, agent files, rules, or the plugin marketplace already
+exist, the installer skips them unless you explicitly add `-Force` /
+`--force`. Use force only for a deliberate upgrade after reviewing the preview;
+the installer backs up managed targets first.
 
 ## 🧠 Operating Model
 

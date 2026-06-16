@@ -48,6 +48,9 @@ This runs:
   release artifacts.
 - `scripts/validate-release-readiness.mjs`: release notes, GitHub settings docs,
   workflow hardening, Gitleaks gate documentation, and source artifact hygiene.
+- `scripts/verify-install-runtime.mjs`: optional read-only post-install runtime
+  verification that compares installed Codex Chef targets with the active
+  Codex CLI `CODEX_HOME`.
 
 Additional release checks:
 
@@ -159,6 +162,17 @@ Expected skill behavior is idempotent and quiet: already installed skills are
 reported as `Skill already installed`, successful new installs are reported as
 `Installed skill`, and raw Skills CLI output is shown only when clone,
 installation, or write failures need diagnosis.
+
+After a real install or upgrade, run the read-only runtime verifier:
+
+```bash
+npm run verify:install:runtime -- --expect-skills
+```
+
+Use `--expect-skills` only when the real install included `-All` or
+`-InstallSkills`. The verifier fails if the active Codex CLI is reading a
+different `CODEX_HOME` than the installed target, which catches sandbox/offline
+home drift without mutating user config.
 
 ## Remote Verification
 

@@ -1,6 +1,6 @@
 {
   "name": "codex-chef",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "private": true,
   "description": "Codex Chef: Windows-first Codex setup kit with agents, skills, MCPs, safe installers, and validation gates.",
   "files": [
@@ -53,6 +53,7 @@
     "validate:release": "node scripts/validate-release-readiness.mjs",
     "plan:install": "node scripts/plan-install.mjs",
     "codex:doctor": "node scripts/codex-doctor.mjs --redact-paths",
+    "verify:install:runtime": "node scripts/verify-install-runtime.mjs --redact-paths",
     "diagram:triplet": "node plugins/codex-chef-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs",
     "verify:skills": "node scripts/verify-skill-sources.mjs",
     "verify:skills:online": "node scripts/verify-skill-sources.mjs --online",

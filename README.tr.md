@@ -35,13 +35,13 @@ Windows PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All
 ```
 
 Önce güvenli ön izleme:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
@@ -222,13 +222,13 @@ Installer şunları yapmaz:
 PowerShell:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 ```
 
 Bash veya WSL:
 
 ```bash
-./scripts/install.sh --all --force --dry-run
+./scripts/install.sh --all --dry-run
 ```
 
 Dry run gerçek dosyalara, Git ayarlarına veya global skill'lere dokunmadan hedef Codex/Agents klasörlerini ve yapılacak değişiklikleri gösterir.
@@ -262,7 +262,7 @@ PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All
 ```
 
 Bash veya WSL:
@@ -271,19 +271,26 @@ Bash veya WSL:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
-./scripts/install.sh --all --force
+./scripts/install.sh --all
 ```
 
 Kurulumdan sonra Codex'i yeniden başlat ve şunları çalıştır:
 
 ```bash
 codex doctor --summary
+npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
 
 Sadece tek bir parça istiyorsan `-InstallSkills` / `--install-skills` veya `-InstallGitGuards` / `--install-git-guards` kullan.
 `-All` incelenmiş skill setini dahil eder, ama ayrıca Git guard'a opt-in
 vermediğin sürece global Git config'i değiştirmez.
+
+Mevcut kullanıcı config'i varsayılan olarak korunur: `~/.codex/config.toml`,
+`~/.codex/AGENTS.md`, ajan dosyaları, rule dosyaları veya plugin marketplace
+zaten varsa installer bunları atlar. Bilerek upgrade etmek istiyorsan önce
+preview'i incele, sonra `-Force` / `--force` kullan; managed hedefler önce
+backup alınarak replace edilir.
 
 ## 🧠 Çalışma Modeli
 

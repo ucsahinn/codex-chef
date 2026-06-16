@@ -8,7 +8,7 @@ Discovery output stays no-write and human-readable:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.6
+Package: codex-chef@0.5.7
 Platform: windows
 
 Profile | Operations | High risk | Optional flags

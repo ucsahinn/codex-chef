@@ -19,7 +19,7 @@ dizini kullanır.
 Yazmadan önce ön izle:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 ```
 
 Installer'lari cagirmadan manifest-backed operasyon planini incele:
@@ -44,7 +44,7 @@ komutlarini, collision policy'yi, backup davranisini ve risk seviyesini listeler
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All
 ```
 
 Kullanışlı parametreler:
@@ -60,6 +60,9 @@ Kullanışlı parametreler:
   `core.excludesfile` ile `core.hooksPath` ayarlar. Bunu ayrı tutuyoruz çünkü
   mevcut kullanıcıdaki bütün Git repolarını etkiler.
 - `-Force`: yedek aldıktan sonra yönetilen Codex dosyalarının üzerine yazar.
+  Bunu sadece bilinçli upgrade için, `-WhatIf` çıktısını inceledikten sonra
+  kullan. Vermezsen mevcut kullanıcı config'i, MCP ayarları, ajan dosyaları,
+  rule dosyaları ve marketplace dosyası atlanır.
 - `-NoBackup`: yedeklemeyi kapatır. Tavsiye edilmez.
 - `-WhatIf`: gerçek setup'a dokunmadan dosya, Git ve skill operasyonlarını ön
   izler.
@@ -69,7 +72,7 @@ Kullanışlı parametreler:
 Yazmadan önce ön izle:
 
 ```bash
-./scripts/install.sh --all --force --dry-run
+./scripts/install.sh --all --dry-run
 ```
 
 Ön izleme doğruysa kur:
@@ -78,7 +81,7 @@ Yazmadan önce ön izle:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
-./scripts/install.sh --all --force
+./scripts/install.sh --all
 ```
 
 Kullanışlı flagler:
@@ -86,7 +89,8 @@ Kullanışlı flagler:
 - `--all`: global Git config'i değiştirmeyen önerilen tam Codex Chef kurulumu.
 - `--install-skills`
 - `--install-git-guards`: global Git ignore ve hook ayarlarına ayrıca opt-in.
-- `--force`
+- `--force`: backup aldıktan sonra managed hedefleri değiştirir; vermezsen
+  mevcut dosyalar atlanır.
 - `--no-backup`
 - `--dry-run`
 
@@ -116,8 +120,15 @@ Codex'i yeniden başlat ve çalıştır:
 
 ```bash
 codex doctor --summary
+npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
+
+`npm run verify:install:runtime` read-only çalışır. Kurulan `~/.codex` ve
+`~/.agents` hedeflerini kontrol eder, sonra bunları `codex doctor --json`
+tarafından bildirilen aktif Codex runtime home ile karşılaştırır. Codex bir
+sandbox veya farklı `CODEX_HOME` okuyorsa MCP'ler yokmuş gibi davranmak yerine
+bu farkı açıkça raporlar.
 
 Codex içinde:
 

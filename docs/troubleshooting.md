@@ -8,7 +8,7 @@ you intentionally run an installer or authenticated connector.
 Run a preview first:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 ```
 
 Common checks:
@@ -74,6 +74,18 @@ credential or TLS workarounds into this repo.
 
 Authenticated MCP connectors are disabled by default. Enable one only for a
 task that needs it, then restart Codex and check active servers with `/mcp`.
+
+First confirm Codex is reading the same home the installer wrote:
+
+```bash
+npm run verify:install:runtime
+```
+
+If the verifier reports an active `CODEX_HOME` mismatch, the installed config
+may be correct while the current Codex CLI process is reading a sandbox,
+offline, or alternate home. Start Codex from the intended shell or set
+`CODEX_HOME` to the installed `~/.codex` path for that session before judging
+MCP availability.
 
 If a server starts but shows no tools:
 

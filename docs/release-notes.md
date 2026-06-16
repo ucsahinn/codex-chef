@@ -2,6 +2,62 @@
 
 ## Unreleased
 
+## v0.5.7 - 2026-06-16
+
+This patch tightens the real install handoff: Codex Chef now has a read-only
+runtime verifier that separates "the files are installed" from "this Codex CLI
+process is reading the same home."
+
+## Highlights
+
+- Added `npm run verify:install:runtime`, backed by
+  `scripts/verify-install-runtime.mjs`.
+- The verifier checks installed Codex Chef files, MCP config blocks, specialist
+  agent files, the plugin marketplace, optional skills, optional Git guards,
+  and active `CODEX_HOME` drift without writing to user config.
+- Changed first-install README and guide commands to omit `-Force` /
+  `--force`, protecting existing user config by default.
+- Clarified that force is for deliberate upgrades after preview and backup, not
+  for the normal first-run path.
+- Added troubleshooting guidance for the case where `codex doctor --json` or
+  `codex mcp list` reads a sandbox/offline Codex home instead of the installed
+  `~/.codex`.
+- Installer success output now points users at the runtime verifier.
+
+## Upgrade Notes
+
+Existing users should preview before replacing managed files. Use force only
+when you intentionally want the newer templates to replace installed managed
+targets after backup:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+```
+
+```powershell
+.\\scripts\\install.ps1 -All -Force -WhatIf
+.\\scripts\\install.ps1 -All -Force
+npm run verify:install:runtime -- --expect-skills
+```
+
+For a first install on a machine that may already have Codex config, omit force:
+
+```powershell
+.\\scripts\\install.ps1 -All
+npm run verify:install:runtime -- --expect-skills
+```
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.6 - 2026-06-16
 
 This patch makes the installed Codex Chef setup more ergonomic after a real

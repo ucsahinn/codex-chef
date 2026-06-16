@@ -2,6 +2,54 @@
 
 ## Unreleased
 
+## v0.5.7 - 2026-06-16
+
+Bu patch gerçek kurulum sonrası kontrolü netleştirir: dosyalar kuruldu mu ve
+çalışan Codex CLI aynı `CODEX_HOME` değerini mi okuyor, bunu read-only şekilde
+ayırt eder.
+
+## Öne Çıkanlar
+
+- `scripts/verify-install-runtime.mjs` ve `npm run verify:install:runtime`
+  eklendi.
+- Verifier kurulu Codex Chef dosyalarını, MCP config block'larını, uzman ajan
+  dosyalarını, plugin marketplace'i, opsiyonel skill'leri, opsiyonel Git
+  guard'larını ve aktif `CODEX_HOME` drift'ini kullanıcı config'ine yazmadan
+  kontrol eder.
+- İlk kurulum komutları artık `-Force` / `--force` kullanmaz; mevcut kullanıcı
+  config'i varsayılan olarak korunur.
+- Force akışının normal ilk kurulum değil, preview ve backup sonrası bilinçli
+  upgrade yolu olduğu netleştirildi.
+- `codex doctor --json` veya `codex mcp list` sandbox/offline Codex home
+  okuyorsa bunun nasıl teşhis edileceği install ve troubleshooting docs'a
+  eklendi.
+
+## Upgrade Notları
+
+Mevcut kullanıcılar managed dosyaları replace etmeden önce preview almalı:
+
+```powershell
+.\\scripts\\install.ps1 -All -Force -WhatIf
+.\\scripts\\install.ps1 -All -Force
+npm run verify:install:runtime -- --expect-skills
+```
+
+İlk kurulumda force kullanma:
+
+```powershell
+.\\scripts\\install.ps1 -All
+npm run verify:install:runtime -- --expect-skills
+```
+
+## Doğrulama
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.6 - 2026-06-16
 
 Bu patch, gercek Windows kurulumundan sonra Codex Chef setup'ini daha rahat

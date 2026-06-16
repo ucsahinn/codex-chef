@@ -20,6 +20,7 @@ npm run check
 node scripts/plan-install.mjs --all --json
 .\scripts\install.ps1 -All -Force -WhatIf
 .\scripts\install.ps1 -All -Force
+npm run verify:install:runtime -- --expect-skills
 ```
 
 Bash or WSL:
@@ -30,7 +31,13 @@ npm run check
 node scripts/plan-install.mjs --all --json
 ./scripts/install.sh --all --force --dry-run
 ./scripts/install.sh --all --force
+npm run verify:install:runtime -- --expect-skills
 ```
+
+`-Force` / `--force` is for deliberate upgrades. A normal first install should
+omit force so existing user config is skipped. During upgrade, force is safe
+only after you reviewed the preview and are comfortable replacing managed
+targets from this repo's templates.
 
 ## Backups
 
@@ -63,6 +70,7 @@ Run:
 
 ```bash
 codex doctor --summary
+npm run verify:install:runtime -- --expect-skills
 codex --strict-config "Summarize the active Codex setup."
 ```
 

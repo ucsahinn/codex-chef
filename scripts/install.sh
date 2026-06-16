@@ -264,6 +264,7 @@ else
   echo "Codex Chef installed."
   echo "Restart Codex, then run:"
   echo "  codex doctor --summary"
+  echo "  npm run verify:install:runtime"
   echo '  codex --strict-config "Summarize the active Codex setup."'
 fi
 if [ "$NO_BACKUP" -ne 1 ] && [ -d "$BACKUP_ROOT" ]; then

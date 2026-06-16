@@ -19,7 +19,7 @@ Codex uses `~/.codex`; if `CODEX_HOME` is set, the installer uses that path.
 Preview without writing:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 ```
 
 Inspect the manifest-backed operation plan without invoking either installer:
@@ -44,7 +44,7 @@ Install after the preview is correct:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All
 ```
 
 Useful switches:
@@ -59,7 +59,10 @@ Useful switches:
 - `-InstallGitGuards`: install global Git ignore, global pre-commit hook, and
   set `core.excludesfile` plus `core.hooksPath`. This is intentionally separate
   because it affects every Git repository for the current user.
-- `-Force`: overwrite managed Codex files after creating backups.
+- `-Force`: overwrite managed Codex files after creating backups. Use this for
+  deliberate upgrades only after reviewing `-WhatIf`; without it, existing
+  user config, MCP settings, agent files, rules, and marketplace files are
+  skipped.
 - `-NoBackup`: skip backups. Not recommended.
 - `-WhatIf`: preview file, Git, and skill operations without changing the real
   setup.
@@ -69,7 +72,7 @@ Useful switches:
 Preview without writing:
 
 ```bash
-./scripts/install.sh --all --force --dry-run
+./scripts/install.sh --all --dry-run
 ```
 
 Install after the preview is correct:
@@ -78,7 +81,7 @@ Install after the preview is correct:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
-./scripts/install.sh --all --force
+./scripts/install.sh --all
 ```
 
 Useful flags:
@@ -86,7 +89,8 @@ Useful flags:
 - `--all`: recommended full Codex Chef setup without global Git config changes.
 - `--install-skills`
 - `--install-git-guards`: opt in to global Git ignore and hook settings.
-- `--force`
+- `--force`: replace managed targets after backup; without it, existing files
+  are skipped.
 - `--no-backup`
 - `--dry-run`
 
@@ -116,8 +120,15 @@ Restart Codex, then run:
 
 ```bash
 codex doctor --summary
+npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
+
+`npm run verify:install:runtime` is read-only. It checks the installed
+`~/.codex` and `~/.agents` targets, then compares them with the active Codex
+runtime home reported by `codex doctor --json`. If Codex is reading a sandbox
+or alternate `CODEX_HOME`, the verifier reports that mismatch instead of
+silently claiming MCPs are missing.
 
 Inside Codex, use:
 

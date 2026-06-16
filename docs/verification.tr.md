@@ -49,6 +49,9 @@ Bu komut şunları çalıştırır:
   release artifact'larini reddeder.
 - `scripts/validate-release-readiness.mjs`: release notes, GitHub settings docs,
   workflow hardening, Gitleaks gate dokumantasyonu ve source artifact hygiene.
+- `scripts/verify-install-runtime.mjs`: opsiyonel read-only post-install
+  runtime kontrolü. Kurulu Codex Chef hedeflerini aktif Codex CLI `CODEX_HOME`
+  ile karşılaştırır.
 
 Ek release kontrolleri:
 
@@ -124,13 +127,13 @@ $errors
 PowerShell dry run:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 ```
 
 Bash dry run:
 
 ```bash
-./scripts/install.sh --all --force --dry-run
+./scripts/install.sh --all --dry-run
 ```
 
 CI ayrica temporary home path'leriyle Bash dry-run ve PowerShell `-WhatIf`
@@ -160,6 +163,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 Beklenen skill davranışı idempotent ve sessizdir: kurulu skill'ler `Skill
 already installed`, başarılı yeni kurulumlar `Installed skill` olarak görünür;
 raw Skills CLI çıktısı yalnızca clone, installation veya write hatasında basılır.
+
+Gerçek kurulum veya upgrade sonrası read-only runtime verifier çalıştır:
+
+```bash
+npm run verify:install:runtime -- --expect-skills
+```
+
+`--expect-skills` flag'ini sadece gerçek kurulumda `-All` veya `-InstallSkills`
+kullandıysan ver. Verifier aktif Codex CLI'ın kurulan hedeften farklı bir
+`CODEX_HOME` okuduğunu görürse fail eder; böylece sandbox/offline home drift'i
+kullanıcı config'ini değiştirmeden yakalanır.
 
 ## Remote Doğrulama
 

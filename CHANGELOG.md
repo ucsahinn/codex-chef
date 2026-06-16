@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## 0.5.7 - 2026-06-16
+
+- Added `scripts/verify-install-runtime.mjs` and
+  `npm run verify:install:runtime` for read-only post-install verification of
+  installed Codex Chef files, MCP blocks, specialist agents, optional skills,
+  optional Git guards, and active Codex CLI `CODEX_HOME` drift.
+- Updated the default README and install-guide commands to omit force on first
+  install so existing user config, MCP settings, agents, rules, and marketplace
+  files are skipped unless the user explicitly chooses a backup-backed
+  upgrade.
+- Clarified that `-Force` / `--force` is an upgrade path, not the safe default
+  first-run path.
+- Added runtime-verifier guidance to install, troubleshooting, verification,
+  and upgrade docs so sandbox/offline Codex homes are diagnosed without
+  mutating user-global config.
+- Updated installer success output to include the read-only runtime verifier.
+
 ## 0.5.6 - 2026-06-16
 
 - Added reviewed per-tool MCP approval overrides for read-only browser,
