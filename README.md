@@ -29,12 +29,12 @@
     <td width="50%" valign="top">
       <h3><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"> English welcome</h3>
       <p>Windows-first Codex setup starter with safer defaults, named agents, MCP defaults, curated skills, plugin workflows, and validation before anything touches your machine.</p>
-      <p><strong>Start here:</strong> [Copy-paste install](#copy-paste-install) or run the safe preview first.</p>
+      <p><strong>Start here:</strong> <a href="#copy-paste-install">Copy-paste install</a> or run the safe preview first.</p>
     </td>
     <td width="50%" valign="top">
-      <h3><img src="https://flagcdn.com/w20/tr.png" alt="Turkce" width="20"> T&#252;rk&#231;e kar&#351;&#305;lama</h3>
-      <p>Windows odakli Codex kurulumu icin guvenli varsayilanlar, ajan ekibi, MCP ayarlari, secilmis skilller, plugin akislari ve islem oncesi dogrulama sunan baslangic seti.</p>
-      <p><strong>Buradan ba&#351;la:</strong> [README.tr.md](README.tr.md) dosyasindan Turkce akisla baslayabilir veya once safe preview calistirabilirsin.</p>
+      <h3><img src="https://flagcdn.com/w20/tr.png" alt="Türkçe" width="20"> Türkçe karşılama</h3>
+      <p>Codex'i Windows'ta temiz ve kontrollü bir zemine oturtmak için hazırladığım başlangıç paketi. Güvenli varsayılanlar, ajan rolleri, MCP ayarları, seçtiğim skill'ler ve işlemden önce bakabileceğin doğrulama adımları tek yerde.</p>
+      <p><strong>Buradan başla:</strong> Türkçe akış için <a href="README.tr.md">README.tr.md</a>; hızlı denemek istersen önce <a href="#copy-paste-install">safe preview</a> komutunu çalıştır.</p>
     </td>
   </tr>
 </table>
