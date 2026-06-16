@@ -167,7 +167,8 @@ reported as `Skill already installed`, successful new installs are reported as
 installation, or write failures need diagnosis.
 
 For a single end-user view of repo health, installed runtime drift, Codex
-doctor checks, and skills context-budget pressure, run:
+doctor checks, skills context-budget pressure, routing controls, and MCP setup
+requirements, run:
 
 ```bash
 npm run codex:status

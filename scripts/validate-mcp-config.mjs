@@ -141,8 +141,20 @@ for (const server of catalog.servers || []) {
   if (!["approve", "prompt", "auto"].includes(server.approval)) {
     fail(`MCP catalog has invalid approval mode for ${server.name}: ${server.approval}`);
   }
+  if (!["none", "tooling", "local-state", "path", "oauth", "env"].includes(server.setupKind)) {
+    fail(`MCP catalog has invalid setupKind for ${server.name}: ${server.setupKind}`);
+  }
+  if (!server.setupHint || typeof server.setupHint !== "string" || server.setupHint.length < 20) {
+    fail(`MCP catalog must explain setupHint for ${server.name}`);
+  }
   if (server.auth && server.auth !== "none" && server.defaultEnabled !== false) {
     fail(`Authenticated MCP must be disabled by default in catalog: ${server.name}`);
+  }
+  if (server.setupKind === "oauth" && server.auth !== "oauth") {
+    fail(`OAuth MCP setupKind must use auth=oauth: ${server.name}`);
+  }
+  if (server.setupKind === "env" && !String(server.auth || "").startsWith("env:")) {
+    fail(`Environment MCP setupKind must use auth=env:<NAME>: ${server.name}`);
   }
   if (["external-account", "database", "filesystem"].includes(server.category) && server.defaultEnabled !== false) {
     fail(`Sensitive MCP category must be disabled by default in catalog: ${server.name}`);

@@ -44,8 +44,10 @@ Rules used in this starter:
 - New MCP servers should prefer narrow config flags such as `enabled_tools`,
   `disabled_tools`, `startup_timeout_sec`, and `tool_timeout_sec` over broad
   prose-only instructions.
-- `catalog/mcp-servers.json` records source URL, auth mode, risk, approval mode,
-  and default-enable rationale for each starter connector.
+- `catalog/mcp-servers.json` records source URL, auth mode, setup kind, setup
+  hint, risk, approval mode, and default-enable rationale for each starter
+  connector. Installers and `npm run codex:status` surface setup requirements
+  without collecting credentials.
 
 Official reference: https://developers.openai.com/codex/mcp
 

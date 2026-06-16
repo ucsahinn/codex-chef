@@ -42,8 +42,10 @@ Bu starter'ın kuralları:
 - Yeni MCP server eklerken `enabled_tools`, `disabled_tools`,
   `startup_timeout_sec` ve `tool_timeout_sec` gibi dar config flag'leri prose-only
   talimatlara tercih edilmelidir.
-- `catalog/mcp-servers.json` her starter connector için source URL, auth mode,
-  risk, approval mode ve default-enable gerekçesi tutar.
+- `catalog/mcp-servers.json` her starter connector icin source URL, auth mode,
+  setup kind, setup hint, risk, approval mode ve default-enable gerekcesi tutar.
+  Installer ve `npm run codex:status` setup gereksinimlerini credential
+  toplamadan gosterir.
 
 Resmi kaynak: https://developers.openai.com/codex/mcp
 

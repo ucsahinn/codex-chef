@@ -4,6 +4,10 @@ Makine tarafından okunabilir liste için `catalog/mcp-servers.json` dosyasına 
 `npm run check`, bu katalog ile Windows/Unix Codex config template'lerinin
 aynı hizada kaldığını doğrular.
 
+Katalog `setupKind` ve `setupHint` alanlarini da tutar. Installer ve
+`npm run codex:status`, local tooling, OAuth, filesystem path veya environment
+variable isteyen MCP'leri bu notlarla gosterir.
+
 Resmi kaynak:
 
 https://developers.openai.com/codex/mcp
@@ -37,15 +41,47 @@ launcher'lar full commit SHA ve matching catalog `sourceRef` icermelidir.
 
 ## Gerektiğinde Aç
 
-| Server | Amaç | Neden disabled |
+| Server | Amac | Acmadan once gereken setup |
 | --- | --- | --- |
-| `github` | GitHub issue/PR/repo | Dış hesap erişimi |
-| `figma` | Figma design context | Workspace auth gerekir |
-| `linear` | Linear issue/project | Dış workspace aksiyonları |
-| `notion` | Notion docs/database | Private workspace verisi |
-| `sentry` | Production error data | Hassas operasyonel veri |
-| `vercel` | Deploy/project yönetimi | Production/billing etkisi olabilir |
-| `supabase` | Database erişimi | Credential ve veri erişimi |
+| `filesystem` | Lokal filesystem erisimi | Config args icinde bilincli ve dar bir root path sec. |
+| `github` | GitHub issue/PR/repo | GitHub/Copilot OAuth hesap yetkilendirmesi. |
+| `figma` | Figma design context | Figma hesap veya workspace yetkilendirmesi. |
+| `linear` | Linear issue/project | Linear workspace yetkilendirmesi. |
+| `notion` | Notion docs/database | Notion workspace yetkilendirmesi. |
+| `sentry` | Production error data | Sentry organization yetkilendirmesi. |
+| `vercel` | Deploy/project yonetimi | Vercel account veya team yetkilendirmesi. |
+| `supabase` | Database erisimi | Acmadan once `SUPABASE_DB_URL` degerini repo disinda ayarla. |
+
+## Opt-In Connector Tarifleri
+
+OAuth isteyen account connector'lari icin once gorevin private account context'e
+ihtiyaci oldugunu dogrula, sonra sadece gereken connector'u ac:
+
+```toml
+[mcp_servers.github]
+enabled = true
+default_tools_approval_mode = "prompt"
+```
+
+Rollback icin `enabled = false` yap ve Codex'i yeniden baslat.
+
+Filesystem icin template path'i acmadan once en dar local root ile degistir:
+
+```toml
+[mcp_servers.filesystem]
+enabled = true
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "C:\\Users\\you\\project"]
+default_tools_approval_mode = "prompt"
+```
+
+Supabase icin database URL'ini repo disinda ayarla ve approval'i prompt tut:
+
+```powershell
+$env:SUPABASE_DB_URL = "<repo disinda ayarla; commit etme>"
+```
+
+Sonra sadece database inspection gereken task icin ac. Kalici workflow olarak
+bilerek secmedikce is bitince tekrar disabled hale getir.
 
 Kural: Dokümantasyon MCP'leri iyi varsayılandır. Auth isteyen MCP'ler görev
 gerektirmeden ve kullanıcı onayı olmadan açılmamalıdır.

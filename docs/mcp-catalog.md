@@ -4,6 +4,10 @@ This starter keeps high-signal MCP servers documented and mostly safe by
 default. See `catalog/mcp-servers.json` for machine-readable metadata.
 `npm run check` validates that this catalog stays aligned with both Windows and
 Unix Codex config templates.
+The catalog also records `setupKind` and `setupHint`; installers and
+`npm run codex:status` print those notes so required local tooling, OAuth,
+filesystem-path, or environment-variable inputs are visible before enabling a
+connector.
 
 Official Codex MCP reference:
 
@@ -38,15 +42,48 @@ must include a full commit SHA and matching catalog `sourceRef`.
 
 ## Disabled Until Needed
 
-| Server | Purpose | Why disabled |
+| Server | Purpose | Setup required before enabling |
 | --- | --- | --- |
-| `github` | GitHub issues, PRs, repositories | External account access |
-| `figma` | Figma design access | Requires user/workspace auth |
-| `linear` | Linear issue/project access | External workspace actions |
-| `notion` | Notion docs and databases | Private workspace data |
-| `sentry` | Production error data | Sensitive operational data |
-| `vercel` | Deploy/project management | Production and billing-adjacent actions |
-| `supabase` | Database inspection | Database credentials and data access |
+| `filesystem` | Local filesystem access | Choose a deliberate local root path in config args. |
+| `github` | GitHub issues, PRs, repositories | GitHub/Copilot OAuth account authorization. |
+| `figma` | Figma design access | Figma account or workspace authorization. |
+| `linear` | Linear issue/project access | Linear workspace authorization. |
+| `notion` | Notion docs and databases | Notion workspace authorization. |
+| `sentry` | Production error data | Sentry organization authorization. |
+| `vercel` | Deploy/project management | Vercel account or team authorization. |
+| `supabase` | Database inspection | Set `SUPABASE_DB_URL` outside the repo before enabling. |
+
+## Opt-In Connector Recipes
+
+For OAuth account connectors, first confirm the task needs private account
+context, then change only that connector:
+
+```toml
+[mcp_servers.github]
+enabled = true
+default_tools_approval_mode = "prompt"
+```
+
+Rollback is `enabled = false` followed by a Codex restart.
+
+For filesystem, replace the template path with the narrowest intended local
+root before enabling:
+
+```toml
+[mcp_servers.filesystem]
+enabled = true
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "C:\\Users\\you\\project"]
+default_tools_approval_mode = "prompt"
+```
+
+For Supabase, set the database URL outside the repo and keep approval prompted:
+
+```powershell
+$env:SUPABASE_DB_URL = "<set outside the repo; do not commit>"
+```
+
+Then enable only for the task that needs database inspection. Disable it again
+afterward unless it is a deliberate durable workflow.
 
 ## Rule
 

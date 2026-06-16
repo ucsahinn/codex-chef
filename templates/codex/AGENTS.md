@@ -61,6 +61,28 @@
   database connectors, or broaden filesystem access without explicit approval.
 - If more than one route matches, prefer the lower-risk read-only specialist
   first, then implement in the main thread after evidence is gathered.
+- For non-trivial tasks, state the selected route, specialist, skill, MCP, or
+  config surface in a working update or final summary. If an obvious route is
+  skipped, state the concrete reason.
+
+### Routing Profile Summary
+
+These installed routing profile IDs mirror `catalog/routing-profiles.json` and
+should remain visible in global instructions so users can see how task shapes
+are selected:
+
+- `repo-map-before-change` - Repository map before broad change
+- `current-docs-research` - Current docs and version-sensitive facts
+- `context-surface-decision` - Context surface decision
+- `bug-root-cause` - Bug or failing test root cause
+- `bounded-feature` - Bounded feature implementation
+- `frontend-ui` - Frontend, UI, and browser evidence
+- `security-sensitive` - Security-sensitive code and abuse paths
+- `mcp-connector-change` - MCP connector or tool exposure change
+- `release-or-publish` - Release, package, push, or publish readiness
+- `seo-web-quality` - SEO and web quality
+- `docs-and-adrs` - Documentation, ADRs, and release notes
+- `starter-health` - Codex Chef starter health and drift
 
 ## Subagent Routing
 

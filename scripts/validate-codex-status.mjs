@@ -1,14 +1,24 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
+import path from "node:path";
 
 const failures = [];
+const fixtureCodexHome = path.resolve("tmp/nonexistent-codex-status-codex-home");
+const fixtureAgentsHome = path.resolve("tmp/nonexistent-codex-status-agents-home");
 
 function fail(message) {
   failures.push(message);
 }
 
 function run(args) {
-  return spawnSync(process.execPath, ["scripts/codex-status.mjs", ...args], {
+  return spawnSync(process.execPath, [
+    "scripts/codex-status.mjs",
+    "--codex-home",
+    fixtureCodexHome,
+    "--agents-home",
+    fixtureAgentsHome,
+    ...args
+  ], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
     timeout: 120000,
@@ -63,6 +73,21 @@ if (report) {
   if (!report.routingBoard?.boundary?.includes("not hidden execution hooks")) {
     fail("codex status routing board must preserve the no-hidden-hooks boundary.");
   }
+  if (!report.mcpSetupBoard || report.mcpSetupBoard.serverCount !== 15) {
+    fail("codex status must include the MCP setup board with all 15 servers.");
+  }
+  if (!Array.isArray(report.mcpSetupBoard.servers) || !report.mcpSetupBoard.servers.some((server) => server.name === "supabase" && server.setupKind === "env" && String(server.setupHint || "").includes("SUPABASE_DB_URL"))) {
+    fail("codex status MCP setup board must explain Supabase SUPABASE_DB_URL setup.");
+  }
+  if (report.effectiveControls?.features?.multiAgent !== true) {
+    fail("codex status must report that multi-agent routing is enabled in effective controls.");
+  }
+  if (report.effectiveControls?.agents?.maxDepth !== 1) {
+    fail("codex status effective controls must report the bounded subagent depth.");
+  }
+  if (report.effectiveControls?.appsDefault?.destructiveEnabled !== false) {
+    fail("codex status effective controls must report destructive app tools disabled by default.");
+  }
   if (!Array.isArray(report.nextActions) || report.nextActions.length === 0) {
     fail("codex status must include nextActions.");
   }
@@ -74,7 +99,7 @@ if (textResult.error) {
 } else if (textResult.status !== 0) {
   fail(`codex status text validation exited ${textResult.status}: ${(textResult.stderr || textResult.stdout).trim()}`);
 } else {
-  for (const required of ["Codex Chef status", "Repo starter:", "Installed runtime:", "Skills context:", "Enterprise routing:"]) {
+  for (const required of ["Codex Chef status", "Repo starter:", "Installed runtime:", "Skills context:", "Enterprise routing:", "Effective controls:", "MCP setup:", "MCP setup note: serena", "MCP setup note: supabase"]) {
     if (!textResult.stdout.includes(required)) fail(`codex status text output missing: ${required}`);
   }
 }

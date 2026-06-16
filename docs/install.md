@@ -132,9 +132,11 @@ Useful flags:
 
 Both installers finish with a capability board that lists the specialist
 agents, default-ready MCP servers, disabled opt-in MCP connectors, bundled
-plugin skills, and reviewed global skills. Account, database, production, and
-broad filesystem connectors remain disabled unless you explicitly enable them
-later.
+plugin skills, reviewed global skills, enterprise routing profiles, and MCP
+setup notes. The setup notes call out local tooling, OAuth authorization,
+filesystem-path selection, and `SUPABASE_DB_URL` requirements before a task
+needs that connector. Account, database, production, and broad filesystem
+connectors remain disabled unless you explicitly enable them later.
 
 ## What Gets Backed Up
 
@@ -176,9 +178,9 @@ filesystem actions still require explicit approval.
 
 `npm run codex:status` is the end-user status board. It combines repo-only
 starter health, installed-runtime drift, direct Codex doctor check summaries,
-skill context-budget warnings, and the routing board summary. Use
-`npm run codex:status:all` when the real install intentionally included curated
-skills and optional Git guards.
+skill context-budget warnings, routing board summary, effective control summary,
+and MCP setup notes. Use `npm run codex:status:all` when the real install
+intentionally included curated skills and optional Git guards.
 
 `npm run verify:install:runtime` is read-only. It checks the installed
 `~/.codex` and `~/.agents` targets, checks managed agent, rule, profile, and

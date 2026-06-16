@@ -17,6 +17,7 @@ const routing = readJson("catalog/routing-profiles.json");
 const agents = readJson("catalog/agents.json");
 const mcp = readJson("catalog/mcp-servers.json");
 const skills = readJson("catalog/skills.json");
+const agentsTemplate = fs.readFileSync(path.join(root, "templates/codex/AGENTS.md"), "utf8");
 
 const agentNames = new Set((agents.agents || []).map((agent) => agent.name));
 const mcpNames = new Set((mcp.servers || []).map((server) => server.name));
@@ -71,6 +72,12 @@ for (const profile of routing.profiles || []) {
   }
   if (!profile.boundary || profile.boundary.length < 40) {
     fail(`routing profile boundary must be explicit: ${profile.id}`);
+  }
+  if (!agentsTemplate.includes(`\`${profile.id}\``)) {
+    fail(`templates/codex/AGENTS.md must expose routing profile id: ${profile.id}`);
+  }
+  if (!agentsTemplate.includes(profile.title)) {
+    fail(`templates/codex/AGENTS.md must expose routing profile title: ${profile.title}`);
   }
 }
 

@@ -528,12 +528,14 @@ try {
   $AgentNames = @($AgentCatalog.agents | ForEach-Object { $_.name })
   $McpReady = @($McpCatalog.servers | Where-Object { $_.defaultEnabled -eq $true } | ForEach-Object { $_.name })
   $McpOptIn = @($McpCatalog.servers | Where-Object { $_.defaultEnabled -ne $true } | ForEach-Object { $_.name })
+  $McpSetupNotes = @($McpCatalog.servers | Where-Object { $_.setupKind -notin @("none", "local-state") } | ForEach-Object { "$($_.name) [$($_.setupKind)]: $($_.setupHint)" })
   $PluginSkills = @(Get-ChildItem -Path $PluginSkillRoot -Directory | ForEach-Object { $_.Name })
   $ReviewedSkills = @($SkillCatalog.skills | Where-Object { $_.install -eq $true } | ForEach-Object { $_.name })
   $RoutingProfiles = @($RoutingCatalog.profiles | ForEach-Object { $_.id })
   Write-NameList -Label "Agents ready" -Names $AgentNames -Color "White"
   Write-NameList -Label "MCP ready by default" -Names $McpReady -Color "White"
   Write-NameList -Label "MCP opt-in / disabled by default" -Names $McpOptIn -Color "DarkYellow"
+  Write-NameList -Label "MCP setup notes" -Names $McpSetupNotes -Color "DarkYellow"
   Write-NameList -Label "Local plugin skills" -Names $PluginSkills -Color "White"
   Write-NameList -Label "Reviewed global skills" -Names $ReviewedSkills -Color "White"
   Write-NameList -Label "Enterprise routing profiles" -Names $RoutingProfiles -Color "White"

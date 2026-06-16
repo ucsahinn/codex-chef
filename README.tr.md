@@ -72,10 +72,12 @@ repo içindeki `templates/codex/config.*.toml`, `templates/codex/agents/*.toml`,
 | 🧩 Plugin + skill'ler | Yerel `codex-chef-workflows` plugin'i, üç bundled skill ve on altı opsiyonel global skill. |
 | 🛡️ Güvenlik kapıları | Backup, dry-run plan, secret scan, validation ve onaylı riskli aksiyon modeli. |
 
-Installer en sonda bir capability board basar: ajan ekibi, varsayılan hazır
+Installer en sonda bir capability board basar: ajan ekibi, varsayilan hazir
 MCP'ler, disabled/opt-in MCP'ler, local plugin skill'leri ve reviewed global
-skill'ler tek ekranda görünür. Yani kurulum bittiğinde "bana ne geldi?"
-sorusunun cevabını direkt görürsün.
+skill'ler tek ekranda gorunur. Tooling, OAuth, filesystem path ve
+`SUPABASE_DB_URL` isteyen MCP'ler icin setup notlarini da basar; yani kurulum
+bittiginde "bana ne geldi ve ne eksik input ister?" sorusunun cevabini direkt
+gorursun.
 
 ### 🔌 MCP Panosu
 
@@ -87,6 +89,10 @@ production ve geniş filesystem tarafı ise sen gerçekten istemeden kapalı kal
 | --- | --- | --- |
 | ✅ Varsayılan hazır | 📚 OpenAI Docs · 🧭 Context7 · 🧠 Sequential Thinking · 🎭 Playwright · 🧰 Chrome DevTools · 🗺️ Serena · 🧩 Memory | Güvenli araştırma, kod gezme, browser kanıtı ve secret içermeyen lokal context. |
 | 🔒 Varsayılan kapalı | 📁 Filesystem · 🐙 GitHub · 🎨 Figma · 📌 Linear · 🗒️ Notion · 🚨 Sentry · ▲ Vercel · 🗄️ Supabase | Private dosya, hesap, telemetry, deploy veya database açabileceği için sadece ihtiyaç olunca açılır. |
+
+Kurulumdan sonra `npm run codex:status` calistirarak canli MCP setup panosunu,
+etkili routing kontrollerini ve global Codex state'ini degistirmeden runtime
+drift durumunu gorebilirsin.
 
 `~/.codex/config.toml` zaten varsa installer önce backup alır ve sadece eksik
 Codex Chef agent/MCP/safety tablolarını ekler. Mevcut MCP kayıtların,

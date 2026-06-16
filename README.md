@@ -78,8 +78,10 @@ manifest-backed install plan.
 
 At the end of the installer, Codex Chef prints a capability board with the
 agent team, default-ready MCPs, disabled opt-in MCPs, local plugin skills, and
-reviewed global skills. That is the quick "what did I just get?" screen after
-setup.
+reviewed global skills. It also prints MCP setup notes for tooling, OAuth,
+filesystem-path, and `SUPABASE_DB_URL` requirements, so first-run gaps are
+visible before a task needs the connector. That is the quick "what did I just
+get?" screen after setup.
 
 ### Enterprise Routing Board
 
@@ -110,6 +112,10 @@ broad filesystem connectors stay parked until you opt in.
 | --- | --- | --- |
 | ✅ Ready by default | 📚 OpenAI Docs · 🧭 Context7 · 🧠 Sequential Thinking · 🎭 Playwright · 🧰 Chrome DevTools · 🗺️ Serena · 🧩 Memory | Safe research, code navigation, browser evidence, and local non-secret context. |
 | 🔒 Disabled by default | 📁 Filesystem · 🐙 GitHub · 🎨 Figma · 📌 Linear · 🗒️ Notion · 🚨 Sentry · ▲ Vercel · 🗄️ Supabase | These can expose private files, accounts, telemetry, deployments, or databases, so you enable them only when the task needs them. |
+
+Run `npm run codex:status` after install to see the live MCP setup board,
+effective routing controls, and any installed-runtime drift without mutating
+global Codex state.
 
 If `~/.codex/config.toml` already exists, the installer backs it up and merges
 only missing Codex Chef agent/MCP/safety tables. Your existing MCP entries,

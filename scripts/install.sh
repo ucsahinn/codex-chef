@@ -452,6 +452,9 @@ const readyMcps = mcpCatalog.servers
 const optInMcps = mcpCatalog.servers
   .filter((server) => server.defaultEnabled !== true)
   .map((server) => server.name);
+const mcpSetupNotes = mcpCatalog.servers
+  .filter((server) => !["none", "local-state"].includes(server.setupKind))
+  .map((server) => `${server.name} [${server.setupKind}]: ${server.setupHint}`);
 const pluginSkills = fs
   .readdirSync(pluginSkillRoot, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -465,6 +468,7 @@ for (const [label, names] of [
   ["Agents ready", agents],
   ["MCP ready by default", readyMcps],
   ["MCP opt-in / disabled by default", optInMcps],
+  ["MCP setup notes", mcpSetupNotes],
   ["Local plugin skills", pluginSkills],
   ["Reviewed global skills", reviewedSkills],
   ["Enterprise routing profiles", routingProfiles]

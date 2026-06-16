@@ -167,8 +167,9 @@ Beklenen skill davranışı idempotent ve sessizdir: kurulu skill'ler `Skill
 already installed`, başarılı yeni kurulumlar `Installed skill` olarak görünür;
 raw Skills CLI çıktısı yalnızca clone, installation veya write hatasında basılır.
 
-Repo sagligi, kurulu runtime drift'i, Codex doctor check'leri ve skills
-context-budget baskisini tek son kullanici gorunumunde gormek icin:
+Repo sagligi, kurulu runtime drift'i, Codex doctor check'leri, skills
+context-budget baskisi, routing kontrolleri ve MCP setup gereksinimlerini tek
+son kullanici gorunumunde gormek icin:
 
 ```bash
 npm run codex:status

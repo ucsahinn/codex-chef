@@ -7,6 +7,11 @@
   agents, skills, MCPs, and config/profile flags.
 - Extended installer capability boards to show enterprise routing profiles
   alongside agents, MCP defaults, plugin skills, and reviewed global skills.
+- Added MCP setup hints to the machine-readable catalog, installer capability
+  board, status board, and MCP docs so tooling, OAuth, filesystem-path, and
+  `SUPABASE_DB_URL` requirements are visible before connector opt-in.
+- Added an effective-controls summary to `npm run codex:status` and a routing
+  profile visibility gate for the global `AGENTS.md` template.
 - Updated first-party Skills CLI mappings to the current upstream skill names
   `ai-project-starter`, `prompt-architect`, and `ai-skill-create`.
 

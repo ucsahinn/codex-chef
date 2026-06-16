@@ -133,8 +133,11 @@ Kullanışlı flagler:
 
 İki installer da en sonda capability board basar: specialist agent'lar,
 varsayılan hazır MCP server'ları, disabled/opt-in MCP connector'ları, bundled
-plugin skill'leri ve reviewed global skill'ler. Account, database, production
-ve geniş filesystem connector'ları sen açıkça enable edene kadar kapalı kalır.
+plugin skill'leri, reviewed global skill'ler, enterprise routing profile'lari
+ve MCP setup notlari. Bu notlar local tooling, OAuth authorization, filesystem
+path secimi ve `SUPABASE_DB_URL` gibi gereksinimleri connector'a ihtiyac
+duymadan once gosterir. Account, database, production ve geniş filesystem
+connector'ları sen açıkça enable edene kadar kapalı kalır.
 
 ## Neler Yedeklenir?
 
@@ -175,8 +178,9 @@ veya auto-executor degildir. Hesap, deploy, database, destructive ve genis
 filesystem aksiyonlari acik onay gerektirir.
 
 `npm run codex:status` son kullanici status panosudur. Repo-only starter
-sagligini, kurulu runtime drift'ini, direkt Codex doctor check ozetlerini ve
-skill context-budget warning'lerini routing board ozetiyle birlikte toplar.
+sagligini, kurulu runtime drift'ini, direkt Codex doctor check ozetlerini,
+skill context-budget warning'lerini, routing board ozetini, effective control
+ozetini ve MCP setup notlarini birlikte toplar.
 Gercek kurulumda curated skill'ler ve opsiyonel Git guard'lar bilerek dahil edildiyse
 `npm run codex:status:all` kullan.
 

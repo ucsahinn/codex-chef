@@ -131,6 +131,38 @@ function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.join(root, relativePath), "utf8"));
 }
 
+function readInstalledOrTemplateConfig() {
+  const installedPath = path.join(options.codexHome, "config.toml");
+  const templatePath = process.platform === "win32"
+    ? path.join(root, "templates/codex/config.windows.toml")
+    : path.join(root, "templates/codex/config.unix.toml");
+  const configPath = fs.existsSync(installedPath) ? installedPath : templatePath;
+  return {
+    path: redact(configPath),
+    source: fs.existsSync(installedPath) ? "installed" : "template",
+    text: fs.readFileSync(configPath, "utf8")
+  };
+}
+
+function readTomlValue(text, dottedKey) {
+  const parts = dottedKey.split(".");
+  const key = parts.pop();
+  const section = parts.length > 0 ? parts.join(".").replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : null;
+  const keyPattern = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const body = section
+    ? text.match(new RegExp(`\\[${section}\\]\\s*([\\s\\S]*?)(?=\\n\\[|$)`))?.[1] || ""
+    : text;
+  const match = body.match(new RegExp(`^\\s*${keyPattern}\\s*=\\s*([^\\n#]+)`, "m"));
+  if (!match) return null;
+  const raw = match[1].trim().replace(/,$/, "");
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  const quoted = raw.match(/^"([\s\S]*)"$/);
+  if (quoted) return quoted[1];
+  const numeric = Number(raw);
+  return Number.isFinite(numeric) ? numeric : raw;
+}
+
 function codexCommand() {
   return process.platform === "win32" ? "codex.cmd" : "codex";
 }
@@ -187,6 +219,71 @@ function inspectRoutingBoard() {
       flags: [...new Set(profiles.flatMap((profile) => profile.flags || []))].sort()
     },
     boundary: "Routing profiles are guidance and status evidence, not hidden execution hooks; destructive, credentialed, publishing, deployment, database, and broad filesystem actions remain approval-gated."
+  };
+}
+
+function inspectMcpSetupBoard() {
+  const catalog = readJson("catalog/mcp-servers.json");
+  const servers = catalog.servers || [];
+  const enabled = servers.filter((server) => server.defaultEnabled === true);
+  const disabled = servers.filter((server) => server.defaultEnabled !== true);
+  const setupRequired = servers.filter((server) => !["none", "local-state"].includes(server.setupKind));
+
+  return {
+    inspected: true,
+    sourcePolicy: catalog.sourcePolicy,
+    serverCount: servers.length,
+    enabledByDefault: enabled.map((server) => server.name),
+    disabledByDefault: disabled.map((server) => server.name),
+    setupRequiredCount: setupRequired.length,
+    servers: servers.map((server) => ({
+      name: server.name,
+      category: server.category,
+      enabledByDefault: server.defaultEnabled === true,
+      auth: server.auth,
+      approval: server.approval,
+      risk: server.risk,
+      setupKind: server.setupKind,
+      setupHint: server.setupHint,
+      defaultReason: server.defaultReason
+    }))
+  };
+}
+
+function inspectEffectiveControls() {
+  const config = readInstalledOrTemplateConfig();
+  const text = config.text;
+  const managedHooks = fs.existsSync(path.join(options.codexHome, "hooks"))
+    ? fs.readdirSync(path.join(options.codexHome, "hooks"), { withFileTypes: true }).filter((entry) => entry.isFile()).length
+    : 0;
+
+  return {
+    inspected: true,
+    configSource: config.source,
+    configPath: config.path,
+    approvalPolicy: readTomlValue(text, "approval_policy"),
+    sandboxMode: readTomlValue(text, "sandbox_mode"),
+    workspaceNetwork: readTomlValue(text, "sandbox_workspace_write.network_access"),
+    features: {
+      apps: readTomlValue(text, "features.apps"),
+      memories: readTomlValue(text, "features.memories"),
+      hooks: readTomlValue(text, "features.hooks"),
+      multiAgent: readTomlValue(text, "features.multi_agent")
+    },
+    agents: {
+      maxThreads: readTomlValue(text, "agents.max_threads"),
+      maxDepth: readTomlValue(text, "agents.max_depth")
+    },
+    appsDefault: {
+      enabled: readTomlValue(text, "apps._default.enabled"),
+      defaultToolsEnabled: readTomlValue(text, "apps._default.default_tools_enabled"),
+      destructiveEnabled: readTomlValue(text, "apps._default.destructive_enabled"),
+      openWorldEnabled: readTomlValue(text, "apps._default.open_world_enabled")
+    },
+    managedHooks,
+    hookNote: managedHooks === 0
+      ? "Codex Chef enables hooks support but ships no lifecycle hook files; inspect /hooks before relying on user or project hooks."
+      : "Managed hook files are present; inspect them before release-sensitive work."
   };
 }
 
@@ -320,6 +417,8 @@ const codexDoctor = summarizeCodexDoctor();
 const skillInventory = inspectSkillInventory();
 const skillsContext = summarizeSkillContext(runtime.report, skillInventory);
 const routingBoard = inspectRoutingBoard();
+const mcpSetupBoard = inspectMcpSetupBoard();
+const effectiveControls = inspectEffectiveControls();
 
 const failures = [
   ...repoDoctor.failures.map((failure) => `repo: ${failure}`),
@@ -356,6 +455,8 @@ const report = {
   skillInventory,
   skillsContext,
   routingBoard,
+  mcpSetupBoard,
+  effectiveControls,
   warnings,
   attentionReasons,
   failures,
@@ -401,6 +502,15 @@ if (options.json) {
   console.log(
     `Enterprise routing: ${routingBoard.profileCount} profiles (agents ${routingBoard.requiredSurfaces.agents.length}, skills ${routingBoard.requiredSurfaces.skills.length}, MCP ${routingBoard.requiredSurfaces.mcp.length}, flags/checks ${routingBoard.requiredSurfaces.flags.length})`
   );
+  console.log(
+    `Effective controls: multi_agent=${effectiveControls.features.multiAgent}, max_depth=${effectiveControls.agents.maxDepth}, approval=${effectiveControls.approvalPolicy}, sandbox=${effectiveControls.sandboxMode}, network=${effectiveControls.workspaceNetwork}, hooks=${effectiveControls.features.hooks}, managed hooks=${effectiveControls.managedHooks}, apps default=${effectiveControls.appsDefault.enabled}/destructive=${effectiveControls.appsDefault.destructiveEnabled}/open_world=${effectiveControls.appsDefault.openWorldEnabled}`
+  );
+  console.log(
+    `MCP setup: ${mcpSetupBoard.serverCount} servers (${mcpSetupBoard.enabledByDefault.length} enabled, ${mcpSetupBoard.disabledByDefault.length} disabled, ${mcpSetupBoard.setupRequiredCount} with setup notes)`
+  );
+  for (const server of mcpSetupBoard.servers.filter((item) => !["none", "local-state"].includes(item.setupKind))) {
+    console.log(`MCP setup note: ${server.name} [${server.setupKind}] - ${server.setupHint}`);
+  }
   if (codexDoctor.inspected) {
     console.log(
       `Codex doctor checks: ${codexDoctor.status} (${codexDoctor.counts.ok} ok, ${codexDoctor.counts.fail} fail, ${codexDoctor.counts.warning} warning)`
