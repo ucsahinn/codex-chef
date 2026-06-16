@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.5.12 - 2026-06-16
+
+- Polished `npm run codex:status` skill inventory reporting so it shows
+  curated, missing, and other installed skill counts without exposing the names
+  of user-installed extra skills.
+- Kept the status board read-only and preserved the v0.5.11 source-backed
+  agent, runtime-verifier, and installer safety improvements.
+
 ## 0.5.11 - 2026-06-16
 
 - Promoted additional official enterprise setup sources into the specialist

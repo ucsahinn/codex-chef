@@ -145,20 +145,30 @@ function inspectSkillInventory() {
     path.join(options.codexHome, "skills"),
     path.join(options.agentsHome, "skills")
   ];
+  const expectedSet = new Set(expected);
   const actual = new Set();
+  const rootCounts = [];
   for (const skillRoot of roots) {
-    if (!fs.existsSync(skillRoot)) continue;
+    let count = 0;
+    if (!fs.existsSync(skillRoot)) {
+      rootCounts.push({ path: redact(skillRoot), exists: false, count });
+      continue;
+    }
     for (const entry of fs.readdirSync(skillRoot, { withFileTypes: true })) {
       if (entry.isDirectory() && !entry.name.startsWith(".")) actual.add(entry.name);
+      if (entry.isDirectory() && !entry.name.startsWith(".")) count += 1;
     }
+    rootCounts.push({ path: redact(skillRoot), exists: true, count });
   }
   const missing = expected.filter((skill) => !actual.has(skill));
+  const extraCount = [...actual].filter((skill) => !expectedSet.has(skill)).length;
   return {
     inspected: true,
     expected: expected.length,
     installed: actual.size,
     missing,
-    roots: roots.map((skillRoot) => ({ path: redact(skillRoot), exists: fs.existsSync(skillRoot) }))
+    extraCount,
+    roots: rootCounts
   };
 }
 
@@ -365,7 +375,7 @@ if (options.json) {
     console.log(`Installed runtime: ${runtime.status}`);
   }
   if (!runtime.report?.skills?.inspected && skillInventory.inspected) {
-    console.log(`Skills: ${skillInventory.installed} installed, ${skillInventory.missing.length} missing from curated set (read-only inventory)`);
+    console.log(`Skills: ${skillInventory.installed} total installed across global roots (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} missing, ${skillInventory.extraCount} other/user-installed)`);
   }
   console.log(`Skills context: ${skillsContext.status} (${skillsContext.installed ?? "not inspected"} installed; curated baseline ${skillsContext.curatedExpected})`);
   if (codexDoctor.inspected) {

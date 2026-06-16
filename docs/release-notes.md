@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## v0.5.12 - 2026-06-16
+
+This patch tightens the new end-user status board. It keeps the status command
+useful for real installs while avoiding unnecessary disclosure of user-installed
+extra skill names in machine-readable output.
+
+## Highlights
+
+- `npm run codex:status` now reports total installed skills, Codex Chef curated
+  baseline count, missing curated count, and other/user-installed count.
+- The report keeps extra skill details count-only, which is enough for context
+  pressure diagnosis without exposing a user's broader global skill inventory.
+- No installer targets, MCP defaults, global Git guard behavior, or curated
+  skill sources changed in this patch.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.11 - 2026-06-16
 
 This patch raises the enterprise-readiness bar without changing the safe

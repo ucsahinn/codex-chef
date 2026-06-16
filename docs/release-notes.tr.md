@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+## v0.5.12 - 2026-06-16
+
+Bu patch yeni son kullanici status panosunu sikilastirir. Komut gercek
+kurulumlarda faydali kalir ama kullanicinin globalde kurdugu ekstra skill
+isimlerini gereksiz yere makine okunur ciktida paylasmaz.
+
+## One Cikanlar
+
+- `npm run codex:status` artik toplam kurulu skill sayisini, Codex Chef curated
+  baseline sayisini, eksik curated skill sayisini ve diger/user-installed skill
+  sayisini raporlar.
+- Ekstra skill detaylari isim listesi olarak degil count-only kalir; bu context
+  baskisini anlamak icin yeterli, kullanicinin daha genis global skill
+  envanterini aciga cikarmamak icin daha dogrudur.
+- Bu patch installer target'larini, MCP default'larini, global Git guard
+  davranisini veya curated skill kaynaklarini degistirmez.
+
+## Dogrulama
+
+Bu surum icin release oncesi su kontroller calismali:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.11 - 2026-06-16
 
 Bu patch installer'in guvenli varsayilanlarini degistirmeden enterprise
