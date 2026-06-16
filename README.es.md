@@ -13,12 +13,12 @@
 
 <p align="center">
   🌐 <strong>Documentación:</strong>
-  <a href="README.de.md">🇩🇪 Deutsch</a> |
-  <a href="README.es.md">🇪🇸 Español</a> |
-  <a href="README.md">🇬🇧 English</a> |
-  <a href="README.pt-BR.md">🇧🇷 Português (Brasil)</a> |
-  <a href="README.tr.md">🇹🇷 Türkçe</a> |
-  <a href="README.fr.md">🇫🇷 French / Français</a>
+  <a href="README.de.md">🇩🇪</a> |
+  <a href="README.es.md">🇪🇸</a> |
+  <a href="README.md">🇬🇧</a> |
+  <a href="README.pt-BR.md">🇧🇷</a> |
+  <a href="README.tr.md">🇹🇷</a> |
+  <a href="README.fr.md">🇫🇷</a>
 </p>
 
 Codex Chef le da a tu setup de Codex en Windows un punto de partida claro: defaults seguros, un equipo de agentes con nombre, skills curadas, MCPs preconfigurados, workflows locales de plugin y validación que puedes revisar antes de tocar tu máquina.

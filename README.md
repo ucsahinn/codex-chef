@@ -15,12 +15,12 @@
 
 <p align="center">
   🌐 <strong>Docs:</strong>
-  <a href="README.de.md">🇩🇪 Deutsch</a> |
-  <a href="README.es.md">🇪🇸 Español</a> |
-  <a href="README.md">🇬🇧 English</a> |
-  <a href="README.pt-BR.md">🇧🇷 Português (Brasil)</a> |
-  <a href="README.tr.md">🇹🇷 Türkçe</a> |
-  <a href="README.fr.md">🇫🇷 French / Français</a>
+  <a href="README.de.md">🇩🇪</a> |
+  <a href="README.es.md">🇪🇸</a> |
+  <a href="README.md">🇬🇧</a> |
+  <a href="README.pt-BR.md">🇧🇷</a> |
+  <a href="README.tr.md">🇹🇷</a> |
+  <a href="README.fr.md">🇫🇷</a>
 </p>
 
 Codex Chef gives a Windows-first Codex setup a clean starting point: safer defaults, a named specialist team, curated skills, MCP defaults, local plugin workflows, and validation that users can inspect before anything touches their machine.
@@ -242,12 +242,12 @@ tokens, profiles, and user-tuned settings are not overwritten unless `-Force` /
 
 | Language | README |
 | --- | --- |
-| &#127465;&#127466; Deutsch | [README.de.md](README.de.md) |
-| &#127466;&#127480; Español | [README.es.md](README.es.md) |
-| &#127468;&#127463; English | [README.md](README.md) |
-| &#127463;&#127479; Português (Brasil) | [README.pt-BR.md](README.pt-BR.md) |
-| &#127481;&#127479; Türkçe | [README.tr.md](README.tr.md) |
-| &#127467;&#127479; French / Français | [README.fr.md](README.fr.md) |
+| 🇩🇪 | [README.de.md](README.de.md) |
+| 🇪🇸 | [README.es.md](README.es.md) |
+| 🇬🇧 | [README.md](README.md) |
+| 🇧🇷 | [README.pt-BR.md](README.pt-BR.md) |
+| 🇹🇷 | [README.tr.md](README.tr.md) |
+| 🇫🇷 | [README.fr.md](README.fr.md) |
 
 ## ⚡ Start Here
 

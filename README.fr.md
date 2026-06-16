@@ -13,12 +13,12 @@
 
 <p align="center">
   🌐 <strong>Documentation:</strong>
-  <a href="README.de.md">🇩🇪 Deutsch</a> |
-  <a href="README.es.md">🇪🇸 Español</a> |
-  <a href="README.md">🇬🇧 English</a> |
-  <a href="README.pt-BR.md">🇧🇷 Português (Brasil)</a> |
-  <a href="README.tr.md">🇹🇷 Türkçe</a> |
-  <a href="README.fr.md">🇫🇷 French / Français</a>
+  <a href="README.de.md">🇩🇪</a> |
+  <a href="README.es.md">🇪🇸</a> |
+  <a href="README.md">🇬🇧</a> |
+  <a href="README.pt-BR.md">🇧🇷</a> |
+  <a href="README.tr.md">🇹🇷</a> |
+  <a href="README.fr.md">🇫🇷</a>
 </p>
 
 Codex Chef donne à ton setup Codex sur Windows un point de départ clair: des defaults prudents, une équipe d'agents nommés, des skills vérifiées, des MCP préconfigurés, des workflows de plugin locaux et une validation lisible avant toute modification.
