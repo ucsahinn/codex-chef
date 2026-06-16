@@ -171,5 +171,6 @@ otoritesi resmi dokümanların yerini almaz.
   terfi edene kadar default runtime authority olmaz.
 - Guncel OpenAI config referansi app/connector kapilarini MCP server approval
   ayarlarindan ayri gosterdigi icin Codex template'lerine acik
+  `apps._default.enabled = false`,
   `apps._default.destructive_enabled = false` ve
   `apps._default.open_world_enabled = false` eklenir.

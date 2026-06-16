@@ -46,6 +46,10 @@ This is an unofficial community starter, not an OpenAI product. It is mapped to 
 
 The multilingual README entry points and six-language deep docs coverage are part
 of the release surface, so users do not have to start from English-only docs.
+English and Turkish carry the full operator detail for install, expected output,
+and release notes; Deutsch, Español, Português (Brasil), and Français keep
+safety summaries plus source section indexes so users know where the
+authoritative full-detail docs live.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Copy-Paste Install
 
@@ -61,15 +65,15 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 Safe preview first:
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
 Repair an existing global Codex setup without deleting user skills:
 
 ```powershell
-.\scripts\install.ps1 -Repair -WhatIf
-.\scripts\install.ps1 -Repair
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair
 ```
 
 Automation-friendly one-shot install without questions:
@@ -323,7 +327,7 @@ The installer does not:
 PowerShell safe preview:
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 Bash or WSL safe preview:
@@ -375,13 +379,37 @@ chmod +x scripts/install.sh
 ./scripts/install.sh --all
 ```
 
+### Install Parameters
+
+| PowerShell | Bash/WSL | Purpose |
+| --- | --- | --- |
+| `-All` | `--all` | Install the reviewed Codex Chef surface: managed Codex files, plugin workflows, and curated skills. |
+| `-Interactive` | `--interactive` | Ask before optional choices and show the plan before applying. |
+| `-WhatIf` | `--dry-run` | Preview without writing files, Git settings, or skills. |
+| `-Repair` | `--repair` | Reconcile an existing global Codex setup with backups; preserves user skills and local approval rules. |
+| `-Force` | `--force` | Replace existing managed Codex Chef targets after backup. Use only after reviewing a dry run. |
+| `-NoBackup` | `--no-backup` | Skip backup creation for managed target changes. This is unsafe for normal use; prefer the default backup behavior. |
+| `-InstallSkills` | `--install-skills` | Install or reconcile only the reviewed global skill catalog. |
+| `-InstallGitGuards` | `--install-git-guards` | Opt in to global Git ignore and pre-commit guards for this Windows user. |
+| `-PlainOutput` | `--plain-output` | Use ASCII-friendly output for older terminals and CI logs. |
+
+Useful verification commands:
+
+| Command | What it proves |
+| --- | --- |
+| `npm run codex:status` | Repo health, installed runtime drift, MCP setup notes, routing profiles, and effective controls. |
+| `npm run codex:status:all` | Same status board plus expected curated skills and optional Git guard checks. |
+| `npm run verify:install:runtime -- --expect-skills --expect-git-guards` | Read-only proof that the installed `CODEX_HOME` has 21 agents, 15 MCP entries, managed files, and curated skills. |
+| `npm run verify:skills:online -- --timeout-ms=90000` | Network-backed proof that all 16 reviewed skill sources still resolve. |
+| `codex exec --strict-config "Summarize the active Codex setup in three short bullets."` | Real Codex startup, strict config compatibility, auth, and model-call smoke test. |
+
 After installation, restart Codex and run:
 
 ```bash
 codex doctor --summary
 npm run codex:status
 npm run verify:install:runtime
-codex --strict-config "Summarize the active Codex setup."
+codex exec --strict-config "Summarize the active Codex setup."
 ```
 
 Use `-InstallSkills` / `--install-skills` or `-InstallGitGuards` / `--install-git-guards` when you only want one optional part of the setup.

@@ -2,13 +2,43 @@
 
 ## Unreleased
 
-- Added an enterprise routing board with `catalog/routing-profiles.json` and
-  `npm run codex:routing`. The board maps common task shapes to the expected
-  subagents, skills, MCPs, and config/profile flags while keeping risky actions
-  approval-gated.
-- `npm run codex:status` now includes the routing board summary, and the
-  PowerShell/Bash installers show enterprise routing profiles in the capability
-  board printed after setup.
+## v0.5.14 - 2026-06-16
+
+This patch closes the remaining connector and documentation gaps found during
+the final Codex Chef audit. App connector browsing is now parked by default,
+repair mode migrates older installs safely, and the README documents the
+installer parameters operators actually need.
+
+## Highlights
+
+- Disabled app/connectors by default with `apps._default.enabled = false` so
+  app connector browsing stays opt-in like authenticated MCP connectors.
+- `npm run repair:install` now removes the deprecated
+  `apps._default.default_tools_enabled` key and rewrites older
+  `apps._default.enabled = true` managed defaults back to the safe parked state.
+- Security, status, and repair validation now require
+  `apps._default.enabled = false`,
+  `apps._default.destructive_enabled = false`, and
+  `apps._default.open_world_enabled = false`.
+- Added README install-parameter tables for `-All`, `-Interactive`, `-WhatIf`,
+  `-Repair`, `-Force`, `-NoBackup`, `-InstallSkills`, `-InstallGitGuards`, and
+  `-PlainOutput`.
+- Clarified the documentation model: English and Turkish carry full operator
+  detail, while German, Spanish, Brazilian Portuguese, and French pages remain
+  safety summaries and source indexes.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run codex:status:all
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
 
 ## v0.5.13 - 2026-06-16
 
@@ -19,8 +49,20 @@ non-blocking WebSocket fallback warnings.
 
 ## Highlights
 
+- Added an enterprise routing board with `catalog/routing-profiles.json` and
+  `npm run codex:routing`. The board maps common task shapes to the expected
+  subagents, skills, MCPs, and config/profile flags while keeping risky actions
+  approval-gated.
+- `npm run codex:status` now includes the routing board summary, and the
+  PowerShell/Bash installers show enterprise routing profiles in the capability
+  board printed after setup.
+- Added MCP setup hints to the machine-readable catalog, installer capability
+  board, status board, and MCP docs so tooling, OAuth, filesystem-path, and
+  `SUPABASE_DB_URL` requirements are visible before connector opt-in.
+- Added an effective-controls summary to `npm run codex:status` and a routing
+  profile visibility gate for the global `AGENTS.md` template.
 - Removed the deprecated `apps._default.default_tools_enabled` config key from
-  shipped templates and repair handling so `codex --strict-config` can start
+  shipped templates and repair handling so `codex exec --strict-config` can start
   cleanly on Codex v0.140.0.
 - Runtime verification now checks that `rules/default.rules` contains the
   managed Codex Chef safety baseline while allowing local approval rules added
@@ -30,6 +72,8 @@ non-blocking WebSocket fallback warnings.
 - `npm run codex:status` keeps provider, MCP, and config issues actionable
   while treating the WebSocket timeout as a non-blocking warning when the rest
   of Codex doctor is healthy and HTTPS fallback is available.
+- Updated first-party Skills CLI mappings to the current upstream skill names
+  `ai-project-starter`, `prompt-architect`, and `ai-skill-create`.
 
 ## Verification
 

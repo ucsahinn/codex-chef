@@ -42,7 +42,7 @@ codex --sandbox read-only --ask-for-approval never
 Config kontrolü:
 
 ```bash
-codex --strict-config "Summarize the active setup."
+codex exec --strict-config "Summarize the active setup."
 ```
 
 `danger-full-access` ve bypass flagleri standart çözüm değildir. Sadece dışarıdan
@@ -74,7 +74,7 @@ kalir.
 
 | Alan | Starter default'u | Kullanim |
 | --- | --- | --- |
-| `apps._default.enabled` | `true` | Belirli auth isteyen servisi acmadan connector taramasina izin verir. |
+| `apps._default.enabled` | `false` | Belirli connector incelenip acilmadan app/connector yuzeyini park halinde tutar. |
 | `apps._default.destructive_enabled` | `false` | Destructive davranis bildiren tool'lari default olarak kapatir. |
 | `apps._default.open_world_enabled` | `false` | Genis open-world davranis bildiren tool'lari default olarak kapatir. |
 | `apps.<id>.tools.<tool>.approval_mode` | unset | Sadece belirli bir connector tool'u review edildiyse kullan. |

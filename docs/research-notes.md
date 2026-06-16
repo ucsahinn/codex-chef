@@ -179,7 +179,8 @@ risk pattern, not as the source of truth.
   trusted publishing, and Sigstore docs into authority references for security,
   release, and review agents so dependency, package, provenance, and artifact
   claims are checked against current primary sources.
-- Add explicit `apps._default.destructive_enabled = false` and
+- Add explicit `apps._default.enabled = false`,
+  `apps._default.destructive_enabled = false`, and
   `apps._default.open_world_enabled = false` to the Codex templates because the
   current OpenAI config reference exposes those app/connector gates separately
   from MCP server approval settings.

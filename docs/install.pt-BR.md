@@ -4,6 +4,10 @@
 
 > Este guia em português do Brasil faz parte do conjunto de documentação em seis idiomas para `install.md`. Ele mantém o mesmo limite de segurança: prever primeiro, não armazenar segredos e verificar localmente cada mudança de setup.
 
+> Parametros completos de instalacao, regras de backup e detalhes de operador
+> ficam em [English](install.md) e [Türkçe](install.tr.md). Esta pagina
+> localizada e um resumo de seguranca com indice de fontes.
+
 ## O que esta página cobre
 
 - Instalação Windows-first com PowerShell e caminho equivalente para Bash/WSL.
@@ -13,7 +17,7 @@
 ## Comandos úteis
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 ```powershell

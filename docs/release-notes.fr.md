@@ -34,12 +34,76 @@ npm run verify:skills:online
 - Utiliser `git diff --check` pour détecter les problèmes de whitespace et Markdown.
 - Utiliser `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks est disponible.
 
+## v0.5.14 - 2026-06-16
+
+Cette version ferme les derniers ecarts de connectors et de documentation du
+dernier audit Codex Chef. App/connectors restent parques par defaut avec
+`apps._default.enabled = false`, repair mode migre les anciens defaults vers
+l'etat sur, et les README anglaise et turque documentent les parametres de
+l'installer.
+
+### Highlights
+
+- App/connectors restent opt-in comme les MCP connectors authentifies.
+- Repair, security et status validation exigent
+  `apps._default.enabled = false`,
+  `apps._default.destructive_enabled = false` et
+  `apps._default.open_world_enabled = false`.
+- README documente `-All`, `-Interactive`, `-WhatIf`, `-Repair`, `-Force`,
+  `-NoBackup`, `-InstallSkills`, `-InstallGitGuards` et `-PlainOutput`.
+
+### Verification
+
+```bash
+npm run check
+npm run codex:status:all
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
+## v0.5.13 - 2026-06-16
+
+Cette version durcit la compatibilite runtime pour les installations Codex
+actuelles. Elle retire le champ obsolete
+`apps._default.default_tools_enabled`, preserve les approval rules locales dans
+`rules/default.rules`, affiche les routing profiles et les notes de setup MCP
+dans le status board, et classe l'avertissement WebSocket fallback comme non
+bloquant quand le reste de Codex doctor est sain.
+
+### Highlights
+
+- Enterprise routing board avec `catalog/routing-profiles.json` et
+  `npm run codex:routing`.
+- Notes de setup MCP pour tooling, OAuth, chemins filesystem et
+  `SUPABASE_DB_URL`.
+- Resume des effective controls dans `npm run codex:status`.
+- Noms de skills mis a jour: `ai-project-starter`, `prompt-architect` et
+  `ai-skill-create`.
+
+### Verification
+
+```bash
+npm run check
+npm run codex:status:all
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## Sections source
 
 Ce fichier localisé suit les sections du fichier source anglais. Source: [release-notes.md](release-notes.md).
 
 - Release Notes
 - Unreleased
+- v0.5.14 - 2026-06-16
+- Highlights
+- Verification
+- v0.5.13 - 2026-06-16
+- Highlights
+- Verification
 - v0.5.12 - 2026-06-16
 - Highlights
 - Verification

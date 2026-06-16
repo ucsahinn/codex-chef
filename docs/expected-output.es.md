@@ -4,6 +4,10 @@
 
 > Esta guía en español forma parte del conjunto de documentación en seis idiomas para `expected-output.md`. Mantiene el mismo límite de seguridad: previsualizar primero, no guardar secretos y verificar localmente cada cambio de setup.
 
+> Los ejemplos completos de salida y los detalles de operador estan en
+> [English](expected-output.md) y [Türkçe](expected-output.tr.md). Esta pagina
+> localizada es un resumen de seguridad con indice de fuentes.
+
 ## Qué cubre esta página
 
 - Instalación Windows-first con PowerShell y una ruta equivalente para Bash/WSL.
@@ -13,7 +17,7 @@
 ## Comandos útiles
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 ```powershell

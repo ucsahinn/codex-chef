@@ -27,7 +27,7 @@ disable_on_external_context = true
 min_rate_limit_remaining_percent = 15
 
 [apps._default]
-enabled = true
+enabled = false
 destructive_enabled = false
 open_world_enabled = false
 

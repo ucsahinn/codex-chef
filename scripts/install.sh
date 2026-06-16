@@ -492,7 +492,7 @@ else
   echo "    npm run codex:routing"
   echo "    npm run codex:status"
   echo "    npm run verify:install:runtime"
-  echo '    codex --strict-config "Summarize the active Codex setup."'
+  echo '    codex exec --strict-config "Summarize the active Codex setup."'
 fi
 if [ "$NO_BACKUP" -ne 1 ] && [ -d "$BACKUP_ROOT" ]; then
   note "Backup: $BACKUP_ROOT"

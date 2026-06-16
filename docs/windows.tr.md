@@ -37,7 +37,7 @@ bir profil kullan.
 
 ```powershell
 codex doctor --summary
-codex --strict-config "Summarize the active setup."
+codex exec --strict-config "Summarize the active setup."
 ```
 
 Bir oturum içinde geçici ek okuma izni gerekiyorsa:

@@ -14,7 +14,7 @@
 
 ```bash
 codex doctor --summary
-codex --strict-config "Summarize the active Codex setup."
+codex exec --strict-config "Summarize the active Codex setup."
 ```
 
 ```text

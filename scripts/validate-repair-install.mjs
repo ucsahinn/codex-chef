@@ -73,7 +73,7 @@ const pluginTarget = path.join(codexHome, "plugins", "codex-chef-workflows");
 write(path.join(codexHome, "AGENTS.md"), "# stale guidance\n");
 write(
   path.join(codexHome, "config.toml"),
-  "# user setting must stay\nmodel = \"gpt-5\"\n\n[apps._default]\ndefault_tools_enabled = true\n"
+  "# user setting must stay\nmodel = \"gpt-5\"\n\n[apps._default]\nenabled = true\ndefault_tools_enabled = true\n"
 );
 write(
   path.join(codexHome, "rules", "default.rules"),
@@ -118,6 +118,15 @@ if (plan) {
   if (!plan.managedFiles?.extraPluginFiles?.length) fail("repair plan must report extra managed plugin files.");
   if (!plan.config?.removedDeprecatedFields?.includes("apps._default.default_tools_enabled")) {
     fail("repair plan must report deprecated managed config fields.");
+  }
+  if (!plan.config?.updatedManagedFields?.includes("apps._default.enabled")) {
+    fail("repair plan must report managed app connector default updates.");
+  }
+  if (!plan.config?.updatedManagedFields?.includes("apps._default.destructive_enabled")) {
+    fail("repair plan must report missing destructive app connector guard backfill.");
+  }
+  if (!plan.config?.updatedManagedFields?.includes("apps._default.open_world_enabled")) {
+    fail("repair plan must report missing open-world app connector guard backfill.");
   }
   if (!plan.skills || plan.skills.extraCount < 1 || plan.skills.duplicateCount < 1) {
     fail("repair plan must report non-curated and duplicate skill inventory.");
@@ -175,6 +184,74 @@ if (!repairedConfig.includes("# user setting must stay") || !repairedConfig.incl
 }
 if (repairedConfig.includes("default_tools_enabled")) {
   fail("repair apply must remove deprecated managed apps._default.default_tools_enabled.");
+}
+if (!/\[apps\._default\][\s\S]*?\nenabled\s*=\s*false/.test(repairedConfig)) {
+  fail("repair apply must set apps._default.enabled = false.");
+}
+if (!/\[apps\._default\][\s\S]*?\ndestructive_enabled\s*=\s*false/.test(repairedConfig)) {
+  fail("repair apply must backfill apps._default.destructive_enabled = false.");
+}
+if (!/\[apps\._default\][\s\S]*?\nopen_world_enabled\s*=\s*false/.test(repairedConfig)) {
+  fail("repair apply must backfill apps._default.open_world_enabled = false.");
+}
+
+const missingConfigRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-missing-config-"));
+const missingConfigCodexHome = path.join(missingConfigRoot, ".codex");
+const missingConfigAgentsHome = path.join(missingConfigRoot, ".agents");
+ensureDir(missingConfigCodexHome);
+ensureDir(missingConfigAgentsHome);
+const missingConfigPlan = parseResult(runRepair([], missingConfigCodexHome, missingConfigAgentsHome), "repair missing config plan");
+if (missingConfigPlan) {
+  if (missingConfigPlan.config?.fullTemplateInstall !== true) {
+    fail("repair plan must report full template install when config.toml is missing.");
+  }
+}
+const missingConfigApplied = parseResult(runRepair(["--apply"], missingConfigCodexHome, missingConfigAgentsHome), "repair missing config apply");
+if (missingConfigApplied) {
+  const installedConfig = fs.readFileSync(path.join(missingConfigCodexHome, "config.toml"), "utf8");
+  if (!/\nmodel\s*=\s*"[^"]+"/.test(`\n${installedConfig}`)) {
+    fail("repair apply must install root-level model when config.toml is missing.");
+  }
+  if (!installedConfig.includes('approval_policy = "on-request"')) {
+    fail("repair apply must install root-level approval policy when config.toml is missing.");
+  }
+  if (!installedConfig.includes('sandbox_mode = "workspace-write"')) {
+    fail("repair apply must install root-level sandbox mode when config.toml is missing.");
+  }
+  if (!/\[apps\._default\][\s\S]*?\nenabled\s*=\s*false/.test(installedConfig)) {
+    fail("repair apply must install app connector defaults when config.toml is missing.");
+  }
+}
+
+const inlineCommentRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-inline-apps-"));
+const inlineCommentCodexHome = path.join(inlineCommentRoot, ".codex");
+const inlineCommentAgentsHome = path.join(inlineCommentRoot, ".agents");
+write(
+  path.join(inlineCommentCodexHome, "config.toml"),
+  [
+    "# inline comments must survive repair",
+    "",
+    "[apps._default]",
+    "enabled = true # local app connector testing",
+    "destructive_enabled = true # must be parked",
+    "open_world_enabled = true # must be parked",
+    ""
+  ].join("\n")
+);
+ensureDir(inlineCommentAgentsHome);
+const inlineCommentApplied = parseResult(runRepair(["--apply"], inlineCommentCodexHome, inlineCommentAgentsHome), "repair inline app comments apply");
+if (inlineCommentApplied) {
+  const inlineConfig = fs.readFileSync(path.join(inlineCommentCodexHome, "config.toml"), "utf8");
+  const appsBlock = /\[apps\._default\]([\s\S]*?)(?:\n\[|$)/.exec(inlineConfig)?.[1] || "";
+  for (const key of ["enabled", "destructive_enabled", "open_world_enabled"]) {
+    const matches = appsBlock.match(new RegExp(`^${key}\\s*=`, "gm")) || [];
+    if (matches.length !== 1) {
+      fail(`repair apply must not duplicate apps._default.${key} when inline comments are present.`);
+    }
+    if (!new RegExp(`${key}\\s*=\\s*false\\s*#`).test(appsBlock)) {
+      fail(`repair apply must rewrite apps._default.${key} to false while preserving inline comments.`);
+    }
+  }
 }
 
 const pruned = parseResult(runRepair(["--apply", "--prune-managed-plugin-extras"], codexHome, agentsHome), "repair prune");

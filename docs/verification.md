@@ -129,7 +129,7 @@ $errors
 PowerShell dry run:
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 Bash dry run:

@@ -13,7 +13,7 @@
 ## Nützliche Befehle
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 ```powershell

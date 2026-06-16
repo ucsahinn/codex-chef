@@ -34,12 +34,74 @@ npm run verify:skills:online
 - Usar `git diff --check` para detectar problemas de whitespace y Markdown.
 - Usar `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks está disponible.
 
+## v0.5.14 - 2026-06-16
+
+Esta version cierra los ultimos huecos de connectors y documentacion del audit
+final de Codex Chef. App/connectors quedan aparcados por defecto con
+`apps._default.enabled = false`, repair mode migra defaults antiguos al estado
+seguro, y las README en ingles y turco documentan los parametros del installer.
+
+### Highlights
+
+- App/connectors siguen siendo opt-in como los MCP connectors autenticados.
+- Repair, security y status validation exigen
+  `apps._default.enabled = false`,
+  `apps._default.destructive_enabled = false` y
+  `apps._default.open_world_enabled = false`.
+- README documenta `-All`, `-Interactive`, `-WhatIf`, `-Repair`, `-Force`,
+  `-NoBackup`, `-InstallSkills`, `-InstallGitGuards` y `-PlainOutput`.
+
+### Verificacion
+
+```bash
+npm run check
+npm run codex:status:all
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
+## v0.5.13 - 2026-06-16
+
+Esta version endurece la compatibilidad runtime para instalaciones actuales de
+Codex. Quita el campo obsoleto `apps._default.default_tools_enabled`, conserva
+approval rules locales en `rules/default.rules`, muestra routing profiles y
+notas de setup MCP en el status board, y trata el warning de WebSocket fallback
+como no bloqueante cuando el resto de Codex doctor esta sano.
+
+### Highlights
+
+- Enterprise routing board con `catalog/routing-profiles.json` y
+  `npm run codex:routing`.
+- Notas de setup MCP para tooling, OAuth, rutas filesystem y
+  `SUPABASE_DB_URL`.
+- Resumen de effective controls en `npm run codex:status`.
+- Nombres de skills actualizados: `ai-project-starter`, `prompt-architect` y
+  `ai-skill-create`.
+
+### Verificacion
+
+```bash
+npm run check
+npm run codex:status:all
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## Secciones fuente
 
 Este archivo localizado sigue las secciones del archivo fuente en inglés. Source: [release-notes.md](release-notes.md).
 
 - Release Notes
 - Unreleased
+- v0.5.14 - 2026-06-16
+- Highlights
+- Verification
+- v0.5.13 - 2026-06-16
+- Highlights
+- Verification
 - v0.5.12 - 2026-06-16
 - Highlights
 - Verification

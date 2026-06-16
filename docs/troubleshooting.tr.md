@@ -8,7 +8,7 @@ isteyen connector çalıştırmadan önce tanı komutlarını read-only tut.
 Önce ön izleme al:
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 Temel kontroller:
@@ -97,7 +97,7 @@ Managed file drift raporlanırsa agent ve MCP sayıları doğru görünse bile k
 kopya eskidir. Önce repair çalıştır:
 
 ```powershell
-.\scripts\install.ps1 -Repair -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
 .\scripts\install.ps1 -Repair
 ```
 
@@ -124,7 +124,7 @@ Sandbox setup hatası alırsan:
 
 ```powershell
 codex doctor --summary
-codex --strict-config "Summarize the active Codex setup."
+codex exec --strict-config "Summarize the active Codex setup."
 ```
 
 Bir PATH binary'si sadece sandbox içinde kayboluyorsa config değiştirmeden önce

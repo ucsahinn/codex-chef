@@ -8,7 +8,7 @@ you intentionally run an installer or authenticated connector.
 Run a preview first:
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 Common checks:
@@ -97,7 +97,7 @@ If it reports managed file drift, the installed copy is stale even when the
 agent and MCP counts look right. Run repair first:
 
 ```powershell
-.\scripts\install.ps1 -Repair -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
 .\scripts\install.ps1 -Repair
 ```
 
@@ -123,7 +123,7 @@ try:
 
 ```powershell
 codex doctor --summary
-codex --strict-config "Summarize the active Codex setup."
+codex exec --strict-config "Summarize the active Codex setup."
 ```
 
 If a PATH binary appears missing only inside the sandbox, verify the binary from

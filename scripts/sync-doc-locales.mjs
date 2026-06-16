@@ -392,7 +392,7 @@ const titles = {
 
 const commandBlocks = {
   install: [
-    "```powershell\n.\\scripts\\install.ps1 -All -WhatIf\n```",
+    "```powershell\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\install.ps1 -All -WhatIf\n```",
     "```powershell\n.\\scripts\\install.ps1 -All -Interactive\n```",
     "```powershell\n.\\scripts\\install.ps1 -All -PlainOutput\n```",
     "```bash\n./scripts/install.sh --all --dry-run\n```",
@@ -401,7 +401,7 @@ const commandBlocks = {
     "```bash\nnode scripts/plan-install.mjs --all --json\n```"
   ],
   codex: [
-    "```bash\ncodex doctor --summary\ncodex --strict-config \"Summarize the active Codex setup.\"\n```",
+    "```bash\ncodex doctor --summary\ncodex exec --strict-config \"Summarize the active Codex setup.\"\n```",
     "```text\n/mcp\n/skills\n/plugins\n/hooks\n```"
   ],
   security: [

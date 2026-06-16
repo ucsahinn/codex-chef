@@ -19,7 +19,7 @@ dizini kullanır.
 Yazmadan önce ön izle:
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 Installer'lari cagirmadan manifest-backed operasyon planini incele:
@@ -56,7 +56,7 @@ Soru sormayan otomasyon dostu kurulum:
 Mevcut global Codex kurulumunu onar:
 
 ```powershell
-.\scripts\install.ps1 -Repair -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
 .\scripts\install.ps1 -Repair
 ```
 
@@ -168,7 +168,7 @@ codex doctor --summary
 npm run codex:routing
 npm run codex:status
 npm run verify:install:runtime
-codex --strict-config "Summarize the active Codex setup."
+codex exec --strict-config "Summarize the active Codex setup."
 ```
 
 `npm run codex:routing`, `catalog/routing-profiles.json` dosyasindan enterprise
@@ -223,7 +223,7 @@ kullan. `tmp/` klasörünü de sadece bilerek oluşturduysan temizle.
 Zaten bir Codex setup'ın varsa once repair planina bak:
 
 ```powershell
-.\scripts\install.ps1 -Repair -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
 ```
 
 Repair temizse normal install komutuna gecebilirsin. Mevcut `config.toml`

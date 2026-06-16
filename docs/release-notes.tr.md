@@ -2,13 +2,44 @@
 
 ## Unreleased
 
-- `catalog/routing-profiles.json` ve `npm run codex:routing` ile enterprise
-  routing panosu eklendi. Pano yaygin task shape'leri beklenen subagent, skill,
-  MCP ve config/profile flag'leriyle eslestirir; riskli aksiyonlar onay
-  kapisinda kalir.
-- `npm run codex:status` artik routing board ozetini de verir. PowerShell ve
-  Bash installer capability board'u da kurulum sonunda enterprise routing
-  profillerini gosterir.
+## v0.5.14 - 2026-06-16
+
+Bu patch final Codex Chef audit'inde kalan connector ve dokumantasyon
+bosluklarini kapatir. App connector browsing artik default kapali kalir, repair
+mode eski kurulumlari guvenli default'a tasir ve README operatorlerin gercekten
+kullanacagi installer parametrelerini acikca anlatir.
+
+## One Cikanlar
+
+- App/connectors default olarak `apps._default.enabled = false` ile kapatildi;
+  app connector browsing authenticated MCP connector'lari gibi opt-in kalir.
+- `npm run repair:install` artik deprecated
+  `apps._default.default_tools_enabled` anahtarini kaldirir ve eski
+  `apps._default.enabled = true` managed default'unu guvenli parked duruma geri
+  yazar.
+- Security, status ve repair validation artik
+  `apps._default.enabled = false`,
+  `apps._default.destructive_enabled = false` ve
+  `apps._default.open_world_enabled = false` alanlarini zorunlu tutar.
+- README'ye `-All`, `-Interactive`, `-WhatIf`, `-Repair`, `-Force`,
+  `-NoBackup`, `-InstallSkills`, `-InstallGitGuards` ve `-PlainOutput` icin
+  kurulum parametre tablolari eklendi.
+- Dokumantasyon modeli netlestirildi: Ingilizce ve Turkce tam operator
+  detayini tasir; Almanca, Ispanyolca, Brezilya Portekizcesi ve Fransizca
+  sayfalar guvenlik ozeti ve kaynak indeksi olarak kalir.
+
+## Dogrulama
+
+Bu surum icin release oncesi su kontroller calismali:
+
+```bash
+npm run check
+npm run codex:status:all
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
 
 ## v0.5.13 - 2026-06-16
 
@@ -18,9 +49,22 @@ gorunmez ve status panosu WebSocket fallback uyarisini daha dogru siniflandirir.
 
 ## One Cikanlar
 
+- `catalog/routing-profiles.json` ve `npm run codex:routing` ile enterprise
+  routing panosu eklendi. Pano yaygin task shape'leri beklenen subagent, skill,
+  MCP ve config/profile flag'leriyle eslestirir; riskli aksiyonlar onay
+  kapisinda kalir.
+- `npm run codex:status` artik routing board ozetini de verir. PowerShell ve
+  Bash installer capability board'u da kurulum sonunda enterprise routing
+  profillerini gosterir.
+- MCP setup hint'leri machine-readable catalog'a, installer capability
+  board'una, status board'a ve MCP dokumanlarina eklendi; tooling, OAuth,
+  filesystem path ve `SUPABASE_DB_URL` gereksinimleri connector opt-in'den once
+  gorunur.
+- `npm run codex:status` icin effective-controls ozeti ve global `AGENTS.md`
+  template'i icin routing profile visibility gate'i eklendi.
 - `apps._default.default_tools_enabled` config anahtari shipped template'lerden
   ve repair handling'den kaldirildi; boylece Codex v0.140.0 ile
-  `codex --strict-config` temiz baslayabilir.
+  `codex exec --strict-config` temiz baslayabilir.
 - Runtime verification artik `rules/default.rules` icinde Codex Chef'in managed
   guvenlik baseline'ini arar ama normal Codex kullanimiyla eklenen lokal
   approval rule'larini drift saymaz.
@@ -29,6 +73,8 @@ gorunmez ve status panosu WebSocket fallback uyarisini daha dogru siniflandirir.
 - `npm run codex:status`, provider, MCP ve config sorunlarini action item olarak
   tutar; Codex doctor'in kalani saglikliyken WebSocket timeout'u HTTPS fallback
   uyarisi olarak non-blocking gosterir.
+- First-party Skills CLI mapping'leri guncel upstream skill adlarina tasindi:
+  `ai-project-starter`, `prompt-architect` ve `ai-skill-create`.
 
 ## Dogrulama
 

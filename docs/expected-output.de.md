@@ -4,6 +4,10 @@
 
 > Diese deutsche Anleitung ist Teil des sechssprachigen Dokumentationssatzes fuer `expected-output.md`. Sie behält dieselbe Sicherheitsgrenze bei: zuerst eine Vorschau ausführen, keine Secrets speichern und jede Setup-Aenderung lokal verifizieren.
 
+> Vollstaendige Ausgabe-Beispiele und Operator-Details stehen in
+> [English](expected-output.md) und [Türkçe](expected-output.tr.md). Diese
+> lokalisierte Seite ist eine Sicherheitszusammenfassung mit Quellenindex.
+
 ## Was diese Seite abdeckt
 
 - Windows-first Installation mit PowerShell und ein passender Bash/WSL-Pfad.
@@ -13,7 +17,7 @@
 ## Nützliche Befehle
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 ```powershell

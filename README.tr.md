@@ -29,6 +29,12 @@ Bu resmi OpenAI ürünü değildir; community starter paketidir. Güncel resmi C
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Tek Seferde İndir Ve Kur
 
+Çok dilli README girişleri ve six-language deep docs coverage release yüzeyinin
+parçasıdır. İngilizce ve Türkçe install, beklenen çıktı ve release notlarında
+tam operatör detayını taşır; Deutsch, Español, Português (Brasil) ve Français
+dosyaları güvenlik özeti ve kaynak bölüm indeksi vererek tam detayın hangi
+otoritatif dosyada olduğunu gösterir.
+
 Windows PowerShell:
 
 ```powershell
@@ -41,15 +47,15 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 Önce güvenli ön izleme:
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
 Mevcut global Codex kurulumunu user skill'lerini silmeden onar:
 
 ```powershell
-.\scripts\install.ps1 -Repair -WhatIf
-.\scripts\install.ps1 -Repair
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair
 ```
 
 Soru sormayan otomasyon dostu tek komut:
@@ -305,7 +311,7 @@ Installer şunları yapmaz:
 PowerShell:
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 Bash veya WSL:
@@ -357,13 +363,37 @@ chmod +x scripts/install.sh
 ./scripts/install.sh --all
 ```
 
+### Kurulum Parametreleri
+
+| PowerShell | Bash/WSL | Amac |
+| --- | --- | --- |
+| `-All` | `--all` | Incelenmis Codex Chef yuzeyini kurar: managed Codex dosyalari, plugin workflow'lari ve curated skill'ler. |
+| `-Interactive` | `--interactive` | Opsiyonel secimler icin sorar ve uygulamadan once planı gosterir. |
+| `-WhatIf` | `--dry-run` | Dosya, Git ayari veya skill yazmadan preview alir. |
+| `-Repair` | `--repair` | Mevcut global Codex setup'ini backup alarak hizalar; user skill'lerini ve lokal approval rule'larini korur. |
+| `-Force` | `--force` | Mevcut managed Codex Chef hedeflerini backup sonrasinda replace eder. Sadece dry-run'i inceledikten sonra kullan. |
+| `-NoBackup` | `--no-backup` | Managed hedef degisikliklerinde backup olusturmayi atlar. Normal kullanim icin risklidir; varsayilan backup davranisini tercih et. |
+| `-InstallSkills` | `--install-skills` | Sadece incelenmis global skill katalogunu kurar veya hizalar. |
+| `-InstallGitGuards` | `--install-git-guards` | Bu Windows kullanicisi icin global Git ignore ve pre-commit guard'larini opt-in kurar. |
+| `-PlainOutput` | `--plain-output` | Eski terminal ve CI log'lari icin ASCII dostu cikti kullanir. |
+
+Faydali dogrulama komutlari:
+
+| Komut | Neyi kanitlar |
+| --- | --- |
+| `npm run codex:status` | Repo sagligini, kurulu runtime drift'ini, MCP setup notlarini, routing profillerini ve effective controls ozetini gosterir. |
+| `npm run codex:status:all` | Ayni status panosuna beklenen curated skill ve opsiyonel Git guard kontrollerini ekler. |
+| `npm run verify:install:runtime -- --expect-skills --expect-git-guards` | Kurulu `CODEX_HOME` icinde 21 ajan, 15 MCP girdisi, managed dosyalar ve curated skill'ler oldugunu read-only kanitlar. |
+| `npm run verify:skills:online -- --timeout-ms=90000` | 16 incelenmis skill kaynaginin hala cozuldugunu network-backed kanitlar. |
+| `codex exec --strict-config "Summarize the active Codex setup in three short bullets."` | Gercek Codex startup, strict config uyumlulugu, auth ve model-call smoke testidir. |
+
 Kurulumdan sonra Codex'i yeniden başlat ve şunları çalıştır:
 
 ```bash
 codex doctor --summary
 npm run codex:status
 npm run verify:install:runtime
-codex --strict-config "Summarize the active Codex setup."
+codex exec --strict-config "Summarize the active Codex setup."
 ```
 
 Sadece tek bir parça istiyorsan `-InstallSkills` / `--install-skills` veya `-InstallGitGuards` / `--install-git-guards` kullan.

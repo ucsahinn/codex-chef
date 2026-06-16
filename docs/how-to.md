@@ -43,7 +43,7 @@ Restart Codex after installing, then run:
 ```bash
 npm run codex:doctor
 codex doctor --summary
-codex --strict-config "Summarize the active Codex setup."
+codex exec --strict-config "Summarize the active Codex setup."
 ```
 
 Inside Codex, inspect:

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.5.14 - 2026-06-16
+
+- Disabled app/connectors by default through `apps._default.enabled = false`
+  and taught repair mode to migrate existing Codex Chef installs to that safer
+  default while preserving the destructive/open-world app gates.
+- Expanded README install-parameter coverage and clarified that English and
+  Turkish carry the full operator details while the other localized docs provide
+  safety summaries with source indexes.
+
 ## 0.5.13 - 2026-06-16
 
 - Added `catalog/routing-profiles.json`, `npm run codex:routing`, and status
@@ -16,7 +25,7 @@
   profile visibility gate for the global `AGENTS.md` template.
 - Removed the deprecated `apps._default.default_tools_enabled` field from
   Codex config templates and taught repair mode to remove that managed field
-  from existing installs so `codex --strict-config` can start cleanly.
+  from existing installs so `codex exec --strict-config` can start cleanly.
 - Changed runtime repair and verification for `rules/default.rules` to require
   the managed safety baseline while preserving local approval rules added by
   normal Codex use.

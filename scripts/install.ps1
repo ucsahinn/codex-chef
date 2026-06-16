@@ -557,7 +557,7 @@ if ($WhatIfPreference) {
   Write-Host "    npm run codex:routing"
   Write-Host "    npm run codex:status"
   Write-Host "    npm run verify:install:runtime"
-  Write-Host "    codex --strict-config `"Summarize the active Codex setup.`""
+  Write-Host "    codex exec --strict-config `"Summarize the active Codex setup.`""
 }
 if (-not $NoBackup -and (Test-Path -LiteralPath $BackupRoot)) {
   Write-Note "Backup: $BackupRoot"

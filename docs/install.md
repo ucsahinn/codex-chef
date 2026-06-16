@@ -19,7 +19,7 @@ Codex uses `~/.codex`; if `CODEX_HOME` is set, the installer uses that path.
 Preview without writing:
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 Inspect the manifest-backed operation plan without invoking either installer:
@@ -56,7 +56,7 @@ Automation-friendly install without questions:
 Repair an existing global Codex setup:
 
 ```powershell
-.\scripts\install.ps1 -Repair -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
 .\scripts\install.ps1 -Repair
 ```
 
@@ -167,7 +167,7 @@ codex doctor --summary
 npm run codex:routing
 npm run codex:status
 npm run verify:install:runtime
-codex --strict-config "Summarize the active Codex setup."
+codex exec --strict-config "Summarize the active Codex setup."
 ```
 
 `npm run codex:routing` prints the enterprise routing board from
@@ -222,7 +222,7 @@ Remove `tmp/` only when you created it intentionally.
 If you already have a Codex setup, inspect the repair plan first:
 
 ```powershell
-.\scripts\install.ps1 -Repair -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
 ```
 
 If repair is clean, continue with the normal install command. Existing

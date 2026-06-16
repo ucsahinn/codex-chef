@@ -43,7 +43,7 @@ Kurulumdan sonra Codex'i yeniden başlat ve çalıştır:
 ```bash
 npm run codex:doctor
 codex doctor --summary
-codex --strict-config "Summarize the active Codex setup."
+codex exec --strict-config "Summarize the active Codex setup."
 ```
 
 Codex içinde şunları kontrol et:

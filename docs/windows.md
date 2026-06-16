@@ -37,7 +37,7 @@ or use a narrower profile instead.
 
 ```powershell
 codex doctor --summary
-codex --strict-config "Summarize the active setup."
+codex exec --strict-config "Summarize the active setup."
 ```
 
 For additional temporary read access inside a session:

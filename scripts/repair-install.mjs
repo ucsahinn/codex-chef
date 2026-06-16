@@ -389,7 +389,9 @@ function runConfigMerge() {
   }
 
   const removedDeprecatedFields = report.removedDeprecatedFields || [];
-  const configNeedsApply = report.addedTableCount > 0 || removedDeprecatedFields.length > 0;
+  const updatedManagedFields = report.updatedManagedFields || [];
+  const fullTemplateInstall = report.fullTemplateInstall === true;
+  const configNeedsApply = fullTemplateInstall || report.addedTableCount > 0 || removedDeprecatedFields.length > 0 || updatedManagedFields.length > 0;
 
   if (options.apply && configNeedsApply) {
     if (fs.existsSync(destination)) backupTarget(destination);
@@ -420,13 +422,15 @@ function runConfigMerge() {
   if (configNeedsApply) {
     recordAction({
       id: "codex-config",
-      kind: report.addedTableCount > 0 ? "merge-config" : "remove-deprecated-config",
+      kind: fullTemplateInstall ? "install-config" : report.addedTableCount > 0 ? "merge-config" : "repair-config-fields",
       source: template,
       target: destination,
       status: options.apply ? "applied" : "planned",
       reason: [
+        fullTemplateInstall ? "missing config.toml" : null,
         report.addedTableCount > 0 ? `missing ${report.addedTableCount} managed config table(s)` : null,
-        removedDeprecatedFields.length > 0 ? `deprecated managed field(s): ${removedDeprecatedFields.join(", ")}` : null
+        removedDeprecatedFields.length > 0 ? `deprecated managed field(s): ${removedDeprecatedFields.join(", ")}` : null,
+        updatedManagedFields.length > 0 ? `managed field update(s): ${updatedManagedFields.join(", ")}` : null
       ].filter(Boolean).join("; ")
     });
   }
@@ -434,9 +438,11 @@ function runConfigMerge() {
   return {
     inspected: true,
     status: configNeedsApply ? (options.apply ? "applied" : "planned") : "current",
+    fullTemplateInstall,
     addedTables: report.addedTables || [],
     addedTableCount: report.addedTableCount || 0,
-    removedDeprecatedFields
+    removedDeprecatedFields,
+    updatedManagedFields
   };
 }
 

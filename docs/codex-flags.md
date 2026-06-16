@@ -68,7 +68,7 @@ separate from MCP server settings so connector tool exposure is reviewable.
 
 | Field | Starter default | Use |
 | --- | --- | --- |
-| `apps._default.enabled` | `true` | Allow connector browsing without enabling a specific authenticated service. |
+| `apps._default.enabled` | `false` | Keep app/connectors parked until a specific connector is explicitly reviewed and enabled. |
 | `apps._default.destructive_enabled` | `false` | Block tools that advertise destructive behavior by default. |
 | `apps._default.open_world_enabled` | `false` | Block tools that advertise broad open-world behavior by default. |
 | `apps.<id>.tools.<tool>.approval_mode` | unset | Use only when a specific connector tool has been reviewed. |
@@ -90,7 +90,7 @@ codex --sandbox read-only --ask-for-approval never
 Config validation:
 
 ```bash
-codex --strict-config "Summarize the active setup."
+codex exec --strict-config "Summarize the active setup."
 ```
 
 Avoid `danger-full-access` and bypass flags unless the environment is

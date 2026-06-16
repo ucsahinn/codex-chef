@@ -85,6 +85,9 @@ if (report) {
   if (report.effectiveControls?.agents?.maxDepth !== 1) {
     fail("codex status effective controls must report the bounded subagent depth.");
   }
+  if (report.effectiveControls?.appsDefault?.enabled !== false) {
+    fail("codex status effective controls must report app connectors disabled by default.");
+  }
   if (report.effectiveControls?.appsDefault?.destructiveEnabled !== false) {
     fail("codex status effective controls must report destructive app tools disabled by default.");
   }

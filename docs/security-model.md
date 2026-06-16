@@ -39,8 +39,8 @@ Rules used in this starter:
   "approve"`; browser, account, filesystem, database, production, and mutating
   tools should use `"prompt"`.
 - Apps/connectors also have a separate `[apps._default]` gate:
-  `destructive_enabled = false` and `open_world_enabled = false` are part of
-  the reviewed templates.
+  `enabled = false`, `destructive_enabled = false`, and
+  `open_world_enabled = false` are part of the reviewed templates.
 - New MCP servers should prefer narrow config flags such as `enabled_tools`,
   `disabled_tools`, `startup_timeout_sec`, and `tool_timeout_sec` over broad
   prose-only instructions.

@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
-  <a href="README.md"><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"></a>
+  <a href="README.md"><img alt="Idiomas da documentacao" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
   <img alt="Windows and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
 </p>
 
@@ -73,7 +73,7 @@ Os installers gerenciam:
 PowerShell:
 
 ```powershell
-.\scripts\install.ps1 -All -WhatIf
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 ```
 
 Bash ou WSL:
@@ -118,7 +118,7 @@ Depois da instalacao, reinicie o Codex e rode:
 ```bash
 codex doctor --summary
 npm run verify:install:runtime
-codex --strict-config "Summarize the active Codex setup."
+codex exec --strict-config "Summarize the active Codex setup."
 ```
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Sinais De Confianca

@@ -37,8 +37,8 @@ Bu starter'ın kuralları:
   kullanabilir; browser, account, filesystem, database, production ve mutating
   tool'lar `"prompt"` kullanmalıdır.
 - Apps/connectors icin ayri bir `[apps._default]` kapisi vardir:
-  `destructive_enabled = false` ve `open_world_enabled = false` incelenmis
-  template'lerin parcasidir.
+  `enabled = false`, `destructive_enabled = false` ve
+  `open_world_enabled = false` incelenmis template'lerin parcasidir.
 - Yeni MCP server eklerken `enabled_tools`, `disabled_tools`,
   `startup_timeout_sec` ve `tool_timeout_sec` gibi dar config flag'leri prose-only
   talimatlara tercih edilmelidir.

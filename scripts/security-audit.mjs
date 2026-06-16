@@ -289,6 +289,9 @@ for (const configFile of ["templates/codex/config.windows.toml", "templates/code
   if (!appDefaults) {
     failures.push(`${configFile} must define [apps._default] connector defaults`);
   } else {
+    if (!/enabled\s*=\s*false/.test(appDefaults[1])) {
+      failures.push(`${configFile} must keep apps._default.enabled = false`);
+    }
     if (!/destructive_enabled\s*=\s*false/.test(appDefaults[1])) {
       failures.push(`${configFile} must keep apps._default.destructive_enabled = false`);
     }

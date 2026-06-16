@@ -10,7 +10,7 @@ Discovery output stays no-write and human-readable:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.12
+Package: codex-chef@0.5.14
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -131,7 +131,7 @@ What if: Performing the operation ...
     npm run codex:routing
     npm run codex:status
     npm run verify:install:runtime
-    codex --strict-config "Summarize the active Codex setup."
+    codex exec --strict-config "Summarize the active Codex setup."
   - Backup: ...
 ```
 
@@ -228,7 +228,7 @@ Would install file from ...
     npm run codex:routing
     npm run codex:status
     npm run verify:install:runtime
-    codex --strict-config "Summarize the active Codex setup."
+    codex exec --strict-config "Summarize the active Codex setup."
   - Backup: ...
 ```
 
