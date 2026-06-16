@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 0.5.10 - 2026-06-16
+
+- Made the recommended Windows path a guided `.\scripts\install.ps1 -All
+  -Interactive` setup so first-time users see the decisions before anything
+  real is installed.
+- Expanded `-Interactive` / `--interactive` to ask about reviewed skill
+  installation, backup-backed force replacement, optional Git guards, and final
+  continue/cancel confirmation while never asking for credentials.
+- Added a post-install capability board to PowerShell and Bash installers that
+  lists installed specialist agents, default-ready MCP servers, opt-in MCP
+  connectors, local plugin skills, and reviewed global skills.
+- Kept automation simple with the unchanged noninteractive `-All` / `--all`
+  path for CI, scripts, and users who already know the defaults.
+- Updated installer alignment validation, expected-output docs, install guides,
+  release notes, and package/plugin metadata for the richer guided setup.
+- Tightened specialist-agent validator coverage for the operational research
+  blocks that were added to the agent corpus.
+
 ## 0.5.9 - 2026-06-16
 
 - Reworked the README first screen with a more prominent MCP connector board

@@ -73,13 +73,13 @@ Die Installer verwalten:
 PowerShell:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 ```
 
 Bash oder WSL:
 
 ```bash
-./scripts/install.sh --all --force --dry-run
+./scripts/install.sh --all --dry-run
 ```
 
 ## 🧾 Install Plan
@@ -98,7 +98,7 @@ PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All -Interactive
 ```
 
 Bash oder WSL:
@@ -107,13 +107,17 @@ Bash oder WSL:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
-./scripts/install.sh --all --force
+./scripts/install.sh --all --interactive
 ```
+
+Am Ende zeigt der Installer ein Capability Board mit Agent-Team, MCPs,
+lokalen Plugin-Skills und geprueften globalen Skills.
 
 Nach der Installation Codex neu starten und ausfuehren:
 
 ```bash
 codex doctor --summary
+npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
 

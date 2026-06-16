@@ -146,7 +146,7 @@ dosya oluşturmak istediğinde kullanılmalı:
 ```powershell
 $env:CODEX_HOME = "$PWD\tmp\codex-home"
 $env:AGENTS_HOME = "$PWD\tmp\agents-home"
-.\scripts\install.ps1 -Force
+.\scripts\install.ps1
 ```
 
 Oluşan `tmp/` klasörü ignored durumdadır ve commit edilmemelidir.
@@ -157,7 +157,7 @@ Gerçek installer yalnızca kullanıcı mevcut Codex/Git setup'ına yazmayı aç
 onayladıktan sonra çalıştırılır:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Force
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
 
 Beklenen skill davranışı idempotent ve sessizdir: kurulu skill'ler `Skill

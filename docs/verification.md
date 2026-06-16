@@ -126,13 +126,13 @@ $errors
 PowerShell dry run:
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 ```
 
 Bash dry run:
 
 ```bash
-./scripts/install.sh --all --force --dry-run
+./scripts/install.sh --all --dry-run
 ```
 
 CI also runs Bash dry-run and PowerShell `-WhatIf` smoke checks with temporary
@@ -144,7 +144,7 @@ under ignored `tmp/` paths:
 ```powershell
 $env:CODEX_HOME = "$PWD\tmp\codex-home"
 $env:AGENTS_HOME = "$PWD\tmp\agents-home"
-.\scripts\install.ps1 -Force
+.\scripts\install.ps1
 ```
 
 The generated `tmp/` folder is ignored and must not be committed.
@@ -155,7 +155,7 @@ Run the real installer only after the user explicitly approves writes to the
 current user's Codex/Git setup:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Force
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
 
 Expected skill behavior is idempotent and quiet: already installed skills are

@@ -18,8 +18,8 @@ PowerShell:
 git pull
 npm run check
 node scripts/plan-install.mjs --all --json
-.\scripts\install.ps1 -All -Force -WhatIf
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All -WhatIf
+.\scripts\install.ps1 -All -Interactive
 npm run verify:install:runtime -- --expect-skills
 ```
 
@@ -29,8 +29,8 @@ Bash veya WSL:
 git pull
 npm run check
 node scripts/plan-install.mjs --all --json
-./scripts/install.sh --all --force --dry-run
-./scripts/install.sh --all --force
+./scripts/install.sh --all --dry-run
+./scripts/install.sh --all --interactive
 npm run verify:install:runtime -- --expect-skills
 ```
 
@@ -40,6 +40,10 @@ veya mevcut kullanıcı refresh akışında force verme; böylece mevcut
 upgrade sırasında force ancak preview'i inceledikten ve bu repo template'lerinin
 managed hedefleri replace etmesini istediğinden emin olduktan sonra
 kullanılmalı.
+
+Managed hedefleri current repo template'leriyle bilerek replace etmek
+istiyorsan preview'i inceledikten sonra aynı installer'ı `-Force` veya
+`--force` ile tekrar çalıştır.
 
 ## Backup'lar
 

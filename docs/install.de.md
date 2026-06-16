@@ -29,6 +29,10 @@
 ```
 
 ```bash
+./scripts/install.sh --all --interactive
+```
+
+```bash
 ./scripts/install.sh --all --plain-output
 ```
 

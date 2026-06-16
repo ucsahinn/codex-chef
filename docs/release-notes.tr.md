@@ -2,6 +2,61 @@
 
 ## Unreleased
 
+## v0.5.10 - 2026-06-16
+
+Bu patch installer'i daha anlasilir bir rehberli onboarding akisina cevirir
+ama sessiz otomasyon yolunu da korur. Ilk kez kuran biri Codex Chef'in ne
+kuracagini, hangi seceneklerin istege bagli ve riskli oldugunu, kurulum sonunda
+hangi agent, MCP ve skill'lerin hazir olacagini tek ekranda gorur.
+
+## One Cikanlar
+
+- Onerilen Windows quickstart komutu `.\scripts\install.ps1 -All -Interactive`
+  oldu. Ilk gercek kurulum Codex/Agents home, reviewed skill kurulumu,
+  backup-backed replacement, opsiyonel Git guard ve son devam onayini sorar.
+- `.\scripts\install.ps1 -All` soru sormayan otomasyon yolu olarak kaldi; CI,
+  script ve tekrar smoke testleri icin ayni sekilde kullanilabilir.
+- Bash/WSL tarafina da `./scripts/install.sh --all --interactive` ile ayni
+  rehberli mod eklendi.
+- PowerShell ve Bash installer sonunda capability board basar: kurulu
+  specialist agent'lar, varsayilan hazir MCP server'lari, disabled/opt-in MCP
+  connector'lari, local plugin skill'leri ve reviewed global skill'ler.
+- Account, database, production ve broad filesystem connector'lari varsayilan
+  olarak kapali kalir; installer bunu ciktida acikca soyler.
+- Installer validation genisledi; guided prompt'lar ve capability board artik
+  PowerShell veya Bash tarafinda sessizce drift edemez.
+
+## Upgrade Notlari
+
+Onerilen rehberli Windows kurulumu:
+
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
+Soru sormayan otomasyon dostu kurulum:
+
+```powershell
+.\scripts\install.ps1 -All
+```
+
+Bash/WSL rehberli kurulum:
+
+```bash
+./scripts/install.sh --all --interactive
+```
+
+## Dogrulama
+
+Bu surum icin release oncesi su kontroller calismali:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.9 - 2026-06-16
 
 Bu patch install polish turunu tamamlar: ilk ekranda ajanlar, skill'ler ve

@@ -39,10 +39,22 @@ function Get-Icon {
   return $Fallback
 }
 
+function Write-DecoratedHost {
+  param(
+    [Parameter(Mandatory=$true)][string]$Message,
+    [string]$Color = "Gray"
+  )
+  if (Use-DecoratedOutput) {
+    Write-Host $Message -ForegroundColor $Color
+    return
+  }
+  Write-Host $Message
+}
+
 function Write-Section {
   param([Parameter(Mandatory=$true)][string]$Title)
   Write-Host ""
-  Write-Host "$(Get-Icon $Script:IconChef "[*]") $Title"
+  Write-DecoratedHost -Message "$(Get-Icon $Script:IconChef "[*]") $Title" -Color "Cyan"
 }
 
 function Write-Action {
@@ -50,12 +62,22 @@ function Write-Action {
     [Parameter(Mandatory=$true)][string]$Status,
     [Parameter(Mandatory=$true)][string]$Message
   )
-  Write-Host "  $(Get-Icon $Script:IconCheck "-") ${Status}: $Message"
+  Write-DecoratedHost -Message "  $(Get-Icon $Script:IconCheck "-") ${Status}: $Message" -Color "Green"
 }
 
 function Write-Note {
   param([Parameter(Mandatory=$true)][string]$Message)
-  Write-Host "  $(Get-Icon $Script:IconBullet "-") $Message"
+  Write-DecoratedHost -Message "  $(Get-Icon $Script:IconBullet "-") $Message" -Color "DarkGray"
+}
+
+function Write-NameList {
+  param(
+    [Parameter(Mandatory=$true)][string]$Label,
+    [Parameter(Mandatory=$true)][object[]]$Names,
+    [string]$Color = "Gray"
+  )
+  Write-Note "$Label ($($Names.Count)):"
+  Write-DecoratedHost -Message "    $($Names -join ', ')" -Color $Color
 }
 
 function Read-OptionalPath {
@@ -89,13 +111,49 @@ function Read-YesNo {
   return $Answer.Trim().ToLowerInvariant().StartsWith("y")
 }
 
+function Test-AnyManagedTargetExists {
+  $managedTargets = @(
+    (Join-Path $CodexHome "AGENTS.md"),
+    (Join-Path $CodexHome "config.toml"),
+    (Join-Path $CodexHome "rules\default.rules"),
+    (Join-Path $CodexHome "plugins\codex-chef-workflows"),
+    (Join-Path $AgentsHome "plugins\marketplace.json")
+  )
+  foreach ($target in $managedTargets) {
+    if (Test-Path -LiteralPath $target) {
+      return $true
+    }
+  }
+  return $false
+}
+
+if ($Interactive) {
+  Write-Section "Guided setup"
+  Write-Note "Press Enter to accept the safe default shown in brackets."
+  Write-Note "No tokens, secrets, cookies, sessions, or credentials are requested."
+}
+
 $CodexHome = Read-OptionalPath -Label "Codex home" -CurrentValue $CodexHome
 $AgentsHome = Read-OptionalPath -Label "Agents home" -CurrentValue $AgentsHome
+
+if ($Interactive -and $All -and $InstallSkills) {
+  if (-not (Read-YesNo -Prompt "Install or reconcile the 16 reviewed global Codex skills now?" -Default $true)) {
+    $InstallSkills = $false
+  }
+}
+
+if ($Interactive -and (Test-AnyManagedTargetExists) -and -not $Force) {
+  if (Read-YesNo -Prompt "Replace existing managed Codex Chef files after backup instead of preserving/merging?" -Default $false) {
+    $Force = $true
+  }
+}
+
 if ($Interactive -and -not $InstallGitGuards) {
   if (Read-YesNo -Prompt "Install optional global Git guards for this Windows user?" -Default $false) {
     $InstallGitGuards = $true
   }
 }
+
 $BackupRoot = Join-Path $CodexHome ("backups\codex-chef-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
 
 function Invoke-Change {
@@ -266,6 +324,13 @@ if ($InstallGitGuards) {
 if ($WhatIfPreference) {
   Write-Note "Dry run: no files, Git settings, or skills will be changed"
 }
+if ($Interactive) {
+  Write-Note "Existing config policy: backup + merge missing Codex Chef blocks unless Force is enabled"
+  Write-Note "Authenticated/account MCP connectors remain disabled by default"
+  if (-not (Read-YesNo -Prompt "Continue with this plan?" -Default $true)) {
+    throw "Codex Chef install cancelled by user."
+  }
+}
 
 Write-Section "Managed Codex files"
 Ensure-Dir $CodexHome
@@ -422,6 +487,27 @@ if ($InstallSkills) {
       Write-Action -Status "installed skill" -Message $Skill.name
     }
   }
+}
+
+Write-Section "Capability board"
+try {
+  $AgentCatalog = Get-Content -Path (Join-Path $RepoRoot "catalog\agents.json") -Raw | ConvertFrom-Json
+  $McpCatalog = Get-Content -Path (Join-Path $RepoRoot "catalog\mcp-servers.json") -Raw | ConvertFrom-Json
+  $SkillCatalog = Get-Content -Path (Join-Path $RepoRoot "catalog\skills.json") -Raw | ConvertFrom-Json
+  $PluginSkillRoot = Join-Path $RepoRoot "plugins\codex-chef-workflows\skills"
+  $AgentNames = @($AgentCatalog.agents | ForEach-Object { $_.name })
+  $McpReady = @($McpCatalog.servers | Where-Object { $_.defaultEnabled -eq $true } | ForEach-Object { $_.name })
+  $McpOptIn = @($McpCatalog.servers | Where-Object { $_.defaultEnabled -ne $true } | ForEach-Object { $_.name })
+  $PluginSkills = @(Get-ChildItem -Path $PluginSkillRoot -Directory | ForEach-Object { $_.Name })
+  $ReviewedSkills = @($SkillCatalog.skills | Where-Object { $_.install -eq $true } | ForEach-Object { $_.name })
+  Write-NameList -Label "Agents ready" -Names $AgentNames -Color "White"
+  Write-NameList -Label "MCP ready by default" -Names $McpReady -Color "White"
+  Write-NameList -Label "MCP opt-in / disabled by default" -Names $McpOptIn -Color "DarkYellow"
+  Write-NameList -Label "Local plugin skills" -Names $PluginSkills -Color "White"
+  Write-NameList -Label "Reviewed global skills" -Names $ReviewedSkills -Color "White"
+  Write-Note "Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled."
+} catch {
+  Write-Warning "Could not render capability board: $($_.Exception.Message)"
 }
 
 Write-Section "Next steps"

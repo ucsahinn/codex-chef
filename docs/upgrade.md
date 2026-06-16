@@ -18,8 +18,8 @@ PowerShell:
 git pull
 npm run check
 node scripts/plan-install.mjs --all --json
-.\scripts\install.ps1 -All -Force -WhatIf
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All -WhatIf
+.\scripts\install.ps1 -All -Interactive
 npm run verify:install:runtime -- --expect-skills
 ```
 
@@ -29,8 +29,8 @@ Bash or WSL:
 git pull
 npm run check
 node scripts/plan-install.mjs --all --json
-./scripts/install.sh --all --force --dry-run
-./scripts/install.sh --all --force
+./scripts/install.sh --all --dry-run
+./scripts/install.sh --all --interactive
 npm run verify:install:runtime -- --expect-skills
 ```
 
@@ -39,6 +39,10 @@ install or existing-user refresh should omit force so existing `config.toml` is
 merged and other existing managed files are skipped. During replacement
 upgrade, force is safe only after you reviewed the preview and are comfortable
 replacing managed targets from this repo's templates.
+
+If you intentionally want to replace managed targets from the current repo
+templates after reviewing the preview, rerun the same installer with `-Force`
+or `--force`.
 
 ## Backups
 

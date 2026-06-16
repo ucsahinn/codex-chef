@@ -16,8 +16,24 @@
 .\scripts\install.ps1 -All -WhatIf
 ```
 
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
+```powershell
+.\scripts\install.ps1 -All -PlainOutput
+```
+
 ```bash
 ./scripts/install.sh --all --dry-run
+```
+
+```bash
+./scripts/install.sh --all --interactive
+```
+
+```bash
+./scripts/install.sh --all --plain-output
 ```
 
 ```bash

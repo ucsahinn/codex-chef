@@ -44,13 +44,13 @@ Install after the preview is correct:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All
+.\scripts\install.ps1 -All -Interactive
 ```
 
-Guided Windows install:
+Automation-friendly install without questions:
 
 ```powershell
-.\scripts\install.ps1 -All -Interactive
+.\scripts\install.ps1 -All
 ```
 
 Useful switches:
@@ -74,7 +74,10 @@ Useful switches:
 - `-WhatIf`: preview file, Git, and skill operations without changing the real
   setup.
 - `-Interactive`: ask before using custom Codex/Agents home values and before
-  enabling optional global Git guards. It never asks for tokens or credentials.
+  enabling optional global Git guards. It also asks whether to install the
+  reviewed skills, whether to force-replace managed files after backup, and
+  whether to continue after the plan summary. It never asks for tokens or
+  credentials.
 - `-PlainOutput`: use ASCII status markers instead of emoji, useful for older
   Windows consoles, CI logs, and terminals that render Unicode poorly.
 
@@ -105,6 +108,14 @@ Useful flags:
 - `--no-backup`
 - `--dry-run`
 - `--plain-output`: use ASCII status markers.
+- `--interactive`: guided Bash/WSL setup with the same path, skills, force,
+  Git-guard, and continue prompts.
+
+Both installers finish with a capability board that lists the specialist
+agents, default-ready MCP servers, disabled opt-in MCP connectors, bundled
+plugin skills, and reviewed global skills. Account, database, production, and
+broad filesystem connectors remain disabled unless you explicitly enable them
+later.
 
 ## What Gets Backed Up
 

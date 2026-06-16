@@ -35,7 +35,7 @@ Windows PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All
+.\scripts\install.ps1 -All -Interactive
 ```
 
 Önce güvenli ön izleme:
@@ -45,11 +45,10 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
-Rehberli Windows kurulumu; Codex/Agents klasörlerini ve opsiyonel Git guard
-seçimini sana sorar:
+Soru sormayan otomasyon dostu tek komut:
 
 ```powershell
-.\scripts\install.ps1 -All -Interactive
+.\scripts\install.ps1 -All
 ```
 
 ## 🍳 Kurulumdan Sonra Ne Gelir?
@@ -65,6 +64,11 @@ repo içindeki `templates/codex/config.*.toml`, `templates/codex/agents/*.toml`,
 | 🔌 MCP varsayılanları | 7 faydalı MCP açık, 8 auth/high-risk connector kapalı bekler. |
 | 🧩 Plugin + skill'ler | Yerel `codex-chef-workflows` plugin'i, üç bundled skill ve on altı opsiyonel global skill. |
 | 🛡️ Güvenlik kapıları | Backup, dry-run plan, secret scan, validation ve onaylı riskli aksiyon modeli. |
+
+Installer en sonda bir capability board basar: ajan ekibi, varsayılan hazır
+MCP'ler, disabled/opt-in MCP'ler, local plugin skill'leri ve reviewed global
+skill'ler tek ekranda görünür. Yani kurulum bittiğinde "bana ne geldi?"
+sorusunun cevabını direkt görürsün.
 
 ### 🔌 MCP Panosu
 
@@ -310,7 +314,7 @@ PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All
+.\scripts\install.ps1 -All -Interactive
 ```
 
 Bash veya WSL:

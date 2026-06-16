@@ -34,7 +34,7 @@ The Bash installer needs a real Bash environment:
 
 ```bash
 bash -n scripts/install.sh
-./scripts/install.sh --all --force --dry-run
+./scripts/install.sh --all --dry-run
 ```
 
 If `bash` is unavailable on Windows, use PowerShell or run the Bash path in WSL

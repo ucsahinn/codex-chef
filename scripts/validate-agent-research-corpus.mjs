@@ -85,6 +85,14 @@ function hasDuplicates(values) {
   return new Set(values).size !== values.length;
 }
 
+function addOwnedSourceMarker(owners, marker, owner) {
+  if (owners.has(marker)) {
+    fail(`Source marker "${marker}" is owned by both ${owners.get(marker)} and ${owner}.`);
+    return;
+  }
+  owners.set(marker, owner);
+}
+
 function validateAuthorityUrl(key, value) {
   if (typeof value !== "string" || value.trim() !== value || /[\u0000-\u001f\u007f]/.test(value)) {
     fail(`authorityRefs.${key} must be a clean string URL.`);
@@ -201,6 +209,19 @@ if (corpus && catalog) {
     "Source currency protocol:",
     "Corpus expansion protocol:",
     "Expert calibration protocol:"
+  ];
+  const expectedOperationalBlocks = [
+    "Evidence output contract:",
+    "Tool and delegation routing:",
+    "Verification checklist:",
+    "Escalation and refusal guardrails:",
+    "Primary reference anchors:",
+    "Senior blind-spot checks:",
+    "Decision thresholds:",
+    "Handoff payload contract:",
+    "Evidence grading rubric:",
+    "Invocation intake checklist:",
+    "Corpus acquisition map:"
   ];
   const manifestBlocks = requireArray(corpus.requiredGuardrailBlocks, "requiredGuardrailBlocks", expectedBlocks.length);
   if (JSON.stringify(manifestBlocks) !== JSON.stringify(expectedBlocks)) {
@@ -378,6 +399,37 @@ if (corpus && catalog) {
     }
   }
 
+  const sourceMarkerOwners = new Map();
+  for (const [key, ref] of Object.entries(authorityRefs || {})) {
+    for (const marker of ref.sourceMarkers || []) {
+      addOwnedSourceMarker(sourceMarkerOwners, marker, `authorityRefs.${key}`);
+    }
+  }
+  for (const [key, ref] of Object.entries(supplementalResearchRefs || {})) {
+    for (const marker of ref.sourceMarkers || []) {
+      addOwnedSourceMarker(sourceMarkerOwners, marker, `supplementalResearchRefs.${key}`);
+    }
+  }
+
+  const sourceMarkerAliases = corpus.sourceMarkerAliases &&
+    typeof corpus.sourceMarkerAliases === "object" &&
+    !Array.isArray(corpus.sourceMarkerAliases)
+    ? corpus.sourceMarkerAliases
+    : null;
+  if (!sourceMarkerAliases) {
+    fail("agent-research-corpus.json sourceMarkerAliases must be an object keyed by authority or supplemental reference.");
+  }
+  for (const [targetRef, aliases] of Object.entries(sourceMarkerAliases || {})) {
+    if (!authorityKeys.has(targetRef) && !supplementalKeys.has(targetRef)) {
+      fail(`sourceMarkerAliases.${targetRef} must target an existing authorityRefs or supplementalResearchRefs key.`);
+    }
+    const aliasList = requireArray(aliases, `sourceMarkerAliases.${targetRef}`, 1);
+    if (hasDuplicates(aliasList)) fail(`sourceMarkerAliases.${targetRef} must not contain duplicates.`);
+    for (const alias of aliasList) {
+      addOwnedSourceMarker(sourceMarkerOwners, alias, `sourceMarkerAliases.${targetRef}`);
+    }
+  }
+
   const expertiseSignals = corpus.expertiseSignals && typeof corpus.expertiseSignals === "object" && !Array.isArray(corpus.expertiseSignals)
     ? corpus.expertiseSignals
     : null;
@@ -450,6 +502,12 @@ if (corpus && catalog) {
         fail(`${agent.name} must include exactly one ${block} found ${occurrences}.`);
       }
     }
+    for (const block of expectedOperationalBlocks) {
+      const occurrences = countOccurrences(template, block);
+      if (occurrences !== 1) {
+        fail(`${agent.name} must include exactly one ${block} found ${occurrences}.`);
+      }
+    }
     for (const contract of expectedRuntimeContracts) {
       const occurrences = countOccurrences(template, contract);
       if (occurrences !== 1) {
@@ -463,6 +521,11 @@ if (corpus && catalog) {
     const distinctSourceMarkers = collectSourceMarkers(template);
     if (distinctSourceMarkers.size < corpus.minimumDistinctSourceMarkers) {
       fail(`${agent.name} has ${distinctSourceMarkers.size} distinct source markers; expected at least ${corpus.minimumDistinctSourceMarkers}.`);
+    }
+    for (const marker of distinctSourceMarkers) {
+      if (!sourceMarkerOwners.has(marker)) {
+        fail(`${agent.name} uses unknown source marker "${marker}"; add it to authorityRefs, supplementalResearchRefs, or sourceMarkerAliases.`);
+      }
     }
   }
 

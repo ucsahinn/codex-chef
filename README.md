@@ -38,7 +38,7 @@ Windows PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All
+.\scripts\install.ps1 -All -Interactive
 ```
 
 Safe preview first:
@@ -48,11 +48,10 @@ Safe preview first:
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
-Guided Windows install, with prompts for custom Codex/Agents homes and optional
-Git guards:
+Automation-friendly one-shot install without questions:
 
 ```powershell
-.\scripts\install.ps1 -All -Interactive
+.\scripts\install.ps1 -All
 ```
 
 ## 🍳 What You Get After Install
@@ -69,6 +68,11 @@ manifest-backed install plan.
 | 🔌 MCP defaults | 7 useful MCP servers enabled and 8 authenticated/high-risk connectors parked disabled. |
 | 🧩 Plugin + skills | Local `codex-chef-workflows` plugin, three bundled skills, and sixteen optional curated global skills. |
 | 🛡️ Safety gates | Backups, dry-run planning, secret scanning, validation, and approval-gated risky actions. |
+
+At the end of the installer, Codex Chef prints a capability board with the
+agent team, default-ready MCPs, disabled opt-in MCPs, local plugin skills, and
+reviewed global skills. That is the quick "what did I just get?" screen after
+setup.
 
 ### 🔌 MCP Connector Board
 
@@ -311,7 +315,7 @@ PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All
+.\scripts\install.ps1 -All -Interactive
 ```
 
 Bash or WSL:

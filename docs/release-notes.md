@@ -2,6 +2,62 @@
 
 ## Unreleased
 
+## v0.5.10 - 2026-06-16
+
+This patch turns the installer into a clearer guided onboarding flow while
+preserving the quiet automation path. New users can see exactly what Codex Chef
+will install, which optional switches are risky, and which agents, MCPs, and
+skills are available after the run.
+
+## Highlights
+
+- Changed the recommended Windows quickstart to
+  `.\scripts\install.ps1 -All -Interactive` so the first real install asks for
+  Codex/Agents homes, reviewed skill installation, backup-backed replacement,
+  optional Git guards, and final confirmation.
+- Kept `.\scripts\install.ps1 -All` as the noninteractive automation path for
+  scripted installs and repeatable smoke tests.
+- Added the same guided mode to Bash/WSL with `./scripts/install.sh --all
+  --interactive`.
+- Added a post-install capability board to both installers. It prints the
+  installed specialist agents, default-ready MCP servers, disabled opt-in MCP
+  connectors, local plugin skills, and reviewed global skills.
+- Kept account, database, production, and broad filesystem connectors disabled
+  by default and called that out directly in the installer output.
+- Expanded installer validation so guided prompts and the capability board
+  cannot silently drift out of PowerShell or Bash.
+
+## Upgrade Notes
+
+Recommended guided Windows install:
+
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
+Automation-friendly install without questions:
+
+```powershell
+.\scripts\install.ps1 -All
+```
+
+Bash/WSL guided install:
+
+```bash
+./scripts/install.sh --all --interactive
+```
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.9 - 2026-06-16
 
 This patch finishes the install polish pass: the first screen now presents

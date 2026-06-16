@@ -11,7 +11,7 @@ Discovery ciktisi no-write ve okunabilir kalir:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.9
+Package: codex-chef@0.5.10
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -51,14 +51,41 @@ node scripts/plan-install.mjs --all --json --redact-paths
 ## PowerShell Dry Run
 
 ```text
+🍳 Guided setup
+  • Press Enter to accept the safe default shown in brackets.
+  • No tokens, secrets, cookies, sessions, or credentials are requested.
+Codex home [...]:
+Agents home [...]:
+Install or reconcile the 16 reviewed global Codex skills now? [Y/n]:
+Replace existing managed Codex Chef files after backup instead of preserving/merging? [y/N]:
+Install optional global Git guards for this Windows user? [y/N]:
+
 🍳 Codex Chef installer
   • Codex home: ...
   • Agents home: ...
   • Mode: preserve existing files; merge missing config blocks
+  • Skills: install reviewed catalog entries with --agent codex
+  • Git guards: disabled by default
   • Dry run: no files, Git settings, or skills will be changed
+  • Existing config policy: backup + merge missing Codex Chef blocks unless Force is enabled
+  • Authenticated/account MCP connectors remain disabled by default
+Continue with this plan? [Y/n]:
 
 🍳 Managed Codex files
 What if: Performing the operation ...
+
+🍳 Capability board
+  • Agents ready (21):
+    code_mapper, docs_researcher, ...
+  • MCP ready by default (7):
+    sequential-thinking, context7, ...
+  • MCP opt-in / disabled by default (8):
+    github, figma, ...
+  • Local plugin skills (3):
+    codex-chef-operator, context-budget-planner, ...
+  • Reviewed global skills (16):
+    dependency-upgrade, gh-fix-ci, ...
+  • Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
 
 🍳 Next steps
   ✓ completed: Codex Chef dry run
@@ -74,6 +101,19 @@ What if: Performing the operation ...
 
 🍳 Managed Codex files
   ✓ installed: ...
+
+🍳 Capability board
+  • Agents ready (21):
+    code_mapper, docs_researcher, ...
+  • MCP ready by default (7):
+    sequential-thinking, context7, ...
+  • MCP opt-in / disabled by default (8):
+    github, figma, ...
+  • Local plugin skills (3):
+    codex-chef-operator, context-budget-planner, ...
+  • Reviewed global skills (16):
+    dependency-upgrade, gh-fix-ci, ...
+  • Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
 
 🍳 Next steps
   • 28 existing managed target(s) were preserved; use -Force only for a deliberate backup-backed replacement
@@ -100,6 +140,19 @@ mevcut managed dosyalar `-Force` verilmedikçe atlanır.
 [*] Managed Codex files
 Would install file from ...
 
+[*] Capability board
+  - Agents ready (21):
+    code_mapper, docs_researcher, ...
+  - MCP ready by default (7):
+    sequential-thinking, context7, ...
+  - MCP opt-in / disabled by default (8):
+    github, figma, ...
+  - Local plugin skills (3):
+    codex-chef-operator, context-budget-planner, ...
+  - Reviewed global skills (16):
+    dependency-upgrade, gh-fix-ci, ...
+  - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
+
 [*] Next steps
   - completed: Codex Chef dry run
 ```
@@ -114,6 +167,19 @@ Would install file from ...
 
 [*] Managed Codex files
   - installed: ...
+
+[*] Capability board
+  - Agents ready (21):
+    code_mapper, docs_researcher, ...
+  - MCP ready by default (7):
+    sequential-thinking, context7, ...
+  - MCP opt-in / disabled by default (8):
+    github, figma, ...
+  - Local plugin skills (3):
+    codex-chef-operator, context-budget-planner, ...
+  - Reviewed global skills (16):
+    dependency-upgrade, gh-fix-ci, ...
+  - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
 
 [*] Next steps
   - 28 existing managed target(s) were preserved; use --force only for a deliberate backup-backed replacement

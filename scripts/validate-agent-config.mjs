@@ -183,7 +183,18 @@ if (!fs.existsSync(catalogPath)) {
           ["Adversarial validation protocol:", "adversarial validation protocol"],
           ["Source currency protocol:", "source currency protocol"],
           ["Corpus expansion protocol:", "corpus expansion protocol"],
-          ["Expert calibration protocol:", "expert calibration protocol"]
+          ["Expert calibration protocol:", "expert calibration protocol"],
+          ["Evidence output contract:", "evidence output contract"],
+          ["Tool and delegation routing:", "tool and delegation routing"],
+          ["Verification checklist:", "verification checklist"],
+          ["Escalation and refusal guardrails:", "escalation and refusal guardrails"],
+          ["Primary reference anchors:", "primary reference anchors"],
+          ["Senior blind-spot checks:", "senior blind-spot checks"],
+          ["Decision thresholds:", "decision thresholds"],
+          ["Handoff payload contract:", "handoff payload contract"],
+          ["Evidence grading rubric:", "evidence grading rubric"],
+          ["Invocation intake checklist:", "invocation intake checklist"],
+          ["Corpus acquisition map:", "corpus acquisition map"]
         ];
         for (const [needle, label] of requiredRoleSections) {
           const occurrences = countOccurrences(template, needle);

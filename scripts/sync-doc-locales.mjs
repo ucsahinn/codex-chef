@@ -393,7 +393,11 @@ const titles = {
 const commandBlocks = {
   install: [
     "```powershell\n.\\scripts\\install.ps1 -All -WhatIf\n```",
+    "```powershell\n.\\scripts\\install.ps1 -All -Interactive\n```",
+    "```powershell\n.\\scripts\\install.ps1 -All -PlainOutput\n```",
     "```bash\n./scripts/install.sh --all --dry-run\n```",
+    "```bash\n./scripts/install.sh --all --interactive\n```",
+    "```bash\n./scripts/install.sh --all --plain-output\n```",
     "```bash\nnode scripts/plan-install.mjs --all --json\n```"
   ],
   codex: [

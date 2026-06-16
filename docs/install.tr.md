@@ -44,13 +44,13 @@ komutlarini, collision policy'yi, backup davranisini ve risk seviyesini listeler
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All
+.\scripts\install.ps1 -All -Interactive
 ```
 
-Rehberli Windows kurulumu:
+Soru sormayan otomasyon dostu kurulum:
 
 ```powershell
-.\scripts\install.ps1 -All -Interactive
+.\scripts\install.ps1 -All
 ```
 
 Kullanışlı parametreler:
@@ -75,7 +75,10 @@ Kullanışlı parametreler:
 - `-WhatIf`: gerçek setup'a dokunmadan dosya, Git ve skill operasyonlarını ön
   izler.
 - `-Interactive`: özel Codex/Agents home değerlerini ve opsiyonel global Git
-  guard seçimini sorar. Token, secret veya credential istemez.
+  guard seçimini sorar. Ayrıca reviewed skill'leri kurup kurmayacağını,
+  managed dosyaları backup sonrası force-replace etmek isteyip istemediğini ve
+  plan özeti sonrası devam edip etmeyeceğini sorar. Token, secret veya
+  credential istemez.
 - `-PlainOutput`: eski Windows konsolları, CI logları veya Unicode'u kötü
   gösteren terminaller için emoji yerine ASCII status işaretleri kullanır.
 
@@ -106,6 +109,13 @@ Kullanışlı flagler:
 - `--no-backup`
 - `--dry-run`
 - `--plain-output`: ASCII status işaretleri kullanır.
+- `--interactive`: Bash/WSL tarafında aynı path, skill, force, Git guard ve
+  devam onaylarını soran rehberli setup.
+
+İki installer da en sonda capability board basar: specialist agent'lar,
+varsayılan hazır MCP server'ları, disabled/opt-in MCP connector'ları, bundled
+plugin skill'leri ve reviewed global skill'ler. Account, database, production
+ve geniş filesystem connector'ları sen açıkça enable edene kadar kapalı kalır.
 
 ## Neler Yedeklenir?
 
