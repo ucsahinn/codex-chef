@@ -4,11 +4,17 @@ param(
   [switch]$InstallSkills,
   [switch]$InstallGitGuards,
   [switch]$Force,
-  [switch]$NoBackup
+  [switch]$NoBackup,
+  [switch]$Interactive,
+  [switch]$PlainOutput
 )
 
 $ErrorActionPreference = "Stop"
 $ScriptCmdlet = $PSCmdlet
+$IconChef = [System.Char]::ConvertFromUtf32(0x1F373)
+$IconCheck = [char]0x2713
+$IconBullet = [char]0x2022
+$SkippedExistingCount = 0
 
 if ($All) {
   $InstallSkills = $true
@@ -17,6 +23,79 @@ if ($All) {
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $CodexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".codex" }
 $AgentsHome = if ($env:AGENTS_HOME) { $env:AGENTS_HOME } else { Join-Path $HOME ".agents" }
+
+function Use-DecoratedOutput {
+  if ($PlainOutput) { return $false }
+  if ($env:NO_COLOR -or $env:TERM -eq "dumb") { return $false }
+  return $true
+}
+
+function Get-Icon {
+  param(
+    [Parameter(Mandatory=$true)][string]$Emoji,
+    [Parameter(Mandatory=$true)][string]$Fallback
+  )
+  if (Use-DecoratedOutput) { return $Emoji }
+  return $Fallback
+}
+
+function Write-Section {
+  param([Parameter(Mandatory=$true)][string]$Title)
+  Write-Host ""
+  Write-Host "$(Get-Icon $Script:IconChef "[*]") $Title"
+}
+
+function Write-Action {
+  param(
+    [Parameter(Mandatory=$true)][string]$Status,
+    [Parameter(Mandatory=$true)][string]$Message
+  )
+  Write-Host "  $(Get-Icon $Script:IconCheck "-") ${Status}: $Message"
+}
+
+function Write-Note {
+  param([Parameter(Mandatory=$true)][string]$Message)
+  Write-Host "  $(Get-Icon $Script:IconBullet "-") $Message"
+}
+
+function Read-OptionalPath {
+  param(
+    [Parameter(Mandatory=$true)][string]$Label,
+    [Parameter(Mandatory=$true)][string]$CurrentValue
+  )
+  if (-not $Interactive) {
+    return $CurrentValue
+  }
+  $Answer = Read-Host "$Label [$CurrentValue]"
+  if ([string]::IsNullOrWhiteSpace($Answer)) {
+    return $CurrentValue
+  }
+  return $Answer.Trim()
+}
+
+function Read-YesNo {
+  param(
+    [Parameter(Mandatory=$true)][string]$Prompt,
+    [bool]$Default = $false
+  )
+  if (-not $Interactive) {
+    return $false
+  }
+  $Suffix = if ($Default) { "[Y/n]" } else { "[y/N]" }
+  $Answer = Read-Host "$Prompt $Suffix"
+  if ([string]::IsNullOrWhiteSpace($Answer)) {
+    return $Default
+  }
+  return $Answer.Trim().ToLowerInvariant().StartsWith("y")
+}
+
+$CodexHome = Read-OptionalPath -Label "Codex home" -CurrentValue $CodexHome
+$AgentsHome = Read-OptionalPath -Label "Agents home" -CurrentValue $AgentsHome
+if ($Interactive -and -not $InstallGitGuards) {
+  if (Read-YesNo -Prompt "Install optional global Git guards for this Windows user?" -Default $false) {
+    $InstallGitGuards = $true
+  }
+}
 $BackupRoot = Join-Path $CodexHome ("backups\codex-chef-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
 
 function Invoke-Change {
@@ -93,7 +172,7 @@ function Install-File {
   )
 
   if ((Test-Path -LiteralPath $Destination) -and -not $Force) {
-    Write-Warning "Skipped existing file: $Destination (use -Force to replace after backup)"
+    $Script:SkippedExistingCount += 1
     return
   }
 
@@ -103,7 +182,7 @@ function Install-File {
     Copy-Item -LiteralPath $Source -Destination $Destination -Force
   }
   if ($changed) {
-    Write-Host "Installed $Destination"
+    Write-Action -Status "installed" -Message $Destination
   }
 }
 
@@ -131,7 +210,7 @@ function Install-CodexConfig {
       }
     }
     if ($changed) {
-      Write-Host "Merged config $Destination"
+      Write-Action -Status "merged config" -Message $Destination
     }
     return
   }
@@ -146,7 +225,7 @@ function Install-Directory {
   )
 
   if ((Test-Path -LiteralPath $Destination) -and -not $Force) {
-    Write-Warning "Skipped existing directory: $Destination (use -Force to replace after backup)"
+    $Script:SkippedExistingCount += 1
     return
   }
 
@@ -162,16 +241,33 @@ function Install-Directory {
     Copy-Item -LiteralPath $Source -Destination $Destination -Recurse -Force
   }
   if ($changed) {
-    Write-Host "Installed $Destination"
+    Write-Action -Status "installed" -Message $Destination
   }
 }
 
-Write-Host "Codex home: $CodexHome"
-Write-Host "Agents home: $AgentsHome"
+Write-Section "Codex Chef installer"
+Write-Note "Codex home: $CodexHome"
+Write-Note "Agents home: $AgentsHome"
+if ($Force) {
+  Write-Note "Mode: replace managed targets after backup"
+} else {
+  Write-Note "Mode: preserve existing files; merge missing config blocks"
+}
+if ($InstallSkills) {
+  Write-Note "Skills: install reviewed catalog entries with --agent codex"
+} else {
+  Write-Note "Skills: skipped unless -All or -InstallSkills is used"
+}
+if ($InstallGitGuards) {
+  Write-Note "Git guards: enabled for this user"
+} else {
+  Write-Note "Git guards: disabled by default"
+}
 if ($WhatIfPreference) {
-  Write-Host "Dry run: no files, Git settings, or skills will be changed."
+  Write-Note "Dry run: no files, Git settings, or skills will be changed"
 }
 
+Write-Section "Managed Codex files"
 Ensure-Dir $CodexHome
 Ensure-Dir (Join-Path $CodexHome "agents")
 Ensure-Dir (Join-Path $CodexHome "rules")
@@ -199,7 +295,7 @@ $MarketplaceDir = Join-Path $AgentsHome "plugins"
 Ensure-Dir $MarketplaceDir
 $MarketplacePath = Join-Path $MarketplaceDir "marketplace.json"
 if ((Test-Path -LiteralPath $MarketplacePath) -and -not $Force) {
-  Write-Warning "Skipped existing marketplace: $MarketplacePath (use -Force to replace after backup)"
+  $Script:SkippedExistingCount += 1
 } else {
   Backup-Target $MarketplacePath
   $marketplace = [ordered]@{
@@ -225,11 +321,12 @@ if ((Test-Path -LiteralPath $MarketplacePath) -and -not $Force) {
     [System.IO.File]::WriteAllText($MarketplacePath, $json + [Environment]::NewLine, $utf8NoBom)
   }
   if ($changed) {
-    Write-Host "Installed $MarketplacePath"
+    Write-Action -Status "installed" -Message $MarketplacePath
   }
 }
 
 if ($InstallGitGuards) {
+  Write-Section "Optional Git guards"
   $GitIgnoreSource = Join-Path $RepoRoot "templates\git\.gitignore_global"
   $GitIgnoreTarget = Join-Path $HOME ".gitignore_global"
   $HooksDir = Join-Path $HOME ".githooks"
@@ -256,19 +353,20 @@ if ($InstallGitGuards) {
     }
   }
   if ($configuredExcludes -and $configuredHooks) {
-    Write-Host "Configured global Git excludesfile and hooksPath."
+    Write-Action -Status "configured" -Message "global Git excludesfile and hooksPath"
   }
 }
 
 if ($InstallSkills) {
+  Write-Section "Curated skills"
   if ($WhatIfPreference) {
     $CatalogPath = Join-Path $RepoRoot "catalog\skills.json"
     $Catalog = Get-Content -Path $CatalogPath -Raw | ConvertFrom-Json
     foreach ($Skill in $Catalog.skills | Where-Object { $_.install -eq $true }) {
       $DepthFlag = if ($Skill.fullDepth -eq $true) { " --full-depth" } else { "" }
-      Write-Host "Would install skill: $($Skill.name) from $($Skill.package) --skill $($Skill.skill)$DepthFlag"
+      Write-Action -Status "would install skill" -Message "$($Skill.name) from $($Skill.package) --skill $($Skill.skill)$DepthFlag"
     }
-    Write-Host "Skipped skill installation because -WhatIf is active."
+    Write-Note "Skipped skill installation because -WhatIf is active"
   } else {
     $CatalogPath = Join-Path $RepoRoot "catalog\skills.json"
     $Catalog = Get-Content -Path $CatalogPath -Raw | ConvertFrom-Json
@@ -303,7 +401,7 @@ if ($InstallSkills) {
         continue
       }
       if ($InstalledSkills.ContainsKey($Skill.name)) {
-        Write-Host "Skill already installed: $($Skill.name)"
+        Write-Action -Status "already installed" -Message $Skill.name
         continue
       }
 
@@ -313,7 +411,7 @@ if ($InstallSkills) {
       }
       $SkillArgs += @("--agent", "codex", "--yes", "--global")
       $DepthFlag = if ($Skill.fullDepth -eq $true) { " --full-depth" } else { "" }
-      Write-Host "Installing skill: $($Skill.name) from $($Skill.package) --skill $($Skill.skill)$DepthFlag"
+      Write-Action -Status "installing skill" -Message "$($Skill.name) from $($Skill.package) --skill $($Skill.skill)$DepthFlag"
       $Output = & npx.cmd @SkillArgs 2>&1
       $ExitCode = $LASTEXITCODE
       $OutputText = ($Output -join [Environment]::NewLine)
@@ -321,21 +419,24 @@ if ($InstallSkills) {
         $Output | ForEach-Object { Write-Host $_ }
         throw "Skill install failed for $($Skill.name)"
       }
-      Write-Host "Installed skill: $($Skill.name)"
+      Write-Action -Status "installed skill" -Message $Skill.name
     }
   }
 }
 
-Write-Host ""
+Write-Section "Next steps"
+if ($SkippedExistingCount -gt 0) {
+  Write-Note "$SkippedExistingCount existing managed target(s) were preserved; use -Force only for a deliberate backup-backed replacement"
+}
 if ($WhatIfPreference) {
-  Write-Host "Codex Chef dry run completed."
+  Write-Action -Status "completed" -Message "Codex Chef dry run"
 } else {
-  Write-Host "Codex Chef installed."
-  Write-Host "Restart Codex, then run:"
-  Write-Host "  codex doctor --summary"
-  Write-Host "  npm run verify:install:runtime"
-  Write-Host "  codex --strict-config `"Summarize the active Codex setup.`""
+  Write-Action -Status "completed" -Message "Codex Chef install"
+  Write-Note "Restart Codex, then run:"
+  Write-Host "    codex doctor --summary"
+  Write-Host "    npm run verify:install:runtime"
+  Write-Host "    codex --strict-config `"Summarize the active Codex setup.`""
 }
 if (-not $NoBackup -and (Test-Path -LiteralPath $BackupRoot)) {
-  Write-Host "Backup: $BackupRoot"
+  Write-Note "Backup: $BackupRoot"
 }

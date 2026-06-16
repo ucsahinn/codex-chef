@@ -40,6 +40,10 @@ Este arquivo localizado acompanha as seções do arquivo fonte em inglês. Sourc
 
 - Release Notes
 - Unreleased
+- v0.5.9 - 2026-06-16
+- Highlights
+- Upgrade Notes
+- Verification
 - v0.5.8 - 2026-06-16
 - Highlights
 - Upgrade Notes

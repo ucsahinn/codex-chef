@@ -57,6 +57,8 @@ requireText(ps, "[switch]$InstallSkills", "PowerShell installer");
 requireText(ps, "[switch]$InstallGitGuards", "PowerShell installer");
 requireText(ps, "[switch]$Force", "PowerShell installer");
 requireText(ps, "[switch]$NoBackup", "PowerShell installer");
+requireText(ps, "[switch]$Interactive", "PowerShell installer");
+requireText(ps, "[switch]$PlainOutput", "PowerShell installer");
 requireText(ps, "SupportsShouldProcess", "PowerShell installer");
 requireText(ps, "CODEX_HOME", "PowerShell installer");
 requireText(ps, "AGENTS_HOME", "PowerShell installer");
@@ -64,6 +66,9 @@ requireText(ps, "Backup-Target", "PowerShell installer");
 requireText(ps, "Assert-ManagedDirectoryTarget", "PowerShell installer");
 requireText(ps, "Install-CodexConfig", "PowerShell installer");
 requireText(ps, "merge-codex-config.mjs", "PowerShell installer");
+requireText(ps, "Read-OptionalPath", "PowerShell installer");
+requireText(ps, "Read-YesNo", "PowerShell installer");
+requireText(ps, "Write-Section", "PowerShell installer");
 requireText(ps, "templates\\codex", "PowerShell installer");
 requireText(ps, "AGENTS.md", "PowerShell installer");
 requireText(ps, "config.windows.toml", "PowerShell installer");
@@ -80,7 +85,8 @@ requireText(ps, "catalog\\skills.json", "PowerShell installer");
 requireText(ps, "skills list --global --json", "PowerShell installer");
 requireText(ps, '"--agent", "codex", "--yes", "--global"', "PowerShell installer");
 requireRegex(ps, /if\s*\(\$All\)\s*\{[\s\S]*\$InstallSkills\s*=\s*\$true[\s\S]*\}/, "PowerShell installer");
-if (/if\s*\(\$All\)\s*\{[\s\S]*\$InstallGitGuards\s*=\s*\$true[\s\S]*\}/.test(ps)) {
+const psAllBlock = ps.match(/if\s*\(\$All\)\s*\{(?<body>[\s\S]*?)\n\}/)?.groups?.body || "";
+if (/\$InstallGitGuards\s*=\s*\$true/.test(psAllBlock)) {
   fail("PowerShell -All must not enable InstallGitGuards; global Git guards require the explicit InstallGitGuards flag.");
 }
 requireRegex(ps, /if\s*\(\$InstallGitGuards\)\s*\{[\s\S]*core\.excludesfile[\s\S]*core\.hooksPath[\s\S]*\}/, "PowerShell installer");
@@ -92,12 +98,16 @@ requireText(sh, "ALL=0", "Bash installer");
 requireText(sh, "FORCE=0", "Bash installer");
 requireText(sh, "NO_BACKUP=0", "Bash installer");
 requireText(sh, "DRY_RUN=0", "Bash installer");
+requireText(sh, "PLAIN_OUTPUT=0", "Bash installer");
+requireText(sh, "--plain-output", "Bash installer");
 requireText(sh, "CODEX_HOME_DIR", "Bash installer");
 requireText(sh, "AGENTS_HOME_DIR", "Bash installer");
 requireText(sh, "backup_target", "Bash installer");
 requireText(sh, "assert_managed_directory_target", "Bash installer");
 requireText(sh, "install_codex_config", "Bash installer");
 requireText(sh, "merge-codex-config.mjs", "Bash installer");
+requireText(sh, "section()", "Bash installer");
+requireText(sh, "action()", "Bash installer");
 requireText(sh, "templates/codex", "Bash installer");
 requireText(sh, "AGENTS.md", "Bash installer");
 requireText(sh, "config.unix.toml", "Bash installer");
@@ -114,7 +124,8 @@ requireText(sh, "catalog/skills.json", "Bash installer");
 requireText(sh, "\"skills\", \"list\", \"--global\", \"--json\"", "Bash installer");
 requireText(sh, "\"--agent\", \"codex\", \"--yes\", \"--global\"", "Bash installer");
 requireRegex(sh, /if \[ "\$ALL" -eq 1 \]; then[\s\S]*INSTALL_SKILLS=1[\s\S]*fi/, "Bash installer");
-if (/if \[ "\$ALL" -eq 1 \]; then[\s\S]*INSTALL_GIT_GUARDS=1[\s\S]*fi/.test(sh)) {
+const shAllBlock = sh.match(/if \[ "\$ALL" -eq 1 \]; then(?<body>[\s\S]*?)\nfi/)?.groups?.body || "";
+if (/INSTALL_GIT_GUARDS=1/.test(shAllBlock)) {
   fail("Bash --all must not enable INSTALL_GIT_GUARDS; global Git guards require the explicit --install-git-guards flag.");
 }
 requireRegex(sh, /if \[ "\$INSTALL_GIT_GUARDS" -eq 1 \]; then[\s\S]*core\.excludesfile[\s\S]*core\.hooksPath[\s\S]*fi/, "Bash installer");

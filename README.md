@@ -48,6 +48,13 @@ Safe preview first:
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
+Guided Windows install, with prompts for custom Codex/Agents homes and optional
+Git guards:
+
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
 ## 🍳 What You Get After Install
 
 Codex Chef installs a reviewed Codex baseline, not a hidden sync from someone
@@ -62,6 +69,22 @@ manifest-backed install plan.
 | 🔌 MCP defaults | 7 useful MCP servers enabled and 8 authenticated/high-risk connectors parked disabled. |
 | 🧩 Plugin + skills | Local `codex-chef-workflows` plugin, three bundled skills, and sixteen optional curated global skills. |
 | 🛡️ Safety gates | Backups, dry-run planning, secret scanning, validation, and approval-gated risky actions. |
+
+### 🔌 MCP Connector Board
+
+Codex Chef treats MCPs as explicit capabilities, not hidden account sync. The
+useful local/research connectors are ready; account, database, production, and
+broad filesystem connectors stay parked until you opt in.
+
+| Status | MCPs | Why |
+| --- | --- | --- |
+| ✅ Ready by default | 📚 OpenAI Docs · 🧭 Context7 · 🧠 Sequential Thinking · 🎭 Playwright · 🧰 Chrome DevTools · 🗺️ Serena · 🧩 Memory | Safe research, code navigation, browser evidence, and local non-secret context. |
+| 🔒 Disabled by default | 📁 Filesystem · 🐙 GitHub · 🎨 Figma · 📌 Linear · 🗒️ Notion · 🚨 Sentry · ▲ Vercel · 🗄️ Supabase | These can expose private files, accounts, telemetry, deployments, or databases, so you enable them only when the task needs them. |
+
+If `~/.codex/config.toml` already exists, the installer backs it up and merges
+only missing Codex Chef agent/MCP/safety tables. Your existing MCP entries,
+tokens, profiles, and tuned settings are preserved unless you deliberately use
+`-Force` / `--force`.
 
 ## 🤖 Installed Agent Team
 

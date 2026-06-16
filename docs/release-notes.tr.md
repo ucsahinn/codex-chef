@@ -2,6 +2,61 @@
 
 ## Unreleased
 
+## v0.5.9 - 2026-06-16
+
+Bu patch install polish turunu tamamlar: ilk ekranda ajanlar, skill'ler ve
+MCP'ler ayni seviyede gorunur; Windows installer hem tek komutla hem de
+rehberli modla calisir ve mevcut Codex config'ini ezmez.
+
+## One Cikanlar
+
+- README'ye default acik lokal/arastirma MCP'lerini ve default kapali hesap,
+  database, production ve genis filesystem connector'larini gosteren belirgin
+  bir MCP panosu eklendi.
+- Codex Chef ikonu daha premium animasyonlu rozet olarak yenilendi ve banner
+  komutu guvenli varsayilan `.\scripts\install.ps1 -All` yoluna cekildi.
+- PowerShell `-Interactive` eklendi; Codex/Agents home secimini ve opsiyonel
+  Git guard opt-in'ini sorar. Token, secret veya credential istemez.
+- PowerShell `-PlainOutput` ve Bash `--plain-output` eklendi; eski Windows
+  konsollari, CI loglari veya Unicode'u kotu gosteren terminaller icin ASCII
+  cikti verir.
+- PowerShell ve Bash installer section/status ciktilari esitlendi; guvenli
+  varsayilan korunur: mevcut `config.toml` backup alinarak merge edilir,
+  kullanici bilerek force secmedikce ezilmez.
+- Install ve expected-output dokumanlari yeni installer UX'i ve runtime
+  verification akisi ile esitlendi.
+
+## Upgrade Notlari
+
+Guvenli ilk kurulum veya mevcut kullanici merge'i:
+
+```powershell
+.\scripts\install.ps1 -All
+```
+
+Rehberli Windows kurulumu:
+
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
+Sade ASCII cikti:
+
+```powershell
+.\scripts\install.ps1 -All -PlainOutput
+```
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermeli:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.8 - 2026-06-16
 
 Bu patch ilk kurulum ve mevcut kullanıcı senaryosunu README'deki sözle aynı

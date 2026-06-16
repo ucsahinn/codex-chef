@@ -1,6 +1,8 @@
 # Expected Output
 
-Installer output is intentionally quiet on success and detailed on failure.
+Installer output is intentionally concise on success and detailed on failure.
+PowerShell uses readable icons by default and supports `-PlainOutput` for
+ASCII-only terminals.
 
 ## Install Plan Preview
 
@@ -8,7 +10,7 @@ Discovery output stays no-write and human-readable:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.8
+Package: codex-chef@0.5.9
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -22,9 +24,9 @@ Codex Chef install plan
 Platform: windows
 Operations: ...
 
-[file] codex-agents-md
-  source: templates/codex/AGENTS.md
-  target: .../.codex/AGENTS.md
+[file] codex-config
+  source: templates/codex/config.windows.toml
+  target: .../.codex/config.toml
   collision: merge-missing-blocks-unless-force-backup-before-replace
   backup: yes
   force: no
@@ -49,24 +51,38 @@ node scripts/plan-install.mjs --all --json --redact-paths
 ## PowerShell Dry Run
 
 ```text
-Codex home: ...
-Agents home: ...
-Dry run: no files, Git settings, or skills will be changed.
+🍳 Codex Chef installer
+  • Codex home: ...
+  • Agents home: ...
+  • Mode: preserve existing files; merge missing config blocks
+  • Dry run: no files, Git settings, or skills will be changed
+
+🍳 Managed Codex files
 What if: Performing the operation ...
-Codex Chef dry run completed.
+
+🍳 Next steps
+  ✓ completed: Codex Chef dry run
 ```
 
 ## PowerShell Success
 
 ```text
-Codex home: ...
-Agents home: ...
-Installed ...
-Codex Chef installed.
-Restart Codex, then run:
-  codex doctor --summary
-  codex --strict-config "Summarize the active Codex setup."
-Backup: ...
+🍳 Codex Chef installer
+  • Codex home: ...
+  • Agents home: ...
+  • Mode: preserve existing files; merge missing config blocks
+
+🍳 Managed Codex files
+  ✓ installed: ...
+
+🍳 Next steps
+  • 28 existing managed target(s) were preserved; use -Force only for a deliberate backup-backed replacement
+  ✓ completed: Codex Chef install
+  • Restart Codex, then run:
+    codex doctor --summary
+    npm run verify:install:runtime
+    codex --strict-config "Summarize the active Codex setup."
+  • Backup: ...
 ```
 
 Existing `config.toml` is backed up and merged unless `-Force` is used; other
@@ -75,24 +91,38 @@ existing managed files are skipped unless `-Force` is used.
 ## Bash Dry Run
 
 ```text
-Codex home: ...
-Agents home: ...
-Dry run: no files, Git settings, or skills will be changed.
+[*] Codex Chef installer
+  - Codex home: ...
+  - Agents home: ...
+  - Mode: preserve existing files; merge missing config blocks
+  - Dry run: no files, Git settings, or skills will be changed
+
+[*] Managed Codex files
 Would install file from ...
-Codex Chef dry run completed.
+
+[*] Next steps
+  - completed: Codex Chef dry run
 ```
 
 ## Bash Success
 
 ```text
-Codex home: ...
-Agents home: ...
-Installed ...
-Codex Chef installed.
-Restart Codex, then run:
-  codex doctor --summary
-  codex --strict-config "Summarize the active Codex setup."
-Backup: ...
+[*] Codex Chef installer
+  - Codex home: ...
+  - Agents home: ...
+  - Mode: preserve existing files; merge missing config blocks
+
+[*] Managed Codex files
+  - installed: ...
+
+[*] Next steps
+  - 28 existing managed target(s) were preserved; use --force only for a deliberate backup-backed replacement
+  - completed: Codex Chef install
+  - Restart Codex, then run:
+    codex doctor --summary
+    npm run verify:install:runtime
+    codex --strict-config "Summarize the active Codex setup."
+  - Backup: ...
 ```
 
 ## Skill Installation

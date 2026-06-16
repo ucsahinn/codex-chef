@@ -7,6 +7,8 @@ ALL=0
 FORCE=0
 NO_BACKUP=0
 DRY_RUN=0
+PLAIN_OUTPUT=0
+SKIPPED_EXISTING_COUNT=0
 
 for arg in "$@"; do
   case "$arg" in
@@ -16,6 +18,7 @@ for arg in "$@"; do
     --force) FORCE=1 ;;
     --no-backup) NO_BACKUP=1 ;;
     --dry-run) DRY_RUN=1 ;;
+    --plain-output) PLAIN_OUTPUT=1 ;;
     *)
       echo "Unknown argument: $arg" >&2
       exit 2
@@ -31,6 +34,27 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
 AGENTS_HOME_DIR="${AGENTS_HOME:-$HOME/.agents}"
 BACKUP_ROOT="$CODEX_HOME_DIR/backups/codex-chef-$(date +%Y%m%d-%H%M%S)"
+
+icon() {
+  if [ "$PLAIN_OUTPUT" -eq 1 ] || [ "${NO_COLOR:-}" != "" ] || [ "${TERM:-}" = "dumb" ]; then
+    printf "%s" "$2"
+  else
+    printf "%s" "$1"
+  fi
+}
+
+section() {
+  echo ""
+  printf "%s %s\n" "$(icon "🍳" "[*]")" "$1"
+}
+
+action() {
+  printf "  %s %s: %s\n" "$(icon "✓" "-")" "$1" "$2"
+}
+
+note() {
+  printf "  %s %s\n" "$(icon "•" "-")" "$1"
+}
 
 run_change() {
   local target="$1"
@@ -77,13 +101,13 @@ install_file() {
   local source="$1"
   local destination="$2"
   if [ -e "$destination" ] && [ "$FORCE" -ne 1 ]; then
-    echo "Skipped existing file: $destination (use --force to replace after backup)" >&2
+    SKIPPED_EXISTING_COUNT=$((SKIPPED_EXISTING_COUNT + 1))
     return
   fi
   ensure_dir "$(dirname "$destination")"
   backup_target "$destination"
   if run_change "$destination" "install file from $source" cp "$source" "$destination"; then
-    echo "Installed $destination"
+    action "installed" "$destination"
   fi
 }
 
@@ -100,7 +124,7 @@ install_codex_config() {
     fi
     if run_change "$destination" "merge missing Codex Chef config blocks from $source" \
       node "$REPO_ROOT/scripts/merge-codex-config.mjs" "$source" "$destination"; then
-      echo "Merged config $destination"
+      action "merged config" "$destination"
     fi
     return
   fi
@@ -112,7 +136,7 @@ install_directory() {
   local source="$1"
   local destination="$2"
   if [ -e "$destination" ] && [ "$FORCE" -ne 1 ]; then
-    echo "Skipped existing directory: $destination (use --force to replace after backup)" >&2
+    SKIPPED_EXISTING_COUNT=$((SKIPPED_EXISTING_COUNT + 1))
     return
   fi
   ensure_dir "$(dirname "$destination")"
@@ -122,16 +146,33 @@ install_directory() {
     run_change "$destination" "replace existing managed directory" rm -rf "$destination" || true
   fi
   if run_change "$destination" "install directory from $source" cp -R "$source" "$destination"; then
-    echo "Installed $destination"
+    action "installed" "$destination"
   fi
 }
 
-echo "Codex home: $CODEX_HOME_DIR"
-echo "Agents home: $AGENTS_HOME_DIR"
+section "Codex Chef installer"
+note "Codex home: $CODEX_HOME_DIR"
+note "Agents home: $AGENTS_HOME_DIR"
+if [ "$FORCE" -eq 1 ]; then
+  note "Mode: replace managed targets after backup"
+else
+  note "Mode: preserve existing files; merge missing config blocks"
+fi
+if [ "$INSTALL_SKILLS" -eq 1 ]; then
+  note "Skills: install reviewed catalog entries with --agent codex"
+else
+  note "Skills: skipped unless --all or --install-skills is used"
+fi
+if [ "$INSTALL_GIT_GUARDS" -eq 1 ]; then
+  note "Git guards: enabled for this user"
+else
+  note "Git guards: disabled by default"
+fi
 if [ "$DRY_RUN" -eq 1 ]; then
-  echo "Dry run: no files, Git settings, or skills will be changed."
+  note "Dry run: no files, Git settings, or skills will be changed"
 fi
 
+section "Managed Codex files"
 ensure_dir "$CODEX_HOME_DIR"
 ensure_dir "$CODEX_HOME_DIR/agents"
 ensure_dir "$CODEX_HOME_DIR/rules"
@@ -159,7 +200,7 @@ MARKETPLACE_DIR="$AGENTS_HOME_DIR/plugins"
 MARKETPLACE_PATH="$MARKETPLACE_DIR/marketplace.json"
 ensure_dir "$MARKETPLACE_DIR"
 if [ -e "$MARKETPLACE_PATH" ] && [ "$FORCE" -ne 1 ]; then
-  echo "Skipped existing marketplace: $MARKETPLACE_PATH (use --force to replace after backup)" >&2
+  SKIPPED_EXISTING_COUNT=$((SKIPPED_EXISTING_COUNT + 1))
 else
   backup_target "$MARKETPLACE_PATH"
   if [ "$DRY_RUN" -eq 1 ]; then
@@ -187,11 +228,12 @@ const marketplace = {
 };
 fs.writeFileSync(marketplacePath, `${JSON.stringify(marketplace, null, 2)}\n`, "utf8");
 NODE
-    echo "Installed $MARKETPLACE_PATH"
+    action "installed" "$MARKETPLACE_PATH"
   fi
 fi
 
 if [ "$INSTALL_GIT_GUARDS" -eq 1 ]; then
+  section "Optional Git guards"
   GITIGNORE_TARGET="$HOME/.gitignore_global"
   HOOKS_DIR="$HOME/.githooks"
   install_file "$REPO_ROOT/templates/git/.gitignore_global" "$GITIGNORE_TARGET"
@@ -204,11 +246,12 @@ if [ "$INSTALL_GIT_GUARDS" -eq 1 ]; then
   else
     git config --global core.excludesfile "$GITIGNORE_TARGET"
     git config --global core.hooksPath "$HOOKS_DIR"
-    echo "Configured global Git excludesfile and hooksPath."
+    action "configured" "global Git excludesfile and hooksPath"
   fi
 fi
 
 if [ "$INSTALL_SKILLS" -eq 1 ]; then
+  section "Curated skills"
   if [ "$DRY_RUN" -eq 1 ]; then
     node - "$REPO_ROOT/catalog/skills.json" <<'NODE'
 const fs = require("fs");
@@ -280,16 +323,19 @@ NODE
   fi
 fi
 
-echo ""
+section "Next steps"
+if [ "$SKIPPED_EXISTING_COUNT" -gt 0 ]; then
+  note "$SKIPPED_EXISTING_COUNT existing managed target(s) were preserved; use --force only for a deliberate backup-backed replacement"
+fi
 if [ "$DRY_RUN" -eq 1 ]; then
-  echo "Codex Chef dry run completed."
+  action "completed" "Codex Chef dry run"
 else
-  echo "Codex Chef installed."
-  echo "Restart Codex, then run:"
-  echo "  codex doctor --summary"
-  echo "  npm run verify:install:runtime"
-  echo '  codex --strict-config "Summarize the active Codex setup."'
+  action "completed" "Codex Chef install"
+  note "Restart Codex, then run:"
+  echo "    codex doctor --summary"
+  echo "    npm run verify:install:runtime"
+  echo '    codex --strict-config "Summarize the active Codex setup."'
 fi
 if [ "$NO_BACKUP" -ne 1 ] && [ -d "$BACKUP_ROOT" ]; then
-  echo "Backup: $BACKUP_ROOT"
+  note "Backup: $BACKUP_ROOT"
 fi

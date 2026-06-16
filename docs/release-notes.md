@@ -2,6 +2,63 @@
 
 ## Unreleased
 
+## v0.5.9 - 2026-06-16
+
+This patch finishes the install polish pass: the first screen now presents
+agents, skills, and MCPs at the same level, and the Windows installer can be
+run as a clean one-shot install or a guided setup without clobbering existing
+Codex config.
+
+## Highlights
+
+- Added a prominent README MCP connector board with default-enabled
+  local/research servers and disabled-by-default account, database, production,
+  and broad filesystem connectors.
+- Replaced the Codex Chef icon with a more polished animated badge and updated
+  the banner command to show the safe default `.\scripts\install.ps1 -All`
+  path.
+- Added PowerShell `-Interactive` for guided Codex/Agents home selection and
+  optional Git-guard opt-in. It does not ask for tokens, secrets, or
+  credentials.
+- Added PowerShell `-PlainOutput` and Bash `--plain-output` for older Windows
+  consoles, CI logs, and terminals that render Unicode poorly.
+- Aligned installer section/status output across PowerShell and Bash while
+  preserving the safe default: existing `config.toml` is backed up and merged,
+  not overwritten, unless the user deliberately chooses force.
+- Updated install and expected-output docs to match the richer installer UX and
+  runtime verification handoff.
+
+## Upgrade Notes
+
+Safe first install or existing-user merge:
+
+```powershell
+.\scripts\install.ps1 -All
+```
+
+Guided Windows install:
+
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
+Plain ASCII output:
+
+```powershell
+.\scripts\install.ps1 -All -PlainOutput
+```
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.8 - 2026-06-16
 
 This patch makes first-run and existing-user installs line up with the promise

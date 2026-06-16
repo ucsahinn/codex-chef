@@ -47,6 +47,12 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install.ps1 -All
 ```
 
+Rehberli Windows kurulumu:
+
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
 Kullanışlı parametreler:
 
 - `-All`: Codex template'lerini, yerel Codex Chef plugin'ini, uzman ajanları,
@@ -68,6 +74,10 @@ Kullanışlı parametreler:
 - `-NoBackup`: yedeklemeyi kapatır. Tavsiye edilmez.
 - `-WhatIf`: gerçek setup'a dokunmadan dosya, Git ve skill operasyonlarını ön
   izler.
+- `-Interactive`: özel Codex/Agents home değerlerini ve opsiyonel global Git
+  guard seçimini sorar. Token, secret veya credential istemez.
+- `-PlainOutput`: eski Windows konsolları, CI logları veya Unicode'u kötü
+  gösteren terminaller için emoji yerine ASCII status işaretleri kullanır.
 
 ## Bash Veya WSL Kurulumu
 
@@ -95,6 +105,7 @@ Kullanışlı flagler:
   mevcut `config.toml` merge edilir ve diğer mevcut managed dosyalar atlanır.
 - `--no-backup`
 - `--dry-run`
+- `--plain-output`: ASCII status işaretleri kullanır.
 
 ## Neler Yedeklenir?
 
@@ -160,6 +171,11 @@ CODEX_HOME="$PWD/tmp/codex-home" AGENTS_HOME="$PWD/tmp/agents-home" \
 
 Non-dry-run temp home'ları yalnızca bilerek smoke install yapmak istiyorsan
 kullan. `tmp/` klasörünü de sadece bilerek oluşturduysan temizle.
+
+Zaten bir Codex setup'ın varsa güvenli varsayılan yine normal install
+komutudur. Mevcut `config.toml` backup alınarak merge edilir; kullanıcıya ait
+tablolar korunur. Diğer mevcut managed dosyalar `-Force` / `--force` vermediğin
+sürece atlanır.
 
 ## Geri Dönüş
 

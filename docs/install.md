@@ -47,6 +47,12 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install.ps1 -All
 ```
 
+Guided Windows install:
+
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
 Useful switches:
 
 - `-All`: install Codex templates, the local Codex Chef plugin, specialist
@@ -67,6 +73,10 @@ Useful switches:
 - `-NoBackup`: skip backups. Not recommended.
 - `-WhatIf`: preview file, Git, and skill operations without changing the real
   setup.
+- `-Interactive`: ask before using custom Codex/Agents home values and before
+  enabling optional global Git guards. It never asks for tokens or credentials.
+- `-PlainOutput`: use ASCII status markers instead of emoji, useful for older
+  Windows consoles, CI logs, and terminals that render Unicode poorly.
 
 ## Bash Or WSL Install
 
@@ -94,6 +104,7 @@ Useful flags:
   `config.toml` is merged and other existing managed files are skipped.
 - `--no-backup`
 - `--dry-run`
+- `--plain-output`: use ASCII status markers.
 
 ## What Gets Backed Up
 
@@ -159,6 +170,11 @@ CODEX_HOME="$PWD/tmp/codex-home" AGENTS_HOME="$PWD/tmp/agents-home" \
 
 Use non-dry-run temp homes only when you intentionally want a smoke install.
 Remove `tmp/` only when you created it intentionally.
+
+If you already have a Codex setup, the safe default path is still the normal
+install command. Existing `config.toml` is backed up and merged; existing user
+tables are preserved. Other existing managed files are skipped unless you use
+`-Force` / `--force` after reviewing the preview.
 
 ## Rollback
 

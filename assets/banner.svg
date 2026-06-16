@@ -50,7 +50,7 @@
     <circle cx="116" cy="108" r="5" fill="#fb7185"/>
     <circle cx="134" cy="108" r="5" fill="#fbbf24"/>
     <circle cx="152" cy="108" r="5" fill="#34d399"/>
-    <text x="178" y="115" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#dbeafe">scripts/install.ps1 -All -Force</text>
+    <text x="178" y="115" font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#dbeafe">scripts/install.ps1 -All</text>
     <rect class="scan" x="102" y="138" width="116" height="174" rx="12" fill="url(#scan)" opacity="0.7"/>
 
     <g font-family="Segoe UI, Arial, sans-serif" font-size="15" fill="#334155">

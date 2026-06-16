@@ -45,6 +45,13 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
+Rehberli Windows kurulumu; Codex/Agents klasörlerini ve opsiyonel Git guard
+seçimini sana sorar:
+
+```powershell
+.\scripts\install.ps1 -All -Interactive
+```
+
 ## 🍳 Kurulumdan Sonra Ne Gelir?
 
 Codex Chef başka bir makinenin global ayarlarını kopyalamaz. Kurulum kaynağı bu
@@ -58,6 +65,22 @@ repo içindeki `templates/codex/config.*.toml`, `templates/codex/agents/*.toml`,
 | 🔌 MCP varsayılanları | 7 faydalı MCP açık, 8 auth/high-risk connector kapalı bekler. |
 | 🧩 Plugin + skill'ler | Yerel `codex-chef-workflows` plugin'i, üç bundled skill ve on altı opsiyonel global skill. |
 | 🛡️ Güvenlik kapıları | Backup, dry-run plan, secret scan, validation ve onaylı riskli aksiyon modeli. |
+
+### 🔌 MCP Panosu
+
+Codex Chef MCP'leri gizli hesap senkronizasyonu gibi kullanmaz; hepsi açık
+yüzeylerdir. Lokal/araştırma odaklı olanlar hazır gelir. Hesap, database,
+production ve geniş filesystem tarafı ise sen gerçekten istemeden kapalı kalır.
+
+| Durum | MCP'ler | Neden |
+| --- | --- | --- |
+| ✅ Varsayılan hazır | 📚 OpenAI Docs · 🧭 Context7 · 🧠 Sequential Thinking · 🎭 Playwright · 🧰 Chrome DevTools · 🗺️ Serena · 🧩 Memory | Güvenli araştırma, kod gezme, browser kanıtı ve secret içermeyen lokal context. |
+| 🔒 Varsayılan kapalı | 📁 Filesystem · 🐙 GitHub · 🎨 Figma · 📌 Linear · 🗒️ Notion · 🚨 Sentry · ▲ Vercel · 🗄️ Supabase | Private dosya, hesap, telemetry, deploy veya database açabileceği için sadece ihtiyaç olunca açılır. |
+
+`~/.codex/config.toml` zaten varsa installer önce backup alır ve sadece eksik
+Codex Chef agent/MCP/safety tablolarını ekler. Mevcut MCP kayıtların,
+token'ların, profile'ların ve kendi ayarların `-Force` / `--force` vermediğin
+sürece korunur.
 
 ## 🤖 Kurulan Ajan Ekibi
 

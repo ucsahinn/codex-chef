@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## 0.5.9 - 2026-06-16
+
+- Reworked the README first screen with a more prominent MCP connector board
+  so enabled local/research servers and disabled account/database connectors
+  are visible beside agents and skills.
+- Replaced the Codex Chef icon with a more polished animated badge while
+  preserving title, description, motion, and reduced-motion accessibility.
+- Updated the banner install command to show the safe default `-All` path
+  instead of implying force should be used on first install.
+- Added PowerShell `-Interactive` and `-PlainOutput` switches so Windows users
+  can choose guided path/Git-guard prompts or ASCII-only output without
+  weakening the default noninteractive installer.
+- Added Bash `--plain-output` and aligned installer section/status output
+  across PowerShell and Bash while preserving backup-first merge behavior.
+- Updated install and expected-output docs for the guided install path, config
+  merge behavior, runtime verification command, and current patch version.
+
 ## 0.5.8 - 2026-06-16
 
 - Added `scripts/merge-codex-config.mjs` so existing `config.toml` files are
