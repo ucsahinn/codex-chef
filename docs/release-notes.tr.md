@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+## v0.5.15 - 2026-06-16
+
+Bu patch Codex Chef operator CLI'ini ekler. Windows-first kullanici kurulum,
+repair, status, MCP, skill, auth ve log akislarini tek numarali menuden
+yonetebilir; yazan aksiyonlar yine acik `--apply` sinirinda kalir.
+
+## One Cikanlar
+
+- `npm run chef` eklendi: status, doctor, preview, install, repair, skill, MCP
+  rehberi, GitHub auth rehberi ve son loglar tek menude.
+- `--status`, `--preview`, `--repair --apply`, `--install --apply`,
+  `--skills`, `--mcp`, `--auth` ve `--logs` gibi noninteractive flag'ler
+  eklendi.
+- Write path'leri menude etiketlenir ve backup'li installer/repair scriptine
+  gitmeden once `--apply` veya acik onay ister.
+- CLI child-process output'u terminale veya `tmp/chef-cli/logs` altina yazmadan
+  once lokal path ve yaygin secret bicimleri icin redakte edilir.
+- `npm run validate:chef-cli` eklendi ve `npm run check`, security audit,
+  package surface, repo shape ve release readiness gate'lerine baglandi.
+- Release ve HTTPS Git auth hatalari icin kalici `gh auth login --scopes
+  repo,workflow` ve Git Credential Manager recovery komutlari dokumante edildi.
+
+## Dogrulama
+
+Bu surum icin release oncesi su kontroller calismali:
+
+```bash
+npm run check
+npm run chef -- --status --plain
+npm run chef -- --preview --plain
+npm run chef -- --repair --plain
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.14 - 2026-06-16
 
 Bu patch final Codex Chef audit'inde kalan connector ve dokumantasyon

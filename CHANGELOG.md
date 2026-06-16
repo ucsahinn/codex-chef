@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.5.15 - 2026-06-16
+
+- Added `npm run chef`, a Windows-friendly Codex Chef operator menu for
+  status, doctor, preview, install, repair, skills, MCP, auth, and log flows.
+- Added `scripts/validate-chef-cli.mjs` and wired it into `npm run check` so the
+  CLI keeps write boundaries, redaction, log placement, and auth guidance under
+  release validation.
+- Documented durable GitHub CLI and Git Credential Manager recovery commands for
+  invalid `gh` auth and missing `repo,workflow` scope without storing tokens in
+  repo files or config.
+
 ## 0.5.14 - 2026-06-16
 
 - Disabled app/connectors by default through `apps._default.enabled = false`

@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+## v0.5.15 - 2026-06-16
+
+This patch adds the Codex Chef operator CLI so Windows-first users can run the
+whole setup, repair, status, MCP, skill, auth, and log workflow from one
+numbered menu while keeping write actions explicit.
+
+## Highlights
+
+- Added `npm run chef` with a numbered menu for status, doctor, preview,
+  install, repair, skills, MCP guidance, GitHub auth guidance, and recent logs.
+- Added noninteractive flags such as `--status`, `--preview`, `--repair
+  --apply`, `--install --apply`, `--skills`, `--mcp`, `--auth`, and `--logs`.
+- Write paths are labeled in the menu and require `--apply` or an explicit
+  confirmation before they call the backup-backed installer or repair script.
+- CLI child-process output is redacted for local paths and common secret-shaped
+  values before it reaches the terminal or `tmp/chef-cli/logs`.
+- Added `npm run validate:chef-cli` and wired it into `npm run check`,
+  security audit, package surface, repo shape, and release readiness gates.
+- Documented durable `gh auth login --scopes repo,workflow` and Git Credential
+  Manager recovery commands for release and HTTPS Git auth failures.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run chef -- --status --plain
+npm run chef -- --preview --plain
+npm run chef -- --repair --plain
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.14 - 2026-06-16
 
 This patch closes the remaining connector and documentation gaps found during
