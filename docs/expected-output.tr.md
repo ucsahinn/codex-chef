@@ -51,88 +51,88 @@ node scripts/plan-install.mjs --all --json --redact-paths
 ## PowerShell Dry Run
 
 ```text
-🍳 Guided setup
-  • Press Enter to accept the safe default shown in brackets.
-  • No tokens, secrets, cookies, sessions, or credentials are requested.
+[chef] Guided setup
+  - Press Enter to accept the safe default shown in brackets.
+  - No tokens, secrets, cookies, sessions, or credentials are requested.
 Codex home [...]:
 Agents home [...]:
 Install or reconcile the 16 reviewed global Codex skills now? [Y/n]:
 Replace existing managed Codex Chef files after backup instead of preserving/merging? [y/N]:
 Install optional global Git guards for this Windows user? [y/N]:
 
-🍳 Codex Chef installer
-  • Codex home: ...
-  • Agents home: ...
-  • Mode: preserve existing files; merge missing config blocks
-  • Skills: install reviewed catalog entries with --agent codex
-  • Git guards: disabled by default
-  • Dry run: no files, Git settings, or skills will be changed
-  • Existing config policy: backup + merge missing Codex Chef blocks unless Force is enabled
-  • Authenticated/account MCP connectors remain disabled by default
+[chef] Codex Chef installer
+  - Codex home: ...
+  - Agents home: ...
+  - Mode: preserve existing files; merge missing config blocks
+  - Skills: install reviewed catalog entries with --agent codex
+  - Git guards: disabled by default
+  - Dry run: no files, Git settings, or skills will be changed
+  - Existing config policy: backup + merge missing Codex Chef blocks unless Force is enabled
+  - Authenticated/account MCP connectors remain disabled by default
 Continue with this plan? [Y/n]:
 
-🍳 Managed Codex files
+[chef] Managed Codex files
 What if: Performing the operation ...
 
-🍳 Capability board
-  • Agents ready (21):
+[chef] Capability board
+  - Agents ready (21):
     code_mapper, docs_researcher, ...
-  • MCP ready by default (7):
+  - MCP ready by default (7):
     sequential-thinking, context7, ...
-  • MCP opt-in / disabled by default (8):
+  - MCP opt-in / disabled by default (8):
     github, figma, ...
   - MCP setup notes (13):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
-  • Local plugin skills (3):
+  - Local plugin skills (3):
     codex-chef-operator, context-budget-planner, ...
-  • Reviewed global skills (16):
+  - Reviewed global skills (16):
     dependency-upgrade, gh-fix-ci, ...
-  • Enterprise routing profiles (12):
+  - Enterprise routing profiles (12):
     repo-map-before-change, current-docs-research, ...
-  • Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
+  - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
 
-🍳 Next steps
-  ✓ completed: Codex Chef dry run
+[chef] Next steps
+  [ok] completed: Codex Chef dry run
 ```
 
 ## PowerShell Başarılı Kurulum
 
 ```text
-🍳 Codex Chef installer
-  • Codex home: ...
-  • Agents home: ...
-  • Mode: preserve existing files; merge missing config blocks
+[chef] Codex Chef installer
+  - Codex home: ...
+  - Agents home: ...
+  - Mode: preserve existing files; merge missing config blocks
 
-🍳 Managed Codex files
-  ✓ installed: ...
+[chef] Managed Codex files
+  [ok] installed: ...
 
-🍳 Capability board
-  • Agents ready (21):
+[chef] Capability board
+  - Agents ready (21):
     code_mapper, docs_researcher, ...
-  • MCP ready by default (7):
+  - MCP ready by default (7):
     sequential-thinking, context7, ...
-  • MCP opt-in / disabled by default (8):
+  - MCP opt-in / disabled by default (8):
     github, figma, ...
   - MCP setup notes (13):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
-  • Local plugin skills (3):
+  - Local plugin skills (3):
     codex-chef-operator, context-budget-planner, ...
-  • Reviewed global skills (16):
+  - Reviewed global skills (16):
     dependency-upgrade, gh-fix-ci, ...
-  • Enterprise routing profiles (12):
+  - Enterprise routing profiles (12):
     repo-map-before-change, current-docs-research, ...
-  • Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
+  - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
 
-🍳 Next steps
-  • 28 existing managed target(s) were preserved; use -Force only for a deliberate backup-backed replacement
-  ✓ completed: Codex Chef install
-  • Restart Codex, then run:
+[chef] Next steps
+  - 28 existing managed target(s) were preserved; use -Force only for a deliberate backup-backed replacement
+  [ok] completed: Codex Chef install
+  - Restart Codex, then run:
     codex doctor --summary
     npm run codex:routing
     npm run codex:status
     npm run verify:install:runtime
     codex --strict-config "Summarize the active Codex setup."
-  • Backup: ...
+  - Backup: ...
 ```
 
 Mevcut `config.toml` `-Force` verilmedikçe backup alınıp merge edilir; diğer
