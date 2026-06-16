@@ -207,6 +207,10 @@ Agent katalog kurali:
 - Her authority reference ayrica `reviewCadenceDays` tasir; corpus validator
   global `dateChecked` degeri resmi docs, standart, vendor guide ve tool
   kaynaklari icindeki en siki cadence'den eskiyse fail eder.
+- Daha genis repo, skill-example, local command, resmi proje-doc ve
+  research-paper kaynaklari `supplementalResearchRefs` altinda kalir.
+  Heuristic'leri ve validator tasarimini guclendirebilirler, ancak
+  `authorityRefs` icine terfi edene kadar default runtime authority degildirler.
 - Her ajan ayrica `decisionHeuristics`, `failureModes` ve
   `verificationSignals` icin `expertiseSignals` tasir. Bunlar source corpus'un
   ajanin davranisini nasil degistirecegini gosteren kisa runtime sinyalleridir.
@@ -222,7 +226,8 @@ Agent katalog kurali:
   TOML promptunda bir source marker'a denk gelmesini zorunlu tutar, her source
   freshness cadence'ini staleness-risk sinifina gore kontrol eder ve stale
   corpus `dateChecked` degerlerini reddeder. Ayrica her bundled ajan icin her
-  reviewed grupta en az uc expertise signal ister.
+  reviewed grupta en az uc expertise signal ister ve supplemental research
+  ref'lerini freshness-checked ama non-authoritative input olarak dogrular.
 - Gate ayrica agent template'lerinde tehlikeli default'lari engeller:
   `danger-full-access`, `approval_policy = "never"` ve role dosyalari icinde
   token environment variable adlari yoktur.

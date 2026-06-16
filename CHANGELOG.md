@@ -2,12 +2,26 @@
 
 ## Unreleased
 
+## 0.5.5 - 2026-06-16
+
+- Added a root `llms.txt` agent-readable index inspired by high-signal
+  catalog repositories such as Awesome Copilot, while keeping Codex Chef's
+  installer and connector defaults unchanged.
+- Made `llms.txt` part of the required public source surface through
+  `package.json`, `scripts/validate-repo.mjs`, and
+  `scripts/validate-package-surface.mjs`.
+- Linked the agent-readable index from all six README entry points and the
+  completion audit so future agents can find install targets, safety
+  boundaries, verification commands, and high-signal comparison sources quickly.
 - Added per-agent expertise-signal metadata and validation so each specialist
   has machine-checkable decision heuristics, failure modes, and verification
   signals, not just source references.
 - Added an `Expertise signal contract` to every specialist role file so the
   reviewed expertise signals change runtime behavior instead of living only in
   the corpus manifest.
+- Added `supplementalResearchRefs` to the agent research corpus so repo
+  patterns, skill examples, command snapshots, and research papers are
+  machine-checkable without becoming default runtime authority.
 - Added authority-reference source freshness cadence metadata and validation so
   stale official docs, standards, vendor guidance, and tool-source references
   fail `validate-agent-research-corpus.mjs` before specialist role prompts

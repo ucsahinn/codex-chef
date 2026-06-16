@@ -57,6 +57,7 @@ const requiredFileEntries = [
   "CODE_OF_CONDUCT.md",
   "CONTRIBUTING.md",
   "LICENSE",
+  "llms.txt",
   "PRIVACY.md",
   "README.de.md",
   "README.es.md",
@@ -124,6 +125,7 @@ if (result.error) {
 
   for (const required of [
     "README.md",
+    "llms.txt",
     "README.tr.md",
     "README.de.md",
     "README.es.md",

@@ -28,6 +28,7 @@ This audit maps the requested end state to current repository evidence.
 | Release notes should be source-controlled and aligned with public release posture. | `docs/release-notes.md` and `docs/release-notes.tr.md` document the v0.5.0 Codex Chef change set and are required by repository and security validation. | Complete |
 | GitHub metadata should be ready before public release claims. | `docs/github-settings.md` and `docs/github-settings.tr.md` define the recommended description, topics, feature toggles, branch/actions posture, and v0.5.0 release metadata. | Complete |
 | Advisory inputs should be reviewable before release. | `docs/advisory-sources.md` and `docs/advisory-sources.tr.md` list the official Codex, OpenAI skill, MCP security, GitHub, PowerShell, and ECC comparison sources maintainers should re-check before publishing. | Complete |
+| Coding agents should have a compact public index. | `llms.txt`, `package.json`, `scripts/validate-repo.mjs`, and `scripts/validate-package-surface.mjs` make the agent-readable repo map part of the checked public source surface. | Complete |
 | Maintenance should stay aligned later. | The bundled `codex-chef-operator` skill requires README/install/how-to docs alignment and bilingual doc pairing. | Complete |
 
 ## Verification Evidence
@@ -90,6 +91,7 @@ explicit user decisions.
 | --- | --- | --- |
 | Specialist-agent authority sources should not silently age out after research expansion. | `catalog/agent-research-corpus.json` records `reviewCadenceDays` for every reviewed authority source, and `scripts/validate-agent-research-corpus.mjs` rejects cadence values that are too loose for the source staleness risk or a corpus `dateChecked` older than the strictest cadence. | Complete |
 | Specialist-agent knowledge should remain operational, not just bibliographic. | `catalog/agent-research-corpus.json` records `expertiseSignals` for every bundled agent, every role TOML carries an `Expertise signal contract`, and the validators require decision heuristics, failure modes, verification signals, and exactly one runtime contract copy for each role. | Complete |
+| Broader repo, skill, command, and research-paper sources should be tracked without becoming default runtime authority. | `catalog/agent-research-corpus.json` records `supplementalResearchRefs` for 24 supporting sources, and `scripts/validate-agent-research-corpus.mjs` requires each supplemental ref to stay freshness-checked, agent-scoped, linked to reviewed authority refs, and `runtimeAuthority: false`. | Complete |
 
 ## 2026-06-11 Routing Addendum
 

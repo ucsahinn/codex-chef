@@ -113,6 +113,13 @@ marker'larinda da gecmesini zorunlu tutar, her staleness-risk sinifi icin
 cadence limitini uygular ve corpus `dateChecked` en siki authority-source
 cadence'inden eskiyse fail eder.
 
+Manifest non-authoritative ama yararli arastirmayi `supplementalResearchRefs`
+altinda ayirir: dis repo pattern'leri, skill ornekleri, local command
+snapshot'lari, resmi proje docs'lari ve research paper'lari. Bu kaynaklar
+heuristic'leri ve future validator tasarimini besleyebilir, fakat validation
+onlari agent-scoped, freshness-checked, reviewed authority ref'lere bagli ve
+maintainer bilerek terfi ettirene kadar `runtimeAuthority: false` tutar.
+
 Her rol dosyasi `developer_instructions` basina yakin `Authority metadata
 contract` ve `Expertise signal contract` bloklari tasir; bu bloklar cagrilan
 ajana source marker'larini ve expertise signal'larini kopuk bibliyografya

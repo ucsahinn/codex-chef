@@ -10,6 +10,24 @@ const maxReviewCadenceDaysByRisk = {
   medium: 45,
   high: 14
 };
+const supplementalConfidenceLevels = new Set(["high", "medium_high", "medium"]);
+const supplementalAdoptionStatuses = new Set([
+  "supplemental_only",
+  "first_party_supplemental",
+  "snapshot_only",
+  "heuristic_only",
+  "support_signal_only"
+]);
+const supplementalRuntimeUses = new Set([
+  "supplemental_pattern",
+  "design_input",
+  "local_discovery_evidence",
+  "support_signal",
+  "heuristic_evidence",
+  "syntax_contract",
+  "validation_design",
+  "safety_pattern"
+]);
 
 const corpusPath = path.join(root, "catalog", "agent-research-corpus.json");
 const catalogPath = path.join(root, "catalog", "agents.json");
@@ -90,6 +108,55 @@ function validateAuthorityUrl(key, value) {
   }
 }
 
+function validateSupplementalUrl(key, value) {
+  if (typeof value !== "string" || value.trim() !== value || /[\u0000-\u001f\u007f]/.test(value)) {
+    fail(`supplementalResearchRefs.${key}.url must be a clean string URL.`);
+    return;
+  }
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    fail(`supplementalResearchRefs.${key}.url must be parseable as a URL.`);
+    return;
+  }
+  if (parsed.protocol !== "https:" || !parsed.hostname.includes(".")) {
+    fail(`supplementalResearchRefs.${key}.url must be an https URL with a hostname.`);
+  }
+  if (parsed.username || parsed.password || parsed.search) {
+    fail(`supplementalResearchRefs.${key}.url must not include credentials or query strings.`);
+  }
+  if (/token|credential|cookie/i.test(value)) {
+    fail(`supplementalResearchRefs.${key}.url must not point at credential-bearing material.`);
+  }
+}
+
+function validateSourceLocation(key, value) {
+  if (typeof value !== "string" || value.trim() !== value || /[\u0000-\u001f\u007f]/.test(value)) {
+    fail(`supplementalResearchRefs.${key}.sourceLocation must be a clean string.`);
+    return;
+  }
+  const match = value.match(/^([^:]+\.md):(\d+)$/);
+  if (!match) {
+    fail(`supplementalResearchRefs.${key}.sourceLocation must look like docs/file.md:12.`);
+    return;
+  }
+  const filePath = path.resolve(root, match[1]);
+  const line = Number(match[2]);
+  if (!filePath.startsWith(root) || !fs.existsSync(filePath)) {
+    fail(`supplementalResearchRefs.${key}.sourceLocation must point at an existing repository markdown file.`);
+    return;
+  }
+  if (!Number.isInteger(line) || line <= 0) {
+    fail(`supplementalResearchRefs.${key}.sourceLocation line must be a positive integer.`);
+    return;
+  }
+  const lineCount = fs.readFileSync(filePath, "utf8").split(/\r?\n/).length;
+  if (line > lineCount) {
+    fail(`supplementalResearchRefs.${key}.sourceLocation line ${line} exceeds ${path.relative(root, filePath)} length.`);
+  }
+}
+
 function parseDateOnly(value, label) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) {
     fail(`${label} must use YYYY-MM-DD.`);
@@ -152,9 +219,22 @@ if (corpus && catalog) {
   if (corpus.minimumExpertiseSignalsPerGroup !== 3) {
     fail("agent-research-corpus.json minimumExpertiseSignalsPerGroup must stay 3.");
   }
+  if (corpus.minimumSupplementalResearchRefs !== 20) {
+    fail("agent-research-corpus.json minimumSupplementalResearchRefs must stay 20.");
+  }
 
   const sourceTiers = requireArray(corpus.sourceTiers, "sourceTiers", 6);
-  for (const requiredTier of ["local repo evidence", "official docs", "Context7 or official library docs", "standards and vendor guidance"]) {
+  for (const requiredTier of [
+    "local repo evidence",
+    "official docs",
+    "Context7 or official library docs",
+    "standards and vendor guidance",
+    "open specifications",
+    "official project docs",
+    "primary project repositories",
+    "research papers and evaluations",
+    "local command evidence"
+  ]) {
     if (!sourceTiers.includes(requiredTier)) fail(`sourceTiers must include: ${requiredTier}`);
   }
 
@@ -209,6 +289,95 @@ if (corpus && catalog) {
   }
 
   const catalogNames = new Set((catalog.agents || []).map((agent) => agent.name));
+  const supplementalResearchRefs = corpus.supplementalResearchRefs &&
+    typeof corpus.supplementalResearchRefs === "object" &&
+    !Array.isArray(corpus.supplementalResearchRefs)
+    ? corpus.supplementalResearchRefs
+    : null;
+  if (!supplementalResearchRefs) {
+    fail("agent-research-corpus.json supplementalResearchRefs must be an object.");
+  }
+  const supplementalKeys = new Set(Object.keys(supplementalResearchRefs || {}));
+  if (supplementalKeys.size < corpus.minimumSupplementalResearchRefs) {
+    fail(`supplementalResearchRefs must include at least ${corpus.minimumSupplementalResearchRefs} reviewed references; found ${supplementalKeys.size}.`);
+  }
+  let strictestSupplementalReviewCadenceDays = Number.POSITIVE_INFINITY;
+  for (const [key, ref] of Object.entries(supplementalResearchRefs || {})) {
+    if (!/^[a-z][a-z0-9_]*$/.test(key)) {
+      fail(`supplementalResearchRefs key must be snake_case: ${key}`);
+    }
+    if (authorityKeys.has(key)) {
+      fail(`supplementalResearchRefs.${key} must not collide with authorityRefs.`);
+    }
+    if (!ref || typeof ref !== "object" || Array.isArray(ref)) {
+      fail(`supplementalResearchRefs.${key} must be an object.`);
+      continue;
+    }
+    if (ref.url !== undefined) {
+      validateSupplementalUrl(key, ref.url);
+    } else if (ref.sourceType !== "local command evidence") {
+      fail(`supplementalResearchRefs.${key}.url is required unless sourceType is local command evidence.`);
+    }
+    validateSourceLocation(key, ref.sourceLocation);
+    if (typeof ref.sourceType !== "string" || !sourceTiers.includes(ref.sourceType)) {
+      fail(`supplementalResearchRefs.${key}.sourceType must match a sourceTiers entry.`);
+    }
+    if (!supplementalConfidenceLevels.has(ref.confidence)) {
+      fail(`supplementalResearchRefs.${key}.confidence must be high, medium_high, or medium.`);
+    }
+    if (!["low", "medium", "high"].includes(ref.stalenessRisk)) {
+      fail(`supplementalResearchRefs.${key}.stalenessRisk must be low, medium, or high.`);
+    }
+    if (!Number.isInteger(ref.reviewCadenceDays) || ref.reviewCadenceDays <= 0) {
+      fail(`supplementalResearchRefs.${key}.reviewCadenceDays must be a positive integer.`);
+    } else {
+      const maxReviewCadenceDays = maxReviewCadenceDaysByRisk[ref.stalenessRisk];
+      if (maxReviewCadenceDays && ref.reviewCadenceDays > maxReviewCadenceDays) {
+        fail(`supplementalResearchRefs.${key}.reviewCadenceDays must be <= ${maxReviewCadenceDays} for ${ref.stalenessRisk} staleness risk.`);
+      }
+      strictestSupplementalReviewCadenceDays = Math.min(strictestSupplementalReviewCadenceDays, ref.reviewCadenceDays);
+    }
+    if (!supplementalAdoptionStatuses.has(ref.adoptionStatus)) {
+      fail(`supplementalResearchRefs.${key}.adoptionStatus is not a reviewed supplemental status.`);
+    }
+    if (!supplementalRuntimeUses.has(ref.runtimeUse)) {
+      fail(`supplementalResearchRefs.${key}.runtimeUse is not a reviewed supplemental runtime-use value.`);
+    }
+    if (ref.runtimeAuthority !== false) {
+      fail(`supplementalResearchRefs.${key}.runtimeAuthority must be false; promote the source to authorityRefs before runtime use.`);
+    }
+    if (typeof ref.defaultRuntimeAuthorityWarning !== "string" || ref.defaultRuntimeAuthorityWarning.trim().length < 40) {
+      fail(`supplementalResearchRefs.${key}.defaultRuntimeAuthorityWarning must explain the runtime-authority boundary.`);
+    }
+    const relatedRefs = requireArray(ref.relatedAuthorityRefs, `supplementalResearchRefs.${key}.relatedAuthorityRefs`, 1);
+    if (hasDuplicates(relatedRefs)) fail(`supplementalResearchRefs.${key}.relatedAuthorityRefs must not contain duplicates.`);
+    for (const relatedRef of relatedRefs) {
+      if (!authorityKeys.has(relatedRef)) {
+        fail(`supplementalResearchRefs.${key}.relatedAuthorityRefs contains unknown authority reference: ${relatedRef}`);
+      }
+    }
+    const sourceMarkers = requireArray(ref.sourceMarkers, `supplementalResearchRefs.${key}.sourceMarkers`, 1);
+    if (hasDuplicates(sourceMarkers)) fail(`supplementalResearchRefs.${key}.sourceMarkers must not contain duplicates.`);
+    const adoptedFor = requireArray(ref.adoptedFor, `supplementalResearchRefs.${key}.adoptedFor`, 1);
+    if (hasDuplicates(adoptedFor)) fail(`supplementalResearchRefs.${key}.adoptedFor must not contain duplicates.`);
+    const appliesToAgents = requireArray(ref.appliesToAgents, `supplementalResearchRefs.${key}.appliesToAgents`, 1);
+    if (hasDuplicates(appliesToAgents)) fail(`supplementalResearchRefs.${key}.appliesToAgents must not contain duplicates.`);
+    for (const agentName of appliesToAgents) {
+      if (!catalogNames.has(agentName)) {
+        fail(`supplementalResearchRefs.${key}.appliesToAgents contains unknown agent: ${agentName}`);
+      }
+    }
+    if (/(cookie|tunnel|raw CDP|deploy automation|implicit installs|auto-checkpoint)/i.test(ref.runtimeUse)) {
+      fail(`supplementalResearchRefs.${key}.runtimeUse must not encode excluded behavior as a runtime mode.`);
+    }
+  }
+  if (dateChecked && Number.isFinite(strictestSupplementalReviewCadenceDays)) {
+    const ageDays = Math.floor((todayUtcMidnight().getTime() - dateChecked.getTime()) / MS_PER_DAY);
+    if (ageDays > strictestSupplementalReviewCadenceDays) {
+      fail(`agent-research-corpus.json dateChecked is ${ageDays} day(s) old; refresh supplemental sources within ${strictestSupplementalReviewCadenceDays} day(s).`);
+    }
+  }
+
   const expertiseSignals = corpus.expertiseSignals && typeof corpus.expertiseSignals === "object" && !Array.isArray(corpus.expertiseSignals)
     ? corpus.expertiseSignals
     : null;

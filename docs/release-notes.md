@@ -2,16 +2,48 @@
 
 ## Unreleased
 
+## v0.5.5 - 2026-06-16
+
+- Added a root `llms.txt` file so coding agents can quickly discover the
+  install surface, docs map, safety boundaries, verification commands, and
+  high-signal comparison sources without scraping the full README first.
+- Made `llms.txt` part of the package and validation surface through
+  `package.json`, `scripts/validate-repo.mjs`, and
+  `scripts/validate-package-surface.mjs`.
+- Linked the agent-readable index from all six README entry points and the
+  completion audit.
 - Agent research corpus entries now include per-agent `expertiseSignals` for
   decision heuristics, failure modes, and verification signals. The corpus
   validator requires every bundled specialist to keep all three groups.
 - Every specialist role file now includes an `Expertise signal contract`, and
   validation requires exactly one copy so the structured expertise metadata is
   consumed at runtime.
+- The corpus now carries `supplementalResearchRefs` for repo patterns, skill
+  examples, local command snapshots, official project docs, and agent research
+  papers. Validation keeps these sources freshness-checked and explicitly
+  outside default runtime authority unless they are promoted into
+  `authorityRefs`.
 - Agent research corpus authority references now include source freshness
   cadence metadata. `scripts/validate-agent-research-corpus.mjs` rejects
   cadence values that are too loose for the source staleness risk and fails
   when `dateChecked` is older than the strictest cadence.
+
+## Upgrade Notes
+
+No installer behavior changed in this patch. Existing users can pull the new
+source and inspect `llms.txt`; real global writes still require the normal
+installer path and dry-run preview.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
 
 ## v0.5.4 - 2026-06-15
 

@@ -1,6 +1,6 @@
 {
   "name": "codex-chef",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "private": true,
   "description": "Codex Chef: Windows-first Codex setup kit with agents, skills, MCPs, safe installers, and validation gates.",
   "files": [
@@ -14,6 +14,7 @@
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.md",
     "LICENSE",
+    "llms.txt",
     "PRIVACY.md",
     "README.de.md",
     "README.es.md",

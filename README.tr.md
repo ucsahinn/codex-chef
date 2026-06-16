@@ -333,6 +333,7 @@ Böylece Codex tek bir sohbet gibi değil, uzman rolleri olan küçük bir yazı
 | 🧾 Install plan gate'i | `manifests/install-plan.json` ve install-state preview schema installer çalışmadan önce doğrulanır. |
 | 🔌 Konservatif MCP'ler | Auth isteyen hesap, database ve geniş filesystem connector'ları disabled kalır. |
 | 🧭 Kaynaklı rehberlik | Research notes kaynak tipi, confidence, neyi desteklediği ve outdated-risk içerir. |
+| Ajan-okunur indeks | `llms.txt`, kodlama ajanlari icin kurulum hedeflerini, docs haritasini, guvenlik sinirlarini ve yuksek sinyalli karsilastirma kaynaklarini kisa anlatir. |
 | 📣 Public-safe triage | CODEOWNERS ve issue template'leri bug, feature, soru ve güvenlik raporlarını private data paylaşmadan yönlendirir. |
 | ♻️ CI eşleşmesi | GitHub Actions aynı `npm run check` yolunu ve shell parser kontrollerini çalıştırır. |
 
@@ -388,6 +389,7 @@ Her derin rehberin İngilizce, Almanca, İspanyolca, Brezilya Portekizcesi, Tür
 - [Araştırma notları](docs/research-notes.tr.md)
 - [Advisory kaynakları](docs/advisory-sources.tr.md)
 - [Publish](docs/publish.tr.md)
+- [Ajan-okunur indeks](llms.txt)
 
 ## 📚 Resmi Codex Kaynakları
 

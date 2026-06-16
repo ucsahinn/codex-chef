@@ -89,6 +89,10 @@ gerektiriyorsa skill yap. Tool veya dagitim gerekiyorsa plugin olarak paketle.
 - Her ajan decision heuristic, failure mode ve verification evidence icin
   reviewed expertise signal tasimalidir. Bu sinyaller corpus'u bibliyografya
   degil operasyonel calisma rehberi olarak tutar.
+- Supplemental repo, skill, command-snapshot ve research-paper kaynaklari,
+  agent `authorityRefs` icine terfi edene kadar `supplementalResearchRefs`
+  altinda kalir; heuristic'leri guclendirebilirler ama default runtime
+  authority degildirler.
 - Her role dosyasi `Authority metadata contract` ve `Expertise signal contract`
   runtime bloklarini tasimalidir; boylece katalog metadata'si sadece offline
   validation'da degil, cagrilan ajanin davranisinda da etkili olur.

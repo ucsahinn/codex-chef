@@ -1,0 +1,144 @@
+# Codex Chef
+
+Codex Chef is an unofficial, Windows-first Codex setup kit. It packages
+reviewed global Codex guidance, conservative config templates, specialist
+subagents, curated skills, MCP defaults, a local plugin, dry-run installers, and
+validation gates.
+
+Canonical repository: https://github.com/ucsahinn/codex-chef
+
+Primary human entry points:
+
+- [README](README.md)
+- [Turkish README](README.tr.md)
+- [Install guide](docs/install.md)
+- [Verification guide](docs/verification.md)
+- [Security model](docs/security-model.md)
+- [Skills and agents](docs/skills-and-agents.md)
+- [Workflow surface map](docs/workflow-surface-map.md)
+- [ECC compatibility](docs/ecc-compatibility.md)
+- [Completion audit](docs/completion-audit.md)
+- [Release notes](docs/release-notes.md)
+
+## What It Installs
+
+The reviewed install surface is described by `manifests/install-plan.json` and
+previewed by:
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+```
+
+The default managed Codex targets are:
+
+- `~/.codex/AGENTS.md`
+- `~/.codex/config.toml`
+- `~/.codex/agents/*.toml`
+- `~/.codex/rules/default.rules`
+- `~/.codex/plugins/codex-chef-workflows`
+- `~/.agents/plugins/marketplace.json`
+
+Optional global Git guards are not part of the silent default. They require the
+explicit `-InstallGitGuards` or `--install-git-guards` flag.
+
+## Core Capabilities
+
+- 21 specialist Codex subagent role definitions.
+- 3 bundled local plugin skills:
+  - `codex-chef-operator`
+  - `context-budget-planner`
+  - `offline-diagram-triplet`
+- 16 reviewed installable global skills in `catalog/skills.json` and
+  `catalog/skills-lock.json`.
+- Conservative MCP defaults in `catalog/mcp-servers.json` and
+  `templates/codex/config.*.toml`.
+- No-write installer previews for PowerShell and Bash.
+- Repo-only doctor command:
+
+```bash
+npm run codex:doctor
+```
+
+## Safe Defaults
+
+Do not assume this repo enables external accounts, production systems, broad
+filesystem access, deployment tokens, GitHub publishing, or browser session
+imports by default. Authenticated and high-risk connectors stay disabled until a
+task explicitly needs them and the user approves the access.
+
+The installer does not commit, push, create releases, deploy, publish packages,
+rotate secrets, or change GitHub repository settings.
+
+## Source-Backed Comparison Policy
+
+High-signal repositories and ecosystems are treated as design input, not as
+trusted configuration to copy wholesale.
+
+Reviewed comparison sources include:
+
+- ECC: https://github.com/affaan-m/ECC
+- OpenAI skills: https://github.com/openai/skills
+- Anthropic skills: https://github.com/anthropics/skills
+- Awesome Copilot: https://github.com/github/awesome-copilot
+- MCP servers: https://github.com/modelcontextprotocol/servers
+- Playwright MCP: https://github.com/microsoft/playwright-mcp
+- Browser Use: https://github.com/browser-use/browser-use
+- SuperClaude Framework: https://github.com/SuperClaude-Org/SuperClaude_Framework
+
+Adopted patterns are mapped to the smallest Codex-native surface:
+
+- Durable repo behavior -> `AGENTS.md`
+- Reusable workflows -> skills
+- Distributed workflow bundles -> plugins
+- Live external context -> MCP/connectors
+- Specialist review or evidence work -> subagents
+- Command exceptions -> rules
+- Lifecycle automation -> hooks after security review
+- Push, release, deploy, external upload -> explicit approval gate
+
+Rejected default patterns include broad cross-harness sync, enabled
+authenticated connectors, prompt-injection lifecycle hooks, cookie import,
+tunnels, auto-commit, auto-deploy, raw credential handling, and unreviewed large
+skill catalogs.
+
+## Official Codex Source Route
+
+Use the current OpenAI Codex manual and official docs as source of truth for
+Codex surfaces, AGENTS.md, skills, plugins, MCP, hooks, rules, permissions,
+config, subagents, noninteractive mode, and Windows behavior.
+
+Primary reference: https://developers.openai.com/codex/codex-manual.md
+
+## Verification
+
+Use the repository gates before claiming the setup is ready:
+
+```bash
+npm run check
+npm run verify:skills:online
+git diff --check
+gitleaks detect --redact --no-banner --no-git --verbose
+```
+
+PowerShell dry-run:
+
+```powershell
+.\scripts\install.ps1 -All -Force -WhatIf
+```
+
+Bash or WSL dry-run:
+
+```bash
+./scripts/install.sh --all --force --dry-run
+```
+
+## Agent Instructions
+
+For work inside this repository, read `AGENTS.md` first. Then prefer the
+repository scripts and validators over ad hoc edits.
+
+Do not add secrets, local user paths, auth files, session state, build output,
+archives, generated scratch data, or dependency folders to tracked source.
+
+Do not weaken validation, approval gates, sandbox defaults, or disabled
+connector defaults to make a check pass.

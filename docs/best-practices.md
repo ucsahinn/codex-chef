@@ -93,6 +93,10 @@ make it a skill. If it needs tools or distribution, package it as a plugin.
 - Every agent must have reviewed expertise signals for decision heuristics,
   failure modes, and verification evidence. These signals keep the corpus
   operational instead of turning it into a bibliography.
+- Supplemental repo, skill, command-snapshot, and research-paper sources belong
+  in `supplementalResearchRefs` until they are promoted into agent
+  `authorityRefs`; they may shape heuristics, but they are not default runtime
+  authority.
 - Every role file must carry the `Authority metadata contract` and
   `Expertise signal contract` runtime blocks so catalog metadata affects
   invoked-agent behavior, not only offline validation.

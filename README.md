@@ -334,6 +334,7 @@ The result is a small specialist-team workflow inside Codex while the main threa
 | 🧾 Install plan gate | `manifests/install-plan.json` and the install-state preview schema are validated before installer execution. |
 | 🔌 Conservative MCPs | Authenticated account, database, and broad filesystem connectors stay disabled. |
 | 🧭 Source-backed guidance | Research notes record source type, confidence, support, and outdated-risk. |
+| Agent-readable index | `llms.txt` gives coding agents a compact map of install targets, docs, safety boundaries, and high-signal comparison sources. |
 | 📣 Public-safe triage | CODEOWNERS and issue templates route bugs, features, questions, and security reports without private data. |
 | ♻️ CI alignment | GitHub Actions runs the same `npm run check` path plus shell parser checks. |
 
@@ -389,6 +390,7 @@ Every deep guide has English, German, Spanish, Brazilian Portuguese, Turkish, an
 - [Research notes](docs/research-notes.md)
 - [Advisory sources](docs/advisory-sources.md)
 - [Publishing](docs/publish.md)
+- [Agent-readable index](llms.txt)
 
 ## 📚 Official Codex References
 

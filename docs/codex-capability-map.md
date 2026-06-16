@@ -112,6 +112,13 @@ per-agent authority key to appear in that agent's TOML source markers, enforces
 cadence limits for each staleness-risk class, and fails when corpus
 `dateChecked` is older than the strictest authority-source cadence.
 
+The manifest separates non-authoritative but useful research into
+`supplementalResearchRefs`: external repo patterns, skill examples, local
+command snapshots, official project docs, and research papers. These sources
+can inform heuristics and future validator design, but validation keeps them
+agent-scoped, freshness-checked, linked back to reviewed authority refs, and
+`runtimeAuthority: false` until a maintainer deliberately promotes them.
+
 Each role file also includes `Authority metadata contract` and
 `Expertise signal contract` near the top of `developer_instructions`, which
 tells the invoked agent how to treat source markers and expertise signals as

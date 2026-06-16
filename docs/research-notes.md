@@ -2,8 +2,8 @@
 
 Date checked: 2026-06-14. Updated for Codex config, skill catalog, SEO
 specialist, GStack/ECC workflow, research-synthesis decisions,
-specialist source-freshness cadence decisions, and per-agent expertise-signal
-coverage on 2026-06-15.
+specialist source-freshness cadence decisions, per-agent expertise-signal
+coverage, and supplemental research-reference validation on 2026-06-15.
 
 Facts below come from official docs, standards, mature public repos, research
 papers, and practitioner issue signals. Practitioner feedback is used only as a
@@ -157,6 +157,10 @@ risk pattern, not as the source of truth.
 - Add per-agent expertise signals to the research corpus so each specialist's
   reviewed knowledge includes decision heuristics, common failure modes, and
   verification signals that can be validated as structured data.
+- Add `supplementalResearchRefs` to the research corpus for repo patterns, skill
+  examples, local command snapshots, official project docs, and research papers
+  that should inform heuristics but not become default runtime authority until
+  promoted into agent `authorityRefs`.
 - Add explicit `apps._default.destructive_enabled = false` and
   `apps._default.open_world_enabled = false` to the Codex templates because the
   current OpenAI config reference exposes those app/connector gates separately

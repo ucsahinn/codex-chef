@@ -13,6 +13,7 @@ const requiredFiles = [
   "README.pt-BR.md",
   "README.tr.md",
   "SECURITY.md",
+  "llms.txt",
   "PRIVACY.md",
   "SUPPORT.md",
   "CODE_OF_CONDUCT.md",

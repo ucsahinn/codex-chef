@@ -28,6 +28,7 @@ Bu denetim istenen final durumu mevcut repo kanıtlarıyla eşleştirir.
 | Release notları source-controlled ve public release duruşuyla hizalı olmalı. | `docs/release-notes.md` ve `docs/release-notes.tr.md` v0.5.0 Codex Chef değişiklik setini dokümante eder ve repo/security validation tarafından zorunlu tutulur. | Tamam |
 | GitHub metadata public release iddiasından önce hazır olmalı. | `docs/github-settings.md` ve `docs/github-settings.tr.md` önerilen açıklama, topic'ler, feature toggle'ları, branch/actions duruşu ve v0.5.0 release metadata'sını tanımlar. | Tamam |
 | Advisory girdileri release öncesi incelenebilir olmalı. | `docs/advisory-sources.md` ve `docs/advisory-sources.tr.md`, maintainer'ların publish öncesi tekrar kontrol etmesi gereken resmi Codex, OpenAI skill, MCP security, GitHub, PowerShell ve ECC karşılaştırma kaynaklarını listeler. | Tamam |
+| Kodlama ajanlari icin kisa public indeks olmali. | `llms.txt`, `package.json`, `scripts/validate-repo.mjs` ve `scripts/validate-package-surface.mjs`, agent-readable repo haritasini kontrol edilen public source yuzeyinin parcasi yapar. | Tamam |
 | Sonraki bakım aynı hizada kalmalı. | Paketlenen `codex-chef-operator` skill'i README/install/how-to doküman hizasını ve iki dilli docs eşleşmesini zorunlu tutuyor. | Tamam |
 
 ## Doğrulama Kanıtı
@@ -90,6 +91,7 @@ kullanıcı kararı olarak kalır.
 | --- | --- | --- |
 | Specialist-agent authority kaynaklari research expansion sonrasi sessizce bayatlamamali. | `catalog/agent-research-corpus.json` her reviewed authority source icin `reviewCadenceDays` kaydeder; `scripts/validate-agent-research-corpus.mjs`, source staleness risk'e gore fazla gevsek cadence degerlerini veya en siki cadence'den eski corpus `dateChecked` degerini reddeder. | Tamam |
 | Specialist-agent bilgisi sadece bibliyografya degil operasyonel kalmali. | `catalog/agent-research-corpus.json` her bundled ajan icin `expertiseSignals` kaydeder, her role TOML `Expertise signal contract` tasir ve validatorlar her rol icin decision heuristic, failure mode, verification signal ve tam bir runtime contract kopyasini zorunlu tutar. | Tamam |
+| Daha genis repo, skill, command ve research-paper kaynaklari default runtime authority olmadan izlenmeli. | `catalog/agent-research-corpus.json` 24 destekleyici kaynak icin `supplementalResearchRefs` kaydeder; `scripts/validate-agent-research-corpus.mjs` her supplemental ref'in freshness-checked, agent-scoped, reviewed authority ref'lere bagli ve `runtimeAuthority: false` kalmasini zorunlu tutar. | Tamam |
 
 ## 2026-06-11 Routing Ek Kapsam
 

@@ -2,8 +2,8 @@
 
 Kontrol tarihi: 2026-06-14. Codex config, skill catalog, SEO uzman kararlari,
 GStack/ECC workflow kararlari, research-synthesis kurallari, specialist
-source-freshness cadence kararlari ve agent basina expertise-signal coverage
-icin 2026-06-15'te guncellendi.
+source-freshness cadence kararlari, agent basina expertise-signal coverage ve
+supplemental research-reference validation icin 2026-06-15'te guncellendi.
 
 Aşağıdaki bilgiler resmi dokümanlardan, standartlardan, olgun public
 repolardan, araştırma makalelerinden ve practitioner issue sinyallerinden
@@ -154,6 +154,10 @@ otoritesi resmi dokümanların yerini almaz.
 - Research corpus'a agent basina expertise signal eklenir; boylece her
   specialist'in reviewed bilgisi decision heuristic, yaygin failure mode ve
   verification signal olarak structured data seklinde dogrulanabilir.
+- Research corpus'a `supplementalResearchRefs` eklenir; repo pattern'leri,
+  skill ornekleri, local command snapshot'lari, resmi proje docs'lari ve
+  research paper'lari heuristic'leri besler ama agent `authorityRefs` icine
+  terfi edene kadar default runtime authority olmaz.
 - Guncel OpenAI config referansi app/connector kapilarini MCP server approval
   ayarlarindan ayri gosterdigi icin Codex template'lerine acik
   `apps._default.destructive_enabled = false` ve

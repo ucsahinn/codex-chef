@@ -125,6 +125,7 @@ codex --strict-config "Summarize the active Codex setup."
 | 🧪 Validierung | `npm run check` prueft Repo, Docs, Install-Plan, MCP-Drift, Skill-Quellen, Supply-Chain und Security. |
 | 🔌 Konservative MCPs | Authentifizierte Connectoren bleiben standardmaessig deaktiviert. |
 | 🩺 Doctor | `npm run codex:doctor` zeigt repo-only Starter-Health ohne globale Writes. |
+| Agent-readable index | `llms.txt` zeigt Installationsziele, Docs, Sicherheitsgrenzen und Vergleichsquellen fuer Coding Agents. |
 | 📐 Offline Diagrams | `offline-diagram-triplet` erzeugt Mermaid, editierbares Excalidraw, SVG, PNG und Markdown ohne Netzwerk. |
 | 📣 Public-safe Triage | CODEOWNERS und Issue Templates lenken Bugs, Features, Fragen und Security Reports ohne private Daten. |
 
@@ -139,6 +140,7 @@ codex --strict-config "Summarize the active Codex setup."
 - [ECC compatibility](docs/ecc-compatibility.de.md)
 - [SEO und Discoverability](docs/seo.de.md)
 - [Advisory sources](docs/advisory-sources.de.md)
+- [Agent-readable index](llms.txt)
 
 ## 🚀 Publishing Boundary
 

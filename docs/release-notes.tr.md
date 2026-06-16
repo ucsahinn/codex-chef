@@ -2,16 +2,48 @@
 
 ## Unreleased
 
+## v0.5.5 - 2026-06-16
+
+- Kok dizine `llms.txt` dosyasi eklendi. Kodlama ajanlari boylece tum README'yi
+  taramadan install yuzeyini, docs haritasini, guvenlik sinirlarini,
+  verification komutlarini ve yuksek sinyalli karsilastirma kaynaklarini hizli
+  okuyabilir.
+- `llms.txt`, `package.json`, `scripts/validate-repo.mjs` ve
+  `scripts/validate-package-surface.mjs` uzerinden package ve validation
+  yuzeyinin parcasi yapildi.
+- Agent-readable indeks alti README girisinden ve completion audit'ten linklendi.
 - Agent research corpus kayitlari artik agent basina decision heuristic,
   failure mode ve verification signal iceren `expertiseSignals` tasir. Corpus
   validator her bundled specialist icin uc grubun da korunmasini zorunlu tutar.
 - Her specialist role dosyasi artik `Expertise signal contract` tasir ve
   validation tam bir kopyayi zorunlu tutar; boylece structured expertise
   metadata runtime'da tuketilir.
+- Corpus artik repo pattern'leri, skill ornekleri, local command snapshot'lari,
+  resmi proje docs'lari ve agent research paper'lari icin
+  `supplementalResearchRefs` tasir. Validation bu kaynaklari freshness-checked
+  tutar ve `authorityRefs` icine terfi etmedikce default runtime authority
+  olmadiklarini zorunlu kilar.
 - Agent research corpus authority reference'lari artik source freshness cadence
   metadata'si tasir. `scripts/validate-agent-research-corpus.mjs`,
   staleness-risk icin fazla gevsek cadence degerlerini reddeder ve
   `dateChecked` en siki cadence'den eskiyse fail eder.
+
+## Upgrade Notlari
+
+Bu patch installer davranisini degistirmez. Mevcut kullanicilar yeni source'u
+cekip `llms.txt` dosyasini inceleyebilir; gercek global write'lar halen normal
+installer ve dry-run preview akisi uzerinden yapilir.
+
+## Dogrulama
+
+Bu version icin release readiness su kontrolleri icermelidir:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
 
 ## v0.5.4 - 2026-06-15
 

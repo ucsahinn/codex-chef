@@ -206,6 +206,10 @@ Agent catalog rule:
   validator fails when the global `dateChecked` value is older than the
   strictest cadence across official docs, standards, vendor guides, and tool
   sources.
+- Broader repository, skill-example, local command, official project-doc, and
+  research-paper sources live in `supplementalResearchRefs`. They can sharpen
+  heuristics and validator design, but they stay outside default runtime
+  authority until promoted into `authorityRefs`.
 - Every agent also has `expertiseSignals` for `decisionHeuristics`,
   `failureModes`, and `verificationSignals`. These are compact, runtime-useful
   summaries of what the source corpus should change in the agent's behavior.
@@ -219,8 +223,9 @@ Agent catalog rule:
   the role TOML files. It also requires each per-agent authority key to match a
   source marker in that agent's TOML prompt, validates each source freshness
   cadence against its staleness-risk class, rejects stale corpus `dateChecked`
-  values, and requires at least three expertise signals in each reviewed group
-  for every bundled agent.
+  values, requires at least three expertise signals in each reviewed group for
+  every bundled agent, and validates supplemental research refs as freshness
+  checked but non-authoritative inputs.
 - The gate also keeps dangerous defaults out of agent templates: no
   `danger-full-access`, no `approval_policy = "never"`, and no token variable
   names embedded in role files.
