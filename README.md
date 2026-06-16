@@ -23,6 +23,23 @@
   <a href="README.fr.md"><img src="https://flagcdn.com/w20/fr.png" alt="Français" width="20"></a>
 </p>
 
+<!-- bilingual-welcome:start -->
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"> English welcome</h3>
+      <p>Windows-first Codex setup starter with safer defaults, named agents, MCP defaults, curated skills, plugin workflows, and validation before anything touches your machine.</p>
+      <p><strong>Start here:</strong> [Copy-paste install](#copy-paste-install) or run the safe preview first.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3><img src="https://flagcdn.com/w20/tr.png" alt="Turkce" width="20"> T&#252;rk&#231;e kar&#351;&#305;lama</h3>
+      <p>Windows odakli Codex kurulumu icin guvenli varsayilanlar, ajan ekibi, MCP ayarlari, secilmis skilller, plugin akislari ve islem oncesi dogrulama sunan baslangic seti.</p>
+      <p><strong>Buradan ba&#351;la:</strong> [README.tr.md](README.tr.md) dosyasindan Turkce akisla baslayabilir veya once safe preview calistirabilirsin.</p>
+    </td>
+  </tr>
+</table>
+<!-- bilingual-welcome:end -->
+
 Codex Chef gives a Windows-first Codex setup a clean starting point: safer defaults, a named specialist team, curated skills, MCP defaults, local plugin workflows, and validation that users can inspect before anything touches their machine.
 
 This is an unofficial community starter, not an OpenAI product. It is mapped to current official Codex documentation and keeps risky actions approval-gated by default.
