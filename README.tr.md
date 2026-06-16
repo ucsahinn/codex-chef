@@ -166,9 +166,9 @@ kurabilir.
 - 📊 **Web Quality Audit** (`web-quality-audit`) - opsiyonel global
 - 📝 **Documentation And ADRs** (`documentation-and-adrs`) - opsiyonel global
 - 🔌 **MCP Builder** (`mcp-builder`) - opsiyonel global
-- 🧱 **Context Starter** (`context-engineering-project-starter`) - opsiyonel global, first-party
-- ✍️ **Prompt Architect Skill** (`codex-enterprise-prompt-architect`) - opsiyonel global, first-party
-- 🛠️ **Skill Forge** (`codex-skill-forge`) - opsiyonel global, first-party
+- 🧱 **Context Starter** (`ai-project-starter`) - opsiyonel global, first-party
+- ✍️ **Prompt Architect Skill** (`prompt-architect`) - opsiyonel global, first-party
+- 🛠️ **Skill Forge** (`ai-skill-create`) - opsiyonel global, first-party
 
 Ek tasarım, React/Vercel, prompt, memory, token ve context skill'leri
 `catalog/skills.json` içinde manuel opt-in olarak durur; default kurulumun içine
@@ -186,11 +186,11 @@ manual opt-in kalır.
 Bizim first-party ekosistem skill'leri artık gözden geçirilmiş `-All` /
 `-InstallSkills` setinin içinde gelir:
 
-- 🧱 `context-engineering-project-starter` - proje context temeli, starter docs,
+- 🧱 `ai-project-starter` - proje context temeli, starter docs,
   ajan instruction dosyaları ve vibe-coding guardrail'leri.
-- ✍️ `codex-enterprise-prompt-architect` - plan-first, onay kapılı Codex prompt
+- ✍️ `prompt-architect` - plan-first, onay kapılı Codex prompt
   paketleri ve prompt audit'leri.
-- 🛠️ `codex-skill-forge` - Codex skill/plugin oluşturma, doğrulama,
+- 🛠️ `ai-skill-create` - Codex skill/plugin oluşturma, doğrulama,
   forward-test ve paketleme.
 
 Manuel kurulum örneği:

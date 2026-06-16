@@ -97,12 +97,12 @@ Default installable public and first-party skills:
 - `documentation-and-adrs`: README, ADR, and durable docs workflow.
 - `mcp-builder`: high-quality MCP server design, tool schemas, transports, and
   evaluations.
-- `context-engineering-project-starter`: first-party project context
+- `ai-project-starter`: first-party project context
   foundations, starter docs, agent instruction files, and vibe-coding
   guardrails.
-- `codex-enterprise-prompt-architect`: first-party plan-first,
+- `prompt-architect`: first-party plan-first,
   approval-gated, security-aware Codex prompt packages and prompt audits.
-- `codex-skill-forge`: first-party skill authoring, validation,
+- `ai-skill-create`: first-party skill authoring, validation,
   forward-testing, plugin packaging, and marketplace preparation.
 
 Manual opt-in catalog references remain visible for users who want more

@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "dateChecked": "2026-06-15",
+  "dateChecked": "2026-06-16",
   "installCommand": "npx skills add <package> --skill <skill> --agent codex --yes --global",
   "sourcePolicy": "Installable entries must declare package, skill, source, sourceUrl, license, risk, and lastChecked. Online resolution is verified separately with npm run verify:skills:online.",
   "lockSemantics": "source-allowlist",
@@ -436,12 +436,12 @@
       "reason": "Manual context-engineering reference retained for users who want extra context mapping patterns beyond the bundled context architect and context budget planner."
     },
     {
-      "name": "context-engineering-project-starter",
+      "name": "ai-project-starter",
       "category": "context-engineering",
       "install": true,
       "package": "ucsahinn/context-engineering-project-starter",
-      "skill": "context-engineering-project-starter",
-      "source": "ucsahinn/context-engineering-project-starter@context-engineering-project-starter",
+      "skill": "ai-project-starter",
+      "source": "ucsahinn/context-engineering-project-starter@ai-project-starter",
       "sourceUrl": "https://github.com/ucsahinn/context-engineering-project-starter",
       "license": "MIT",
       "risk": "medium",
@@ -466,12 +466,12 @@
       "reason": "Manual context-selection reference; not default because Codex Chef already ships context_architect plus a local context-budget-planner."
     },
     {
-      "name": "codex-enterprise-prompt-architect",
+      "name": "prompt-architect",
       "category": "prompt-engineering",
       "install": true,
       "package": "ucsahinn/codex-enterprise-prompt-architect",
-      "skill": "codex-enterprise-prompt-architect",
-      "source": "ucsahinn/codex-enterprise-prompt-architect@codex-enterprise-prompt-architect",
+      "skill": "prompt-architect",
+      "source": "ucsahinn/codex-enterprise-prompt-architect@prompt-architect",
       "sourceUrl": "https://github.com/ucsahinn/codex-enterprise-prompt-architect",
       "license": "MIT",
       "risk": "medium",
@@ -511,12 +511,12 @@
       "reason": "Manual prompt-security reference for teams that want an extra review workflow without making it a noisy default trigger."
     },
     {
-      "name": "codex-skill-forge",
+      "name": "ai-skill-create",
       "category": "skill-authoring",
       "install": true,
       "package": "ucsahinn/codex-skill-forge",
-      "skill": "codex-skill-forge",
-      "source": "ucsahinn/codex-skill-forge@codex-skill-forge",
+      "skill": "ai-skill-create",
+      "source": "ucsahinn/codex-skill-forge@ai-skill-create",
       "sourceUrl": "https://github.com/ucsahinn/codex-skill-forge",
       "license": "MIT",
       "risk": "medium",

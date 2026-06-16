@@ -7,6 +7,8 @@
   agents, skills, MCPs, and config/profile flags.
 - Extended installer capability boards to show enterprise routing profiles
   alongside agents, MCP defaults, plugin skills, and reviewed global skills.
+- Updated first-party Skills CLI mappings to the current upstream skill names
+  `ai-project-starter`, `prompt-architect`, and `ai-skill-create`.
 
 ## 0.5.12 - 2026-06-16
 
@@ -154,8 +156,8 @@
 - Expanded the optional installable skill allowlist from nine to sixteen
   verified sources by adding `systematic-debugging`,
   `request-refactor-plan`, `webapp-testing`, `mcp-builder`, and the
-  first-party `context-engineering-project-starter`,
-  `codex-enterprise-prompt-architect`, and `codex-skill-forge` skills.
+  first-party `ai-project-starter`, `prompt-architect`, and
+  `ai-skill-create` skills.
 - Added the bundled local `context-budget-planner` skill for token/context
   budgeting, source prioritization, compaction handoff, and verification gates.
 - Added reference-backed bundled skill guidance with `references/*.md`,
@@ -163,9 +165,9 @@
   skills cannot silently lose instructions, UI metadata, or catalog coverage.
 - Documented the exact offline diagram contract for the supported Mermaid
   subset, editable Excalidraw scene shape, and SVG/PNG/Markdown outputs.
-- Moved the first-party ecosystem skills
-  `context-engineering-project-starter`, `codex-enterprise-prompt-architect`,
-  and `codex-skill-forge` into the reviewed `-All` / `-InstallSkills` set.
+- Moved the first-party ecosystem skills `ai-project-starter`,
+  `prompt-architect`, and `ai-skill-create` into the reviewed `-All` /
+  `-InstallSkills` set.
 - Kept global Git ignore, hook, and Git config changes out of `-All`; they now
   require the explicit `-InstallGitGuards` / `--install-git-guards` opt-in.
 - Kept `impeccable`, extra design-taste, Vercel, prompt, context, memory, and

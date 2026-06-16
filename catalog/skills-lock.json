@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "generatedFrom": "catalog/skills.json",
-  "dateChecked": "2026-06-15",
+  "dateChecked": "2026-06-16",
   "status": "offline-validated",
   "lockSemantics": "source-allowlist",
   "immutability": "Skills CLI installation uses owner/repo plus skill name; this lock verifies reviewed package/skill/source metadata but does not pin upstream commits.",
@@ -112,29 +112,29 @@
       "installCommand": "npx skills add anthropics/skills --skill mcp-builder --agent codex --yes --global"
     },
     {
-      "name": "context-engineering-project-starter",
+      "name": "ai-project-starter",
       "package": "ucsahinn/context-engineering-project-starter",
-      "skill": "context-engineering-project-starter",
-      "source": "ucsahinn/context-engineering-project-starter@context-engineering-project-starter",
+      "skill": "ai-project-starter",
+      "source": "ucsahinn/context-engineering-project-starter@ai-project-starter",
       "sourceUrl": "https://github.com/ucsahinn/context-engineering-project-starter",
-      "installCommand": "npx skills add ucsahinn/context-engineering-project-starter --skill context-engineering-project-starter --agent codex --yes --global"
+      "installCommand": "npx skills add ucsahinn/context-engineering-project-starter --skill ai-project-starter --agent codex --yes --global"
     },
     {
-      "name": "codex-enterprise-prompt-architect",
+      "name": "prompt-architect",
       "package": "ucsahinn/codex-enterprise-prompt-architect",
-      "skill": "codex-enterprise-prompt-architect",
-      "source": "ucsahinn/codex-enterprise-prompt-architect@codex-enterprise-prompt-architect",
+      "skill": "prompt-architect",
+      "source": "ucsahinn/codex-enterprise-prompt-architect@prompt-architect",
       "sourceUrl": "https://github.com/ucsahinn/codex-enterprise-prompt-architect",
-      "installCommand": "npx skills add ucsahinn/codex-enterprise-prompt-architect --skill codex-enterprise-prompt-architect --agent codex --yes --global"
+      "installCommand": "npx skills add ucsahinn/codex-enterprise-prompt-architect --skill prompt-architect --agent codex --yes --global"
     },
     {
-      "name": "codex-skill-forge",
+      "name": "ai-skill-create",
       "package": "ucsahinn/codex-skill-forge",
-      "skill": "codex-skill-forge",
-      "source": "ucsahinn/codex-skill-forge@codex-skill-forge",
+      "skill": "ai-skill-create",
+      "source": "ucsahinn/codex-skill-forge@ai-skill-create",
       "sourceUrl": "https://github.com/ucsahinn/codex-skill-forge",
       "fullDepth": true,
-      "installCommand": "npx skills add ucsahinn/codex-skill-forge --skill codex-skill-forge --full-depth --agent codex --yes --global"
+      "installCommand": "npx skills add ucsahinn/codex-skill-forge --skill ai-skill-create --full-depth --agent codex --yes --global"
     }
   ]
 }

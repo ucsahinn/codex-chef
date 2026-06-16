@@ -87,8 +87,8 @@ risk pattern, not as the source of truth.
   with bundled agents or require authenticated/vendor-specific flows.
 - Map first-party ecosystem skills into the reviewed `-All` / `-InstallSkills`
   set:
-  `context-engineering-project-starter`, `codex-enterprise-prompt-architect`,
-  and `codex-skill-forge`. They preserve capability under first-party
+  `ai-project-starter`, `prompt-architect`,
+  and `ai-skill-create`. They preserve capability under first-party
   ownership while external overlapping design, Vercel, memory, token, prompt,
   and context references remain manual.
 - Keep global Git guard changes outside `-All`; global `core.excludesfile` and

@@ -435,9 +435,9 @@ bozmadan sunmaktir.
 - Mermaid, Excalidraw, SVG, PNG ve Markdown iddialari deterministik yerel
   renderer ile ayni hizada kalsin diye offline diagram sozlesmesi dokumante
   edildi.
-- First-party ekosistem skill'leri `context-engineering-project-starter`,
-  `codex-enterprise-prompt-architect` ve `codex-skill-forge`, `catalog/skills.json`,
-  `catalog/skills-lock.json` ve skill dokumantasyonunda incelenmis `-All` /
+- First-party ekosistem skill'leri `ai-project-starter`, `prompt-architect`
+  ve `ai-skill-create`, `catalog/skills.json`, `catalog/skills-lock.json`
+  ve skill dokumantasyonunda incelenmis `-All` /
   `-InstallSkills` setine eklendi.
 - Global Git ignore, hook ve Git config degisiklikleri `-All` disinda tutuldu;
   kullanici bunlari `-InstallGitGuards` / `--install-git-guards` ile ayrica acar.

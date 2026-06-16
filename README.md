@@ -169,9 +169,9 @@ authoring, and one broad frontend workflow.
 - 📊 **Web Quality Audit** (`web-quality-audit`) - optional global
 - 📝 **Documentation And ADRs** (`documentation-and-adrs`) - optional global
 - 🔌 **MCP Builder** (`mcp-builder`) - optional global
-- 🧱 **Context Starter** (`context-engineering-project-starter`) - optional global, first-party
-- ✍️ **Prompt Architect Skill** (`codex-enterprise-prompt-architect`) - optional global, first-party
-- 🛠️ **Skill Forge** (`codex-skill-forge`) - optional global, first-party
+- 🧱 **Context Starter** (`ai-project-starter`) - optional global, first-party
+- ✍️ **Prompt Architect Skill** (`prompt-architect`) - optional global, first-party
+- 🛠️ **Skill Forge** (`ai-skill-create`) - optional global, first-party
 
 Extra design, React/Vercel, prompt, memory, token, and context skills stay in
 `catalog/skills.json` as manual opt-ins instead of default installs. That keeps
@@ -187,11 +187,11 @@ remain opt-in because they can touch accounts or duplicate existing triggers.
 First-party ecosystem skills are part of the reviewed `-All` / `-InstallSkills`
 set:
 
-- 🧱 `context-engineering-project-starter` - project context foundations,
+- 🧱 `ai-project-starter` - project context foundations,
   starter docs, agent instruction files, and vibe-coding guardrails.
-- ✍️ `codex-enterprise-prompt-architect` - plan-first, approval-gated Codex
+- ✍️ `prompt-architect` - plan-first, approval-gated Codex
   prompt packages and prompt audits.
-- 🛠️ `codex-skill-forge` - create, validate, forward-test, and package Codex
+- 🛠️ `ai-skill-create` - create, validate, forward-test, and package Codex
   skills and plugins.
 
 Manual opt-in example:

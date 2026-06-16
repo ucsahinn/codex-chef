@@ -100,11 +100,11 @@ Varsayilan kurulabilir public ve first-party skill seti:
 - `documentation-and-adrs`: README, ADR ve kalici docs workflow'u.
 - `mcp-builder`: kaliteli MCP server tasarimi, tool schema'lari, transport ve
   evaluation akisi.
-- `context-engineering-project-starter`: first-party proje context temeli,
+- `ai-project-starter`: first-party proje context temeli,
   starter docs, agent instruction dosyalari ve vibe-coding guardrail'leri.
-- `codex-enterprise-prompt-architect`: first-party plan-first, approval-gated,
+- `prompt-architect`: first-party plan-first, approval-gated,
   security-aware Codex prompt paketleri ve prompt audit'leri.
-- `codex-skill-forge`: first-party skill authoring, validation,
+- `ai-skill-create`: first-party skill authoring, validation,
   forward-testing, plugin packaging ve marketplace hazirligi.
 
 Manuel opt-in referansları, daha özel workflow isteyen kullanıcılar için

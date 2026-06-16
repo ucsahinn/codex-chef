@@ -88,8 +88,8 @@ otoritesi resmi dokümanların yerini almaz.
   gerektirdiginde manuel opt-in katalog referansi olarak korunur.
 - First-party ekosistem skill'leri incelenmis `-All` / `-InstallSkills` setine
   alinir:
-  `context-engineering-project-starter`, `codex-enterprise-prompt-architect`
-  ve `codex-skill-forge`. Boylece kabiliyet first-party sahiplik altinda
+  `ai-project-starter`, `prompt-architect`
+  ve `ai-skill-create`. Boylece kabiliyet first-party sahiplik altinda
   kurulur; dis kaynakli cakisan design, Vercel, memory, token, prompt ve
   context referanslari manual kalir.
 - Global Git guard degisiklikleri `-All` disinda tutulur; global

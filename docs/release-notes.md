@@ -446,8 +446,8 @@ default automation.
 - Documented the exact offline diagram contract so Mermaid, Excalidraw, SVG,
   PNG, and Markdown claims match the deterministic local renderer.
 - Added the first-party ecosystem skills
-  `context-engineering-project-starter`, `codex-enterprise-prompt-architect`,
-  and `codex-skill-forge` to the reviewed `-All` / `-InstallSkills` set in
+  `ai-project-starter`, `prompt-architect`, and `ai-skill-create` to the
+  reviewed `-All` / `-InstallSkills` set in
   `catalog/skills.json`, `catalog/skills-lock.json`, and the skills docs.
 - Kept global Git ignore, hook, and Git config changes out of `-All`; users
   must opt in with `-InstallGitGuards` / `--install-git-guards`.
