@@ -176,7 +176,7 @@ runCliSmoke("skills", ["--skills", "--plain", "--no-log"], [
 runCliSmoke("reset-preview", ["--reset", "--plain", "--no-log"], [
   "Reset preview first",
   "--force",
-  "What if:",
+  "completed: Codex Chef dry run",
   "Log disabled by --no-log"
 ]);
 

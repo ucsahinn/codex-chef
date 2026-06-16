@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## v0.5.18 - 2026-06-17
+
+This patch fixes the cross-platform CI assertion for the Codex Chef CLI
+reset-preview smoke test. Windows emits PowerShell `-WhatIf` lines, while Linux
+CI exercises the Bash dry-run branch; the validator now checks the shared
+`completed: Codex Chef dry run` signal instead of a Windows-only string.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run chef -- --status --plain --no-log
+npm run chef -- --preview --plain --no-log
+npm run chef -- --reset --plain --no-log
+npm run chef -- --skills --plain --no-log
+npm run chef -- --mcp --plain --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.17 - 2026-06-17
 
 This patch closes the final audit findings on the Codex Chef operator CLI.

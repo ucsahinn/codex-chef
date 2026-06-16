@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## v0.5.18 - 2026-06-17
+
+Bu patch Codex Chef CLI reset-preview smoke testindeki cross-platform CI
+assertion'ini duzeltir. Windows PowerShell `-WhatIf` satirlari uretirken Linux
+CI Bash dry-run branch'ini calistirir; validator artik Windows'a ozel string
+yerine ortak `completed: Codex Chef dry run` sinyalini kontrol eder.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run check
+npm run chef -- --status --plain --no-log
+npm run chef -- --preview --plain --no-log
+npm run chef -- --reset --plain --no-log
+npm run chef -- --skills --plain --no-log
+npm run chef -- --mcp --plain --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.17 - 2026-06-17
 
 Bu patch Codex Chef operator CLI icin son audit bulgularini kapatir.

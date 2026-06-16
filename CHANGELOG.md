@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.5.18 - 2026-06-17
+
+- Fixed the `validate:chef-cli` reset-preview smoke assertion so it works on
+  both Windows PowerShell `-WhatIf` output and Linux Bash dry-run output.
+- Kept the `v0.5.17` CLI hardening intact: `--no-log`, richer MCP tables,
+  runtime CLI smoke checks, and repaired Turkish MCP catalog text.
+
 ## 0.5.17 - 2026-06-17
 
 - Added `--no-log` to the Codex Chef CLI for strict audit runs that should not
