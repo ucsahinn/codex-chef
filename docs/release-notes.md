@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+## v0.5.16 - 2026-06-16
+
+This patch closes the remaining CLI completion gaps from the original Codex
+Chef operator goal: safe reset/reinstall, skill selection, and MCP selection are
+now first-class menu flows.
+
+## Highlights
+
+- Added `npm run chef -- --reset` for backup-backed managed refresh/reinstall
+  preview, plus `npm run chef -- --reset --apply` for explicit apply-gated
+  execution.
+- `npm run chef -- --skills` now shows the reviewed skill table and, in an
+  interactive terminal, lets the user select one skill by number. Installation
+  still requires `--apply`.
+- `npm run chef -- --mcp` now lets interactive users select one connector by
+  number and prints setup, auth, verification, source, risk, and rollback notes
+  without enabling account/database/filesystem connectors.
+- CLI validation now requires the reset, skill selection, MCP explanation,
+  redaction, auth guidance, and log surfaces before release.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run chef -- --status --plain
+npm run chef -- --preview --plain
+npm run chef -- --reset --plain
+npm run chef -- --skills --plain
+npm run chef -- --mcp --plain
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.15 - 2026-06-16
 
 This patch adds the Codex Chef operator CLI so Windows-first users can run the

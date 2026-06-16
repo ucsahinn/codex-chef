@@ -64,6 +64,7 @@ Codex Chef CLI ayni guvenli scriptleri tek Windows dostu menude toplar:
 npm run chef
 npm run chef -- --status
 npm run chef -- --preview
+npm run chef -- --reset --apply
 npm run chef -- --repair --apply
 npm run chef -- --install --apply
 npm run chef -- --skills
@@ -74,11 +75,14 @@ npm run chef -- --logs
 
 Menu her aksiyonun write sinirini gosterir. `--status`, `--doctor`,
 `--preview`, `--skills`, `--mcp`, `--auth` ve `--logs` varsayilan olarak
-read-only rehberlik veya dogrulama akislari olur. Sadece `--repair --apply` ve
-`--install --apply` global dosyalara yazabilir; onlar da user state silmek
-yerine backup alan installer/repair scriptlerine gider. CLI loglari
-`tmp/chef-cli/logs` altina yazilir; bu klasor ignore edilir ve source package'a
-girmez.
+read-only rehberlik veya dogrulama akislari olur. `--reset --apply`,
+`--repair --apply` ve `--install --apply` global dosyalara yazabilen
+path'lerdir; user state silmek yerine backup alan installer/repair scriptlerine
+giderler. Interactive terminalde `--skills` numarayla tek reviewed skill
+sectirir ve sadece `--apply` ile kurar. `--mcp` numarayla connector sectirip
+setup, auth, dogrulama ve rollback notlarini gosterir; account connector'larini
+kendiliginden acmaz. CLI loglari `tmp/chef-cli/logs` altina yazilir; bu klasor
+ignore edilir ve source package'a girmez.
 
 GitHub CLI release veya push kontrollerinde `401 Unauthorized` ya da eksik
 workflow scope gorursen GitHub CLI ve Git Credential Manager'i bir kez kalici

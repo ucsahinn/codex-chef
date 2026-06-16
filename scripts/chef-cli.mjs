@@ -22,6 +22,7 @@ const ACTION_FLAGS = new Map([
   ["--status", "status"],
   ["--doctor", "doctor"],
   ["--preview", "preview"],
+  ["--reset", "reset"],
   ["--repair", "repair"],
   ["--install", "install"],
   ["--skills", "skills"],
@@ -87,6 +88,12 @@ const MENU_ITEMS = [
     description: "Full install. Requires --apply or confirmation."
   },
   {
+    id: "reset",
+    label: "Reset",
+    writes: "global/network",
+    description: "Backup-backed managed refresh/reinstall. Requires --apply or confirmation."
+  },
+  {
     id: "repair",
     label: "Repair",
     writes: "global",
@@ -132,6 +139,7 @@ Usage:
   npm run chef -- --status
   npm run chef -- --doctor
   npm run chef -- --preview
+  npm run chef -- --reset [--apply]
   npm run chef -- --repair [--apply]
   npm run chef -- --install [--apply]
   npm run chef -- --skills
@@ -142,7 +150,7 @@ Usage:
 Options:
   --json     Emit JSON where supported
   --plain    Use ASCII labels instead of icons
-  --apply    Allow write actions for install or repair
+  --apply    Allow write actions for install, reset, repair, or selected skill install
   --help     Show this help
 
 Logs:
@@ -307,17 +315,28 @@ function runDoctor() {
   ]);
 }
 
-function runPreview() {
+function runPreview(force = false) {
   const plan = runNode("preview-plan", "scripts/plan-install.mjs", [
     "--all",
+    ...(force ? ["--force"] : []),
     "--json",
     "--redact-paths"
   ]);
   if (!plan.ok) return plan;
   if (process.platform === "win32") {
-    return runPowerShell("preview-installer", ".\\scripts\\install.ps1", ["-All", "-WhatIf", "-PlainOutput"]);
+    return runPowerShell("preview-installer", ".\\scripts\\install.ps1", [
+      "-All",
+      ...(force ? ["-Force"] : []),
+      "-WhatIf",
+      "-PlainOutput"
+    ]);
   }
-  return runBash("preview-installer", "scripts/install.sh", ["--all", "--dry-run", "--plain-output"]);
+  return runBash("preview-installer", "scripts/install.sh", [
+    "--all",
+    ...(force ? ["--force"] : []),
+    "--dry-run",
+    "--plain-output"
+  ]);
 }
 
 async function runInstall() {
@@ -330,6 +349,22 @@ async function runInstall() {
     return runPowerShell("install", ".\\scripts\\install.ps1", ["-All", "-Interactive", "-PlainOutput"]);
   }
   return runBash("install", "scripts/install.sh", ["--all", "--interactive", "--plain-output"]);
+}
+
+async function runReset() {
+  if (!options.apply) {
+    console.log(`${ICONS.info} Reset preview first. Use npm run chef -- --reset --apply for a backup-backed managed refresh.`);
+    return runPreview(true);
+  }
+  const allowed = await confirmWriteAction(
+    "Reset",
+    "Reset refreshes managed Codex Chef files after backup with installer force mode; unrelated user files remain out of scope."
+  );
+  if (!allowed) return { ok: false, skipped: true };
+  if (process.platform === "win32") {
+    return runPowerShell("reset-apply", ".\\scripts\\install.ps1", ["-All", "-Force", "-Interactive", "-PlainOutput"]);
+  }
+  return runBash("reset-apply", "scripts/install.sh", ["--all", "--force", "--interactive", "--plain-output"]);
 }
 
 async function runRepair() {
@@ -345,7 +380,65 @@ async function runRepair() {
   return runNode("repair-apply", "scripts/repair-install.mjs", ["--redact-paths", "--apply"]);
 }
 
-function runSkills() {
+function npxCommand() {
+  return process.platform === "win32" ? "npx.cmd" : "npx";
+}
+
+async function askSelection(items, prompt) {
+  if (!process.stdin.isTTY) return null;
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    const answer = await rl.question(prompt);
+    const index = Number(answer.trim());
+    if (!Number.isInteger(index) || index < 1 || index > items.length) return null;
+    return items[index - 1];
+  } finally {
+    rl.close();
+  }
+}
+
+async function installSelectedSkill(skill) {
+  const allowed = await confirmWriteAction(
+    "Skill install",
+    `Install selected global skill ${skill.name} from ${skill.source}.`
+  );
+  if (!allowed) return { ok: false, skipped: true };
+  return runLoggedCommand("skill-install", npxCommand(), [
+    "skills",
+    "add",
+    skill.package,
+    "--skill",
+    skill.skill,
+    ...(skill.fullDepth ? ["--full-depth"] : []),
+    "--agent",
+    "codex",
+    "--yes",
+    "--global"
+  ], { timeout: 300000 });
+}
+
+async function selectSkill(installable) {
+  console.log("");
+  console.log("Skill selection:");
+  installable.forEach((skill, index) => {
+    console.log(`${index + 1}. ${skill.name} - ${skill.source}`);
+  });
+  const selected = await askSelection(
+    installable,
+    "\nSelect a skill number to install with --apply, or press Enter to skip: "
+  );
+  if (!selected) {
+    console.log(`${ICONS.info} No skill selected.`);
+    return { ok: true };
+  }
+  if (!options.apply) {
+    console.log(`${ICONS.warn} Selected ${selected.name}. Re-run npm run chef -- --skills --apply and choose it to install.`);
+    return { ok: false, skipped: true };
+  }
+  return installSelectedSkill(selected);
+}
+
+async function runSkills() {
   const catalog = readJson("catalog/skills.json");
   const installable = (catalog.skills || []).filter((skill) => skill.install === true);
   console.log(`${ICONS.docs} Curated installable skills: ${installable.length}`);
@@ -357,10 +450,26 @@ function runSkills() {
     checked: skill.lastChecked
   })));
   console.log(`${ICONS.info} Offline verification runs by default. Online resolution: npm run verify:skills:online -- --timeout-ms=90000`);
-  return runNode("skills", "scripts/verify-skill-sources.mjs");
+  const verification = runNode("skills", "scripts/verify-skill-sources.mjs");
+  if (!verification.ok || !process.stdin.isTTY) return verification;
+  return selectSkill(installable);
 }
 
-function runMcp() {
+function explainMcpServer(server) {
+  console.log("");
+  console.log(`${server.name}`);
+  console.log(`- status: ${server.defaultEnabled ? "ready_by_default" : "disabled_by_default"}`);
+  console.log(`- auth: ${server.auth}`);
+  console.log(`- approval: ${server.approval}`);
+  console.log(`- risk: ${server.risk}`);
+  console.log(`- setup: ${server.setupKind} - ${server.setupHint}`);
+  console.log(`- reason: ${server.defaultReason}`);
+  console.log(`- source: ${server.sourceUrl}`);
+  console.log("- verified: not_checked until /mcp, codex mcp, or a safe read-only probe succeeds.");
+  console.log("- rollback: set this connector's enabled flag to false and restart Codex.");
+}
+
+async function runMcp() {
   const catalog = readJson("catalog/mcp-servers.json");
   const servers = catalog.servers || [];
   console.log(`${ICONS.docs} MCP servers: ${servers.length}`);
@@ -382,6 +491,14 @@ function runMcp() {
   console.log("Authenticated account, database, and broad filesystem MCP connectors stay disabled by default.");
   console.log("Enable them only for a concrete task in ~/.codex/config.toml, restart Codex, then verify with /mcp or codex mcp.");
   console.log("Rollback: set the connector's enabled flag back to false and restart Codex.");
+  if (process.stdin.isTTY) {
+    console.log("");
+    servers.forEach((server, index) => {
+      console.log(`${index + 1}. ${server.name}`);
+    });
+    const selected = await askSelection(servers, "\nSelect an MCP number to explain, or press Enter to skip: ");
+    if (selected) explainMcpServer(selected);
+  }
   return { ok: true };
 }
 
@@ -432,6 +549,8 @@ async function runAction(action) {
       return runDoctor();
     case "preview":
       return runPreview();
+    case "reset":
+      return runReset();
     case "install":
       return runInstall();
     case "repair":
@@ -460,7 +579,7 @@ async function runMenu() {
         const item = MENU_ITEMS[index];
         console.log(`${index + 1}. ${item.label} [writes: ${item.writes}] - ${item.description}`);
       }
-      const answer = await rl.question("\nSelect 1-10: ");
+      const answer = await rl.question(`\nSelect 1-${MENU_ITEMS.length}: `);
       const index = Number(answer.trim());
       const item = MENU_ITEMS[index - 1];
       if (!item) {

@@ -150,12 +150,17 @@ Codex Chef CLI smoke:
 npm run validate:chef-cli
 npm run chef -- --status
 npm run chef -- --preview
+npm run chef -- --reset
 ```
 
 `npm run chef` numarali operator menusunu acar. Yukaridaki noninteractive
 smoke komutlari read-only'dir. Write path'leri `--apply` ister:
+`npm run chef -- --reset --apply` backup'li managed refresh icin,
 `npm run chef -- --repair --apply` backup'li repair icin,
 `npm run chef -- --install --apply` full managed install icin kullanilir.
+Interactive terminalde `npm run chef -- --skills` numarayla tek reviewed skill
+sectirir; `npm run chef -- --mcp` numarayla connector sectirip setup/auth/
+rollback notlarini gosterir ama connector'i acmaz.
 
 CI ayrica temporary home path'leriyle Bash dry-run ve PowerShell `-WhatIf`
 smoke check calistirir; boylece installer runtime branch'leri global write

@@ -82,6 +82,7 @@ Codex Chef CLI wraps the same safe scripts in one Windows-friendly menu:
 npm run chef
 npm run chef -- --status
 npm run chef -- --preview
+npm run chef -- --reset --apply
 npm run chef -- --repair --apply
 npm run chef -- --install --apply
 npm run chef -- --skills
@@ -92,10 +93,14 @@ npm run chef -- --logs
 
 The menu labels every action with its write boundary. `--status`,
 `--doctor`, `--preview`, `--skills`, `--mcp`, `--auth`, and `--logs` are
-read-only guidance or verification paths by default. `--repair --apply` and
-`--install --apply` are the only write paths; they route to the backup-backed
-installer or repair script instead of deleting user state. CLI logs are written
-under `tmp/chef-cli/logs`, which is ignored and not part of the source package.
+read-only guidance or verification paths by default. `--reset --apply`,
+`--repair --apply`, and `--install --apply` are the write paths; they route to
+the backup-backed installer or repair script instead of deleting user state.
+In an interactive terminal, `--skills` lets you pick one reviewed skill by
+number and installs it only when you rerun with `--apply`. `--mcp` lets you pick
+one connector by number to see setup, auth, verification, and rollback notes
+without enabling account connectors. CLI logs are written under
+`tmp/chef-cli/logs`, which is ignored and not part of the source package.
 
 If GitHub CLI release or push checks report `401 Unauthorized` or missing
 workflow scope, refresh GitHub CLI and Git Credential Manager once:

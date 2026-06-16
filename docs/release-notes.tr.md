@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+## v0.5.16 - 2026-06-16
+
+Bu patch orijinal Codex Chef operator hedefinde kalan CLI bosluklarini kapatir:
+guvenli reset/reinstall, skill secimi ve MCP secimi artik birinci sinif menu
+akisidir.
+
+## One Cikanlar
+
+- `npm run chef -- --reset` backup'li managed refresh/reinstall preview icin
+  eklendi; `npm run chef -- --reset --apply` acik apply gate'iyle calisir.
+- `npm run chef -- --skills` reviewed skill tablosunu gosterir ve interactive
+  terminalde kullaniciya numarayla tek skill sectirir. Kurulum yine `--apply`
+  ister.
+- `npm run chef -- --mcp` interactive kullanicinin numarayla tek connector
+  secmesini saglar; setup, auth, dogrulama, source, risk ve rollback notlarini
+  basar ama account/database/filesystem connector'larini acmaz.
+- CLI validation artik reset, skill selection, MCP explanation, redaction, auth
+  guidance ve log yuzeylerini release oncesi zorunlu tutar.
+
+## Dogrulama
+
+Bu surum icin release oncesi su kontroller calismali:
+
+```bash
+npm run check
+npm run chef -- --status --plain
+npm run chef -- --preview --plain
+npm run chef -- --reset --plain
+npm run chef -- --skills --plain
+npm run chef -- --mcp --plain
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.15 - 2026-06-16
 
 Bu patch Codex Chef operator CLI'ini ekler. Windows-first kullanici kurulum,

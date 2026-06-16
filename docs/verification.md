@@ -149,12 +149,17 @@ Codex Chef CLI smoke:
 npm run validate:chef-cli
 npm run chef -- --status
 npm run chef -- --preview
+npm run chef -- --reset
 ```
 
 `npm run chef` opens the numbered operator menu. The noninteractive smoke
 commands above are read-only. Write paths require `--apply`:
-`npm run chef -- --repair --apply` for backup-backed repair and
-`npm run chef -- --install --apply` for a full managed install.
+`npm run chef -- --reset --apply` for backup-backed managed refresh,
+`npm run chef -- --repair --apply` for backup-backed repair, and
+`npm run chef -- --install --apply` for a full managed install. In an
+interactive terminal, `npm run chef -- --skills` lets the user select one
+reviewed skill by number, and `npm run chef -- --mcp` lets the user select one
+connector by number for setup/auth/rollback notes without enabling it.
 
 CI also runs Bash dry-run and PowerShell `-WhatIf` smoke checks with temporary
 homes so installer runtime branches are exercised without global writes.

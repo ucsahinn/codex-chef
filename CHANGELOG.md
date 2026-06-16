@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.5.16 - 2026-06-16
+
+- Completed the Codex Chef CLI operator flow with `--reset` for backup-backed
+  managed refresh/reinstall previews and apply-gated execution.
+- Added interactive skill selection so users can pick one reviewed skill by
+  number and install it only with `--skills --apply`.
+- Added interactive MCP selection so users can pick one connector by number and
+  see setup, auth, verification, and rollback guidance without enabling it.
+
 ## 0.5.15 - 2026-06-16
 
 - Added `npm run chef`, a Windows-friendly Codex Chef operator menu for
