@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.13 - 2026-06-16
+
 - Added `catalog/routing-profiles.json`, `npm run codex:routing`, and status
   board routing summaries so Codex Chef exposes the task-shape mapping between
   agents, skills, MCPs, and config/profile flags.
