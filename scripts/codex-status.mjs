@@ -172,6 +172,24 @@ function inspectSkillInventory() {
   };
 }
 
+function inspectRoutingBoard() {
+  const catalog = readJson("catalog/routing-profiles.json");
+  const profiles = catalog.profiles || [];
+  return {
+    inspected: true,
+    sourcePolicy: catalog.sourcePolicy,
+    profileCount: profiles.length,
+    profileIds: profiles.map((profile) => profile.id),
+    requiredSurfaces: {
+      agents: [...new Set(profiles.flatMap((profile) => profile.agents || []))].sort(),
+      skills: [...new Set(profiles.flatMap((profile) => profile.skills || []))].sort(),
+      mcp: [...new Set(profiles.flatMap((profile) => profile.mcp || []))].sort(),
+      flags: [...new Set(profiles.flatMap((profile) => profile.flags || []))].sort()
+    },
+    boundary: "Routing profiles are guidance and status evidence, not hidden execution hooks; destructive, credentialed, publishing, deployment, database, and broad filesystem actions remain approval-gated."
+  };
+}
+
 function summarizeCodexDoctor() {
   if (options.skipCodexDoctorChecks) {
     return { inspected: false, status: "skipped", note: "Skipped by --skip-codex-doctor-checks." };
@@ -301,6 +319,7 @@ const runtime = options.skipRuntime
 const codexDoctor = summarizeCodexDoctor();
 const skillInventory = inspectSkillInventory();
 const skillsContext = summarizeSkillContext(runtime.report, skillInventory);
+const routingBoard = inspectRoutingBoard();
 
 const failures = [
   ...repoDoctor.failures.map((failure) => `repo: ${failure}`),
@@ -336,11 +355,12 @@ const report = {
   codexDoctor,
   skillInventory,
   skillsContext,
+  routingBoard,
   warnings,
   attentionReasons,
   failures,
   nextActions: status === "fail"
-    ? ["Fix failed repo or runtime checks, then rerun npm run codex:status."]
+    ? ["Run npm run repair:install -- --apply to repair managed runtime drift, then rerun npm run codex:status."]
     : attentionReasons.length > 0
       ? ["Review attention items; they do not necessarily mean Codex Chef install is broken."]
       : ["No action needed."]
@@ -378,6 +398,9 @@ if (options.json) {
     console.log(`Skills: ${skillInventory.installed} total installed across global roots (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} missing, ${skillInventory.extraCount} other/user-installed)`);
   }
   console.log(`Skills context: ${skillsContext.status} (${skillsContext.installed ?? "not inspected"} installed; curated baseline ${skillsContext.curatedExpected})`);
+  console.log(
+    `Enterprise routing: ${routingBoard.profileCount} profiles (agents ${routingBoard.requiredSurfaces.agents.length}, skills ${routingBoard.requiredSurfaces.skills.length}, MCP ${routingBoard.requiredSurfaces.mcp.length}, flags/checks ${routingBoard.requiredSurfaces.flags.length})`
+  );
   if (codexDoctor.inspected) {
     console.log(
       `Codex doctor checks: ${codexDoctor.status} (${codexDoctor.counts.ok} ok, ${codexDoctor.counts.fail} fail, ${codexDoctor.counts.warning} warning)`

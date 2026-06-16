@@ -5,6 +5,7 @@ INSTALL_SKILLS=0
 INSTALL_GIT_GUARDS=0
 ALL=0
 FORCE=0
+REPAIR=0
 NO_BACKUP=0
 DRY_RUN=0
 PLAIN_OUTPUT=0
@@ -17,6 +18,7 @@ for arg in "$@"; do
     --install-skills) INSTALL_SKILLS=1 ;;
     --install-git-guards) INSTALL_GIT_GUARDS=1 ;;
     --force) FORCE=1 ;;
+    --repair) REPAIR=1 ;;
     --no-backup) NO_BACKUP=1 ;;
     --dry-run) DRY_RUN=1 ;;
     --plain-output) PLAIN_OUTPUT=1 ;;
@@ -108,6 +110,31 @@ fi
 
 CODEX_HOME_DIR="$(optional_path "Codex home" "$CODEX_HOME_DIR")"
 AGENTS_HOME_DIR="$(optional_path "Agents home" "$AGENTS_HOME_DIR")"
+
+if [ "$REPAIR" -eq 1 ]; then
+  section "Codex Chef repair"
+  REPAIR_ARGS=(
+    "$REPO_ROOT/scripts/repair-install.mjs"
+    "--redact-paths"
+    "--platform"
+    "unix"
+    "--codex-home"
+    "$CODEX_HOME_DIR"
+    "--agents-home"
+    "$AGENTS_HOME_DIR"
+  )
+  if [ "$DRY_RUN" -eq 1 ]; then
+    note "Mode: repair preview; no files will be changed"
+  else
+    note "Mode: backup-backed repair of managed Codex Chef drift"
+    REPAIR_ARGS+=("--apply")
+  fi
+  if [ "$NO_BACKUP" -eq 1 ]; then
+    REPAIR_ARGS+=("--no-backup")
+  fi
+  node "${REPAIR_ARGS[@]}"
+  exit $?
+fi
 
 if [ "$INTERACTIVE" -eq 1 ] && [ "$ALL" -eq 1 ] && [ "$INSTALL_SKILLS" -eq 1 ]; then
   if ! yes_no "Install or reconcile the 16 reviewed global Codex skills now?" "yes"; then
@@ -415,6 +442,7 @@ const readJson = (relativePath) =>
 const agentCatalog = readJson("catalog/agents.json");
 const mcpCatalog = readJson("catalog/mcp-servers.json");
 const skillCatalog = readJson("catalog/skills.json");
+const routingCatalog = readJson("catalog/routing-profiles.json");
 const pluginSkillRoot = path.join(root, "plugins/codex-chef-workflows/skills");
 
 const agents = agentCatalog.agents.map((agent) => agent.name);
@@ -431,13 +459,15 @@ const pluginSkills = fs
 const reviewedSkills = skillCatalog.skills
   .filter((skill) => skill.install === true)
   .map((skill) => skill.name);
+const routingProfiles = routingCatalog.profiles.map((profile) => profile.id);
 
 for (const [label, names] of [
   ["Agents ready", agents],
   ["MCP ready by default", readyMcps],
   ["MCP opt-in / disabled by default", optInMcps],
   ["Local plugin skills", pluginSkills],
-  ["Reviewed global skills", reviewedSkills]
+  ["Reviewed global skills", reviewedSkills],
+  ["Enterprise routing profiles", routingProfiles]
 ]) {
   console.log(`  - ${label} (${names.length}):`);
   console.log(`    ${names.join(", ")}`);
@@ -455,6 +485,7 @@ else
   action "completed" "Codex Chef install"
   note "Restart Codex, then run:"
   echo "    codex doctor --summary"
+  echo "    npm run codex:routing"
   echo "    npm run codex:status"
   echo "    npm run verify:install:runtime"
   echo '    codex --strict-config "Summarize the active Codex setup."'

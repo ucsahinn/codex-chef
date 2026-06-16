@@ -94,8 +94,17 @@ Verifier MCP durumuna karar vermeden önce Codex CLI kontrollerini `CODEX_HOME`
 açıkça kurulu hedefe ayarlanmış şekilde tekrar çalıştırır.
 
 Managed file drift raporlanırsa agent ve MCP sayıları doğru görünse bile kurulu
-kopya eskidir. Bilinçli, backup destekli replacement ile installer'ı yeniden
-çalıştır veya sadece raporlanan managed dosyaları backup aldıktan sonra kopyala.
+kopya eskidir. Önce repair çalıştır:
+
+```powershell
+.\scripts\install.ps1 -Repair -WhatIf
+.\scripts\install.ps1 -Repair
+```
+
+Repair modu Codex Chef'in yönettiği drift'i backup alıp düzeltir; başka
+marketplace plugin'lerini ve user skill'lerini silmez. Force replacement'i
+sadece repair planını inceledikten ve tam managed-target replacement istediğine
+karar verdikten sonra kullan.
 
 Bir server açılıyor ama tool göstermiyorsa:
 

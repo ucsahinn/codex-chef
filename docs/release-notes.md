@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Added an enterprise routing board with `catalog/routing-profiles.json` and
+  `npm run codex:routing`. The board maps common task shapes to the expected
+  subagents, skills, MCPs, and config/profile flags while keeping risky actions
+  approval-gated.
+- `npm run codex:status` now includes the routing board summary, and the
+  PowerShell/Bash installers show enterprise routing profiles in the capability
+  board printed after setup.
+
 ## v0.5.12 - 2026-06-16
 
 This patch tightens the new end-user status board. It keeps the status command
@@ -14,8 +22,12 @@ extra skill names in machine-readable output.
   baseline count, missing curated count, and other/user-installed count.
 - The report keeps extra skill details count-only, which is enough for context
   pressure diagnosis without exposing a user's broader global skill inventory.
-- No installer targets, MCP defaults, global Git guard behavior, or curated
-  skill sources changed in this patch.
+- `npm run repair:install` plus installer `-Repair` / `--repair` give existing
+  global Codex users a backup-backed repair path before force replacement. It
+  reconciles managed drift, preserves unrelated marketplace plugins, and
+  reports extra or duplicate user skills without deleting them.
+- No MCP defaults, global Git guard behavior, or curated skill sources changed
+  in this patch.
 
 ## Verification
 

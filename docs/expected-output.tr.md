@@ -85,6 +85,8 @@ What if: Performing the operation ...
     codex-chef-operator, context-budget-planner, ...
   • Reviewed global skills (16):
     dependency-upgrade, gh-fix-ci, ...
+  • Enterprise routing profiles (12):
+    repo-map-before-change, current-docs-research, ...
   • Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
 
 🍳 Next steps
@@ -113,6 +115,8 @@ What if: Performing the operation ...
     codex-chef-operator, context-budget-planner, ...
   • Reviewed global skills (16):
     dependency-upgrade, gh-fix-ci, ...
+  • Enterprise routing profiles (12):
+    repo-map-before-change, current-docs-research, ...
   • Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
 
 🍳 Next steps
@@ -120,6 +124,7 @@ What if: Performing the operation ...
   ✓ completed: Codex Chef install
   • Restart Codex, then run:
     codex doctor --summary
+    npm run codex:routing
     npm run codex:status
     npm run verify:install:runtime
     codex --strict-config "Summarize the active Codex setup."
@@ -128,6 +133,28 @@ What if: Performing the operation ...
 
 Mevcut `config.toml` `-Force` verilmedikçe backup alınıp merge edilir; diğer
 mevcut managed dosyalar `-Force` verilmedikçe atlanır.
+
+## Repair On Izleme
+
+```text
+Codex Chef repair
+Mode: plan
+Overall: attention
+Codex home: ...
+Agents home: ...
+Managed files: 36/37 current, 1 planned, 0 applied
+Config: current
+Marketplace: planned
+Skills: 94 unique installed (16 curated expected, 0 missing, 78 non-curated, 3 duplicate names)
+Action: planned copy-file .../.codex/rules/default.rules
+Action: planned update-marketplace-entry .../.agents/plugins/marketplace.json
+Warning: 78 non-curated global skill(s) are installed; repair reports them but does not delete user skills.
+```
+
+JSON ciktisi `schemaVersion: codex-chef.repair.v1` kullanir. `-Repair -WhatIf`
+ve `npm run repair:install -- --json` no-write kalir. `-Repair` ve
+`npm run repair:install -- --apply` managed drift'i duzeltmeden once backup
+olusturur.
 
 ## Bash Dry Run
 
@@ -152,6 +179,8 @@ Would install file from ...
     codex-chef-operator, context-budget-planner, ...
   - Reviewed global skills (16):
     dependency-upgrade, gh-fix-ci, ...
+  - Enterprise routing profiles (12):
+    repo-map-before-change, current-docs-research, ...
   - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
 
 [*] Next steps
@@ -180,6 +209,8 @@ Would install file from ...
     codex-chef-operator, context-budget-planner, ...
   - Reviewed global skills (16):
     dependency-upgrade, gh-fix-ci, ...
+  - Enterprise routing profiles (12):
+    repo-map-before-change, current-docs-research, ...
   - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
 
 [*] Next steps
@@ -187,6 +218,7 @@ Would install file from ...
   - completed: Codex Chef install
   - Restart Codex, then run:
     codex doctor --summary
+    npm run codex:routing
     npm run codex:status
     npm run verify:install:runtime
     codex --strict-config "Summarize the active Codex setup."

@@ -36,6 +36,32 @@
   instruction blocks it. If an obvious routing surface is skipped, state the
   concrete reason.
 
+## Enterprise Routing Loop
+
+- At the start of every non-trivial request, classify the task shape before
+  acting. Match it against the installed agent team, available skills, enabled
+  MCPs, and relevant config/profile flags.
+- Apply the narrowest matching route:
+  repo mapping -> `code_mapper` plus Serena/sequential-thinking; current docs
+  -> `docs_researcher` plus OpenAI Docs or Context7; context placement ->
+  `context_architect` plus prompt/skill/context starter skills; bug or failing
+  test -> `root_cause_debugger`, `test_verifier`, and systematic debugging;
+  bounded feature -> engineering planning, TDD/new-feature skills, then
+  verification; frontend/UI -> design review, frontend verification,
+  Playwright/Chrome DevTools, and frontend/webapp/accessibility skills;
+  security-sensitive work -> read-only security review and security skills;
+  MCP changes -> `mcp_integrator` with MCP docs and prompt-gated tools;
+  release/publish -> `release_verifier`, git hygiene, gitleaks, and explicit
+  approval gates; SEO/web quality -> SEO, accessibility, browser evidence, and
+  current docs; docs/ADRs -> docs author and documentation skills; starter
+  health -> `codex_doctor`, `npm run codex:status`, and runtime verification.
+- Treat this as safe autonomy, not hidden execution. It is required to use the
+  matching reasoning, skill, MCP, and flag guidance; it is never permission to
+  commit, push, publish, deploy, delete, rotate credentials, enable account or
+  database connectors, or broaden filesystem access without explicit approval.
+- If more than one route matches, prefer the lower-risk read-only specialist
+  first, then implement in the main thread after evidence is gathered.
+
 ## Subagent Routing
 
 - Treat subagents as explicit delegation, not background magic. When the user

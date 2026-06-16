@@ -51,6 +51,18 @@ if (report) {
   if (report.skillsContext?.documentedBudget?.includes("2%") !== true) {
     fail("codex status must explain the documented skills context budget.");
   }
+  if (report.routingBoard?.profileCount < 10) {
+    fail("codex status must include the enterprise routing board profile count.");
+  }
+  if (!report.routingBoard?.requiredSurfaces?.agents?.includes("context_architect")) {
+    fail("codex status routing board must include context_architect in required agent surfaces.");
+  }
+  if (!report.routingBoard?.requiredSurfaces?.mcp?.includes("openaiDeveloperDocs")) {
+    fail("codex status routing board must include OpenAI Docs MCP in required MCP surfaces.");
+  }
+  if (!report.routingBoard?.boundary?.includes("not hidden execution hooks")) {
+    fail("codex status routing board must preserve the no-hidden-hooks boundary.");
+  }
   if (!Array.isArray(report.nextActions) || report.nextActions.length === 0) {
     fail("codex status must include nextActions.");
   }
@@ -62,8 +74,31 @@ if (textResult.error) {
 } else if (textResult.status !== 0) {
   fail(`codex status text validation exited ${textResult.status}: ${(textResult.stderr || textResult.stdout).trim()}`);
 } else {
-  for (const required of ["Codex Chef status", "Repo starter:", "Installed runtime:", "Skills context:"]) {
+  for (const required of ["Codex Chef status", "Repo starter:", "Installed runtime:", "Skills context:", "Enterprise routing:"]) {
     if (!textResult.stdout.includes(required)) fail(`codex status text output missing: ${required}`);
+  }
+}
+
+const routingResult = spawnSync(process.execPath, ["scripts/codex-routing-board.mjs", "--json"], {
+  encoding: "utf8",
+  stdio: ["ignore", "pipe", "pipe"],
+  timeout: 120000,
+  windowsHide: true
+});
+if (routingResult.error) {
+  fail(`codex routing JSON validation could not run: ${routingResult.error.message}`);
+} else if (routingResult.status !== 0) {
+  fail(`codex routing JSON validation exited ${routingResult.status}: ${(routingResult.stderr || routingResult.stdout).trim()}`);
+} else {
+  try {
+    const routing = JSON.parse(routingResult.stdout);
+    if (routing.schemaVersion !== "codex-chef.routing.v1") fail("codex routing schemaVersion drifted.");
+    if (routing.profileCount < 10) fail("codex routing must include at least 10 profiles.");
+    if (!routing.sourcePolicy?.includes("not hidden execution hooks")) {
+      fail("codex routing must preserve the no-hidden-hooks source policy.");
+    }
+  } catch (error) {
+    fail(`codex routing did not emit parseable JSON: ${error.message}`);
   }
 }
 

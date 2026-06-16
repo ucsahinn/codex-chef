@@ -53,6 +53,20 @@ Automation-friendly install without questions:
 .\scripts\install.ps1 -All
 ```
 
+Repair an existing global Codex setup:
+
+```powershell
+.\scripts\install.ps1 -Repair -WhatIf
+.\scripts\install.ps1 -Repair
+```
+
+Repair mode is for machines that already have a Codex setup. It previews or
+applies backup-backed reconciliation for Codex Chef-managed guidance, rules,
+agent/profile files, the bundled plugin, missing config blocks, and the local
+plugin marketplace entry. It preserves unrelated marketplace plugins and never
+deletes user skills; extra or duplicate global skills are reported as cleanup
+candidates.
+
 Useful switches:
 
 - `-All`: install Codex templates, the local Codex Chef plugin, specialist
@@ -70,6 +84,9 @@ Useful switches:
   deliberate upgrades only after reviewing `-WhatIf`; without it, existing
   `config.toml` is backed up and receives only missing Codex Chef blocks, while
   existing agent files, rules, and marketplace files are skipped.
+- `-Repair`: repair an existing setup with the shared repair engine. With
+  `-WhatIf`, it prints a no-write repair plan. Without `-WhatIf`, it backs up
+  and repairs managed drift. It does not delete user skills.
 - `-NoBackup`: skip backups. Not recommended.
 - `-WhatIf`: preview file, Git, and skill operations without changing the real
   setup.
@@ -105,6 +122,8 @@ Useful flags:
 - `--install-git-guards`: opt in to global Git ignore and hook settings.
 - `--force`: replace managed targets after backup; without it, existing
   `config.toml` is merged and other existing managed files are skipped.
+- `--repair`: preview or apply backup-backed repair for an existing global
+  Codex setup. Use it with `--dry-run` for a no-write plan.
 - `--no-backup`
 - `--dry-run`
 - `--plain-output`: use ASCII status markers.
@@ -143,15 +162,23 @@ Restart Codex, then run:
 
 ```bash
 codex doctor --summary
+npm run codex:routing
 npm run codex:status
 npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
 
+`npm run codex:routing` prints the enterprise routing board from
+`catalog/routing-profiles.json`: task shapes, matching subagents, skills, MCPs,
+and config/profile flags. The board is a visible routing contract, not a hidden
+execution hook; risky account, deployment, database, destructive, and broad
+filesystem actions still require explicit approval.
+
 `npm run codex:status` is the end-user status board. It combines repo-only
 starter health, installed-runtime drift, direct Codex doctor check summaries,
-and skill context-budget warnings. Use `npm run codex:status:all` when the real
-install intentionally included curated skills and optional Git guards.
+skill context-budget warnings, and the routing board summary. Use
+`npm run codex:status:all` when the real install intentionally included curated
+skills and optional Git guards.
 
 `npm run verify:install:runtime` is read-only. It checks the installed
 `~/.codex` and `~/.agents` targets, checks managed agent, rule, profile, and
@@ -190,10 +217,17 @@ CODEX_HOME="$PWD/tmp/codex-home" AGENTS_HOME="$PWD/tmp/agents-home" \
 Use non-dry-run temp homes only when you intentionally want a smoke install.
 Remove `tmp/` only when you created it intentionally.
 
-If you already have a Codex setup, the safe default path is still the normal
-install command. Existing `config.toml` is backed up and merged; existing user
-tables are preserved. Other existing managed files are skipped unless you use
-`-Force` / `--force` after reviewing the preview.
+If you already have a Codex setup, inspect the repair plan first:
+
+```powershell
+.\scripts\install.ps1 -Repair -WhatIf
+```
+
+If repair is clean, continue with the normal install command. Existing
+`config.toml` is backed up and merged; existing user tables are preserved.
+Other existing managed files are skipped unless you use `-Force` / `--force`
+after reviewing the preview. When managed drift exists, `-Repair` / `--repair`
+is the safer first step before force replacement.
 
 ## Rollback
 

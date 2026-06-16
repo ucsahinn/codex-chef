@@ -253,3 +253,14 @@ Güvenlik notu: subagent'lar onayları, sandbox'ı veya connector auth sınırla
 atlamaz. En iyi kullanım alanları okuma ağırlıklı keşif, context/prompt/MCP
 planlama, log/test inceleme, UI doğrulama, güvenlik audit'i ve release öncesi
 kanıt toplamadır.
+
+## Enterprise Routing Profilleri
+
+`catalog/routing-profiles.json`, ajan ekibini, curated skill'leri, MCP varsayilanlarini ve config/profile flag'lerini birbirine baglayan checked-in routing kontratidir. Su komutlarla gorunur:
+
+```bash
+npm run codex:routing
+npm run codex:status
+```
+
+Her profil task trigger'ini, gerekli subagent'lari, ilgili skill'leri, kullanilacak MCP'leri, beklenen flag/check'leri, evidence sinyallerini ve guvenlik sinirini yazar. Bu Codex Chef'i faydali anlamda otonom yapar: task shape profile uydugunda eslesen uzman, skill, MCP ve flag rehberligi zorunlu olur. Gizli hook veya sessiz executor olusturmaz. Destructive, credential, publish, deploy, database ve genis filesystem aksiyonlari onay kapisinda kalir.

@@ -247,3 +247,22 @@ Routing rule:
 - Subagents inherit approvals, sandboxing, and connector auth. They must never
   be used to bypass user approval, credentials, destructive actions, or
   external-state controls.
+
+## Enterprise Routing Profiles
+
+`catalog/routing-profiles.json` is the checked-in routing contract that ties the
+agent team, curated skills, MCP defaults, and config/profile flags together. It
+is surfaced by:
+
+```bash
+npm run codex:routing
+npm run codex:status
+```
+
+Each profile names the task trigger, required subagents, relevant skills,
+allowed MCPs, expected flags/checks, evidence signals, and the safety boundary.
+This keeps Codex Chef autonomous in the useful sense: when a task clearly
+matches a profile, the matching specialist, skill, MCP, and flag guidance is
+required unless a higher-priority instruction blocks it. It does not create
+hidden hooks or silent execution. Destructive, credentialed, publishing,
+deployment, database, and broad filesystem actions remain approval-gated.

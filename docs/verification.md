@@ -28,6 +28,9 @@ This runs:
   version alignment, and high-risk selection checks.
 - `scripts/validate-installer-alignment.mjs`: manifest-to-installer drift
   checks for PowerShell and Bash install surfaces.
+- `scripts/validate-repair-install.mjs`: fixture-based repair-mode validation
+  for drift preview, backup-backed apply, marketplace preservation, config
+  merge, skill cleanup reporting, and explicit managed-plugin pruning.
 - `scripts/validate-agent-config.mjs`: specialist-agent catalog/config drift
   checks across Windows and Unix Codex templates.
 - `scripts/validate-agent-research-corpus.mjs`: specialist-agent research

@@ -95,6 +95,23 @@ Agents ve opsiyonel Git-guard alanlarinda tutar; `.claude`, `.cursor`,
 `.opencode`, `.zed` ve `.vscode` gibi komsu harness home path'leri install
 yuzeyine sessizce giremez.
 
+## Repair Modu
+
+`scripts/repair-install.mjs`, zaten global Codex setup'i olan kullanicilar icin
+repair/reconcile yoludur. `--apply` olmadan read-only calisir ve managed drift,
+eksik config bloklari, marketplace drift'i, managed plugin icindeki ekstra
+dosyalar, curated olmayan skill'ler ve duplicate skill adlarini raporlar.
+`--apply` ile sadece Codex Chef'in yonettigi dosyalari backup alip onarir, eksik
+config bloklarini merge eder ve baska marketplace plugin'lerini koruyarak Codex
+Chef marketplace kaydini yeniler.
+
+Repair modu user skill'lerini silmez. Ekstra global skill'ler ve duplicate skill
+adlari cleanup adayi olarak raporlanir; cunku Codex'in initial skill-list
+butcesini sisirebilirler ama kullanici tarafindan bilerek kurulmus olabilirler.
+Managed Codex Chef plugin dizini icindeki ekstra dosyalari silmek icin ayrica
+`--prune-managed-plugin-extras` flag'i gerekir; bu islem de backup sonrasi
+yalnizca tek managed plugin hedefiyle sinirli kalir.
+
 ## Rules
 
 `templates/codex/rules/default.rules` hızlı read-only discovery ve project-native

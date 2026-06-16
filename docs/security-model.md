@@ -90,6 +90,23 @@ Codex, Agents, and optional Git-guard targets so adjacent harness homes such as
 `.claude`, `.cursor`, `.opencode`, `.zed`, and `.vscode` cannot drift into the
 install surface silently.
 
+## Repair Mode
+
+`scripts/repair-install.mjs` is the repair/reconcile path for users who already
+have a global Codex setup. Without `--apply`, it is read-only and reports
+managed drift, missing config blocks, marketplace drift, extra managed plugin
+files, non-curated skills, and duplicate skill names. With `--apply`, it backs
+up and repairs only Codex Chef-managed files, merges missing config blocks, and
+updates the Codex Chef marketplace entry while preserving unrelated marketplace
+plugins.
+
+Repair mode does not delete user skills. Extra global skills and duplicate
+skill names are cleanup candidates because they can pressure Codex's initial
+skill-list budget, but they may have been installed intentionally. Deleting
+extra files inside the managed Codex Chef plugin directory requires the
+explicit `--prune-managed-plugin-extras` flag and still stays scoped to that
+single managed plugin target after backup.
+
 ## Rules
 
 `templates/codex/rules/default.rules` allows fast read-only discovery and

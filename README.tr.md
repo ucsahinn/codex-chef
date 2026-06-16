@@ -45,6 +45,13 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
+Mevcut global Codex kurulumunu user skill'lerini silmeden onar:
+
+```powershell
+.\scripts\install.ps1 -Repair -WhatIf
+.\scripts\install.ps1 -Repair
+```
+
 Soru sormayan otomasyon dostu tek komut:
 
 ```powershell
@@ -85,6 +92,25 @@ production ve geniş filesystem tarafı ise sen gerçekten istemeden kapalı kal
 Codex Chef agent/MCP/safety tablolarını ekler. Mevcut MCP kayıtların,
 token'ların, profile'ların ve kendi ayarların `-Force` / `--force` vermediğin
 sürece korunur.
+
+### Enterprise Routing Panosu
+
+Codex Chef artik `catalog/routing-profiles.json` dosyasini da kurulum yuzeyinin
+bir parcasi olarak tasir. Bu dosya Codex'e yaygin enterprise is sekillerinde
+hangi subagent, skill, MCP ve config/profile flag'inin kullanilacagini soyler:
+guncel dokuman arastirmasi, context'in nereye yazilacagi, bug root-cause,
+frontend dogrulama, guvenlik review'u, MCP connector degisikligi, release
+hazirligi, SEO, docs ve starter sagligi.
+
+```bash
+npm run codex:routing
+npm run codex:status
+```
+
+Bu guvenli otonomidir; gizli calisan bir auto-executor degildir. Task shape
+uydugunda dogru ajan, skill, MCP ve flag zorunlu hale gelir; ama destructive,
+credential, publish, deploy, database ve genis filesystem aksiyonlari yine
+onay kapisinda kalir.
 
 ## 🤖 Kurulan Ajan Ekibi
 
@@ -347,6 +373,12 @@ hedefler `-Force` / `--force` verilmedikçe atlanır. Bilerek upgrade etmek
 istiyorsan önce preview'i incele; managed hedefler replace edilmeden önce backup
 alınır.
 
+Mevcut global Codex kullananlarda force'tan önce repair kullan. `-Repair` /
+`--repair`, Codex Chef'in yönettiği dosyalardaki drift'i yedekli onarır,
+eksik config bloklarını merge eder, plugin marketplace kaydını başka plugin'leri
+düşürmeden yeniler ve fazla ya da duplicate global skill'leri silmeden cleanup
+adayı olarak raporlar.
+
 ## 🧠 Çalışma Modeli
 
 1. Bilmediğin kodu önce `code_mapper` ile haritalat.
@@ -393,6 +425,7 @@ Böylece Codex tek bir sohbet gibi değil, uzman rolleri olan küçük bir yazı
 | 🤖 Agent drift gate'i | `catalog/agents.json` ve `catalog/agent-research-corpus.json` Windows/Unix config bloklari, role TOML dosyalari, zorunlu guardrail bloklari ve source-backed item sayilariyla karsilastirilir. |
 | 🩺 Doctor gate'i | `npm run codex:doctor` global write yapmadan repo-only Codex starter sagligini ozetler. |
 | 📟 Status panosu | `npm run codex:status` repo sagligini, kurulu runtime drift'ini, Codex doctor check'lerini ve skill context-budget warning'lerini tek yerde toplar. |
+| Repair modu | `npm run repair:install -- --apply` ve installer `-Repair` / `--repair`, managed drift'i backup sonrası düzeltir; başka marketplace plugin'lerini ve user skill'lerini silmez. |
 | 🧾 Install plan gate'i | `manifests/install-plan.json` ve install-state preview schema installer çalışmadan önce doğrulanır. |
 | 🔌 Konservatif MCP'ler | Auth isteyen hesap, database ve geniş filesystem connector'ları disabled kalır. |
 | 🧭 Kaynaklı rehberlik | Research notes kaynak tipi, confidence, neyi desteklediği ve outdated-risk içerir. |

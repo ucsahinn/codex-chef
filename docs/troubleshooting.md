@@ -94,9 +94,17 @@ alternate home. The verifier reruns Codex CLI checks with `CODEX_HOME`
 explicitly set to the installed target before judging MCP availability.
 
 If it reports managed file drift, the installed copy is stale even when the
-agent and MCP counts look right. Re-run the installer with an intentional
-backup-backed replacement, or copy only the reported managed files after taking
-a backup.
+agent and MCP counts look right. Run repair first:
+
+```powershell
+.\scripts\install.ps1 -Repair -WhatIf
+.\scripts\install.ps1 -Repair
+```
+
+Repair mode backs up and reconciles Codex Chef-managed drift while preserving
+unrelated marketplace plugins and user skills. Use force replacement only after
+reviewing the repair plan and deciding that a full managed-target replacement
+is intentional.
 
 If a server starts but shows no tools:
 

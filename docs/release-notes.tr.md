@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `catalog/routing-profiles.json` ve `npm run codex:routing` ile enterprise
+  routing panosu eklendi. Pano yaygin task shape'leri beklenen subagent, skill,
+  MCP ve config/profile flag'leriyle eslestirir; riskli aksiyonlar onay
+  kapisinda kalir.
+- `npm run codex:status` artik routing board ozetini de verir. PowerShell ve
+  Bash installer capability board'u da kurulum sonunda enterprise routing
+  profillerini gosterir.
+
 ## v0.5.12 - 2026-06-16
 
 Bu patch yeni son kullanici status panosunu sikilastirir. Komut gercek
@@ -16,8 +24,12 @@ isimlerini gereksiz yere makine okunur ciktida paylasmaz.
 - Ekstra skill detaylari isim listesi olarak degil count-only kalir; bu context
   baskisini anlamak icin yeterli, kullanicinin daha genis global skill
   envanterini aciga cikarmamak icin daha dogrudur.
-- Bu patch installer target'larini, MCP default'larini, global Git guard
-  davranisini veya curated skill kaynaklarini degistirmez.
+- `npm run repair:install` ve installer `-Repair` / `--repair`, mevcut global
+  Codex kullanicilari icin force replacement'tan once backup'li repair yolu
+  verir. Managed drift'i onarir, baska marketplace plugin'lerini korur ve ekstra
+  ya da duplicate user skill'lerini silmeden raporlar.
+- Bu patch MCP default'larini, global Git guard davranisini veya curated skill
+  kaynaklarini degistirmez.
 
 ## Dogrulama
 

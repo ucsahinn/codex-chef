@@ -29,6 +29,9 @@ Bu komut şunları çalıştırır:
   version hizasi ve high-risk selection kontrolleri.
 - `scripts/validate-installer-alignment.mjs`: PowerShell ve Bash install
   yuzeyleri icin manifest-to-installer drift kontrolleri.
+- `scripts/validate-repair-install.mjs`: repair modu icin fixture tabanli
+  kontrol. Drift preview, backup'li apply, marketplace koruma, config merge,
+  skill cleanup raporu ve explicit managed-plugin pruning davranisini kanitlar.
 - `scripts/validate-agent-config.mjs`: Windows ve Unix Codex template'leri icin
   uzman ajan catalog/config drift kontrolleri.
 - `scripts/validate-agent-research-corpus.mjs`: uzman ajan research corpus

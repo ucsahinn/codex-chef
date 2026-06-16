@@ -1,0 +1,96 @@
+#!/usr/bin/env node
+import fs from "node:fs";
+import path from "node:path";
+
+const root = path.resolve(process.cwd());
+const failures = [];
+
+function fail(message) {
+  failures.push(message);
+}
+
+function readJson(relativePath) {
+  return JSON.parse(fs.readFileSync(path.join(root, relativePath), "utf8"));
+}
+
+const routing = readJson("catalog/routing-profiles.json");
+const agents = readJson("catalog/agents.json");
+const mcp = readJson("catalog/mcp-servers.json");
+const skills = readJson("catalog/skills.json");
+
+const agentNames = new Set((agents.agents || []).map((agent) => agent.name));
+const mcpNames = new Set((mcp.servers || []).map((server) => server.name));
+const catalogSkillNames = new Set((skills.skills || []).map((skill) => skill.name));
+const localSkillRoot = path.join(root, "plugins", "codex-chef-workflows", "skills");
+const localSkillNames = fs.existsSync(localSkillRoot)
+  ? new Set(fs.readdirSync(localSkillRoot, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name))
+  : new Set();
+const allowedSkills = new Set([...catalogSkillNames, ...localSkillNames]);
+
+if (routing.version !== "0.1.0") fail("routing profile catalog version must stay 0.1.0 until schema changes.");
+if (!Array.isArray(routing.profiles) || routing.profiles.length < 10) {
+  fail("routing profile catalog must define at least 10 enterprise task-shape profiles.");
+}
+if (!routing.sourcePolicy || !/not hidden execution hooks/i.test(routing.sourcePolicy)) {
+  fail("routing profile sourcePolicy must state that profiles are not hidden execution hooks.");
+}
+
+const seenIds = new Set();
+for (const profile of routing.profiles || []) {
+  for (const key of ["id", "title", "trigger", "agents", "skills", "mcp", "flags", "evidence", "boundary"]) {
+    if (!Object.prototype.hasOwnProperty.call(profile, key)) {
+      fail(`routing profile missing ${key}: ${profile.id || "<unknown>"}`);
+    }
+  }
+  if (!/^[a-z0-9-]+$/.test(profile.id || "")) fail(`routing profile id must be kebab-case: ${profile.id}`);
+  if (seenIds.has(profile.id)) fail(`duplicate routing profile id: ${profile.id}`);
+  seenIds.add(profile.id);
+
+  if (!Array.isArray(profile.agents) || profile.agents.length === 0) {
+    fail(`routing profile must name at least one agent: ${profile.id}`);
+  }
+  for (const agent of profile.agents || []) {
+    if (!agentNames.has(agent)) fail(`routing profile ${profile.id} references unknown agent: ${agent}`);
+  }
+
+  for (const skill of profile.skills || []) {
+    if (!allowedSkills.has(skill)) fail(`routing profile ${profile.id} references unknown skill: ${skill}`);
+  }
+
+  for (const server of profile.mcp || []) {
+    if (!mcpNames.has(server)) fail(`routing profile ${profile.id} references unknown MCP server: ${server}`);
+  }
+
+  if (!Array.isArray(profile.flags) || profile.flags.length === 0) {
+    fail(`routing profile must name at least one flag/config mode: ${profile.id}`);
+  }
+  if (!Array.isArray(profile.evidence) || profile.evidence.length < 2) {
+    fail(`routing profile must include at least two evidence signals: ${profile.id}`);
+  }
+  if (!profile.boundary || profile.boundary.length < 40) {
+    fail(`routing profile boundary must be explicit: ${profile.id}`);
+  }
+}
+
+for (const required of [
+  "current-docs-research",
+  "context-surface-decision",
+  "bug-root-cause",
+  "frontend-ui",
+  "security-sensitive",
+  "mcp-connector-change",
+  "release-or-publish",
+  "starter-health"
+]) {
+  if (!seenIds.has(required)) fail(`routing profile catalog missing required profile: ${required}`);
+}
+
+if (failures.length > 0) {
+  console.error("Routing profile validation failed:");
+  for (const failure of failures) console.error(`- ${failure}`);
+  process.exit(1);
+}
+
+console.log(`Routing profile validation passed. Checked ${routing.profiles.length} profiles.`);

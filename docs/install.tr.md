@@ -53,6 +53,20 @@ Soru sormayan otomasyon dostu kurulum:
 .\scripts\install.ps1 -All
 ```
 
+Mevcut global Codex kurulumunu onar:
+
+```powershell
+.\scripts\install.ps1 -Repair -WhatIf
+.\scripts\install.ps1 -Repair
+```
+
+Repair modu, zaten Codex setup'i olan makineler icindir. Codex Chef'in
+yonettigi global guidance, rule, agent/profile dosyalari, bundled plugin, eksik
+config bloklari ve local plugin marketplace kaydi icin once no-write plan
+verir, sonra istenirse backup alarak onarir. Baska marketplace plugin'lerini
+korur ve user skill'lerini silmez; fazla veya duplicate global skill'leri
+cleanup adayi olarak raporlar.
+
 Kullanışlı parametreler:
 
 - `-All`: Codex template'lerini, yerel Codex Chef plugin'ini, uzman ajanları,
@@ -71,6 +85,9 @@ Kullanışlı parametreler:
   kullan. Vermezsen mevcut `config.toml` önce yedeklenir ve sadece eksik Codex
   Chef bloklarını alır; mevcut ajan dosyaları, rule dosyaları ve marketplace
   dosyası atlanır.
+- `-Repair`: ortak repair motoruyla mevcut setup'i onarir. `-WhatIf` ile
+  no-write repair plani basar. `-WhatIf` olmadan managed drift'i backup alip
+  duzeltir. User skill'lerini silmez.
 - `-NoBackup`: yedeklemeyi kapatır. Tavsiye edilmez.
 - `-WhatIf`: gerçek setup'a dokunmadan dosya, Git ve skill operasyonlarını ön
   izler.
@@ -106,6 +123,8 @@ Kullanışlı flagler:
 - `--install-git-guards`: global Git ignore ve hook ayarlarına ayrıca opt-in.
 - `--force`: backup aldıktan sonra managed hedefleri değiştirir; vermezsen
   mevcut `config.toml` merge edilir ve diğer mevcut managed dosyalar atlanır.
+- `--repair`: mevcut global Codex setup'i icin backup'li repair uygular;
+  `--dry-run` ile no-write plan verir.
 - `--no-backup`
 - `--dry-run`
 - `--plain-output`: ASCII status işaretleri kullanır.
@@ -143,15 +162,22 @@ Codex'i yeniden başlat ve çalıştır:
 
 ```bash
 codex doctor --summary
+npm run codex:routing
 npm run codex:status
 npm run verify:install:runtime
 codex --strict-config "Summarize the active Codex setup."
 ```
 
+`npm run codex:routing`, `catalog/routing-profiles.json` dosyasindan enterprise
+routing panosunu basar: task shape, eslesen subagent, skill, MCP ve
+config/profile flag'leri. Bu pano gorunur bir routing kontratidir; gizli hook
+veya auto-executor degildir. Hesap, deploy, database, destructive ve genis
+filesystem aksiyonlari acik onay gerektirir.
+
 `npm run codex:status` son kullanici status panosudur. Repo-only starter
 sagligini, kurulu runtime drift'ini, direkt Codex doctor check ozetlerini ve
-skill context-budget warning'lerini tek yerde toplar. Gercek kurulumda curated
-skill'ler ve opsiyonel Git guard'lar bilerek dahil edildiyse
+skill context-budget warning'lerini routing board ozetiyle birlikte toplar.
+Gercek kurulumda curated skill'ler ve opsiyonel Git guard'lar bilerek dahil edildiyse
 `npm run codex:status:all` kullan.
 
 `npm run verify:install:runtime` read-only çalışır. Kurulan `~/.codex` ve
@@ -190,10 +216,16 @@ CODEX_HOME="$PWD/tmp/codex-home" AGENTS_HOME="$PWD/tmp/agents-home" \
 Non-dry-run temp home'ları yalnızca bilerek smoke install yapmak istiyorsan
 kullan. `tmp/` klasörünü de sadece bilerek oluşturduysan temizle.
 
-Zaten bir Codex setup'ın varsa güvenli varsayılan yine normal install
-komutudur. Mevcut `config.toml` backup alınarak merge edilir; kullanıcıya ait
-tablolar korunur. Diğer mevcut managed dosyalar `-Force` / `--force` vermediğin
-sürece atlanır.
+Zaten bir Codex setup'ın varsa once repair planina bak:
+
+```powershell
+.\scripts\install.ps1 -Repair -WhatIf
+```
+
+Repair temizse normal install komutuna gecebilirsin. Mevcut `config.toml`
+backup alınarak merge edilir; kullanıcıya ait tablolar korunur. Diğer mevcut
+managed dosyalar `-Force` / `--force` vermediğin sürece atlanır. Managed drift
+varsa `-Repair` / `--repair` force'tan daha guvenli ilk adımdır.
 
 ## Geri Dönüş
 

@@ -48,6 +48,13 @@ Safe preview first:
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
+Repair an existing global Codex setup without deleting user skills:
+
+```powershell
+.\scripts\install.ps1 -Repair -WhatIf
+.\scripts\install.ps1 -Repair
+```
+
 Automation-friendly one-shot install without questions:
 
 ```powershell
@@ -73,6 +80,25 @@ At the end of the installer, Codex Chef prints a capability board with the
 agent team, default-ready MCPs, disabled opt-in MCPs, local plugin skills, and
 reviewed global skills. That is the quick "what did I just get?" screen after
 setup.
+
+### Enterprise Routing Board
+
+Codex Chef also ships `catalog/routing-profiles.json`, a machine-readable
+task-shape routing contract. It tells Codex which subagents, skills, MCPs, and
+config/profile flags should be used for common enterprise work such as current
+docs research, context placement, bug root cause, frontend verification,
+security review, MCP connector changes, release readiness, SEO, docs, and
+starter health.
+
+```bash
+npm run codex:routing
+npm run codex:status
+```
+
+This is safe autonomy, not hidden execution. Matching agents, skills, MCPs, and
+flags are required when the task shape appears, but destructive, credentialed,
+publishing, deployment, database, and broad filesystem actions stay
+approval-gated.
 
 ### 🔌 MCP Connector Board
 
@@ -348,6 +374,12 @@ unless you explicitly add `-Force` / `--force`. Use force only for a deliberate
 upgrade after reviewing the preview; the installer backs up managed targets
 first.
 
+For existing global Codex users, prefer repair before force. `-Repair` /
+`--repair` previews or applies backup-backed reconciliation for Codex
+Chef-managed files, merges missing config blocks, refreshes the plugin
+marketplace entry without dropping unrelated plugins, and reports extra or
+duplicate global skills as cleanup candidates instead of deleting them.
+
 ## 🧠 Operating Model
 
 1. Map unfamiliar code with `code_mapper`.
@@ -394,6 +426,7 @@ The result is a small specialist-team workflow inside Codex while the main threa
 | 🤖 Agent drift gate | `catalog/agents.json` and `catalog/agent-research-corpus.json` are checked against Windows/Unix config blocks, role TOML files, required guardrail blocks, and source-backed item counts. |
 | 🩺 Doctor gate | `npm run codex:doctor` summarizes repo-only Codex starter health without global writes. |
 | 📟 Status board | `npm run codex:status` combines repo health, installed runtime drift, Codex doctor checks, and skill context-budget warnings. |
+| Repair mode | `npm run repair:install -- --apply` and installer `-Repair` / `--repair` fix managed drift after backup while preserving unrelated marketplace plugins and user skills. |
 | 🧾 Install plan gate | `manifests/install-plan.json` and the install-state preview schema are validated before installer execution. |
 | 🔌 Conservative MCPs | Authenticated account, database, and broad filesystem connectors stay disabled. |
 | 🧭 Source-backed guidance | Research notes record source type, confidence, support, and outdated-risk. |

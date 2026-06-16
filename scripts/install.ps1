@@ -4,6 +4,7 @@ param(
   [switch]$InstallSkills,
   [switch]$InstallGitGuards,
   [switch]$Force,
+  [switch]$Repair,
   [switch]$NoBackup,
   [switch]$Interactive,
   [switch]$PlainOutput
@@ -135,6 +136,34 @@ if ($Interactive) {
 
 $CodexHome = Read-OptionalPath -Label "Codex home" -CurrentValue $CodexHome
 $AgentsHome = Read-OptionalPath -Label "Agents home" -CurrentValue $AgentsHome
+
+if ($Repair) {
+  Write-Section "Codex Chef repair"
+  if ($WhatIfPreference) {
+    Write-Note "Mode: repair preview; no files will be changed"
+  } else {
+    Write-Note "Mode: backup-backed repair of managed Codex Chef drift"
+  }
+  $RepairScript = Join-Path $RepoRoot "scripts\repair-install.mjs"
+  $RepairArgs = @(
+    $RepairScript,
+    "--redact-paths",
+    "--platform",
+    "windows",
+    "--codex-home",
+    $CodexHome,
+    "--agents-home",
+    $AgentsHome
+  )
+  if (-not $WhatIfPreference) {
+    $RepairArgs += "--apply"
+  }
+  if ($NoBackup) {
+    $RepairArgs += "--no-backup"
+  }
+  & node @RepairArgs
+  exit $LASTEXITCODE
+}
 
 if ($Interactive -and $All -and $InstallSkills) {
   if (-not (Read-YesNo -Prompt "Install or reconcile the 16 reviewed global Codex skills now?" -Default $true)) {
@@ -494,17 +523,20 @@ try {
   $AgentCatalog = Get-Content -Path (Join-Path $RepoRoot "catalog\agents.json") -Raw | ConvertFrom-Json
   $McpCatalog = Get-Content -Path (Join-Path $RepoRoot "catalog\mcp-servers.json") -Raw | ConvertFrom-Json
   $SkillCatalog = Get-Content -Path (Join-Path $RepoRoot "catalog\skills.json") -Raw | ConvertFrom-Json
+  $RoutingCatalog = Get-Content -Path (Join-Path $RepoRoot "catalog\routing-profiles.json") -Raw | ConvertFrom-Json
   $PluginSkillRoot = Join-Path $RepoRoot "plugins\codex-chef-workflows\skills"
   $AgentNames = @($AgentCatalog.agents | ForEach-Object { $_.name })
   $McpReady = @($McpCatalog.servers | Where-Object { $_.defaultEnabled -eq $true } | ForEach-Object { $_.name })
   $McpOptIn = @($McpCatalog.servers | Where-Object { $_.defaultEnabled -ne $true } | ForEach-Object { $_.name })
   $PluginSkills = @(Get-ChildItem -Path $PluginSkillRoot -Directory | ForEach-Object { $_.Name })
   $ReviewedSkills = @($SkillCatalog.skills | Where-Object { $_.install -eq $true } | ForEach-Object { $_.name })
+  $RoutingProfiles = @($RoutingCatalog.profiles | ForEach-Object { $_.id })
   Write-NameList -Label "Agents ready" -Names $AgentNames -Color "White"
   Write-NameList -Label "MCP ready by default" -Names $McpReady -Color "White"
   Write-NameList -Label "MCP opt-in / disabled by default" -Names $McpOptIn -Color "DarkYellow"
   Write-NameList -Label "Local plugin skills" -Names $PluginSkills -Color "White"
   Write-NameList -Label "Reviewed global skills" -Names $ReviewedSkills -Color "White"
+  Write-NameList -Label "Enterprise routing profiles" -Names $RoutingProfiles -Color "White"
   Write-Note "Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled."
 } catch {
   Write-Warning "Could not render capability board: $($_.Exception.Message)"
@@ -520,6 +552,7 @@ if ($WhatIfPreference) {
   Write-Action -Status "completed" -Message "Codex Chef install"
   Write-Note "Restart Codex, then run:"
   Write-Host "    codex doctor --summary"
+  Write-Host "    npm run codex:routing"
   Write-Host "    npm run codex:status"
   Write-Host "    npm run verify:install:runtime"
   Write-Host "    codex --strict-config `"Summarize the active Codex setup.`""
