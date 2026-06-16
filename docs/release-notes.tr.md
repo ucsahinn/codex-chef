@@ -2,6 +2,63 @@
 
 ## Unreleased
 
+## v0.5.8 - 2026-06-16
+
+Bu patch ilk kurulum ve mevcut kullanıcı senaryosunu README'deki sözle aynı
+hizaya getirir: Codex Chef artık mevcut Codex config'ini ezmeden eksik parçaları
+ekleyebilir.
+
+## Öne Çıkanlar
+
+- `scripts/merge-codex-config.mjs` eklendi. Bu helper template'teki eksik
+  managed Codex Chef tablolarını dependency kullanmadan mevcut config'e ekler.
+- PowerShell ve Bash installer'ları, `config.toml` zaten varsa ve force
+  kullanılmadıysa önce backup alır, sonra eksik blokları güvenli şekilde merge
+  eder.
+- Kullanıcının mevcut tabloları korunur. Mevcut MCP kayıtları, token'lar,
+  profile'lar, model ayarları ve custom tool ayarları ancak kullanıcı bilerek
+  `-Force` / `--force` seçerse replace edilir.
+- Skill kurulumu artık varsayılan olarak ignored repo-local `tmp/npm-cache`
+  kullanır; böylece Windows `%LOCALAPPDATA%` npm cache izin hataları `npx`
+  çözümlemesini düşürmez.
+- Install plan `codex-config` collision policy'si
+  `merge-missing-blocks-unless-force-backup-before-replace` olarak düzeltildi.
+- README MCP bölümü agent ve skill listeleri gibi ikonlu, görünür bir katalog
+  haline getirildi.
+- Installer alignment validation artık iki install yüzeyinde de config merge
+  helper'ın bağlı kalmasını kontrol eder.
+
+## Upgrade Notları
+
+İlk kurulum:
+
+```powershell
+.\\scripts\\install.ps1 -All
+npm run verify:install:runtime -- --expect-skills
+```
+
+Mevcut kurulumda kullanıcı config'ini koruyarak eksikleri ekleme:
+
+```powershell
+.\\scripts\\install.ps1 -All
+```
+
+Template'i bilinçli şekilde replace etmek istersen önce preview ve backup:
+
+```powershell
+.\\scripts\\install.ps1 -All -Force -WhatIf
+.\\scripts\\install.ps1 -All -Force
+```
+
+## Doğrulama
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.7 - 2026-06-16
 
 Bu patch gerçek kurulum sonrası kontrolü netleştirir: dosyalar kuruldu mu ve

@@ -45,10 +45,10 @@
       },
       "destination": "${CODEX_HOME}/config.toml",
       "platforms": ["windows", "unix"],
-      "collision": "skip-unless-force-backup-before-replace",
+      "collision": "merge-missing-blocks-unless-force-backup-before-replace",
       "backup": true,
       "risk": "medium",
-      "conflictPolicy": "Keeps authenticated MCP connectors disabled by default and should not import broad external repo connector defaults."
+      "conflictPolicy": "Existing user config is preserved by default: missing Codex Chef agent/MCP and safety tables are merged, while existing tables are not overwritten. Force replaces the file after backup."
     },
     {
       "id": "codex-rules",

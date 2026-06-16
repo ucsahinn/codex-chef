@@ -15,7 +15,7 @@ PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All
 ```
 
 Bash or WSL:
@@ -24,7 +24,7 @@ Bash or WSL:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
-./scripts/install.sh --all --force
+./scripts/install.sh --all
 ```
 
 Use the narrower flags only when you intentionally want a partial setup:

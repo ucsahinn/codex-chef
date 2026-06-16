@@ -34,10 +34,12 @@ node scripts/plan-install.mjs --all --json
 npm run verify:install:runtime -- --expect-skills
 ```
 
-`-Force` / `--force` bilinçli upgrade içindir. Normal ilk kurulumda force
-verme; böylece mevcut kullanıcı config'i atlanır. Upgrade sırasında force ancak
-preview'i inceledikten ve bu repo template'lerinin managed hedefleri replace
-etmesini istediğinden emin olduktan sonra kullanılmalı.
+`-Force` / `--force` bilinçli replace upgrade içindir. Normal ilk kurulumda
+veya mevcut kullanıcı refresh akışında force verme; böylece mevcut
+`config.toml` merge edilir ve diğer mevcut managed dosyalar atlanır. Replace
+upgrade sırasında force ancak preview'i inceledikten ve bu repo template'lerinin
+managed hedefleri replace etmesini istediğinden emin olduktan sonra
+kullanılmalı.
 
 ## Backup'lar
 

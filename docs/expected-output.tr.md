@@ -9,7 +9,7 @@ Discovery ciktisi no-write ve okunabilir kalir:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.7
+Package: codex-chef@0.5.8
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -26,7 +26,7 @@ Operations: ...
 [file] codex-agents-md
   source: templates/codex/AGENTS.md
   target: .../.codex/AGENTS.md
-  collision: skip-unless-force-backup-before-replace
+  collision: merge-missing-blocks-unless-force-backup-before-replace
   backup: yes
   force: no
   risk: medium
@@ -69,7 +69,8 @@ Restart Codex, then run:
 Backup: ...
 ```
 
-Var olan dosyalar `-Force` verilmedikçe atlanır.
+Mevcut `config.toml` `-Force` verilmedikçe backup alınıp merge edilir; diğer
+mevcut managed dosyalar `-Force` verilmedikçe atlanır.
 
 ## Bash Dry Run
 

@@ -87,6 +87,27 @@ install_file() {
   fi
 }
 
+install_codex_config() {
+  local source="$1"
+  local destination="$2"
+  if [ -e "$destination" ] && [ "$FORCE" -ne 1 ]; then
+    ensure_dir "$(dirname "$destination")"
+    backup_target "$destination"
+    if [ "$DRY_RUN" -eq 1 ]; then
+      run_change "$destination" "merge missing Codex Chef config blocks from $source" true || true
+      node "$REPO_ROOT/scripts/merge-codex-config.mjs" "$source" "$destination" --dry-run
+      return
+    fi
+    if run_change "$destination" "merge missing Codex Chef config blocks from $source" \
+      node "$REPO_ROOT/scripts/merge-codex-config.mjs" "$source" "$destination"; then
+      echo "Merged config $destination"
+    fi
+    return
+  fi
+
+  install_file "$source" "$destination"
+}
+
 install_directory() {
   local source="$1"
   local destination="$2"
@@ -119,7 +140,7 @@ ensure_dir "$AGENTS_HOME_DIR"
 TEMPLATE_ROOT="$REPO_ROOT/templates/codex"
 
 install_file "$TEMPLATE_ROOT/AGENTS.md" "$CODEX_HOME_DIR/AGENTS.md"
-install_file "$TEMPLATE_ROOT/config.unix.toml" "$CODEX_HOME_DIR/config.toml"
+install_codex_config "$TEMPLATE_ROOT/config.unix.toml" "$CODEX_HOME_DIR/config.toml"
 install_file "$TEMPLATE_ROOT/rules/default.rules" "$CODEX_HOME_DIR/rules/default.rules"
 
 for file in "$TEMPLATE_ROOT"/agents/*.toml; do
@@ -211,7 +232,9 @@ const env = {
   CI: process.env.CI || "1",
   NO_COLOR: process.env.NO_COLOR || "1",
   FORCE_COLOR: process.env.FORCE_COLOR || "0",
-  TERM: process.env.TERM || "dumb"
+  TERM: process.env.TERM || "dumb",
+  npm_config_cache: process.env.npm_config_cache || `${process.cwd()}/tmp/npm-cache`,
+  NPM_CONFIG_CACHE: process.env.NPM_CONFIG_CACHE || process.env.npm_config_cache || `${process.cwd()}/tmp/npm-cache`
 };
 const installed = new Set();
 const listResult = spawnSync("npx", ["skills", "list", "--global", "--json"], {

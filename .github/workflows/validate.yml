@@ -29,6 +29,7 @@ jobs:
       - run: node --check scripts/validate-install-state-preview.mjs
       - run: node --check scripts/validate-installer-alignment.mjs
       - run: node --check scripts/plan-install.mjs
+      - run: node --check scripts/merge-codex-config.mjs
       - run: node --check scripts/codex-doctor.mjs
       - run: node --check scripts/sync-doc-locales.mjs
       - run: node --check scripts/validate-agent-config.mjs
@@ -47,7 +48,7 @@ jobs:
           CODEX_HOME="$PWD/tmp/ci-codex-home" \
           AGENTS_HOME="$PWD/tmp/ci-agents-home" \
           HOME="$PWD/tmp/ci-home" \
-          bash scripts/install.sh --all --force --dry-run
+          bash scripts/install.sh --all --dry-run
       - shell: pwsh
         run: |
           $errors = $null
@@ -61,5 +62,5 @@ jobs:
         run: |
           $env:CODEX_HOME = Join-Path (Get-Location) "tmp/ci-codex-home"
           $env:AGENTS_HOME = Join-Path (Get-Location) "tmp/ci-agents-home"
-          ./scripts/install.ps1 -All -Force -WhatIf
+          ./scripts/install.ps1 -All -WhatIf
       - run: npm run check

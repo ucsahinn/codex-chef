@@ -8,7 +8,7 @@ Discovery output stays no-write and human-readable:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.7
+Package: codex-chef@0.5.8
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -25,7 +25,7 @@ Operations: ...
 [file] codex-agents-md
   source: templates/codex/AGENTS.md
   target: .../.codex/AGENTS.md
-  collision: skip-unless-force-backup-before-replace
+  collision: merge-missing-blocks-unless-force-backup-before-replace
   backup: yes
   force: no
   risk: medium
@@ -69,7 +69,8 @@ Restart Codex, then run:
 Backup: ...
 ```
 
-Existing files are skipped unless `-Force` is used.
+Existing `config.toml` is backed up and merged unless `-Force` is used; other
+existing managed files are skipped unless `-Force` is used.
 
 ## Bash Dry Run
 

@@ -13,11 +13,11 @@
 ## Comandos úteis
 
 ```powershell
-.\scripts\install.ps1 -All -Force -WhatIf
+.\scripts\install.ps1 -All -WhatIf
 ```
 
 ```bash
-./scripts/install.sh --all --force --dry-run
+./scripts/install.sh --all --dry-run
 ```
 
 ```bash

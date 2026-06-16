@@ -14,7 +14,7 @@ PowerShell:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Force
+.\scripts\install.ps1 -All
 ```
 
 Bash veya WSL:
@@ -23,7 +23,7 @@ Bash veya WSL:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
-./scripts/install.sh --all --force
+./scripts/install.sh --all
 ```
 
 Sadece belirli parçaları kurmak istiyorsan dar bayrakları kullan:

@@ -149,10 +149,35 @@ npx skills add pbakaus/impeccable --skill impeccable --agent codex --yes --globa
 
 ## 🔌 MCP Defaults
 
-Enabled by default for useful local/research work: OpenAI Developer Docs,
-Context7, sequential thinking, Playwright, Chrome DevTools, Serena, and memory.
-Disabled by default until explicitly needed: filesystem, GitHub, Figma, Linear,
-Notion, Sentry, Vercel, and Supabase.
+Codex Chef installs MCP config entries, not hidden account connections. Useful
+local/research servers are enabled; authenticated, database, production, and
+broad filesystem connectors stay disabled until a task explicitly needs them.
+
+Default enabled:
+
+- 📚 **OpenAI Developer Docs** (`openaiDeveloperDocs`) - official OpenAI/Codex docs.
+- 🧭 **Context7** (`context7`) - current library and framework docs.
+- 🧠 **Sequential Thinking** (`sequential-thinking`) - structured decomposition for complex tasks.
+- 🎭 **Playwright** (`playwright`) - browser snapshots, console/network evidence, and UI checks.
+- 🧰 **Chrome DevTools** (`chrome-devtools`) - isolated Chrome inspection with redacted network headers.
+- 🗺️ **Serena** (`serena`) - semantic code navigation and repo symbol search.
+- 🧩 **Memory** (`memory`) - local memory graph for non-secret project context.
+
+Default disabled until opt-in:
+
+- 📁 **Filesystem** (`filesystem`) - broad local file access; set an intentional path before enabling.
+- 🐙 **GitHub** (`github`) - private repo/PR context through account authorization.
+- 🎨 **Figma** (`figma`) - private design files and workspace context.
+- 📌 **Linear** (`linear`) - issues, projects, and team planning context.
+- 🗒️ **Notion** (`notion`) - private docs and databases.
+- 🚨 **Sentry** (`sentry`) - production error and telemetry context.
+- ▲ **Vercel** (`vercel`) - project and deployment platform context.
+- 🗄️ **Supabase** (`supabase`) - database access through `SUPABASE_DB_URL`.
+
+If a user already has `~/.codex/config.toml`, the installer now preserves it and
+adds only missing Codex Chef agent/MCP/safety tables. Existing MCP entries,
+tokens, profiles, and user-tuned settings are not overwritten unless `-Force` /
+`--force` is used after preview and backup.
 
 ## &#127760; Language Entry Points
 
@@ -287,11 +312,13 @@ Use `-InstallSkills` / `--install-skills` or `-InstallGitGuards` / `--install-gi
 `-All` includes the reviewed skill set, but it does not change global Git
 config unless you also opt in to Git guards.
 
-Existing user config is protected by default: if `~/.codex/config.toml`,
-`~/.codex/AGENTS.md`, agent files, rules, or the plugin marketplace already
-exist, the installer skips them unless you explicitly add `-Force` /
-`--force`. Use force only for a deliberate upgrade after reviewing the preview;
-the installer backs up managed targets first.
+Existing user config is protected by default: if `~/.codex/config.toml`
+already exists, the installer backs it up and merges only missing Codex Chef
+agent/MCP/safety tables. Existing tables are preserved. Other managed files
+such as `AGENTS.md`, agent files, rules, and the plugin marketplace are skipped
+unless you explicitly add `-Force` / `--force`. Use force only for a deliberate
+upgrade after reviewing the preview; the installer backs up managed targets
+first.
 
 ## 🧠 Operating Model
 

@@ -97,8 +97,8 @@ if (!fs.existsSync(validateWorkflow)) {
     "node --check scripts/validate-readme-locales.mjs",
     "node --check scripts/validate-content-safety.mjs",
     "node --check scripts/validate-agent-config.mjs",
-    "bash scripts/install.sh --all --force --dry-run",
-    "./scripts/install.ps1 -All -Force -WhatIf",
+    "bash scripts/install.sh --all --dry-run",
+    "./scripts/install.ps1 -All -WhatIf",
     "npm run check"
   ]) {
     if (!text.includes(required)) failures.push(`validate workflow missing security gate signal: ${required}`);

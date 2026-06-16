@@ -55,14 +55,15 @@ Useful switches:
 - `-InstallSkills`: install `catalog/skills.json` entries that have
   `install: true`, a verified `package` in `owner/repo` format, and a matching
   `skill` name. The installer calls `npx.cmd skills add <package> --skill
-  <skill> --agent codex --yes --global`.
+  <skill> --agent codex --yes --global` with a repo-local npm cache under
+  ignored `tmp/npm-cache` unless the user already set npm cache env vars.
 - `-InstallGitGuards`: install global Git ignore, global pre-commit hook, and
   set `core.excludesfile` plus `core.hooksPath`. This is intentionally separate
   because it affects every Git repository for the current user.
 - `-Force`: overwrite managed Codex files after creating backups. Use this for
   deliberate upgrades only after reviewing `-WhatIf`; without it, existing
-  user config, MCP settings, agent files, rules, and marketplace files are
-  skipped.
+  `config.toml` is backed up and receives only missing Codex Chef blocks, while
+  existing agent files, rules, and marketplace files are skipped.
 - `-NoBackup`: skip backups. Not recommended.
 - `-WhatIf`: preview file, Git, and skill operations without changing the real
   setup.
@@ -89,8 +90,8 @@ Useful flags:
 - `--all`: recommended full Codex Chef setup without global Git config changes.
 - `--install-skills`
 - `--install-git-guards`: opt in to global Git ignore and hook settings.
-- `--force`: replace managed targets after backup; without it, existing files
-  are skipped.
+- `--force`: replace managed targets after backup; without it, existing
+  `config.toml` is merged and other existing managed files are skipped.
 - `--no-backup`
 - `--dry-run`
 

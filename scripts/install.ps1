@@ -107,6 +107,38 @@ function Install-File {
   }
 }
 
+function Install-CodexConfig {
+  param(
+    [Parameter(Mandatory=$true)][string]$Source,
+    [Parameter(Mandatory=$true)][string]$Destination
+  )
+
+  if ((Test-Path -LiteralPath $Destination) -and -not $Force) {
+    Ensure-Dir (Split-Path -Parent $Destination)
+    Backup-Target $Destination
+    $MergeScript = Join-Path $RepoRoot "scripts\merge-codex-config.mjs"
+    $Action = "Merge missing Codex Chef config blocks from $Source"
+    if ($WhatIfPreference) {
+      Invoke-Change -Target $Destination -Action $Action -ScriptBlock {
+        & node $MergeScript $Source $Destination --dry-run
+      } | Out-Null
+      return
+    }
+    $changed = Invoke-Change -Target $Destination -Action $Action -ScriptBlock {
+      & node $MergeScript $Source $Destination
+      if ($LASTEXITCODE -ne 0) {
+        throw "Codex config merge failed with code $LASTEXITCODE"
+      }
+    }
+    if ($changed) {
+      Write-Host "Merged config $Destination"
+    }
+    return
+  }
+
+  Install-File -Source $Source -Destination $Destination
+}
+
 function Install-Directory {
   param(
     [Parameter(Mandatory=$true)][string]$Source,
@@ -148,7 +180,7 @@ Ensure-Dir $AgentsHome
 $TemplateRoot = Join-Path $RepoRoot "templates\codex"
 
 Install-File -Source (Join-Path $TemplateRoot "AGENTS.md") -Destination (Join-Path $CodexHome "AGENTS.md")
-Install-File -Source (Join-Path $TemplateRoot "config.windows.toml") -Destination (Join-Path $CodexHome "config.toml")
+Install-CodexConfig -Source (Join-Path $TemplateRoot "config.windows.toml") -Destination (Join-Path $CodexHome "config.toml")
 Install-File -Source (Join-Path $TemplateRoot "rules\default.rules") -Destination (Join-Path $CodexHome "rules\default.rules")
 
 Get-ChildItem -Path (Join-Path $TemplateRoot "agents") -Filter "*.toml" | ForEach-Object {
@@ -247,6 +279,12 @@ if ($InstallSkills) {
     $env:NO_COLOR = "1"
     $env:FORCE_COLOR = "0"
     $env:TERM = "dumb"
+    if (-not $env:npm_config_cache) {
+      $env:npm_config_cache = Join-Path $RepoRoot "tmp\npm-cache"
+    }
+    if (-not $env:NPM_CONFIG_CACHE) {
+      $env:NPM_CONFIG_CACHE = $env:npm_config_cache
+    }
     $InstalledSkills = @{}
     try {
       $InstalledJson = & npx.cmd skills list --global --json 2>$null

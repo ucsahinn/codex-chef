@@ -34,10 +34,11 @@ node scripts/plan-install.mjs --all --json
 npm run verify:install:runtime -- --expect-skills
 ```
 
-`-Force` / `--force` is for deliberate upgrades. A normal first install should
-omit force so existing user config is skipped. During upgrade, force is safe
-only after you reviewed the preview and are comfortable replacing managed
-targets from this repo's templates.
+`-Force` / `--force` is for deliberate replacement upgrades. A normal first
+install or existing-user refresh should omit force so existing `config.toml` is
+merged and other existing managed files are skipped. During replacement
+upgrade, force is safe only after you reviewed the preview and are comfortable
+replacing managed targets from this repo's templates.
 
 ## Backups
 

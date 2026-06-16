@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.5.8 - 2026-06-16
+
+- Added `scripts/merge-codex-config.mjs` so existing `config.toml` files are
+  preserved by default while missing Codex Chef agent, MCP, and safety tables
+  are merged in after backup.
+- Updated PowerShell and Bash installers to use safe config merge when
+  `config.toml` already exists and `-Force` / `--force` was not requested.
+- Corrected the install-plan collision policy for `codex-config` to advertise
+  merge-missing-blocks behavior instead of skip-only behavior.
+- Expanded the English and Turkish README MCP sections into icon-rich enabled
+  and opt-in connector lists so MCPs are as visible as agents and skills.
+- Added installer-alignment validation for the config merge helper.
+
 ## 0.5.7 - 2026-06-16
 
 - Added `scripts/verify-install-runtime.mjs` and

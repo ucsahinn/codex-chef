@@ -55,14 +55,16 @@ Kullanışlı parametreler:
 - `-InstallSkills`: `catalog/skills.json` içinde `install: true` olan,
   `owner/repo` formatında doğrulanmış `package` ve eşleşen `skill` adı taşıyan
   kayıtları kurar. Installer `npx.cmd skills add <package> --skill <skill>
-  --agent codex --yes --global` çağırır.
+  --agent codex --yes --global` çağırır ve kullanıcı npm cache env'i
+  tanımlamadıysa ignored `tmp/npm-cache` altında repo-local npm cache kullanır.
 - `-InstallGitGuards`: global Git ignore, global pre-commit hook kurar ve
   `core.excludesfile` ile `core.hooksPath` ayarlar. Bunu ayrı tutuyoruz çünkü
   mevcut kullanıcıdaki bütün Git repolarını etkiler.
 - `-Force`: yedek aldıktan sonra yönetilen Codex dosyalarının üzerine yazar.
   Bunu sadece bilinçli upgrade için, `-WhatIf` çıktısını inceledikten sonra
-  kullan. Vermezsen mevcut kullanıcı config'i, MCP ayarları, ajan dosyaları,
-  rule dosyaları ve marketplace dosyası atlanır.
+  kullan. Vermezsen mevcut `config.toml` önce yedeklenir ve sadece eksik Codex
+  Chef bloklarını alır; mevcut ajan dosyaları, rule dosyaları ve marketplace
+  dosyası atlanır.
 - `-NoBackup`: yedeklemeyi kapatır. Tavsiye edilmez.
 - `-WhatIf`: gerçek setup'a dokunmadan dosya, Git ve skill operasyonlarını ön
   izler.
@@ -90,7 +92,7 @@ Kullanışlı flagler:
 - `--install-skills`
 - `--install-git-guards`: global Git ignore ve hook ayarlarına ayrıca opt-in.
 - `--force`: backup aldıktan sonra managed hedefleri değiştirir; vermezsen
-  mevcut dosyalar atlanır.
+  mevcut `config.toml` merge edilir ve diğer mevcut managed dosyalar atlanır.
 - `--no-backup`
 - `--dry-run`
 

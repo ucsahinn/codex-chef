@@ -148,10 +148,35 @@ npx skills add pbakaus/impeccable --skill impeccable --agent codex --yes --globa
 
 ## 🔌 MCP Varsayılanları
 
-Varsayılan açık gelenler: OpenAI Developer Docs, Context7, sequential thinking,
-Playwright, Chrome DevTools, Serena ve memory. Açıkça ihtiyaç olana kadar kapalı
-bekleyenler: filesystem, GitHub, Figma, Linear, Notion, Sentry, Vercel ve
-Supabase.
+Codex Chef MCP config kayıtları kurar; gizli hesap bağlantısı açmaz. Lokal ve
+araştırma odaklı kaynaklar açık gelir. Auth, database, production ve geniş
+filesystem connector'ları ise gerçekten ihtiyaç olana kadar kapalı kalır.
+
+Varsayılan açık:
+
+- 📚 **OpenAI Developer Docs** (`openaiDeveloperDocs`) - resmi OpenAI/Codex dokümanları.
+- 🧭 **Context7** (`context7`) - güncel kütüphane ve framework dokümanları.
+- 🧠 **Sequential Thinking** (`sequential-thinking`) - karmaşık işleri parçalara ayırma.
+- 🎭 **Playwright** (`playwright`) - browser snapshot, console/network kanıtı ve UI kontrolü.
+- 🧰 **Chrome DevTools** (`chrome-devtools`) - izole Chrome inceleme ve redacted network headers.
+- 🗺️ **Serena** (`serena`) - semantic code navigation ve repo symbol araması.
+- 🧩 **Memory** (`memory`) - secret içermeyen lokal proje context hafızası.
+
+İhtiyaç olana kadar kapalı:
+
+- 📁 **Filesystem** (`filesystem`) - geniş lokal dosya erişimi; açmadan önce bilinçli path seç.
+- 🐙 **GitHub** (`github`) - auth isteyen private repo/PR context'i.
+- 🎨 **Figma** (`figma`) - private tasarım dosyaları ve workspace context'i.
+- 📌 **Linear** (`linear`) - issue, proje ve takım planlama context'i.
+- 🗒️ **Notion** (`notion`) - private docs ve database'ler.
+- 🚨 **Sentry** (`sentry`) - production hata ve telemetry context'i.
+- ▲ **Vercel** (`vercel`) - proje ve deployment platform context'i.
+- 🗄️ **Supabase** (`supabase`) - `SUPABASE_DB_URL` üzerinden database erişimi.
+
+Kullanıcıda zaten `~/.codex/config.toml` varsa installer artık onu korur ve
+sadece eksik Codex Chef agent/MCP/safety tablolarını ekler. Mevcut MCP
+kayıtları, token'lar, profile'lar ve kullanıcı ayarları `-Force` / `--force`
+ile preview ve backup sonrası bilinçli replace seçilmedikçe değiştirilmez.
 
 ## &#127760; Dil Girişleri
 
@@ -286,11 +311,13 @@ Sadece tek bir parça istiyorsan `-InstallSkills` / `--install-skills` veya `-In
 `-All` incelenmiş skill setini dahil eder, ama ayrıca Git guard'a opt-in
 vermediğin sürece global Git config'i değiştirmez.
 
-Mevcut kullanıcı config'i varsayılan olarak korunur: `~/.codex/config.toml`,
-`~/.codex/AGENTS.md`, ajan dosyaları, rule dosyaları veya plugin marketplace
-zaten varsa installer bunları atlar. Bilerek upgrade etmek istiyorsan önce
-preview'i incele, sonra `-Force` / `--force` kullan; managed hedefler önce
-backup alınarak replace edilir.
+Mevcut kullanıcı config'i varsayılan olarak korunur: `~/.codex/config.toml`
+zaten varsa installer önce backup alır, sonra sadece eksik Codex Chef
+agent/MCP/safety tablolarını merge eder. Var olan tablolar korunur. `AGENTS.md`,
+ajan dosyaları, rule dosyaları ve plugin marketplace gibi diğer managed
+hedefler `-Force` / `--force` verilmedikçe atlanır. Bilerek upgrade etmek
+istiyorsan önce preview'i incele; managed hedefler replace edilmeden önce backup
+alınır.
 
 ## 🧠 Çalışma Modeli
 

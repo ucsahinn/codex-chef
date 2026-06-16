@@ -12,7 +12,7 @@ eklerken burayi kullan.
 
 | Hedef | Kullan |
 | --- | --- |
-| Tum starter'i kur | `./scripts/install.sh --all --force` veya `.\scripts\install.ps1 -All -Force` |
+| Tum starter'i kur | `./scripts/install.sh --all` veya `.\scripts\install.ps1 -All` |
 | Neyin nereye ait oldugunu anla | Asagidaki yuzey haritasi ve [docs/codex-surfaces.tr.md](codex-surfaces.tr.md) |
 | Tekrar kullanilabilir workflow ekle | Once skill; bundle olarak dagitilacaksa plugin |
 | Canli dis baglam ekle | Auth gerekiyorsa varsayilan disabled MCP veya connector |

@@ -12,7 +12,7 @@ or public-facing document.
 
 | Goal | Use |
 | --- | --- |
-| Install the full starter | `./scripts/install.sh --all --force` or `.\scripts\install.ps1 -All -Force` |
+| Install the full starter | `./scripts/install.sh --all` or `.\scripts\install.ps1 -All` |
 | Understand what belongs where | The surface map below and [docs/codex-surfaces.md](codex-surfaces.md) |
 | Add a reusable workflow | A skill first; package it as a plugin only when it should be installed as a bundle |
 | Add live external context | An MCP server or connector, disabled by default when it needs auth |

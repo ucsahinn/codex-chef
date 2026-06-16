@@ -106,8 +106,8 @@ for (const required of [
   "node --check scripts/validate-agent-research-corpus.mjs",
   "node --check scripts/validate-package-surface.mjs",
   "npm run check",
-  "bash scripts/install.sh --all --force --dry-run",
-  "./scripts/install.ps1 -All -Force -WhatIf"
+  "bash scripts/install.sh --all --dry-run",
+  "./scripts/install.ps1 -All -WhatIf"
 ]) {
   if (!workflow.includes(required)) fail(`validate workflow missing release gate signal: ${required}`);
 }

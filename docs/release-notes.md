@@ -2,6 +2,64 @@
 
 ## Unreleased
 
+## v0.5.8 - 2026-06-16
+
+This patch makes first-run and existing-user installs line up with the promise
+in the README: Codex Chef can now enrich an existing Codex config without
+clobbering it.
+
+## Highlights
+
+- Added `scripts/merge-codex-config.mjs`, a dependency-free helper that appends
+  only missing managed Codex Chef tables from the template.
+- Updated PowerShell and Bash installers so an existing `config.toml` is backed
+  up and then safely merged when force is not used.
+- Existing user-defined tables are preserved. Existing MCP entries, tokens,
+  profiles, model settings, and custom tool settings are not overwritten unless
+  the user deliberately chooses `-Force` / `--force`.
+- Skill installation now uses an ignored repo-local npm cache by default to
+  avoid Windows `%LOCALAPPDATA%` npm cache permission failures during `npx`
+  resolution.
+- Corrected the install-plan collision policy for `codex-config` so previews
+  show `merge-missing-blocks-unless-force-backup-before-replace`.
+- Expanded the README MCP section into an icon-rich catalog of default-enabled
+  servers and disabled-by-default opt-in connectors.
+- Added installer-alignment validation so both install surfaces must keep the
+  config merge helper wired in.
+
+## Upgrade Notes
+
+First install:
+
+```powershell
+.\\scripts\\install.ps1 -All
+npm run verify:install:runtime -- --expect-skills
+```
+
+Existing install, preserve user config and merge missing Codex Chef blocks:
+
+```powershell
+.\\scripts\\install.ps1 -All
+```
+
+Deliberate template replacement after preview and backup:
+
+```powershell
+.\\scripts\\install.ps1 -All -Force -WhatIf
+.\\scripts\\install.ps1 -All -Force
+```
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.7 - 2026-06-16
 
 This patch tightens the real install handoff: Codex Chef now has a read-only

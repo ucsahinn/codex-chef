@@ -78,8 +78,8 @@ function validateWorkflow(file) {
       "persist-credentials: false",
       "npm run check",
       "bash -n scripts/install.sh",
-      "bash scripts/install.sh --all --force --dry-run",
-      "./scripts/install.ps1 -All -Force -WhatIf"
+      "bash scripts/install.sh --all --dry-run",
+      "./scripts/install.ps1 -All -WhatIf"
     ]) {
       if (!text.includes(required)) failures.push(`validate workflow missing ${required}`);
     }

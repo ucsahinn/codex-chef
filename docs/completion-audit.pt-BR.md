@@ -42,6 +42,7 @@ Este arquivo localizado acompanha as seções do arquivo fonte em inglês. Sourc
 - Requirements
 - Verification Evidence
 - Publication Note
+- 2026-06-16 Agent Research Freshness Addendum
 - 2026-06-11 Routing Addendum
 - 2026-06-14 ECC-Informed Addendum
 - 2026-06-15 Skill And Context-Budget Addendum
