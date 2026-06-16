@@ -58,6 +58,40 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -R
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair
 ```
 
+Codex Chef CLI ayni guvenli scriptleri tek Windows dostu menude toplar:
+
+```powershell
+npm run chef
+npm run chef -- --status
+npm run chef -- --preview
+npm run chef -- --repair --apply
+npm run chef -- --install --apply
+npm run chef -- --skills
+npm run chef -- --mcp
+npm run chef -- --auth
+npm run chef -- --logs
+```
+
+Menu her aksiyonun write sinirini gosterir. `--status`, `--doctor`,
+`--preview`, `--skills`, `--mcp`, `--auth` ve `--logs` varsayilan olarak
+read-only rehberlik veya dogrulama akislari olur. Sadece `--repair --apply` ve
+`--install --apply` global dosyalara yazabilir; onlar da user state silmek
+yerine backup alan installer/repair scriptlerine gider. CLI loglari
+`tmp/chef-cli/logs` altina yazilir; bu klasor ignore edilir ve source package'a
+girmez.
+
+GitHub CLI release veya push kontrollerinde `401 Unauthorized` ya da eksik
+workflow scope gorursen GitHub CLI ve Git Credential Manager'i bir kez kalici
+yenile:
+
+```powershell
+gh auth login --hostname github.com --git-protocol https --web --scopes repo,workflow
+gh auth setup-git --hostname github.com
+gh auth status --hostname github.com
+git config --global credential.helper manager
+git ls-remote origin HEAD
+```
+
 Soru sormayan otomasyon dostu tek komut:
 
 ```powershell

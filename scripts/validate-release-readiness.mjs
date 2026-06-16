@@ -22,6 +22,8 @@ const requiredFiles = [
   "docs/publish.tr.md",
   "docs/advisory-sources.md",
   "docs/advisory-sources.tr.md",
+  "scripts/chef-cli.mjs",
+  "scripts/validate-chef-cli.mjs",
   "scripts/validate-readme-locales.mjs",
   "scripts/validate-workflow-security.mjs",
   "scripts/validate-agent-config.mjs",

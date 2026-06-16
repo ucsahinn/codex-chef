@@ -39,6 +39,9 @@ Bu komut şunları çalıştırır:
   stale `dateChecked` kontrolleri ile agent basina expertise signal coverage.
 - `scripts/validate-mcp-config.mjs`: Windows ve Unix Codex template'leri icin
   MCP catalog/config drift kontrolleri.
+- `scripts/validate-chef-cli.mjs`: tek menulu Codex Chef CLI sozlesmesi,
+  guvenli komut routing'i, write-boundary etiketleri, log konumu, README
+  kullanim ornekleri ve GitHub CLI/Git Credential Manager auth rehberi.
 - `scripts/verify-skill-sources.mjs`: offline skill catalog validation ve
   `catalog/skills-lock.json` kaynak allowlist drift kontrolleri.
 - `scripts/scan-supply-chain-iocs.mjs`: remote execution, tehlikeli shell,
@@ -95,6 +98,8 @@ node --check scripts/plan-install.mjs
 node --check scripts/validate-agent-config.mjs
 node --check scripts/validate-agent-research-corpus.mjs
 node --check scripts/validate-mcp-config.mjs
+node --check scripts/chef-cli.mjs
+node --check scripts/validate-chef-cli.mjs
 node --check scripts/verify-skill-sources.mjs
 node --check scripts/scan-supply-chain-iocs.mjs
 node --check scripts/validate-package-surface.mjs
@@ -138,6 +143,19 @@ Bash dry run:
 ```bash
 ./scripts/install.sh --all --dry-run
 ```
+
+Codex Chef CLI smoke:
+
+```bash
+npm run validate:chef-cli
+npm run chef -- --status
+npm run chef -- --preview
+```
+
+`npm run chef` numarali operator menusunu acar. Yukaridaki noninteractive
+smoke komutlari read-only'dir. Write path'leri `--apply` ister:
+`npm run chef -- --repair --apply` backup'li repair icin,
+`npm run chef -- --install --apply` full managed install icin kullanilir.
 
 CI ayrica temporary home path'leriyle Bash dry-run ve PowerShell `-WhatIf`
 smoke check calistirir; boylece installer runtime branch'leri global write

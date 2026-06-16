@@ -38,6 +38,9 @@ This runs:
   stale `dateChecked` checks, and per-agent expertise signal coverage.
 - `scripts/validate-mcp-config.mjs`: MCP catalog/config drift checks across
   Windows and Unix Codex templates.
+- `scripts/validate-chef-cli.mjs`: one-menu Codex Chef CLI contract, safe
+  command routing, write-boundary labels, log location, README usage snippets,
+  and GitHub CLI/Git Credential Manager auth guidance.
 - `scripts/verify-skill-sources.mjs`: offline skill catalog validation and
   `catalog/skills-lock.json` source-allowlist drift checks.
 - `scripts/scan-supply-chain-iocs.mjs`: high-signal remote execution,
@@ -94,6 +97,8 @@ node --check scripts/plan-install.mjs
 node --check scripts/validate-agent-config.mjs
 node --check scripts/validate-agent-research-corpus.mjs
 node --check scripts/validate-mcp-config.mjs
+node --check scripts/chef-cli.mjs
+node --check scripts/validate-chef-cli.mjs
 node --check scripts/verify-skill-sources.mjs
 node --check scripts/scan-supply-chain-iocs.mjs
 node --check scripts/validate-package-surface.mjs
@@ -137,6 +142,19 @@ Bash dry run:
 ```bash
 ./scripts/install.sh --all --dry-run
 ```
+
+Codex Chef CLI smoke:
+
+```bash
+npm run validate:chef-cli
+npm run chef -- --status
+npm run chef -- --preview
+```
+
+`npm run chef` opens the numbered operator menu. The noninteractive smoke
+commands above are read-only. Write paths require `--apply`:
+`npm run chef -- --repair --apply` for backup-backed repair and
+`npm run chef -- --install --apply` for a full managed install.
 
 CI also runs Bash dry-run and PowerShell `-WhatIf` smoke checks with temporary
 homes so installer runtime branches are exercised without global writes.
