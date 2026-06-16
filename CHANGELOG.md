@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.5.20 - 2026-06-17
+
+- Removed remaining machine-specific local-audit path details from public
+  verification docs so the latest main commit is included in a release tag.
+
 ## 0.5.19 - 2026-06-17
 
 - Replaced public README and CLI auth guidance that printed account-scoped

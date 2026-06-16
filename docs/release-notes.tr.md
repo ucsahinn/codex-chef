@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## v0.5.20 - 2026-06-17
+
+Bu patch son public dokumantasyon temizligini release history icine alir ve
+verification docs icinde kalan machine-specific local-audit path detaylarini
+kaldirir.
+
+## One cikanlar
+
+- Local audit docs artik workstation'a ozel path detaylarini acmadan
+  verification boundary'yi anlatir.
+- Release tag final dokumantasyon temizliginden sonraki en guncel, dogrulanmis
+  `main` commit'iyle hizalanir.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run chef -- --status --plain --no-log
+npm run chef -- --auth --plain --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.19 - 2026-06-17
 
 Bu patch GitHub account repair isini public CLI ve README icinde account-scoped

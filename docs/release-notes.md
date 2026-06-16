@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## v0.5.20 - 2026-06-17
+
+This patch keeps the latest public documentation cleanup inside the released
+history by removing remaining machine-specific local-audit path details from
+verification docs.
+
+## Highlights
+
+- Local audit docs now describe the verification boundary without exposing
+  workstation-specific path details.
+- The release tag is aligned with the latest validated `main` commit after the
+  final documentation cleanup.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run chef -- --status --plain --no-log
+npm run chef -- --auth --plain --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.19 - 2026-06-17
 
 This patch keeps Codex Chef's public auth guidance safer by treating GitHub
