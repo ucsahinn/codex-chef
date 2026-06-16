@@ -15,12 +15,12 @@
 
 <p align="center">
   🌐 <strong>Docs:</strong>
-  <a href="README.de.md">🇩🇪</a> |
-  <a href="README.es.md">🇪🇸</a> |
-  <a href="README.md">🇬🇧</a> |
-  <a href="README.pt-BR.md">🇧🇷</a> |
-  <a href="README.tr.md">🇹🇷</a> |
-  <a href="README.fr.md">🇫🇷</a>
+  <a href="README.de.md">Deutsch</a> |
+  <a href="README.es.md">Español</a> |
+  <a href="README.md">English</a> |
+  <a href="README.pt-BR.md">Português (Brasil)</a> |
+  <a href="README.tr.md">Türkçe</a> |
+  <a href="README.fr.md">Français</a>
 </p>
 
 Codex Chef gives a Windows-first Codex setup a clean starting point: safer defaults, a named specialist team, curated skills, MCP defaults, local plugin workflows, and validation that users can inspect before anything touches their machine.

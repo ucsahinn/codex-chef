@@ -15,12 +15,12 @@
 
 <p align="center">
   🌐 <strong>Doküman dilleri:</strong>
-  <a href="README.de.md">🇩🇪</a> |
-  <a href="README.es.md">🇪🇸</a> |
-  <a href="README.md">🇬🇧</a> |
-  <a href="README.pt-BR.md">🇧🇷</a> |
-  <a href="README.tr.md">🇹🇷</a> |
-  <a href="README.fr.md">🇫🇷</a>
+  <a href="README.de.md">Deutsch</a> |
+  <a href="README.es.md">Español</a> |
+  <a href="README.md">English</a> |
+  <a href="README.pt-BR.md">Português (Brasil)</a> |
+  <a href="README.tr.md">Türkçe</a> |
+  <a href="README.fr.md">Français</a>
 </p>
 
 Codex Chef, Windows tarafında güçlü ama güvenli bir Codex başlangıcı isteyenler için hazırlanmış bir setup kitidir. Sana tek tek uğraşmadan kurulabilen bir temel verir: kalıcı talimatlar, kontrollü config, isimlendirilmiş uzman ajanlar, MCP varsayılanları, seçilmiş skill'ler, yerel plugin akışları ve kurulmadan önce doğrulanabilen güvenlik kapıları.

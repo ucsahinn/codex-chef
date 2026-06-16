@@ -13,12 +13,12 @@
 
 <p align="center">
   🌐 <strong>Dokumentation:</strong>
-  <a href="README.de.md">🇩🇪</a> |
-  <a href="README.es.md">🇪🇸</a> |
-  <a href="README.md">🇬🇧</a> |
-  <a href="README.pt-BR.md">🇧🇷</a> |
-  <a href="README.tr.md">🇹🇷</a> |
-  <a href="README.fr.md">🇫🇷</a>
+  <a href="README.de.md">Deutsch</a> |
+  <a href="README.es.md">Español</a> |
+  <a href="README.md">English</a> |
+  <a href="README.pt-BR.md">Português (Brasil)</a> |
+  <a href="README.tr.md">Türkçe</a> |
+  <a href="README.fr.md">Français</a>
 </p>
 
 Codex Chef gibt deinem Windows-first Codex-Setup einen klaren Startpunkt: sichere Defaults, ein benanntes Agent-Team, kuratierte Skills, MCP-Vorgaben, lokale Plugin-Workflows und Validierung, die du vor echten Aenderungen pruefen kannst.
