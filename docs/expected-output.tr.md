@@ -9,7 +9,7 @@ Discovery ciktisi no-write ve okunabilir kalir:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.4
+Package: codex-chef@0.5.6
 Platform: windows
 
 Profile | Operations | High risk | Optional flags

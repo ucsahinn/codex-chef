@@ -12,6 +12,12 @@ prefix_rule(pattern = ["Select-Object"], decision = "allow")
 prefix_rule(pattern = ["Get-Command"], decision = "allow")
 prefix_rule(pattern = ["Get-Process"], decision = "allow")
 prefix_rule(pattern = ["Test-Path"], decision = "allow")
+prefix_rule(pattern = ["Where-Object"], decision = "allow")
+prefix_rule(pattern = ["ForEach-Object"], decision = "allow")
+prefix_rule(pattern = ["Get-FileHash"], decision = "allow")
+prefix_rule(pattern = ["Get-AuthenticodeSignature"], decision = "allow")
+prefix_rule(pattern = ["where.exe"], decision = "allow")
+prefix_rule(pattern = ["Test-NetConnection"], decision = "allow")
 prefix_rule(pattern = ["netstat", "-ano"], decision = "allow")
 
 # Read-only git inspection.
@@ -29,6 +35,11 @@ prefix_rule(pattern = ["git", "tag"], decision = "allow")
 prefix_rule(pattern = ["git", "ls-files"], decision = "allow")
 prefix_rule(pattern = ["git", "ls-remote"], decision = "allow")
 prefix_rule(pattern = ["git", "check-ignore"], decision = "allow")
+prefix_rule(pattern = ["git", "fetch"], decision = "allow")
+prefix_rule(pattern = ["git", "config", "--get"], decision = "allow")
+prefix_rule(pattern = ["git", "config", "--get-all"], decision = "allow")
+prefix_rule(pattern = ["git", "config", "--list"], decision = "allow")
+prefix_rule(pattern = ["git", "config", "--show-origin"], decision = "allow")
 prefix_rule(pattern = ["git", "config", "--global", "--get"], decision = "allow")
 
 # Common local verification.
@@ -40,6 +51,8 @@ prefix_rule(pattern = ["npm.cmd", "run", "lint"], decision = "allow")
 prefix_rule(pattern = ["npm.cmd", "run", "typecheck"], decision = "allow")
 prefix_rule(pattern = ["npm.cmd", "run", "build"], decision = "allow")
 prefix_rule(pattern = ["npm.cmd", "run", "ui:smoke"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "run", "check"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "run", "validate"], decision = "allow")
 
 # Codex-local skill and MCP helpers. Keep package execution narrow.
 prefix_rule(pattern = ["npx.cmd", "skills", "find"], decision = "allow")
@@ -51,8 +64,26 @@ prefix_rule(pattern = ["npx.cmd", "-y", "chrome-devtools-mcp@1.2.0"], decision =
 prefix_rule(pattern = ["New-Item", "-ItemType", "Directory"], decision = "allow")
 prefix_rule(pattern = ["sc.exe", "query"], decision = "allow")
 prefix_rule(pattern = ["gitleaks", "version"], decision = "allow")
+prefix_rule(pattern = ["gitleaks", "dir"], decision = "allow")
 prefix_rule(pattern = ["gitleaks", "detect", "--redact", "--no-banner", "--verbose"], decision = "allow")
 prefix_rule(pattern = ["gitleaks", "detect", "--redact", "--no-banner", "--no-git", "--verbose"], decision = "allow")
+
+# GitHub CLI read-only inspection. Broad gh and auth-changing commands stay interactive.
+prefix_rule(pattern = ["gh", "--version"], decision = "allow")
+prefix_rule(pattern = ["gh", "auth", "status"], decision = "allow")
+prefix_rule(pattern = ["gh", "config", "get"], decision = "allow")
+prefix_rule(pattern = ["gh", "config", "list"], decision = "allow")
+prefix_rule(pattern = ["gh", "pr", "list"], decision = "allow")
+prefix_rule(pattern = ["gh", "pr", "view"], decision = "allow")
+prefix_rule(pattern = ["gh", "pr", "check"], decision = "allow")
+prefix_rule(pattern = ["gh", "run", "list"], decision = "allow")
+prefix_rule(pattern = ["gh", "run", "view"], decision = "allow")
+prefix_rule(pattern = ["gh", "repo", "view"], decision = "allow")
+prefix_rule(pattern = ["gh", "issue", "list"], decision = "allow")
+prefix_rule(pattern = ["gh", "issue", "view"], decision = "allow")
+prefix_rule(pattern = ["gh", "release", "view"], decision = "allow")
+prefix_rule(pattern = ["gh", "workflow", "list"], decision = "allow")
+prefix_rule(pattern = ["gh", "workflow", "view"], decision = "allow")
 
 # Always keep irreversible, external-write, credential, or broad shell operations interactive.
 # Deletion/removal/cleanup operations must ask first; non-destructive work may continue.

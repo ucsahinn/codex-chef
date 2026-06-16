@@ -2,6 +2,50 @@
 
 ## Unreleased
 
+## v0.5.6 - 2026-06-16
+
+Bu patch, gercek Windows kurulumundan sonra Codex Chef setup'ini daha rahat
+kullanilir hale getirir; default write yetkisini genisletmez.
+
+## One Cikanlar
+
+- Read-only browser kaniti, repo indeksleme, diagnostic ve memory lookup
+  komutlari icin MCP tool bazli approval override'lari eklendi.
+- Interactive browser aksiyonlari, account-backed connector'lar, filesystem
+  connector'lari, production servisleri ve mutating tool'lar default olarak
+  prompt-gated veya disabled kalir.
+- Doctor ve MCP validator'larinda MCP block parsing sikilastirildi; nested tool
+  override table'lari ayri server gibi sayilmaz.
+- Read-only PowerShell, Git, GitHub CLI, Gitleaks ve lokal validation komutlari
+  icin konservatif command rule seti genisletildi.
+- Plugin metadata'si ve beklenen cikti ornekleri patch version ile hizalandi.
+
+## Upgrade Notlari
+
+v0.5.5 kurulu olan kullanicilar guncel config ve rule dosyalarini almak icin
+normal preview ve install akislarini tekrar calistirabilir. `-Force`
+kullanildiginda mevcut global dosyalar replace oncesi yedeklenir.
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+```
+
+```powershell
+.\\scripts\\install.ps1 -All -Force -WhatIf
+.\\scripts\\install.ps1 -All -Force
+```
+
+## Dogrulama
+
+Bu version icin release readiness su kontrolleri icermelidir:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.5 - 2026-06-16
 
 - Kok dizine `llms.txt` dosyasi eklendi. Kodlama ajanlari boylece tum README'yi

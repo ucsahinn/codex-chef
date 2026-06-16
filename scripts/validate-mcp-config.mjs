@@ -29,7 +29,7 @@ function parseMcpBlocks(text) {
   }
 
   for (const line of lines) {
-    const heading = line.match(/^\[mcp_servers\.([^\]]+)\]\s*$/);
+    const heading = line.match(/^\[mcp_servers\.([A-Za-z0-9_-]+)\]\s*$/);
     if (heading) {
       flush();
       currentName = heading[1];

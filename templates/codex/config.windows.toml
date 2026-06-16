@@ -159,6 +159,28 @@ default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 180
 
+# Read-only browser evidence can run without extra prompts; interaction stays prompt-only.
+[mcp_servers.playwright.tools.browser_snapshot]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_take_screenshot]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_console_messages]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_network_requests]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_network_request]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_wait_for]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_resize]
+approval_mode = "approve"
+
 [mcp_servers.chrome-devtools]
 enabled = true
 command = "cmd.exe"
@@ -166,6 +188,36 @@ args = ["/c", "npx", "-y", "chrome-devtools-mcp@1.2.0", "--isolated", "--no-usag
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 180
+
+[mcp_servers.chrome-devtools.tools.list_pages]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.select_page]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.take_snapshot]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.take_screenshot]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.list_console_messages]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.get_console_message]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.list_network_requests]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.get_network_request]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.wait_for]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.resize_page]
+approval_mode = "approve"
 
 [mcp_servers.serena]
 enabled = true
@@ -175,6 +227,45 @@ default_tools_approval_mode = "prompt"
 startup_timeout_sec = 30
 tool_timeout_sec = 180
 
+[mcp_servers.serena.tools.activate_project]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.get_current_config]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.initial_instructions]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.onboarding]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.list_memories]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.read_memory]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.search_for_pattern]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.find_symbol]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.find_declaration]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.find_implementations]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.find_referencing_symbols]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.get_symbols_overview]
+approval_mode = "approve"
+
+[mcp_servers.serena.tools.get_diagnostics_for_file]
+approval_mode = "approve"
+
 [mcp_servers.memory]
 enabled = true
 command = "cmd.exe"
@@ -182,6 +273,15 @@ args = ["/c", "npx", "-y", "@modelcontextprotocol/server-memory@2026.1.26"]
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 60
+
+[mcp_servers.memory.tools.read_graph]
+approval_mode = "approve"
+
+[mcp_servers.memory.tools.search_nodes]
+approval_mode = "approve"
+
+[mcp_servers.memory.tools.open_nodes]
+approval_mode = "approve"
 
 # Disabled by default because it grants local filesystem tool access.
 # Replace the path with an intentional workspace before enabling.

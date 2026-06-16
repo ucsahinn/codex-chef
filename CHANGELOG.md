@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.5.6 - 2026-06-16
+
+- Added reviewed per-tool MCP approval overrides for read-only browser,
+  repository-indexing, and memory lookup tools so common evidence gathering is
+  smoother while interactive, account, filesystem, and mutating tools still
+  prompt.
+- Tightened MCP config parsing in `scripts/codex-doctor.mjs` and
+  `scripts/validate-mcp-config.mjs` so nested tool override tables are not
+  counted as separate MCP servers.
+- Expanded conservative command-approval rules for read-only PowerShell, Git,
+  GitHub CLI, Gitleaks, and local validation commands without allowing
+  deletion, publishing, credential access, or broad shell execution.
+- Updated release metadata, plugin version, and expected-output examples for
+  the new patch release.
+
 ## 0.5.5 - 2026-06-16
 
 - Added a root `llms.txt` agent-readable index inspired by high-signal

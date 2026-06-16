@@ -51,7 +51,7 @@ function parseAgentBlocks(text) {
 
 function parseMcpBlocks(text) {
   const blocks = new Set();
-  for (const match of text.matchAll(/^\[mcp_servers\.([A-Za-z0-9_.-]+)\]\s*$/gm)) {
+  for (const match of text.matchAll(/^\[mcp_servers\.([A-Za-z0-9_-]+)\]\s*$/gm)) {
     blocks.add(match[1]);
   }
   return blocks;

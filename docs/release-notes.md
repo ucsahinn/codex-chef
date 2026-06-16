@@ -2,6 +2,51 @@
 
 ## Unreleased
 
+## v0.5.6 - 2026-06-16
+
+This patch makes the installed Codex Chef setup more ergonomic after a real
+Windows install, without broadening default write access.
+
+## Highlights
+
+- Added per-tool MCP approval overrides for read-only browser evidence,
+  repository indexing, diagnostics, and memory lookup commands.
+- Kept interactive browser actions, account-backed connectors, filesystem
+  connectors, production services, and mutating tools prompt-gated or disabled
+  by default.
+- Tightened MCP block parsing in the doctor and MCP validators so nested tool
+  override tables are validated without being miscounted as separate servers.
+- Expanded conservative command rules for read-only PowerShell, Git, GitHub CLI,
+  Gitleaks, and local validation commands.
+- Updated plugin metadata and expected-output examples to match the patch
+  version.
+
+## Upgrade Notes
+
+Users who already installed v0.5.5 can preview and re-run the normal install
+flow to apply the updated config and rules. Existing global files are backed up
+before replacement when `-Force` is used.
+
+```bash
+node scripts/plan-install.mjs --all --json --redact-paths
+```
+
+```powershell
+.\\scripts\\install.ps1 -All -Force -WhatIf
+.\\scripts\\install.ps1 -All -Force
+```
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run verify:skills:online
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.5 - 2026-06-16
 
 - Added a root `llms.txt` file so coding agents can quickly discover the
