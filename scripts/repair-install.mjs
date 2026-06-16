@@ -204,6 +204,48 @@ function repairFile(sourceRel, targetPath, id) {
   return { status: action.status, source: sourceRel, target: redact(targetPath), reason: action.reason };
 }
 
+function significantRulesLines(text) {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function repairRulesFile(sourceRel, targetPath, id) {
+  const sourcePath = path.join(root, sourceRel);
+  const exists = fs.existsSync(targetPath);
+  const sourceText = fs.readFileSync(sourcePath, "utf8");
+  const targetText = exists ? fs.readFileSync(targetPath, "utf8") : "";
+  const targetLines = new Set(significantRulesLines(targetText));
+  const missingLines = significantRulesLines(sourceText).filter((line) => !targetLines.has(line));
+  if (exists && missingLines.length === 0) {
+    return { status: "current", source: sourceRel, target: redact(targetPath) };
+  }
+
+  const action = {
+    id,
+    kind: "merge-rules-baseline",
+    source: sourceRel,
+    target: targetPath,
+    status: options.apply ? "applied" : "planned",
+    reason: exists ? `missing ${missingLines.length} managed rules baseline line(s)` : "missing"
+  };
+
+  if (options.apply) {
+    assertManagedTarget(targetPath);
+    ensureDir(path.dirname(targetPath));
+    action.backup = backupTarget(targetPath);
+    const extra = exists
+      ? targetText.split(/\r?\n/).filter((line) => !significantRulesLines(sourceText).includes(line.trim())).join("\n").trim()
+      : "";
+    const next = extra ? `${sourceText.trimEnd()}\n\n# Local approval rules preserved by Codex Chef repair.\n${extra}\n` : sourceText;
+    fs.writeFileSync(targetPath, next, "utf8");
+  }
+
+  recordAction(action);
+  return { status: action.status, source: sourceRel, target: redact(targetPath), reason: action.reason };
+}
+
 function repairManagedFiles() {
   const entries = [];
   entries.push({
@@ -211,11 +253,11 @@ function repairManagedFiles() {
     source: "templates/codex/AGENTS.md",
     target: path.join(options.codexHome, "AGENTS.md")
   });
-  entries.push({
+  const rulesEntry = {
     id: "codex-rules",
     source: "templates/codex/rules/default.rules",
     target: path.join(options.codexHome, "rules", "default.rules")
-  });
+  };
 
   for (const file of listFilesRecursive(path.join(root, "templates", "codex", "agents"))) {
     entries.push({
@@ -254,6 +296,11 @@ function repairManagedFiles() {
     else if (result.status === "applied") applied += 1;
     if (result.status !== "current") changed.push(result);
   }
+  const rulesResult = repairRulesFile(rulesEntry.source, rulesEntry.target, rulesEntry.id);
+  if (rulesResult.status === "current") current += 1;
+  else if (rulesResult.status === "planned") planned += 1;
+  else if (rulesResult.status === "applied") applied += 1;
+  if (rulesResult.status !== "current") changed.push(rulesResult);
 
   const sourceFiles = new Set(listFilesRecursive(pluginSourceRoot));
   const targetFiles = listFilesRecursive(pluginTargetRoot);
@@ -295,7 +342,7 @@ function repairManagedFiles() {
   }
 
   return {
-    expected: entries.length,
+    expected: entries.length + 1,
     current,
     planned,
     applied,
@@ -341,7 +388,10 @@ function runConfigMerge() {
     return { inspected: true, status: "fail", exitCode: inspect.status };
   }
 
-  if (options.apply && report.addedTableCount > 0) {
+  const removedDeprecatedFields = report.removedDeprecatedFields || [];
+  const configNeedsApply = report.addedTableCount > 0 || removedDeprecatedFields.length > 0;
+
+  if (options.apply && configNeedsApply) {
     if (fs.existsSync(destination)) backupTarget(destination);
     ensureDir(path.dirname(destination));
     const apply = spawnSync(process.execPath, [
@@ -367,22 +417,26 @@ function runConfigMerge() {
     }
   }
 
-  if (report.addedTableCount > 0) {
+  if (configNeedsApply) {
     recordAction({
       id: "codex-config",
-      kind: "merge-config",
+      kind: report.addedTableCount > 0 ? "merge-config" : "remove-deprecated-config",
       source: template,
       target: destination,
       status: options.apply ? "applied" : "planned",
-      reason: `missing ${report.addedTableCount} managed config table(s)`
+      reason: [
+        report.addedTableCount > 0 ? `missing ${report.addedTableCount} managed config table(s)` : null,
+        removedDeprecatedFields.length > 0 ? `deprecated managed field(s): ${removedDeprecatedFields.join(", ")}` : null
+      ].filter(Boolean).join("; ")
     });
   }
 
   return {
     inspected: true,
-    status: report.addedTableCount > 0 ? (options.apply ? "applied" : "planned") : "current",
+    status: configNeedsApply ? (options.apply ? "applied" : "planned") : "current",
     addedTables: report.addedTables || [],
-    addedTableCount: report.addedTableCount || 0
+    addedTableCount: report.addedTableCount || 0,
+    removedDeprecatedFields
   };
 }
 

@@ -235,6 +235,9 @@ if (!fs.existsSync(catalogPath)) {
       validateTextContains(configFile, text, "max_threads = 6");
       validateTextContains(configFile, text, "max_depth = 1");
       validateTextContains(configFile, text, "job_max_runtime_seconds = 1800");
+      if (/\[apps\._default\][\s\S]*?\ndefault_tools_enabled\s*=/.test(text)) {
+        fail(`${configFile} must not use apps._default.default_tools_enabled; Codex strict config rejects it.`);
+      }
 
       for (const name of catalogNames) {
         if (!configNames.has(name)) fail(`${configFile} missing agent block for ${name}.`);

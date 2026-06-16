@@ -28,7 +28,6 @@ min_rate_limit_remaining_percent = 15
 
 [apps._default]
 enabled = true
-default_tools_enabled = true
 destructive_enabled = false
 open_world_enabled = false
 

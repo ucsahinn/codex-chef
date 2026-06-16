@@ -10,6 +10,39 @@
   PowerShell/Bash installers show enterprise routing profiles in the capability
   board printed after setup.
 
+## v0.5.13 - 2026-06-16
+
+This patch finishes the runtime compatibility hardening for current Codex
+installs. It keeps strict config clean, prevents normal local approval rules
+from looking like managed-file drift, and makes the status board clearer about
+non-blocking WebSocket fallback warnings.
+
+## Highlights
+
+- Removed the deprecated `apps._default.default_tools_enabled` config key from
+  shipped templates and repair handling so `codex --strict-config` can start
+  cleanly on Codex v0.140.0.
+- Runtime verification now checks that `rules/default.rules` contains the
+  managed Codex Chef safety baseline while allowing local approval rules added
+  by normal Codex use.
+- Repair mode merges the managed rules baseline without deleting local approval
+  rules.
+- `npm run codex:status` keeps provider, MCP, and config issues actionable
+  while treating the WebSocket timeout as a non-blocking warning when the rest
+  of Codex doctor is healthy and HTTPS fallback is available.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run check
+npm run codex:status:all
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.12 - 2026-06-16
 
 This patch tightens the new end-user status board. It keeps the status command

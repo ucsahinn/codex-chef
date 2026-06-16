@@ -73,7 +73,7 @@ const pluginTarget = path.join(codexHome, "plugins", "codex-chef-workflows");
 write(path.join(codexHome, "AGENTS.md"), "# stale guidance\n");
 write(
   path.join(codexHome, "config.toml"),
-  "# user setting must stay\nmodel = \"gpt-5\"\n"
+  "# user setting must stay\nmodel = \"gpt-5\"\n\n[apps._default]\ndefault_tools_enabled = true\n"
 );
 write(
   path.join(codexHome, "rules", "default.rules"),
@@ -116,6 +116,9 @@ if (plan) {
   if (plan.status !== "attention") fail(`repair plan should need attention, got ${plan.status}.`);
   if (!Array.isArray(plan.actions) || plan.actions.length === 0) fail("repair plan must include planned actions.");
   if (!plan.managedFiles?.extraPluginFiles?.length) fail("repair plan must report extra managed plugin files.");
+  if (!plan.config?.removedDeprecatedFields?.includes("apps._default.default_tools_enabled")) {
+    fail("repair plan must report deprecated managed config fields.");
+  }
   if (!plan.skills || plan.skills.extraCount < 1 || plan.skills.duplicateCount < 1) {
     fail("repair plan must report non-curated and duplicate skill inventory.");
   }
@@ -138,8 +141,11 @@ if (applied) {
 }
 
 const repairedRules = fs.readFileSync(path.join(codexHome, "rules", "default.rules"), "utf8");
-if (repairedRules !== read("templates/codex/rules/default.rules")) {
-  fail("repair apply must restore default.rules from the managed template.");
+if (!repairedRules.includes(read("templates/codex/rules/default.rules").trim())) {
+  fail("repair apply must preserve the managed default.rules baseline.");
+}
+if (!repairedRules.includes("powershell.exe")) {
+  fail("repair apply must preserve local approval rules in default.rules.");
 }
 if (fs.readFileSync(path.join(codexHome, "AGENTS.md"), "utf8") !== read("templates/codex/AGENTS.md")) {
   fail("repair apply must restore AGENTS.md from the managed template.");
@@ -166,6 +172,9 @@ if (!chefPlugin || chefPlugin.source?.path !== pluginTarget) {
 const repairedConfig = fs.readFileSync(path.join(codexHome, "config.toml"), "utf8");
 if (!repairedConfig.includes("# user setting must stay") || !repairedConfig.includes("[mcp_servers.")) {
   fail("repair apply must preserve user config text and merge missing managed blocks.");
+}
+if (repairedConfig.includes("default_tools_enabled")) {
+  fail("repair apply must remove deprecated managed apps._default.default_tools_enabled.");
 }
 
 const pruned = parseResult(runRepair(["--apply", "--prune-managed-plugin-extras"], codexHome, agentsHome), "repair prune");

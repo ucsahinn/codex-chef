@@ -73,12 +73,33 @@ const destination = destinationExists ? normalizeNewlines(fs.readFileSync(destin
 const templateTables = parseTables(template);
 const destinationTables = parseTables(destination);
 const missing = [];
+const removedDeprecatedFields = [];
+
+function removeDeprecatedManagedFields(text) {
+  const lines = normalizeNewlines(text).split("\n");
+  let currentTable = null;
+  const next = [];
+
+  for (const line of lines) {
+    const tableMatch = /^\s*\[([^\]]+)\]\s*$/.exec(line);
+    if (tableMatch) currentTable = tableMatch[1].trim();
+    if (currentTable === "apps._default" && /^\s*default_tools_enabled\s*=/.test(line)) {
+      removedDeprecatedFields.push("apps._default.default_tools_enabled");
+      continue;
+    }
+    next.push(line);
+  }
+
+  return next.join("\n");
+}
 
 for (const [tableName, tableText] of templateTables.entries()) {
   if (!isManagedTable(tableName)) continue;
   if (destinationTables.has(tableName)) continue;
   missing.push({ tableName, tableText });
 }
+
+const sanitizedDestination = removeDeprecatedManagedFields(destination);
 
 const report = {
   schemaVersion: "codex-chef.config-merge.v1",
@@ -87,22 +108,31 @@ const report = {
   destinationExists,
   dryRun: options.dryRun,
   addedTables: missing.map((entry) => entry.tableName),
-  addedTableCount: missing.length
+  addedTableCount: missing.length,
+  removedDeprecatedFields
 };
 
-if (missing.length > 0 && !options.dryRun) {
-  const prefix = destination.trimEnd();
+if ((missing.length > 0 || removedDeprecatedFields.length > 0) && !options.dryRun) {
+  const prefix = sanitizedDestination.trimEnd();
   const addition = missing.map((entry) => entry.tableText).join("\n\n");
-  const next = `${prefix}${prefix ? "\n\n" : ""}# Codex Chef merged config blocks. Existing user-defined tables were preserved.\n${addition}\n`;
+  const next = missing.length > 0
+    ? `${prefix}${prefix ? "\n\n" : ""}# Codex Chef merged config blocks. Existing user-defined tables were preserved.\n${addition}\n`
+    : `${prefix}\n`;
   fs.writeFileSync(destinationPath, next, "utf8");
 }
 
 if (options.json) {
   console.log(JSON.stringify(report, null, 2));
-} else if (missing.length === 0) {
+} else if (missing.length === 0 && removedDeprecatedFields.length === 0) {
   console.log("Codex config already contains all managed Codex Chef blocks.");
 } else if (options.dryRun) {
-  console.log(`Would merge ${missing.length} missing Codex Chef config block(s): ${missing.map((entry) => entry.tableName).join(", ")}`);
+  const parts = [];
+  if (missing.length > 0) parts.push(`merge ${missing.length} missing Codex Chef config block(s): ${missing.map((entry) => entry.tableName).join(", ")}`);
+  if (removedDeprecatedFields.length > 0) parts.push(`remove deprecated managed field(s): ${removedDeprecatedFields.join(", ")}`);
+  console.log(`Would ${parts.join("; ")}`);
 } else {
-  console.log(`Merged ${missing.length} missing Codex Chef config block(s): ${missing.map((entry) => entry.tableName).join(", ")}`);
+  const parts = [];
+  if (missing.length > 0) parts.push(`merged ${missing.length} missing Codex Chef config block(s): ${missing.map((entry) => entry.tableName).join(", ")}`);
+  if (removedDeprecatedFields.length > 0) parts.push(`removed deprecated managed field(s): ${removedDeprecatedFields.join(", ")}`);
+  console.log(parts.join("; "));
 }

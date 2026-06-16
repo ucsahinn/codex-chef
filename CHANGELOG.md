@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.13 - 2026-06-16
+
 - Added `catalog/routing-profiles.json`, `npm run codex:routing`, and status
   board routing summaries so Codex Chef exposes the task-shape mapping between
   agents, skills, MCPs, and config/profile flags.
@@ -12,6 +14,12 @@
   `SUPABASE_DB_URL` requirements are visible before connector opt-in.
 - Added an effective-controls summary to `npm run codex:status` and a routing
   profile visibility gate for the global `AGENTS.md` template.
+- Removed the deprecated `apps._default.default_tools_enabled` field from
+  Codex config templates and taught repair mode to remove that managed field
+  from existing installs so `codex --strict-config` can start cleanly.
+- Changed runtime repair and verification for `rules/default.rules` to require
+  the managed safety baseline while preserving local approval rules added by
+  normal Codex use.
 - Updated first-party Skills CLI mappings to the current upstream skill names
   `ai-project-starter`, `prompt-architect`, and `ai-skill-create`.
 

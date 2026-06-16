@@ -10,6 +10,38 @@
   Bash installer capability board'u da kurulum sonunda enterprise routing
   profillerini gosterir.
 
+## v0.5.13 - 2026-06-16
+
+Bu patch guncel Codex kurulumlari icin runtime uyumlulugunu tamamlar. Strict
+config temiz kalir, normal lokal approval rule'lari managed-file drift gibi
+gorunmez ve status panosu WebSocket fallback uyarisini daha dogru siniflandirir.
+
+## One Cikanlar
+
+- `apps._default.default_tools_enabled` config anahtari shipped template'lerden
+  ve repair handling'den kaldirildi; boylece Codex v0.140.0 ile
+  `codex --strict-config` temiz baslayabilir.
+- Runtime verification artik `rules/default.rules` icinde Codex Chef'in managed
+  guvenlik baseline'ini arar ama normal Codex kullanimiyla eklenen lokal
+  approval rule'larini drift saymaz.
+- Repair mode managed rules baseline'ini lokal approval rule'larini silmeden
+  merge eder.
+- `npm run codex:status`, provider, MCP ve config sorunlarini action item olarak
+  tutar; Codex doctor'in kalani saglikliyken WebSocket timeout'u HTTPS fallback
+  uyarisi olarak non-blocking gosterir.
+
+## Dogrulama
+
+Bu surum icin release oncesi su kontroller calismali:
+
+```bash
+npm run check
+npm run codex:status:all
+npm run verify:skills:online -- --timeout-ms=90000
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.12 - 2026-06-16
 
 Bu patch yeni son kullanici status panosunu sikilastirir. Komut gercek
