@@ -69,7 +69,6 @@ separate from MCP server settings so connector tool exposure is reviewable.
 | Field | Starter default | Use |
 | --- | --- | --- |
 | `apps._default.enabled` | `true` | Allow connector browsing without enabling a specific authenticated service. |
-| `apps._default.default_tools_enabled` | `true` | Keep normal connector tools visible unless a specific app overrides them. |
 | `apps._default.destructive_enabled` | `false` | Block tools that advertise destructive behavior by default. |
 | `apps._default.open_world_enabled` | `false` | Block tools that advertise broad open-world behavior by default. |
 | `apps.<id>.tools.<tool>.approval_mode` | unset | Use only when a specific connector tool has been reviewed. |

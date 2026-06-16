@@ -276,7 +276,6 @@ function inspectEffectiveControls() {
     },
     appsDefault: {
       enabled: readTomlValue(text, "apps._default.enabled"),
-      defaultToolsEnabled: readTomlValue(text, "apps._default.default_tools_enabled"),
       destructiveEnabled: readTomlValue(text, "apps._default.destructive_enabled"),
       openWorldEnabled: readTomlValue(text, "apps._default.open_world_enabled")
     },
@@ -292,65 +291,95 @@ function summarizeCodexDoctor() {
     return { inspected: false, status: "skipped", note: "Skipped by --skip-codex-doctor-checks." };
   }
 
-  const result = run(codexCommand(), ["doctor", "--json"], {
-    env: { ...process.env, CODEX_HOME: options.codexHome },
-    timeout: 120000
-  });
-  if (result.error) {
+  const doctorEnv = { ...process.env, CODEX_HOME: options.codexHome };
+
+  function inspectOnce() {
+    const result = run(codexCommand(), ["doctor", "--json"], {
+      env: doctorEnv,
+      timeout: 120000
+    });
+    if (result.error) {
+      return {
+        inspected: false,
+        status: "attention",
+        failures: [],
+        warnings: [`codex doctor --json could not run: ${result.error.message}`]
+      };
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(result.stdout || "{}");
+    } catch (error) {
+      return {
+        inspected: false,
+        status: "attention",
+        failures: [],
+        warnings: [`codex doctor --json did not emit parseable JSON: ${error.message}`]
+      };
+    }
+
+    const checks = Object.values(parsed.checks || {});
+    const counts = { ok: 0, warning: 0, fail: 0, other: 0 };
+    for (const check of checks) {
+      if (check.status === "ok") counts.ok += 1;
+      else if (check.status === "warning") counts.warning += 1;
+      else if (check.status === "fail") counts.fail += 1;
+      else counts.other += 1;
+    }
+
+    const failedChecks = checks
+      .filter((check) => check.status === "fail")
+      .map((check) => ({
+        id: check.id,
+        summary: check.summary,
+        remediation: check.remediation || null
+      }));
+    const warningChecks = checks
+      .filter((check) => check.status === "warning")
+      .map((check) => ({
+        id: check.id,
+        summary: check.summary,
+        remediation: check.remediation || null
+      }));
+    const nonBlockingWarningIds = new Set(["network.websocket_reachability"]);
+    const blockingWarningChecks = warningChecks.filter((check) => !nonBlockingWarningIds.has(check.id));
+    const nonBlockingWarningChecks = warningChecks.filter((check) => nonBlockingWarningIds.has(check.id));
+
     return {
-      inspected: false,
-      status: "attention",
-      failures: [],
-      warnings: [`codex doctor --json could not run: ${result.error.message}`]
+      inspected: true,
+      status: counts.fail > 0 || blockingWarningChecks.length > 0 ? "attention" : "ok",
+      exitCode: result.status,
+      overallStatus: parsed.overallStatus || null,
+      codexVersion: parsed.codexVersion || null,
+      counts,
+      failedChecks: redactDeep(failedChecks),
+      warningChecks: redactDeep(warningChecks),
+      blockingWarningChecks: redactDeep(blockingWarningChecks),
+      nonBlockingWarningChecks: redactDeep(nonBlockingWarningChecks)
     };
   }
 
-  let parsed;
-  try {
-    parsed = JSON.parse(result.stdout || "{}");
-  } catch (error) {
+  const first = inspectOnce();
+  const retryableIds = new Set(["network.provider_reachability", "mcp.config"]);
+  const shouldRetry = [
+    ...(first.failedChecks || []),
+    ...(first.warningChecks || [])
+  ].some((check) => retryableIds.has(check.id));
+  if (!shouldRetry) return first;
+
+  const second = inspectOnce();
+  if (!second.inspected) return first;
+  const firstScore = (first.counts?.fail || 0) * 10 + (first.counts?.warning || 0);
+  const secondScore = (second.counts?.fail || 0) * 10 + (second.counts?.warning || 0);
+  if (secondScore < firstScore) {
     return {
-      inspected: false,
-      status: "attention",
-      failures: [],
-      warnings: [`codex doctor --json did not emit parseable JSON: ${error.message}`]
+      ...second,
+      retried: true,
+      retryReason: "Transient provider reachability or MCP config doctor result improved on retry."
     };
   }
-
-  const checks = Object.values(parsed.checks || {});
-  const counts = { ok: 0, warning: 0, fail: 0, other: 0 };
-  for (const check of checks) {
-    if (check.status === "ok") counts.ok += 1;
-    else if (check.status === "warning") counts.warning += 1;
-    else if (check.status === "fail") counts.fail += 1;
-    else counts.other += 1;
-  }
-
-  const failedChecks = checks
-    .filter((check) => check.status === "fail")
-    .map((check) => ({
-      id: check.id,
-      summary: check.summary,
-      remediation: check.remediation || null
-    }));
-  const warningChecks = checks
-    .filter((check) => check.status === "warning")
-    .map((check) => ({
-      id: check.id,
-      summary: check.summary,
-      remediation: check.remediation || null
-    }));
-
-  return {
-    inspected: true,
-    status: counts.fail > 0 || counts.warning > 0 ? "attention" : "ok",
-    exitCode: result.status,
-    overallStatus: parsed.overallStatus || null,
-    codexVersion: parsed.codexVersion || null,
-    counts,
-    failedChecks: redactDeep(failedChecks),
-    warningChecks: redactDeep(warningChecks)
-  };
+  return first;
 }
 
 function summarizeSkillContext(runtimeReport, skillInventory) {
@@ -521,7 +550,8 @@ if (options.json) {
   for (const warning of warnings) console.log(`Warning: ${warning}`);
   if (skillsContext.status === "attention") console.log(`Attention: ${skillsContext.impact}`);
   for (const check of codexDoctor.failedChecks || []) console.log(`Attention: ${check.id} - ${check.summary}`);
-  for (const check of codexDoctor.warningChecks || []) console.log(`Attention: ${check.id} - ${check.summary}`);
+  for (const check of codexDoctor.blockingWarningChecks || codexDoctor.warningChecks || []) console.log(`Attention: ${check.id} - ${check.summary}`);
+  for (const check of codexDoctor.nonBlockingWarningChecks || []) console.log(`Warning: ${check.id} - ${check.summary}`);
   for (const failure of failures) console.error(`Failure: ${failure}`);
   if (options.output) console.log(`Report: ${redact(path.resolve(root, options.output))}`);
 }

@@ -242,6 +242,37 @@ function inspectManagedFileDrift(failures) {
     failures.push(`Installed managed file drifted from source: ${sourceLabel} -> ${redact(targetPath)}`);
   }
 
+  function significantRulesLines(text) {
+    return text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
+
+  function compareRulesBaseline(sourceRel, targetPath) {
+    expectedFiles += 1;
+    const sourcePath = path.join(root, sourceRel);
+    if (!fs.existsSync(sourcePath) || !fs.existsSync(targetPath)) {
+      recordMissing(sourceRel, targetPath);
+      return;
+    }
+
+    const targetLines = new Set(significantRulesLines(fs.readFileSync(targetPath, "utf8")));
+    const missingLines = significantRulesLines(fs.readFileSync(sourcePath, "utf8"))
+      .filter((line) => !targetLines.has(line));
+    if (missingLines.length > 0) {
+      mismatched.push({
+        source: sourceRel,
+        target: redact(targetPath),
+        reason: "missing-managed-rules-baseline",
+        missingLines: missingLines.length
+      });
+      failures.push(`Installed rules file is missing ${missingLines.length} managed baseline line(s): ${sourceRel} -> ${redact(targetPath)}`);
+      return;
+    }
+    matchedFiles += 1;
+  }
+
   function compareFile(sourceRel, targetPath) {
     expectedFiles += 1;
     const sourcePath = path.join(root, sourceRel);
@@ -259,7 +290,7 @@ function inspectManagedFileDrift(failures) {
   }
 
   compareFile("templates/codex/AGENTS.md", path.join(options.codexHome, "AGENTS.md"));
-  compareFile("templates/codex/rules/default.rules", path.join(options.codexHome, "rules", "default.rules"));
+  compareRulesBaseline("templates/codex/rules/default.rules", path.join(options.codexHome, "rules", "default.rules"));
 
   for (const file of listFilesRecursive(path.join(root, "templates", "codex", "agents"))) {
     compareFile(

@@ -75,7 +75,6 @@ kalir.
 | Alan | Starter default'u | Kullanim |
 | --- | --- | --- |
 | `apps._default.enabled` | `true` | Belirli auth isteyen servisi acmadan connector taramasina izin verir. |
-| `apps._default.default_tools_enabled` | `true` | Belirli app override etmedikce normal connector tool'lari gorunur kalir. |
 | `apps._default.destructive_enabled` | `false` | Destructive davranis bildiren tool'lari default olarak kapatir. |
 | `apps._default.open_world_enabled` | `false` | Genis open-world davranis bildiren tool'lari default olarak kapatir. |
 | `apps.<id>.tools.<tool>.approval_mode` | unset | Sadece belirli bir connector tool'u review edildiyse kullan. |
