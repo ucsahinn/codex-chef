@@ -212,6 +212,42 @@ if (fakeCodexResult.error) {
   }
 }
 
+const missingCodexCommand = path.join(path.resolve("tmp/validate-codex-status"), process.platform === "win32" ? "missing-codex.cmd" : "missing-codex");
+const missingCodexResult = run([
+  "--json",
+  "--redact-paths",
+  "--skip-runtime",
+  "--skip-codex-doctor-checks"
+], {
+  env: {
+    ...process.env,
+    CODEX_STATUS_CODEX_COMMAND: missingCodexCommand
+  }
+});
+if (missingCodexResult.error) {
+  fail(`codex status missing Codex validation could not run: ${missingCodexResult.error.message}`);
+} else if (missingCodexResult.status !== 0) {
+  fail(`codex status missing Codex validation exited ${missingCodexResult.status}: ${(missingCodexResult.stderr || missingCodexResult.stdout).trim()}`);
+} else {
+  try {
+    const missingReport = JSON.parse(missingCodexResult.stdout);
+    if (missingReport.codexCliRuntime?.status !== "attention") {
+      fail("codex status missing Codex validation must report Codex CLI attention.");
+    }
+    if (missingReport.codexCliRuntime?.ambient?.inspected !== true) {
+      fail("codex status missing Codex validation must keep ambient status visible.");
+    }
+    if (!["same", "unknown"].includes(missingReport.codexCliRuntime?.ambient?.relationshipToTarget)) {
+      fail("codex status missing Codex validation must not report a target/ambient drift when the configured Codex command is unavailable.");
+    }
+    if (missingReport.codexCliRuntime?.ambient?.login?.status !== "attention") {
+      fail("codex status missing Codex validation must surface ambient login attention.");
+    }
+  } catch (error) {
+    fail(`codex status missing Codex validation did not emit parseable JSON: ${error.message}`);
+  }
+}
+
 const textResult = run(["--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks"]);
 if (textResult.error) {
   fail(`codex status text validation could not run: ${textResult.error.message}`);

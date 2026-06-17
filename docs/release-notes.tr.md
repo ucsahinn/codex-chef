@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+## v0.5.22 - 2026-06-17
+
+Bu patch Codex CLI henuz kurulu olmayan CI ve temiz makinelerde release
+validation akisini duzeltir. Status panosu Codex CLI erisilebilirligini yine
+attention olarak gosterir, fakat yeni kullanici Codex'i kurmadan once validation
+gereksiz yere fail etmez.
+
+## One cikanlar
+
+- Configured `codex` komutu yoksa bile ambient Codex status'u raporda gorunur
+  kalir.
+- `npm run validate:status` artik missing-Codex fixture'i icerir; Ubuntu CI ve
+  temiz makinelerde bu davranis korunur.
+- Release, v0.5.21 premium status board calismasini korurken public CI ve
+  first-run validation icin guvenli hale getirir.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run codex:status:all
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.21 - 2026-06-17
 
 Bu patch Codex Chef icin premium operator status gecisini tamamlar. Status

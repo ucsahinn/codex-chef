@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.5.22 - 2026-06-17
+
+- Fixed the Codex status validator for CI and fresh machines where the Codex
+  CLI is not installed: ambient status now remains visible as an attention
+  state instead of failing validation before users install Codex.
+
 ## 0.5.21 - 2026-06-17
 
 - Upgraded the Codex Chef status board with an end-user quick start,

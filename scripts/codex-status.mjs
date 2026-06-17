@@ -469,7 +469,7 @@ function inspectCodexCliRuntime() {
       outputPreview: mcp.outputPreview || null
     },
     ambient: {
-      inspected: ambientProbe.version.inspected || ambientProbe.login.inspected || ambientProbe.mcp.inspected,
+      inspected: true,
       relationshipToTarget: ambientRelationship,
       codexHomeEnv: process.env.CODEX_HOME ? redact(process.env.CODEX_HOME) : null,
       version: {

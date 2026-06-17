@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+## v0.5.22 - 2026-06-17
+
+This patch fixes the release CI validation path for environments that do not
+have the Codex CLI installed yet. The status board still reports Codex CLI
+availability as an attention item, but validation no longer fails before a new
+user installs Codex.
+
+## Highlights
+
+- Ambient Codex status stays visible even when the configured `codex` command
+  is unavailable.
+- `npm run validate:status` now includes a missing-Codex fixture so Ubuntu CI
+  and fresh machines keep this behavior covered.
+- The release keeps the v0.5.21 premium status board work intact while making
+  it safe for public CI and first-run validation.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run codex:status:all
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.21 - 2026-06-17
 
 This patch completes the premium operator status pass for Codex Chef. The
