@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 
 const failures = [];
@@ -10,7 +11,7 @@ function fail(message) {
   failures.push(message);
 }
 
-function run(args) {
+function run(args, extra = {}) {
   return spawnSync(process.execPath, [
     "scripts/codex-status.mjs",
     "--codex-home",
@@ -22,8 +23,40 @@ function run(args) {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
     timeout: 120000,
-    windowsHide: true
+    windowsHide: true,
+    env: extra.env || process.env
   });
+}
+
+function writeFakeCodexCommand() {
+  const fixtureDir = path.resolve("tmp/validate-codex-status");
+  fs.mkdirSync(fixtureDir, { recursive: true });
+  if (process.platform === "win32") {
+    const commandPath = path.join(fixtureDir, "fake-codex.cmd");
+    fs.writeFileSync(commandPath, [
+      "@echo off",
+      "if \"%1\"==\"--strict-config\" echo codex-cli 0.140.0 C:\\\\Users\\\\codex-status-private\\\\AppData && exit /b 0",
+      "if \"%1\"==\"login\" echo logged in from C:\\\\Users\\\\codex-status-private\\\\auth && exit /b 0",
+      "if \"%1\"==\"mcp\" echo [{\"name\":\"fakeMcp\"}] && exit /b 0",
+      "echo unexpected fake codex args %*",
+      "exit /b 1",
+      ""
+    ].join("\r\n"), "utf8");
+    return commandPath;
+  }
+
+  const commandPath = path.join(fixtureDir, "fake-codex.sh");
+  fs.writeFileSync(commandPath, [
+    "#!/bin/sh",
+    "if [ \"$1\" = \"--strict-config\" ]; then printf 'codex-cli 0.140.0 C:\\\\Users\\\\codex-status-private\\\\AppData\\n'; exit 0; fi",
+    "if [ \"$1\" = \"login\" ]; then printf 'logged in from C:\\\\Users\\\\codex-status-private\\\\auth\\n'; exit 0; fi",
+    "if [ \"$1\" = \"mcp\" ]; then printf '[{\"name\":\"fakeMcp\"}]\\n'; exit 0; fi",
+    "printf 'unexpected fake codex args %s\\n' \"$*\"",
+    "exit 1",
+    ""
+  ].join("\n"), "utf8");
+  fs.chmodSync(commandPath, 0o755);
+  return commandPath;
 }
 
 const jsonResult = run(["--json", "--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks"]);
@@ -94,6 +127,89 @@ if (report) {
   if (!Array.isArray(report.nextActions) || report.nextActions.length === 0) {
     fail("codex status must include nextActions.");
   }
+  if (report.cliQuickStart?.interactiveMenu !== "npm run chef") {
+    fail("codex status must include the interactive Chef CLI entrypoint.");
+  }
+  if (!report.codexCliRuntime?.target?.codexHome) {
+    fail("codex status must include the explicit target CODEX_HOME under test.");
+  }
+  if (!report.codexCliRuntime?.ambient?.inspected) {
+    fail("codex status must include ambient Codex CLI status so shell drift is visible.");
+  }
+  if (!["same", "different", "unknown"].includes(report.codexCliRuntime?.ambient?.relationshipToTarget)) {
+    fail("codex status ambient relationship must be same, different, or unknown.");
+  }
+  for (const command of [
+    "npm run chef -- --status",
+    "npm run chef -- --doctor",
+    "npm run chef -- --mcp",
+    "npm run chef -- --logs"
+  ]) {
+    if (!report.cliQuickStart?.readOnlyCommands?.includes(command)) {
+      fail(`codex status quick start missing read-only command: ${command}`);
+    }
+  }
+  if (report.cliQuickStart?.numberedActions !== true) {
+    fail("codex status must document numbered interactive actions.");
+  }
+  if (!report.gitRepository?.inspected) {
+    fail("codex status must inspect Git repository health.");
+  }
+  if (!["ok", "attention", "fail"].includes(report.gitRepository?.status)) {
+    fail(`codex status Git repository health has unexpected status: ${report.gitRepository?.status}`);
+  }
+  if ((report.gitRepository?.dirtyLineCount || 0) > 0 && report.gitRepository.status === "ok") {
+    fail("codex status must report dirty Git worktrees as attention, not ok.");
+  }
+  if ((report.gitRepository?.dirtyLineCount || 0) > 0 && report.status === "ok") {
+    fail("codex status overall status must not be ok while the Git worktree is dirty.");
+  }
+  if (!report.logSummary?.inspected) {
+    fail("codex status must include a log summary.");
+  }
+  if (!Array.isArray(report.logSummary?.repoCliLogs?.recent)) {
+    fail("codex status log summary must include recent repo CLI logs.");
+  }
+  if (report.logSummary?.repoCliLogs?.contentInspected !== false) {
+    fail("codex status must not inspect repo CLI log contents.");
+  }
+  if (!Array.isArray(report.logSummary?.codexLogs?.recent)) {
+    fail("codex status log summary must include recent Codex log metadata.");
+  }
+  if (report.logSummary?.codexLogs?.contentInspected !== false) {
+    fail("codex status must not inspect Codex log contents.");
+  }
+}
+
+const fakeCodexCommand = writeFakeCodexCommand();
+const fakeCodexResult = run([
+  "--json",
+  "--redact-paths",
+  "--skip-runtime",
+  "--skip-codex-doctor-checks"
+], {
+  env: {
+    ...process.env,
+    CODEX_STATUS_CODEX_COMMAND: fakeCodexCommand
+  }
+});
+if (fakeCodexResult.error) {
+  fail(`codex status fake Codex validation could not run: ${fakeCodexResult.error.message}`);
+} else if (fakeCodexResult.status !== 0 && fakeCodexResult.status !== 1) {
+  fail(`codex status fake Codex validation exited ${fakeCodexResult.status}: ${(fakeCodexResult.stderr || fakeCodexResult.stdout).trim()}`);
+} else {
+  const serialized = fakeCodexResult.stdout;
+  try {
+    const fakeReport = JSON.parse(fakeCodexResult.stdout);
+    if (!fakeReport.codexCliRuntime?.mcp?.configuredServers?.includes("fakeMcp")) {
+      fail("codex status fake Codex validation must use CODEX_STATUS_CODEX_COMMAND.");
+    }
+  } catch (error) {
+    fail(`codex status fake Codex validation did not emit parseable JSON: ${error.message}`);
+  }
+  if (serialized.includes("codex-status-private") || serialized.includes("C:\\\\Users\\\\codex-status-private")) {
+    fail("codex status --redact-paths must redact escaped Windows user profile paths in command previews.");
+  }
 }
 
 const textResult = run(["--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks"]);
@@ -102,7 +218,7 @@ if (textResult.error) {
 } else if (textResult.status !== 0) {
   fail(`codex status text validation exited ${textResult.status}: ${(textResult.stderr || textResult.stdout).trim()}`);
 } else {
-  for (const required of ["Codex Chef status", "Repo starter:", "Installed runtime:", "Skills context:", "Enterprise routing:", "Effective controls:", "MCP setup:", "MCP setup note: serena", "MCP setup note: supabase"]) {
+  for (const required of ["Codex Chef status", "Use:", "Numbered menu:", "Target Codex home:", "Ambient Codex:", "Repo Git:", "Logs:", "Repo starter:", "Installed runtime:", "Skills context:", "Enterprise routing:", "Effective controls:", "MCP setup:", "MCP setup note: serena", "MCP setup note: supabase"]) {
     if (!textResult.stdout.includes(required)) fail(`codex status text output missing: ${required}`);
   }
 }

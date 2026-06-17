@@ -108,6 +108,16 @@ if (!exists(cliPath)) {
     if (!cli.includes(required)) fail(`${cliPath} missing required CLI surface: ${required}`);
   }
 
+  for (const requiredIcon of ["🍳", "✅", "ℹ️", "⚠️", "▶️", "🔐", "📘", "🧾"]) {
+    if (!cli.includes(requiredIcon)) fail(`${cliPath} missing enterprise icon: ${requiredIcon}`);
+  }
+  if (/[ðâ][^\n"]{0,8}/.test(cli) || cli.includes("�")) {
+    fail(`${cliPath} contains mojibake in the icon set; use real UTF-8 icons or --plain ASCII labels.`);
+  }
+  if (/TERM:\s*"dumb"/.test(cli)) {
+    fail(`${cliPath} must not force TERM=dumb because codex doctor treats that as a terminal health issue.`);
+  }
+
   for (const requiredLabel of [
     "Status",
     "Doctor",

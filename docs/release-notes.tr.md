@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+## v0.5.21 - 2026-06-17
+
+Bu patch Codex Chef icin premium operator status gecisini tamamlar. Status
+panosu artik son kullaniciya daha net calisma adimlari, canli Codex runtime
+kaniti, guvenli log metadata'si ve Git/release dikkat sinyalleri verir; lokal
+dosya icerigini terminale basmaz.
+
+## One cikanlar
+
+- `npm run codex:status:all` artik quick-start bolumu, target ve ambient Codex
+  runtime probe'lari, version/login/MCP kontrolleri, Git sagligi, routing
+  profile gorunurlugu ve effective-control ozetleri gosterir.
+- Recent log raporu metadata-only calisir: dosya adi, zaman ve boyut gorunur,
+  fakat log icerigi okunmaz veya yazdirilmaz.
+- CLI validation artik icon/mojibake regresyonlarini, escaped Windows path
+  sizintilarini, dirty Git worktree icin yanlis temiz durumlarini ve fake Codex
+  probe regresyonlarini engeller.
+- `npm run chef -- --status` artik `TERM=dumb` zorlamaz; bu da gercek Windows
+  terminallerinde false `codex doctor` terminal-health hatalarini engeller.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run codex:status:all
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.20 - 2026-06-17
 
 Bu patch son public dokumantasyon temizligini release history icine alir ve

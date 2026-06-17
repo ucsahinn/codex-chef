@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+## v0.5.21 - 2026-06-17
+
+This patch completes the premium operator status pass for Codex Chef. The
+status board now shows a clearer end-user handoff, live Codex runtime evidence,
+safe log metadata, and Git/release attention signals without exposing local
+file contents.
+
+## Highlights
+
+- `npm run codex:status:all` now includes a quick-start section, target and
+  ambient Codex runtime probes, version/login/MCP checks, Git health, routing
+  profile visibility, and effective-control summaries.
+- Recent log reporting is metadata-only: names, timestamps, and sizes are shown,
+  but log contents are not inspected or printed.
+- CLI validation now blocks icon/mojibake regressions, escaped Windows path
+  leaks, false clean states for dirty Git worktrees, and fake Codex probe
+  regressions.
+- `npm run chef -- --status` no longer forces `TERM=dumb`, avoiding false
+  `codex doctor` terminal-health failures on real Windows terminals.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run codex:status:all
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.20 - 2026-06-17
 
 This patch keeps the latest public documentation cleanup inside the released

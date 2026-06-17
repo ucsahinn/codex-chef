@@ -239,7 +239,6 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
       ...process.env,
       FORCE_COLOR: "0",
       NO_COLOR: "1",
-      TERM: "dumb",
       ...(extra.env || {})
     }
   });

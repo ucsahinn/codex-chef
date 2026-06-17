@@ -68,12 +68,17 @@ Options:
 function redact(value) {
   if (!options.redactPaths || typeof value !== "string") return value;
   const home = os.homedir();
+  const escapedHome = home.replaceAll("\\", "\\\\");
+  const escapedRoot = root.replaceAll("\\", "\\\\");
   return value
     .replaceAll(home, "${HOME}")
+    .replaceAll(escapedHome, "${HOME}")
     .replaceAll(home.replaceAll("\\", "/"), "${HOME}")
     .replaceAll(root, "${REPO}")
+    .replaceAll(escapedRoot, "${REPO}")
     .replaceAll(root.replaceAll("\\", "/"), "${REPO}")
     .replace(/[A-Za-z]:\\Users\\[^\\/]+/g, "${OTHER_USERPROFILE}")
+    .replace(/[A-Za-z]:\\\\Users\\\\[^\\/]+/g, "${OTHER_USERPROFILE}")
     .replace(/[A-Za-z]:\/Users\/[^\\/]+/g, "${OTHER_USERPROFILE}");
 }
 
@@ -131,6 +136,39 @@ function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.join(root, relativePath), "utf8"));
 }
 
+function safeStat(filePath) {
+  try {
+    return fs.statSync(filePath);
+  } catch {
+    return null;
+  }
+}
+
+function listRecentFiles(dir, extensions = null, limit = 8) {
+  if (!fs.existsSync(dir)) return { exists: false, recent: [] };
+  const recent = fs.readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .filter((entry) => {
+      if (!extensions) return true;
+      return extensions.some((extension) => entry.name.endsWith(extension));
+    })
+    .map((entry) => {
+      const fullPath = path.join(dir, entry.name);
+      const stat = safeStat(fullPath);
+      if (!stat) return null;
+      return {
+        file: redact(fullPath),
+        name: entry.name,
+        size: stat.size,
+        modified: stat.mtime.toISOString()
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.modified.localeCompare(a.modified))
+    .slice(0, limit);
+  return { exists: true, recent };
+}
+
 function readInstalledOrTemplateConfig() {
   const installedPath = path.join(options.codexHome, "config.toml");
   const templatePath = process.platform === "win32"
@@ -163,7 +201,23 @@ function readTomlValue(text, dottedKey) {
   return Number.isFinite(numeric) ? numeric : raw;
 }
 
+function expandUserPath(value, fallback) {
+  if (!value || typeof value !== "string") return fallback;
+  let expanded = value
+    .replaceAll("$CODEX_HOME", options.codexHome)
+    .replaceAll("${CODEX_HOME}", options.codexHome)
+    .replaceAll("%CODEX_HOME%", options.codexHome)
+    .replaceAll("$HOME", os.homedir())
+    .replaceAll("${HOME}", os.homedir())
+    .replaceAll("%USERPROFILE%", os.homedir());
+  if (expanded === "~" || expanded.startsWith(`~${path.sep}`) || expanded.startsWith("~/")) {
+    expanded = path.join(os.homedir(), expanded.slice(2));
+  }
+  return path.resolve(expanded);
+}
+
 function codexCommand() {
+  if (process.env.CODEX_STATUS_CODEX_COMMAND) return process.env.CODEX_STATUS_CODEX_COMMAND;
   return process.platform === "win32" ? "codex.cmd" : "codex";
 }
 
@@ -283,6 +337,279 @@ function inspectEffectiveControls() {
     hookNote: managedHooks === 0
       ? "Codex Chef enables hooks support but ships no lifecycle hook files; inspect /hooks before relying on user or project hooks."
       : "Managed hook files are present; inspect them before release-sensitive work."
+  };
+}
+
+function parseJsonCommand(command, commandArgs, label, extra = {}) {
+  const result = run(command, commandArgs, { timeout: extra.timeout || 120000, env: extra.env || process.env });
+  const output = redact([result.stdout, result.stderr].filter(Boolean).join("\n").trim());
+  if (result.error) {
+    return {
+      inspected: false,
+      status: "attention",
+      label,
+      exitCode: null,
+      summary: `${label} could not run: ${result.error.message}`,
+      outputPreview: null
+    };
+  }
+  if (result.status !== 0) {
+    return {
+      inspected: true,
+      status: "attention",
+      label,
+      exitCode: result.status,
+      summary: `${label} exited ${result.status}.`,
+      outputPreview: output.split(/\r?\n/).slice(0, 6)
+    };
+  }
+  try {
+    return {
+      inspected: true,
+      status: "ok",
+      label,
+      exitCode: result.status,
+      parsed: JSON.parse(result.stdout || "{}")
+    };
+  } catch (error) {
+    return {
+      inspected: true,
+      status: "attention",
+      label,
+      exitCode: result.status,
+      summary: `${label} did not emit parseable JSON: ${error.message}`,
+      outputPreview: output.split(/\r?\n/).slice(0, 6)
+    };
+  }
+}
+
+function parseTextCommand(command, commandArgs, label, extra = {}) {
+  const result = run(command, commandArgs, { timeout: extra.timeout || 120000, env: extra.env || process.env });
+  const output = redact([result.stdout, result.stderr].filter(Boolean).join("\n").trim());
+  if (result.error) {
+    return {
+      inspected: false,
+      status: "attention",
+      label,
+      exitCode: null,
+      summary: `${label} could not run: ${result.error.message}`,
+      outputPreview: null
+    };
+  }
+  return {
+    inspected: true,
+    status: result.status === 0 ? "ok" : "attention",
+    label,
+    exitCode: result.status,
+    outputPreview: output.split(/\r?\n/).filter(Boolean).slice(0, 6)
+  };
+}
+
+function inspectCodexCliRuntime() {
+  function inspectWithEnv(env, labelPrefix) {
+    const version = parseTextCommand(codexCommand(), ["--strict-config", "--version"], `${labelPrefix} codex --strict-config --version`, { env });
+    const login = parseTextCommand(codexCommand(), ["login", "status"], `${labelPrefix} codex login status`, { env });
+    const mcp = parseJsonCommand(codexCommand(), ["mcp", "list", "--json"], `${labelPrefix} codex mcp list --json`, { env });
+    const mcpEntries = Array.isArray(mcp.parsed)
+      ? mcp.parsed
+      : Array.isArray(mcp.parsed?.servers)
+        ? mcp.parsed.servers
+        : Array.isArray(mcp.parsed?.mcp_servers)
+          ? mcp.parsed.mcp_servers
+          : [];
+    const mcpNames = mcpEntries
+      .map((server) => server.name || server.id)
+      .filter(Boolean)
+      .sort();
+
+    return { version, login, mcp, mcpNames };
+  }
+
+  const targetEnv = { ...process.env, CODEX_HOME: options.codexHome };
+  const targetProbe = inspectWithEnv(targetEnv, "target");
+  const ambientProbe = inspectWithEnv(process.env, "ambient");
+  const { version, login, mcp, mcpNames } = targetProbe;
+  const ambientMcpNames = ambientProbe.mcpNames;
+  const ambientSameAsTarget = ambientProbe.login.status === login.status
+    && ambientMcpNames.length === mcpNames.length
+    && ambientMcpNames.every((name, index) => name === mcpNames[index]);
+  const ambientRelationship = ambientProbe.login.inspected || ambientProbe.mcp.inspected
+    ? (ambientSameAsTarget ? "same" : "different")
+    : "unknown";
+
+  const issues = [
+    ...(version.status === "ok" ? [] : [version.summary || `${version.label} needs attention.`]),
+    ...(login.status === "ok" ? [] : ["Codex login is not confirmed by `codex login status`; refresh auth outside repo files if needed."]),
+    ...(mcp.status === "ok" ? [] : [mcp.summary || "`codex mcp list --json` needs attention."]),
+    ...(ambientRelationship === "different"
+      ? ["Ambient Codex CLI status differs from the explicit Codex Chef target; restart Codex or set CODEX_HOME for direct shell diagnostics."]
+      : [])
+  ];
+
+  return {
+    inspected: true,
+    status: issues.length === 0 ? "ok" : "attention",
+    target: {
+      codexHome: redact(options.codexHome),
+      agentsHome: redact(options.agentsHome)
+    },
+    version,
+    login: {
+      inspected: login.inspected,
+      status: login.status,
+      exitCode: login.exitCode,
+      outputPreview: login.outputPreview
+    },
+    mcp: {
+      inspected: mcp.inspected,
+      status: mcp.status,
+      exitCode: mcp.exitCode,
+      configuredCount: mcpNames.length,
+      configuredServers: mcpNames,
+      outputPreview: mcp.outputPreview || null
+    },
+    ambient: {
+      inspected: ambientProbe.version.inspected || ambientProbe.login.inspected || ambientProbe.mcp.inspected,
+      relationshipToTarget: ambientRelationship,
+      codexHomeEnv: process.env.CODEX_HOME ? redact(process.env.CODEX_HOME) : null,
+      version: {
+        inspected: ambientProbe.version.inspected,
+        status: ambientProbe.version.status,
+        exitCode: ambientProbe.version.exitCode,
+        outputPreview: ambientProbe.version.outputPreview
+      },
+      login: {
+        inspected: ambientProbe.login.inspected,
+        status: ambientProbe.login.status,
+        exitCode: ambientProbe.login.exitCode,
+        outputPreview: ambientProbe.login.outputPreview
+      },
+      mcp: {
+        inspected: ambientProbe.mcp.inspected,
+        status: ambientProbe.mcp.status,
+        exitCode: ambientProbe.mcp.exitCode,
+        configuredCount: ambientMcpNames.length,
+        configuredServers: ambientMcpNames,
+        outputPreview: ambientProbe.mcp.outputPreview || null
+      }
+    },
+    issues,
+    note: "Auth and MCP status use official Codex CLI commands; this script does not read auth.json, keyrings, OAuth caches, or token values."
+  };
+}
+
+function inspectCliQuickStart() {
+  return {
+    inspected: true,
+    interactiveMenu: "npm run chef",
+    numberedActions: true,
+    readOnlyCommands: [
+      "npm run chef -- --status",
+      "npm run chef -- --doctor",
+      "npm run chef -- --preview",
+      "npm run chef -- --skills",
+      "npm run chef -- --mcp",
+      "npm run chef -- --auth",
+      "npm run chef -- --logs",
+      "npm run codex:status",
+      "npm run codex:status:all"
+    ],
+    writeActionsRequireApply: [
+      "npm run chef -- --install --apply",
+      "npm run chef -- --reset --apply",
+      "npm run chef -- --repair --apply",
+      "npm run chef -- --skills --apply"
+    ],
+    auditMode: "npm run chef -- --status --no-log",
+    plainOutput: "npm run chef -- --plain",
+    boundary: "Install, reset, repair, selected skill install, publish, deploy, credential, database, and destructive work still require explicit approval or --apply where supported."
+  };
+}
+
+function inspectGitRepository() {
+  const result = run("git", ["status", "--short"], { timeout: 30000 });
+  const output = redact([result.stdout, result.stderr].filter(Boolean).join("\n").trim());
+  if (result.error) {
+    return {
+      inspected: true,
+      status: "attention",
+      issueId: "git.unavailable",
+      summary: `git status could not run: ${result.error.message}`,
+      dirtyLineCount: null,
+      outputPreview: null
+    };
+  }
+
+  if (result.status !== 0) {
+    const safeDirectory = /dubious ownership|safe\.directory/i.test(output);
+    return {
+      inspected: true,
+      status: safeDirectory ? "attention" : "fail",
+      issueId: safeDirectory ? "git.safe_directory" : "git.status_failed",
+      summary: safeDirectory
+        ? "Git refuses this checkout because Windows ownership differs from the current user."
+        : `git status --short exited ${result.status}.`,
+      remediation: safeDirectory
+        ? `If you trust this checkout, run: git config --global --add safe.directory ${redact(root)}`
+        : "Read the git status stderr and fix the repository state before release or push work.",
+      dirtyLineCount: null,
+      outputPreview: output.split(/\r?\n/).slice(0, 4)
+    };
+  }
+
+  const dirtyLineCount = result.stdout
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length > 0)
+    .length;
+  return {
+    inspected: true,
+    status: dirtyLineCount === 0 ? "ok" : "attention",
+    issueId: null,
+    summary: dirtyLineCount === 0
+      ? "git status --short is clean."
+      : `git status --short reports ${dirtyLineCount} changed line(s).`,
+    dirtyLineCount,
+    outputPreview: dirtyLineCount === 0 ? [] : result.stdout.split(/\r?\n/).filter(Boolean).slice(0, 8)
+  };
+}
+
+function inspectRepoCliLog(logFile) {
+  return {
+    contentInspected: false,
+    note: "Content is not inspected by status because command logs can contain local context."
+  };
+}
+
+function inspectLogSummary() {
+  const repoLogDir = path.join(root, "tmp", "chef-cli", "logs");
+  const repoCliLogs = listRecentFiles(repoLogDir, [".log"], 12);
+  repoCliLogs.recent = repoCliLogs.recent.map((entry) => ({
+    ...entry,
+    ...inspectRepoCliLog(path.join(repoLogDir, entry.name))
+  }));
+
+  const config = readInstalledOrTemplateConfig();
+  const configuredLogDir = readTomlValue(config.text, "log_dir");
+  const codexLogDir = expandUserPath(configuredLogDir, path.join(options.codexHome, "log"));
+  const codexLogs = listRecentFiles(codexLogDir, [".log", ".jsonl"], 8);
+
+  return {
+    inspected: true,
+    repoCliLogs: {
+      path: redact(repoLogDir),
+      exists: repoCliLogs.exists,
+      recent: repoCliLogs.recent,
+      contentInspected: false,
+      note: "Repo-local Chef CLI logs are generated by this wrapper and have command output redacted."
+    },
+    codexLogs: {
+      path: redact(codexLogDir),
+      configSource: config.source,
+      exists: codexLogs.exists,
+      recent: codexLogs.recent,
+      contentInspected: false,
+      note: "Codex log contents are not read here because they can contain prompts or local context; this status only reports file metadata."
+    }
   };
 }
 
@@ -448,6 +775,10 @@ const skillsContext = summarizeSkillContext(runtime.report, skillInventory);
 const routingBoard = inspectRoutingBoard();
 const mcpSetupBoard = inspectMcpSetupBoard();
 const effectiveControls = inspectEffectiveControls();
+const codexCliRuntime = inspectCodexCliRuntime();
+const cliQuickStart = inspectCliQuickStart();
+const gitRepository = inspectGitRepository();
+const logSummary = inspectLogSummary();
 
 const failures = [
   ...repoDoctor.failures.map((failure) => `repo: ${failure}`),
@@ -461,6 +792,8 @@ const warnings = [
 const attentionReasons = [
   ...(warnings.length > 0 ? warnings : []),
   ...(skillsContext.status === "attention" ? [skillsContext.impact] : []),
+  ...(codexCliRuntime.status === "attention" ? codexCliRuntime.issues : []),
+  ...(gitRepository.status === "ok" ? [] : [gitRepository.summary]),
   ...(codexDoctor.status === "attention"
     ? [
         `codex doctor checks need attention: ${codexDoctor.counts?.fail || 0} fail, ${codexDoctor.counts?.warning || 0} warning`
@@ -481,11 +814,15 @@ const report = {
   repoDoctor,
   runtime,
   codexDoctor,
+  codexCliRuntime,
   skillInventory,
   skillsContext,
   routingBoard,
   mcpSetupBoard,
   effectiveControls,
+  cliQuickStart,
+  gitRepository,
+  logSummary,
   warnings,
   attentionReasons,
   failures,
@@ -503,6 +840,20 @@ if (options.json) {
 } else {
   console.log("Codex Chef status");
   console.log(`Overall: ${report.status}`);
+  console.log(`Use: ${cliQuickStart.interactiveMenu} (or ${cliQuickStart.auditMode} for no repo-local log)`);
+  console.log(`Numbered menu: ${cliQuickStart.numberedActions ? "yes" : "no"}; write actions require --apply or typed confirmation.`);
+  console.log(`Target Codex home: ${codexCliRuntime.target.codexHome}`);
+  console.log(
+    `Ambient Codex: ${codexCliRuntime.ambient.relationshipToTarget} (login ${codexCliRuntime.ambient.login.status}, MCP ${codexCliRuntime.ambient.mcp.configuredCount}; CODEX_HOME env ${codexCliRuntime.ambient.codexHomeEnv || "unset"})`
+  );
+  console.log(`Repo Git: ${gitRepository.status} - ${gitRepository.summary}`);
+  if (gitRepository.remediation) console.log(`Repo Git remediation: ${gitRepository.remediation}`);
+  console.log(
+    `Codex CLI: ${codexCliRuntime.status} (strict config ${codexCliRuntime.version.status}, login ${codexCliRuntime.login.status}, MCP ${codexCliRuntime.mcp.status}; MCP configured ${codexCliRuntime.mcp.configuredCount})`
+  );
+  console.log(
+    `Logs: Chef ${logSummary.repoCliLogs.recent.length} recent metadata record(s), content not inspected; Codex ${logSummary.codexLogs.recent.length} recent metadata record(s), content not inspected`
+  );
   if (repoDoctor.report) {
     console.log(
       `Repo starter: ${repoDoctor.status} (${repoDoctor.report.agents?.count || 0} agents, ${repoDoctor.report.mcp?.count || 0} MCP, ${repoDoctor.report.docs?.baseGuides || 0} docs x ${repoDoctor.report.docs?.languages || 0})`

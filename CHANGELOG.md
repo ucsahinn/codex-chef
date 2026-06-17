@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.5.21 - 2026-06-17
+
+- Upgraded the Codex Chef status board with an end-user quick start,
+  target/ambient Codex runtime checks, live MCP/login/version probes, Git
+  health, routing/effective-control summaries, and metadata-only log reporting.
+- Fixed false terminal-health warnings by letting the Codex child process inherit
+  the real terminal environment instead of forcing `TERM=dumb`.
+- Strengthened release validation for visual CLI icons, mojibake regressions,
+  escaped Windows path redaction, fake Codex command probes, dirty Git worktree
+  attention states, and no log-content inspection.
+
 ## 0.5.20 - 2026-06-17
 
 - Removed remaining machine-specific local-audit path details from public
