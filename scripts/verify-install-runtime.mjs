@@ -54,6 +54,12 @@ Options:
 `);
 }
 
+const progressEnabled = !options.json;
+if (progressEnabled) {
+  console.log("Codex Chef install runtime verification");
+  console.log("Collecting installed file, Codex CLI, MCP, skill, and Git guard checks; this can take 30-60 seconds.");
+}
+
 function readJson(rel) {
   return JSON.parse(fs.readFileSync(path.join(root, rel), "utf8"));
 }
@@ -494,7 +500,7 @@ report.status = failures.length === 0 ? "ok" : "fail";
 if (options.json) {
   console.log(JSON.stringify(report, null, 2));
 } else {
-  console.log("Codex Chef install runtime verification");
+  if (!progressEnabled) console.log("Codex Chef install runtime verification");
   console.log(`Status: ${report.status}`);
   console.log(`Codex home: ${report.installed.codexHome}`);
   console.log(`Agents home: ${report.installed.agentsHome}`);

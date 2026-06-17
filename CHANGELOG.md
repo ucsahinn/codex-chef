@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.5.23 - 2026-06-17
+
+- Added immediate progress messages to the Chef status wrapper, direct status
+  board, and install runtime verifier so long Codex/runtime checks do not look
+  silent or broken while they collect evidence.
+
 ## 0.5.22 - 2026-06-17
 
 - Fixed the Codex status validator for CI and fresh machines where the Codex

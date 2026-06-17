@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+## v0.5.23 - 2026-06-17
+
+This patch improves the end-user command experience for long runtime checks.
+Status and install verification now print an immediate progress message before
+they collect Codex CLI, MCP, Git, skill, and log metadata evidence.
+
+## Highlights
+
+- `npm run chef -- --status` now tells the user that Codex runtime, MCP, Git,
+  and log metadata checks are being collected and may take 30-60 seconds.
+- `npm run codex:status:all` prints an immediate status preamble before the
+  heavier runtime probes run.
+- `npm run verify:install:runtime -- --expect-skills --expect-git-guards`
+  prints an immediate verification preamble before installed-runtime checks run.
+- JSON outputs remain machine-readable; progress text is only printed in human
+  text mode.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --status --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.22 - 2026-06-17
 
 This patch fixes the release CI validation path for environments that do not

@@ -65,6 +65,12 @@ Options:
 `);
 }
 
+const progressEnabled = !options.json;
+if (progressEnabled) {
+  console.log("Codex Chef status");
+  console.log("Collecting repo, runtime, Codex CLI, MCP, Git, and log metadata checks; this can take 30-60 seconds.");
+}
+
 function redact(value) {
   if (!options.redactPaths || typeof value !== "string") return value;
   const home = os.homedir();
@@ -838,7 +844,7 @@ writeOutput(report);
 if (options.json) {
   console.log(JSON.stringify(report, null, 2));
 } else {
-  console.log("Codex Chef status");
+  if (!progressEnabled) console.log("Codex Chef status");
   console.log(`Overall: ${report.status}`);
   console.log(`Use: ${cliQuickStart.interactiveMenu} (or ${cliQuickStart.auditMode} for no repo-local log)`);
   console.log(`Numbered menu: ${cliQuickStart.numberedActions ? "yes" : "no"}; write actions require --apply or typed confirmation.`);

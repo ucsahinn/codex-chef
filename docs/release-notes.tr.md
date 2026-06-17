@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+## v0.5.23 - 2026-06-17
+
+Bu patch uzun runtime kontrolleri icin son kullanici komut deneyimini
+iyilestirir. Status ve install verification komutlari artik Codex CLI, MCP,
+Git, skill ve log metadata kanitlarini toplamadan once hemen progress mesaji
+basar.
+
+## One cikanlar
+
+- `npm run chef -- --status` artik Codex runtime, MCP, Git ve log metadata
+  kontrollerinin toplandigini ve 30-60 saniye surebilecegini kullaniciya hemen
+  soyler.
+- `npm run codex:status:all`, agir runtime probe'lari baslamadan once aninda
+  status preamble'i basar.
+- `npm run verify:install:runtime -- --expect-skills --expect-git-guards`,
+  installed-runtime kontrollerinden once aninda verification preamble'i basar.
+- JSON ciktilari makine okunur kalir; progress metni yalnizca human text mode'da
+  basilir.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --status --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.22 - 2026-06-17
 
 Bu patch Codex CLI henuz kurulu olmayan CI ve temiz makinelerde release

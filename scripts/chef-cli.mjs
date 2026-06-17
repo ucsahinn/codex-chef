@@ -228,6 +228,7 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
   ].join("\n");
   if (logPath) fs.appendFileSync(logPath, header, "utf8");
   console.log(`${ICONS.run} ${commandForDisplay(command, commandArgs)}`);
+  if (extra.waitNote && !options.json) console.log(`${ICONS.info} ${extra.waitNote}`);
 
   const result = spawnSync(executable, argsForSpawn, {
     cwd: root,
@@ -305,21 +306,27 @@ function runStatus() {
   return runNode("status", "scripts/codex-status.mjs", [
     "--redact-paths",
     ...(options.json ? ["--json"] : [])
-  ]);
+  ], {
+    waitNote: "Collecting Codex runtime, MCP, Git, and log metadata checks; this can take 30-60 seconds."
+  });
 }
 
 function runDoctor() {
   const first = runNode("doctor", "scripts/codex-doctor.mjs", [
     "--redact-paths",
     ...(options.json ? ["--json"] : [])
-  ]);
+  ], {
+    waitNote: "Running repo doctor checks."
+  });
   if (!first.ok) return first;
   return runNode("runtime", "scripts/verify-install-runtime.mjs", [
     "--redact-paths",
     "--expect-skills",
     "--expect-git-guards",
     ...(options.json ? ["--json"] : [])
-  ]);
+  ], {
+    waitNote: "Verifying installed Codex Chef runtime; this can take 30-60 seconds."
+  });
 }
 
 function runPreview(force = false) {
