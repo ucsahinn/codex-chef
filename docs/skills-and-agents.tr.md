@@ -237,8 +237,15 @@ Routing kurali:
 - Subagent kullanimi acik delegasyondur. Kullanici paralel/delege is isterse
   veya aktif global setup task-shape routing'e izin veriyorsa Codex uygun uzman
   ajani bilerek spawn etmelidir.
+- Bu starter global AGENTS routing bolumunu, eslesen non-trivial task shape icin
+  standing explicit delegation istegi gibi ele alir. Codex'in gizli background
+  auto-spawn scheduler'i varmis gibi anlatmaz.
 - Non-trivial is kayitli bir uzmana denk geliyorsa o uzman kullanilir ve sonucu
   kullanmadan once ozetlenir.
+- Gorunur routing ciktisi `Agent plan`, `Agent started`, `Agent result`,
+  `Skill selected`, `MCP selected` ve
+  `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`
+  satirlarini icermelidir.
 - En iyi alanlari gurultulu okuma ve kanit toplama isleridir: kesif, guncel
   docs, context yerlestirme, prompt tasarimi, MCP planlama, review, UI
   dogrulama, security audit, test/build kaniti, setup tanilama ve release
@@ -261,6 +268,13 @@ kanıt toplamadır.
 ```bash
 npm run codex:routing
 npm run codex:status
+npm run chef -- --routing --profile starter-health
 ```
 
-Her profil task trigger'ini, gerekli subagent'lari, ilgili skill'leri, kullanilacak MCP'leri, beklenen flag/check'leri, evidence sinyallerini ve guvenlik sinirini yazar. Bu Codex Chef'i faydali anlamda otonom yapar: task shape profile uydugunda eslesen uzman, skill, MCP ve flag rehberligi zorunlu olur. Gizli hook veya sessiz executor olusturmaz. Destructive, credential, publish, deploy, database ve genis filesystem aksiyonlari onay kapisinda kalir.
+Her profil task trigger'ini, gerekli subagent'lari, ilgili skill'leri,
+kullanilacak MCP'leri, beklenen flag/check'leri, evidence sinyallerini, owner,
+durability, primary surface, privilege delta, validation gate, rollback path ve
+guvenlik sinirini yazar. Bu Codex Chef'i faydali anlamda otonom yapar: task
+shape profile uydugunda eslesen uzman, skill, MCP ve flag rehberligi zorunlu
+olur. Gizli hook veya sessiz executor olusturmaz. Destructive, credential,
+publish, deploy, database ve genis filesystem aksiyonlari onay kapisinda kalir.

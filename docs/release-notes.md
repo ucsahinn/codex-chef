@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+## v0.5.24 - 2026-06-18
+
+This patch makes Codex Chef's agent, skill, and MCP routing behavior visible to
+operators. The CLI now exposes the routing contract directly, and the installed
+AGENTS template tells Codex to show which agents, skills, and MCPs were selected
+instead of letting delegated work disappear into the background.
+
+## Highlights
+
+- `npm run chef -- --routing` prints the enterprise routing board, subagent
+  visibility contract, wait policy, skill triggers, MCP choices, and `/agent`
+  inspection guidance.
+- The AGENTS template now requires `Agent plan`, `Agent started`, `Agent
+  result`, `Skill selected`, `MCP selected`, and final `Surfaces used`
+  reporting when those surfaces are used.
+- Validation now smoke-tests the routing CLI and blocks drift in the installed
+  visibility contract.
+- `npm run chef -- --status --repo-only` provides a fast local status path that
+  skips installed runtime and live Codex CLI probes for strict audits.
+- Direct script execution now resolves the repository root from the script
+  location, and the docs show `npm --prefix` for PowerShell users who start
+  outside the repo.
+- Routing profiles now carry owner, durability, privilege, validation, and
+  rollback metadata; MCP evidence is split into cataloged, installed config,
+  live `codex mcp list`, and `/mcp` session-visible states.
+- Status and runtime verification now share the same MCP JSON parser for array,
+  `servers`, `mcp_servers`, and object-map outputs.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --routing --no-log
+npm run chef -- --status --repo-only --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.23 - 2026-06-17
 
 This patch improves the end-user command experience for long runtime checks.

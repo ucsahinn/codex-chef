@@ -86,10 +86,35 @@ are selected:
 
 ## Subagent Routing
 
+### Subagent Visibility Contract
+
 - Treat subagents as explicit delegation, not background magic. When the user
   asks for parallel or delegated work, or this global setup authorizes automatic
   task-shape routing, deliberately spawn the matching specialist and wait for a
   summarized result before relying on it.
+- Treat this section as the user's standing explicit request for matching
+  non-trivial task-shape delegation in this setup. Do not describe it as hidden
+  or platform-native auto-spawn; if the current Codex surface requires explicit
+  delegation, this policy and the user's prompt are the delegation request.
+- When delegation is used, make it visible. Before spawning, print an
+  `Agent plan` that names each requested agent, its scope, why it is needed,
+  expected output, and whether you will wait. After spawning, print
+  `Agent started` with the visible agent name or nickname and assigned task.
+  Before finalizing, print `Agent result` for each requested agent and include a
+  `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`
+  line so evidence is explicit and easy to audit.
+- When a skill is selected implicitly or explicitly, print `Skill selected`
+  with the skill name and the prompt or task-shape trigger. When an MCP server
+  is selected for docs, browser evidence, code navigation, or external context,
+  print `MCP selected` with the server name and reason. If an obvious skill or
+  MCP is skipped, state the reason instead of staying silent.
+- If the user asks for agent work and does not explicitly say "background",
+  wait for all requested subagents before continuing or finalizing. If the user
+  sends another prompt while agents are running, first report which agents are
+  still running, completed, failed, or blocked, then continue without losing the
+  later agent results.
+- In Codex CLI, tell the user they can use `/agent` to inspect active agent
+  threads, switch to one, steer it, or close completed threads.
 - Do not spawn subagents for trivial, single-file, low-risk changes.
 - For non-trivial work that matches a registered specialist, use the specialist
   instead of silently doing all exploration or verification in the main thread.

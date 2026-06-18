@@ -5,8 +5,10 @@ import path from "node:path";
 import process from "node:process";
 import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(process.cwd());
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(scriptDir, "..");
 const logRoot = path.join(root, "tmp", "chef-cli", "logs");
 const args = process.argv.slice(2);
 
@@ -15,8 +17,10 @@ const options = {
   json: false,
   plain: false,
   noLog: false,
+  repoOnly: false,
   apply: false,
-  action: null
+  action: null,
+  profile: null
 };
 
 const ACTION_FLAGS = new Map([
@@ -28,41 +32,39 @@ const ACTION_FLAGS = new Map([
   ["--install", "install"],
   ["--skills", "skills"],
   ["--mcp", "mcp"],
+  ["--routing", "routing"],
   ["--auth", "auth"],
   ["--logs", "logs"]
 ]);
 
-for (const arg of args) {
+for (let index = 0; index < args.length; index += 1) {
+  const arg = args[index];
   if (arg === "--help" || arg === "-h") options.help = true;
   else if (arg === "--json") options.json = true;
   else if (arg === "--plain") options.plain = true;
   else if (arg === "--no-log") options.noLog = true;
+  else if (arg === "--repo-only") options.repoOnly = true;
   else if (arg === "--apply") options.apply = true;
+  else if (arg === "--profile") {
+    options.profile = args[index + 1] || null;
+    index += 1;
+  }
   else if (ACTION_FLAGS.has(arg)) options.action = ACTION_FLAGS.get(arg);
   else throw new Error(`Unknown argument: ${arg}`);
 }
 
-const ICONS = options.plain
-  ? {
-      chef: "[chef]",
-      ok: "[ok]",
-      info: "[info]",
-      warn: "[warn]",
-      run: "[run]",
-      lock: "[auth]",
-      docs: "[docs]",
-      logs: "[logs]"
-    }
-  : {
-      chef: "🍳",
-      ok: "✅",
-      info: "ℹ️",
-      warn: "⚠️",
-      run: "▶️",
-      lock: "🔐",
-      docs: "📘",
-      logs: "🧾"
-    };
+const ASCII_ICONS = {
+  chef: "[chef]",
+  ok: "[ok]",
+  info: "[info]",
+  warn: "[warn]",
+  run: "[run]",
+  lock: "[auth]",
+  docs: "[docs]",
+  logs: "[logs]"
+};
+
+const ICONS = ASCII_ICONS;
 
 const MENU_ITEMS = [
   {
@@ -70,6 +72,12 @@ const MENU_ITEMS = [
     label: "Status",
     writes: "none",
     description: "Read-only installed runtime and repo status board."
+  },
+  {
+    id: "status:repo-only",
+    label: "Repo-only status",
+    writes: "none",
+    description: "Fast local repo checks without installed runtime or Codex CLI probes."
   },
   {
     id: "doctor",
@@ -114,6 +122,12 @@ const MENU_ITEMS = [
     description: "Show MCP defaults, disabled account connectors, and setup notes."
   },
   {
+    id: "routing",
+    label: "Routing",
+    writes: "none",
+    description: "Show task-shape routing, agent wait policy, skills, and MCP usage contract."
+  },
+  {
     id: "auth",
     label: "Auth",
     writes: "none/account guidance",
@@ -141,20 +155,25 @@ Usage:
   npm run chef -- --status
   npm run chef -- --doctor
   npm run chef -- --preview
+  npm run chef -- --status --repo-only
   npm run chef -- --reset [--apply]
   npm run chef -- --repair [--apply]
   npm run chef -- --install [--apply]
   npm run chef -- --skills
   npm run chef -- --mcp
+  npm run chef -- --routing
+  npm run chef -- --routing --profile starter-health
   npm run chef -- --auth
   npm run chef -- --logs
 
 Options:
-  --json     Emit JSON where supported
-  --plain    Use ASCII labels instead of icons
-  --no-log   Do not create repo-local CLI log files for strict audits
-  --apply    Allow write actions for install, reset, repair, or selected skill install
-  --help     Show this help
+  --json       Emit JSON where supported
+  --plain      Use ASCII labels instead of icons
+  --no-log     Do not create repo-local CLI log files for strict audits
+  --repo-only  Skip installed runtime and Codex CLI probes for status
+  --profile ID Show one routing profile when used with --routing
+  --apply      Allow write actions for install, reset, repair, or selected skill install
+  --help       Show this help
 
 Logs:
   tmp/chef-cli/logs
@@ -302,12 +321,16 @@ function printHeader() {
   console.log("");
 }
 
-function runStatus() {
-  return runNode("status", "scripts/codex-status.mjs", [
+function runStatus(overrides = {}) {
+  const repoOnly = Boolean(overrides.repoOnly || options.repoOnly);
+  return runNode(repoOnly ? "status-repo-only" : "status", "scripts/codex-status.mjs", [
     "--redact-paths",
+    ...(repoOnly ? ["--skip-runtime", "--skip-codex-doctor-checks", "--skip-codex-cli"] : []),
     ...(options.json ? ["--json"] : [])
   ], {
-    waitNote: "Collecting Codex runtime, MCP, Git, and log metadata checks; this can take 30-60 seconds."
+    waitNote: repoOnly
+      ? "Collecting local repo checks only; installed runtime and Codex CLI probes are skipped."
+      : "Collecting Codex runtime, MCP, Git, and log metadata checks; this can take 30-60 seconds."
   });
 }
 
@@ -333,7 +356,7 @@ function runPreview(force = false) {
   const plan = runNode("preview-plan", "scripts/plan-install.mjs", [
     "--all",
     ...(force ? ["--force"] : []),
-    "--json",
+    ...(options.json ? ["--json"] : []),
     "--redact-paths"
   ]);
   if (!plan.ok) return plan;
@@ -530,6 +553,15 @@ async function runMcp() {
   return { ok: true };
 }
 
+function runRouting() {
+  return runNode("routing", "scripts/codex-routing-board.mjs", [
+    ...(options.profile ? ["--profile", options.profile] : []),
+    ...(options.json ? ["--json"] : [])
+  ], {
+    waitNote: "Showing the agent, skill, MCP, and wait-policy routing contract."
+  });
+}
+
 function runAuth() {
   console.log(`${ICONS.lock} GitHub authentication boundary`);
   console.log("");
@@ -572,6 +604,8 @@ async function runAction(action) {
   switch (action) {
     case "status":
       return runStatus();
+    case "status:repo-only":
+      return runStatus({ repoOnly: true });
     case "doctor":
       return runDoctor();
     case "preview":
@@ -586,6 +620,8 @@ async function runAction(action) {
       return runSkills();
     case "mcp":
       return runMcp();
+    case "routing":
+      return runRouting();
     case "auth":
       return runAuth();
     case "logs":

@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+## v0.5.24 - 2026-06-18
+
+Bu patch Codex Chef'in agent, skill ve MCP routing davranisini operator icin
+gorunur hale getirir. CLI routing sozlesmesini dogrudan gosterir; kurulan
+AGENTS template'i de Codex'e hangi agent, skill ve MCP'nin secildigini sessiz
+arka plan isi gibi kaybetmeden raporlatir.
+
+## One cikanlar
+
+- `npm run chef -- --routing` enterprise routing board'u, subagent gorunurluk
+  sozlesmesini, bekleme politikasini, skill trigger'larini, MCP secimlerini ve
+  `/agent` inspection rehberini basar.
+- AGENTS template'i artik ilgili yuzeyler kullanildiginda `Agent plan`,
+  `Agent started`, `Agent result`, `Skill selected`, `MCP selected` ve final
+  `Surfaces used` raporlamasini zorunlu tutar.
+- Validation routing CLI'ini smoke-test eder ve kurulu gorunurluk sozlesmesinde
+  drift olursa release oncesi yakalar.
+- `npm run chef -- --status --repo-only`, strict audit icin kurulu runtime ve
+  live Codex CLI probe'larini atlayan hizli lokal status path'i verir.
+- Direct script execution artik repo kokunu script konumundan cozer; docs,
+  repo disindan baslayan PowerShell kullanicilari icin `npm --prefix` formunu
+  gosterir.
+- Routing profilleri owner, durability, privilege, validation ve rollback
+  metadata'si tasir; MCP kaniti cataloged, installed config, live
+  `codex mcp list` ve `/mcp` session-visible hallerine ayrilir.
+- Status ve runtime verification, array, `servers`, `mcp_servers` ve object-map
+  MCP JSON ciktilarini ayni parser ile okur.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --routing --no-log
+npm run chef -- --status --repo-only --no-log
+npm run verify:install:runtime -- --expect-skills --expect-git-guards
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.23 - 2026-06-17
 
 Bu patch uzun runtime kontrolleri icin son kullanici komut deneyimini

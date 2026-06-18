@@ -235,8 +235,14 @@ Routing rule:
 - Subagents are explicit delegation. Codex should deliberately spawn them when
   the user asks for parallel/delegated work or the active global setup
   authorizes task-shape routing.
+- This starter treats the global AGENTS routing section as a standing explicit
+  request for matching non-trivial task-shape delegation. It does not claim that
+  Codex has a hidden background auto-spawn scheduler.
 - For non-trivial work that maps to a registered specialist, use that specialist
   and summarize the result before relying on it.
+- Visible routing output should include `Agent plan`, `Agent started`,
+  `Agent result`, `Skill selected`, `MCP selected`, and
+  `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`.
 - Use them for noisy, read-heavy, or evidence-heavy side work: exploration,
   current docs, context placement, prompt design, MCP planning, review, UI
   verification, security audit, test/build evidence, setup diagnostics, and
@@ -257,12 +263,14 @@ is surfaced by:
 ```bash
 npm run codex:routing
 npm run codex:status
+npm run chef -- --routing --profile starter-health
 ```
 
 Each profile names the task trigger, required subagents, relevant skills,
-allowed MCPs, expected flags/checks, evidence signals, and the safety boundary.
-This keeps Codex Chef autonomous in the useful sense: when a task clearly
-matches a profile, the matching specialist, skill, MCP, and flag guidance is
-required unless a higher-priority instruction blocks it. It does not create
-hidden hooks or silent execution. Destructive, credentialed, publishing,
+allowed MCPs, expected flags/checks, evidence signals, owner, durability,
+primary surface, privilege delta, validation gate, rollback path, and the safety
+boundary. This keeps Codex Chef autonomous in the useful sense: when a task
+clearly matches a profile, the matching specialist, skill, MCP, and flag
+guidance is required unless a higher-priority instruction blocks it. It does not
+create hidden hooks or silent execution. Destructive, credentialed, publishing,
 deployment, database, and broad filesystem actions remain approval-gated.

@@ -3,8 +3,10 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(process.cwd());
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
 
 const options = {
@@ -66,6 +68,25 @@ function readJson(rel) {
 
 function readText(filePath) {
   return fs.readFileSync(filePath, "utf8");
+}
+
+function mcpEntriesFromParsed(parsed) {
+  if (Array.isArray(parsed)) return parsed;
+  if (Array.isArray(parsed?.servers)) return parsed.servers;
+  if (Array.isArray(parsed?.mcp_servers)) return parsed.mcp_servers;
+  if (parsed?.servers && typeof parsed.servers === "object") {
+    return Object.entries(parsed.servers).map(([id, value]) => ({
+      id,
+      ...(value && typeof value === "object" ? value : { value })
+    }));
+  }
+  if (parsed?.mcp_servers && typeof parsed.mcp_servers === "object") {
+    return Object.entries(parsed.mcp_servers).map(([id, value]) => ({
+      id,
+      ...(value && typeof value === "object" ? value : { value })
+    }));
+  }
+  return [];
 }
 
 function redact(value) {
@@ -392,7 +413,10 @@ function inspectCodexRuntime(failures, warnings) {
 
   try {
     const parsed = JSON.parse(mcpList.stdout || "[]");
-    const servers = Array.isArray(parsed) ? parsed.map((server) => server.name).filter(Boolean).sort() : [];
+    const servers = mcpEntriesFromParsed(parsed)
+      .map((server) => server.name || server.id)
+      .filter(Boolean)
+      .sort();
     const expected = readJson("catalog/mcp-servers.json").servers.map((server) => server.name).sort();
     const actual = new Set(servers);
     const missing = expected.filter((server) => !actual.has(server));

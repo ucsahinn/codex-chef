@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(process.cwd());
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(scriptDir, "..");
 const failures = [];
 
 function fail(message) {
@@ -18,6 +20,7 @@ const agents = readJson("catalog/agents.json");
 const mcp = readJson("catalog/mcp-servers.json");
 const skills = readJson("catalog/skills.json");
 const agentsTemplate = fs.readFileSync(path.join(root, "templates/codex/AGENTS.md"), "utf8");
+const routingBoardScript = fs.readFileSync(path.join(root, "scripts/codex-routing-board.mjs"), "utf8");
 
 const agentNames = new Set((agents.agents || []).map((agent) => agent.name));
 const mcpNames = new Set((mcp.servers || []).map((server) => server.name));
@@ -38,9 +41,43 @@ if (!routing.sourcePolicy || !/not hidden execution hooks/i.test(routing.sourceP
   fail("routing profile sourcePolicy must state that profiles are not hidden execution hooks.");
 }
 
+for (const required of [
+  "Subagent Visibility Contract",
+  "Agent plan",
+  "Agent started",
+  "Agent result",
+  "Skill selected",
+  "MCP selected",
+  "Surfaces used",
+  "/agent",
+  "wait for all requested subagents"
+]) {
+  if (!agentsTemplate.includes(required)) {
+    fail(`templates/codex/AGENTS.md missing subagent visibility contract snippet: ${required}`);
+  }
+}
+
+for (const required of [
+  "Subagent visibility contract",
+  "Agent plan",
+  "Skill selected",
+  "MCP selected",
+  "Surfaces used",
+  "agents=...",
+  "Use /agent in Codex CLI",
+  "wait for requested subagent results",
+  "Privilege delta",
+  "Validation",
+  "Rollback"
+]) {
+  if (!routingBoardScript.includes(required)) {
+    fail(`scripts/codex-routing-board.mjs missing routing visibility output snippet: ${required}`);
+  }
+}
+
 const seenIds = new Set();
 for (const profile of routing.profiles || []) {
-  for (const key of ["id", "title", "trigger", "agents", "skills", "mcp", "flags", "evidence", "boundary"]) {
+  for (const key of ["id", "title", "trigger", "agents", "skills", "mcp", "flags", "evidence", "boundary", "owner", "primarySurface", "durability", "privilegeDelta", "validationGate", "rollback"]) {
     if (!Object.prototype.hasOwnProperty.call(profile, key)) {
       fail(`routing profile missing ${key}: ${profile.id || "<unknown>"}`);
     }
@@ -72,6 +109,11 @@ for (const profile of routing.profiles || []) {
   }
   if (!profile.boundary || profile.boundary.length < 40) {
     fail(`routing profile boundary must be explicit: ${profile.id}`);
+  }
+  for (const key of ["owner", "primarySurface", "durability", "privilegeDelta", "validationGate", "rollback"]) {
+    if (typeof profile[key] !== "string" || profile[key].length < 12) {
+      fail(`routing profile ${key} must be explicit: ${profile.id}`);
+    }
   }
   if (!agentsTemplate.includes(`\`${profile.id}\``)) {
     fail(`templates/codex/AGENTS.md must expose routing profile id: ${profile.id}`);

@@ -9,6 +9,16 @@ Katalog `setupKind` ve `setupHint` alanlarini da tutar. Installer,
 filesystem path veya environment variable isteyen MCP'leri bu notlarla
 gosterir.
 
+Status kaniti bilincli olarak ayrilir:
+
+- `cataloged`: `catalog/mcp-servers.json` icinde var.
+- `installed config`: kurulu veya template Codex config icinde var.
+- `live codex mcp list`: `codex mcp list --json` ile dogrulandi.
+- `/mcp session visible`: aktif Codex oturumunda `/mcp` ile gorunur.
+
+Bir connector'u sadece catalog'da var diye live kabul etme; live komut veya
+`/mcp` bunu dogrulamalidir.
+
 Resmi kaynak:
 
 https://developers.openai.com/codex/mcp

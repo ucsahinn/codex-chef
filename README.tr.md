@@ -63,29 +63,45 @@ Codex Chef CLI ayni guvenli scriptleri tek Windows dostu menude toplar:
 ```powershell
 npm run chef
 npm run chef -- --status
+npm run chef -- --status --repo-only
 npm run chef -- --preview
 npm run chef -- --reset --apply
 npm run chef -- --repair --apply
 npm run chef -- --install --apply
 npm run chef -- --skills
 npm run chef -- --mcp
+npm run chef -- --routing
+npm run chef -- --routing --profile starter-health
 npm run chef -- --auth
 npm run chef -- --logs
-npm run chef -- --status --no-log
+npm run chef -- --status --repo-only --no-log
 ```
 
 Menu her aksiyonun write sinirini gosterir. `--status`, `--doctor`,
-`--preview`, `--skills`, `--mcp`, `--auth` ve `--logs` varsayilan olarak
+`--preview`, `--skills`, `--mcp`, `--routing`, `--auth` ve `--logs` varsayilan olarak
 global/user state icin read-only rehberlik veya dogrulama akislari olur.
 Normalde `tmp/chef-cli/logs` altina ignored lokal audit log'u yazarlar; strict
-audit icin `--no-log` ekle. `--reset --apply`, `--repair --apply` ve
+audit icin `--no-log` ekle. Hızlı lokal repo kontrolü için
+`--status --repo-only` kullan; bu mod kurulu runtime ve live Codex CLI
+probe'larini atlar. `--reset --apply`, `--repair --apply` ve
 `--install --apply` global dosyalara yazabilen path'lerdir; user state silmek
 yerine backup alan installer/repair scriptlerine giderler. Interactive
 terminalde `--skills` numarayla tek reviewed skill sectirir ve sadece `--apply`
 ile kurar. `--mcp` numarayla connector sectirip transport, endpoint veya
 package, setup, auth, dogrulama, source ve rollback notlarini gosterir; account
-connector'larini kendiliginden acmaz. CLI loglari ignored kalir ve source
+connector'larini kendiliginden acmaz. `--routing` task-shape haritasini, agent
+bekleme politikasini, skill trigger'larini, MCP secimlerini ve final "Surfaces
+used" raporlama sozlesmesini gosterir. CLI loglari ignored kalir ve source
 package'a girmez.
+
+PowerShell baska bir dizinde `Could not read package.json` hatasi verirse
+komutu repo icinden calistir veya npm prefix formunu kullan:
+
+```powershell
+cd C:\Users\you\Desktop\codex-chef
+npm run chef -- --status
+npm --prefix C:\Users\you\Desktop\codex-chef run chef -- --status
+```
 
 GitHub release, push veya workflow kontrolleri lokal GitHub auth eskidigi icin
 fail ederse GitHub CLI veya Git Credential Manager'i kendi kurum politikaniza
@@ -152,12 +168,16 @@ hazirligi, SEO, docs ve starter sagligi.
 ```bash
 npm run codex:routing
 npm run codex:status
+npm run chef -- --routing --profile starter-health
 ```
 
 Bu guvenli otonomidir; gizli calisan bir auto-executor degildir. Task shape
 uydugunda dogru ajan, skill, MCP ve flag zorunlu hale gelir; ama destructive,
 credential, publish, deploy, database ve genis filesystem aksiyonlari yine
-onay kapisinda kalir.
+onay kapisinda kalir. Pano `Agent plan`, `Agent started`, `Agent result`,
+`Skill selected`, `MCP selected` ve
+`Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`
+satirlarini da gosterir; hangi yuzeyin kullanildigi final raporda kaybolmaz.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Kurulan Ajan Ekibi
 

@@ -16,6 +16,10 @@ Doğru kural: ihtiyacın kalıcılığı ve kapsamı neyse en küçük uygun yü
 | Paralel uzman iş | Subagent | Büyük/dağınık işleri bölmek için |
 | Geçici override | `AGENTS.override.md` | İş bitince kaldırılması gereken lokal override |
 
+Routing kaniti ayrica `catalog/routing-profiles.json` ve
+`npm run chef -- --routing` ile gorulur. Bu permission vermez; sadece beklenen
+ajan, skill, MCP, validation gate ve final raporlama sozlesmesini gosterir.
+
 Resmi kaynaklar:
 
 - AGENTS.md: https://developers.openai.com/codex/guides/agents-md

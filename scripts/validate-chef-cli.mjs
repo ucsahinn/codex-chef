@@ -2,8 +2,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(process.cwd());
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(scriptDir, "..");
 const failures = [];
 
 function fail(message) {
@@ -32,13 +34,13 @@ function runNodeCheck(relativePath) {
   }
 }
 
-function runCliSmoke(name, cliArgs, expectedSnippets) {
-  const result = spawnSync(process.execPath, ["scripts/chef-cli.mjs", ...cliArgs], {
-    cwd: root,
+function runCliSmoke(name, cliArgs, expectedSnippets, extra = {}) {
+  const result = spawnSync(process.execPath, [path.join(root, "scripts/chef-cli.mjs"), ...cliArgs], {
+    cwd: extra.cwd || root,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true,
-    timeout: 180000
+    timeout: extra.timeout || 180000
   });
   const output = `${result.stdout || ""}\n${result.stderr || ""}`;
   if (result.error) {
@@ -69,6 +71,8 @@ if (!exists(cliPath)) {
     "--json",
     "--plain",
     "--no-log",
+    "--repo-only",
+    "--profile",
     "--status",
     "--doctor",
     "--preview",
@@ -77,6 +81,7 @@ if (!exists(cliPath)) {
     "--install",
     "--skills",
     "--mcp",
+    "--routing",
     "--auth",
     "--logs",
     "--apply",
@@ -87,6 +92,7 @@ if (!exists(cliPath)) {
     "repair-install.mjs",
     "verify-install-runtime.mjs",
     "verify-skill-sources.mjs",
+    "codex-routing-board.mjs",
     "install.ps1",
     "install.sh",
     "GitHub authentication boundary",
@@ -103,17 +109,13 @@ if (!exists(cliPath)) {
     "redactLocalPaths",
     "redactSensitiveOutput",
     "[REDACTED_GITHUB_TOKEN]",
-    "[REDACTED_CONNECTION_STRING]"
+    "[REDACTED_CONNECTION_STRING]",
+    "fileURLToPath",
+    "const ICONS = ASCII_ICONS"
   ]) {
     if (!cli.includes(required)) fail(`${cliPath} missing required CLI surface: ${required}`);
   }
 
-  for (const requiredIcon of ["🍳", "✅", "ℹ️", "⚠️", "▶️", "🔐", "📘", "🧾"]) {
-    if (!cli.includes(requiredIcon)) fail(`${cliPath} missing enterprise icon: ${requiredIcon}`);
-  }
-  if (/[ðâ][^\n"]{0,8}/.test(cli) || cli.includes("�")) {
-    fail(`${cliPath} contains mojibake in the icon set; use real UTF-8 icons or --plain ASCII labels.`);
-  }
   if (/TERM:\s*"dumb"/.test(cli)) {
     fail(`${cliPath} must not force TERM=dumb because codex doctor treats that as a terminal health issue.`);
   }
@@ -127,6 +129,7 @@ if (!exists(cliPath)) {
     "Repair",
     "Skills",
     "MCP",
+    "Routing",
     "Auth",
     "Logs"
   ]) {
@@ -183,6 +186,28 @@ runCliSmoke("skills", ["--skills", "--plain", "--no-log"], [
   "Skill source verification passed",
   "Log disabled by --no-log"
 ]);
+runCliSmoke("routing", ["--routing", "--plain", "--no-log"], [
+  "Codex Chef enterprise routing board",
+  "Subagent visibility contract",
+  "Agent plan",
+  "Skill selected",
+  "MCP selected",
+  "Surfaces used",
+  "Use /agent in Codex CLI"
+]);
+runCliSmoke("routing-profile-wrong-cwd", ["--routing", "--profile", "starter-health", "--plain", "--no-log"], [
+  "Codex Chef enterprise routing board",
+  "Profiles: 1",
+  "starter-health",
+  "Owner:",
+  "Validation:"
+], { cwd: path.dirname(root) });
+runCliSmoke("status-repo-only", ["--status", "--repo-only", "--plain", "--no-log"], [
+  "Codex Chef status",
+  "Codex CLI: skipped",
+  "Installed runtime: skipped/skipped",
+  "Log disabled by --no-log"
+], { timeout: 180000 });
 runCliSmoke("reset-preview", ["--reset", "--plain", "--no-log"], [
   "Reset preview first",
   "--force",
@@ -200,41 +225,47 @@ for (const [file, snippets] of Object.entries({
   "README.md": [
     "npm run chef",
     "npm run chef -- --status",
+    "npm run chef -- --status --repo-only",
     "npm run chef -- --preview",
     "npm run chef -- --reset --apply",
     "npm run chef -- --repair --apply",
     "npm run chef -- --install --apply",
     "npm run chef -- --skills",
     "npm run chef -- --mcp",
+    "npm run chef -- --routing",
     "npm run chef -- --auth",
     "npm run chef -- --logs",
-    "npm run chef -- --status --no-log",
+    "npm run chef -- --status --repo-only --no-log",
     "GitHub CLI or Git Credential Manager",
     "organization policy"
   ],
   "README.tr.md": [
     "npm run chef",
     "npm run chef -- --status",
+    "npm run chef -- --status --repo-only",
     "npm run chef -- --preview",
     "npm run chef -- --reset --apply",
     "npm run chef -- --repair --apply",
     "npm run chef -- --install --apply",
     "npm run chef -- --skills",
     "npm run chef -- --mcp",
+    "npm run chef -- --routing",
     "npm run chef -- --auth",
     "npm run chef -- --logs",
-    "npm run chef -- --status --no-log",
+    "npm run chef -- --status --repo-only --no-log",
     "GitHub CLI veya Git Credential Manager",
     "kendi kurum politikaniza"
   ],
   "docs/verification.md": [
     "npm run validate:chef-cli",
     "npm run chef -- --status",
+    "npm run chef -- --status --repo-only",
     "npm run chef -- --preview"
   ],
   "docs/verification.tr.md": [
     "npm run validate:chef-cli",
     "npm run chef -- --status",
+    "npm run chef -- --status --repo-only",
     "npm run chef -- --preview"
   ]
 })) {

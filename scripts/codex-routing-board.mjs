@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(process.cwd());
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
 const options = {
   json: false,
@@ -51,6 +53,18 @@ const report = {
   schemaVersion: "codex-chef.routing.v1",
   generatedAt: new Date().toISOString(),
   sourcePolicy: routing.sourcePolicy,
+  visibilityContract: {
+    subagents: [
+      "Agent plan: before spawning, name each requested agent, scope, reason, expected output, and wait policy.",
+      "Agent started: after spawning, repeat the visible agent name or nickname and the assigned task.",
+      "Agent result: wait for requested subagent results before continuing unless the user explicitly says to run in the background.",
+      "Skill selected: name every selected skill and why it matches the task before acting on it.",
+      "MCP selected: name every selected MCP/tool surface, why it is needed, and whether it is read-only or approval-gated.",
+      "Surfaces used: final summaries use agents=..., skills=..., mcp=..., commands=..., skipped=... so evidence is explicit."
+    ],
+    cli: "Use /agent in Codex CLI to inspect active agent threads, switch to one, or steer/close it.",
+    boundary: "Routing profiles guide safe autonomy; they do not silently enable account, database, production, destructive, or broad filesystem actions."
+  },
   profileCount: profiles.length,
   profiles
 };
@@ -61,6 +75,16 @@ if (options.json) {
   console.log("Codex Chef enterprise routing board");
   console.log(`Profiles: ${profiles.length}`);
   console.log("Policy: task-shape routing is required when applicable, but risky actions remain approval-gated.");
+  console.log("");
+  console.log("Subagent visibility contract:");
+  console.log("- Agent plan: name each requested agent, scope, reason, expected output, and wait policy before spawning.");
+  console.log("- Agent started: show the visible agent name or nickname and assigned task after spawning.");
+  console.log("- Agent result: wait for requested subagent results before continuing unless the user explicitly asks for background work.");
+  console.log("- Skill selected: name every selected skill and why it matches the task before acting on it.");
+  console.log("- MCP selected: name every selected MCP/tool surface, why it is needed, and whether it is read-only or approval-gated.");
+  console.log("- Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...");
+  console.log("- Use /agent in Codex CLI to inspect active agent threads, switch to one, or steer/close it.");
+  console.log("- Boundary: routing profiles are safe autonomy guidance, not hidden permission to enable risky tools.");
   for (const profile of profiles) {
     console.log("");
     console.log(`- ${profile.title} (${profile.id})`);
@@ -69,6 +93,12 @@ if (options.json) {
     console.log(`  Skills: ${profile.skills.length ? profile.skills.join(", ") : "none"}`);
     console.log(`  MCP: ${profile.mcp.length ? profile.mcp.join(", ") : "none"}`);
     console.log(`  Flags/checks: ${profile.flags.join(", ")}`);
+    console.log(`  Owner: ${profile.owner}`);
+    console.log(`  Surface: ${profile.primarySurface}`);
+    console.log(`  Durability: ${profile.durability}`);
+    console.log(`  Privilege delta: ${profile.privilegeDelta}`);
+    console.log(`  Validation: ${profile.validationGate}`);
+    console.log(`  Rollback: ${profile.rollback}`);
     console.log(`  Boundary: ${profile.boundary}`);
   }
 }

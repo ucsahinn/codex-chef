@@ -14,6 +14,7 @@ Use the smallest durable surface that matches the scope.
 | Command approval exception | Rule | Narrow sandbox escalation policy |
 | Lifecycle automation | Hook | Reviewed local automation around events |
 | Parallel specialist work | Subagent | Useful for noisy read-heavy work or focused verification |
+| Routing evidence | `catalog/routing-profiles.json` and `npm run chef -- --routing` | Shows expected agents, skills, MCPs, validation gates, and final reporting contract |
 | Temporary override | `AGENTS.override.md` | Local short-lived override; remove when done |
 
 Official references:
@@ -31,6 +32,9 @@ Official references:
 This starter uses:
 
 - `AGENTS.md` for behavior and routing.
+- `catalog/routing-profiles.json` plus `npm run chef -- --routing` for
+  inspection evidence. This does not grant permission; it only shows which
+  surfaces should be considered and which gates still apply.
 - `config.toml` for feature flags, MCPs, agents, and sandbox defaults.
 - Skills for repeatable workflows.
 - A local plugin package for shareable workflow distribution.

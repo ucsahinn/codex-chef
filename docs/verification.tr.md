@@ -149,9 +149,11 @@ Codex Chef CLI smoke:
 ```bash
 npm run validate:chef-cli
 npm run chef -- --status
-npm run chef -- --status --no-log
+npm run chef -- --status --repo-only
+npm run chef -- --status --repo-only --no-log
 npm run chef -- --preview
 npm run chef -- --reset
+npm run chef -- --routing --profile starter-health
 ```
 
 `npm run chef` numarali operator menusunu acar. Yukaridaki noninteractive
@@ -199,6 +201,12 @@ son kullanici gorunumunde gormek icin:
 
 ```bash
 npm run codex:status
+```
+
+Kurulu runtime ve live Codex CLI probe'larini atlayan hizli repo-only audit icin:
+
+```bash
+npm run chef -- --status --repo-only --no-log
 ```
 
 Gercek kurulum curated global skill'leri ve opsiyonel Git guard'lari bilerek

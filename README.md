@@ -81,29 +81,45 @@ Codex Chef CLI wraps the same safe scripts in one Windows-friendly menu:
 ```powershell
 npm run chef
 npm run chef -- --status
+npm run chef -- --status --repo-only
 npm run chef -- --preview
 npm run chef -- --reset --apply
 npm run chef -- --repair --apply
 npm run chef -- --install --apply
 npm run chef -- --skills
 npm run chef -- --mcp
+npm run chef -- --routing
+npm run chef -- --routing --profile starter-health
 npm run chef -- --auth
 npm run chef -- --logs
-npm run chef -- --status --no-log
+npm run chef -- --status --repo-only --no-log
 ```
 
 The menu labels every action with its write boundary. `--status`,
-`--doctor`, `--preview`, `--skills`, `--mcp`, `--auth`, and `--logs` are
+`--doctor`, `--preview`, `--skills`, `--mcp`, `--routing`, `--auth`, and `--logs` are
 read-only for global/user state by default. They normally create ignored
 repo-local audit logs under `tmp/chef-cli/logs`; add `--no-log` for strict
-no-filesystem-write audits. `--reset --apply`, `--repair --apply`, and
+no-filesystem-write audits. Use `--status --repo-only` when you want a fast
+local repo check that skips installed runtime and live Codex CLI probes.
+`--reset --apply`, `--repair --apply`, and
 `--install --apply` are the write paths; they route to the backup-backed
 installer or repair script instead of deleting user state.
 In an interactive terminal, `--skills` lets you pick one reviewed skill by
 number and installs it only when you rerun with `--apply`. `--mcp` lets you pick
 one connector by number to see transport, endpoint or package, setup, auth,
 verification, source, and rollback notes without enabling account connectors.
+`--routing` shows the task-shape map, agent wait policy, skill triggers, MCP
+choices, and the final "Surfaces used" reporting contract for visible autonomy.
 CLI logs are ignored and not part of the source package.
+
+If PowerShell reports `Could not read package.json` from another directory,
+run the command from the repository or use npm's prefix form:
+
+```powershell
+cd C:\Users\you\Desktop\codex-chef
+npm run chef -- --status
+npm --prefix C:\Users\you\Desktop\codex-chef run chef -- --status
+```
 
 If GitHub release, push, or workflow checks fail because local GitHub
 authentication is stale, refresh GitHub CLI or Git Credential Manager according
@@ -151,12 +167,16 @@ starter health.
 ```bash
 npm run codex:routing
 npm run codex:status
+npm run chef -- --routing --profile starter-health
 ```
 
 This is safe autonomy, not hidden execution. Matching agents, skills, MCPs, and
 flags are required when the task shape appears, but destructive, credentialed,
 publishing, deployment, database, and broad filesystem actions stay
-approval-gated.
+approval-gated. The board also prints `Agent plan`, `Agent started`,
+`Agent result`, `Skill selected`, `MCP selected`, and
+`Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`
+so operator-facing routing evidence is visible.
 
 ### <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP Connector Board
 

@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+## 0.5.24 - 2026-06-18
+
+- Added a read-only Chef routing menu/flag so operators can inspect task-shape
+  agent routing, skill triggers, MCP choices, subagent wait policy, and final
+  "Surfaces used" reporting from the CLI.
+- Strengthened the Codex `AGENTS.md` template with visible `Agent plan`,
+  `Agent started`, `Agent result`, `Skill selected`, `MCP selected`, and
+  `Surfaces used` contracts so delegated work is tracked instead of silent.
+- Added validator and smoke coverage for the routing visibility contract and
+  installed the updated global AGENTS template through the backup-backed repair
+  flow.
+- Fixed wrong-current-directory CLI/script execution by resolving repository
+  roots from script locations and documented `npm --prefix` usage for
+  PowerShell users who start outside the repo.
+- Added `--status --repo-only` for fast local status checks that skip installed
+  runtime and live Codex CLI probes, while full status keeps progress messages.
+- Expanded routing profiles with owner, durability, privilege, validation, and
+  rollback metadata, and made MCP status evidence distinguish cataloged,
+  installed-config, live `codex mcp list`, and `/mcp` session-visible states.
+- Normalized MCP JSON parsing across status and runtime verification so array,
+  `servers`, `mcp_servers`, and object-map shapes are handled consistently.
+
 ## 0.5.23 - 2026-06-17
 
 - Added immediate progress messages to the Chef status wrapper, direct status

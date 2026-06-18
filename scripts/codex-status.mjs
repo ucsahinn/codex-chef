@@ -3,8 +3,10 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(process.cwd());
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
 
 const options = {
@@ -14,6 +16,7 @@ const options = {
   expectGitGuards: false,
   skipRuntime: false,
   skipCodexDoctorChecks: false,
+  skipCodexCli: false,
   output: null,
   forceOutput: false,
   codexHome: process.env.CODEX_HOME || path.join(os.homedir(), ".codex"),
@@ -28,6 +31,7 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--expect-git-guards") options.expectGitGuards = true;
   else if (arg === "--skip-runtime") options.skipRuntime = true;
   else if (arg === "--skip-codex-doctor-checks") options.skipCodexDoctorChecks = true;
+  else if (arg === "--skip-codex-cli") options.skipCodexCli = true;
   else if (arg === "--force-output") options.forceOutput = true;
   else if (arg === "--output") {
     options.output = args[index + 1];
@@ -59,6 +63,7 @@ Options:
   --expect-git-guards          Fail runtime status if optional Git guards are missing
   --skip-runtime               Skip installed runtime verification
   --skip-codex-doctor-checks   Skip direct Codex CLI doctor check summary
+  --skip-codex-cli             Skip Codex CLI version/login/MCP probes
   --codex-home <path>          Installed Codex home to inspect
   --agents-home <path>         Installed Agents home to inspect
   --redact-paths               Redact home and repository paths in output
@@ -68,7 +73,13 @@ Options:
 const progressEnabled = !options.json;
 if (progressEnabled) {
   console.log("Codex Chef status");
-  console.log("Collecting repo, runtime, Codex CLI, MCP, Git, and log metadata checks; this can take 30-60 seconds.");
+  console.log(options.skipRuntime && options.skipCodexDoctorChecks && options.skipCodexCli
+    ? "Collecting local repository checks; installed runtime and live Codex CLI probes are skipped."
+    : "Collecting repo, runtime, Codex CLI, MCP, Git, and log metadata checks; this can take 30-60 seconds.");
+}
+
+function progress(message) {
+  if (progressEnabled) console.log(`[status] ${message}`);
 }
 
 function redact(value) {
@@ -113,6 +124,7 @@ function run(command, commandArgs, extra = {}) {
 }
 
 function runNodeScript(script, scriptArgs, label) {
+  progress(`running ${label} (timeout 120s)`);
   const result = run(process.execPath, [script, ...scriptArgs], { timeout: 120000 });
   const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
   if (result.error) {
@@ -292,6 +304,12 @@ function inspectMcpSetupBoard() {
   return {
     inspected: true,
     sourcePolicy: catalog.sourcePolicy,
+    evidenceBoundary: {
+      catalog: "cataloged in catalog/mcp-servers.json",
+      installedConfig: "configured only after templates or installed config are inspected",
+      live: "verified only after /mcp or `codex mcp list --json` succeeds",
+      sessionVisible: "visible in the active Codex session only through /mcp or equivalent live tooling"
+    },
     serverCount: servers.length,
     enabledByDefault: enabled.map((server) => server.name),
     disabledByDefault: disabled.map((server) => server.name),
@@ -305,7 +323,14 @@ function inspectMcpSetupBoard() {
       risk: server.risk,
       setupKind: server.setupKind,
       setupHint: server.setupHint,
-      defaultReason: server.defaultReason
+      defaultReason: server.defaultReason,
+      evidenceState: {
+        cataloged: true,
+        installedConfig: "not_inferred_from_catalog",
+        liveCodexMcpList: "not_checked_here",
+        sessionVisible: "not_checked_here"
+      },
+      rollback: "Set enabled=false for the connector in Codex config and restart Codex."
     }))
   };
 }
@@ -347,6 +372,7 @@ function inspectEffectiveControls() {
 }
 
 function parseJsonCommand(command, commandArgs, label, extra = {}) {
+  progress(`running ${label} (timeout ${Math.round((extra.timeout || 120000) / 1000)}s)`);
   const result = run(command, commandArgs, { timeout: extra.timeout || 120000, env: extra.env || process.env });
   const output = redact([result.stdout, result.stderr].filter(Boolean).join("\n").trim());
   if (result.error) {
@@ -390,6 +416,7 @@ function parseJsonCommand(command, commandArgs, label, extra = {}) {
 }
 
 function parseTextCommand(command, commandArgs, label, extra = {}) {
+  progress(`running ${label} (timeout ${Math.round((extra.timeout || 120000) / 1000)}s)`);
   const result = run(command, commandArgs, { timeout: extra.timeout || 120000, env: extra.env || process.env });
   const output = redact([result.stdout, result.stderr].filter(Boolean).join("\n").trim());
   if (result.error) {
@@ -411,18 +438,69 @@ function parseTextCommand(command, commandArgs, label, extra = {}) {
   };
 }
 
+function mcpEntriesFromParsed(parsed) {
+  if (Array.isArray(parsed)) return parsed;
+  if (Array.isArray(parsed?.servers)) return parsed.servers;
+  if (Array.isArray(parsed?.mcp_servers)) return parsed.mcp_servers;
+  if (parsed?.servers && typeof parsed.servers === "object") {
+    return Object.entries(parsed.servers).map(([id, value]) => ({
+      id,
+      ...(value && typeof value === "object" ? value : { value })
+    }));
+  }
+  if (parsed?.mcp_servers && typeof parsed.mcp_servers === "object") {
+    return Object.entries(parsed.mcp_servers).map(([id, value]) => ({
+      id,
+      ...(value && typeof value === "object" ? value : { value })
+    }));
+  }
+  return [];
+}
+
 function inspectCodexCliRuntime() {
+  if (options.skipCodexCli) {
+    return {
+      inspected: false,
+      status: "skipped",
+      target: {
+        codexHome: redact(options.codexHome),
+        agentsHome: redact(options.agentsHome)
+      },
+      version: { inspected: false, status: "skipped", exitCode: null, outputPreview: [] },
+      login: { inspected: false, status: "skipped", exitCode: null, outputPreview: [] },
+      mcp: {
+        inspected: false,
+        status: "skipped",
+        exitCode: null,
+        configuredCount: 0,
+        configuredServers: [],
+        outputPreview: null
+      },
+      ambient: {
+        inspected: false,
+        relationshipToTarget: "skipped",
+        codexHomeEnv: process.env.CODEX_HOME ? redact(process.env.CODEX_HOME) : null,
+        version: { inspected: false, status: "skipped", exitCode: null, outputPreview: [] },
+        login: { inspected: false, status: "skipped", exitCode: null, outputPreview: [] },
+        mcp: {
+          inspected: false,
+          status: "skipped",
+          exitCode: null,
+          configuredCount: 0,
+          configuredServers: [],
+          outputPreview: null
+        }
+      },
+      issues: [],
+      note: "Skipped by --skip-codex-cli; this also skips live `codex mcp list --json` evidence."
+    };
+  }
+
   function inspectWithEnv(env, labelPrefix) {
     const version = parseTextCommand(codexCommand(), ["--strict-config", "--version"], `${labelPrefix} codex --strict-config --version`, { env });
     const login = parseTextCommand(codexCommand(), ["login", "status"], `${labelPrefix} codex login status`, { env });
     const mcp = parseJsonCommand(codexCommand(), ["mcp", "list", "--json"], `${labelPrefix} codex mcp list --json`, { env });
-    const mcpEntries = Array.isArray(mcp.parsed)
-      ? mcp.parsed
-      : Array.isArray(mcp.parsed?.servers)
-        ? mcp.parsed.servers
-        : Array.isArray(mcp.parsed?.mcp_servers)
-          ? mcp.parsed.mcp_servers
-          : [];
+    const mcpEntries = mcpEntriesFromParsed(mcp.parsed);
     const mcpNames = mcpEntries
       .map((server) => server.name || server.id)
       .filter(Boolean)
@@ -511,6 +589,7 @@ function inspectCliQuickStart() {
     numberedActions: true,
     readOnlyCommands: [
       "npm run chef -- --status",
+      "npm run chef -- --status --repo-only",
       "npm run chef -- --doctor",
       "npm run chef -- --preview",
       "npm run chef -- --skills",
@@ -526,7 +605,7 @@ function inspectCliQuickStart() {
       "npm run chef -- --repair --apply",
       "npm run chef -- --skills --apply"
     ],
-    auditMode: "npm run chef -- --status --no-log",
+    auditMode: "npm run chef -- --status --repo-only --no-log",
     plainOutput: "npm run chef -- --plain",
     boundary: "Install, reset, repair, selected skill install, publish, deploy, credential, database, and destructive work still require explicit approval or --apply where supported."
   };
@@ -786,9 +865,26 @@ const cliQuickStart = inspectCliQuickStart();
 const gitRepository = inspectGitRepository();
 const logSummary = inspectLogSummary();
 
+function classifyRuntimeInstallState(runtimeReport) {
+  if (!runtimeReport) return options.skipRuntime ? "skipped" : "unknown";
+  const managed = runtimeReport.managedFiles || {};
+  const expected = Number(managed.expected || 0);
+  const matched = Number(managed.matched || 0);
+  const missing = Number(managed.missing || 0);
+  const mismatched = Number(managed.mismatched || 0);
+  if (expected > 0 && matched === 0 && missing >= Math.max(1, expected - mismatched)) return "not_installed";
+  if (expected > 0 && matched < expected) return "drift";
+  return runtimeReport.status === "ok" ? "installed" : "attention";
+}
+
+const runtimeInstallState = classifyRuntimeInstallState(runtime.report);
+const runtimeFailures = runtimeInstallState === "not_installed"
+  ? ["runtime: Codex Chef is not installed at the target Codex home; run `npm run chef -- --preview --no-log` before install or `npm run chef -- --install --apply` when ready."]
+  : runtime.failures.map((failure) => `runtime: ${failure}`);
+
 const failures = [
   ...repoDoctor.failures.map((failure) => `repo: ${failure}`),
-  ...runtime.failures.map((failure) => `runtime: ${failure}`)
+  ...runtimeFailures
 ];
 const warnings = [
   ...(runtime.report?.warnings || []),
@@ -819,6 +915,7 @@ const report = {
   status,
   repoDoctor,
   runtime,
+  runtimeInstallState,
   codexDoctor,
   codexCliRuntime,
   skillInventory,
@@ -833,7 +930,9 @@ const report = {
   attentionReasons,
   failures,
   nextActions: status === "fail"
-    ? ["Run npm run repair:install -- --apply to repair managed runtime drift, then rerun npm run codex:status."]
+    ? (runtimeInstallState === "not_installed"
+        ? ["Run npm run chef -- --preview --no-log to inspect the install plan, then run npm run chef -- --install --apply when ready."]
+        : ["Run npm run repair:install -- --apply to repair managed runtime drift, then rerun npm run codex:status."])
     : attentionReasons.length > 0
       ? ["Review attention items; they do not necessarily mean Codex Chef install is broken."]
       : ["No action needed."]
@@ -871,7 +970,7 @@ if (options.json) {
     const installed = runtime.report.installed || {};
     const managed = runtime.report.managedFiles || {};
     console.log(
-      `Installed runtime: ${runtime.status} (agents ${installed.agents?.installed || 0}/${installed.agents?.expected || 0}, MCP ${installed.mcp?.installed || 0}/${installed.mcp?.expected || 0}, managed files ${managed.matched || 0}/${managed.expected || 0})`
+      `Installed runtime: ${runtime.status}/${runtimeInstallState} (agents ${installed.agents?.installed || 0}/${installed.agents?.expected || 0}, MCP ${installed.mcp?.installed || 0}/${installed.mcp?.expected || 0}, managed files ${managed.matched || 0}/${managed.expected || 0})`
     );
     if (runtime.report.skills?.inspected) {
       console.log(
@@ -879,7 +978,7 @@ if (options.json) {
       );
     }
   } else {
-    console.log(`Installed runtime: ${runtime.status}`);
+    console.log(`Installed runtime: ${runtime.status}/${runtimeInstallState}`);
   }
   if (!runtime.report?.skills?.inspected && skillInventory.inspected) {
     console.log(`Skills: ${skillInventory.installed} total installed across global roots (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} missing, ${skillInventory.extraCount} other/user-installed)`);

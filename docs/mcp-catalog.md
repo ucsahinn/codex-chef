@@ -9,6 +9,16 @@ The catalog also records `setupKind` and `setupHint`; installers and
 filesystem-path, or environment-variable inputs are visible before enabling a
 connector.
 
+Status evidence is intentionally split:
+
+- `cataloged`: present in `catalog/mcp-servers.json`.
+- `installed config`: present in the installed or template Codex config.
+- `live codex mcp list`: verified by `codex mcp list --json`.
+- `/mcp session visible`: visible in the current Codex session.
+
+Do not treat a cataloged connector as live until the live command or `/mcp`
+confirms it.
+
 Official Codex MCP reference:
 
 https://developers.openai.com/codex/mcp

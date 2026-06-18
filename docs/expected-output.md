@@ -48,6 +48,28 @@ placeholders:
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
+## Routing Board
+
+```text
+Codex Chef enterprise routing board
+Profiles: 12
+Policy: task-shape routing is required when applicable, but risky actions remain approval-gated.
+
+Subagent visibility contract:
+- Agent plan: name each requested agent, scope, reason, expected output, and wait policy before spawning.
+- Agent started: show the visible agent name or nickname and assigned task after spawning.
+- Agent result: wait for requested subagent results before continuing unless the user explicitly asks for background work.
+- Skill selected: name every selected skill and why it matches the task before acting on it.
+- MCP selected: name every selected MCP/tool surface, why it is needed, and whether it is read-only or approval-gated.
+- Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...
+```
+
+For one profile:
+
+```bash
+npm run chef -- --routing --profile starter-health --plain --no-log
+```
+
 ## PowerShell Dry Run
 
 ```text

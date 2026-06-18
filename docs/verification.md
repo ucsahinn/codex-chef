@@ -148,9 +148,11 @@ Codex Chef CLI smoke:
 ```bash
 npm run validate:chef-cli
 npm run chef -- --status
-npm run chef -- --status --no-log
+npm run chef -- --status --repo-only
+npm run chef -- --status --repo-only --no-log
 npm run chef -- --preview
 npm run chef -- --reset
+npm run chef -- --routing --profile starter-health
 ```
 
 `npm run chef` opens the numbered operator menu. The noninteractive smoke
@@ -198,6 +200,13 @@ requirements, run:
 
 ```bash
 npm run codex:status
+```
+
+For a fast repository-only audit that avoids installed-runtime and live Codex
+CLI probes, run:
+
+```bash
+npm run chef -- --status --repo-only --no-log
 ```
 
 Use `npm run codex:status:all` when the real install intentionally included
