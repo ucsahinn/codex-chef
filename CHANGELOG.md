@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.5.26 - 2026-06-20
+
+- Added `npm run chefg` as a compatibility typo alias for the same Chef CLI
+  menu, while keeping `npm run chef` as the canonical documented command.
+- Added validator coverage so the alias remains wired to the Chef CLI and does
+  not drift into a missing-script npm error again.
+
 ## 0.5.25 - 2026-06-20
 
 - Added `npm run chef -- --update` and `npm run chef:update` as a safe

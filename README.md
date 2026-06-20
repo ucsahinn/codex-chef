@@ -132,6 +132,8 @@ npm --prefix C:\Users\you\Desktop\codex-chef run chef -- --status
 
 Do not use `npx run`; this repository exposes local npm scripts, and the npm
 package named `run` starts an unrelated filesystem watcher.
+`npm run chefg` is kept as a compatibility typo alias for the same menu, but
+new docs should use `npm run chef`.
 
 If GitHub release, push, or workflow checks fail because local GitHub
 authentication is stale, refresh GitHub CLI or Git Credential Manager according

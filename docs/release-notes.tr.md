@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+## v0.5.26 - 2026-06-20
+
+Bu patch Windows ilk kullanim raporundaki son typo-entrypoint boslugunu
+kapatir. `npm run chefg` artik compatibility alias olarak ayni Chef CLI'ini
+acar; `npm run chef` ise dokuman ve orneklerde canonical komut olarak kalir.
+
+## One cikanlar
+
+- `npm run chefg` eklendi; yaygin typo artik npm'in missing-script hatasina
+  dusmez.
+- `npm run chef` canonical komut olarak kalir ve `npx run`'in ilgisiz npm
+  watcher paketi oldugu dokumante edilir.
+- `npm run validate:chef-cli`, alias'in `scripts/chef-cli.mjs` yuzeyine bagli
+  kalmasini zorunlu tutar.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chefg -- --help --plain --no-log
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.25 - 2026-06-20
 
 Bu patch Codex Chef'in Windows-first update ve status bosluklarini kapatir.

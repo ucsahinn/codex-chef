@@ -114,6 +114,8 @@ npm --prefix C:\Users\you\Desktop\codex-chef run chef -- --status
 
 `npx run` kullanma; bu repo lokal npm script'leri expose eder ve npm'deki
 `run` paketi ilgisiz bir filesystem watcher baslatir.
+`npm run chefg` ayni menuye giden compatibility typo alias olarak kalir; yeni
+dokumanlarda `npm run chef` kullan.
 
 GitHub release, push veya workflow kontrolleri lokal GitHub auth eskidigi icin
 fail ederse GitHub CLI veya Git Credential Manager'i kendi kurum politikaniza

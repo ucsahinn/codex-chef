@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+## v0.5.26 - 2026-06-20
+
+This patch closes the last typo-entrypoint gap from the Windows first-run
+report. `npm run chefg` now opens the same Chef CLI as a compatibility alias,
+while `npm run chef` stays the canonical command in docs and examples.
+
+## Highlights
+
+- Added `npm run chefg` so the common typo no longer falls through to npm's
+  missing-script error.
+- Kept `npm run chef` as the canonical command and documented that `npx run`
+  is the unrelated npm watcher package.
+- Extended `npm run validate:chef-cli` so the alias must stay wired to
+  `scripts/chef-cli.mjs`.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chefg -- --help --plain --no-log
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.25 - 2026-06-20
 
 This patch closes the Windows-first update and status gaps around Codex Chef.

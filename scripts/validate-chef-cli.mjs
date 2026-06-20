@@ -241,6 +241,7 @@ const packageJson = JSON.parse(read("package.json"));
 const scripts = packageJson.scripts || {};
 const requiredScripts = {
   chef: "node scripts/chef-cli.mjs",
+  chefg: "node scripts/chef-cli.mjs",
   "chef:status": "node scripts/chef-cli.mjs --status",
   "chef:update": "node scripts/chef-cli.mjs --update",
   "validate:chef-cli": "node scripts/validate-chef-cli.mjs"
