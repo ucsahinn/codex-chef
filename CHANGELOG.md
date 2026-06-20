@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## 0.5.27 - 2026-06-20
+
+- Added `npm run chef -- --backups` and `npm run chef:backups` so operators can
+  list Codex Chef backup archives, inspect metadata, and preview restore targets
+  without touching global/user state.
+- Added `npm run chef -- --backups --backup <id> --restore --apply` for
+  apply-gated restore of known Codex Chef-managed files, with a fresh rollback
+  backup created before current targets are overwritten.
+- Added backup manifest generation for new installer, repair, and restore
+  rollback archives, including package version, operation, platform,
+  backup-relative paths, sizes, hashes, and archive issues.
+- Extended Chef CLI validation with temporary-home backup smokes for list,
+  inspect, restore preview, restore apply, rollback backup creation, and JSON.
+- Updated install, upgrade, verification, security, README, and Turkish docs so
+  backup inventory and restore behavior are documented as first-class CLI
+  surfaces.
+
 ## 0.5.26 - 2026-06-20
 
 - Added `npm run chefg` as a compatibility typo alias for the same Chef CLI

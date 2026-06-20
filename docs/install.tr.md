@@ -83,6 +83,23 @@ dosyalari backup alan installer uzerinden yeniler. Update curated global skill
 veya opsiyonel global Git guard kurmaz; bunlar icin `--install --apply` veya
 `--skills --apply` yuzeylerini acikca kullan.
 
+Codex Chef backup archive'larini ayni CLI ile incele veya geri yukle:
+
+```powershell
+npm run chef -- --backups
+npm run chef -- --backups --backup <id>
+npm run chef -- --backups --backup <id> --restore
+npm run chef -- --backups --backup <id> --restore --apply
+```
+
+List ve inspect komutlari metadata-only calisir: backup archive konumunu,
+manifest durumunu, restorable dosya sayisini, size ve hash bilgilerini gosterir
+ama file content basmaz. Restore, `--apply` verilmedikce preview'dir. Apply
+path'i selected archive'dan bilinen Codex Chef managed dosyalarini geri
+kopyalamadan once mevcut target'lar icin yeni rollback backup olusturur. Backup
+delete otomatik degildir; eski archive'i ancak path'i inceleyip artik ihtiyacin
+olmadigindan emin olduktan sonra manuel kaldir.
+
 Kullanışlı parametreler:
 
 - `-All`: Codex template'lerini, yerel Codex Chef plugin'ini, uzman ajanları,
@@ -162,6 +179,10 @@ Mevcut dosyalar şu klasöre kopyalanır:
 ```text
 ~/.codex/backups/codex-chef-YYYYMMDD-HHMMSS/
 ```
+
+Yeni backup'lar ayrica `.codex-chef-backup.json` manifest'i tasir. Bu kucuk
+dosya operation, package version, platform, backup-relative path, size, hash ve
+metadata yazilirken gorulen archive issue'larini kaydeder.
 
 Installer şu managed target'ları replace etmeden önce yedekler:
 

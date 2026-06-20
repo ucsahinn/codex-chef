@@ -70,6 +70,30 @@ function runCliSmoke(name, cliArgs, expectedSnippets, extra = {}) {
   }
 }
 
+function runCliSmokeRaw(name, cliArgs, extra = {}) {
+  const result = spawnSync(process.execPath, [path.join(root, "scripts/chef-cli.mjs"), ...cliArgs], {
+    cwd: extra.cwd || root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    env: {
+      ...process.env,
+      ...(extra.env || {})
+    },
+    windowsHide: true,
+    timeout: extra.timeout || 180000
+  });
+  const output = `${result.stdout || ""}\n${result.stderr || ""}`;
+  if (result.error) {
+    fail(`chef-cli smoke ${name} failed: ${result.error.message}`);
+    return { ok: false, output, stdout: result.stdout || "", stderr: result.stderr || "" };
+  }
+  if (result.status !== 0) {
+    fail(`chef-cli smoke ${name} exited ${result.status}: ${output.trim()}`);
+    return { ok: false, output, stdout: result.stdout || "", stderr: result.stderr || "" };
+  }
+  return { ok: true, output, stdout: result.stdout || "", stderr: result.stderr || "" };
+}
+
 function runCliJsonSmoke(name, cliArgs) {
   const result = spawnSync(process.execPath, [path.join(root, "scripts/chef-cli.mjs"), ...cliArgs], {
     cwd: root,
@@ -94,6 +118,86 @@ function runCliJsonSmoke(name, cliArgs) {
     JSON.parse(stdout);
   } catch (error) {
     fail(`chef-cli JSON smoke ${name} did not emit parseable JSON: ${error.message}`);
+  }
+}
+
+function runBackupsFixtureSmokes() {
+  const fixtureRoot = fs.mkdtempSync(path.join(root, "tmp", "chef-cli-backups-smoke-"));
+  const codexHome = path.join(fixtureRoot, "codex-home");
+  const agentsHome = path.join(fixtureRoot, "agents-home");
+  const backupId = "codex-chef-20990101-000000";
+  const backupRoot = path.join(codexHome, "backups", backupId);
+
+  fs.mkdirSync(path.join(backupRoot, "rules"), { recursive: true });
+  fs.mkdirSync(path.join(backupRoot, "agents"), { recursive: true });
+  fs.writeFileSync(path.join(backupRoot, "AGENTS.md"), "# restored agents\n", "utf8");
+  fs.writeFileSync(path.join(backupRoot, "config.toml"), "sandbox_mode = \"workspace-write\"\n", "utf8");
+  fs.writeFileSync(path.join(backupRoot, "rules", "default.rules"), "allow [\"rg\"]\n", "utf8");
+  fs.writeFileSync(path.join(backupRoot, "marketplace.json"), "{\"name\":\"codex-chef\"}\n", "utf8");
+
+  fs.mkdirSync(path.join(codexHome, "rules"), { recursive: true });
+  fs.mkdirSync(path.join(agentsHome, "plugins"), { recursive: true });
+  fs.writeFileSync(path.join(codexHome, "AGENTS.md"), "# current agents\n", "utf8");
+  fs.writeFileSync(path.join(codexHome, "rules", "default.rules"), "allow [\"git\", \"status\"]\n", "utf8");
+  fs.writeFileSync(path.join(agentsHome, "plugins", "marketplace.json"), "{\"name\":\"current\"}\n", "utf8");
+
+  const env = { CODEX_HOME: codexHome, AGENTS_HOME: agentsHome };
+  const list = runCliSmokeRaw("backups-list-fixture", ["--backups", "--plain", "--no-log"], { env });
+  if (list.ok) {
+    for (const snippet of ["Codex Chef backups", backupId, "Backup root"]) {
+      if (!list.output.includes(snippet)) fail(`chef-cli smoke backups-list-fixture missing output snippet: ${snippet}`);
+    }
+  }
+
+  const inspect = runCliSmokeRaw("backups-inspect-fixture", ["--backups", "--backup", backupId, "--plain", "--no-log"], { env });
+  if (inspect.ok) {
+    for (const snippet of ["Backup archive", "AGENTS.md", "rules/default.rules", "marketplace.json"]) {
+      if (!inspect.output.includes(snippet)) fail(`chef-cli smoke backups-inspect-fixture missing output snippet: ${snippet}`);
+    }
+  }
+
+  const preview = runCliSmokeRaw("backups-restore-preview-fixture", ["--backups", "--backup", backupId, "--restore", "--plain", "--no-log"], { env });
+  if (preview.ok) {
+    for (const snippet of ["Restore preview", "No files restored", "Rerun with --apply"]) {
+      if (!preview.output.includes(snippet)) fail(`chef-cli smoke backups-restore-preview-fixture missing output snippet: ${snippet}`);
+    }
+  }
+  const currentAfterPreview = fs.readFileSync(path.join(codexHome, "AGENTS.md"), "utf8");
+  if (!currentAfterPreview.includes("current agents")) {
+    fail("chef-cli backup restore preview must not modify CODEX_HOME files");
+  }
+
+  const apply = runCliSmokeRaw("backups-restore-apply-fixture", ["--backups", "--backup", backupId, "--restore", "--apply", "--plain", "--no-log"], { env });
+  if (apply.ok) {
+    for (const snippet of ["Restore applied", "Rollback backup"]) {
+      if (!apply.output.includes(snippet)) fail(`chef-cli smoke backups-restore-apply-fixture missing output snippet: ${snippet}`);
+    }
+  }
+  const restoredAgents = fs.readFileSync(path.join(codexHome, "AGENTS.md"), "utf8");
+  const restoredMarketplace = fs.readFileSync(path.join(agentsHome, "plugins", "marketplace.json"), "utf8");
+  if (!restoredAgents.includes("restored agents")) {
+    fail("chef-cli backup restore apply did not restore CODEX_HOME/AGENTS.md from the archive");
+  }
+  if (!restoredMarketplace.includes("codex-chef")) {
+    fail("chef-cli backup restore apply did not restore AGENTS_HOME/plugins/marketplace.json from legacy marketplace backup");
+  }
+  const rollbackArchives = fs.readdirSync(path.join(codexHome, "backups"), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith("codex-chef-restore-"));
+  if (rollbackArchives.length === 0) {
+    fail("chef-cli backup restore apply must create a rollback backup before overwriting current targets");
+  }
+
+  const json = runCliSmokeRaw("backups-json-fixture", ["--backups", "--json", "--no-log"], { env });
+  if (json.ok) {
+    try {
+      const parsed = JSON.parse(json.stdout);
+      if (parsed.schemaVersion !== 1) fail("chef-cli backups JSON must include schemaVersion 1");
+      if (!Array.isArray(parsed.backups) || !parsed.backups.some((backup) => backup.id === backupId)) {
+        fail("chef-cli backups JSON must include fixture backup id");
+      }
+    } catch (error) {
+      fail(`chef-cli backups JSON fixture did not emit parseable JSON: ${error.message}`);
+    }
   }
 }
 
@@ -140,6 +244,9 @@ if (!exists(cliPath)) {
     "--preview",
     "--reset",
     "--repair",
+    "--backups",
+    "--backup",
+    "--restore",
     "--install",
     "--update",
     "--skills",
@@ -171,6 +278,11 @@ if (!exists(cliPath)) {
     "runLoggedCommand",
     "confirmWriteAction",
     "runUpdate",
+    "runBackups",
+    "listBackupArchives",
+    "resolveBackupArchive",
+    "restoreBackupArchive",
+    "createRollbackBackup",
     "runUpdateValidation",
     "update-validate",
     "update-security-audit",
@@ -209,6 +321,7 @@ if (!exists(cliPath)) {
     "Install",
     "Reset",
     "Repair",
+    "Backups",
     "Skills",
     "MCP",
     "Routing",
@@ -243,6 +356,7 @@ const requiredScripts = {
   chef: "node scripts/chef-cli.mjs",
   chefg: "node scripts/chef-cli.mjs",
   "chef:status": "node scripts/chef-cli.mjs --status",
+  "chef:backups": "node scripts/chef-cli.mjs --backups",
   "chef:update": "node scripts/chef-cli.mjs --update",
   "validate:chef-cli": "node scripts/validate-chef-cli.mjs"
 };
@@ -257,10 +371,12 @@ runCliSmoke("help", ["--help", "--plain", "--no-log"], [
   "Codex Chef CLI",
   "--no-log",
   "--update [--apply]",
+  "--backups [--backup ID] [--restore --apply]",
   "Allow write actions for update",
   "--reset [--apply]",
   "tmp/chef-cli/logs"
 ], { forbidAnsi: true });
+runBackupsFixtureSmokes();
 runCliErrorSmoke("unknown-option", ["--bad-flag", "--plain", "--no-log"], [
   "Codex Chef CLI error: Unknown option --bad-flag",
   "npm run chef -- --help"
@@ -352,6 +468,8 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --status --repo-only",
     "npm run chef -- --preview",
     "npm run chef -- --update",
+    "npm run chef -- --backups",
+    "npm run chef:backups",
     "npm run chef -- --reset --apply",
     "npm run chef -- --repair --apply",
     "npm run chef -- --install --apply",
@@ -372,6 +490,8 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --status --repo-only",
     "npm run chef -- --preview",
     "npm run chef -- --update",
+    "npm run chef -- --backups",
+    "npm run chef:backups",
     "npm run chef -- --reset --apply",
     "npm run chef -- --repair --apply",
     "npm run chef -- --install --apply",
@@ -392,6 +512,8 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --status --repo-only",
     "npm run chef -- --preview",
     "npm run chef -- --update",
+    "npm run chef -- --backups",
+    "backup archive",
     "Skill activation has two evidence levels"
   ],
   "docs/verification.tr.md": [
@@ -400,10 +522,13 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --status --repo-only",
     "npm run chef -- --preview",
     "npm run chef -- --update",
+    "npm run chef -- --backups",
+    "backup archive",
     "Skill aktivasyonunda iki kanit seviyesi"
   ],
   "docs/install.md": [
     "npm run chef -- --update",
+    "npm run chef -- --backups",
     "does not change managed/global files",
     "If the pull advances",
     "repo is already current",
@@ -411,6 +536,7 @@ for (const [file, snippets] of Object.entries({
   ],
   "docs/install.tr.md": [
     "npm run chef -- --update",
+    "npm run chef -- --backups",
     "managed/global dosyalari degistirmez",
     "Pull repo HEAD'ini ilerletirse",
     "Repo zaten guncelse",
@@ -418,18 +544,21 @@ for (const [file, snippets] of Object.entries({
   ],
   "docs/upgrade.md": [
     "npm run chef -- --update",
+    "npm run chef -- --backups",
     "does not change managed/global files",
     "If the pull advances the repo",
     "repo is already"
   ],
   "docs/upgrade.tr.md": [
     "npm run chef -- --update",
+    "npm run chef -- --backups",
     "managed/global dosyalari degistirmez",
     "Pull repo HEAD'ini ilerletirse",
     "Repo zaten guncelse"
   ],
   "docs/security-model.md": [
     "npm run chef -- --update",
+    "npm run chef -- --backups",
     "repo-local CLI logs",
     "prints a fresh preview",
     "local validation before the managed refresh",
@@ -439,6 +568,7 @@ for (const [file, snippets] of Object.entries({
   ],
   "docs/security-model.tr.md": [
     "npm run chef -- --update",
+    "npm run chef -- --backups",
     "normal repo-local CLI loglari",
     "fresh preview basar",
     "managed refresh oncesi lokal validation",

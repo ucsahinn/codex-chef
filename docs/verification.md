@@ -152,6 +152,8 @@ npm run chef -- --status --repo-only
 npm run chef -- --status --repo-only --no-log
 npm run chef -- --preview
 npm run chef -- --update
+npm run chef -- --backups
+npm run chef -- --backups --backup <id>
 npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
 ```
@@ -169,6 +171,13 @@ interactive terminal, `npm run chef -- --skills` lets the user select one
 reviewed skill by number, and `npm run chef -- --mcp` lets the user select one
 connector by number for transport, endpoint/package, setup/auth/source/rollback
 notes without enabling it.
+
+`npm run chef -- --backups` lists backup archive metadata without touching
+global/user state. `npm run chef -- --backups --backup <id>` inspects a backup
+archive using paths, sizes, hashes, manifest status, and restorable target
+metadata only. `npm run validate:chef-cli` includes temporary-home backup
+smokes for list, inspect, restore preview, restore apply, rollback backup
+creation, and parseable JSON.
 
 The update apply path is intentionally not a skill installer: curated global
 skills and optional global Git guards stay behind `--install --apply`,

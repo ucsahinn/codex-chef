@@ -70,6 +70,16 @@ Varsayılan olarak overwrite edilen yönetilen dosyalar şuraya yedeklenir:
 
 Başka backup'ın yoksa `-NoBackup` veya `--no-backup` kullanma.
 
+Rollback oncesi mevcut backup archive'larini listele ve incele:
+
+```powershell
+npm run chef -- --backups
+npm run chef -- --backups --backup <id>
+```
+
+Backup archive inspect gorunumu metadata-only calisir; path, size, hash,
+manifest durumu ve restorable target bilgisini basar ama file content basmaz.
+
 ## Neyi Karşılaştırmalı?
 
 Upgrade öncesi şu dosyaları incele:
@@ -107,6 +117,13 @@ Codex içinde kontrol et:
 ## Rollback
 
 1. Codex'i kapat.
-2. Önceki dosyaları timestamp'li backup klasöründen geri kopyala.
-3. Codex'i yeniden başlat.
-4. `codex doctor --summary` komutunu tekrar çalıştır.
+2. Secilen backup archive'dan restore preview al:
+   `npm run chef -- --backups --backup <id> --restore`.
+3. Preview dogruysa apply et:
+   `npm run chef -- --backups --backup <id> --restore --apply`.
+4. Codex'i yeniden başlat.
+5. `codex doctor --summary` komutunu tekrar çalıştır.
+
+Restore apply once mevcut target'lar icin rollback backup olusturur. Yalniz
+bilinen Codex Chef managed dosyalarini restore eder ve eski backup archive'lari
+otomatik silmez.

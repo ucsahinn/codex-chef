@@ -84,6 +84,10 @@ npm run chef -- --status
 npm run chef -- --status --repo-only
 npm run chef -- --preview
 npm run chef -- --update
+npm run chef -- --backups
+npm run chef -- --backups --backup <id>
+npm run chef -- --backups --backup <id> --restore
+npm run chef:backups
 npm run chef -- --reset --apply
 npm run chef -- --repair --apply
 npm run chef -- --install --apply
@@ -113,6 +117,15 @@ global Git guards.
 `--reset --apply`, `--repair --apply`, and `--install --apply` are the other
 write paths; they route to the backup-backed installer or repair script instead
 of deleting user state.
+`--backups` is read-only by default and lists Codex Chef backup archive
+locations, manifest status, file counts, restorable file counts, and restore
+commands. `--backups --backup <id>` inspects backup archive metadata and hashes
+without printing file contents. `--backups --backup <id> --restore` previews
+the managed files that would be copied back, and
+`--backups --backup <id> --restore --apply` restores only known Codex Chef
+managed targets after creating a rollback backup of the current files. Backup
+archive deletion is not automated by the CLI; review the printed location and
+remove old archives manually only after you no longer need them.
 In an interactive terminal, `--skills` lets you pick one reviewed skill by
 number and installs it only when you rerun with `--apply`. `--mcp` lets you pick
 one connector by number to see transport, endpoint or package, setup, auth,

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import crypto from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -19,7 +20,9 @@ const options = {
   noLog: false,
   repoOnly: false,
   apply: false,
+  restore: false,
   action: null,
+  backupId: null,
   profile: null
 };
 
@@ -30,6 +33,7 @@ const ACTION_FLAGS = new Map([
   ["--update", "update"],
   ["--reset", "reset"],
   ["--repair", "repair"],
+  ["--backups", "backups"],
   ["--install", "install"],
   ["--skills", "skills"],
   ["--mcp", "mcp"],
@@ -46,6 +50,16 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--no-log") options.noLog = true;
   else if (arg === "--repo-only") options.repoOnly = true;
   else if (arg === "--apply") options.apply = true;
+  else if (arg === "--restore") options.restore = true;
+  else if (arg === "--backup") {
+    const value = args[index + 1];
+    if (!value || value.startsWith("--")) {
+      console.error("Codex Chef CLI error: --backup requires a backup id. Run npm run chef -- --backups to list available backups.");
+      process.exit(2);
+    }
+    options.backupId = value;
+    index += 1;
+  }
   else if (arg === "--profile") {
     options.profile = args[index + 1] || null;
     index += 1;
@@ -189,6 +203,12 @@ const MENU_ITEMS = [
     description: "Repair managed drift after backup. Requires --apply or confirmation."
   },
   {
+    id: "backups",
+    label: "Backups",
+    writes: "none/global with --restore --apply",
+    description: "List, inspect, or restore Codex Chef backup archives."
+  },
+  {
     id: "skills",
     label: "Skills",
     writes: "network optional",
@@ -238,6 +258,7 @@ Usage:
   npm run chef -- --status --repo-only
   npm run chef -- --reset [--apply]
   npm run chef -- --repair [--apply]
+  npm run chef -- --backups [--backup ID] [--restore --apply]
   npm run chef -- --install [--apply]
   npm run chef -- --skills
   npm run chef -- --mcp
@@ -252,6 +273,8 @@ Options:
   --no-log     Do not create repo-local CLI log files for strict audits
   --repo-only  Skip installed runtime, global skill roots, Codex logs, and Codex CLI probes for status
   --profile ID Show one routing profile when used with --routing
+  --backup ID  Inspect or restore a specific Codex Chef backup archive
+  --restore    Preview restore for --backup ID; add --apply to copy files back
   --apply      Allow write actions for update, install, reset, repair, or selected skill install
   --help       Show this help
 
@@ -615,6 +638,483 @@ async function runRepair() {
   return runNode("repair-apply", "scripts/repair-install.mjs", ["--redact-paths", "--apply"]);
 }
 
+const BACKUP_MANIFEST_NAME = ".codex-chef-backup.json";
+const BACKUP_ID_PATTERN = /^codex-chef-[A-Za-z0-9._-]+$/;
+
+function codexHome() {
+  return path.resolve(process.env.CODEX_HOME || path.join(os.homedir(), ".codex"));
+}
+
+function agentsHome() {
+  return path.resolve(process.env.AGENTS_HOME || path.join(os.homedir(), ".agents"));
+}
+
+function backupRootPath() {
+  return path.join(codexHome(), "backups");
+}
+
+function compactTimestamp() {
+  const date = new Date();
+  const pad = (value) => String(value).padStart(2, "0");
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate())
+  ].join("") + "-" + [
+    pad(date.getHours()),
+    pad(date.getMinutes()),
+    pad(date.getSeconds())
+  ].join("");
+}
+
+function isInside(child, parent) {
+  const relative = path.relative(path.resolve(parent), path.resolve(child));
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+function safeRealpath(filePath) {
+  try {
+    return fs.realpathSync.native(filePath);
+  } catch {
+    return path.resolve(filePath);
+  }
+}
+
+function assertInside(child, parent, label) {
+  const childPath = path.resolve(child);
+  const parentPath = path.resolve(parent);
+  if (!isInside(childPath, parentPath)) {
+    throw new Error(`Refusing ${label} outside expected root: ${redactLocalPaths(childPath)}`);
+  }
+}
+
+function validateBackupId(id) {
+  if (!id || !BACKUP_ID_PATTERN.test(id) || id.includes("/") || id.includes("\\")) {
+    throw new Error(`Invalid backup id: ${id || "<missing>"}`);
+  }
+}
+
+function validateArchiveRelativePath(relativePath) {
+  if (!relativePath || relativePath.includes("\0")) return false;
+  if (path.isAbsolute(relativePath) || path.win32.isAbsolute(relativePath) || path.posix.isAbsolute(relativePath)) return false;
+  if (/^[A-Za-z]:/.test(relativePath) || relativePath.startsWith("\\\\") || relativePath.startsWith("//")) return false;
+  const normalized = relativePath.replaceAll("\\", "/");
+  if (normalized.startsWith("../") || normalized.includes("/../") || normalized.endsWith("/..")) return false;
+  const parts = normalized.split("/").filter(Boolean);
+  if (parts.some((part) => part === "." || part === "..")) return false;
+  if (parts.some((part) => /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part))) return false;
+  return true;
+}
+
+function hashFile(filePath) {
+  const hash = crypto.createHash("sha256");
+  hash.update(fs.readFileSync(filePath));
+  return hash.digest("hex");
+}
+
+function readBackupManifest(archivePath) {
+  const manifestPath = path.join(archivePath, BACKUP_MANIFEST_NAME);
+  if (!fs.existsSync(manifestPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  } catch (error) {
+    return { invalid: true, error: error.message };
+  }
+}
+
+function listArchiveFiles(archivePath, includeHashes = false) {
+  const files = [];
+  const issues = [];
+  const archiveReal = safeRealpath(archivePath);
+
+  function walk(current) {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const fullPath = path.join(current, entry.name);
+      const relative = toPosix(path.relative(archivePath, fullPath));
+      if (relative === BACKUP_MANIFEST_NAME) continue;
+      if (!validateArchiveRelativePath(relative)) {
+        issues.push(`Rejected unsafe backup path: ${relative}`);
+        continue;
+      }
+      const stat = fs.lstatSync(fullPath);
+      const real = safeRealpath(fullPath);
+      if (!isInside(real, archiveReal)) {
+        issues.push(`Rejected backup path escaping archive root: ${relative}`);
+        continue;
+      }
+      if (stat.isSymbolicLink()) {
+        issues.push(`Rejected symlink in backup archive: ${relative}`);
+        continue;
+      }
+      if (stat.isDirectory()) {
+        walk(fullPath);
+      } else if (stat.isFile()) {
+        files.push({
+          relative,
+          path: fullPath,
+          size: stat.size,
+          sha256: includeHashes ? hashFile(fullPath) : undefined
+        });
+      }
+    }
+  }
+
+  walk(archivePath);
+  files.sort((a, b) => a.relative.localeCompare(b.relative));
+  return { files, issues };
+}
+
+function mapBackupRelativeToTarget(relative) {
+  const normalized = relative.replaceAll("\\", "/");
+  const ch = codexHome();
+  const ah = agentsHome();
+  if (normalized.startsWith("codex/")) {
+    return path.join(ch, ...normalized.slice("codex/".length).split("/"));
+  }
+  if (normalized.startsWith("agents/plugins/")) {
+    return path.join(ah, ...normalized.slice("agents/".length).split("/"));
+  }
+  if (normalized === "marketplace.json") {
+    return path.join(ah, "plugins", "marketplace.json");
+  }
+  if (
+    normalized === "AGENTS.md" ||
+    normalized === "config.toml" ||
+    normalized.startsWith("rules/") ||
+    normalized.startsWith("agents/") ||
+    normalized.startsWith("plugins/codex-chef-workflows/") ||
+    /^[A-Za-z0-9._-]+\.config\.toml$/.test(normalized)
+  ) {
+    return path.join(ch, ...normalized.split("/"));
+  }
+  return null;
+}
+
+function assertNoSymlinkParents(targetPath) {
+  const roots = [codexHome(), agentsHome()];
+  const rootForTarget = roots.find((candidate) => isInside(targetPath, candidate));
+  if (!rootForTarget) {
+    throw new Error(`Refusing restore target outside Codex/Agents homes: ${redactLocalPaths(targetPath)}`);
+  }
+
+  const rootReal = safeRealpath(rootForTarget);
+  let current = rootForTarget;
+  const relativeParts = path.relative(rootForTarget, path.dirname(targetPath))
+    .split(path.sep)
+    .filter(Boolean);
+  for (const part of relativeParts) {
+    current = path.join(current, part);
+    if (!fs.existsSync(current)) continue;
+    const stat = fs.lstatSync(current);
+    if (stat.isSymbolicLink()) {
+      throw new Error(`Refusing restore through symlinked directory: ${redactLocalPaths(current)}`);
+    }
+    if (!stat.isDirectory()) {
+      throw new Error(`Refusing restore through non-directory path: ${redactLocalPaths(current)}`);
+    }
+    if (!isInside(safeRealpath(current), rootReal)) {
+      throw new Error(`Refusing restore through directory outside canonical root: ${redactLocalPaths(current)}`);
+    }
+  }
+}
+
+function assertManagedRestoreTarget(targetPath) {
+  const resolved = path.resolve(targetPath);
+  if (!isInside(resolved, codexHome()) && !isInside(resolved, agentsHome())) {
+    throw new Error(`Refusing restore target outside Codex/Agents homes: ${redactLocalPaths(resolved)}`);
+  }
+  assertNoSymlinkParents(resolved);
+}
+
+function restoreBackupPlan(archivePath) {
+  const { files, issues } = listArchiveFiles(archivePath, true);
+  const unsupported = [];
+  const planned = [];
+  const seenTargets = new Set();
+
+  for (const file of files) {
+    const target = mapBackupRelativeToTarget(file.relative);
+    if (!target) {
+      unsupported.push(file.relative);
+      continue;
+    }
+    assertManagedRestoreTarget(target);
+    const canonicalTarget = path.resolve(target).toLowerCase();
+    if (seenTargets.has(canonicalTarget)) {
+      throw new Error(`Backup archive maps multiple files to the same restore target: ${redactLocalPaths(target)}`);
+    }
+    seenTargets.add(canonicalTarget);
+    planned.push({
+      ...file,
+      target,
+      targetExists: fs.existsSync(target)
+    });
+  }
+
+  return { files: planned, unsupported, issues };
+}
+
+function createRollbackBackup(plan) {
+  const restoreId = `codex-chef-restore-${compactTimestamp()}-${process.pid}`;
+  const rollbackPath = path.join(backupRootPath(), restoreId);
+  const entries = [];
+  for (const item of plan.files) {
+    if (!fs.existsSync(item.target)) continue;
+    assertManagedRestoreTarget(item.target);
+    const targetStat = fs.lstatSync(item.target);
+    if (targetStat.isSymbolicLink()) {
+      throw new Error(`Refusing to back up symlink restore target: ${redactLocalPaths(item.target)}`);
+    }
+    const relative = isInside(item.target, codexHome())
+      ? path.join("codex", path.relative(codexHome(), item.target))
+      : path.join("agents", path.relative(agentsHome(), item.target));
+    const destination = path.join(rollbackPath, relative);
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.cpSync(item.target, destination, { recursive: true, force: true });
+    entries.push({
+      source: redactLocalPaths(item.target),
+      backupRelativePath: toPosix(relative),
+      size: targetStat.size
+    });
+  }
+  if (entries.length > 0) {
+    writeBackupManifest(rollbackPath, {
+      operation: "restore-rollback",
+      restoredFrom: path.basename(options.backupId || ""),
+      entries
+    });
+  }
+  return entries.length > 0 ? rollbackPath : null;
+}
+
+function writeBackupManifest(backupPath, extra = {}) {
+  fs.mkdirSync(backupPath, { recursive: true });
+  const packageJson = readJson("package.json");
+  const manifest = {
+    schemaVersion: "codex-chef.backup.v1",
+    createdAt: new Date().toISOString(),
+    packageName: packageJson.name,
+    packageVersion: packageJson.version,
+    platform: process.platform,
+    ...extra
+  };
+  fs.writeFileSync(path.join(backupPath, BACKUP_MANIFEST_NAME), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+}
+
+function restoreBackupArchive(archivePath, plan) {
+  if (plan.files.length === 0) {
+    throw new Error("Selected backup archive has no restorable managed Codex Chef files.");
+  }
+  for (const item of plan.files) {
+    const sourceStat = fs.lstatSync(item.path);
+    if (sourceStat.isSymbolicLink()) {
+      throw new Error(`Refusing to restore symlink from backup archive: ${item.relative}`);
+    }
+    assertInside(safeRealpath(item.path), safeRealpath(archivePath), "restore source");
+    assertManagedRestoreTarget(item.target);
+  }
+  const rollbackPath = createRollbackBackup(plan);
+  for (const item of plan.files) {
+    fs.mkdirSync(path.dirname(item.target), { recursive: true });
+    fs.copyFileSync(item.path, item.target);
+  }
+  return { restored: plan.files.length, rollbackPath };
+}
+
+function summarizeBackupArchive(id, archivePath) {
+  const stat = fs.statSync(archivePath);
+  const manifest = readBackupManifest(archivePath);
+  const { files, issues } = listArchiveFiles(archivePath);
+  const restorableCount = files.filter((file) => mapBackupRelativeToTarget(file.relative)).length;
+  const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+  return {
+    id,
+    kind: id.startsWith("codex-chef-repair-")
+      ? "repair"
+      : id.startsWith("codex-chef-restore-")
+        ? "restore-rollback"
+        : "install",
+    path: archivePath,
+    fileCount: files.length,
+    restorableCount,
+    totalBytes,
+    modified: stat.mtime.toISOString(),
+    manifest: manifest
+      ? {
+        present: true,
+        schemaVersion: manifest.schemaVersion || null,
+        operation: manifest.operation || null,
+        packageVersion: manifest.packageVersion || null,
+        invalid: manifest.invalid === true
+      }
+      : { present: false },
+    issues
+  };
+}
+
+function listBackupArchives() {
+  const backupRoot = backupRootPath();
+  if (!fs.existsSync(backupRoot)) return [];
+  const rootReal = safeRealpath(backupRoot);
+  return fs.readdirSync(backupRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && BACKUP_ID_PATTERN.test(entry.name))
+    .map((entry) => {
+      const archivePath = path.join(backupRoot, entry.name);
+      const archiveReal = safeRealpath(archivePath);
+      if (!isInside(archiveReal, rootReal)) {
+        throw new Error(`Refusing backup archive outside backup root: ${entry.name}`);
+      }
+      return summarizeBackupArchive(entry.name, archivePath);
+    })
+    .sort((a, b) => b.modified.localeCompare(a.modified));
+}
+
+function resolveBackupArchive(id) {
+  validateBackupId(id);
+  const backupRoot = backupRootPath();
+  const archivePath = path.join(backupRoot, id);
+  assertInside(archivePath, backupRoot, "backup archive");
+  if (!fs.existsSync(archivePath) || !fs.statSync(archivePath).isDirectory()) {
+    throw new Error(`Backup archive not found: ${id}`);
+  }
+  const rootReal = safeRealpath(backupRoot);
+  const archiveReal = safeRealpath(archivePath);
+  if (!isInside(archiveReal, rootReal)) {
+    throw new Error(`Refusing backup archive outside canonical backup root: ${id}`);
+  }
+  return archivePath;
+}
+
+function backupJsonPayload(backups) {
+  return {
+    schemaVersion: 1,
+    backupRoot: redactLocalPaths(backupRootPath()),
+    codexHome: redactLocalPaths(codexHome()),
+    agentsHome: redactLocalPaths(agentsHome()),
+    backups: backups.map((backup) => ({
+      ...backup,
+      path: redactLocalPaths(backup.path)
+    }))
+  };
+}
+
+function printBackupTable(backups) {
+  console.log(`${ICONS.logs} Codex Chef backups`);
+  console.log(`${styleLabel("Backup root")}: ${redactLocalPaths(backupRootPath())}`);
+  if (backups.length === 0) {
+    console.log(`${ICONS.info} No backup archives found.`);
+    return;
+  }
+  console.table(backups.map((backup) => ({
+    id: backup.id,
+    kind: backup.kind,
+    files: backup.fileCount,
+    restorable: backup.restorableCount,
+    bytes: backup.totalBytes,
+    manifest: backup.manifest.present ? backup.manifest.schemaVersion || "present" : "missing",
+    modified: backup.modified
+  })));
+  console.log(`${ICONS.info} Inspect one archive: npm run chef -- --backups --backup <id>`);
+  console.log(`${ICONS.info} Restore preview: npm run chef -- --backups --backup <id> --restore`);
+}
+
+function printBackupInspect(archivePath, plan) {
+  console.log(`${ICONS.logs} Backup archive: ${path.basename(archivePath)}`);
+  console.log(`${styleLabel("Location")}: ${redactLocalPaths(archivePath)}`);
+  if (plan.issues.length > 0) {
+    console.log(`${ICONS.warn} Archive issues:`);
+    for (const issue of plan.issues) console.log(`- ${issue}`);
+  }
+  if (plan.unsupported.length > 0) {
+    console.log(`${ICONS.warn} Unsupported entries are not restorable by this CLI: ${plan.unsupported.join(", ")}`);
+  }
+  if (plan.files.length === 0) {
+    console.log(`${ICONS.info} No restorable managed Codex Chef files found.`);
+    return;
+  }
+  console.table(plan.files.map((file) => ({
+    archiveFile: file.relative,
+    target: redactLocalPaths(file.target),
+    exists: file.targetExists ? "yes" : "no",
+    bytes: file.size,
+    sha256: file.sha256.slice(0, 12)
+  })));
+  console.log(`${ICONS.info} Restore preview: npm run chef -- --backups --backup ${path.basename(archivePath)} --restore`);
+}
+
+async function runBackups() {
+  try {
+    if (!options.backupId) {
+      if (options.restore) {
+        console.error(`${ICONS.warn} --restore requires --backup ID.`);
+        return { ok: false };
+      }
+      const backups = listBackupArchives();
+      if (options.json) {
+        console.log(JSON.stringify(backupJsonPayload(backups), null, 2));
+      } else {
+        printBackupTable(backups);
+      }
+      return { ok: true };
+    }
+
+    const archivePath = resolveBackupArchive(options.backupId);
+    const plan = restoreBackupPlan(archivePath);
+    if (options.json) {
+      console.log(JSON.stringify({
+        schemaVersion: 1,
+        backup: path.basename(archivePath),
+        backupPath: redactLocalPaths(archivePath),
+        restore: options.restore,
+        apply: options.apply,
+        restorableFiles: plan.files.map((file) => ({
+          archiveFile: file.relative,
+          target: redactLocalPaths(file.target),
+          targetExists: file.targetExists,
+          bytes: file.size,
+          sha256: file.sha256
+        })),
+        unsupported: plan.unsupported,
+        issues: plan.issues
+      }, null, 2));
+      return { ok: true };
+    }
+
+    if (!options.restore) {
+      printBackupInspect(archivePath, plan);
+      return { ok: true };
+    }
+
+    console.log(`${ICONS.info} Restore preview for backup ${path.basename(archivePath)}`);
+    printBackupInspect(archivePath, plan);
+    if (plan.issues.length > 0) {
+      console.error(`${ICONS.warn} Restore blocked because the archive has unsafe entries.`);
+      return { ok: false };
+    }
+    if (!options.apply) {
+      console.log(`${ICONS.info} No files restored. Rerun with --apply to restore this backup.`);
+      return { ok: true };
+    }
+    const allowed = await confirmWriteAction(
+      "Backup restore",
+      "Restore copies selected managed Codex Chef files from the backup archive after creating a rollback backup of current targets."
+    );
+    if (!allowed) return { ok: false, skipped: true };
+    const result = restoreBackupArchive(archivePath, plan);
+    console.log(`${ICONS.ok} Restore applied: ${result.restored} managed file(s) copied from ${path.basename(archivePath)}.`);
+    if (result.rollbackPath) {
+      console.log(`${ICONS.info} Rollback backup: ${redactLocalPaths(result.rollbackPath)}`);
+    } else {
+      console.log(`${ICONS.info} Rollback backup: none needed because no current targets existed.`);
+    }
+    console.log(`${ICONS.info} Restart Codex, then run npm run chef -- --status --repo-only --no-log.`);
+    return { ok: true };
+  } catch (error) {
+    console.error(`${ICONS.warn} ${error.message}`);
+    return { ok: false };
+  }
+}
+
 function npxCommand() {
   return process.platform === "win32" ? "npx.cmd" : "npx";
 }
@@ -824,6 +1324,8 @@ async function runAction(action) {
       return runInstall();
     case "repair":
       return runRepair();
+    case "backups":
+      return runBackups();
     case "skills":
       return runSkills();
     case "mcp":

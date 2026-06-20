@@ -125,6 +125,20 @@ directory. It does not publish, perform unscoped cleanup, install curated
 global skills, install optional global Git guards, delete user skills, rotate
 credentials, or enable account/database/broad-filesystem connectors.
 
+## Backup Inventory And Restore
+
+`npm run chef -- --backups` lists backup archives under the active Codex home
+without changing global/user state. `npm run chef -- --backups --backup <id>`
+inspects backup archive metadata only: paths, sizes, hashes, manifest status,
+issues, and restorable targets. It does not print file contents.
+
+Restore treats backup archives as untrusted input. `npm run chef -- --backups
+--backup <id> --restore` is a preview. The apply path requires `--apply`,
+creates a fresh rollback backup of current targets first, rejects unsafe archive
+paths and symlinks, and restores only known Codex Chef-managed files under the
+active Codex or Agents homes. Backup archive cleanup and deletion are not
+automated; they remain manual, reviewed operator actions.
+
 ## Rules
 
 `templates/codex/rules/default.rules` allows fast read-only discovery and

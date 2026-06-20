@@ -59,11 +59,11 @@ Use `assets/social-preview.svg` as the GitHub social preview image.
 
 ## Release Metadata
 
-For v0.5.26, use:
+For v0.5.27, use:
 
 ```text
-Title: Codex Chef v0.5.26
-Tag: v0.5.26
+Title: Codex Chef v0.5.27
+Tag: v0.5.27
 Notes: docs/release-notes.md
 ```
 

@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+## v0.5.27 - 2026-06-20
+
+This release closes the backup recovery gap in the enterprise CLI. Backup
+archives are now visible from `npm run chef`, restore has a safe preview/apply
+flow, and new backup archives carry a manifest so future recovery checks have
+machine-readable evidence.
+
+## Highlights
+
+- Added `npm run chef -- --backups` and `npm run chef:backups` for read-only
+  backup archive inventory.
+- Added `npm run chef -- --backups --backup <id>` to inspect backup archive
+  metadata, sizes, hashes, manifest status, and restorable targets without
+  printing file contents.
+- Added `npm run chef -- --backups --backup <id> --restore --apply`, which
+  restores only known Codex Chef-managed files after first creating a rollback
+  backup of current targets.
+- Added `.codex-chef-backup.json` manifest generation for new installer, repair,
+  and restore rollback backup archives.
+- Extended `npm run validate:chef-cli` with temporary-home backup smokes for
+  list, inspect, restore preview, restore apply, rollback creation, and JSON.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --backups --plain --no-log
+npm run chef:backups -- --plain --no-log
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.26 - 2026-06-20
 
 This patch closes the last typo-entrypoint gap from the Windows first-run

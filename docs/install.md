@@ -84,6 +84,23 @@ backup-backed installer. Update does not install curated global skills or
 optional global Git guards; use `--install --apply` or `--skills --apply` when
 you want those explicit surfaces.
 
+Inspect or restore Codex Chef backup archives through the same CLI:
+
+```powershell
+npm run chef -- --backups
+npm run chef -- --backups --backup <id>
+npm run chef -- --backups --backup <id> --restore
+npm run chef -- --backups --backup <id> --restore --apply
+```
+
+The list and inspect commands are metadata-only: they show backup archive
+locations, manifest status, restorable file counts, sizes, and hashes without
+printing file contents. Restore is a preview unless `--apply` is supplied. The
+apply path creates a new rollback backup of current targets before copying
+known Codex Chef-managed files back from the selected archive. Backup deletion
+is not automated; review the printed archive location and remove old backups
+manually only after you no longer need them.
+
 Useful switches:
 
 - `-All`: install Codex templates, the local Codex Chef plugin, specialist
@@ -162,6 +179,10 @@ Existing files are copied into:
 ```text
 ~/.codex/backups/codex-chef-YYYYMMDD-HHMMSS/
 ```
+
+New backups also include `.codex-chef-backup.json`, a small manifest with the
+operation, package version, platform, backup-relative paths, sizes, hashes, and
+any archive issues detected while writing metadata.
 
 The installer backs up managed targets before replacing them:
 

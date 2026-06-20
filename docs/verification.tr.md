@@ -153,6 +153,8 @@ npm run chef -- --status --repo-only
 npm run chef -- --status --repo-only --no-log
 npm run chef -- --preview
 npm run chef -- --update
+npm run chef -- --backups
+npm run chef -- --backups --backup <id>
 npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
 ```
@@ -170,6 +172,13 @@ Interactive terminalde `npm run chef -- --skills` numarayla tek reviewed skill
 sectirir; `npm run chef -- --mcp` numarayla connector sectirip setup/auth/
 source/rollback ve transport/endpoint-package notlarini gosterir ama
 connector'i acmaz.
+
+`npm run chef -- --backups` backup archive metadata'sini global/user state'e
+dokunmadan listeler. `npm run chef -- --backups --backup <id>` bir backup
+archive'i yalniz path, size, hash, manifest durumu ve restorable target
+metadata'siyle inceler; file content basmaz. `npm run validate:chef-cli`,
+temporary-home fixture ile list, inspect, restore preview, restore apply,
+rollback backup creation ve parseable JSON backup smoke'larini kapsar.
 
 Update apply path bilerek skill installer degildir: curated global skill'ler ve
 opsiyonel global Git guard'lar `--install --apply`, `--skills --apply` veya

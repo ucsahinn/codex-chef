@@ -129,6 +129,21 @@ edebilir. Publish, unscoped cleanup, curated global skill kurma, opsiyonel
 global Git guard kurma, user skill silme, credential rotate veya
 account/database/broad-filesystem connector enable etmez.
 
+## Backup Inventory Ve Restore
+
+`npm run chef -- --backups`, aktif Codex home altindaki backup archive'larini
+global/user state degistirmeden listeler. `npm run chef -- --backups --backup
+<id>` backup archive metadata'sini inceler: path, size, hash, manifest durumu,
+issue ve restorable target bilgisi. File content basmaz.
+
+Restore backup archive'larini untrusted input kabul eder. `npm run chef --
+--backups --backup <id> --restore` preview'dir. Apply path'i `--apply` ister,
+once mevcut target'larin fresh rollback backup'ini olusturur, unsafe archive
+path'lerini ve symlink'leri reddeder, yalniz aktif Codex veya Agents home
+altindaki bilinen Codex Chef managed dosyalarini restore eder. Backup archive
+cleanup ve delete otomatik degildir; manuel ve review edilmis operator aksiyonu
+olarak kalir.
+
 ## Rules
 
 `templates/codex/rules/default.rules` hızlı read-only discovery ve project-native

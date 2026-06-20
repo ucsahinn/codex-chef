@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+## v0.5.27 - 2026-06-20
+
+Bu release enterprise CLI icindeki backup recovery boslugunu kapatir. Backup
+archive'lari artik `npm run chef` uzerinden gorulur, restore guvenli
+preview/apply akisina sahiptir ve yeni backup archive'lari ilerideki recovery
+kontrolleri icin machine-readable manifest tasir.
+
+## One cikanlar
+
+- `npm run chef -- --backups` ve `npm run chef:backups` read-only backup
+  archive inventory icin eklendi.
+- `npm run chef -- --backups --backup <id>`, file content basmadan backup
+  archive metadata, size, hash, manifest durumu ve restorable target bilgisini
+  gosterir.
+- `npm run chef -- --backups --backup <id> --restore --apply`, once current
+  target'lar icin rollback backup olusturur, sonra yalniz bilinen Codex Chef
+  managed dosyalarini restore eder.
+- Yeni installer, repair ve restore rollback backup archive'lari icin
+  `.codex-chef-backup.json` manifest generation eklendi.
+- `npm run validate:chef-cli`, list, inspect, restore preview, restore apply,
+  rollback creation ve JSON icin temporary-home backup smoke'larini kapsar.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --backups --plain --no-log
+npm run chef:backups -- --plain --no-log
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.26 - 2026-06-20
 
 Bu patch Windows ilk kullanim raporundaki son typo-entrypoint boslugunu

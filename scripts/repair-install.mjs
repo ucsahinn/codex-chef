@@ -593,6 +593,30 @@ function inspectSkills() {
   };
 }
 
+function writeBackupManifest() {
+  if (!options.apply || options.noBackup || !fs.existsSync(backupRoot)) return;
+  const result = spawnSync(process.execPath, [
+    "scripts/write-backup-manifest.mjs",
+    "--backup-root",
+    backupRoot,
+    "--operation",
+    "repair",
+    "--platform",
+    options.platform
+  ], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true,
+    timeout: 60000
+  });
+  if (result.error) {
+    warnings.push(`Could not write repair backup manifest: ${result.error.message}`);
+  } else if (result.status !== 0) {
+    warnings.push(`Could not write repair backup manifest: ${[result.stdout, result.stderr].filter(Boolean).join("\n").trim()}`);
+  }
+}
+
 let managedFiles;
 let config;
 let marketplace;
@@ -603,6 +627,7 @@ try {
   config = runConfigMerge();
   marketplace = repairMarketplace();
   skills = inspectSkills();
+  writeBackupManifest();
 } catch (error) {
   failures.push(error.message);
 }

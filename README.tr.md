@@ -66,6 +66,10 @@ npm run chef -- --status
 npm run chef -- --status --repo-only
 npm run chef -- --preview
 npm run chef -- --update
+npm run chef -- --backups
+npm run chef -- --backups --backup <id>
+npm run chef -- --backups --backup <id> --restore
+npm run chef:backups
 npm run chef -- --reset --apply
 npm run chef -- --repair --apply
 npm run chef -- --install --apply
@@ -94,7 +98,16 @@ installer uzerinden yeniler; curated global skill veya opsiyonel global Git
 guard kurmaz.
 `--reset --apply`, `--repair --apply` ve `--install --apply` diger write
 path'leridir; user state silmek yerine backup alan installer/repair
-scriptlerine giderler. Interactive
+scriptlerine giderler. `--backups` varsayilan olarak read-only calisir; Codex
+Chef backup archive konumlarini, manifest durumunu, dosya sayisini, restore
+edilebilir dosya sayisini ve restore komutlarini gosterir. `--backups --backup
+<id>` file content basmadan backup archive metadata ve hash'lerini inceler.
+`--backups --backup <id> --restore` geri kopyalanacak managed dosyalari preview
+eder; `--backups --backup <id> --restore --apply` ise mevcut hedeflerin rollback
+backup'ini aldiktan sonra yalniz bilinen Codex Chef managed target'larini geri
+kopyalar. Backup archive delete/cleanup CLI tarafinda otomatik degildir; path'i
+inceleyip artik ihtiyacin olmadigindan emin olduktan sonra manuel yap.
+Interactive
 terminalde `--skills` numarayla tek reviewed skill sectirir ve sadece `--apply`
 ile kurar. `--mcp` numarayla connector sectirip transport, endpoint veya
 package, setup, auth, dogrulama, source ve rollback notlarini gosterir; account

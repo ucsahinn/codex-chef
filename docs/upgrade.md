@@ -72,6 +72,16 @@ By default, overwritten managed files are backed up under:
 
 Do not use `-NoBackup` or `--no-backup` unless you already have another backup.
 
+List and inspect available backup archives before rollback:
+
+```powershell
+npm run chef -- --backups
+npm run chef -- --backups --backup <id>
+```
+
+The backup archive inspect view is metadata-only and prints paths, sizes,
+hashes, manifest status, and restorable targets without printing file contents.
+
 ## What To Compare
 
 Review these files before upgrading:
@@ -109,6 +119,13 @@ Inside Codex, check:
 ## Rollback
 
 1. Close Codex.
-2. Copy the previous files back from the timestamped backup directory.
-3. Restart Codex.
-4. Re-run `codex doctor --summary`.
+2. Preview restore from the selected backup archive:
+   `npm run chef -- --backups --backup <id> --restore`.
+3. Apply only after the preview is correct:
+   `npm run chef -- --backups --backup <id> --restore --apply`.
+4. Restart Codex.
+5. Re-run `codex doctor --summary`.
+
+The restore apply path creates a rollback backup of current targets first. It
+restores only known Codex Chef-managed files and does not delete old backup
+archives automatically.

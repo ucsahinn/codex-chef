@@ -495,5 +495,8 @@ else
   echo '    codex exec --strict-config "Summarize the active Codex setup."'
 fi
 if [ "$NO_BACKUP" -ne 1 ] && [ -d "$BACKUP_ROOT" ]; then
+  if ! node "$REPO_ROOT/scripts/write-backup-manifest.mjs" --backup-root "$BACKUP_ROOT" --operation install --platform unix; then
+    echo "Warning: could not write backup manifest" >&2
+  fi
   note "Backup: $BACKUP_ROOT"
 fi

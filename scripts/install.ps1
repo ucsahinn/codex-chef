@@ -560,5 +560,10 @@ if ($WhatIfPreference) {
   Write-Host "    codex exec --strict-config `"Summarize the active Codex setup.`""
 }
 if (-not $NoBackup -and (Test-Path -LiteralPath $BackupRoot)) {
+  $ManifestScript = Join-Path $RepoRoot "scripts\write-backup-manifest.mjs"
+  $ManifestOutput = & node $ManifestScript --backup-root $BackupRoot --operation install --platform windows 2>&1
+  if ($LASTEXITCODE -ne 0) {
+    Write-Warning "Could not write backup manifest: $($ManifestOutput -join [Environment]::NewLine)"
+  }
   Write-Note "Backup: $BackupRoot"
 }
