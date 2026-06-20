@@ -16,16 +16,16 @@ Guided CLI guvenli yolu tek komutta toplar:
 
 ```powershell
 npm run chef -- --update
+npm run chef -- --update --verbose-plan
 npm run chef -- --update --apply
 ```
 
 `--apply` olmadan update modu managed/global dosyalari degistirmez; normal CLI
-loglari `--no-log` yoksa repo-local kalir. Apply modunda clean worktree ister
-ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse CLI fresh
-preview basip durur; bu updated preview'i inceledikten sonra
-`npm run chef -- --update --apply` tekrar calistir. Repo zaten guncelse managed
-dosyalari lokal validation sonrasi backup alan installer uzerinden yeniler;
-curated global skill veya opsiyonel global Git guard kurmaz.
+loglari `--no-log` yoksa repo-local kalir. Varsayilan preview kisadir;
+`npm run chef -- --update --verbose-plan` tam install dry-run kanitini basar.
+Apply modunda clean worktree ister ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse CLI fresh preview basip durur; bu updated preview'i
+inceledikten sonra `npm run chef -- --update --apply` tekrar calistir. Repo zaten guncelse managed dosyalari lokal validation sonrasi backup alan installer
+uzerinden yeniler; curated global skill veya opsiyonel global Git guard kurmaz.
 
 Manuel PowerShell:
 
@@ -75,10 +75,13 @@ Rollback oncesi mevcut backup archive'larini listele ve incele:
 ```powershell
 npm run chef -- --backups
 npm run chef -- --backups --backup <id>
+npm run chef -- --backups --backup <id> --delete
 ```
 
 Backup archive inspect gorunumu metadata-only calisir; path, size, hash,
 manifest durumu ve restorable target bilgisini basar ama file content basmaz.
+Silme preview-first'tur; resolved archive path'i artik gerekmedigini
+dogruladigin backup'a aitse yalniz o zaman `--apply` ekle.
 
 ## Neyi Karşılaştırmalı?
 

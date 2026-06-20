@@ -9,17 +9,20 @@ The guided CLI wraps the safe path:
 
 ```powershell
 npm run chef -- --update
+npm run chef -- --update --verbose-plan
 npm run chef -- --update --apply
 ```
 
 Without `--apply`, update mode does not change managed/global files; normal CLI
-logs are still repo-local unless `--no-log` is supplied. Apply mode requires a
-clean worktree and runs `git pull --ff-only`. If the pull advances the repo,
-the CLI prints a fresh preview and stops; rerun `npm run chef -- --update
---apply` only after reviewing that updated preview. If the repo is already
-current, apply runs local validation and refreshes managed files through the
-backup-backed installer without installing curated global skills or optional
-global Git guards.
+logs are still repo-local unless `--no-log` is supplied. The default preview is
+concise; `npm run chef -- --update --verbose-plan` prints the full install
+dry-run evidence. Apply mode requires a clean worktree and runs
+`git pull --ff-only`. If the pull advances the repo, the CLI prints a fresh
+preview and stops; rerun `npm run chef -- --update --apply` only after
+reviewing that updated preview. If the repo is already current, apply runs
+local validation and refreshes managed files through the backup-backed
+installer without installing curated global skills or optional global Git
+guards.
 
 Manual flow:
 
@@ -77,10 +80,13 @@ List and inspect available backup archives before rollback:
 ```powershell
 npm run chef -- --backups
 npm run chef -- --backups --backup <id>
+npm run chef -- --backups --backup <id> --delete
 ```
 
 The backup archive inspect view is metadata-only and prints paths, sizes,
 hashes, manifest status, and restorable targets without printing file contents.
+Deletion is preview-first; add `--apply` only after confirming the resolved
+archive path belongs to the backup you no longer need.
 
 ## What To Compare
 

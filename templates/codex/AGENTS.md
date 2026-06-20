@@ -115,6 +115,15 @@ are selected:
   later agent results.
 - In Codex CLI, tell the user they can use `/agent` to inspect active agent
   threads, switch to one, steer it, or close completed threads.
+- Close completed subagent threads when they are no longer needed. Before
+  finalizing large delegated work, report any agents that are still running,
+  completed, failed, or blocked; if the current surface exposes an agent-close
+  tool, close completed agents after you have summarized their results.
+- Use `/ps` to inspect background terminals and `/stop` to cancel terminal work
+  started by the current session. Close browser or MCP pages/sessions when the
+  selected tool exposes a close operation. If an external MCP process such as
+  Serena persists after the task, report it and ask before killing processes or
+  deleting local state.
 - Do not spawn subagents for trivial, single-file, low-risk changes.
 - For non-trivial work that matches a registered specialist, use the specialist
   instead of silently doing all exploration or verification in the main thread.

@@ -13,6 +13,31 @@ const root = path.resolve(scriptDir, "..");
 const logRoot = path.join(root, "tmp", "chef-cli", "logs");
 const args = process.argv.slice(2);
 
+function normalizeLanguage(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return null;
+  if (["tr", "tr-tr", "turkish"].includes(normalized)) return "tr";
+  if (["en", "en-us", "en-gb", "english"].includes(normalized)) return "en";
+  return null;
+}
+
+function languageFromEnvironment() {
+  return normalizeLanguage(process.env.CODEX_CHEF_LANG || process.env.CHEF_LANG) || "en";
+}
+
+function languageFromArgs(argv, fallback) {
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--tr") return "tr";
+    if (arg === "--lang") {
+      const value = argv[index + 1];
+      const parsed = value && !value.startsWith("--") ? normalizeLanguage(value) : null;
+      if (parsed) return parsed;
+    }
+  }
+  return fallback;
+}
+
 const options = {
   help: false,
   json: false,
@@ -21,10 +46,27 @@ const options = {
   repoOnly: false,
   apply: false,
   restore: false,
+  deleteBackup: false,
+  verbosePlan: false,
+  lang: languageFromArgs(args, languageFromEnvironment()),
   action: null,
   backupId: null,
   profile: null
 };
+
+function isTr() {
+  return options.lang === "tr";
+}
+
+function localText(en, tr) {
+  return isTr() ? tr : en;
+}
+
+function cliError(en, tr = en) {
+  const prefix = isTr() ? "Codex Chef CLI hatasi" : "Codex Chef CLI error";
+  console.error(`${prefix}: ${localText(en, tr)}`);
+  process.exit(2);
+}
 
 const ACTION_FLAGS = new Map([
   ["--status", "status"],
@@ -46,16 +88,30 @@ for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
   if (arg === "--help" || arg === "-h") options.help = true;
   else if (arg === "--json") options.json = true;
+  else if (arg === "--lang") {
+    const value = args[index + 1];
+    if (!value || value.startsWith("--")) {
+      cliError("--lang requires a language code (en or tr). Run npm run chef -- --help for supported commands.", "--lang dil kodu ister (en veya tr). Desteklenen komutlar icin npm run chef -- --help calistirin.");
+    }
+    const parsed = normalizeLanguage(value);
+    if (!parsed) {
+      cliError(`Unsupported language ${value}. Supported languages: en, tr.`, `Desteklenmeyen dil ${value}. Desteklenen diller: en, tr.`);
+    }
+    options.lang = parsed;
+    index += 1;
+  }
+  else if (arg === "--tr") options.lang = "tr";
   else if (arg === "--plain") options.plain = true;
   else if (arg === "--no-log") options.noLog = true;
   else if (arg === "--repo-only") options.repoOnly = true;
   else if (arg === "--apply") options.apply = true;
   else if (arg === "--restore") options.restore = true;
+  else if (arg === "--delete") options.deleteBackup = true;
+  else if (arg === "--verbose-plan") options.verbosePlan = true;
   else if (arg === "--backup") {
     const value = args[index + 1];
     if (!value || value.startsWith("--")) {
-      console.error("Codex Chef CLI error: --backup requires a backup id. Run npm run chef -- --backups to list available backups.");
-      process.exit(2);
+      cliError("--backup requires a backup id. Run npm run chef -- --backups to list available backups.", "--backup bir yedek id'si ister. Uygun yedekleri listelemek icin npm run chef -- --backups calistirin.");
     }
     options.backupId = value;
     index += 1;
@@ -66,8 +122,7 @@ for (let index = 0; index < args.length; index += 1) {
   }
   else if (ACTION_FLAGS.has(arg)) options.action = ACTION_FLAGS.get(arg);
   else {
-    console.error(`Codex Chef CLI error: Unknown option ${arg}. Run npm run chef -- --help for supported commands.`);
-    process.exit(2);
+    cliError(`Unknown option ${arg}. Run npm run chef -- --help for supported commands.`, `Bilinmeyen secenek ${arg}. Desteklenen komutlar icin npm run chef -- --help calistirin.`);
   }
 }
 
@@ -246,7 +301,142 @@ const MENU_ITEMS = [
   }
 ];
 
+const MENU_TEXT_TR = {
+  status: {
+    label: "Durum",
+    description: "Read-only kurulu runtime ve repo durum panosu.",
+    writes: "yok"
+  },
+  "status:repo-only": {
+    label: "Sadece repo durumu",
+    description: "Kurulu runtime veya Codex CLI probu olmadan hizli lokal repo kontrolleri.",
+    writes: "yok"
+  },
+  doctor: {
+    label: "Doctor",
+    description: "Repo doctor ve tam kurulu runtime beklentileri.",
+    writes: "yok"
+  },
+  preview: {
+    label: "On izleme",
+    description: "Yazmasiz kurulum plani ve PowerShell/Bash dry run.",
+    writes: "yok"
+  },
+  update: {
+    label: "Guncelle",
+    description: "Git fast-forward ve yedekli managed refresh on izlemesi ya da apply.",
+    writes: "repo/global/ag"
+  },
+  install: {
+    label: "Kur",
+    description: "Tam kurulum. --apply veya onay ister.",
+    writes: "global/ag"
+  },
+  reset: {
+    label: "Reset",
+    description: "Yedekli managed refresh/reinstall. --apply veya onay ister.",
+    writes: "global/ag"
+  },
+  repair: {
+    label: "Onar",
+    description: "Yedekten sonra managed drift onarimi. --apply veya onay ister.",
+    writes: "global"
+  },
+  backups: {
+    label: "Yedekler",
+    description: "Codex Chef yedek arsivlerini listele, incele veya geri yukle.",
+    writes: "yok / --restore --apply ile global"
+  },
+  skills: {
+    label: "Skill'ler",
+    description: "Curated skill katalogunu goster ve kaynaklari dogrula.",
+    writes: "ag opsiyonel"
+  },
+  mcp: {
+    label: "MCP",
+    description: "MCP varsayilanlari, kapali hesap connector'lari ve setup notlari.",
+    writes: "yok / hesap rehberi"
+  },
+  routing: {
+    label: "Yonlendirme",
+    description: "Gorev tipi routing, agent bekleme politikalari, skill ve MCP kontrati.",
+    writes: "yok"
+  },
+  auth: {
+    label: "Auth",
+    description: "Public-safe GitHub auth sinirlari ve dogrulama notlari.",
+    writes: "yok / hesap rehberi"
+  },
+  logs: {
+    label: "Loglar",
+    description: "Son Codex Chef CLI log dosyalarini listele.",
+    writes: "yok"
+  },
+  exit: {
+    label: "Cikis",
+    description: "Menuyu kapat.",
+    writes: "yok"
+  }
+};
+
+function menuLabel(item) {
+  return isTr() ? MENU_TEXT_TR[item.id]?.label || item.label : item.label;
+}
+
+function menuDescription(item) {
+  return isTr() ? MENU_TEXT_TR[item.id]?.description || item.description : item.description;
+}
+
+function menuWrites(item) {
+  return isTr() ? MENU_TEXT_TR[item.id]?.writes || item.writes : item.writes;
+}
+
 function printHelp() {
+  if (isTr()) {
+    console.log(`${colorize("Codex Chef CLI", "cyan")}
+
+Kullanim:
+  npm run chef
+  npm run chef -- --status
+  npm run chef -- --doctor
+  npm run chef -- --preview
+  npm run chef -- --update [--apply]
+  npm run chef -- --update --verbose-plan
+  npm run chef -- --status --repo-only
+  npm run chef -- --reset [--apply]
+  npm run chef -- --repair [--apply]
+  npm run chef -- --backups [--backup ID] [--restore|--delete --apply]
+  npm run chef -- --install [--apply]
+  npm run chef -- --skills
+  npm run chef -- --mcp
+  npm run chef -- --routing
+  npm run chef -- --routing --profile starter-health
+  npm run chef -- --auth
+  npm run chef -- --logs
+
+Secenekler:
+  --json          Desteklenen yerlerde JSON cikti verir
+  --lang tr      Operator metinlerini Turkce yapar (en veya tr)
+  --tr           --lang tr kisa yolu
+  --plain        Ikon yerine ASCII etiketleri kullanir
+  --no-log       Siki audit icin repo-local CLI log dosyasi olusturmaz
+  --repo-only    Status icin kurulu runtime, global skill kokleri, Codex loglari ve Codex CLI problarini atlar
+  --profile ID   --routing ile tek routing profilini gosterir
+  --backup ID    Belirli Codex Chef yedek arsivini inceler veya geri yukler
+  --restore      --backup ID icin geri yukleme preview'i; dosya kopyalamak icin --apply ekle
+  --delete       --backup ID icin silme preview'i; arsivi silmek icin --apply ekle
+  --verbose-plan --update preview'de tam install dry-run kanitini basar
+  --apply        Update, install, reset, repair veya secili skill install icin write action izni verir
+  --help         Bu yardimi gosterir
+
+Aksiyonlar:
+  Durum, Doctor, On izleme, Guncelle, Kur, Reset, Onar, Yedekler, Skill'ler, MCP, Yonlendirme, Auth, Loglar
+
+Loglar:
+  tmp/chef-cli/logs
+`);
+    return;
+  }
   console.log(`${colorize("Codex Chef CLI", "cyan")}
 
 Usage:
@@ -255,10 +445,11 @@ Usage:
   npm run chef -- --doctor
   npm run chef -- --preview
   npm run chef -- --update [--apply]
+  npm run chef -- --update --verbose-plan
   npm run chef -- --status --repo-only
   npm run chef -- --reset [--apply]
   npm run chef -- --repair [--apply]
-  npm run chef -- --backups [--backup ID] [--restore --apply]
+  npm run chef -- --backups [--backup ID] [--restore|--delete --apply]
   npm run chef -- --install [--apply]
   npm run chef -- --skills
   npm run chef -- --mcp
@@ -268,15 +459,19 @@ Usage:
   npm run chef -- --logs
 
 Options:
-  --json       Emit JSON where supported
-  --plain      Use ASCII labels instead of icons
-  --no-log     Do not create repo-local CLI log files for strict audits
-  --repo-only  Skip installed runtime, global skill roots, Codex logs, and Codex CLI probes for status
-  --profile ID Show one routing profile when used with --routing
-  --backup ID  Inspect or restore a specific Codex Chef backup archive
-  --restore    Preview restore for --backup ID; add --apply to copy files back
-  --apply      Allow write actions for update, install, reset, repair, or selected skill install
-  --help       Show this help
+  --json          Emit JSON where supported
+  --lang tr      Localize operator-facing wrapper text (en or tr)
+  --tr           Shortcut for --lang tr
+  --plain        Use ASCII labels instead of icons
+  --no-log       Do not create repo-local CLI log files for strict audits
+  --repo-only    Skip installed runtime, global skill roots, Codex logs, and Codex CLI probes for status
+  --profile ID   Show one routing profile when used with --routing
+  --backup ID    Inspect or restore a specific Codex Chef backup archive
+  --restore      Preview restore for --backup ID; add --apply to copy files back
+  --delete       Preview deletion for --backup ID; add --apply to remove the archive
+  --verbose-plan Print the full install dry-run evidence for --update previews
+  --apply        Allow write actions for update, install, reset, repair, or selected skill install
+  --help         Show this help
 
 Logs:
   tmp/chef-cli/logs
@@ -409,18 +604,21 @@ function runBash(action, script, scriptArgs = []) {
 async function confirmWriteAction(action, detail) {
   if (options.apply) return true;
   if (!process.stdin.isTTY) {
-    console.log(`${ICONS.warn} ${action} is a write action. Re-run with --apply to execute it.`);
+    console.log(`${ICONS.warn} ${localText(`${action} is a write action. Re-run with --apply to execute it.`, `${action} write action'dir. Calistirmak icin --apply ile tekrar deneyin.`)}`);
     return false;
   }
   const rl = createInterface({ input: process.stdin, output: process.stdout });
-  const answer = await rl.question(`${ICONS.warn} ${detail} Type APPLY to continue: `);
+  const answer = await rl.question(`${ICONS.warn} ${detail} ${localText("Type APPLY to continue:", "Devam etmek icin APPLY yazin:")} `);
   rl.close();
   return answer.trim() === "APPLY";
 }
 
 function printHeader() {
   console.log(`${ICONS.chef} Codex Chef`);
-  console.log(styleMuted("One menu for install, update, repair, diagnostics, skills, MCP notes, auth, and logs."));
+  console.log(styleMuted(localText(
+    "One menu for install, update, repair, diagnostics, skills, MCP notes, auth, and logs.",
+    "Kurulum, guncelleme, onarim, diagnostic, skill, MCP notlari, auth ve loglar icin tek menu."
+  )));
   console.log("");
 }
 
@@ -432,8 +630,14 @@ function runStatus(overrides = {}) {
     ...(options.json ? ["--json"] : [])
   ], {
     waitNote: repoOnly
-      ? "Collecting local repo checks only; installed runtime, global skill roots, Codex logs, and Codex CLI probes are skipped."
-      : "Collecting Codex runtime, MCP, Git, and log metadata checks; this can take 30-60 seconds."
+      ? localText(
+          "Collecting local repo checks only; installed runtime, global skill roots, Codex logs, and Codex CLI probes are skipped.",
+          "Yalnizca lokal repo kontrolleri toplaniyor; kurulu runtime, global skill kokleri, Codex loglari ve Codex CLI problari atlandi."
+        )
+      : localText(
+          "Collecting Codex runtime, MCP, Git, and log metadata checks; this can take 30-60 seconds.",
+          "Codex runtime, MCP, Git ve log metadata kontrolleri toplaniyor; 30-60 saniye surebilir."
+        )
   });
 }
 
@@ -488,16 +692,55 @@ function runPackageScript(action, scriptName, extra = {}) {
 }
 
 function runUpdateValidation() {
-  console.log(`${ICONS.info} Running local validation before managed refresh.`);
+  console.log(`${ICONS.info} ${localText("Running local validation before managed refresh.", "Managed refresh oncesi lokal validation calisiyor.")}`);
   const validate = runPackageScript("update-validate", "validate", {
     timeout: 300000,
-    waitNote: "Checking repository structure before global managed files are refreshed."
+    waitNote: localText(
+      "Checking repository structure before global managed files are refreshed.",
+      "Global managed dosyalar yenilenmeden once repo yapisi kontrol ediliyor."
+    )
   });
   if (!validate.ok) return validate;
   return runPackageScript("update-security-audit", "audit:security", {
     timeout: 300000,
-    waitNote: "Checking tracked release/security surfaces before global managed files are refreshed."
+    waitNote: localText(
+      "Checking tracked release/security surfaces before global managed files are refreshed.",
+      "Global managed dosyalar yenilenmeden once release/security yuzeyleri kontrol ediliyor."
+    )
   });
+}
+
+const MANAGED_REFRESH_TARGETS = [
+  "CODEX_HOME/AGENTS.md",
+  "CODEX_HOME/config.toml",
+  "CODEX_HOME/rules/default.rules",
+  "CODEX_HOME/*.config.toml profiles",
+  "CODEX_HOME/agents/*.toml role files",
+  "AGENTS_HOME/plugins/codex-chef-workflows",
+  "AGENTS_HOME/plugins/marketplace.json"
+];
+
+function printManagedRefreshSummary() {
+  console.log(`${ICONS.info} ${localText(
+    `Managed overwrite targets: ${MANAGED_REFRESH_TARGETS.join(", ")}.`,
+    `Managed overwrite hedefleri: ${MANAGED_REFRESH_TARGETS.join(", ")}.`
+  )}`);
+  console.log(`${ICONS.info} ${localText(
+    "Backup behavior: update apply backs up replaced managed files before refreshing them; it does not delete, prune, or clean user data.",
+    "Yedekleme davranisi: update apply yenilemeden once degisecek managed dosyalari yedekler; user data silmez, prune/clean yapmaz."
+  )}`);
+  console.log(`${ICONS.info} ${localText(
+    "Update preview excludes curated global skill installs and optional global Git guards; use --install or --skills for those explicit surfaces.",
+    "Update preview curated global skill kurulumlarini ve opsiyonel global Git guard'larini disarida tutar; bu yuzeyler icin --install veya --skills kullanin."
+  )}`);
+  console.log(`${ICONS.info} ${localText(
+    "Next: npm run chef -- --update --apply",
+    "Sonraki komut: npm run chef -- --update --apply"
+  )}`);
+  console.log(`${ICONS.info} ${localText(
+    "Full evidence: npm run chef -- --update --verbose-plan",
+    "Tam kanit: npm run chef -- --update --verbose-plan"
+  )}`);
 }
 
 function inspectGitDirty() {
@@ -544,31 +787,38 @@ function gitHead() {
 
 async function runUpdate() {
   if (!options.apply) {
-    console.log(`${ICONS.update} Update preview first. No managed or global files changed.`);
-    console.log(`${ICONS.info} Use npm run chef -- --update --apply to pull the latest Codex Chef and refresh managed files after backup.`);
-    console.log(`${ICONS.info} Update preview excludes curated global skill installs; use --install or --skills for that explicit surface.`);
-    return runPreview(true, false);
+    console.log(`${ICONS.update} ${localText("Update preview first. No managed or global files changed.", "Guncelleme preview'i. Degisiklik yapilmadi.")}`);
+    console.log(`${ICONS.info} ${localText(
+      "Use npm run chef -- --update --apply to pull the latest Codex Chef and refresh managed files after backup.",
+      "Son Codex Chef'i cekip managed dosyalari yedekten sonra yenilemek icin npm run chef -- --update --apply kullanin."
+    )}`);
+    printManagedRefreshSummary();
+    if (options.verbosePlan) return runPreview(true, false);
+    return { ok: true };
   }
   const dirty = inspectGitDirty();
   if (!dirty.ok) {
-    console.log(`${ICONS.warn} Cannot inspect Git worktree: ${dirty.message}`);
+    console.log(`${ICONS.warn} ${localText(`Cannot inspect Git worktree: ${dirty.message}`, `Git worktree incelenemedi: ${dirty.message}`)}`);
     if (dirty.output.trim()) process.stdout.write(dirty.output.endsWith("\n") ? dirty.output : `${dirty.output}\n`);
     return { ok: false };
   }
   if (dirty.dirty) {
-    console.log(`${ICONS.warn} Update apply requires a clean worktree so local edits are not overwritten.`);
+    console.log(`${ICONS.warn} ${localText("Update apply requires a clean worktree so local edits are not overwritten.", "Update apply lokal editlerin ustune yazmamak icin temiz worktree ister.")}`);
     process.stdout.write(dirty.output.endsWith("\n") ? dirty.output : `${dirty.output}\n`);
-    console.log(`${ICONS.info} Commit, stash, or move local changes, then rerun npm run chef -- --update --apply.`);
+    console.log(`${ICONS.info} ${localText("Commit, stash, or move local changes, then rerun npm run chef -- --update --apply.", "Lokal degisiklikleri commit/stash/move yapin, sonra npm run chef -- --update --apply tekrar calistirin.")}`);
     return { ok: false };
   }
   const beforeHead = gitHead();
   if (!beforeHead.ok) {
-    console.log(`${ICONS.warn} Cannot inspect current Git HEAD: ${beforeHead.message}`);
+    console.log(`${ICONS.warn} ${localText(`Cannot inspect current Git HEAD: ${beforeHead.message}`, `Gecerli Git HEAD incelenemedi: ${beforeHead.message}`)}`);
     return { ok: false };
   }
   const allowed = await confirmWriteAction(
-    "Update",
-    "Update pulls latest Codex Chef changes with git pull --ff-only, then refreshes managed Codex files after a same-tree preview."
+    localText("Update", "Guncelleme"),
+    localText(
+      "Update pulls latest Codex Chef changes with git pull --ff-only, then refreshes managed Codex files after a same-tree preview.",
+      "Guncelleme git pull --ff-only ile son Codex Chef degisikliklerini ceker, sonra ayni agac preview'inden sonra managed Codex dosyalarini yeniler."
+    )
   );
   if (!allowed) return { ok: false, skipped: true };
   const pull = runLoggedCommand("update-pull", "git", ["pull", "--ff-only"], {
@@ -578,17 +828,17 @@ async function runUpdate() {
   if (!pull.ok) return pull;
   const afterHead = gitHead();
   if (!afterHead.ok) {
-    console.log(`${ICONS.warn} Cannot inspect updated Git HEAD: ${afterHead.message}`);
+    console.log(`${ICONS.warn} ${localText(`Cannot inspect updated Git HEAD: ${afterHead.message}`, `Guncel Git HEAD incelenemedi: ${afterHead.message}`)}`);
     return { ok: false };
   }
   if (beforeHead.value !== afterHead.value) {
-    console.log(`${ICONS.update} Repository updated from ${beforeHead.value.slice(0, 7)} to ${afterHead.value.slice(0, 7)}.`);
-    console.log(`${ICONS.info} Running a fresh preview from the updated tree. Review it, then rerun npm run chef -- --update --apply to refresh managed files.`);
+    console.log(`${ICONS.update} ${localText(`Repository updated from ${beforeHead.value.slice(0, 7)} to ${afterHead.value.slice(0, 7)}.`, `Repo ${beforeHead.value.slice(0, 7)} -> ${afterHead.value.slice(0, 7)} guncellendi.`)}`);
+    console.log(`${ICONS.info} ${localText("Running a fresh preview from the updated tree. Review it, then rerun npm run chef -- --update --apply to refresh managed files.", "Guncel agactan fresh preview basiliyor. Inceleyip managed dosyalari yenilemek icin npm run chef -- --update --apply tekrar calistirin.")}`);
     const preview = runPreview(true, false);
     if (!preview.ok) return preview;
     return { ok: true, skipped: true };
   }
-  console.log(`${ICONS.ok} Repository already up to date; applying the reviewed managed refresh.`);
+  console.log(`${ICONS.ok} ${localText("Repository already up to date; applying the reviewed managed refresh.", "Repo zaten guncel; incelenmis managed refresh uygulaniyor.")}`);
   const validation = runUpdateValidation();
   if (!validation.ok) return validation;
   if (process.platform === "win32") {
@@ -921,6 +1171,15 @@ function restoreBackupArchive(archivePath, plan) {
   return { restored: plan.files.length, rollbackPath };
 }
 
+function deleteBackupArchive(archivePath) {
+  const rootReal = safeRealpath(backupRootPath());
+  const archiveReal = safeRealpath(archivePath);
+  if (!isInside(archiveReal, rootReal)) {
+    throw new Error(`Refusing backup archive deletion outside canonical backup root: ${path.basename(archivePath)}`);
+  }
+  fs.rmSync(archivePath, { recursive: true, force: false });
+}
+
 function summarizeBackupArchive(id, archivePath) {
   const stat = fs.statSync(archivePath);
   const manifest = readBackupManifest(archivePath);
@@ -999,54 +1258,103 @@ function backupJsonPayload(backups) {
 }
 
 function printBackupTable(backups) {
-  console.log(`${ICONS.logs} Codex Chef backups`);
-  console.log(`${styleLabel("Backup root")}: ${redactLocalPaths(backupRootPath())}`);
+  console.log(`${ICONS.logs} ${localText("Codex Chef backups", "Codex Chef yedekleri")}`);
+  console.log(`${styleLabel(localText("Backup root", "Yedek kok dizini"))}: ${redactLocalPaths(backupRootPath())}`);
+  console.log(`${ICONS.info} ${localText(
+    "Read-only inventory; no files restored.",
+    "read-only envanter; dosya geri yuklenmedi."
+  )}`);
   if (backups.length === 0) {
-    console.log(`${ICONS.info} No backup archives found.`);
+    console.log(`${ICONS.info} ${localText("No backup archives found.", "Yedek arsivi bulunamadi.")}`);
     return;
   }
-  console.table(backups.map((backup) => ({
-    id: backup.id,
-    kind: backup.kind,
-    files: backup.fileCount,
-    restorable: backup.restorableCount,
-    bytes: backup.totalBytes,
-    manifest: backup.manifest.present ? backup.manifest.schemaVersion || "present" : "missing",
-    modified: backup.modified
-  })));
-  console.log(`${ICONS.info} Inspect one archive: npm run chef -- --backups --backup <id>`);
-  console.log(`${ICONS.info} Restore preview: npm run chef -- --backups --backup <id> --restore`);
+  const latestRestorable = backups.find((backup) => backup.restorableCount > 0);
+  if (latestRestorable) {
+    console.log(`${ICONS.info} ${localText(
+      `Latest restorable backup: ${latestRestorable.id} (${latestRestorable.restorableCount} managed files).`,
+      `Son geri yuklenebilir yedek: ${latestRestorable.id} (${latestRestorable.restorableCount} managed dosya).`
+    )}`);
+  }
+  console.table(backups.map((backup) => isTr()
+    ? {
+        id: backup.id,
+        tur: backup.kind,
+        dosya: backup.fileCount,
+        geriYuklenebilir: backup.restorableCount,
+        bayt: backup.totalBytes,
+        manifest: backup.manifest.present ? backup.manifest.schemaVersion || "present" : "legacy/yok",
+        degisti: backup.modified
+      }
+    : {
+        id: backup.id,
+        kind: backup.kind,
+        files: backup.fileCount,
+        restorable: backup.restorableCount,
+        bytes: backup.totalBytes,
+        manifest: backup.manifest.present ? backup.manifest.schemaVersion || "present" : "missing",
+        modified: backup.modified
+      }));
+  console.log(`${ICONS.info} ${localText(
+    "Inspect one archive: npm run chef -- --backups --backup <id>",
+    "Bir arsivi incele: npm run chef -- --backups --backup <id>"
+  )}`);
+  console.log(`${ICONS.info} ${localText(
+    "Restore preview: npm run chef -- --backups --backup <id> --restore",
+    "Geri yukleme preview: npm run chef -- --backups --backup <id> --restore"
+  )}`);
+  console.log(`${ICONS.info} ${localText(
+    "Delete preview: npm run chef -- --backups --backup <id> --delete",
+    "Silme preview: npm run chef -- --backups --backup <id> --delete"
+  )}`);
 }
 
 function printBackupInspect(archivePath, plan) {
-  console.log(`${ICONS.logs} Backup archive: ${path.basename(archivePath)}`);
-  console.log(`${styleLabel("Location")}: ${redactLocalPaths(archivePath)}`);
+  console.log(`${ICONS.logs} ${localText("Backup archive", "Yedek arsivi")}: ${path.basename(archivePath)}`);
+  console.log(`${styleLabel(localText("Location", "Konum"))}: ${redactLocalPaths(archivePath)}`);
   if (plan.issues.length > 0) {
-    console.log(`${ICONS.warn} Archive issues:`);
+    console.log(`${ICONS.warn} ${localText("Archive issues:", "Arsiv sorunlari:")}`);
     for (const issue of plan.issues) console.log(`- ${issue}`);
   }
   if (plan.unsupported.length > 0) {
-    console.log(`${ICONS.warn} Unsupported entries are not restorable by this CLI: ${plan.unsupported.join(", ")}`);
+    console.log(`${ICONS.warn} ${localText(
+      `Unsupported entries are not restorable by this CLI: ${plan.unsupported.join(", ")}`,
+      `Bu CLI tarafindan geri yuklenemeyen girdiler: ${plan.unsupported.join(", ")}`
+    )}`);
   }
   if (plan.files.length === 0) {
-    console.log(`${ICONS.info} No restorable managed Codex Chef files found.`);
+    console.log(`${ICONS.info} ${localText("No restorable managed Codex Chef files found.", "Geri yuklenebilir managed Codex Chef dosyasi bulunamadi.")}`);
     return;
   }
-  console.table(plan.files.map((file) => ({
-    archiveFile: file.relative,
-    target: redactLocalPaths(file.target),
-    exists: file.targetExists ? "yes" : "no",
-    bytes: file.size,
-    sha256: file.sha256.slice(0, 12)
-  })));
-  console.log(`${ICONS.info} Restore preview: npm run chef -- --backups --backup ${path.basename(archivePath)} --restore`);
+  console.table(plan.files.map((file) => isTr()
+    ? {
+        arsivDosyasi: file.relative,
+        hedef: redactLocalPaths(file.target),
+        varMi: file.targetExists ? "evet" : "hayir",
+        bayt: file.size,
+        sha256: file.sha256.slice(0, 12)
+      }
+    : {
+        archiveFile: file.relative,
+        target: redactLocalPaths(file.target),
+        exists: file.targetExists ? "yes" : "no",
+        bytes: file.size,
+        sha256: file.sha256.slice(0, 12)
+      }));
+  console.log(`${ICONS.info} ${localText(
+    `Restore preview: npm run chef -- --backups --backup ${path.basename(archivePath)} --restore`,
+    `Geri yukleme preview: npm run chef -- --backups --backup ${path.basename(archivePath)} --restore`
+  )}`);
+  console.log(`${ICONS.info} ${localText(
+    `Delete preview: npm run chef -- --backups --backup ${path.basename(archivePath)} --delete`,
+    `Silme preview: npm run chef -- --backups --backup ${path.basename(archivePath)} --delete`
+  )}`);
 }
 
 async function runBackups() {
   try {
     if (!options.backupId) {
-      if (options.restore) {
-        console.error(`${ICONS.warn} --restore requires --backup ID.`);
+      if (options.restore || options.deleteBackup) {
+        console.error(`${ICONS.warn} ${localText("--restore and --delete require --backup ID.", "--restore ve --delete icin --backup ID gerekir.")}`);
         return { ok: false };
       }
       const backups = listBackupArchives();
@@ -1060,12 +1368,17 @@ async function runBackups() {
 
     const archivePath = resolveBackupArchive(options.backupId);
     const plan = restoreBackupPlan(archivePath);
+    if (options.restore && options.deleteBackup) {
+      console.error(`${ICONS.warn} ${localText("Choose either --restore or --delete for one backup archive.", "Tek yedek arsivi icin --restore veya --delete secin; ikisini birlikte kullanmayin.")}`);
+      return { ok: false };
+    }
     if (options.json) {
       console.log(JSON.stringify({
         schemaVersion: 1,
         backup: path.basename(archivePath),
         backupPath: redactLocalPaths(archivePath),
         restore: options.restore,
+        delete: options.deleteBackup,
         apply: options.apply,
         restorableFiles: plan.files.map((file) => ({
           archiveFile: file.relative,
@@ -1080,34 +1393,67 @@ async function runBackups() {
       return { ok: true };
     }
 
+    if (options.deleteBackup) {
+      console.log(`${ICONS.warn} ${localText(`Backup delete preview for archive ${path.basename(archivePath)}`, `Yedek silme preview: ${path.basename(archivePath)}`)}`);
+      console.log(`${styleLabel(localText("Location", "Konum"))}: ${redactLocalPaths(archivePath)}`);
+      console.log(`${ICONS.info} ${localText(
+        "Deletion is limited to this resolved Codex Chef backup archive under the canonical backup root.",
+        "Silme yalniz canonical backup root altinda resolve edilen bu Codex Chef yedek arsiviyle sinirlidir."
+      )}`);
+      if (!options.apply) {
+        console.log(`${ICONS.info} ${localText("No backup archive deleted. Rerun with --apply to delete this archive.", "Yedek arsivi silinmedi. Bu arsivi silmek icin --apply ile tekrar calistirin.")}`);
+        return { ok: true };
+      }
+      const allowed = await confirmWriteAction(
+        localText("Backup delete", "Yedek silme"),
+        localText(
+          "Delete removes the selected Codex Chef backup archive. This does not touch live managed files, but the deleted archive cannot be restored unless you have another copy.",
+          "Silme secili Codex Chef yedek arsivini kaldirir. Live managed dosyalara dokunmaz, ama baska kopya yoksa bu arsivden geri donemezsiniz."
+        )
+      );
+      if (!allowed) return { ok: false, skipped: true };
+      deleteBackupArchive(archivePath);
+      console.log(`${ICONS.ok} ${localText(`Backup archive deleted: ${path.basename(archivePath)}.`, `Yedek arsivi silindi: ${path.basename(archivePath)}.`)}`);
+      return { ok: true };
+    }
+
     if (!options.restore) {
       printBackupInspect(archivePath, plan);
       return { ok: true };
     }
 
-    console.log(`${ICONS.info} Restore preview for backup ${path.basename(archivePath)}`);
+    console.log(`${ICONS.info} ${localText(`Restore preview for backup ${path.basename(archivePath)}`, `Geri yukleme preview: ${path.basename(archivePath)}`)}`);
     printBackupInspect(archivePath, plan);
     if (plan.issues.length > 0) {
-      console.error(`${ICONS.warn} Restore blocked because the archive has unsafe entries.`);
+      console.error(`${ICONS.warn} ${localText("Restore blocked because the archive has unsafe entries.", "Arsiv guvensiz girdiler icerdigi icin geri yukleme bloklandi.")}`);
       return { ok: false };
     }
     if (!options.apply) {
-      console.log(`${ICONS.info} No files restored. Rerun with --apply to restore this backup.`);
+      console.log(`${ICONS.info} ${localText("No files restored. Rerun with --apply to restore this backup.", "Dosya geri yuklenmedi. Bu yedegi geri yuklemek icin --apply ile tekrar calistirin.")}`);
       return { ok: true };
     }
     const allowed = await confirmWriteAction(
-      "Backup restore",
-      "Restore copies selected managed Codex Chef files from the backup archive after creating a rollback backup of current targets."
+      localText("Backup restore", "Yedek geri yukleme"),
+      localText(
+        "Restore copies selected managed Codex Chef files from the backup archive after creating a rollback backup of current targets.",
+        "Geri yukleme, mevcut hedeflerin rollback yedegini olusturduktan sonra secili managed Codex Chef dosyalarini arsivden kopyalar."
+      )
     );
     if (!allowed) return { ok: false, skipped: true };
     const result = restoreBackupArchive(archivePath, plan);
-    console.log(`${ICONS.ok} Restore applied: ${result.restored} managed file(s) copied from ${path.basename(archivePath)}.`);
+    console.log(`${ICONS.ok} ${localText(
+      `Restore applied: ${result.restored} managed file(s) copied from ${path.basename(archivePath)}.`,
+      `Geri yukleme uygulandi: ${path.basename(archivePath)} arsivinden ${result.restored} managed dosya kopyalandi.`
+    )}`);
     if (result.rollbackPath) {
-      console.log(`${ICONS.info} Rollback backup: ${redactLocalPaths(result.rollbackPath)}`);
+      console.log(`${ICONS.info} ${localText("Rollback backup", "Rollback yedegi")}: ${redactLocalPaths(result.rollbackPath)}`);
     } else {
-      console.log(`${ICONS.info} Rollback backup: none needed because no current targets existed.`);
+      console.log(`${ICONS.info} ${localText(
+        "Rollback backup: none needed because no current targets existed.",
+        "Rollback yedegi: mevcut hedef olmadigi icin gerekmedi."
+      )}`);
     }
-    console.log(`${ICONS.info} Restart Codex, then run npm run chef -- --status --repo-only --no-log.`);
+    console.log(`${ICONS.info} ${localText("Restart Codex, then run npm run chef -- --status --repo-only --no-log.", "Codex'i yeniden baslatin, sonra npm run chef -- --status --repo-only --no-log calistirin.")}`);
     return { ok: true };
   } catch (error) {
     console.error(`${ICONS.warn} ${error.message}`);
@@ -1264,22 +1610,34 @@ function runRouting() {
     ...(options.profile ? ["--profile", options.profile] : []),
     ...(options.json ? ["--json"] : [])
   ], {
-    waitNote: "Showing the agent, skill, MCP, and wait-policy routing contract."
+    waitNote: localText(
+      "Showing the agent, skill, MCP, and wait-policy routing contract.",
+      "Agent, skill, MCP ve bekleme politikasi routing kontrati gosteriliyor."
+    )
   });
 }
 
 function runAuth() {
-  console.log(`${ICONS.lock} GitHub authentication boundary`);
+  console.log(`${ICONS.lock} ${localText("GitHub authentication boundary", "GitHub kimlik dogrulama siniri")}`);
   console.log("");
-  console.log(styleMuted("This public CLI does not print account-scoped re-auth or global Git credential-helper commands."));
-  console.log(styleMuted("If GitHub release, push, or workflow checks fail because local auth is stale, refresh GitHub CLI or Git Credential Manager according to your organization policy."));
-  console.log(styleMuted("After refresh, use a read-only remote check such as `git ls-remote origin HEAD` from the target repository before retrying a publish step."));
+  console.log(styleMuted(localText(
+    "This public CLI does not print account-scoped re-auth or global Git credential-helper commands.",
+    "Bu public CLI account-scope re-auth veya global Git credential-helper komutlari basmaz."
+  )));
+  console.log(styleMuted(localText(
+    "If GitHub release, push, or workflow checks fail because local auth is stale, refresh GitHub CLI or Git Credential Manager according to your organization policy.",
+    "GitHub release, push veya workflow kontrolleri lokal auth bayat oldugu icin fail olursa GitHub CLI veya Git Credential Manager'i kendi kurum politikaniza gore yenileyin."
+  )));
+  console.log(styleMuted(localText(
+    "After refresh, use a read-only remote check such as `git ls-remote origin HEAD` from the target repository before retrying a publish step.",
+    "Yenilemeden sonra publish adimini tekrar denemeden once hedef repoda `git ls-remote origin HEAD` gibi read-only remote check kullanin."
+  )));
   console.log("");
-  console.log(styleHeading("Notes:"));
-  console.log(`- ${colorize("Do not paste tokens", "yellow")} into repo files, AGENTS.md, skills, rules, or shell history.`);
-  console.log("- Keep personal account repair, token scope decisions, and global Git credential configuration outside this public repo.");
-  console.log("- Do not store workflow or release tokens in Codex Chef templates, examples, logs, or docs.");
-  console.log("- Authenticated MCP connectors still remain disabled until a task needs them.");
+  console.log(styleHeading(localText("Notes:", "Notlar:")));
+  console.log(`- ${colorize(localText("Do not paste tokens", "Token yapistirmayin"), "yellow")} ${localText("into repo files, AGENTS.md, skills, rules, or shell history.", "repo dosyalarina, AGENTS.md'ye, skill'lere, rule'lara veya shell history'ye.")}`);
+  console.log(`- ${localText("Keep personal account repair, token scope decisions, and global Git credential configuration outside this public repo.", "Kisisel account repair, token scope kararlari ve global Git credential config'i bu public repo disinda tutun.")}`);
+  console.log(`- ${localText("Do not store workflow or release tokens in Codex Chef templates, examples, logs, or docs.", "Workflow veya release token'larini Codex Chef template, example, log veya docs icinde saklamayin.")}`);
+  console.log(`- ${localText("Authenticated MCP connectors still remain disabled until a task needs them.", "Auth isteyen MCP connector'lari bir task gerek duyana kadar disabled kalir.")}`);
   return { ok: true };
 }
 
@@ -1350,14 +1708,15 @@ async function runMenu() {
     while (true) {
       for (let index = 0; index < MENU_ITEMS.length; index += 1) {
         const item = MENU_ITEMS[index];
-        const label = item.id === "exit" ? colorize(item.label, "dim") : styleAction(item.label);
-        console.log(`${index + 1}. ${label} [writes: ${styleWriteBoundary(item.writes)}] - ${styleMuted(item.description)}`);
+        const labelText = menuLabel(item);
+        const label = item.id === "exit" ? colorize(labelText, "dim") : styleAction(labelText);
+        console.log(`${index + 1}. ${label} [writes: ${styleWriteBoundary(menuWrites(item))}] - ${styleMuted(menuDescription(item))}`);
       }
-      const answer = await rl.question(`\nSelect 1-${MENU_ITEMS.length}: `);
+      const answer = await rl.question(`\n${localText(`Select 1-${MENU_ITEMS.length}:`, `Sec 1-${MENU_ITEMS.length}:`)} `);
       const index = Number(answer.trim());
       const item = MENU_ITEMS[index - 1];
       if (!item) {
-        console.log(`${ICONS.warn} Choose a number from 1 to ${MENU_ITEMS.length}.`);
+        console.log(`${ICONS.warn} ${localText(`Choose a number from 1 to ${MENU_ITEMS.length}.`, `1 ile ${MENU_ITEMS.length} arasinda bir sayi secin.`)}`);
         continue;
       }
       console.log("");

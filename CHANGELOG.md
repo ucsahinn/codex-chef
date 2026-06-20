@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+## 0.5.28 - 2026-06-20
+
+- Added Turkish operator text for the Chef CLI through `--lang tr`, `--tr`,
+  and `CODEX_CHEF_LANG=tr` while keeping JSON output stable and English flags
+  unchanged.
+- Made `npm run chef -- --update` concise by default with managed overwrite
+  targets, backup behavior, skipped surfaces, next command, and a
+  `--verbose-plan` path for the full installer dry-run evidence.
+- Added subagent and MCP lifecycle hygiene to the routing board, shipped global
+  `AGENTS.md` template, README, and skill/agent docs so completed agent
+  threads are closed and persistent MCP processes such as Serena are reported
+  instead of silently accumulating.
+- Added preview-first `npm run chef -- --backups --backup <id> --delete`
+  support, with `--apply` required before a selected Codex Chef backup archive
+  is removed.
+- Relabeled repo-only status progress from `codex:doctor` to `repo:doctor` so
+  skipped direct Codex CLI doctor checks are not misrepresented as running.
+- Extended Chef CLI and status validators with Turkish CLI smokes, concise
+  update preview checks, backup Turkish output coverage, routing lifecycle
+  coverage, and repo-doctor label checks.
+
 ## 0.5.27 - 2026-06-20
 
 - Added `npm run chef -- --backups` and `npm run chef:backups` so operators can

@@ -874,7 +874,7 @@ function writeOutput(report) {
 const repoDoctor = runNodeScript(
   "scripts/codex-doctor.mjs",
   ["--json", ...(options.redactPaths ? ["--redact-paths"] : [])],
-  "codex:doctor"
+  "repo:doctor"
 );
 
 const runtime = options.skipRuntime

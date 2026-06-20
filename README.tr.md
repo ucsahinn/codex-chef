@@ -66,9 +66,11 @@ npm run chef -- --status
 npm run chef -- --status --repo-only
 npm run chef -- --preview
 npm run chef -- --update
+npm run chef -- --update --verbose-plan
 npm run chef -- --backups
 npm run chef -- --backups --backup <id>
 npm run chef -- --backups --backup <id> --restore
+npm run chef -- --backups --backup <id> --delete
 npm run chef:backups
 npm run chef -- --reset --apply
 npm run chef -- --repair --apply
@@ -79,6 +81,7 @@ npm run chef -- --routing
 npm run chef -- --routing --profile starter-health
 npm run chef -- --auth
 npm run chef -- --logs
+npm run chef -- --help --lang tr
 npm run chef -- --status --repo-only --no-log
 ```
 
@@ -89,13 +92,13 @@ Normalde `tmp/chef-cli/logs` altina ignored lokal audit log'u yazarlar; strict
 audit icin `--no-log` ekle. Hızlı lokal repo kontrolü için
 `--status --repo-only` kullan; bu mod kurulu runtime'i, global skill-root
 envanterini, Codex log metadata'sini ve live Codex CLI probe'larini atlar.
-`--update`, `--apply` eklenmedikce managed/global no-write
-preview yapar; apply modunda clean worktree ister ve `git pull --ff-only`
-calistirir. Pull repo HEAD'ini ilerletirse CLI yeni tree icin fresh preview
-basip durur; preview'i inceleyip `--update --apply` tekrar calistirirsin. Repo
-zaten guncelse lokal validation calistirip managed dosyalari backup alan
-installer uzerinden yeniler; curated global skill veya opsiyonel global Git
-guard kurmaz.
+`--update`, `--apply` eklenmedikce kisa managed/global no-write preview yapar;
+tam install dry-run kaniti icin `npm run chef -- --update --verbose-plan`
+kullan. Apply modunda clean worktree ister ve `git pull --ff-only` calistirir.
+Pull repo HEAD'ini ilerletirse CLI yeni tree icin fresh preview basip durur;
+preview'i inceleyip `--update --apply` tekrar calistirirsin. Repo zaten
+guncelse lokal validation calistirip managed dosyalari backup alan installer
+uzerinden yeniler; curated global skill veya opsiyonel global Git guard kurmaz.
 `--reset --apply`, `--repair --apply` ve `--install --apply` diger write
 path'leridir; user state silmek yerine backup alan installer/repair
 scriptlerine giderler. `--backups` varsayilan olarak read-only calisir; Codex
@@ -105,16 +108,20 @@ edilebilir dosya sayisini ve restore komutlarini gosterir. `--backups --backup
 `--backups --backup <id> --restore` geri kopyalanacak managed dosyalari preview
 eder; `--backups --backup <id> --restore --apply` ise mevcut hedeflerin rollback
 backup'ini aldiktan sonra yalniz bilinen Codex Chef managed target'larini geri
-kopyalar. Backup archive delete/cleanup CLI tarafinda otomatik degildir; path'i
-inceleyip artik ihtiyacin olmadigindan emin olduktan sonra manuel yap.
+kopyalar. Backup delete de preview-first'tur: `--backups --backup <id>
+--delete` resolved archive path'ini gosterir ama silmez; `--backups --backup
+<id> --delete --apply` yalniz canonical backup root altindaki secili Codex Chef
+backup archive'ini kaldirir.
 Interactive
 terminalde `--skills` numarayla tek reviewed skill sectirir ve sadece `--apply`
 ile kurar. `--mcp` numarayla connector sectirip transport, endpoint veya
 package, setup, auth, dogrulama, source ve rollback notlarini gosterir; account
 connector'larini kendiliginden acmaz. `--routing` task-shape haritasini, agent
 bekleme politikasini, skill trigger'larini, MCP secimlerini ve final "Surfaces
-used" raporlama sozlesmesini gosterir. CLI loglari ignored kalir ve source
-package'a girmez.
+used" raporlama sozlesmesini gosterir. Ayrica tamamlanan agent thread'leri
+icin `/agent`, background terminal kontrolu icin `/ps`, current session
+terminal islerini durdurmak icin `/stop` hatirlatmasi yapar. CLI loglari
+ignored kalir ve source package'a girmez.
 
 PowerShell baska bir dizinde `Could not read package.json` hatasi verirse
 komutu repo icinden calistir veya npm prefix formunu kullan:
@@ -186,11 +193,12 @@ sürece korunur.
 ### Enterprise Routing Panosu
 
 Codex Chef artik `catalog/routing-profiles.json` dosyasini da kurulum yuzeyinin
-bir parcasi olarak tasir. Bu dosya Codex'e yaygin enterprise is sekillerinde
-hangi subagent, skill, MCP ve config/profile flag'inin kullanilacagini soyler:
-guncel dokuman arastirmasi, context'in nereye yazilacagi, bug root-cause,
-frontend dogrulama, guvenlik review'u, MCP connector degisikligi, release
-hazirligi, SEO, docs ve starter sagligi.
+bir parcasi olarak tasir. Bu reviewed routing kontrati audited mapping'i
+kaydeder; `templates/codex/AGENTS.md`, config template'leri ve CLI routing
+panosu hangi subagent, skill, MCP ve config/profile flag'inin kullanilacagini
+Codex ve operator icin gorunur yapar: guncel dokuman arastirmasi, context'in
+nereye yazilacagi, bug root-cause, frontend dogrulama, guvenlik review'u, MCP
+connector degisikligi, release hazirligi, SEO, docs ve starter sagligi.
 
 ```bash
 npm run codex:routing

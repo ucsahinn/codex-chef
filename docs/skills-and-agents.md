@@ -243,6 +243,12 @@ Routing rule:
 - Visible routing output should include `Agent plan`, `Agent started`,
   `Agent result`, `Skill selected`, `MCP selected`, and
   `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`.
+- Lifecycle hygiene is part of the contract: close completed agent threads
+  when they are no longer needed, use `/agent` to inspect or close active
+  threads before finalizing large work, use `/ps` for background terminals, and
+  use `/stop` to cancel terminal work started by the current session. If an MCP
+  process such as Serena remains after the task, report it and ask before
+  killing processes or deleting local state.
 - Use them for noisy, read-heavy, or evidence-heavy side work: exploration,
   current docs, context placement, prompt design, MCP planning, review, UI
   verification, security audit, test/build evidence, setup diagnostics, and
@@ -256,9 +262,11 @@ Routing rule:
 
 ## Enterprise Routing Profiles
 
-`catalog/routing-profiles.json` is the checked-in routing contract that ties the
-agent team, curated skills, MCP defaults, and config/profile flags together. It
-is surfaced by:
+`catalog/routing-profiles.json` is the reviewed routing contract that ties the
+agent team, curated skills, MCP defaults, and config/profile flags together.
+The JSON records the audited mapping; `templates/codex/AGENTS.md`, config
+templates, and the CLI routing board make the contract visible. It is surfaced
+by:
 
 ```bash
 npm run codex:routing

@@ -5,6 +5,10 @@
 This repository packages a safe Codex setup starter. Keep edits focused on
 installable templates, docs, validation, and security guardrails.
 
+For the installable global Codex operating contract, review
+`templates/codex/AGENTS.md` and `catalog/routing-profiles.json`. This root
+file governs maintenance of this repository only.
+
 ## Security
 
 - Never commit secrets, auth files, memory files, sessions, local caches, or

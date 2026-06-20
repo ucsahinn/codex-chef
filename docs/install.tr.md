@@ -71,17 +71,17 @@ Mevcut checkout ve managed setup'i guided CLI ile guncelle:
 
 ```powershell
 npm run chef -- --update
+npm run chef -- --update --verbose-plan
 npm run chef -- --update --apply
 ```
 
 `--apply` olmadan update modu managed/global dosyalari degistirmez; normal CLI
-loglari `--no-log` yoksa repo-local kalir. Apply modunda clean worktree ister
-ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse CLI fresh
-preview basip durur; bu updated preview'i inceledikten sonra
-`npm run chef -- --update --apply` tekrar calistir. Repo zaten guncelse managed
-dosyalari backup alan installer uzerinden yeniler. Update curated global skill
-veya opsiyonel global Git guard kurmaz; bunlar icin `--install --apply` veya
-`--skills --apply` yuzeylerini acikca kullan.
+loglari `--no-log` yoksa repo-local kalir. Varsayilan preview kisadir;
+`npm run chef -- --update --verbose-plan` tam install dry-run kanitini basar.
+Apply modunda clean worktree ister ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse CLI fresh preview basip durur; bu updated preview'i
+inceledikten sonra `npm run chef -- --update --apply` tekrar calistir. Repo zaten guncelse managed dosyalari backup alan installer uzerinden yeniler.
+Update curated global skill veya opsiyonel global Git guard kurmaz; bunlar icin
+`--install --apply` veya `--skills --apply` yuzeylerini acikca kullan.
 
 Codex Chef backup archive'larini ayni CLI ile incele veya geri yukle:
 
@@ -89,16 +89,19 @@ Codex Chef backup archive'larini ayni CLI ile incele veya geri yukle:
 npm run chef -- --backups
 npm run chef -- --backups --backup <id>
 npm run chef -- --backups --backup <id> --restore
+npm run chef -- --backups --backup <id> --delete
 npm run chef -- --backups --backup <id> --restore --apply
+npm run chef -- --backups --backup <id> --delete --apply
 ```
 
 List ve inspect komutlari metadata-only calisir: backup archive konumunu,
 manifest durumunu, restorable dosya sayisini, size ve hash bilgilerini gosterir
 ama file content basmaz. Restore, `--apply` verilmedikce preview'dir. Apply
 path'i selected archive'dan bilinen Codex Chef managed dosyalarini geri
-kopyalamadan once mevcut target'lar icin yeni rollback backup olusturur. Backup
-delete otomatik degildir; eski archive'i ancak path'i inceleyip artik ihtiyacin
-olmadigindan emin olduktan sonra manuel kaldir.
+kopyalamadan once mevcut target'lar icin yeni rollback backup olusturur. Delete
+de preview-first calisir: `--delete` resolved archive path'ini gosterir ama
+silmez; `--delete --apply` yalniz canonical backup root altindaki secili Codex
+Chef backup archive'ini kaldirir.
 
 Kullanışlı parametreler:
 

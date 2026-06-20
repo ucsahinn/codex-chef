@@ -58,6 +58,15 @@ function runCliSmoke(name, cliArgs, expectedSnippets, extra = {}) {
   for (const snippet of expectedSnippets) {
     if (!output.includes(snippet)) fail(`chef-cli smoke ${name} missing output snippet: ${snippet}`);
   }
+  if (extra.forbiddenSnippets) {
+    for (const snippet of extra.forbiddenSnippets) {
+      if (output.includes(snippet)) fail(`chef-cli smoke ${name} must not include output snippet: ${snippet}`);
+    }
+  }
+  if (extra.maxLines) {
+    const lineCount = output.split(/\r?\n/).filter((line) => line.trim()).length;
+    if (lineCount > extra.maxLines) fail(`chef-cli smoke ${name} should be <= ${extra.maxLines} non-empty lines, got ${lineCount}`);
+  }
   if (output.includes("Log: tmp/chef-cli/logs")) {
     fail(`chef-cli smoke ${name} should not create logs when --no-log is used`);
   }
@@ -148,6 +157,12 @@ function runBackupsFixtureSmokes() {
       if (!list.output.includes(snippet)) fail(`chef-cli smoke backups-list-fixture missing output snippet: ${snippet}`);
     }
   }
+  const listTr = runCliSmokeRaw("backups-list-tr-fixture", ["--backups", "--tr", "--plain", "--no-log"], { env });
+  if (listTr.ok) {
+    for (const snippet of ["Codex Chef yedekleri", backupId, "Yedek kok dizini", "read-only envanter"]) {
+      if (!listTr.output.includes(snippet)) fail(`chef-cli smoke backups-list-tr-fixture missing output snippet: ${snippet}`);
+    }
+  }
 
   const inspect = runCliSmokeRaw("backups-inspect-fixture", ["--backups", "--backup", backupId, "--plain", "--no-log"], { env });
   if (inspect.ok) {
@@ -160,6 +175,12 @@ function runBackupsFixtureSmokes() {
   if (preview.ok) {
     for (const snippet of ["Restore preview", "No files restored", "Rerun with --apply"]) {
       if (!preview.output.includes(snippet)) fail(`chef-cli smoke backups-restore-preview-fixture missing output snippet: ${snippet}`);
+    }
+  }
+  const previewTr = runCliSmokeRaw("backups-restore-preview-tr-fixture", ["--backups", "--backup", backupId, "--restore", "--tr", "--plain", "--no-log"], { env });
+  if (previewTr.ok) {
+    for (const snippet of ["Geri yukleme preview", "Dosya geri yuklenmedi", "--apply"]) {
+      if (!previewTr.output.includes(snippet)) fail(`chef-cli smoke backups-restore-preview-tr-fixture missing output snippet: ${snippet}`);
     }
   }
   const currentAfterPreview = fs.readFileSync(path.join(codexHome, "AGENTS.md"), "utf8");
@@ -199,6 +220,26 @@ function runBackupsFixtureSmokes() {
       fail(`chef-cli backups JSON fixture did not emit parseable JSON: ${error.message}`);
     }
   }
+
+  const deletePreview = runCliSmokeRaw("backups-delete-preview-fixture", ["--backups", "--backup", backupId, "--delete", "--plain", "--no-log"], { env });
+  if (deletePreview.ok) {
+    for (const snippet of ["Backup delete preview", "No backup archive deleted", "Rerun with --apply"]) {
+      if (!deletePreview.output.includes(snippet)) fail(`chef-cli smoke backups-delete-preview-fixture missing output snippet: ${snippet}`);
+    }
+  }
+  if (!fs.existsSync(backupRoot)) {
+    fail("chef-cli backup delete preview must not remove the archive");
+  }
+
+  const deleteApply = runCliSmokeRaw("backups-delete-apply-fixture", ["--backups", "--backup", backupId, "--delete", "--apply", "--plain", "--no-log"], { env });
+  if (deleteApply.ok) {
+    for (const snippet of ["Backup archive deleted", backupId]) {
+      if (!deleteApply.output.includes(snippet)) fail(`chef-cli smoke backups-delete-apply-fixture missing output snippet: ${snippet}`);
+    }
+  }
+  if (fs.existsSync(backupRoot)) {
+    fail("chef-cli backup delete apply must remove only the selected backup archive");
+  }
 }
 
 function runCliErrorSmoke(name, cliArgs, expectedSnippets) {
@@ -235,6 +276,9 @@ if (!exists(cliPath)) {
   for (const required of [
     "--help",
     "--json",
+    "--lang",
+    "--tr",
+    "--verbose-plan",
     "--plain",
     "--no-log",
     "--repo-only",
@@ -247,6 +291,7 @@ if (!exists(cliPath)) {
     "--backups",
     "--backup",
     "--restore",
+    "--delete",
     "--install",
     "--update",
     "--skills",
@@ -266,6 +311,11 @@ if (!exists(cliPath)) {
     "install.ps1",
     "install.sh",
     "GitHub authentication boundary",
+    "GitHub kimlik dogrulama siniri",
+    "CODEX_CHEF_LANG",
+    "languageFromEnvironment",
+    "localText",
+    "printManagedRefreshSummary",
     "does not print account-scoped re-auth",
     "organization policy",
     "git ls-remote origin HEAD",
@@ -282,6 +332,7 @@ if (!exists(cliPath)) {
     "listBackupArchives",
     "resolveBackupArchive",
     "restoreBackupArchive",
+    "deleteBackupArchive",
     "createRollbackBackup",
     "runUpdateValidation",
     "update-validate",
@@ -371,15 +422,52 @@ runCliSmoke("help", ["--help", "--plain", "--no-log"], [
   "Codex Chef CLI",
   "--no-log",
   "--update [--apply]",
-  "--backups [--backup ID] [--restore --apply]",
+  "--backups [--backup ID] [--restore|--delete --apply]",
+  "--lang tr",
+  "--tr",
+  "--verbose-plan",
   "Allow write actions for update",
   "--reset [--apply]",
   "tmp/chef-cli/logs"
 ], { forbidAnsi: true });
+runCliSmoke("help-tr", ["--help", "--lang", "tr", "--plain", "--no-log"], [
+  "Codex Chef CLI",
+  "Kullanim:",
+  "Secenekler:",
+  "--lang tr",
+  "--verbose-plan",
+  "tmp/chef-cli/logs"
+], { forbidAnsi: true });
+runCliSmoke("help-tr-alias", ["--help", "--tr", "--plain", "--no-log"], [
+  "Kullanim:",
+  "Secenekler:",
+  "Guncelle"
+], { forbidAnsi: true });
+runCliSmoke("help-tr-env", ["--help", "--plain", "--no-log"], [
+  "Kullanim:",
+  "Secenekler:"
+], {
+  env: {
+    CODEX_CHEF_LANG: "tr"
+  },
+  forbidAnsi: true
+});
 runBackupsFixtureSmokes();
 runCliErrorSmoke("unknown-option", ["--bad-flag", "--plain", "--no-log"], [
   "Codex Chef CLI error: Unknown option --bad-flag",
   "npm run chef -- --help"
+]);
+runCliErrorSmoke("unknown-option-tr", ["--bad-flag", "--tr", "--plain", "--no-log"], [
+  "Codex Chef CLI hatasi: Bilinmeyen secenek --bad-flag",
+  "npm run chef -- --help"
+]);
+runCliErrorSmoke("missing-lang-value", ["--lang", "--plain", "--no-log"], [
+  "Codex Chef CLI error:",
+  "--lang requires"
+]);
+runCliErrorSmoke("unsupported-lang", ["--lang", "de", "--plain", "--no-log"], [
+  "Codex Chef CLI error:",
+  "Supported languages"
 ]);
 runCliSmoke("forced-color", ["--help", "--no-log"], [
   "Codex Chef CLI"
@@ -420,6 +508,7 @@ runCliSmoke("skills", ["--skills", "--plain", "--no-log"], [
 runCliSmoke("routing", ["--routing", "--plain", "--no-log"], [
   "Codex Chef enterprise routing board",
   "Subagent visibility contract",
+  "Lifecycle hygiene",
   "Agent plan",
   "Skill selected",
   "MCP selected",
@@ -437,9 +526,30 @@ runCliSmoke("update-preview", ["--update", "--plain", "--no-log"], [
   "Update preview",
   "No managed or global files changed",
   "npm run chef -- --update --apply",
-  "excludes curated global skill installs"
+  "excludes curated global skill installs",
+  "Managed overwrite targets",
+  "Full evidence"
+], {
+  forbiddenSnippets: ["What if:"],
+  maxLines: 80
+});
+runCliSmoke("update-preview-tr", ["--update", "--tr", "--plain", "--no-log"], [
+  "Guncelleme preview",
+  "Degisiklik yapilmadi",
+  "npm run chef -- --update --apply",
+  "Managed overwrite hedefleri",
+  "Tam kanit"
+], {
+  forbiddenSnippets: ["What if:"],
+  maxLines: 80
+});
+runCliSmoke("update-preview-verbose", ["--update", "--verbose-plan", "--plain", "--no-log"], [
+  "Update preview",
+  "npm run chef -- --update --apply",
+  "--force"
 ]);
 runCliJsonSmoke("status-repo-only-json", ["--status", "--repo-only", "--json", "--no-log"]);
+runCliJsonSmoke("status-repo-only-json-tr", ["--status", "--repo-only", "--json", "--lang", "tr", "--no-log"]);
 runCliSmoke("status-repo-only", ["--status", "--repo-only", "--plain", "--no-log"], [
   "Codex Chef status",
   "Codex CLI: skipped",
@@ -460,6 +570,12 @@ runCliSmoke("auth", ["--auth", "--plain", "--no-log"], [
   "organization policy",
   "git ls-remote origin HEAD"
 ], { forbidAnsi: true });
+runCliSmoke("auth-tr", ["--auth", "--tr", "--plain", "--no-log"], [
+  "GitHub kimlik dogrulama siniri",
+  "token",
+  "kurum politikaniza",
+  "git ls-remote origin HEAD"
+], { forbidAnsi: true });
 
 for (const [file, snippets] of Object.entries({
   "README.md": [
@@ -470,6 +586,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --update",
     "npm run chef -- --backups",
     "npm run chef:backups",
+    "npm run chef -- --backups --backup <id> --delete",
     "npm run chef -- --reset --apply",
     "npm run chef -- --repair --apply",
     "npm run chef -- --install --apply",
@@ -478,7 +595,11 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --routing",
     "npm run chef -- --auth",
     "npm run chef -- --logs",
+    "npm run chef -- --help --lang tr",
+    "npm run chef -- --update --verbose-plan",
     "npm run chef -- --status --repo-only --no-log",
+    "completed agent threads",
+    "/agent",
     "Installed skills do not execute by themselves",
     "live activation is",
     "GitHub CLI or Git Credential Manager",
@@ -492,6 +613,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --update",
     "npm run chef -- --backups",
     "npm run chef:backups",
+    "npm run chef -- --backups --backup <id> --delete",
     "npm run chef -- --reset --apply",
     "npm run chef -- --repair --apply",
     "npm run chef -- --install --apply",
@@ -500,7 +622,11 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --routing",
     "npm run chef -- --auth",
     "npm run chef -- --logs",
+    "npm run chef -- --help --lang tr",
+    "npm run chef -- --update --verbose-plan",
     "npm run chef -- --status --repo-only --no-log",
+    "tamamlanan agent thread",
+    "/agent",
     "Kurulu skill'ler kendiliginden calismaz",
     "canli aktivasyon",
     "GitHub CLI veya Git Credential Manager",
@@ -512,7 +638,9 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --status --repo-only",
     "npm run chef -- --preview",
     "npm run chef -- --update",
+    "npm run chef -- --update --verbose-plan",
     "npm run chef -- --backups",
+    "backup delete",
     "backup archive",
     "Skill activation has two evidence levels"
   ],
@@ -522,12 +650,15 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --status --repo-only",
     "npm run chef -- --preview",
     "npm run chef -- --update",
+    "npm run chef -- --update --verbose-plan",
     "npm run chef -- --backups",
+    "backup delete",
     "backup archive",
     "Skill aktivasyonunda iki kanit seviyesi"
   ],
   "docs/install.md": [
     "npm run chef -- --update",
+    "npm run chef -- --update --verbose-plan",
     "npm run chef -- --backups",
     "does not change managed/global files",
     "If the pull advances",
@@ -536,6 +667,7 @@ for (const [file, snippets] of Object.entries({
   ],
   "docs/install.tr.md": [
     "npm run chef -- --update",
+    "npm run chef -- --update --verbose-plan",
     "npm run chef -- --backups",
     "managed/global dosyalari degistirmez",
     "Pull repo HEAD'ini ilerletirse",
@@ -544,6 +676,7 @@ for (const [file, snippets] of Object.entries({
   ],
   "docs/upgrade.md": [
     "npm run chef -- --update",
+    "npm run chef -- --update --verbose-plan",
     "npm run chef -- --backups",
     "does not change managed/global files",
     "If the pull advances the repo",
@@ -551,6 +684,7 @@ for (const [file, snippets] of Object.entries({
   ],
   "docs/upgrade.tr.md": [
     "npm run chef -- --update",
+    "npm run chef -- --update --verbose-plan",
     "npm run chef -- --backups",
     "managed/global dosyalari degistirmez",
     "Pull repo HEAD'ini ilerletirse",

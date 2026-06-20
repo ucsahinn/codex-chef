@@ -152,7 +152,9 @@ npm run chef -- --status --repo-only
 npm run chef -- --status --repo-only --no-log
 npm run chef -- --preview
 npm run chef -- --update
+npm run chef -- --update --verbose-plan
 npm run chef -- --backups
+npm run chef -- --backups --backup <id> --delete
 npm run chef -- --backups --backup <id>
 npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
@@ -176,8 +178,8 @@ notes without enabling it.
 global/user state. `npm run chef -- --backups --backup <id>` inspects a backup
 archive using paths, sizes, hashes, manifest status, and restorable target
 metadata only. `npm run validate:chef-cli` includes temporary-home backup
-smokes for list, inspect, restore preview, restore apply, rollback backup
-creation, and parseable JSON.
+smokes for list, inspect, restore preview, restore apply, backup delete
+preview/apply, rollback backup creation, and parseable JSON.
 
 The update apply path is intentionally not a skill installer: curated global
 skills and optional global Git guards stay behind `--install --apply`,

@@ -84,9 +84,11 @@ npm run chef -- --status
 npm run chef -- --status --repo-only
 npm run chef -- --preview
 npm run chef -- --update
+npm run chef -- --update --verbose-plan
 npm run chef -- --backups
 npm run chef -- --backups --backup <id>
 npm run chef -- --backups --backup <id> --restore
+npm run chef -- --backups --backup <id> --delete
 npm run chef:backups
 npm run chef -- --reset --apply
 npm run chef -- --repair --apply
@@ -97,6 +99,7 @@ npm run chef -- --routing
 npm run chef -- --routing --profile starter-health
 npm run chef -- --auth
 npm run chef -- --logs
+npm run chef -- --help --lang tr
 npm run chef -- --status --repo-only --no-log
 ```
 
@@ -107,13 +110,14 @@ repo-local audit logs under `tmp/chef-cli/logs`; add `--no-log` for strict
 no-filesystem-write audits. Use `--status --repo-only` when you want a fast
 local repo check that skips installed runtime, global skill-root inventory,
 Codex log metadata, and live Codex CLI probes.
-`--update` is managed/global no-write preview unless you add `--apply`; apply
-mode requires a clean worktree and runs `git pull --ff-only`. If the pull
-advances the repo, the CLI prints a fresh preview and stops so you can review
-the updated tree before rerunning `--update --apply`; if the repo is already
-current, it validates locally and refreshes managed files through the
-backup-backed installer without installing curated global skills or optional
-global Git guards.
+`--update` is a concise managed/global no-write preview unless you add
+`--apply`; use `npm run chef -- --update --verbose-plan` when you want the full
+install dry-run evidence. Apply mode requires a clean worktree and runs
+`git pull --ff-only`. If the pull advances the repo, the CLI prints a fresh
+preview and stops so you can review the updated tree before rerunning
+`--update --apply`; if the repo is already current, it validates locally and
+refreshes managed files through the backup-backed installer without installing
+curated global skills or optional global Git guards.
 `--reset --apply`, `--repair --apply`, and `--install --apply` are the other
 write paths; they route to the backup-backed installer or repair script instead
 of deleting user state.
@@ -124,15 +128,19 @@ without printing file contents. `--backups --backup <id> --restore` previews
 the managed files that would be copied back, and
 `--backups --backup <id> --restore --apply` restores only known Codex Chef
 managed targets after creating a rollback backup of the current files. Backup
-archive deletion is not automated by the CLI; review the printed location and
-remove old archives manually only after you no longer need them.
+delete is preview-first: `--backups --backup <id> --delete` shows the resolved
+archive path without removing it, and `--backups --backup <id> --delete --apply`
+removes only that selected Codex Chef backup archive under the canonical backup
+root.
 In an interactive terminal, `--skills` lets you pick one reviewed skill by
 number and installs it only when you rerun with `--apply`. `--mcp` lets you pick
 one connector by number to see transport, endpoint or package, setup, auth,
 verification, source, and rollback notes without enabling account connectors.
 `--routing` shows the task-shape map, agent wait policy, skill triggers, MCP
 choices, and the final "Surfaces used" reporting contract for visible autonomy.
-CLI logs are ignored and not part of the source package.
+It also reminds operators to close completed agent threads with `/agent`, check
+background terminals with `/ps`, and use `/stop` for terminal work started by
+the current session. CLI logs are ignored and not part of the source package.
 
 If PowerShell reports `Could not read package.json` from another directory,
 run the command from the repository or use npm's prefix form:
@@ -184,12 +192,14 @@ get?" screen after setup.
 
 ### Enterprise Routing Board
 
-Codex Chef also ships `catalog/routing-profiles.json`, a machine-readable
-task-shape routing contract. It tells Codex which subagents, skills, MCPs, and
-config/profile flags should be used for common enterprise work such as current
-docs research, context placement, bug root cause, frontend verification,
-security review, MCP connector changes, release readiness, SEO, docs, and
-starter health.
+Codex Chef also ships `catalog/routing-profiles.json`, a reviewed task-shape
+routing contract. The JSON records the audited mapping, while
+`templates/codex/AGENTS.md`, config templates, and the CLI routing board make
+that contract visible to Codex and operators: which subagents, skills, MCPs,
+and config/profile flags should be used for common enterprise work such as
+current docs research, context placement, bug root cause, frontend
+verification, security review, MCP connector changes, release readiness, SEO,
+docs, and starter health.
 
 ```bash
 npm run codex:routing

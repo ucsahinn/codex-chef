@@ -71,18 +71,20 @@ Update an existing checkout and managed setup through the guided CLI:
 
 ```powershell
 npm run chef -- --update
+npm run chef -- --update --verbose-plan
 npm run chef -- --update --apply
 ```
 
 Without `--apply`, update mode does not change managed/global files; normal
-CLI logs are still repo-local unless `--no-log` is supplied. Apply mode
-requires a clean worktree and runs `git pull --ff-only`. If the pull advances
-the repo, the CLI prints a fresh preview and stops; rerun
-`npm run chef -- --update --apply` after reviewing that updated preview. If the
-repo is already current, apply refreshes managed files through the
-backup-backed installer. Update does not install curated global skills or
-optional global Git guards; use `--install --apply` or `--skills --apply` when
-you want those explicit surfaces.
+CLI logs are still repo-local unless `--no-log` is supplied. The default
+preview is concise; `npm run chef -- --update --verbose-plan` prints the full
+install dry-run evidence. Apply mode requires a clean worktree and runs
+`git pull --ff-only`. If the pull advances the repo, the CLI prints a fresh
+preview and stops; rerun `npm run chef -- --update --apply` after reviewing
+that updated preview. If the repo is already current, apply refreshes managed
+files through the backup-backed installer. Update does not install curated global skills
+or optional global Git guards; use `--install --apply` or `--skills --apply`
+when you want those explicit surfaces.
 
 Inspect or restore Codex Chef backup archives through the same CLI:
 
@@ -90,16 +92,19 @@ Inspect or restore Codex Chef backup archives through the same CLI:
 npm run chef -- --backups
 npm run chef -- --backups --backup <id>
 npm run chef -- --backups --backup <id> --restore
+npm run chef -- --backups --backup <id> --delete
 npm run chef -- --backups --backup <id> --restore --apply
+npm run chef -- --backups --backup <id> --delete --apply
 ```
 
 The list and inspect commands are metadata-only: they show backup archive
 locations, manifest status, restorable file counts, sizes, and hashes without
 printing file contents. Restore is a preview unless `--apply` is supplied. The
 apply path creates a new rollback backup of current targets before copying
-known Codex Chef-managed files back from the selected archive. Backup deletion
-is not automated; review the printed archive location and remove old backups
-manually only after you no longer need them.
+known Codex Chef-managed files back from the selected archive. Delete is also
+preview-first: `--delete` prints the resolved archive path without removing it,
+and `--delete --apply` removes only the selected Codex Chef backup archive under
+the canonical backup root.
 
 Useful switches:
 

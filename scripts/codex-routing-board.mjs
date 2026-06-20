@@ -63,6 +63,13 @@ const report = {
       "Surfaces used: final summaries use agents=..., skills=..., mcp=..., commands=..., skipped=... so evidence is explicit."
     ],
     cli: "Use /agent in Codex CLI to inspect active agent threads, switch to one, or steer/close it.",
+    lifecycle: [
+      "Close completed subagent threads when the task no longer needs them.",
+      "Use /agent to inspect, switch, steer, or close agent threads before finalizing large work.",
+      "Use /ps to inspect background terminals and /stop to cancel terminal work started by the current session.",
+      "Close browser/MCP pages or sessions when the selected tool exposes a close operation.",
+      "If an external MCP process such as Serena persists after the task, report it and ask before killing processes or deleting state."
+    ],
     boundary: "Routing profiles guide safe autonomy; they do not silently enable account, database, production, destructive, or broad filesystem actions."
   },
   profileCount: profiles.length,
@@ -85,6 +92,13 @@ if (options.json) {
   console.log("- Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...");
   console.log("- Use /agent in Codex CLI to inspect active agent threads, switch to one, or steer/close it.");
   console.log("- Boundary: routing profiles are safe autonomy guidance, not hidden permission to enable risky tools.");
+  console.log("");
+  console.log("Lifecycle hygiene:");
+  console.log("- Close completed subagent threads when they are no longer needed.");
+  console.log("- Use /agent before finalizing large work to inspect, switch, steer, or close agent threads.");
+  console.log("- Use /ps for background terminals and /stop to cancel terminal work started by the current session.");
+  console.log("- Close browser/MCP pages or sessions when the selected tool exposes a close operation.");
+  console.log("- If an external MCP process such as Serena persists after the task, report it and ask before killing processes or deleting state.");
   for (const profile of profiles) {
     console.log("");
     console.log(`- ${profile.title} (${profile.id})`);

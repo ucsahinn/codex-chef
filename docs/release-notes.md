@@ -2,6 +2,48 @@
 
 ## Unreleased
 
+## v0.5.28 - 2026-06-20
+
+This release tightens the enterprise orchestration surface. The Chef CLI now has
+Turkish operator text, update preview is concise by default, and routing output
+now includes lifecycle hygiene for subagents, background terminals, browser/MCP
+sessions, and persistent MCP processes such as Serena.
+
+## Highlights
+
+- Added `--lang tr`, `--tr`, and `CODEX_CHEF_LANG=tr` for Turkish
+  operator-facing Chef CLI text while preserving stable JSON payloads and
+  English command flags.
+- Changed `npm run chef -- --update` into a concise no-write summary that names
+  managed overwrite targets, backup behavior, skipped surfaces, the apply
+  command, and `npm run chef -- --update --verbose-plan` for full dry-run
+  evidence.
+- Added routing lifecycle hygiene to `npm run chef -- --routing`, the installed
+  global `AGENTS.md` template, README, and skill/agent docs.
+- Added preview-first `npm run chef -- --backups --backup <id> --delete`
+  support; `--apply` is required before the selected archive is removed.
+- Relabeled repo-only status progress as `repo:doctor` so direct Codex CLI
+  doctor checks do not appear to run when they are intentionally skipped.
+- Extended validation with Turkish CLI smokes, concise update preview checks,
+  backup Turkish output coverage, lifecycle routing checks, and repo-doctor
+  label checks.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --help --lang tr --plain --no-log
+npm run chef -- --update --lang tr --plain --no-log
+npm run chef -- --routing --plain --no-log
+npm run chef -- --backups --backup <id> --delete --plain --no-log
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.27 - 2026-06-20
 
 This release closes the backup recovery gap in the enterprise CLI. Backup

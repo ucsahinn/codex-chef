@@ -246,6 +246,12 @@ Routing kurali:
   `Skill selected`, `MCP selected` ve
   `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`
   satirlarini icermelidir.
+- Lifecycle hijyeni bu kontratin parcasidir: artik gerekmeyen tamamlanmis agent
+  thread'lerini kapat, buyuk isleri finallemeden once `/agent` ile aktif
+  thread'leri incele veya kapat, background terminaller icin `/ps`, current
+  session tarafindan baslatilan terminal islerini durdurmak icin `/stop`
+  kullan. Serena gibi bir MCP process'i is bittikten sonra kalirsa bunu raporla
+  ve process kill veya local state delete oncesi onay iste.
 - En iyi alanlari gurultulu okuma ve kanit toplama isleridir: kesif, guncel
   docs, context yerlestirme, prompt tasarimi, MCP planlama, review, UI
   dogrulama, security audit, test/build kaniti, setup tanilama ve release
@@ -263,7 +269,10 @@ kanıt toplamadır.
 
 ## Enterprise Routing Profilleri
 
-`catalog/routing-profiles.json`, ajan ekibini, curated skill'leri, MCP varsayilanlarini ve config/profile flag'lerini birbirine baglayan checked-in routing kontratidir. Su komutlarla gorunur:
+`catalog/routing-profiles.json`, ajan ekibini, curated skill'leri, MCP
+varsayilanlarini ve config/profile flag'lerini birbirine baglayan reviewed
+routing kontratidir. JSON audited mapping'i kaydeder; `templates/codex/AGENTS.md`,
+config template'leri ve CLI routing panosu kontrati gorunur yapar. Su komutlarla gorunur:
 
 ```bash
 npm run codex:routing

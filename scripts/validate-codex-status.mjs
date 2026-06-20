@@ -261,6 +261,12 @@ if (textResult.error) {
   for (const required of ["Codex Chef status", "Use:", "Numbered menu:", "Target Codex home:", "Ambient Codex:", "Repo Git:", "Logs:", "Repo starter:", "Installed runtime:", "Skills context:", "Enterprise routing:", "Effective controls:", "MCP setup:", "MCP setup note: serena", "MCP setup note: supabase"]) {
     if (!textResult.stdout.includes(required)) fail(`codex status text output missing: ${required}`);
   }
+  if (!textResult.stdout.includes("[status] running repo:doctor")) {
+    fail("codex status text output should label the repository doctor as repo:doctor.");
+  }
+  if (textResult.stdout.includes("[status] running codex:doctor")) {
+    fail("codex status repo-only output must not imply direct Codex CLI doctor checks are running.");
+  }
 }
 
 const routingResult = spawnSync(process.execPath, ["scripts/codex-routing-board.mjs", "--json"], {
