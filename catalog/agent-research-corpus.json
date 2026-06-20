@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dateChecked": "2026-06-16",
+  "dateChecked": "2026-06-20",
   "minimumSourceBackedItems": 100,
   "minimumDistinctSourceMarkers": 20,
   "requiredGuardrailBlocks": ["Source refresh protocol:", "Cross-repo transfer protocol:", "Research synthesis protocol:", "Adversarial validation protocol:", "Source currency protocol:", "Corpus expansion protocol:", "Expert calibration protocol:"],
@@ -465,9 +465,9 @@
       "sourceMarkers": ["context-engineering-project-starter"],
       "appliesToAgents": ["context_architect", "prompt_architect", "docs_author", "codex_doctor"]
     },
-    "codex_enterprise_prompt_architect": {
-      "url": "https://github.com/ucsahinn/codex-enterprise-prompt-architect",
-      "sourceLocation": "docs/research-notes.md:35",
+    "prompt_architect": {
+      "url": "https://github.com/ucsahinn/prompt-architect",
+      "sourceLocation": "docs/research-notes.md:38",
       "sourceType": "primary project repositories",
       "confidence": "high",
       "stalenessRisk": "medium",
@@ -478,7 +478,7 @@
       "runtimeAuthority": false,
       "defaultRuntimeAuthorityWarning": "Use for first-party prompt-package, approval, and security-aware prompt audit patterns; preserve current user scope and destructive-action gates.",
       "relatedAuthorityRefs": ["openai_codex_customization", "openai_codex_manual", "openai_codex_subagents"],
-      "sourceMarkers": ["codex-enterprise-prompt-architect"],
+      "sourceMarkers": ["prompt-architect"],
       "appliesToAgents": ["prompt_architect", "context_architect", "security_auditor", "spec_author"]
     },
     "codex_skill_forge": {

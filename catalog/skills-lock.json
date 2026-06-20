@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "generatedFrom": "catalog/skills.json",
-  "dateChecked": "2026-06-16",
+  "dateChecked": "2026-06-20",
   "status": "offline-validated",
   "lockSemantics": "source-allowlist",
   "immutability": "Skills CLI installation uses owner/repo plus skill name; this lock verifies reviewed package/skill/source metadata but does not pin upstream commits.",
@@ -121,11 +121,11 @@
     },
     {
       "name": "prompt-architect",
-      "package": "ucsahinn/codex-enterprise-prompt-architect",
+      "package": "ucsahinn/prompt-architect",
       "skill": "prompt-architect",
-      "source": "ucsahinn/codex-enterprise-prompt-architect@prompt-architect",
-      "sourceUrl": "https://github.com/ucsahinn/codex-enterprise-prompt-architect",
-      "installCommand": "npx skills add ucsahinn/codex-enterprise-prompt-architect --skill prompt-architect --agent codex --yes --global"
+      "source": "ucsahinn/prompt-architect@prompt-architect",
+      "sourceUrl": "https://github.com/ucsahinn/prompt-architect",
+      "installCommand": "npx skills add ucsahinn/prompt-architect --skill prompt-architect --agent codex --yes --global"
     },
     {
       "name": "ai-skill-create",

@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "dateChecked": "2026-06-16",
+  "dateChecked": "2026-06-20",
   "installCommand": "npx skills add <package> --skill <skill> --agent codex --yes --global",
   "sourcePolicy": "Installable entries must declare package, skill, source, sourceUrl, license, risk, and lastChecked. Online resolution is verified separately with npm run verify:skills:online.",
   "lockSemantics": "source-allowlist",
@@ -469,16 +469,16 @@
       "name": "prompt-architect",
       "category": "prompt-engineering",
       "install": true,
-      "package": "ucsahinn/codex-enterprise-prompt-architect",
+      "package": "ucsahinn/prompt-architect",
       "skill": "prompt-architect",
-      "source": "ucsahinn/codex-enterprise-prompt-architect@prompt-architect",
-      "sourceUrl": "https://github.com/ucsahinn/codex-enterprise-prompt-architect",
+      "source": "ucsahinn/prompt-architect@prompt-architect",
+      "sourceUrl": "https://github.com/ucsahinn/prompt-architect",
       "license": "MIT",
       "risk": "medium",
       "networkRequired": true,
       "authRequired": false,
-      "lastChecked": "2026-06-15",
-      "reason": "First-party Codex Chef ecosystem skill for plan-first, approval-gated, security-aware Codex prompt generation and prompt audits. Included in -All because it complements the bundled prompt_architect with reusable prompt workflows."
+      "lastChecked": "2026-06-20",
+      "reason": "First-party Codex Chef ecosystem skill for plan-first, approval-gated, security-aware Codex prompt generation, prompt audits, and packaged Prompt Lab KB workflows. Included in -All because it complements the bundled prompt_architect with reusable prompt workflows."
     },
     {
       "name": "prompt-engineering-patterns",
