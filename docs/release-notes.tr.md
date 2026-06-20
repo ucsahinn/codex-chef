@@ -2,6 +2,47 @@
 
 ## Unreleased
 
+## v0.5.29 - 2026-06-20
+
+Bu release Chef CLI'a read-only tanilama merkezini ekler. Operator artik
+repo-only canli saglik, attention nedenleri, sonraki guvenli adimlar, backup/log
+ozetleri, update ve repair preview girisleri, runtime parity ve Serena/MCP surec
+denetimi komutlarini tek komutta gorur; global dosya degismez ve surec
+durdurulmaz.
+
+## One cikanlar
+
+- `npm run chef -- --diagnostics`, `npm run chef -- --diagnose` ve
+  `npm run chef:diagnostics` eklendi.
+- Tanilama gorunumu repo-only saglik, attention nedenleri, guvenli sonraki
+  adimlar, repo-local log kok dizini, backup kok dizini, son CLI log
+  metadata'si ve lifecycle temizlik notlarini log icerigi basmadan gosterir.
+- Diagnostics kanit listesine update ve repair preview komutlari eklendi.
+- `--tr` / `--lang tr` icin Turkce tanilama ciktisi eklendi.
+- Parse edilebilir `npm run --silent ... --json` diagnostics ciktisi release
+  gate kapsaminda dogrulaniyor.
+- Tanilama yuzeyi read-only kalir; surec temizligi audit kaniti gorundukten
+  sonra yine acik operator onayi ister.
+- `npm run validate:chef-cli`, README, Turkce README ve verification docs
+  genisletildi; tanilama menusu release gate'lerinde kalici olarak kontrol
+  edilir.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --diagnostics --plain --no-log
+npm run chef -- --diagnostics --tr --plain --no-log
+npm run chef -- --diagnose --plain --no-log
+npm run verify:install:runtime -- --expect-skills --redact-paths
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.28 - 2026-06-20
 
 Bu release enterprise orchestration yuzeyini sikilastirir. Chef CLI artik

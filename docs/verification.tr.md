@@ -159,6 +159,7 @@ npm run chef -- --backups --backup <id> --delete
 npm run chef -- --backups --backup <id>
 npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
+npm run chef -- --diagnostics
 ```
 
 `npm run chef` numarali operator menusunu acar. Yukaridaki noninteractive
@@ -174,6 +175,15 @@ Interactive terminalde `npm run chef -- --skills` numarayla tek reviewed skill
 sectirir; `npm run chef -- --mcp` numarayla connector sectirip setup/auth/
 source/rollback ve transport/endpoint-package notlarini gosterir ama
 connector'i acmaz.
+
+`npm run chef -- --diagnostics --no-log` read-only triage menusudur. Repo-only
+status snapshot'ini calistirir; canli saglik, attention nedenleri, sonraki
+guvenli adimlar, backup/log ozetleri ve status, doctor, routing, update
+preview, repair preview, backup, log, runtime parity, Serena/MCP surec denetimi
+icin tanilama kanit komutlarini gosterir. Log kok dizinini ve son CLI log
+metadata'sini basar, log icerigi basmaz ve surec durdurmaz. npm uzerinden
+parse edilebilir JSON icin `npm run --silent chef -- --diagnostics --json
+--no-log` kullan.
 
 `npm run chef -- --backups` backup archive metadata'sini global/user state'e
 dokunmadan listeler. `npm run chef -- --backups --backup <id>` bir backup

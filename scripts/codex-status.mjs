@@ -624,6 +624,8 @@ function inspectCliQuickStart() {
       "npm run chef -- --doctor",
       "npm run chef -- --preview",
       "npm run chef -- --update",
+      "npm run chef -- --diagnostics",
+      "npm run chef:diagnostics",
       "npm run chef -- --skills",
       "npm run chef -- --mcp",
       "npm run chef -- --auth",

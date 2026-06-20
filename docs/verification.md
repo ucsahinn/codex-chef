@@ -158,6 +158,7 @@ npm run chef -- --backups --backup <id> --delete
 npm run chef -- --backups --backup <id>
 npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
+npm run chef -- --diagnostics
 ```
 
 `npm run chef` opens the numbered operator menu. The noninteractive smoke
@@ -173,6 +174,14 @@ interactive terminal, `npm run chef -- --skills` lets the user select one
 reviewed skill by number, and `npm run chef -- --mcp` lets the user select one
 connector by number for transport, endpoint/package, setup/auth/source/rollback
 notes without enabling it.
+
+`npm run chef -- --diagnostics --no-log` is the read-only triage menu. It runs a
+repo-only status snapshot, shows current health, attention reasons, next safe
+actions, backup/log summaries, and the diagnostic evidence commands for status,
+doctor, routing, update preview, repair preview, backups, logs, runtime parity,
+and Serena/MCP process audits. It prints the log root and recent CLI log
+metadata without printing log contents or stopping processes. For parseable JSON
+through npm, use `npm run --silent chef -- --diagnostics --json --no-log`.
 
 `npm run chef -- --backups` lists backup archive metadata without touching
 global/user state. `npm run chef -- --backups --backup <id>` inspects a backup

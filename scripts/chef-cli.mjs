@@ -80,6 +80,8 @@ const ACTION_FLAGS = new Map([
   ["--skills", "skills"],
   ["--mcp", "mcp"],
   ["--routing", "routing"],
+  ["--diagnostics", "diagnostics"],
+  ["--diagnose", "diagnostics"],
   ["--auth", "auth"],
   ["--logs", "logs"]
 ]);
@@ -282,6 +284,12 @@ const MENU_ITEMS = [
     description: "Show task-shape routing, agent wait policy, skills, and MCP usage contract."
   },
   {
+    id: "diagnostics",
+    label: "Diagnostics",
+    writes: "none",
+    description: "Show read-only evidence commands, log locations, backups, and lifecycle cleanup notes."
+  },
+  {
     id: "auth",
     label: "Auth",
     writes: "none/account guidance",
@@ -362,6 +370,11 @@ const MENU_TEXT_TR = {
     description: "Gorev tipi routing, agent bekleme politikalari, skill ve MCP kontrati.",
     writes: "yok"
   },
+  diagnostics: {
+    label: "Tanilama",
+    description: "Read-only kanit komutlari, log konumlari, yedekler ve lifecycle temizlik notlari.",
+    writes: "yok"
+  },
   auth: {
     label: "Auth",
     description: "Public-safe GitHub auth sinirlari ve dogrulama notlari.",
@@ -411,6 +424,7 @@ Kullanim:
   npm run chef -- --mcp
   npm run chef -- --routing
   npm run chef -- --routing --profile starter-health
+  npm run chef -- --diagnostics
   npm run chef -- --auth
   npm run chef -- --logs
 
@@ -422,6 +436,7 @@ Secenekler:
   --no-log       Siki audit icin repo-local CLI log dosyasi olusturmaz
   --repo-only    Status icin kurulu runtime, global skill kokleri, Codex loglari ve Codex CLI problarini atlar
   --profile ID   --routing ile tek routing profilini gosterir
+  --diagnose     --diagnostics kisa yolu
   --backup ID    Belirli Codex Chef yedek arsivini inceler veya geri yukler
   --restore      --backup ID icin geri yukleme preview'i; dosya kopyalamak icin --apply ekle
   --delete       --backup ID icin silme preview'i; arsivi silmek icin --apply ekle
@@ -430,7 +445,7 @@ Secenekler:
   --help         Bu yardimi gosterir
 
 Aksiyonlar:
-  Durum, Doctor, On izleme, Guncelle, Kur, Reset, Onar, Yedekler, Skill'ler, MCP, Yonlendirme, Auth, Loglar
+  Durum, Doctor, On izleme, Guncelle, Kur, Reset, Onar, Yedekler, Skill'ler, MCP, Yonlendirme, Tanilama, Auth, Loglar
 
 Loglar:
   tmp/chef-cli/logs
@@ -455,6 +470,7 @@ Usage:
   npm run chef -- --mcp
   npm run chef -- --routing
   npm run chef -- --routing --profile starter-health
+  npm run chef -- --diagnostics
   npm run chef -- --auth
   npm run chef -- --logs
 
@@ -466,6 +482,7 @@ Options:
   --no-log       Do not create repo-local CLI log files for strict audits
   --repo-only    Skip installed runtime, global skill roots, Codex logs, and Codex CLI probes for status
   --profile ID   Show one routing profile when used with --routing
+  --diagnose     Alias for --diagnostics
   --backup ID    Inspect or restore a specific Codex Chef backup archive
   --restore      Preview restore for --backup ID; add --apply to copy files back
   --delete       Preview deletion for --backup ID; add --apply to remove the archive
@@ -1257,6 +1274,26 @@ function backupJsonPayload(backups) {
   };
 }
 
+function printRows(rows, columns, emptyMessage = null) {
+  if (rows.length === 0) {
+    if (emptyMessage) console.log(`${ICONS.info} ${emptyMessage}`);
+    return;
+  }
+  if (!options.plain) {
+    console.table(rows.map((row) => Object.fromEntries(
+      columns.map((column) => [column.label, row[column.key] ?? ""])
+    )));
+    return;
+  }
+  rows.forEach((row, index) => {
+    const primary = columns[0];
+    console.log(`${index + 1}. ${row[primary.key] ?? ""}`);
+    for (const column of columns.slice(1)) {
+      console.log(`   ${column.label}: ${row[column.key] ?? ""}`);
+    }
+  });
+}
+
 function printBackupTable(backups) {
   console.log(`${ICONS.logs} ${localText("Codex Chef backups", "Codex Chef yedekleri")}`);
   console.log(`${styleLabel(localText("Backup root", "Yedek kok dizini"))}: ${redactLocalPaths(backupRootPath())}`);
@@ -1275,25 +1312,43 @@ function printBackupTable(backups) {
       `Son geri yuklenebilir yedek: ${latestRestorable.id} (${latestRestorable.restorableCount} managed dosya).`
     )}`);
   }
-  console.table(backups.map((backup) => isTr()
-    ? {
-        id: backup.id,
-        tur: backup.kind,
-        dosya: backup.fileCount,
-        geriYuklenebilir: backup.restorableCount,
-        bayt: backup.totalBytes,
-        manifest: backup.manifest.present ? backup.manifest.schemaVersion || "present" : "legacy/yok",
-        degisti: backup.modified
-      }
-    : {
-        id: backup.id,
-        kind: backup.kind,
-        files: backup.fileCount,
-        restorable: backup.restorableCount,
-        bytes: backup.totalBytes,
-        manifest: backup.manifest.present ? backup.manifest.schemaVersion || "present" : "missing",
-        modified: backup.modified
-      }));
+  const visibleBackups = options.plain ? backups.slice(0, 10) : backups;
+  if (options.plain && backups.length > visibleBackups.length) {
+    console.log(`${ICONS.info} ${localText(
+      `Showing latest ${visibleBackups.length} of ${backups.length}; use --json for the full machine-readable list.`,
+      `${backups.length} yedegin son ${visibleBackups.length} girdisi gosteriliyor; tam liste icin --json kullan.`
+    )}`);
+  }
+  printRows(
+    visibleBackups.map((backup) => ({
+      id: backup.id,
+      kind: backup.kind,
+      files: backup.fileCount,
+      restorable: backup.restorableCount,
+      bytes: backup.totalBytes,
+      manifest: backup.manifest.present ? backup.manifest.schemaVersion || "present" : localText("missing", "legacy/yok"),
+      modified: backup.modified
+    })),
+    isTr()
+      ? [
+          { key: "id", label: "id" },
+          { key: "kind", label: "tur" },
+          { key: "files", label: "dosya" },
+          { key: "restorable", label: "geriYuklenebilir" },
+          { key: "bytes", label: "bayt" },
+          { key: "manifest", label: "manifest" },
+          { key: "modified", label: "degisti" }
+        ]
+      : [
+          { key: "id", label: "id" },
+          { key: "kind", label: "kind" },
+          { key: "files", label: "files" },
+          { key: "restorable", label: "restorable" },
+          { key: "bytes", label: "bytes" },
+          { key: "manifest", label: "manifest" },
+          { key: "modified", label: "modified" }
+        ]
+  );
   console.log(`${ICONS.info} ${localText(
     "Inspect one archive: npm run chef -- --backups --backup <id>",
     "Bir arsivi incele: npm run chef -- --backups --backup <id>"
@@ -1325,21 +1380,30 @@ function printBackupInspect(archivePath, plan) {
     console.log(`${ICONS.info} ${localText("No restorable managed Codex Chef files found.", "Geri yuklenebilir managed Codex Chef dosyasi bulunamadi.")}`);
     return;
   }
-  console.table(plan.files.map((file) => isTr()
-    ? {
-        arsivDosyasi: file.relative,
-        hedef: redactLocalPaths(file.target),
-        varMi: file.targetExists ? "evet" : "hayir",
-        bayt: file.size,
-        sha256: file.sha256.slice(0, 12)
-      }
-    : {
-        archiveFile: file.relative,
-        target: redactLocalPaths(file.target),
-        exists: file.targetExists ? "yes" : "no",
-        bytes: file.size,
-        sha256: file.sha256.slice(0, 12)
-      }));
+  printRows(
+    plan.files.map((file) => ({
+      archiveFile: file.relative,
+      target: redactLocalPaths(file.target),
+      exists: file.targetExists ? localText("yes", "evet") : localText("no", "hayir"),
+      bytes: file.size,
+      sha256: file.sha256.slice(0, 12)
+    })),
+    isTr()
+      ? [
+          { key: "archiveFile", label: "arsivDosyasi" },
+          { key: "target", label: "hedef" },
+          { key: "exists", label: "varMi" },
+          { key: "bytes", label: "bayt" },
+          { key: "sha256", label: "sha256" }
+        ]
+      : [
+          { key: "archiveFile", label: "archiveFile" },
+          { key: "target", label: "target" },
+          { key: "exists", label: "exists" },
+          { key: "bytes", label: "bytes" },
+          { key: "sha256", label: "sha256" }
+        ]
+  );
   console.log(`${ICONS.info} ${localText(
     `Restore preview: npm run chef -- --backups --backup ${path.basename(archivePath)} --restore`,
     `Geri yukleme preview: npm run chef -- --backups --backup ${path.basename(archivePath)} --restore`
@@ -1641,12 +1705,11 @@ function runAuth() {
   return { ok: true };
 }
 
-function runLogs() {
+function recentCliLogs(limit = 12) {
   if (!fs.existsSync(logRoot)) {
-    console.log(`${ICONS.info} No logs yet.`);
-    return { ok: true };
+    return [];
   }
-  const logs = fs.readdirSync(logRoot, { withFileTypes: true })
+  return fs.readdirSync(logRoot, { withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith(".log"))
     .map((entry) => {
       const fullPath = path.join(logRoot, entry.name);
@@ -1658,9 +1721,269 @@ function runLogs() {
       };
     })
     .sort((a, b) => b.modified.localeCompare(a.modified))
-    .slice(0, 12);
-  if (logs.length === 0) console.log(`${ICONS.info} No logs yet.`);
-  else console.table(logs);
+    .slice(0, limit);
+}
+
+function printRecentCliLogs(logs) {
+  printRows(
+    logs,
+    [
+      { key: "file", label: localText("file", "dosya") },
+      { key: "size", label: localText("size", "boyut") },
+      { key: "modified", label: localText("modified", "degisti") }
+    ],
+    localText("No logs yet.", "Henuz log yok.")
+  );
+}
+
+function readRepoStatusSnapshot() {
+  const result = spawnSync(process.execPath, [
+    "scripts/codex-status.mjs",
+    "--redact-paths",
+    "--skip-runtime",
+    "--skip-codex-doctor-checks",
+    "--skip-codex-cli",
+    "--json"
+  ], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: 120000,
+    windowsHide: true,
+    env: {
+      ...process.env,
+      FORCE_COLOR: "0",
+      NO_COLOR: "1"
+    }
+  });
+  if (result.error) {
+    return {
+      ok: false,
+      status: "attention",
+      attentionReasons: [`Repo-only status could not run: ${result.error.message}`],
+      nextActions: ["Run npm run chef -- --status --repo-only --no-log for details."]
+    };
+  }
+  const output = redactSensitiveOutput([result.stdout, result.stderr].filter(Boolean).join("\n").trim());
+  try {
+    const parsed = JSON.parse(result.stdout || "{}");
+    return {
+      ok: result.status === 0,
+      status: parsed.status || (result.status === 0 ? "ok" : "attention"),
+      git: parsed.gitRepository || null,
+      repoDoctor: parsed.repoDoctor ? {
+        status: parsed.repoDoctor.status,
+        failures: parsed.repoDoctor.failures || []
+      } : null,
+      attentionReasons: parsed.attentionReasons || [],
+      failures: parsed.failures || [],
+      nextActions: parsed.nextActions || [],
+      generatedAt: parsed.generatedAt || null
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      status: "attention",
+      attentionReasons: [`Repo-only status did not emit parseable JSON: ${error.message}`],
+      nextActions: ["Run npm run chef -- --status --repo-only --no-log for text details."],
+      outputPreview: output.split(/\r?\n/).slice(0, 6)
+    };
+  }
+}
+
+function backupSummary(backups) {
+  const latest = backups[0] || null;
+  const latestRestorable = backups.find((backup) => backup.restorableCount > 0) || null;
+  return {
+    count: backups.length,
+    latest: latest ? {
+      id: latest.id,
+      kind: latest.kind,
+      files: latest.fileCount,
+      restorable: latest.restorableCount,
+      modified: latest.modified
+    } : null,
+    latestRestorable: latestRestorable ? {
+      id: latestRestorable.id,
+      files: latestRestorable.fileCount,
+      restorable: latestRestorable.restorableCount,
+      modified: latestRestorable.modified
+    } : null
+  };
+}
+
+function logSummary(logs) {
+  return {
+    count: logs.length,
+    latest: logs[0] || null,
+    contentPrinted: false,
+    note: "Only repo-local log metadata is shown; raw log contents are intentionally not printed."
+  };
+}
+
+function diagnosticCommandRows() {
+  return [
+    {
+      area: localText("Repo status", "Repo durumu"),
+      command: "npm run chef -- --status --repo-only --no-log",
+      writes: localText("none", "yok"),
+      reason: localText("Fast repo health without installed runtime probes.", "Kurulu runtime probu olmadan hizli repo sagligi.")
+    },
+    {
+      area: localText("Full status", "Tam durum"),
+      command: "npm run chef -- --status --no-log",
+      writes: localText("none", "yok"),
+      reason: localText("Runtime, MCP, Git, routing, and log metadata checks.", "Runtime, MCP, Git, routing ve log metadata kontrolleri.")
+    },
+    {
+      area: "Doctor",
+      command: "npm run chef -- --doctor --no-log",
+      writes: localText("none", "yok"),
+      reason: localText("Repo doctor plus install/runtime expectations.", "Repo doctor ve kurulum/runtime beklentileri.")
+    },
+    {
+      area: localText("Routing", "Yonlendirme"),
+      command: "npm run chef -- --routing --no-log",
+      writes: localText("none", "yok"),
+      reason: localText("Agent, skill, MCP, and wait-policy routing contract.", "Agent, skill, MCP ve bekleme politikasi routing kontrati.")
+    },
+    {
+      area: localText("Update preview", "Guncelleme preview"),
+      command: "npm run chef -- --update --no-log",
+      writes: localText("none without --apply", "--apply yoksa yok"),
+      reason: localText("Shows repo/global refresh plan and validation gates without changing managed files.", "Managed dosyalari degistirmeden repo/global refresh plani ve validation gate'lerini gosterir.")
+    },
+    {
+      area: localText("Repair preview", "Onarim preview"),
+      command: "npm run chef -- --repair --no-log",
+      writes: localText("none without --apply", "--apply yoksa yok"),
+      reason: localText("Shows drift repair actions before any backup-backed write.", "Yedekli write oncesi drift onarim adimlarini gosterir.")
+    },
+    {
+      area: localText("Backups", "Yedekler"),
+      command: "npm run chef -- --backups --no-log",
+      writes: localText("none", "yok"),
+      reason: localText("Backup archive inventory and restore/delete preview entry points.", "Yedek arsiv envanteri ve restore/delete preview girisleri.")
+    },
+    {
+      area: localText("CLI logs", "CLI loglari"),
+      command: "npm run chef -- --logs --no-log",
+      writes: localText("none", "yok"),
+      reason: localText("Recent repo-local CLI log metadata; file contents are not printed.", "Son repo-local CLI log metadata'si; dosya icerigi basilmaz.")
+    },
+    {
+      area: localText("Runtime parity", "Runtime esligi"),
+      command: "npm run verify:install:runtime -- --expect-skills --redact-paths",
+      writes: localText("none", "yok"),
+      reason: localText("Source/runtime managed file, agent, MCP, and skill parity.", "Source/runtime managed file, agent, MCP ve skill esligi.")
+    },
+    {
+      area: localText("Serena/MCP process audit", "Serena/MCP surec denetimi"),
+      command: "Get-Process | Where-Object { $_.ProcessName -match 'serena|uvx|python|chrome' } | Group-Object ProcessName | Select-Object Name,Count",
+      writes: localText("none", "yok"),
+      reason: localText("Read-only count before asking for any process stop.", "Herhangi bir surec durdurma onayi istemeden once read-only sayim.")
+    }
+  ];
+}
+
+function runDiagnostics() {
+  const commands = diagnosticCommandRows();
+  const logs = recentCliLogs(12);
+  const status = readRepoStatusSnapshot();
+  const backups = listBackupArchives();
+  const attentionReasons = [
+    ...(status.attentionReasons || []),
+    ...(status.failures || [])
+  ];
+  const nextActions = [
+    ...(status.nextActions || []),
+    "npm run chef -- --update --no-log",
+    "npm run chef -- --repair --no-log",
+    "npm run chef -- --backups --no-log",
+    "npm run verify:install:runtime -- --expect-skills --redact-paths"
+  ].filter((value, index, array) => array.indexOf(value) === index);
+  const payload = {
+    schemaVersion: 1,
+    logRoot: redactLocalPaths(logRoot),
+    backupRoot: redactLocalPaths(backupRootPath()),
+    status: {
+      source: "repo-only",
+      overall: status.status,
+      generatedAt: status.generatedAt,
+      git: status.git,
+      repoDoctor: status.repoDoctor
+    },
+    attentionReasons,
+    nextActions,
+    backupSummary: backupSummary(backups),
+    logSummary: logSummary(logs),
+    commands,
+    recentLogs: logs,
+    safety: [
+      "Read-only by default.",
+      "Use --apply only on explicit install, update, repair, restore, or delete flows.",
+      "Ask before stopping persistent MCP/browser/process state."
+    ]
+  };
+
+  if (options.json) {
+    console.log(JSON.stringify(payload, null, 2));
+    return { ok: true };
+  }
+
+  console.log(`${ICONS.docs} ${localText("Codex Chef diagnostics", "Codex Chef tanilama")}`);
+  console.log(`${styleLabel(localText("Scope", "Kapsam"))}: ${localText("read-only evidence hub; no global files changed.", "read-only kanit merkezi; global dosya degistirmez.")}`);
+  console.log(`${styleLabel(localText("Log root", "Log kok dizini"))}: ${payload.logRoot}`);
+  console.log(`${styleLabel(localText("Backup root", "Yedek kok dizini"))}: ${payload.backupRoot}`);
+  console.log("");
+  console.log(styleHeading(localText("Current health", "Canli saglik")));
+  console.log(`${styleLabel(localText("Overall", "Genel"))}: ${payload.status.overall}`);
+  if (payload.status.git?.summary) {
+    console.log(`${styleLabel("Git")}: ${payload.status.git.summary}`);
+  }
+  if (payload.attentionReasons.length > 0) {
+    console.log(`${ICONS.warn} ${localText("Attention reasons:", "Dikkat nedenleri:")}`);
+    for (const reason of payload.attentionReasons) console.log(`- ${reason}`);
+  } else {
+    console.log(`${ICONS.ok} ${localText("No repo-only attention reasons.", "Repo-only dikkat nedeni yok.")}`);
+  }
+  console.log(`${styleLabel(localText("Backups", "Yedekler"))}: ${payload.backupSummary.count}${payload.backupSummary.latestRestorable ? `; ${localText("latest restorable", "son geri yuklenebilir")}: ${payload.backupSummary.latestRestorable.id}` : ""}`);
+  console.log(`${styleLabel(localText("CLI logs", "CLI loglari"))}: ${payload.logSummary.count}${payload.logSummary.latest ? `; ${localText("latest", "son")}: ${payload.logSummary.latest.file}` : ""}`);
+  console.log("");
+  console.log(styleHeading(localText("Next safe actions", "Sonraki guvenli adimlar")));
+  for (const action of payload.nextActions.slice(0, 6)) console.log(`- ${action}`);
+  console.log("");
+  console.log(styleHeading(localText("Diagnostic evidence commands", "Tanilama kanit komutlari")));
+  printRows(
+    commands,
+    isTr()
+      ? [
+          { key: "area", label: "alan" },
+          { key: "command", label: "komut" },
+          { key: "writes", label: "yazar" },
+          { key: "reason", label: "amac" }
+        ]
+      : [
+          { key: "area", label: "area" },
+          { key: "command", label: "command" },
+          { key: "writes", label: "writes" },
+          { key: "reason", label: "reason" }
+        ]
+  );
+  console.log("");
+  console.log(styleHeading(localText("Recent CLI logs", "Son CLI loglari")));
+  printRecentCliLogs(logs);
+  console.log("");
+  console.log(styleHeading(localText("Lifecycle cleanup notes", "Lifecycle temizlik notlari")));
+  console.log(`- ${localText("Use /agent to inspect and close completed agent threads.", "Tamamlanan agent thread'lerini incelemek ve kapatmak icin /agent kullan.")}`);
+  console.log(`- ${localText("Use /ps and /stop for live Codex tasks before starting another long operation.", "Yeni uzun isleme baslamadan once live Codex task'lari icin /ps ve /stop kullan.")}`);
+  console.log(`- ${localText("If Serena, browser, or MCP processes persist, audit first and ask before stopping them.", "Serena, browser veya MCP surecleri kalirsa once denetle ve durdurmadan once onay iste.")}`);
+  console.log(`- ${localText("Do not paste raw logs publicly; redaction covers common tokens but local logs can still contain machine context.", "Raw loglari public paylasma; redaction yaygin tokenlari kapsar ama lokal loglar makine baglami icerebilir.")}`);
+  return { ok: true };
+}
+
+function runLogs() {
+  printRecentCliLogs(recentCliLogs(12));
   return { ok: true };
 }
 
@@ -1690,6 +2013,8 @@ async function runAction(action) {
       return runMcp();
     case "routing":
       return runRouting();
+    case "diagnostics":
+      return runDiagnostics();
     case "auth":
       return runAuth();
     case "logs":

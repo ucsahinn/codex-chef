@@ -79,6 +79,7 @@ npm run chef -- --skills
 npm run chef -- --mcp
 npm run chef -- --routing
 npm run chef -- --routing --profile starter-health
+npm run chef -- --diagnostics
 npm run chef -- --auth
 npm run chef -- --logs
 npm run chef -- --help --lang tr
@@ -86,7 +87,8 @@ npm run chef -- --status --repo-only --no-log
 ```
 
 Menu her aksiyonun write sinirini gosterir. `--status`, `--doctor`,
-`--preview`, `--skills`, `--mcp`, `--routing`, `--auth` ve `--logs` varsayilan olarak
+`--preview`, `--skills`, `--mcp`, `--routing`, `--diagnostics`, `--auth` ve
+`--logs` varsayilan olarak
 global/user state icin read-only rehberlik veya dogrulama akislari olur.
 Normalde `tmp/chef-cli/logs` altina ignored lokal audit log'u yazarlar; strict
 audit icin `--no-log` ekle. Hızlı lokal repo kontrolü için
@@ -120,7 +122,14 @@ connector'larini kendiliginden acmaz. `--routing` task-shape haritasini, agent
 bekleme politikasini, skill trigger'larini, MCP secimlerini ve final "Surfaces
 used" raporlama sozlesmesini gosterir. Ayrica tamamlanan agent thread'leri
 icin `/agent`, background terminal kontrolu icin `/ps`, current session
-terminal islerini durdurmak icin `/stop` hatirlatmasi yapar. CLI loglari
+terminal islerini durdurmak icin `/stop` hatirlatmasi yapar. `--diagnostics`
+once repo-only status snapshot'ini calistiran read-only tanilama ekranidir;
+attention nedenlerini, sonraki guvenli adimlari, backup/log ozetini, update ve
+repair preview komutlarini, runtime parity ve Serena/MCP surec denetimi
+komutlarini tek yerde toplar. Log kok dizinini ve son CLI log metadata'sini
+basar; surec durdurmaz, log icerigi basmaz ve global dosya degistirmez. npm
+uzerinden machine-readable JSON icin `npm run --silent chef -- --diagnostics
+--json --no-log` kullan; boylece npm script banner'i JSON'u bozmaz. CLI loglari
 ignored kalir ve source package'a girmez.
 
 PowerShell baska bir dizinde `Could not read package.json` hatasi verirse
@@ -480,6 +489,7 @@ Faydali dogrulama komutlari:
 | --- | --- |
 | `npm run codex:status` | Repo sagligini, kurulu runtime drift'ini, MCP setup notlarini, routing profillerini ve effective controls ozetini gosterir. |
 | `npm run codex:status:all` | Ayni status panosuna beklenen curated skill ve opsiyonel Git guard kontrollerini ekler. |
+| `npm run chef -- --diagnostics --no-log` | Canli saglik, attention nedenleri, sonraki guvenli adimlar, kanit komutlari, log kok dizini, backup/log ozetleri, update/repair preview girisleri ve surec denetimi rehberi iceren read-only tanilama menusu. |
 | `npm run verify:install:runtime -- --expect-skills --expect-git-guards` | Kurulu `CODEX_HOME` icinde 21 ajan, 15 MCP girdisi, managed dosyalar ve curated skill'ler oldugunu read-only kanitlar. |
 | `npm run verify:skills:online -- --timeout-ms=90000` | 16 incelenmis skill kaynaginin hala cozuldugunu network-backed kanitlar. |
 | `codex exec --strict-config "Summarize the active Codex setup in three short bullets."` | Gercek Codex startup, strict config uyumlulugu, auth ve model-call smoke testidir. |

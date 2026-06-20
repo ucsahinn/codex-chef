@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.5.29 - 2026-06-20
+
+- Added `npm run chef -- --diagnostics` / `--diagnose` and
+  `npm run chef:diagnostics` as a read-only diagnostic hub with repo-only
+  health, attention reasons, next safe actions, backup/log summaries, update
+  and repair preview entry points, runtime parity, and Serena/MCP process-audit
+  commands.
+- Extended Chef CLI validation and English/Turkish docs so the diagnostic menu,
+  parseable `npm run --silent ... --json` path, log root, recent log metadata,
+  and no-process-stop safety contract remain covered.
+
 ## 0.5.28 - 2026-06-20
 
 - Added Turkish operator text for the Chef CLI through `--lang tr`, `--tr`,

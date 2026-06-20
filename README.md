@@ -97,6 +97,7 @@ npm run chef -- --skills
 npm run chef -- --mcp
 npm run chef -- --routing
 npm run chef -- --routing --profile starter-health
+npm run chef -- --diagnostics
 npm run chef -- --auth
 npm run chef -- --logs
 npm run chef -- --help --lang tr
@@ -104,7 +105,8 @@ npm run chef -- --status --repo-only --no-log
 ```
 
 The menu labels every action with its write boundary. `--status`,
-`--doctor`, `--preview`, `--skills`, `--mcp`, `--routing`, `--auth`, and `--logs` are
+`--doctor`, `--preview`, `--skills`, `--mcp`, `--routing`, `--diagnostics`,
+`--auth`, and `--logs` are
 read-only for global/user state by default. They normally create ignored
 repo-local audit logs under `tmp/chef-cli/logs`; add `--no-log` for strict
 no-filesystem-write audits. Use `--status --repo-only` when you want a fast
@@ -140,7 +142,14 @@ verification, source, and rollback notes without enabling account connectors.
 choices, and the final "Surfaces used" reporting contract for visible autonomy.
 It also reminds operators to close completed agent threads with `/agent`, check
 background terminals with `/ps`, and use `/stop` for terminal work started by
-the current session. CLI logs are ignored and not part of the source package.
+the current session. `--diagnostics` is a read-only triage screen that first
+runs the repo-only status snapshot, then prints attention reasons, next safe
+actions, backup/log summaries, update and repair preview commands, runtime
+parity, and Serena/MCP process-audit commands. It prints the log root and
+recent CLI log metadata, but it does not stop processes, print log contents, or
+change global files. For machine-readable JSON through npm, use
+`npm run --silent chef -- --diagnostics --json --no-log` so npm does not prepend
+script banners. CLI logs are ignored and not part of the source package.
 
 If PowerShell reports `Could not read package.json` from another directory,
 run the command from the repository or use npm's prefix form:
@@ -498,6 +507,7 @@ Useful verification commands:
 | --- | --- |
 | `npm run codex:status` | Repo health, installed runtime drift, MCP setup notes, routing profiles, and effective controls. |
 | `npm run codex:status:all` | Same status board plus expected curated skills and optional Git guard checks. |
+| `npm run chef -- --diagnostics --no-log` | Read-only diagnostic menu with current health, attention reasons, next safe actions, evidence commands, log root, backup/log summaries, update/repair preview entry points, and process-audit guidance. |
 | `npm run verify:install:runtime -- --expect-skills --expect-git-guards` | Read-only proof that the installed `CODEX_HOME` has 21 agents, 15 MCP entries, managed files, and curated skills. |
 | `npm run verify:skills:online -- --timeout-ms=90000` | Network-backed proof that all 16 reviewed skill sources still resolve. |
 | `codex exec --strict-config "Summarize the active Codex setup in three short bullets."` | Real Codex startup, strict config compatibility, auth, and model-call smoke test. |

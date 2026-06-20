@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+## v0.5.29 - 2026-06-20
+
+This release adds a read-only diagnostics hub to the Chef CLI. Operators can now
+see current repo-only health, attention reasons, next safe actions, backup/log
+summaries, update and repair preview entry points, runtime parity, and
+Serena/MCP process-audit commands from one command without changing global files
+or stopping processes.
+
+## Highlights
+
+- Added `npm run chef -- --diagnostics`, `npm run chef -- --diagnose`, and
+  `npm run chef:diagnostics`.
+- The diagnostics view prints repo-only health, attention reasons, safe next
+  actions, the repo-local log root, backup root, recent CLI log metadata, and
+  lifecycle cleanup notes without printing log contents.
+- Added update and repair preview commands to the diagnostics evidence list.
+- Added Turkish diagnostics output for `--tr` / `--lang tr`.
+- Added release-gate coverage for parseable `npm run --silent ... --json`
+  diagnostics output.
+- Kept the diagnostics surface read-only; process cleanup still requires an
+  explicit operator approval after audit evidence is shown.
+- Extended `npm run validate:chef-cli`, README, Turkish README, and verification
+  docs so the diagnostics menu remains covered by release gates.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --diagnostics --plain --no-log
+npm run chef -- --diagnostics --tr --plain --no-log
+npm run chef -- --diagnose --plain --no-log
+npm run verify:install:runtime -- --expect-skills --redact-paths
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.28 - 2026-06-20
 
 This release tightens the enterprise orchestration surface. The Chef CLI now has
