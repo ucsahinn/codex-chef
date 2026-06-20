@@ -12,7 +12,22 @@ istiyorsan bu rehberi kullan.
 5. Codex'i yeniden başlat.
 6. Aktif config ve skill'leri doğrula.
 
-PowerShell:
+Guided CLI guvenli yolu tek komutta toplar:
+
+```powershell
+npm run chef -- --update
+npm run chef -- --update --apply
+```
+
+`--apply` olmadan update modu managed/global dosyalari degistirmez; normal CLI
+loglari `--no-log` yoksa repo-local kalir. Apply modunda clean worktree ister
+ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse CLI fresh
+preview basip durur; bu updated preview'i inceledikten sonra
+`npm run chef -- --update --apply` tekrar calistir. Repo zaten guncelse managed
+dosyalari lokal validation sonrasi backup alan installer uzerinden yeniler;
+curated global skill veya opsiyonel global Git guard kurmaz.
+
+Manuel PowerShell:
 
 ```powershell
 git pull

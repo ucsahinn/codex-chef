@@ -44,6 +44,7 @@ Diese lokalisierte Datei folgt den Abschnitten der englischen Quelldatei. Source
 - Skills
 - Plugins
 - Specialist Agents
+- Enterprise Routing Profiles
 
 ## Synchron halten
 

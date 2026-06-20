@@ -152,6 +152,7 @@ npm run chef -- --status
 npm run chef -- --status --repo-only
 npm run chef -- --status --repo-only --no-log
 npm run chef -- --preview
+npm run chef -- --update
 npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
 ```
@@ -159,6 +160,9 @@ npm run chef -- --routing --profile starter-health
 `npm run chef` numarali operator menusunu acar. Yukaridaki noninteractive
 smoke komutlari global/user state'e yazmaz. `--no-log` verilmezse ignored
 repo-local CLI log'u olustururlar. Write path'leri `--apply` ister:
+`npm run chef -- --update --apply` clean worktree uzerinde Git fast-forward,
+yeni commit gelirse fresh preview, repo zaten guncelse backup'li managed
+refresh icin lokal validation sonrasinda,
 `npm run chef -- --reset --apply` backup'li managed refresh icin,
 `npm run chef -- --repair --apply` backup'li repair icin,
 `npm run chef -- --install --apply` full managed install icin kullanilir.
@@ -166,6 +170,10 @@ Interactive terminalde `npm run chef -- --skills` numarayla tek reviewed skill
 sectirir; `npm run chef -- --mcp` numarayla connector sectirip setup/auth/
 source/rollback ve transport/endpoint-package notlarini gosterir ama
 connector'i acmaz.
+
+Update apply path bilerek skill installer degildir: curated global skill'ler ve
+opsiyonel global Git guard'lar `--install --apply`, `--skills --apply` veya
+explicit installer flag'lerinin arkasinda kalir.
 
 CI ayrica temporary home path'leriyle Bash dry-run ve PowerShell `-WhatIf`
 smoke check calistirir; boylece installer runtime branch'leri global write
@@ -195,6 +203,19 @@ Beklenen skill davranışı idempotent ve sessizdir: kurulu skill'ler `Skill
 already installed`, başarılı yeni kurulumlar `Installed skill` olarak görünür;
 raw Skills CLI çıktısı yalnızca clone, installation veya write hatasında basılır.
 
+Skill aktivasyonunda iki kanit seviyesi vardir. Repo check'leri katalogun,
+routing profillerinin ve activation contract'in varligini kanitlar:
+
+```bash
+npm run chef -- --skills --plain --no-log
+npm run chef -- --routing --profile starter-health --plain --no-log
+```
+
+Gercek canli aktivasyon ise oturum kanitidir: `$security-best-practices` gibi
+bir skill'i veya bundled local skill adini iceren no-write bir Codex turn'u
+baslat; asistanin aksiyondan once `Skill selected` yazdigini ve hedef
+`SKILL.md` dosyasini okudugunu dogrula.
+
 Repo sagligi, kurulu runtime drift'i, Codex doctor check'leri, skills
 context-budget baskisi, routing kontrolleri ve MCP setup gereksinimlerini tek
 son kullanici gorunumunde gormek icin:
@@ -203,7 +224,8 @@ son kullanici gorunumunde gormek icin:
 npm run codex:status
 ```
 
-Kurulu runtime ve live Codex CLI probe'larini atlayan hizli repo-only audit icin:
+Kurulu runtime check'lerini, global skill-root envanterini, Codex log
+metadata'sini ve live Codex CLI probe'larini atlayan hizli repo-only audit icin:
 
 ```bash
 npm run chef -- --status --repo-only --no-log

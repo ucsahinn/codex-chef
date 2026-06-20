@@ -142,6 +142,7 @@ if (report) {
   for (const command of [
     "npm run chef -- --status",
     "npm run chef -- --doctor",
+    "npm run chef -- --update",
     "npm run chef -- --mcp",
     "npm run chef -- --logs"
   ]) {
@@ -151,6 +152,9 @@ if (report) {
   }
   if (report.cliQuickStart?.numberedActions !== true) {
     fail("codex status must document numbered interactive actions.");
+  }
+  if (!String(report.cliQuickStart?.boundary || "").includes("Update, install")) {
+    fail("codex status quick start boundary must mention update as an apply-gated write path.");
   }
   if (!report.gitRepository?.inspected) {
     fail("codex status must inspect Git repository health.");

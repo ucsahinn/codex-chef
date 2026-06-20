@@ -5,6 +5,7 @@ import path from "node:path";
 const root = path.resolve(process.cwd());
 const failures = [];
 const ignoredDirs = new Set([".git", ".serena", "node_modules", "dist", "build", "coverage", ".next", "tmp", "temp"]);
+const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 
 function posix(filePath) {
   return filePath.split(path.sep).join("/");
@@ -86,9 +87,29 @@ function validateWorkflow(file) {
   }
 }
 
+function validateDocText(file) {
+  const rel = posix(path.relative(root, file));
+  const text = fs.readFileSync(file, "utf8");
+  if (/npx\s+run\s+chef/i.test(text)) {
+    failures.push(`Documentation must not suggest the unrelated npx run watcher command: ${rel}`);
+  }
+  if (/^docs\/expected-output(?:\.(?:de|es|pt-BR|tr|fr))?\.md$/.test(rel)) {
+    const versionPattern = /codex-chef@(\d+\.\d+\.\d+)/g;
+    let match;
+    while ((match = versionPattern.exec(text)) !== null) {
+      if (match[1] !== packageJson.version) {
+        failures.push(`${rel} has stale package example codex-chef@${match[1]}; expected codex-chef@${packageJson.version}`);
+      }
+    }
+  }
+}
+
 for (const file of walk(root)) {
   const rel = posix(path.relative(root, file));
-  if (rel.endsWith(".md")) validateMarkdownLinks(file);
+  if (rel.endsWith(".md")) {
+    validateMarkdownLinks(file);
+    validateDocText(file);
+  }
   if (rel.endsWith(".yml") || rel.endsWith(".yaml")) validateWorkflow(file);
 }
 

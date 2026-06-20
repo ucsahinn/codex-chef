@@ -109,6 +109,22 @@ extra files inside the managed Codex Chef plugin directory requires the
 explicit `--prune-managed-plugin-extras` flag and still stays scoped to that
 single managed plugin target after backup.
 
+## Update Mode
+
+`npm run chef -- --update` does not change managed/global files; ordinary
+repo-local CLI logs are still written unless `--no-log` is supplied. It uses
+the managed-file install plan and installer dry-run path, excluding curated
+global skill installs and optional global Git guards.
+`npm run chef -- --update --apply` first requires a clean Git worktree, then
+runs `git pull --ff-only`. If new commits are pulled, it prints a fresh preview
+from the updated tree and stops. If the repository is already current, it runs
+local validation before the managed refresh, then refreshes scoped managed
+Codex Chef files through the backup-backed installer. That refresh may backup
+and replace scoped managed targets, including the managed Codex Chef plugin
+directory. It does not publish, perform unscoped cleanup, install curated
+global skills, install optional global Git guards, delete user skills, rotate
+credentials, or enable account/database/broad-filesystem connectors.
+
 ## Rules
 
 `templates/codex/rules/default.rules` allows fast read-only discovery and

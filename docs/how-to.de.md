@@ -24,6 +24,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 .\scripts\install.ps1 -All -PlainOutput
 ```
 
+```powershell
+npm run chef -- --update --plain --no-log
+npm run chef -- --update --apply
+```
+
 ```bash
 ./scripts/install.sh --all --dry-run
 ```

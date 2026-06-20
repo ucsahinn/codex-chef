@@ -44,6 +44,8 @@ Este arquivo localizado acompanha as seções do arquivo fonte em inglês. Sourc
 - Skill Sources
 - Specialist Agent Boundaries
 - Install Planning And Collision Policy
+- Repair Mode
+- Update Mode
 - Rules
 - Hooks
 - Git Hygiene

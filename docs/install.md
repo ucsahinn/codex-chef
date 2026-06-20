@@ -67,6 +67,23 @@ plugin marketplace entry. It preserves unrelated marketplace plugins and never
 deletes user skills; extra or duplicate global skills are reported as cleanup
 candidates.
 
+Update an existing checkout and managed setup through the guided CLI:
+
+```powershell
+npm run chef -- --update
+npm run chef -- --update --apply
+```
+
+Without `--apply`, update mode does not change managed/global files; normal
+CLI logs are still repo-local unless `--no-log` is supplied. Apply mode
+requires a clean worktree and runs `git pull --ff-only`. If the pull advances
+the repo, the CLI prints a fresh preview and stops; rerun
+`npm run chef -- --update --apply` after reviewing that updated preview. If the
+repo is already current, apply refreshes managed files through the
+backup-backed installer. Update does not install curated global skills or
+optional global Git guards; use `--install --apply` or `--skills --apply` when
+you want those explicit surfaces.
+
 Useful switches:
 
 - `-All`: install Codex templates, the local Codex Chef plugin, specialist

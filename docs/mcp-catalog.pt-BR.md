@@ -43,6 +43,7 @@ Este arquivo localizado acompanha as seções do arquivo fonte em inglês. Sourc
 - MCP Catalog
 - Enabled By Default
 - Disabled Until Needed
+- Opt-In Connector Recipes
 - Rule
 - Config Flags To Prefer
 

@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 0.5.25 - 2026-06-20
+
+- Added `npm run chef -- --update` and `npm run chef:update` as a safe
+  update preview/apply flow for Windows-first Codex Chef refreshes.
+- Kept update preview no-write by default; `--apply` now requires a clean
+  worktree, runs `git pull --ff-only`, stops for review after a changed pull,
+  runs local validation/security audit before same-tree refresh, and only then
+  uses the existing backup-backed managed installer path.
+- Scoped update refresh to managed Codex Chef files only so it does not install
+  curated global skills or optional global Git guards.
+- Tightened repo-only status output so it explicitly skips installed runtime,
+  global skill inventory, Codex log metadata, and live Codex CLI probes.
+- Added forced-color/plain-output smoke checks plus validator coverage for the
+  update command, parseable JSON mode, unknown CLI options, stale package
+  examples, wrong `npx run` entrypoints, and skill activation contract.
+- Updated install, security, upgrade, verification, README, and Turkish docs so
+  the documented command surface matches the CLI.
+
 ## 0.5.24 - 2026-06-18
 
 - Added a read-only Chef routing menu/flag so operators can inspect task-shape

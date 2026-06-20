@@ -65,6 +65,7 @@ npm run chef
 npm run chef -- --status
 npm run chef -- --status --repo-only
 npm run chef -- --preview
+npm run chef -- --update
 npm run chef -- --reset --apply
 npm run chef -- --repair --apply
 npm run chef -- --install --apply
@@ -82,10 +83,18 @@ Menu her aksiyonun write sinirini gosterir. `--status`, `--doctor`,
 global/user state icin read-only rehberlik veya dogrulama akislari olur.
 Normalde `tmp/chef-cli/logs` altina ignored lokal audit log'u yazarlar; strict
 audit icin `--no-log` ekle. Hızlı lokal repo kontrolü için
-`--status --repo-only` kullan; bu mod kurulu runtime ve live Codex CLI
-probe'larini atlar. `--reset --apply`, `--repair --apply` ve
-`--install --apply` global dosyalara yazabilen path'lerdir; user state silmek
-yerine backup alan installer/repair scriptlerine giderler. Interactive
+`--status --repo-only` kullan; bu mod kurulu runtime'i, global skill-root
+envanterini, Codex log metadata'sini ve live Codex CLI probe'larini atlar.
+`--update`, `--apply` eklenmedikce managed/global no-write
+preview yapar; apply modunda clean worktree ister ve `git pull --ff-only`
+calistirir. Pull repo HEAD'ini ilerletirse CLI yeni tree icin fresh preview
+basip durur; preview'i inceleyip `--update --apply` tekrar calistirirsin. Repo
+zaten guncelse lokal validation calistirip managed dosyalari backup alan
+installer uzerinden yeniler; curated global skill veya opsiyonel global Git
+guard kurmaz.
+`--reset --apply`, `--repair --apply` ve `--install --apply` diger write
+path'leridir; user state silmek yerine backup alan installer/repair
+scriptlerine giderler. Interactive
 terminalde `--skills` numarayla tek reviewed skill sectirir ve sadece `--apply`
 ile kurar. `--mcp` numarayla connector sectirip transport, endpoint veya
 package, setup, auth, dogrulama, source ve rollback notlarini gosterir; account
@@ -102,6 +111,9 @@ cd C:\Users\you\Desktop\codex-chef
 npm run chef -- --status
 npm --prefix C:\Users\you\Desktop\codex-chef run chef -- --status
 ```
+
+`npx run` kullanma; bu repo lokal npm script'leri expose eder ve npm'deki
+`run` paketi ilgisiz bir filesystem watcher baslatir.
 
 GitHub release, push veya workflow kontrolleri lokal GitHub auth eskidigi icin
 fail ederse GitHub CLI veya Git Credential Manager'i kendi kurum politikaniza
@@ -207,6 +219,13 @@ task routing sırasında kullanacağı isim, açıklama ve TOML rol dosyalarıd�
 - <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa7a.svg" alt="" aria-hidden="true" width="20"> **Codex Doktoru** (`codex_doctor`) - setup sağlığı
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skill'ler
+
+Kurulu skill'ler kendiliginden calismaz. Bir skill, kullanici adini yazdiginda,
+ornegin `$security-best-practices`, ya da is acikca description ile eslestiginde
+Codex context'ine girer. `npm run chef -- --skills --plain --no-log` katalogu,
+kaynak gate'ini ve activation contract'i kanitlar; canli aktivasyon ise oturum
+icinde asistanin `Skill selected` yazmasi ve aksiyondan once ilgili
+`SKILL.md` dosyasini okumasiyla kanitlanir.
 
 Codex Chef üç yerel plugin skill'iyle gelir. Bunlar `codex-chef-workflows`
 plugin'iyle birlikte gelir ve `npm run validate:plugin-skills` ile kontrol

@@ -44,6 +44,7 @@ Ce fichier localisé suit les sections du fichier source anglais. Source: [skill
 - Skills
 - Plugins
 - Specialist Agents
+- Enterprise Routing Profiles
 
 ## Garder synchronisé
 

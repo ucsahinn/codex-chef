@@ -4,10 +4,6 @@
 
 > Esta guía en español forma parte del conjunto de documentación en seis idiomas para `install.md`. Mantiene el mismo límite de seguridad: previsualizar primero, no guardar secretos y verificar localmente cada cambio de setup.
 
-> Los parametros completos de instalacion, reglas de backup y detalles de
-> operador estan en [English](install.md) y [Türkçe](install.tr.md). Esta
-> pagina localizada es un resumen de seguridad con indice de fuentes.
-
 ## Qué cubre esta página
 
 - Instalación Windows-first con PowerShell y una ruta equivalente para Bash/WSL.
@@ -26,6 +22,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 
 ```powershell
 .\scripts\install.ps1 -All -PlainOutput
+```
+
+```powershell
+npm run chef -- --update --plain --no-log
+npm run chef -- --update --apply
 ```
 
 ```bash

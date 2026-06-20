@@ -2,6 +2,50 @@
 
 ## Unreleased
 
+## v0.5.25 - 2026-06-20
+
+This patch closes the Windows-first update and status gaps around Codex Chef.
+Operators now have a documented `chef:update` surface that previews safely by
+default, requires a clean tree before applying, and uses the existing
+backup-backed installer only after the user reviews a freshly pulled tree and
+local validation passes.
+
+## Highlights
+
+- `npm run chef -- --update` and `npm run chef:update` run a no-write update
+  preview so users do not accidentally launch the unrelated `npx run` watcher.
+- `npm run chef -- --update --apply` checks for a clean Git worktree, runs
+  `git pull --ff-only`, stops after any changed pull for review, and then uses
+  the existing backup-backed managed install flow on the next apply after
+  `npm run validate` and `npm run audit:security` pass.
+- Update apply is scoped to managed Codex Chef files; it does not install
+  curated global skills or optional global Git guards.
+- Repo-only status now states that installed runtime, global skill inventory,
+  Codex log metadata, and live Codex CLI probes are intentionally skipped.
+- The Chef CLI now has forced-color and `--plain` smoke coverage so terminal
+  output can be polished without breaking log-safe plain mode.
+- Chef CLI JSON mode now stays parseable, and unknown options return an
+  actionable error instead of a Node stack trace.
+- README, install, security, upgrade, verification, and Turkish docs now carry
+  the same update-mode boundary and command examples.
+- Documentation validation now catches stale `codex-chef@...` expected-output
+  examples and the wrong `npx run` entrypoint.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --update --no-log --plain
+npm run chef:update -- --no-log --plain
+npm run chef -- --status --repo-only --no-log --plain
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.24 - 2026-06-18
 
 This patch makes Codex Chef's agent, skill, and MCP routing behavior visible to

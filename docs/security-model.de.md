@@ -44,6 +44,8 @@ Diese lokalisierte Datei folgt den Abschnitten der englischen Quelldatei. Source
 - Skill Sources
 - Specialist Agent Boundaries
 - Install Planning And Collision Policy
+- Repair Mode
+- Update Mode
 - Rules
 - Hooks
 - Git Hygiene

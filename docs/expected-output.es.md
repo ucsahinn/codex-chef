@@ -4,10 +4,6 @@
 
 > Esta guía en español forma parte del conjunto de documentación en seis idiomas para `expected-output.md`. Mantiene el mismo límite de seguridad: previsualizar primero, no guardar secretos y verificar localmente cada cambio de setup.
 
-> Los ejemplos completos de salida y los detalles de operador estan en
-> [English](expected-output.md) y [Türkçe](expected-output.tr.md). Esta pagina
-> localizada es un resumen de seguridad con indice de fuentes.
-
 ## Qué cubre esta página
 
 - Instalación Windows-first con PowerShell y una ruta equivalente para Bash/WSL.
@@ -26,6 +22,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 
 ```powershell
 .\scripts\install.ps1 -All -PlainOutput
+```
+
+```powershell
+npm run chef -- --update --plain --no-log
+npm run chef -- --update --apply
 ```
 
 ```bash
@@ -62,8 +63,10 @@ Este archivo localizado sigue las secciones del archivo fuente en inglés. Sourc
 
 - Expected Output
 - Install Plan Preview
+- Routing Board
 - PowerShell Dry Run
 - PowerShell Success
+- Repair Preview
 - Bash Dry Run
 - Bash Success
 - Skill Installation

@@ -67,6 +67,22 @@ verir, sonra istenirse backup alarak onarir. Baska marketplace plugin'lerini
 korur ve user skill'lerini silmez; fazla veya duplicate global skill'leri
 cleanup adayi olarak raporlar.
 
+Mevcut checkout ve managed setup'i guided CLI ile guncelle:
+
+```powershell
+npm run chef -- --update
+npm run chef -- --update --apply
+```
+
+`--apply` olmadan update modu managed/global dosyalari degistirmez; normal CLI
+loglari `--no-log` yoksa repo-local kalir. Apply modunda clean worktree ister
+ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse CLI fresh
+preview basip durur; bu updated preview'i inceledikten sonra
+`npm run chef -- --update --apply` tekrar calistir. Repo zaten guncelse managed
+dosyalari backup alan installer uzerinden yeniler. Update curated global skill
+veya opsiyonel global Git guard kurmaz; bunlar icin `--install --apply` veya
+`--skills --apply` yuzeylerini acikca kullan.
+
 Kullanışlı parametreler:
 
 - `-All`: Codex template'lerini, yerel Codex Chef plugin'ini, uzman ajanları,

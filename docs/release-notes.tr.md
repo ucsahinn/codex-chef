@@ -2,6 +2,50 @@
 
 ## Unreleased
 
+## v0.5.25 - 2026-06-20
+
+Bu patch Codex Chef'in Windows-first update ve status bosluklarini kapatir.
+Operator artik guvenli varsayilanla preview yapan, apply oncesi temiz Git
+agaci isteyen ve yeni pull sonrasi tekrar inceleme icin duran belgeli
+`chef:update` yuzeyine sahiptir; same-tree refresh oncesi lokal validation da
+gecmek zorundadir.
+
+## One cikanlar
+
+- `npm run chef -- --update` ve `npm run chef:update`, kullaniciyi yanlislikla
+  ilgisiz `npx run` watcher'ina sokmadan no-write update preview calistirir.
+- `npm run chef -- --update --apply`, temiz Git worktree kontrolu yapar,
+  `git pull --ff-only` calistirir, degisen pull sonrasi inceleme icin durur ve
+  `npm run validate` ile `npm run audit:security` gectikten sonra yalnizca
+  sonraki apply'da backup-backed managed install akisina devam eder.
+- Update apply managed Codex Chef dosyalariyla sinirlidir; curated global skill
+  veya opsiyonel global Git guard kurmaz.
+- Repo-only status artik installed runtime, global skill inventory, Codex log
+  metadata ve live Codex CLI probe'larinin bilerek atlandigini acik yazar.
+- Chef CLI, terminal cikti polish'i plain/log-safe modu bozmadan kalabilsin
+  diye forced-color ve `--plain` smoke coverage kazandi.
+- Chef CLI JSON mode artik parse edilebilir kalir; bilinmeyen option Node stack
+  trace yerine aksiyon alinabilir hata dondurur.
+- README, install, security, upgrade, verification ve Turkish docs ayni update
+  boundary'sini ve komut orneklerini tasir.
+- Documentation validation artik stale `codex-chef@...` expected-output
+  orneklerini ve yanlis `npx run` entrypoint'ini yakalar.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run chef -- --update --no-log --plain
+npm run chef:update -- --no-log --plain
+npm run chef -- --status --repo-only --no-log --plain
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.24 - 2026-06-18
 
 Bu patch Codex Chef'in agent, skill ve MCP routing davranisini operator icin

@@ -83,6 +83,7 @@ npm run chef
 npm run chef -- --status
 npm run chef -- --status --repo-only
 npm run chef -- --preview
+npm run chef -- --update
 npm run chef -- --reset --apply
 npm run chef -- --repair --apply
 npm run chef -- --install --apply
@@ -100,10 +101,18 @@ The menu labels every action with its write boundary. `--status`,
 read-only for global/user state by default. They normally create ignored
 repo-local audit logs under `tmp/chef-cli/logs`; add `--no-log` for strict
 no-filesystem-write audits. Use `--status --repo-only` when you want a fast
-local repo check that skips installed runtime and live Codex CLI probes.
-`--reset --apply`, `--repair --apply`, and
-`--install --apply` are the write paths; they route to the backup-backed
-installer or repair script instead of deleting user state.
+local repo check that skips installed runtime, global skill-root inventory,
+Codex log metadata, and live Codex CLI probes.
+`--update` is managed/global no-write preview unless you add `--apply`; apply
+mode requires a clean worktree and runs `git pull --ff-only`. If the pull
+advances the repo, the CLI prints a fresh preview and stops so you can review
+the updated tree before rerunning `--update --apply`; if the repo is already
+current, it validates locally and refreshes managed files through the
+backup-backed installer without installing curated global skills or optional
+global Git guards.
+`--reset --apply`, `--repair --apply`, and `--install --apply` are the other
+write paths; they route to the backup-backed installer or repair script instead
+of deleting user state.
 In an interactive terminal, `--skills` lets you pick one reviewed skill by
 number and installs it only when you rerun with `--apply`. `--mcp` lets you pick
 one connector by number to see transport, endpoint or package, setup, auth,
@@ -120,6 +129,9 @@ cd C:\Users\you\Desktop\codex-chef
 npm run chef -- --status
 npm --prefix C:\Users\you\Desktop\codex-chef run chef -- --status
 ```
+
+Do not use `npx run`; this repository exposes local npm scripts, and the npm
+package named `run` starts an unrelated filesystem watcher.
 
 If GitHub release, push, or workflow checks fail because local GitHub
 authentication is stale, refresh GitHub CLI or Git Credential Manager according
@@ -234,6 +246,13 @@ the installer can also add sixteen reviewed public and first-party skills for ma
 debugging, refactoring, security, testing, browser verification, SEO, web
 quality, docs, MCP building, context engineering, prompt architecture, skill
 authoring, and one broad frontend workflow.
+
+Installed skills do not execute by themselves. A skill enters Codex context
+when the user names it, for example `$security-best-practices`, or when a task
+clearly matches its description. `npm run chef -- --skills --plain --no-log`
+proves the catalog, source gate, and activation contract; live activation is
+proved in-session when the assistant prints `Skill selected` and reads that
+skill's `SKILL.md` before acting.
 
 - <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> **Chef Operator** (`codex-chef-operator`) - plugin-local
 - <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d0.svg" alt="" aria-hidden="true" width="20"> **Offline Diagram Triplet** (`offline-diagram-triplet`) - plugin-local

@@ -151,6 +151,7 @@ npm run chef -- --status
 npm run chef -- --status --repo-only
 npm run chef -- --status --repo-only --no-log
 npm run chef -- --preview
+npm run chef -- --update
 npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
 ```
@@ -158,6 +159,9 @@ npm run chef -- --routing --profile starter-health
 `npm run chef` opens the numbered operator menu. The noninteractive smoke
 commands above do not write global/user state. They create ignored repo-local
 CLI logs unless `--no-log` is supplied. Write paths require `--apply`:
+`npm run chef -- --update --apply` for a clean-worktree Git fast-forward plus
+a fresh preview when new commits are pulled, or backup-backed managed refresh
+when the repo is already current after local validation,
 `npm run chef -- --reset --apply` for backup-backed managed refresh,
 `npm run chef -- --repair --apply` for backup-backed repair, and
 `npm run chef -- --install --apply` for a full managed install. In an
@@ -165,6 +169,10 @@ interactive terminal, `npm run chef -- --skills` lets the user select one
 reviewed skill by number, and `npm run chef -- --mcp` lets the user select one
 connector by number for transport, endpoint/package, setup/auth/source/rollback
 notes without enabling it.
+
+The update apply path is intentionally not a skill installer: curated global
+skills and optional global Git guards stay behind `--install --apply`,
+`--skills --apply`, or the explicit installer flags.
 
 CI also runs Bash dry-run and PowerShell `-WhatIf` smoke checks with temporary
 homes so installer runtime branches are exercised without global writes.
@@ -194,6 +202,19 @@ reported as `Skill already installed`, successful new installs are reported as
 `Installed skill`, and raw Skills CLI output is shown only when clone,
 installation, or write failures need diagnosis.
 
+Skill activation has two evidence levels. Repo checks prove that the catalog,
+routing profiles, and activation contract are present:
+
+```bash
+npm run chef -- --skills --plain --no-log
+npm run chef -- --routing --profile starter-health --plain --no-log
+```
+
+Actual live activation is session evidence: start a no-write Codex turn that
+names a skill such as `$security-best-practices` or a bundled local skill, then
+confirm the assistant prints `Skill selected` and reads the target `SKILL.md`
+before acting.
+
 For a single end-user view of repo health, installed runtime drift, Codex
 doctor checks, skills context-budget pressure, routing controls, and MCP setup
 requirements, run:
@@ -202,8 +223,8 @@ requirements, run:
 npm run codex:status
 ```
 
-For a fast repository-only audit that avoids installed-runtime and live Codex
-CLI probes, run:
+For a fast repository-only audit that avoids installed-runtime checks, global
+skill-root inventory, Codex log metadata, and live Codex CLI probes, run:
 
 ```bash
 npm run chef -- --status --repo-only --no-log

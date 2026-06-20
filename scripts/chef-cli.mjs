@@ -27,6 +27,7 @@ const ACTION_FLAGS = new Map([
   ["--status", "status"],
   ["--doctor", "doctor"],
   ["--preview", "preview"],
+  ["--update", "update"],
   ["--reset", "reset"],
   ["--repair", "repair"],
   ["--install", "install"],
@@ -50,7 +51,10 @@ for (let index = 0; index < args.length; index += 1) {
     index += 1;
   }
   else if (ACTION_FLAGS.has(arg)) options.action = ACTION_FLAGS.get(arg);
-  else throw new Error(`Unknown argument: ${arg}`);
+  else {
+    console.error(`Codex Chef CLI error: Unknown option ${arg}. Run npm run chef -- --help for supported commands.`);
+    process.exit(2);
+  }
 }
 
 const ASCII_ICONS = {
@@ -59,12 +63,81 @@ const ASCII_ICONS = {
   info: "[info]",
   warn: "[warn]",
   run: "[run]",
+  update: "[update]",
   lock: "[auth]",
   docs: "[docs]",
   logs: "[logs]"
 };
 
-const ICONS = ASCII_ICONS;
+const COLOR_CODES = {
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  dim: "\x1b[2m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m"
+};
+
+const ICON_COLORS = {
+  chef: "cyan",
+  ok: "green",
+  info: "blue",
+  warn: "yellow",
+  run: "magenta",
+  update: "green",
+  lock: "yellow",
+  docs: "cyan",
+  logs: "dim"
+};
+
+function supportsColor() {
+  if (options.plain) return false;
+  if (Object.hasOwn(process.env, "NO_COLOR") && process.env.NO_COLOR !== "") return false;
+  const force = String(process.env.FORCE_COLOR || "").toLowerCase();
+  if (force === "0" || force === "false") return false;
+  if (force || process.env.CLICOLOR_FORCE === "1") return true;
+  return Boolean(process.stdout.isTTY);
+}
+
+function colorize(value, color) {
+  if (!supportsColor()) return String(value);
+  const code = COLOR_CODES[color];
+  if (!code) return String(value);
+  return `${code}${value}${COLOR_CODES.reset}`;
+}
+
+function styleAction(action) {
+  return colorize(action, "cyan");
+}
+
+function styleHeading(value) {
+  return colorize(value, "bold");
+}
+
+function styleLabel(value) {
+  return colorize(value, "cyan");
+}
+
+function styleMuted(value) {
+  return colorize(value, "dim");
+}
+
+function styleWriteBoundary(boundary) {
+  if (boundary === "none") return colorize(boundary, "green");
+  if (boundary.includes("optional") || boundary.includes("guidance")) return colorize(boundary, "yellow");
+  return colorize(boundary, "red");
+}
+
+function makeIcons() {
+  return Object.fromEntries(
+    Object.entries(ASCII_ICONS).map(([name, icon]) => [name, colorize(icon, ICON_COLORS[name])])
+  );
+}
+
+const ICONS = makeIcons();
 
 const MENU_ITEMS = [
   {
@@ -90,6 +163,12 @@ const MENU_ITEMS = [
     label: "Preview",
     writes: "none",
     description: "No-write install plan and PowerShell/Bash dry run."
+  },
+  {
+    id: "update",
+    label: "Update",
+    writes: "repo/global/network",
+    description: "Preview or apply a Git fast-forward plus backup-backed managed refresh."
   },
   {
     id: "install",
@@ -148,13 +227,14 @@ const MENU_ITEMS = [
 ];
 
 function printHelp() {
-  console.log(`Codex Chef CLI
+  console.log(`${colorize("Codex Chef CLI", "cyan")}
 
 Usage:
   npm run chef
   npm run chef -- --status
   npm run chef -- --doctor
   npm run chef -- --preview
+  npm run chef -- --update [--apply]
   npm run chef -- --status --repo-only
   npm run chef -- --reset [--apply]
   npm run chef -- --repair [--apply]
@@ -170,9 +250,9 @@ Options:
   --json       Emit JSON where supported
   --plain      Use ASCII labels instead of icons
   --no-log     Do not create repo-local CLI log files for strict audits
-  --repo-only  Skip installed runtime and Codex CLI probes for status
+  --repo-only  Skip installed runtime, global skill roots, Codex logs, and Codex CLI probes for status
   --profile ID Show one routing profile when used with --routing
-  --apply      Allow write actions for install, reset, repair, or selected skill install
+  --apply      Allow write actions for update, install, reset, repair, or selected skill install
   --help       Show this help
 
 Logs:
@@ -246,7 +326,7 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
     ""
   ].join("\n");
   if (logPath) fs.appendFileSync(logPath, header, "utf8");
-  console.log(`${ICONS.run} ${commandForDisplay(command, commandArgs)}`);
+  if (!options.json) console.log(`${ICONS.run} ${commandForDisplay(command, commandArgs)}`);
   if (extra.waitNote && !options.json) console.log(`${ICONS.info} ${extra.waitNote}`);
 
   const result = spawnSync(executable, argsForSpawn, {
@@ -279,8 +359,8 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
     console.error(`${ICONS.warn} Command failed with exit ${result.status}.${logNote}`);
     return { ok: false, status: result.status, logPath };
   }
-  if (logPath) console.log(`${ICONS.ok} Log: ${toPosix(path.relative(root, logPath))}`);
-  else console.log(`${ICONS.ok} Log disabled by --no-log`);
+  if (logPath && !options.json) console.log(`${ICONS.ok} Log: ${toPosix(path.relative(root, logPath))}`);
+  else if (!options.json) console.log(`${ICONS.ok} Log disabled by --no-log`);
   return { ok: true, status: result.status, logPath };
 }
 
@@ -317,7 +397,7 @@ async function confirmWriteAction(action, detail) {
 
 function printHeader() {
   console.log(`${ICONS.chef} Codex Chef`);
-  console.log("One menu for install, repair, diagnostics, skills, MCP notes, auth, and logs.");
+  console.log(styleMuted("One menu for install, update, repair, diagnostics, skills, MCP notes, auth, and logs."));
   console.log("");
 }
 
@@ -329,7 +409,7 @@ function runStatus(overrides = {}) {
     ...(options.json ? ["--json"] : [])
   ], {
     waitNote: repoOnly
-      ? "Collecting local repo checks only; installed runtime and Codex CLI probes are skipped."
+      ? "Collecting local repo checks only; installed runtime, global skill roots, Codex logs, and Codex CLI probes are skipped."
       : "Collecting Codex runtime, MCP, Git, and log metadata checks; this can take 30-60 seconds."
   });
 }
@@ -352,9 +432,9 @@ function runDoctor() {
   });
 }
 
-function runPreview(force = false) {
+function runPreview(force = false, includeSkills = true) {
   const plan = runNode("preview-plan", "scripts/plan-install.mjs", [
-    "--all",
+    ...(includeSkills ? ["--all"] : []),
     ...(force ? ["--force"] : []),
     ...(options.json ? ["--json"] : []),
     "--redact-paths"
@@ -362,18 +442,136 @@ function runPreview(force = false) {
   if (!plan.ok) return plan;
   if (process.platform === "win32") {
     return runPowerShell("preview-installer", ".\\scripts\\install.ps1", [
-      "-All",
+      ...(includeSkills ? ["-All"] : []),
       ...(force ? ["-Force"] : []),
       "-WhatIf",
       "-PlainOutput"
     ]);
   }
   return runBash("preview-installer", "scripts/install.sh", [
-    "--all",
+    ...(includeSkills ? ["--all"] : []),
     ...(force ? ["--force"] : []),
     "--dry-run",
     "--plain-output"
   ]);
+}
+
+function npmCommand() {
+  return process.platform === "win32" ? "npm.cmd" : "npm";
+}
+
+function runPackageScript(action, scriptName, extra = {}) {
+  return runLoggedCommand(action, npmCommand(), ["run", scriptName], extra);
+}
+
+function runUpdateValidation() {
+  console.log(`${ICONS.info} Running local validation before managed refresh.`);
+  const validate = runPackageScript("update-validate", "validate", {
+    timeout: 300000,
+    waitNote: "Checking repository structure before global managed files are refreshed."
+  });
+  if (!validate.ok) return validate;
+  return runPackageScript("update-security-audit", "audit:security", {
+    timeout: 300000,
+    waitNote: "Checking tracked release/security surfaces before global managed files are refreshed."
+  });
+}
+
+function inspectGitDirty() {
+  const result = spawnSync("git", ["status", "--short"], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: 30000,
+    windowsHide: true
+  });
+  if (result.error) {
+    return { ok: false, message: result.error.message, output: "" };
+  }
+  if (result.status !== 0) {
+    return {
+      ok: false,
+      message: `git status exited ${result.status}`,
+      output: redactSensitiveOutput([result.stdout, result.stderr].filter(Boolean).join("\n"))
+    };
+  }
+  return { ok: true, dirty: Boolean(String(result.stdout || "").trim()), output: redactLocalPaths(result.stdout || "") };
+}
+
+function gitHead() {
+  const result = spawnSync("git", ["rev-parse", "HEAD"], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: 30000,
+    windowsHide: true
+  });
+  if (result.error) {
+    return { ok: false, message: result.error.message, value: null };
+  }
+  if (result.status !== 0) {
+    return {
+      ok: false,
+      message: `git rev-parse exited ${result.status}`,
+      value: null
+    };
+  }
+  return { ok: true, message: null, value: String(result.stdout || "").trim() };
+}
+
+async function runUpdate() {
+  if (!options.apply) {
+    console.log(`${ICONS.update} Update preview first. No managed or global files changed.`);
+    console.log(`${ICONS.info} Use npm run chef -- --update --apply to pull the latest Codex Chef and refresh managed files after backup.`);
+    console.log(`${ICONS.info} Update preview excludes curated global skill installs; use --install or --skills for that explicit surface.`);
+    return runPreview(true, false);
+  }
+  const dirty = inspectGitDirty();
+  if (!dirty.ok) {
+    console.log(`${ICONS.warn} Cannot inspect Git worktree: ${dirty.message}`);
+    if (dirty.output.trim()) process.stdout.write(dirty.output.endsWith("\n") ? dirty.output : `${dirty.output}\n`);
+    return { ok: false };
+  }
+  if (dirty.dirty) {
+    console.log(`${ICONS.warn} Update apply requires a clean worktree so local edits are not overwritten.`);
+    process.stdout.write(dirty.output.endsWith("\n") ? dirty.output : `${dirty.output}\n`);
+    console.log(`${ICONS.info} Commit, stash, or move local changes, then rerun npm run chef -- --update --apply.`);
+    return { ok: false };
+  }
+  const beforeHead = gitHead();
+  if (!beforeHead.ok) {
+    console.log(`${ICONS.warn} Cannot inspect current Git HEAD: ${beforeHead.message}`);
+    return { ok: false };
+  }
+  const allowed = await confirmWriteAction(
+    "Update",
+    "Update pulls latest Codex Chef changes with git pull --ff-only, then refreshes managed Codex files after a same-tree preview."
+  );
+  if (!allowed) return { ok: false, skipped: true };
+  const pull = runLoggedCommand("update-pull", "git", ["pull", "--ff-only"], {
+    timeout: 300000,
+    waitNote: "Fetching and fast-forwarding the Codex Chef repository."
+  });
+  if (!pull.ok) return pull;
+  const afterHead = gitHead();
+  if (!afterHead.ok) {
+    console.log(`${ICONS.warn} Cannot inspect updated Git HEAD: ${afterHead.message}`);
+    return { ok: false };
+  }
+  if (beforeHead.value !== afterHead.value) {
+    console.log(`${ICONS.update} Repository updated from ${beforeHead.value.slice(0, 7)} to ${afterHead.value.slice(0, 7)}.`);
+    console.log(`${ICONS.info} Running a fresh preview from the updated tree. Review it, then rerun npm run chef -- --update --apply to refresh managed files.`);
+    const preview = runPreview(true, false);
+    if (!preview.ok) return preview;
+    return { ok: true, skipped: true };
+  }
+  console.log(`${ICONS.ok} Repository already up to date; applying the reviewed managed refresh.`);
+  const validation = runUpdateValidation();
+  if (!validation.ok) return validation;
+  if (process.platform === "win32") {
+    return runPowerShell("update-install", ".\\scripts\\install.ps1", ["-Force", "-PlainOutput"]);
+  }
+  return runBash("update-install", "scripts/install.sh", ["--force", "--plain-output"]);
 }
 
 async function runInstall() {
@@ -456,9 +654,9 @@ async function installSelectedSkill(skill) {
 
 async function selectSkill(installable) {
   console.log("");
-  console.log("Skill selection:");
+  console.log(styleHeading("Skill selection:"));
   installable.forEach((skill, index) => {
-    console.log(`${index + 1}. ${skill.name} - ${skill.source}`);
+    console.log(`${index + 1}. ${styleAction(skill.name)} - ${styleMuted(skill.source)}`);
   });
   const selected = await askSelection(
     installable,
@@ -477,7 +675,9 @@ async function selectSkill(installable) {
 
 async function runSkills() {
   const catalog = readJson("catalog/skills.json");
+  const routing = readJson("catalog/routing-profiles.json");
   const installable = (catalog.skills || []).filter((skill) => skill.install === true);
+  const profileCount = (routing.profiles || []).length;
   console.log(`${ICONS.docs} Curated installable skills: ${installable.length}`);
   console.table(installable.map((skill) => ({
     name: skill.name,
@@ -486,6 +686,12 @@ async function runSkills() {
     auth: skill.authRequired ? "yes" : "no",
     checked: skill.lastChecked
   })));
+  console.log("");
+  console.log(styleHeading("Skill activation contract"));
+  console.log("- Installed skills do not run by themselves or grant hidden permissions.");
+  console.log("- A skill enters context when the user names it, for example $SkillName, or when the task clearly matches its description.");
+  console.log("- Codex reads the selected skill's SKILL.md before acting, then loads only referenced files needed for the task.");
+  console.log(`- ${profileCount} routing profiles map task shapes to recommended skills; inspect them with npm run chef -- --routing.`);
   console.log(`${ICONS.info} Offline verification runs by default. Online resolution: npm run verify:skills:online -- --timeout-ms=90000`);
   const verification = runNode("skills", "scripts/verify-skill-sources.mjs");
   if (!verification.ok || !process.stdin.isTTY) return verification;
@@ -494,19 +700,19 @@ async function runSkills() {
 
 function explainMcpServer(server) {
   console.log("");
-  console.log(`${server.name}`);
-  console.log(`- status: ${server.defaultEnabled ? "ready_by_default" : "disabled_by_default"}`);
-  console.log(`- transport: ${server.transport}`);
-  console.log(`- target: ${mcpTarget(server)}`);
-  console.log(`- auth: ${server.auth}`);
-  console.log(`- approval: ${server.approval}`);
-  console.log(`- risk: ${server.risk}`);
-  console.log(`- setup: ${server.setupKind} - ${server.setupHint}`);
-  console.log(`- reason: ${server.defaultReason}`);
-  console.log(`- source: ${server.sourceUrl}`);
-  console.log("- config details: see templates/codex/config.windows.toml and templates/codex/config.unix.toml for timeouts and per-tool exposure.");
-  console.log("- verified: not_checked until /mcp, codex mcp, or a safe read-only probe succeeds.");
-  console.log("- rollback: set this connector's enabled flag to false and restart Codex.");
+  console.log(styleHeading(server.name));
+  console.log(`- ${styleLabel("status")}: ${server.defaultEnabled ? colorize("ready_by_default", "green") : colorize("disabled_by_default", "yellow")}`);
+  console.log(`- ${styleLabel("transport")}: ${server.transport}`);
+  console.log(`- ${styleLabel("target")}: ${mcpTarget(server)}`);
+  console.log(`- ${styleLabel("auth")}: ${server.auth}`);
+  console.log(`- ${styleLabel("approval")}: ${server.approval}`);
+  console.log(`- ${styleLabel("risk")}: ${server.risk}`);
+  console.log(`- ${styleLabel("setup")}: ${server.setupKind} - ${server.setupHint}`);
+  console.log(`- ${styleLabel("reason")}: ${server.defaultReason}`);
+  console.log(`- ${styleLabel("source")}: ${server.sourceUrl}`);
+  console.log(`- ${styleLabel("config details")}: see templates/codex/config.windows.toml and templates/codex/config.unix.toml for timeouts and per-tool exposure.`);
+  console.log(`- ${styleLabel("verified")}: not_checked until /mcp, codex mcp, or a safe read-only probe succeeds.`);
+  console.log(`- ${styleLabel("rollback")}: set this connector's enabled flag to false and restart Codex.`);
 }
 
 function mcpTarget(server) {
@@ -520,7 +726,7 @@ async function runMcp() {
   const catalog = readJson("catalog/mcp-servers.json");
   const servers = catalog.servers || [];
   console.log(`${ICONS.docs} MCP servers: ${servers.length}`);
-  console.log("Evidence levels: documented=catalog, configured=template/installed config, verified=only after /mcp or codex mcp live check.");
+  console.log(styleMuted("Evidence levels: documented=catalog, configured=template/installed config, verified=only after /mcp or codex mcp live check."));
   console.table(servers.map((server) => ({
     name: server.name,
     category: server.category,
@@ -534,18 +740,18 @@ async function runMcp() {
     setup: server.setupKind,
     source: server.sourceUrl
   })));
-  console.log("Timeouts and per-tool exposure live in templates/codex/config.windows.toml and templates/codex/config.unix.toml.");
+  console.log(styleMuted("Timeouts and per-tool exposure live in templates/codex/config.windows.toml and templates/codex/config.unix.toml."));
   for (const server of servers.filter((item) => item.setupHint)) {
-    console.log(`- ${server.name}: ${server.setupHint}`);
+    console.log(`- ${styleAction(server.name)}: ${server.setupHint}`);
   }
   console.log("");
-  console.log("Authenticated account, database, and broad filesystem MCP connectors stay disabled by default.");
-  console.log("Enable them only for a concrete task in ~/.codex/config.toml, restart Codex, then verify with /mcp or codex mcp.");
-  console.log("Rollback: set the connector's enabled flag back to false and restart Codex.");
+  console.log(colorize("Authenticated account, database, and broad filesystem MCP connectors stay disabled by default.", "yellow"));
+  console.log(styleMuted("Enable them only for a concrete task in ~/.codex/config.toml, restart Codex, then verify with /mcp or codex mcp."));
+  console.log(styleMuted("Rollback: set the connector's enabled flag back to false and restart Codex."));
   if (process.stdin.isTTY) {
     console.log("");
     servers.forEach((server, index) => {
-      console.log(`${index + 1}. ${server.name}`);
+      console.log(`${index + 1}. ${styleAction(server.name)}`);
     });
     const selected = await askSelection(servers, "\nSelect an MCP number to explain, or press Enter to skip: ");
     if (selected) explainMcpServer(selected);
@@ -565,12 +771,12 @@ function runRouting() {
 function runAuth() {
   console.log(`${ICONS.lock} GitHub authentication boundary`);
   console.log("");
-  console.log("This public CLI does not print account-scoped re-auth or global Git credential-helper commands.");
-  console.log("If GitHub release, push, or workflow checks fail because local auth is stale, refresh GitHub CLI or Git Credential Manager according to your organization policy.");
-  console.log("After refresh, use a read-only remote check such as `git ls-remote origin HEAD` from the target repository before retrying a publish step.");
+  console.log(styleMuted("This public CLI does not print account-scoped re-auth or global Git credential-helper commands."));
+  console.log(styleMuted("If GitHub release, push, or workflow checks fail because local auth is stale, refresh GitHub CLI or Git Credential Manager according to your organization policy."));
+  console.log(styleMuted("After refresh, use a read-only remote check such as `git ls-remote origin HEAD` from the target repository before retrying a publish step."));
   console.log("");
-  console.log("Notes:");
-  console.log("- Do not paste tokens into repo files, AGENTS.md, skills, rules, or shell history.");
+  console.log(styleHeading("Notes:"));
+  console.log(`- ${colorize("Do not paste tokens", "yellow")} into repo files, AGENTS.md, skills, rules, or shell history.`);
   console.log("- Keep personal account repair, token scope decisions, and global Git credential configuration outside this public repo.");
   console.log("- Do not store workflow or release tokens in Codex Chef templates, examples, logs, or docs.");
   console.log("- Authenticated MCP connectors still remain disabled until a task needs them.");
@@ -610,6 +816,8 @@ async function runAction(action) {
       return runDoctor();
     case "preview":
       return runPreview();
+    case "update":
+      return runUpdate();
     case "reset":
       return runReset();
     case "install":
@@ -640,7 +848,8 @@ async function runMenu() {
     while (true) {
       for (let index = 0; index < MENU_ITEMS.length; index += 1) {
         const item = MENU_ITEMS[index];
-        console.log(`${index + 1}. ${item.label} [writes: ${item.writes}] - ${item.description}`);
+        const label = item.id === "exit" ? colorize(item.label, "dim") : styleAction(item.label);
+        console.log(`${index + 1}. ${label} [writes: ${styleWriteBoundary(item.writes)}] - ${styleMuted(item.description)}`);
       }
       const answer = await rl.question(`\nSelect 1-${MENU_ITEMS.length}: `);
       const index = Number(answer.trim());

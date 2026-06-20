@@ -74,12 +74,16 @@ const progressEnabled = !options.json;
 if (progressEnabled) {
   console.log("Codex Chef status");
   console.log(options.skipRuntime && options.skipCodexDoctorChecks && options.skipCodexCli
-    ? "Collecting local repository checks; installed runtime and live Codex CLI probes are skipped."
+    ? "Collecting local repository checks; installed runtime, global skill-root inventory, Codex log metadata, and live Codex CLI probes are skipped."
     : "Collecting repo, runtime, Codex CLI, MCP, Git, and log metadata checks; this can take 30-60 seconds.");
 }
 
 function progress(message) {
   if (progressEnabled) console.log(`[status] ${message}`);
+}
+
+function skipInstalledRuntimeAndCliMetadata() {
+  return options.skipRuntime && options.skipCodexCli;
 }
 
 function redact(value) {
@@ -189,14 +193,25 @@ function listRecentFiles(dir, extensions = null, limit = 8) {
 
 function readInstalledOrTemplateConfig() {
   const installedPath = path.join(options.codexHome, "config.toml");
-  const templatePath = process.platform === "win32"
-    ? path.join(root, "templates/codex/config.windows.toml")
-    : path.join(root, "templates/codex/config.unix.toml");
+  const template = readTemplateConfig();
+  const templatePath = template.rawPath;
   const configPath = fs.existsSync(installedPath) ? installedPath : templatePath;
   return {
     path: redact(configPath),
     source: fs.existsSync(installedPath) ? "installed" : "template",
     text: fs.readFileSync(configPath, "utf8")
+  };
+}
+
+function readTemplateConfig() {
+  const templatePath = process.platform === "win32"
+    ? path.join(root, "templates/codex/config.windows.toml")
+    : path.join(root, "templates/codex/config.unix.toml");
+  return {
+    rawPath: templatePath,
+    path: redact(templatePath),
+    source: "template",
+    text: fs.readFileSync(templatePath, "utf8")
   };
 }
 
@@ -239,12 +254,24 @@ function codexCommand() {
   return process.platform === "win32" ? "codex.cmd" : "codex";
 }
 
-function inspectSkillInventory() {
+function inspectSkillInventory(skipGlobal = false) {
   const expected = readJson("catalog/skills.json")
     .skills
     .filter((skill) => skill.install === true)
     .map((skill) => skill.name)
     .sort();
+  if (skipGlobal) {
+    return {
+      inspected: false,
+      status: "skipped",
+      expected: expected.length,
+      installed: null,
+      missing: [],
+      extraCount: null,
+      roots: [],
+      note: "Skipped installed/global skill roots because installed-runtime and live Codex CLI probes are disabled."
+    };
+  }
   const roots = [
     path.join(options.codexHome, "skills"),
     path.join(options.agentsHome, "skills")
@@ -335,10 +362,12 @@ function inspectMcpSetupBoard() {
   };
 }
 
-function inspectEffectiveControls() {
-  const config = readInstalledOrTemplateConfig();
+function inspectEffectiveControls(skipInstalled = false) {
+  const config = skipInstalled ? readTemplateConfig() : readInstalledOrTemplateConfig();
   const text = config.text;
-  const managedHooks = fs.existsSync(path.join(options.codexHome, "hooks"))
+  const managedHooks = skipInstalled
+    ? null
+    : fs.existsSync(path.join(options.codexHome, "hooks"))
     ? fs.readdirSync(path.join(options.codexHome, "hooks"), { withFileTypes: true }).filter((entry) => entry.isFile()).length
     : 0;
 
@@ -365,7 +394,9 @@ function inspectEffectiveControls() {
       openWorldEnabled: readTomlValue(text, "apps._default.open_world_enabled")
     },
     managedHooks,
-    hookNote: managedHooks === 0
+    hookNote: skipInstalled
+      ? "Repo-only mode reports template controls and does not inspect installed hooks."
+      : managedHooks === 0
       ? "Codex Chef enables hooks support but ships no lifecycle hook files; inspect /hooks before relying on user or project hooks."
       : "Managed hook files are present; inspect them before release-sensitive work."
   };
@@ -592,6 +623,7 @@ function inspectCliQuickStart() {
       "npm run chef -- --status --repo-only",
       "npm run chef -- --doctor",
       "npm run chef -- --preview",
+      "npm run chef -- --update",
       "npm run chef -- --skills",
       "npm run chef -- --mcp",
       "npm run chef -- --auth",
@@ -601,13 +633,14 @@ function inspectCliQuickStart() {
     ],
     writeActionsRequireApply: [
       "npm run chef -- --install --apply",
+      "npm run chef -- --update --apply",
       "npm run chef -- --reset --apply",
       "npm run chef -- --repair --apply",
       "npm run chef -- --skills --apply"
     ],
     auditMode: "npm run chef -- --status --repo-only --no-log",
     plainOutput: "npm run chef -- --plain",
-    boundary: "Install, reset, repair, selected skill install, publish, deploy, credential, database, and destructive work still require explicit approval or --apply where supported."
+    boundary: "Update, install, reset, repair, selected skill install, publish, deploy, credential, database, and destructive work still require explicit approval or --apply where supported."
   };
 }
 
@@ -665,7 +698,7 @@ function inspectRepoCliLog(logFile) {
   };
 }
 
-function inspectLogSummary() {
+function inspectLogSummary(skipCodexLogs = false) {
   const repoLogDir = path.join(root, "tmp", "chef-cli", "logs");
   const repoCliLogs = listRecentFiles(repoLogDir, [".log"], 12);
   repoCliLogs.recent = repoCliLogs.recent.map((entry) => ({
@@ -673,10 +706,10 @@ function inspectLogSummary() {
     ...inspectRepoCliLog(path.join(repoLogDir, entry.name))
   }));
 
-  const config = readInstalledOrTemplateConfig();
-  const configuredLogDir = readTomlValue(config.text, "log_dir");
-  const codexLogDir = expandUserPath(configuredLogDir, path.join(options.codexHome, "log"));
-  const codexLogs = listRecentFiles(codexLogDir, [".log", ".jsonl"], 8);
+  const config = skipCodexLogs ? null : readInstalledOrTemplateConfig();
+  const configuredLogDir = config ? readTomlValue(config.text, "log_dir") : null;
+  const codexLogDir = config ? expandUserPath(configuredLogDir, path.join(options.codexHome, "log")) : null;
+  const codexLogs = skipCodexLogs ? { exists: false, recent: [] } : listRecentFiles(codexLogDir, [".log", ".jsonl"], 8);
 
   return {
     inspected: true,
@@ -688,12 +721,15 @@ function inspectLogSummary() {
       note: "Repo-local Chef CLI logs are generated by this wrapper and have command output redacted."
     },
     codexLogs: {
-      path: redact(codexLogDir),
-      configSource: config.source,
+      inspected: !skipCodexLogs,
+      path: codexLogDir ? redact(codexLogDir) : null,
+      configSource: config?.source || "skipped",
       exists: codexLogs.exists,
       recent: codexLogs.recent,
       contentInspected: false,
-      note: "Codex log contents are not read here because they can contain prompts or local context; this status only reports file metadata."
+      note: skipCodexLogs
+        ? "Skipped Codex log metadata because installed-runtime and live Codex CLI probes are disabled."
+        : "Codex log contents are not read here because they can contain prompts or local context; this status only reports file metadata."
     }
   };
 }
@@ -810,10 +846,14 @@ function summarizeSkillContext(runtimeReport, skillInventory) {
     documentedBudget: "Codex caps the initial skills list at roughly 2% of the model context window, or 8,000 characters when the context window is unknown.",
     impact: warningLikely
       ? "Skill descriptions may be shortened in the initial list; selected skills still load their full SKILL.md instructions."
-      : "Installed skill count is unlikely to pressure the initial skills list.",
+      : skills.inspected === false
+        ? "Installed skill count was not inspected in repo-only mode; use npm run codex:status for runtime skill pressure."
+        : "Installed skill count is unlikely to pressure the initial skills list.",
     recommendation: warningLikely
       ? "Disable unused global skills or plugins when implicit skill discovery feels noisy; explicit skill names still work."
-      : "No action needed."
+      : skills.inspected === false
+        ? "No action needed for repo-only audits."
+        : "No action needed."
   };
 }
 
@@ -855,15 +895,16 @@ const runtime = options.skipRuntime
     );
 
 const codexDoctor = summarizeCodexDoctor();
-const skillInventory = inspectSkillInventory();
+const skipGlobalMetadata = skipInstalledRuntimeAndCliMetadata();
+const skillInventory = inspectSkillInventory(skipGlobalMetadata);
 const skillsContext = summarizeSkillContext(runtime.report, skillInventory);
 const routingBoard = inspectRoutingBoard();
 const mcpSetupBoard = inspectMcpSetupBoard();
-const effectiveControls = inspectEffectiveControls();
+const effectiveControls = inspectEffectiveControls(skipGlobalMetadata);
 const codexCliRuntime = inspectCodexCliRuntime();
 const cliQuickStart = inspectCliQuickStart();
 const gitRepository = inspectGitRepository();
-const logSummary = inspectLogSummary();
+const logSummary = inspectLogSummary(skipGlobalMetadata);
 
 function classifyRuntimeInstallState(runtimeReport) {
   if (!runtimeReport) return options.skipRuntime ? "skipped" : "unknown";
@@ -957,7 +998,7 @@ if (options.json) {
     `Codex CLI: ${codexCliRuntime.status} (strict config ${codexCliRuntime.version.status}, login ${codexCliRuntime.login.status}, MCP ${codexCliRuntime.mcp.status}; MCP configured ${codexCliRuntime.mcp.configuredCount})`
   );
   console.log(
-    `Logs: Chef ${logSummary.repoCliLogs.recent.length} recent metadata record(s), content not inspected; Codex ${logSummary.codexLogs.recent.length} recent metadata record(s), content not inspected`
+    `Logs: Chef ${logSummary.repoCliLogs.recent.length} recent metadata record(s), content not inspected; ${logSummary.codexLogs.inspected === false ? "Codex skipped" : `Codex ${logSummary.codexLogs.recent.length} recent metadata record(s), content not inspected`}`
   );
   if (repoDoctor.report) {
     console.log(
@@ -982,8 +1023,13 @@ if (options.json) {
   }
   if (!runtime.report?.skills?.inspected && skillInventory.inspected) {
     console.log(`Skills: ${skillInventory.installed} total installed across global roots (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} missing, ${skillInventory.extraCount} other/user-installed)`);
+  } else if (!runtime.report?.skills?.inspected && skillInventory.inspected === false) {
+    console.log(`Skills: skipped (${skillInventory.note})`);
   }
-  console.log(`Skills context: ${skillsContext.status} (${skillsContext.installed ?? "not inspected"} installed; curated baseline ${skillsContext.curatedExpected})`);
+  const skillsInstalledText = skillsContext.installed === null || skillsContext.installed === undefined
+    ? "installed not inspected"
+    : `${skillsContext.installed} installed`;
+  console.log(`Skills context: ${skillsContext.status} (${skillsInstalledText}; curated baseline ${skillsContext.curatedExpected})`);
   console.log(
     `Enterprise routing: ${routingBoard.profileCount} profiles (agents ${routingBoard.requiredSurfaces.agents.length}, skills ${routingBoard.requiredSurfaces.skills.length}, MCP ${routingBoard.requiredSurfaces.mcp.length}, flags/checks ${routingBoard.requiredSurfaces.flags.length})`
   );

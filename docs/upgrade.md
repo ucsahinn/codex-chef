@@ -5,6 +5,24 @@ version of this starter.
 
 ## Safe Upgrade Flow
 
+The guided CLI wraps the safe path:
+
+```powershell
+npm run chef -- --update
+npm run chef -- --update --apply
+```
+
+Without `--apply`, update mode does not change managed/global files; normal CLI
+logs are still repo-local unless `--no-log` is supplied. Apply mode requires a
+clean worktree and runs `git pull --ff-only`. If the pull advances the repo,
+the CLI prints a fresh preview and stops; rerun `npm run chef -- --update
+--apply` only after reviewing that updated preview. If the repo is already
+current, apply runs local validation and refreshes managed files through the
+backup-backed installer without installing curated global skills or optional
+global Git guards.
+
+Manual flow:
+
 1. Pull the repository update.
 2. Review the diff.
 3. Preview installer changes.

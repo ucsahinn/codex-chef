@@ -44,6 +44,8 @@ Ce fichier localisé suit les sections du fichier source anglais. Source: [secur
 - Skill Sources
 - Specialist Agent Boundaries
 - Install Planning And Collision Policy
+- Repair Mode
+- Update Mode
 - Rules
 - Hooks
 - Git Hygiene

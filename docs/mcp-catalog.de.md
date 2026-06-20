@@ -43,6 +43,7 @@ Diese lokalisierte Datei folgt den Abschnitten der englischen Quelldatei. Source
 - MCP Catalog
 - Enabled By Default
 - Disabled Until Needed
+- Opt-In Connector Recipes
 - Rule
 - Config Flags To Prefer
 

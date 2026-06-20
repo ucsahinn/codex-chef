@@ -44,6 +44,7 @@ Este archivo localizado sigue las secciones del archivo fuente en inglés. Sourc
 - Skills
 - Plugins
 - Specialist Agents
+- Enterprise Routing Profiles
 
 ## Mantener sincronizado
 

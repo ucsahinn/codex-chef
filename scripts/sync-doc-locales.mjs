@@ -4,6 +4,7 @@ import path from "node:path";
 
 const root = path.resolve(process.cwd());
 const docsDir = path.join(root, "docs");
+const preserveLocalizedContent = new Set(["release-notes"]);
 
 const locales = [
   {
@@ -395,6 +396,7 @@ const commandBlocks = {
     "```powershell\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\install.ps1 -All -WhatIf\n```",
     "```powershell\n.\\scripts\\install.ps1 -All -Interactive\n```",
     "```powershell\n.\\scripts\\install.ps1 -All -PlainOutput\n```",
+    "```powershell\nnpm run chef -- --update --plain --no-log\nnpm run chef -- --update --apply\n```",
     "```bash\n./scripts/install.sh --all --dry-run\n```",
     "```bash\n./scripts/install.sh --all --interactive\n```",
     "```bash\n./scripts/install.sh --all --plain-output\n```",
@@ -503,12 +505,15 @@ const baseDocs = fs
   .filter((file) => file.endsWith(".md") && !isLocalizedDoc(file))
   .sort();
 
+let syncedCount = 0;
 for (const file of baseDocs) {
   const slug = file.replace(/\.md$/, "");
+  if (preserveLocalizedContent.has(slug)) continue;
   for (const locale of locales) {
     const outputPath = path.join(docsDir, `${slug}.${locale.code}.md`);
     fs.writeFileSync(outputPath, renderDoc(slug, locale), "utf8");
+    syncedCount += 1;
   }
 }
 
-console.log(`Synced ${baseDocs.length * locales.length} localized docs across ${locales.length} languages.`);
+console.log(`Synced ${syncedCount} localized docs across ${locales.length} languages.`);
