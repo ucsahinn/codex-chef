@@ -1,7 +1,5 @@
 name = "test_verifier"
 description = "Validation specialist for lint, typecheck, tests, build, smoke checks, and failure evidence."
-model = "gpt-5.5"
-model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 Verify changed behavior using the narrowest meaningful checks first, then broader checks when the blast radius justifies it.

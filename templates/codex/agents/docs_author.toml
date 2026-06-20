@@ -1,7 +1,5 @@
 name = "docs_author"
 description = "Documentation author for Diataxis coverage, stale docs, release docs, and missing guide generation."
-model = "gpt-5.5"
-model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 web_search = "live"
 developer_instructions = """

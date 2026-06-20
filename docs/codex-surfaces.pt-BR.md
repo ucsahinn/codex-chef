@@ -7,10 +7,16 @@
 ## O que esta página cobre
 
 - Qual superfície Codex, config, skill, agent ou MCP usar em cada caso.
+- `token-safe.config.toml` como perfil opcional para reduzir orcamentos de reasoning e output.
+- Roles de agents nao fixam model/reasoning por agent; quem decide e o perfil ativo.
 - Defaults conservadores para sandbox, aprovações e conectores externos.
 - Decisões de routing documentadas e verificáveis dentro do repo.
 
 ## Comandos úteis
+
+```bash
+npm run token:audit
+```
 
 ```bash
 codex doctor --summary
@@ -33,6 +39,7 @@ codex exec --strict-config "Summarize the active Codex setup."
 ## Verificação
 
 - Executar `npm run check` antes de publicar.
+- Usar `npm run token:audit` para enxergar as principais superficies de contexto e tokens.
 - Usar `git diff --check` para encontrar problemas de whitespace e Markdown.
 - Usar `gitleaks detect --redact --no-banner --no-git --verbose` quando Gitleaks estiver disponível.
 

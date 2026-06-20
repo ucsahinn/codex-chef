@@ -119,8 +119,13 @@ Installer profilleri `~/.codex` içine kopyalar:
 - `development.config.toml`: normal geliştirme profili.
 - `review.config.toml`: read-only, yüksek reasoning review profili.
 - `ci.config.toml`: hook'ları kapalı read-only doğrulama profili.
+- `token-safe.config.toml`: broad veya uzun işlerde skill, agent, MCP, memory,
+  hook veya app kapatmadan daha düşük verbosity, daha düşük default reasoning,
+  compaction ve tool-output limitleri kullanır.
 
 Ana config'i bozmak yerine farklı güvenlik duruşu gerektiğinde profil kullan.
+Uzman role dosyaları agent bazlı model/reasoning pinlemez; aktif profil ve
+Codex runtime task'a uygun dengeyi seçebilir.
 
 ## Kullanışlı Promptlar
 

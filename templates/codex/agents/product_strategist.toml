@@ -1,7 +1,5 @@
 name = "product_strategist"
 description = "Product strategist for forcing questions, scope decisions, and 10-star alternatives before implementation."
-model = "gpt-5.5"
-model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 web_search = "live"
 developer_instructions = """

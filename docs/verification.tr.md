@@ -33,7 +33,8 @@ Bu komut şunları çalıştırır:
   kontrol. Drift preview, backup'li apply, marketplace koruma, config merge,
   skill cleanup raporu ve explicit managed-plugin pruning davranisini kanitlar.
 - `scripts/validate-agent-config.mjs`: Windows ve Unix Codex template'leri icin
-  uzman ajan catalog/config drift kontrolleri.
+  uzman ajan catalog/config drift kontrolleri; role dosyalari icin otomatik
+  model/reasoning secimini de kontrol eder.
 - `scripts/validate-agent-research-corpus.mjs`: uzman ajan research corpus
   drift'i, authority-reference source marker'lari, source freshness cadence ve
   stale `dateChecked` kontrolleri ile agent basina expertise signal coverage.
@@ -42,6 +43,9 @@ Bu komut şunları çalıştırır:
 - `scripts/validate-chef-cli.mjs`: tek menulu Codex Chef CLI sozlesmesi,
   guvenli komut routing'i, write-boundary etiketleri, log konumu, README
   kullanim ornekleri ve public-safe GitHub auth boundary rehberi.
+- `scripts/validate-token-surfaces.mjs`: token audit script'i, `token-safe`
+  profil, AGENTS token disiplini, context-budget skill referansi, README komut
+  dokumani ve pinlenmeyen agent model/reasoning sozlesmesi.
 - `scripts/verify-skill-sources.mjs`: offline skill catalog validation ve
   `catalog/skills-lock.json` kaynak allowlist drift kontrolleri.
 - `scripts/scan-supply-chain-iocs.mjs`: remote execution, tehlikeli shell,
@@ -62,6 +66,7 @@ Bu komut şunları çalıştırır:
 Ek release kontrolleri:
 
 ```bash
+npm run token:audit
 git status --short
 git diff --check
 gitleaks detect --redact --no-banner --no-git --verbose
@@ -100,6 +105,8 @@ node --check scripts/validate-agent-research-corpus.mjs
 node --check scripts/validate-mcp-config.mjs
 node --check scripts/chef-cli.mjs
 node --check scripts/validate-chef-cli.mjs
+node --check scripts/analyze-token-surfaces.mjs
+node --check scripts/validate-token-surfaces.mjs
 node --check scripts/verify-skill-sources.mjs
 node --check scripts/scan-supply-chain-iocs.mjs
 node --check scripts/validate-package-surface.mjs
@@ -160,6 +167,7 @@ npm run chef -- --backups --backup <id>
 npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
 npm run chef -- --diagnostics
+npm run chef -- --processes
 ```
 
 `npm run chef` numarali operator menusunu acar. Yukaridaki noninteractive
@@ -180,8 +188,9 @@ connector'i acmaz.
 status snapshot'ini calistirir; canli saglik, attention nedenleri, sonraki
 guvenli adimlar, backup/log ozetleri ve status, doctor, routing, update
 preview, repair preview, backup, log, runtime parity, Serena/MCP surec denetimi
-icin tanilama kanit komutlarini gosterir. Log kok dizinini ve son CLI log
-metadata'sini basar, log icerigi basmaz ve surec durdurmaz. npm uzerinden
+icin tanilama kanit komutlarini gosterir. `npm run chef -- --processes
+--no-log` bu surec sayimini hicbir seyi durdurmadan direkt calistirir. Log kok
+dizinini ve son CLI log metadata'sini basar, log icerigi basmaz ve surec durdurmaz. npm uzerinden
 parse edilebilir JSON icin `npm run --silent chef -- --diagnostics --json
 --no-log` kullan.
 

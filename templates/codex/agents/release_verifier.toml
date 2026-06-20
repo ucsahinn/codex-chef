@@ -1,7 +1,5 @@
 name = "release_verifier"
 description = "Release readiness verifier for git hygiene, changelog/version checks, artifacts, secret scans, and publish gates."
-model = "gpt-5.5"
-model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 Verify readiness before push, tag, release, deploy, package publication, or public artifact handoff.

@@ -336,6 +336,7 @@ if (!exists(cliPath)) {
     "--routing",
     "--diagnostics",
     "--diagnose",
+    "--processes",
     "--auth",
     "--logs",
     "--apply",
@@ -348,6 +349,8 @@ if (!exists(cliPath)) {
     "verify-skill-sources.mjs",
     "codex-routing-board.mjs",
     "runDiagnostics",
+    "runProcesses",
+    "processAuditPayload",
     "recentCliLogs",
     "Diagnostic evidence commands",
     "Tanilama kanit komutlari",
@@ -420,6 +423,7 @@ if (!exists(cliPath)) {
     "MCP",
     "Routing",
     "Diagnostics",
+    "Processes",
     "Auth",
     "Logs",
     "Update"
@@ -453,6 +457,7 @@ const requiredScripts = {
   "chef:status": "node scripts/chef-cli.mjs --status",
   "chef:backups": "node scripts/chef-cli.mjs --backups",
   "chef:diagnostics": "node scripts/chef-cli.mjs --diagnostics",
+  "chef:processes": "node scripts/chef-cli.mjs --processes",
   "chef:update": "node scripts/chef-cli.mjs --update",
   "validate:chef-cli": "node scripts/validate-chef-cli.mjs"
 };
@@ -469,6 +474,7 @@ runCliSmoke("help", ["--help", "--plain", "--no-log"], [
   "--update [--apply]",
   "--backups [--backup ID] [--restore|--delete --apply]",
   "--diagnostics",
+  "--processes",
   "--lang tr",
   "--tr",
   "--verbose-plan",
@@ -481,6 +487,7 @@ runCliSmoke("help-tr", ["--help", "--lang", "tr", "--plain", "--no-log"], [
   "Kullanim:",
   "Secenekler:",
   "--diagnostics",
+  "--processes",
   "--lang tr",
   "--verbose-plan",
   "tmp/chef-cli/logs"
@@ -571,6 +578,7 @@ runCliSmoke("diagnostics", ["--diagnostics", "--plain", "--no-log"], [
   "npm run chef -- --update --no-log",
   "npm run chef -- --repair --no-log",
   "npm run chef -- --logs --no-log",
+  "npm run chef -- --processes --no-log",
   "npm run verify:install:runtime -- --expect-skills --redact-paths",
   "Serena/MCP process audit",
   "Recent CLI logs",
@@ -585,6 +593,7 @@ runCliSmoke("diagnostics-tr", ["--diagnostics", "--tr", "--plain", "--no-log"], 
   "npm run chef -- --update --no-log",
   "npm run chef -- --repair --no-log",
   "npm run chef -- --logs --no-log",
+  "npm run chef -- --processes --no-log",
   "npm run verify:install:runtime -- --expect-skills --redact-paths",
   "Serena/MCP surec denetimi",
   "Son CLI loglari",
@@ -592,6 +601,19 @@ runCliSmoke("diagnostics-tr", ["--diagnostics", "--tr", "--plain", "--no-log"], 
 ], { forbidAnsi: true });
 runCliJsonSmoke("diagnostics-json", ["--diagnostics", "--json", "--no-log"]);
 runNpmSilentJsonSmoke("diagnostics-npm-silent-json", ["chef", "--", "--diagnostics", "--json", "--no-log"], ["status", "overall"]);
+runCliSmoke("processes", ["--processes", "--plain", "--no-log"], [
+  "Codex Chef process audit",
+  "read-only count",
+  "Total matching processes",
+  "No process is stopped"
+], { forbidAnsi: true });
+runCliSmoke("processes-tr", ["--processes", "--tr", "--plain", "--no-log"], [
+  "Codex Chef surec denetimi",
+  "read-only sayim",
+  "Eslesen toplam surec",
+  "hicbir surec durdurulmaz"
+], { forbidAnsi: true });
+runCliJsonSmoke("processes-json", ["--processes", "--json", "--no-log"]);
 runNpmSilentJsonSmoke("status-npm-silent-json", ["chef", "--", "--status", "--repo-only", "--json", "--no-log"], ["cliQuickStart", "readOnlyCommands"]);
 runCliSmoke("routing-profile-wrong-cwd", ["--routing", "--profile", "starter-health", "--plain", "--no-log"], [
   "Codex Chef enterprise routing board",
@@ -672,6 +694,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --mcp",
     "npm run chef -- --routing",
     "npm run chef -- --diagnostics",
+    "npm run chef -- --processes",
     "npm run chef -- --auth",
     "npm run chef -- --logs",
     "npm run chef -- --help --lang tr",
@@ -701,6 +724,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --mcp",
     "npm run chef -- --routing",
     "npm run chef -- --diagnostics",
+    "npm run chef -- --processes",
     "npm run chef -- --auth",
     "npm run chef -- --logs",
     "npm run chef -- --help --lang tr",
@@ -723,6 +747,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --update --verbose-plan",
     "npm run chef -- --backups",
     "npm run chef -- --diagnostics",
+    "npm run chef -- --processes",
     "backup delete",
     "backup archive",
     "Skill activation has two evidence levels"
@@ -736,6 +761,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --update --verbose-plan",
     "npm run chef -- --backups",
     "npm run chef -- --diagnostics",
+    "npm run chef -- --processes",
     "backup delete",
     "backup archive",
     "Skill aktivasyonunda iki kanit seviyesi"

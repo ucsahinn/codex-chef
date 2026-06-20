@@ -37,6 +37,8 @@ node scripts/plan-install.mjs --list-operations
 
 The plan lists managed targets, optional global Git changes, curated skill
 commands, collision policy, backup behavior, and risk level.
+The profile copy operation includes `development.config.toml`,
+`review.config.toml`, `ci.config.toml`, and `token-safe.config.toml`.
 
 Install after the preview is correct:
 
@@ -176,6 +178,11 @@ setup notes. The setup notes call out local tooling, OAuth authorization,
 filesystem-path selection, and `SUPABASE_DB_URL` requirements before a task
 needs that connector. Account, database, production, and broad filesystem
 connectors remain disabled unless you explicitly enable them later.
+Agent role files are installed without per-agent model/reasoning pins. The
+active profile and Codex runtime choose the task-appropriate balance; use
+`token-safe.config.toml` for broad or long-running work that needs lower
+verbosity and tighter tool-output limits without disabling skills, agents, or
+MCPs.
 
 ## What Gets Backed Up
 
@@ -277,8 +284,14 @@ is the safer first step before force replacement.
 ## Rollback
 
 1. Close Codex.
-2. Copy files back from the timestamped backup folder.
-3. Restart Codex.
-4. Run `codex doctor --summary`.
+2. List backup archives with `npm run chef -- --backups`.
+3. Preview restore from the selected archive:
+   `npm run chef -- --backups --backup <id> --restore`.
+4. Apply only after the preview is correct:
+   `npm run chef -- --backups --backup <id> --restore --apply`.
+5. Restart Codex.
+6. Run `codex doctor --summary`.
 
-The installer does not delete backups.
+Restore creates a rollback backup of the current managed targets first. The
+installer and CLI do not delete backups unless you explicitly run the
+preview-first backup delete flow with `--apply`.

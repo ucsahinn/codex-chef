@@ -31,6 +31,7 @@ node scripts/scan-supply-chain-iocs.mjs
 ## Verifikation
 
 - `npm run check` vor einer Veröffentlichung ausführen.
+- `npm run token:audit` nutzen, um die groessten Context- und Token-Flaechen sichtbar zu machen.
 - `git diff --check` nutzen, um Whitespace- und Markdown-Probleme zu erkennen.
 - `gitleaks detect --redact --no-banner --no-git --verbose` nutzen, wenn Gitleaks verfügbar ist.
 
@@ -46,6 +47,7 @@ Diese lokalisierte Datei folgt den Abschnitten der englischen Quelldatei. Source
 - Install Planning And Collision Policy
 - Repair Mode
 - Update Mode
+- Backup Inventory And Restore
 - Rules
 - Hooks
 - Git Hygiene

@@ -123,6 +123,9 @@ The token/context distinction matters: the bundled `context-budget-planner`
 handles LLM context budgets and compaction handoffs. Deployment-token or
 vendor-auth skills such as `vercel-cli-with-tokens` remain manual because they
 can involve account credentials and deployment-specific behavior.
+Use `npm run token:audit` when you need a repo-local view of startup, config,
+agent-role, skill, docs, and validation context weight before changing prompt
+or skill routing.
 
 Manual opt-in example:
 
@@ -190,6 +193,10 @@ Agent catalog rule:
 
 - `catalog/agents.json` is the reviewed source for the twenty-one bundled
   specialist agents.
+- Cataloged agents declare `modelSelection: auto` and
+  `modelReasoningEffort: auto`; role TOML files must not pin `model` or
+  `model_reasoning_effort`, so the active profile and Codex runtime can choose
+  the right balance for the task.
 - `catalog/agent-research-corpus.json` records each specialist agent's domain
   focus, primary source types, refresh triggers, handoff targets, and reviewed
   authority-reference metadata.
@@ -215,9 +222,10 @@ Agent catalog rule:
   summaries of what the source corpus should change in the agent's behavior.
 - `scripts/validate-agent-config.mjs` checks that every cataloged agent exists
   in both Windows and Unix config templates and that each `config_file` points
-  at a matching `templates/codex/agents/*.toml` role file. It also enforces one
-  copy of each required runtime contract and guardrail block, plus at least 100
-  source-backed instruction items and 20 distinct source markers per role file.
+  at a matching `templates/codex/agents/*.toml` role file. It also enforces
+  unpinned model/reasoning selection, one copy of each required runtime contract
+  and guardrail block, plus at least 100 source-backed instruction items and 20
+  distinct source markers per role file.
 - `scripts/validate-agent-research-corpus.mjs` checks the machine-readable
   corpus index against `catalog/agents.json`, reviewed authority metadata, and
   the role TOML files. It also requires each per-agent authority key to match a

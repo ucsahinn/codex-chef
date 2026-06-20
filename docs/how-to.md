@@ -117,9 +117,13 @@ The installer copies profile configs into `~/.codex`:
 - `development.config.toml`: normal implementation profile.
 - `review.config.toml`: read-only, high-reasoning review profile.
 - `ci.config.toml`: read-only verification profile with hooks disabled.
+- `token-safe.config.toml`: lower verbosity, lower default reasoning,
+  compaction, and tool-output limits for broad or long-running work without
+  disabling skills, agents, MCPs, memory, hooks, or apps.
 
 Use profiles when a task needs a different safety posture without rewriting the
-main config.
+main config. Specialist role files leave per-agent model/reasoning unpinned, so
+the active profile and Codex runtime can choose the right balance for the task.
 
 ## Common Prompts
 

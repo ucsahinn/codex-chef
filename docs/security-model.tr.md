@@ -17,6 +17,9 @@ için tasarlandı.
   destructive ve open-world tool'lari kapali tutar.
 - Global command rule'ları dar kapsamlıdır ve read-only discovery ile lokal
   verification komutlarına ağırlık verir.
+- `token-safe.config.toml` skill, agent, MCP server, memory, hook veya app
+  kapatmadan verbosity, default reasoning, compaction threshold ve tool-output
+  boyutunu dusurur.
 - Delete, cleanup, prune, uninstall, overwrite, database drop/truncate ve benzer
   destructive işlemler açık kullanıcı onayı ister.
 
@@ -75,6 +78,10 @@ Agent template'leri `danger-full-access`, `approval_policy = "never"` veya
 gomulu token environment variable adlari kullanmamalidir. Read-only uzmanlar
 read-only kalir; verifier/release rolleri sadece smoke-test output gibi lokal
 kanitlar icin `workspace-write` kullanabilir.
+Catalog bu alanlari `auto` olarak isaretlediginde agent role template'leri
+agent bazli `model` ve `model_reasoning_effort` pinlemez. Boylece aktif profil
+ve Codex runtime, role boundary ve approval gate'lerini zayiflatmadan uygun
+model/effort dengesini secebilir.
 
 ## Install Planlama ve Çakışma Politikası
 

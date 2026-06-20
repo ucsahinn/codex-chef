@@ -1,7 +1,5 @@
 name = "security_auditor"
 description = "Read-only security auditor for auth, secrets, API routes, data access, permissions, cryptography, and abuse paths."
-model = "gpt-5.5"
-model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 web_search = "live"
 developer_instructions = """

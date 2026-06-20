@@ -150,11 +150,14 @@ if (result.error) {
     "scripts/validate-routing-profiles.mjs",
     "scripts/validate-repair-install.mjs",
     "scripts/validate-chef-cli.mjs",
+    "scripts/analyze-token-surfaces.mjs",
+    "scripts/validate-token-surfaces.mjs",
     "scripts/validate-package-surface.mjs",
     "scripts/validate-readme-locales.mjs",
     "scripts/validate-workflow-security.mjs",
     "manifests/install-plan.json",
-    "catalog/mcp-servers.json"
+    "catalog/mcp-servers.json",
+    "templates/codex/profiles/token-safe.config.toml"
   ]) {
     if (!fileSet.has(required)) fail(`npm pack dry-run surface missing required source file: ${required}`);
   }

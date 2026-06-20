@@ -54,6 +54,7 @@ node scripts/plan-install.mjs --all --json
 ## Verificación
 
 - Ejecutar `npm run check` antes de publicar.
+- Usar `npm run token:audit` para ver las superficies principales de contexto y tokens.
 - Usar `git diff --check` para detectar problemas de whitespace y Markdown.
 - Usar `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks está disponible.
 

@@ -32,7 +32,7 @@ Codex lisible, vérifiable et facile à faire évoluer:
 
 | Surface | Résultat |
 | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Équipe d'agents | 21 rôles nommés, dont Code Mapper, Docs Researcher, Google SEO Auditor, Security Auditor et Release Verifier. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Équipe d'agents | 21 rôles nommés, dont Code Mapper, Docs Researcher, Google SEO Auditor, Security Auditor et Release Verifier; model/reasoning n'est pas fixe par agent et le profil actif decide. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skills locales | `codex-chef-operator`, `offline-diagram-triplet` et `context-budget-planner` sont livrées avec le plugin local. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" alt="" aria-hidden="true" width="20"> Skills optionnelles | 16 skills globales public/first-party vérifiées pour maintenance, debugging, planification de refactor, sécurité, tests, vérification navigateur, SEO, qualité web, docs, CI, MCP, context engineering, prompt architecture, skill authoring et un workflow frontend large peuvent être installées avec `-All`. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP par défaut | Les MCP locaux et de recherche sont prêts; les connecteurs authentifiés restent désactivés jusqu'à besoin explicite. |
@@ -55,12 +55,15 @@ Les installers gerent:
 
 - `~/.codex/AGENTS.md`
 - `~/.codex/config.toml`
+- `~/.codex/*.config.toml`
 - `~/.codex/agents/*.toml`
 - `~/.codex/rules/default.rules`
 - `~/.codex/plugins/codex-chef-workflows`
 - `~/.agents/plugins/marketplace.json`
 
 `-All` installe les skills Codex vérifiées, mais ne change pas la configuration Git globale. Les Git guards globaux restent un opt-in séparé avec `-InstallGitGuards` ou `--install-git-guards`.
+
+`token-safe.config.toml` est copie comme profil. `npm run token:audit` montre les principales surfaces de contexte et tokens sans desactiver skills, MCPs, agents, hooks ni memories.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> Ce Que Cela Ne Fait Pas
 
@@ -126,7 +129,7 @@ codex exec --strict-config "Summarize the active Codex setup."
 | Signal | Preuve |
 | --- | --- |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Public-safe | Aucun secret, auth file, session, memory ou etat specifique machine. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Validation reelle | `npm run check` couvre repo, docs, install-plan, MCP drift, skills, supply-chain et security. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Validation reelle | `npm run check` couvre repo, docs, install-plan, MCP drift, skills, token surfaces, supply-chain et security; `npm run token:audit` fournit le diagnostic token. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCPs conservateurs | Les connecteurs authentifies restent desactives par defaut. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa7a.svg" alt="" aria-hidden="true" width="20"> Doctor | `npm run codex:doctor` resume la health repo-only sans ecritures globales. |
 | Index pour agents | `llms.txt` resume les cibles d'installation, docs, frontieres de securite et sources comparees pour coding agents. |

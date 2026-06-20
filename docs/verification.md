@@ -32,7 +32,8 @@ This runs:
   for drift preview, backup-backed apply, marketplace preservation, config
   merge, skill cleanup reporting, and explicit managed-plugin pruning.
 - `scripts/validate-agent-config.mjs`: specialist-agent catalog/config drift
-  checks across Windows and Unix Codex templates.
+  checks across Windows and Unix Codex templates, including automatic
+  model/reasoning selection for role files.
 - `scripts/validate-agent-research-corpus.mjs`: specialist-agent research
   corpus drift, authority-reference source markers, source freshness cadence,
   stale `dateChecked` checks, and per-agent expertise signal coverage.
@@ -41,6 +42,9 @@ This runs:
 - `scripts/validate-chef-cli.mjs`: one-menu Codex Chef CLI contract, safe
   command routing, write-boundary labels, log location, README usage snippets,
   and public-safe GitHub auth boundary guidance.
+- `scripts/validate-token-surfaces.mjs`: token audit script, `token-safe`
+  profile, AGENTS token discipline, context-budget skill reference, README
+  command docs, and unpinned agent model/reasoning contract.
 - `scripts/verify-skill-sources.mjs`: offline skill catalog validation and
   `catalog/skills-lock.json` source-allowlist drift checks.
 - `scripts/scan-supply-chain-iocs.mjs`: high-signal remote execution,
@@ -61,6 +65,7 @@ This runs:
 Additional release checks:
 
 ```bash
+npm run token:audit
 git status --short
 git diff --check
 gitleaks detect --redact --no-banner --no-git --verbose
@@ -99,6 +104,8 @@ node --check scripts/validate-agent-research-corpus.mjs
 node --check scripts/validate-mcp-config.mjs
 node --check scripts/chef-cli.mjs
 node --check scripts/validate-chef-cli.mjs
+node --check scripts/analyze-token-surfaces.mjs
+node --check scripts/validate-token-surfaces.mjs
 node --check scripts/verify-skill-sources.mjs
 node --check scripts/scan-supply-chain-iocs.mjs
 node --check scripts/validate-package-surface.mjs
@@ -159,6 +166,7 @@ npm run chef -- --backups --backup <id>
 npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
 npm run chef -- --diagnostics
+npm run chef -- --processes
 ```
 
 `npm run chef` opens the numbered operator menu. The noninteractive smoke
@@ -179,7 +187,8 @@ notes without enabling it.
 repo-only status snapshot, shows current health, attention reasons, next safe
 actions, backup/log summaries, and the diagnostic evidence commands for status,
 doctor, routing, update preview, repair preview, backups, logs, runtime parity,
-and Serena/MCP process audits. It prints the log root and recent CLI log
+and Serena/MCP process audits. `npm run chef -- --processes --no-log` runs that
+process count directly without stopping anything. It prints the log root and recent CLI log
 metadata without printing log contents or stopping processes. For parseable JSON
 through npm, use `npm run --silent chef -- --diagnostics --json --no-log`.
 

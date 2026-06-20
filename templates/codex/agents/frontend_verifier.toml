@@ -1,7 +1,5 @@
 name = "frontend_verifier"
 description = "Browser-oriented verifier for UI changes, visual regressions, responsive layout, and user flows."
-model = "gpt-5.5"
-model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 Verify the rendered product, not just the code. Use browser or Playwright tools when available.

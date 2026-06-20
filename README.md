@@ -98,6 +98,7 @@ npm run chef -- --mcp
 npm run chef -- --routing
 npm run chef -- --routing --profile starter-health
 npm run chef -- --diagnostics
+npm run chef -- --processes
 npm run chef -- --auth
 npm run chef -- --logs
 npm run chef -- --help --lang tr
@@ -106,7 +107,7 @@ npm run chef -- --status --repo-only --no-log
 
 The menu labels every action with its write boundary. `--status`,
 `--doctor`, `--preview`, `--skills`, `--mcp`, `--routing`, `--diagnostics`,
-`--auth`, and `--logs` are
+`--processes`, `--auth`, and `--logs` are
 read-only for global/user state by default. They normally create ignored
 repo-local audit logs under `tmp/chef-cli/logs`; add `--no-log` for strict
 no-filesystem-write audits. Use `--status --repo-only` when you want a fast
@@ -145,11 +146,13 @@ background terminals with `/ps`, and use `/stop` for terminal work started by
 the current session. `--diagnostics` is a read-only triage screen that first
 runs the repo-only status snapshot, then prints attention reasons, next safe
 actions, backup/log summaries, update and repair preview commands, runtime
-parity, and Serena/MCP process-audit commands. It prints the log root and
+parity, and the Serena/MCP process-audit command (`--processes`). It prints the log root and
 recent CLI log metadata, but it does not stop processes, print log contents, or
 change global files. For machine-readable JSON through npm, use
 `npm run --silent chef -- --diagnostics --json --no-log` so npm does not prepend
 script banners. CLI logs are ignored and not part of the source package.
+Use `npm run chef -- --processes --no-log` for direct read-only Serena, MCP,
+browser, Python, and Node process counts.
 
 If PowerShell reports `Could not read package.json` from another directory,
 run the command from the repository or use npm's prefix form:
@@ -186,7 +189,7 @@ manifest-backed install plan.
 
 | Surface | What lands on your machine |
 | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent team | 21 registered Codex subagent role files under `~/.codex/agents/*.toml`. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent team | 21 registered Codex subagent role files under `~/.codex/agents/*.toml`, with per-agent model/reasoning left unpinned for profile-aware selection. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Durable guidance | Global `~/.codex/AGENTS.md` with safe routing, verification, and approval rules. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP defaults | 7 useful MCP servers enabled and 8 authenticated/high-risk connectors parked disabled. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skills | Local `codex-chef-workflows` plugin, three bundled skills, and sixteen optional curated global skills. |
@@ -318,6 +321,11 @@ the starter broad without losing references such as `impeccable`,
 The key distinction: Codex Chef solves LLM token/context planning with the
 bundled local `context-budget-planner`; deployment-token or vendor-auth skills
 remain opt-in because they can touch accounts or duplicate existing triggers.
+Run `npm run token:audit` to inspect the repo's startup, config, agent, skill,
+docs, and validation token surfaces before changing prompts or skill routing.
+`token-safe.config.toml` is shipped as an optional profile for lower
+reasoning/output budgets without disabling skills, MCPs, agents, hooks, apps,
+or memory.
 
 First-party ecosystem skills are part of the reviewed `-All` / `-InstallSkills`
 set:
@@ -410,6 +418,7 @@ The installers copy these managed templates:
 
 - `~/.codex/AGENTS.md`
 - `~/.codex/config.toml`
+- `~/.codex/*.config.toml`
 - `~/.codex/agents/*.toml`
 - `~/.codex/rules/default.rules`
 - `~/.codex/plugins/codex-chef-workflows`
@@ -508,6 +517,7 @@ Useful verification commands:
 | `npm run codex:status` | Repo health, installed runtime drift, MCP setup notes, routing profiles, and effective controls. |
 | `npm run codex:status:all` | Same status board plus expected curated skills and optional Git guard checks. |
 | `npm run chef -- --diagnostics --no-log` | Read-only diagnostic menu with current health, attention reasons, next safe actions, evidence commands, log root, backup/log summaries, update/repair preview entry points, and process-audit guidance. |
+| `npm run chef -- --processes --no-log` | Read-only Serena, MCP, browser, Python, and Node process count; it does not stop processes. |
 | `npm run verify:install:runtime -- --expect-skills --expect-git-guards` | Read-only proof that the installed `CODEX_HOME` has 21 agents, 15 MCP entries, managed files, and curated skills. |
 | `npm run verify:skills:online -- --timeout-ms=90000` | Network-backed proof that all 16 reviewed skill sources still resolve. |
 | `codex exec --strict-config "Summarize the active Codex setup in three short bullets."` | Real Codex startup, strict config compatibility, auth, and model-call smoke test. |
@@ -574,15 +584,15 @@ The result is a small specialist-team workflow inside Codex while the main threa
 | Signal | Evidence |
 | --- | --- |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Public-safe by design | No tokens, auth files, sessions, memories, cookies, private keys, or machine-specific state are included. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Real validation | `npm run check` runs repo, docs, install-plan, agent drift, MCP drift, skill-source, supply-chain, and security checks. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Real validation | `npm run check` runs repo, docs, install-plan, agent drift, MCP drift, token-surface, skill-source, supply-chain, and security checks. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f510.svg" alt="" aria-hidden="true" width="20"> Secret scanning ready | Gitleaks command is documented and the Git hook runs it when available. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> Multilingual docs | Deutsch, Español, English, Português (Brasil), Türkçe, and Français README and deep documentation files are present; six-language deep docs are enforced by validation. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ac.svg" alt="" aria-hidden="true" width="20"> Accessible visuals | SVG assets include title, description, motion, reduced-motion fallback, and README alt text. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skill source gate | `catalog/skills-lock.json` is checked against installable skill metadata. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Local skill gate | `npm run validate:plugin-skills` checks every bundled skill, reference file, UI metadata file, and catalog entry. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d0.svg" alt="" aria-hidden="true" width="20"> Offline diagrams | Bundled `offline-diagram-triplet` emits Mermaid, editable Excalidraw, SVG, PNG, and Markdown with zero network. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context budget | Bundled `context-budget-planner` keeps large tasks focused with source priority, token budgeting, and compaction handoff. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent drift gate | `catalog/agents.json` and `catalog/agent-research-corpus.json` are checked against Windows/Unix config blocks, role TOML files, required guardrail blocks, and source-backed item counts. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context budget | Bundled `context-budget-planner` keeps large tasks focused with source priority, token budgeting, compaction handoff, and `npm run token:audit`. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent drift gate | `catalog/agents.json` and `catalog/agent-research-corpus.json` are checked against Windows/Unix config blocks, role TOML files, automatic model/reasoning selection, required guardrail blocks, and source-backed item counts. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa7a.svg" alt="" aria-hidden="true" width="20"> Doctor gate | `npm run codex:doctor` summarizes repo-only Codex starter health without global writes. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4df.svg" alt="" aria-hidden="true" width="20"> Status board | `npm run codex:status` combines repo health, installed runtime drift, Codex doctor checks, and skill context-budget warnings. |
 | Repair mode | `npm run repair:install -- --apply` and installer `-Repair` / `--repair` fix managed drift after backup while preserving unrelated marketplace plugins and user skills. |

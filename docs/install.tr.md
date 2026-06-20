@@ -37,6 +37,8 @@ node scripts/plan-install.mjs --list-operations
 
 Plan managed target'lari, opsiyonel global Git degisikliklerini, curated skill
 komutlarini, collision policy'yi, backup davranisini ve risk seviyesini listeler.
+Profile copy operation `development.config.toml`, `review.config.toml`,
+`ci.config.toml` ve `token-safe.config.toml` dosyalarini kapsar.
 
 Ön izleme doğruysa kur:
 
@@ -174,6 +176,10 @@ ve MCP setup notlari. Bu notlar local tooling, OAuth authorization, filesystem
 path secimi ve `SUPABASE_DB_URL` gibi gereksinimleri connector'a ihtiyac
 duymadan once gosterir. Account, database, production ve geniş filesystem
 connector'ları sen açıkça enable edene kadar kapalı kalır.
+Agent role dosyalari agent bazli model/reasoning pinlemeden kurulur. Aktif
+profil ve Codex runtime task'a uygun dengeyi secebilir; broad veya uzun islerde
+skill, agent ya da MCP kapatmadan daha dusuk verbosity ve daha dar tool-output
+limitleri icin `token-safe.config.toml` kullan.
 
 ## Neler Yedeklenir?
 
@@ -274,8 +280,14 @@ varsa `-Repair` / `--repair` force'tan daha guvenli ilk adımdır.
 ## Geri Dönüş
 
 1. Codex'i kapat.
-2. Timestamp içeren backup klasöründen dosyaları geri kopyala.
-3. Codex'i yeniden başlat.
-4. `codex doctor --summary` çalıştır.
+2. Backup archive'larini `npm run chef -- --backups` ile listele.
+3. Secilen archive'dan restore preview al:
+   `npm run chef -- --backups --backup <id> --restore`.
+4. Preview dogruysa apply et:
+   `npm run chef -- --backups --backup <id> --restore --apply`.
+5. Codex'i yeniden başlat.
+6. `codex doctor --summary` çalıştır.
 
-Installer backup dosyalarını silmez.
+Restore once mevcut managed target'lar icin rollback backup olusturur.
+Installer ve CLI, preview-first backup delete akisinda acikca `--apply`
+vermedikce backup dosyalarini silmez.

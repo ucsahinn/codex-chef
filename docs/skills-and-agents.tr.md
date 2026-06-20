@@ -137,6 +137,9 @@ Token/context ayrimi onemlidir: bundled `context-budget-planner`, LLM context
 butcesi ve compaction handoff isini cozer. `vercel-cli-with-tokens` gibi
 deployment-token veya vendor-auth skill'leri hesap credential'i ve deployment
 davranisi gerektirebildigi icin manual kalir.
+Prompt veya skill routing degistirmeden once startup, config, agent-role,
+skill, docs ve validation context agirligini gormek icin `npm run token:audit`
+kullan.
 
 Bundled yerel skill dogrulamasi public skill-source resolution'dan ayridir:
 
@@ -192,6 +195,9 @@ Agent katalog kurali:
 
 - `catalog/agents.json`, paketlenen yirmi bir uzman ajan icin incelenmis
   kaynaktir.
+- Catalog'daki ajanlar `modelSelection: auto` ve `modelReasoningEffort: auto`
+  tasir; role TOML dosyalari `model` veya `model_reasoning_effort` pinlemez.
+  Boylece aktif profil ve Codex runtime task'a uygun dengeyi secebilir.
 - `catalog/agent-research-corpus.json`, her uzman ajanin domain focus, primary
   source type, refresh trigger, handoff hedefi ve reviewed authority-reference
   metadata'sini kaydeder.
@@ -217,9 +223,10 @@ Agent katalog kurali:
 - `scripts/validate-agent-config.mjs`, katalogdaki her ajanin hem Windows hem
   Unix config template'inde yer aldigini ve her `config_file` alaninin eslesen
   `templates/codex/agents/*.toml` role dosyasina gittigini kontrol eder. Ayrica
-  her zorunlu runtime contract ve guardrail blogundan bir tane bulunmasini,
-  ayrica rol dosyasi basina en az 100 source-backed instruction item'i ve 20
-  distinct source marker olmasini zorunlu tutar.
+  pinlenmeyen model/reasoning secimini, her zorunlu runtime contract ve
+  guardrail blogundan bir tane bulunmasini, rol dosyasi basina en az 100
+  source-backed instruction item'i ve 20 distinct source marker olmasini
+  zorunlu tutar.
 - `scripts/validate-agent-research-corpus.mjs`, machine-readable corpus index'i
   `catalog/agents.json`, reviewed authority metadata'si ve role TOML
   dosyalariyla karsilastirir. Ayrica her ajan icin authority key'in o ajanin

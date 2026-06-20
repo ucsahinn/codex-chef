@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 0.5.30 - 2026-06-20
+
+- Added `token-safe.config.toml`, `npm run token:audit`,
+  `npm run token:audit:json`, and `npm run validate:tokens` so context/token
+  optimization is visible, validated, and profile-based instead of disabling
+  skills, MCPs, subagents, hooks, apps, or memory.
+- Changed specialist agent catalog metadata to automatic model/reasoning
+  selection and removed per-agent model/reasoning pins from the role TOML files
+  so the active Codex profile can choose the right effort for each task.
+- Extended CI, release validators, README files, English/Turkish docs, and
+  generated localized docs so token-safe, token audit, and agent-auto behavior
+  remain documented across all six documentation languages.
+- Added `npm run chef -- --processes` and `npm run chef:processes` as a
+  read-only process audit for Serena, MCP, browser, Python, and Node processes;
+  the command reports counts but never stops processes.
+- Reconciled installed managed Codex Chef runtime files through backup-backed
+  repair so `verify:install:runtime` can prove `38/38` managed files current.
+
 ## 0.5.29 - 2026-06-20
 
 - Added `npm run chef -- --diagnostics` / `--diagnose` and

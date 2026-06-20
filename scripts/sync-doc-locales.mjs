@@ -29,6 +29,7 @@ const locales = [
     ],
     verifyBullets: [
       "`npm run check` vor einer Veröffentlichung ausführen.",
+      "`npm run token:audit` nutzen, um die groessten Context- und Token-Flaechen sichtbar zu machen.",
       "`git diff --check` nutzen, um Whitespace- und Markdown-Probleme zu erkennen.",
       "`gitleaks detect --redact --no-banner --no-git --verbose` nutzen, wenn Gitleaks verfügbar ist."
     ],
@@ -40,6 +41,8 @@ const locales = [
       ],
       codex: [
         "Welche Codex-Oberfläche, Config, Skill, Agent- oder MCP-Fläche wofür genutzt wird.",
+        "`token-safe.config.toml` als optionales Profil fuer niedrigere Reasoning- und Output-Budgets.",
+        "Agent-Rollen bleiben ohne per-agent model/reasoning pins, damit das aktive Profil entscheidet.",
         "Konservative Defaults für Sandbox, Approvals und externe Connectoren.",
         "Routing-Entscheidungen, die im Repo dokumentiert und verifizierbar bleiben."
       ],
@@ -77,6 +80,7 @@ const locales = [
     ],
     verifyBullets: [
       "Ejecutar `npm run check` antes de publicar.",
+      "Usar `npm run token:audit` para ver las superficies principales de contexto y tokens.",
       "Usar `git diff --check` para detectar problemas de whitespace y Markdown.",
       "Usar `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks está disponible."
     ],
@@ -88,6 +92,8 @@ const locales = [
       ],
       codex: [
         "Qué superficie de Codex, config, skill, agent o MCP se usa para cada caso.",
+        "`token-safe.config.toml` como perfil opcional para reducir presupuestos de reasoning y output.",
+        "Los roles de agents no fijan model/reasoning por agente; decide el perfil activo.",
         "Defaults conservadores para sandbox, aprobaciones y conectores externos.",
         "Decisiones de routing documentadas y verificables dentro del repo."
       ],
@@ -125,6 +131,7 @@ const locales = [
     ],
     verifyBullets: [
       "Executar `npm run check` antes de publicar.",
+      "Usar `npm run token:audit` para enxergar as principais superficies de contexto e tokens.",
       "Usar `git diff --check` para encontrar problemas de whitespace e Markdown.",
       "Usar `gitleaks detect --redact --no-banner --no-git --verbose` quando Gitleaks estiver disponível."
     ],
@@ -136,6 +143,8 @@ const locales = [
       ],
       codex: [
         "Qual superfície Codex, config, skill, agent ou MCP usar em cada caso.",
+        "`token-safe.config.toml` como perfil opcional para reduzir orcamentos de reasoning e output.",
+        "Roles de agents nao fixam model/reasoning por agent; quem decide e o perfil ativo.",
         "Defaults conservadores para sandbox, aprovações e conectores externos.",
         "Decisões de routing documentadas e verificáveis dentro do repo."
       ],
@@ -173,6 +182,7 @@ const locales = [
     ],
     verifyBullets: [
       "Exécuter `npm run check` avant publication.",
+      "Utiliser `npm run token:audit` pour voir les principales surfaces de contexte et tokens.",
       "Utiliser `git diff --check` pour détecter les problèmes de whitespace et Markdown.",
       "Utiliser `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks est disponible."
     ],
@@ -184,6 +194,8 @@ const locales = [
       ],
       codex: [
         "Quelle surface Codex, config, skill, agent ou MCP utiliser selon le besoin.",
+        "`token-safe.config.toml` comme profil optionnel pour reduire les budgets reasoning et output.",
+        "Les roles d'agents ne fixent pas model/reasoning par agent; le profil actif decide.",
         "Defaults conservateurs pour sandbox, approvals et connecteurs externes.",
         "Décisions de routing documentées et vérifiables dans le repo."
       ],
@@ -403,6 +415,7 @@ const commandBlocks = {
     "```bash\nnode scripts/plan-install.mjs --all --json\n```"
   ],
   codex: [
+    "```bash\nnpm run token:audit\n```",
     "```bash\ncodex doctor --summary\ncodex exec --strict-config \"Summarize the active Codex setup.\"\n```",
     "```text\n/mcp\n/skills\n/plugins\n/hooks\n```"
   ],

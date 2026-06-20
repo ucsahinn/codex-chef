@@ -80,6 +80,7 @@ npm run chef -- --mcp
 npm run chef -- --routing
 npm run chef -- --routing --profile starter-health
 npm run chef -- --diagnostics
+npm run chef -- --processes
 npm run chef -- --auth
 npm run chef -- --logs
 npm run chef -- --help --lang tr
@@ -87,8 +88,8 @@ npm run chef -- --status --repo-only --no-log
 ```
 
 Menu her aksiyonun write sinirini gosterir. `--status`, `--doctor`,
-`--preview`, `--skills`, `--mcp`, `--routing`, `--diagnostics`, `--auth` ve
-`--logs` varsayilan olarak
+`--preview`, `--skills`, `--mcp`, `--routing`, `--diagnostics`, `--processes`,
+`--auth` ve `--logs` varsayilan olarak
 global/user state icin read-only rehberlik veya dogrulama akislari olur.
 Normalde `tmp/chef-cli/logs` altina ignored lokal audit log'u yazarlar; strict
 audit icin `--no-log` ekle. Hızlı lokal repo kontrolü için
@@ -127,7 +128,9 @@ once repo-only status snapshot'ini calistiran read-only tanilama ekranidir;
 attention nedenlerini, sonraki guvenli adimlari, backup/log ozetini, update ve
 repair preview komutlarini, runtime parity ve Serena/MCP surec denetimi
 komutlarini tek yerde toplar. Log kok dizinini ve son CLI log metadata'sini
-basar; surec durdurmaz, log icerigi basmaz ve global dosya degistirmez. npm
+basar; surec durdurmaz, log icerigi basmaz ve global dosya degistirmez. Direkt
+read-only Serena, MCP, browser, Python ve Node surec sayimi icin
+`npm run chef -- --processes --no-log` kullan. npm
 uzerinden machine-readable JSON icin `npm run --silent chef -- --diagnostics
 --json --no-log` kullan; boylece npm script banner'i JSON'u bozmaz. CLI loglari
 ignored kalir ve source package'a girmez.
@@ -166,7 +169,7 @@ repo içindeki `templates/codex/config.*.toml`, `templates/codex/agents/*.toml`,
 
 | Yüzey | Makineye ne kurulur? |
 | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Ajan ekibi | `~/.codex/agents/*.toml` altında 21 kayıtlı Codex subagent rol dosyası. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Ajan ekibi | `~/.codex/agents/*.toml` altinda 21 kayitli Codex subagent rol dosyasi; agent bazli model/reasoning pinlenmez, aktif profile gore secilir. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Kalıcı rehberlik | Güvenli routing, doğrulama ve onay kuralları içeren global `~/.codex/AGENTS.md`. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP varsayılanları | 7 faydalı MCP açık, 8 auth/high-risk connector kapalı bekler. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skill'ler | Yerel `codex-chef-workflows` plugin'i, üç bundled skill ve on altı opsiyonel global skill. |
@@ -300,6 +303,10 @@ kurulum gereksiz trigger gürültüsüyle şişmez.
 `context-budget-planner` çözer. Deployment-token veya vendor-auth tarafındaki
 skill'ler ise hesaplara dokunabildiği ya da mevcut tetikleri çoğalttığı için
 manual opt-in kalır.
+Prompt veya skill routing degistirmeden once `npm run token:audit` ile repo
+startup, config, agent, skill, docs ve validation token yuzeylerini gorebilirsin.
+`token-safe.config.toml`, skill, MCP, ajan, hook, app veya memory kapatmadan daha
+dusuk reasoning/output butceleri icin opsiyonel profil olarak gelir.
 
 Bizim first-party ekosistem skill'leri artık gözden geçirilmiş `-All` /
 `-InstallSkills` setinin içinde gelir:
@@ -392,6 +399,7 @@ Installer şu yönetilen template'leri kopyalar:
 
 - `~/.codex/AGENTS.md`
 - `~/.codex/config.toml`
+- `~/.codex/*.config.toml`
 - `~/.codex/agents/*.toml`
 - `~/.codex/rules/default.rules`
 - `~/.codex/plugins/codex-chef-workflows`
@@ -490,6 +498,7 @@ Faydali dogrulama komutlari:
 | `npm run codex:status` | Repo sagligini, kurulu runtime drift'ini, MCP setup notlarini, routing profillerini ve effective controls ozetini gosterir. |
 | `npm run codex:status:all` | Ayni status panosuna beklenen curated skill ve opsiyonel Git guard kontrollerini ekler. |
 | `npm run chef -- --diagnostics --no-log` | Canli saglik, attention nedenleri, sonraki guvenli adimlar, kanit komutlari, log kok dizini, backup/log ozetleri, update/repair preview girisleri ve surec denetimi rehberi iceren read-only tanilama menusu. |
+| `npm run chef -- --processes --no-log` | Serena, MCP, browser, Python ve Node sureclerini read-only sayar; surec durdurmaz. |
 | `npm run verify:install:runtime -- --expect-skills --expect-git-guards` | Kurulu `CODEX_HOME` icinde 21 ajan, 15 MCP girdisi, managed dosyalar ve curated skill'ler oldugunu read-only kanitlar. |
 | `npm run verify:skills:online -- --timeout-ms=90000` | 16 incelenmis skill kaynaginin hala cozuldugunu network-backed kanitlar. |
 | `codex exec --strict-config "Summarize the active Codex setup in three short bullets."` | Gercek Codex startup, strict config uyumlulugu, auth ve model-call smoke testidir. |
@@ -556,15 +565,15 @@ Böylece Codex tek bir sohbet gibi değil, uzman rolleri olan küçük bir yazı
 | Sinyal | Kanıt |
 | --- | --- |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Public-safe tasarım | Token, auth dosyası, session, memory, cookie, private key veya makineye özel state içermez. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Gerçek doğrulama | `npm run check` repo, docs, install-plan, agent drift, MCP drift, skill-source, supply-chain ve security kontrollerini çalıştırır. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Gerçek doğrulama | `npm run check` repo, docs, install-plan, agent drift, MCP drift, token-surface, skill-source, supply-chain ve security kontrollerini calistirir. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f510.svg" alt="" aria-hidden="true" width="20"> Secret scan hazır | Gitleaks komutu dokümante edilir; Git hook varsa Gitleaks çalıştırır. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> Çok dilli docs | Deutsch, Español, English, Português (Brasil), Türkçe ve Français README ve derin dokümantasyon dosyaları bulunur; altı dilli deep docs validation ile zorunlu tutulur. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ac.svg" alt="" aria-hidden="true" width="20"> Erişilebilir görseller | SVG'lerde title, description, motion, reduced-motion fallback ve README alt text vardır. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skill kaynak gate'i | `catalog/skills-lock.json` installable skill metadata'sıyla karşılaştırılır. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Yerel skill gate'i | `npm run validate:plugin-skills` bundled skill'leri, reference dosyalarını, UI metadata'sını ve catalog kaydını kontrol eder. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d0.svg" alt="" aria-hidden="true" width="20"> Offline diagram | Bundled `offline-diagram-triplet` Mermaid, editable Excalidraw, SVG, PNG ve Markdown çıktısını network kullanmadan üretir. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context bütçesi | Bundled `context-budget-planner` büyük işleri kaynak önceliği, token bütçesi ve compaction handoff'u ile odaklı tutar. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent drift gate'i | `catalog/agents.json` ve `catalog/agent-research-corpus.json` Windows/Unix config bloklari, role TOML dosyalari, zorunlu guardrail bloklari ve source-backed item sayilariyla karsilastirilir. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context bütçesi | Bundled `context-budget-planner` buyuk isleri kaynak onceligi, token butcesi, compaction handoff'u ve `npm run token:audit` ile odakli tutar. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent drift gate'i | `catalog/agents.json` ve `catalog/agent-research-corpus.json` Windows/Unix config bloklari, role TOML dosyalari, otomatik model/reasoning secimi, zorunlu guardrail bloklari ve source-backed item sayilariyla karsilastirilir. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa7a.svg" alt="" aria-hidden="true" width="20"> Doctor gate'i | `npm run codex:doctor` global write yapmadan repo-only Codex starter sagligini ozetler. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4df.svg" alt="" aria-hidden="true" width="20"> Status panosu | `npm run codex:status` repo sagligini, kurulu runtime drift'ini, Codex doctor check'lerini ve skill context-budget warning'lerini tek yerde toplar. |
 | Repair modu | `npm run repair:install -- --apply` ve installer `-Repair` / `--repair`, managed drift'i backup sonrası düzeltir; başka marketplace plugin'lerini ve user skill'lerini silmez. |

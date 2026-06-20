@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+## v0.5.30 - 2026-06-20
+
+Bu release token/context kontrolunu Codex Chef icinde birinci sinif yuzey yapar
+ve enterprise setup'i kullanisli yapan skill, MCP, subagent, hook, app veya
+memory ozelliklerini kapatmadan otonom akisi korur. Token rehberi artik profil,
+audit komutu, validator, docs ve kurulu runtime yolunda bulunur; agent
+model/reasoning secimi de role bazli pin yerine aktif profile birakilir.
+
+## One cikanlar
+
+- Daha dusuk reasoning verbosity, compact summary, auto compaction ve tool-output
+  limitleri icin opsiyonel `token-safe.config.toml` profili eklendi.
+- `npm run token:audit`, `npm run token:audit:json` ve
+  `npm run validate:tokens` eklendi.
+- CI ve docs, `scripts/analyze-token-surfaces.mjs` ile
+  `scripts/validate-token-surfaces.mjs` dosyalarini acik `node --check`
+  kapsaminda dogrular.
+- 21 uzman agent role dosyasi, catalog otomatik secim dediginde agent bazli
+  model/reasoning pinlemeyecek sekilde guncellendi.
+- README'ler, Ingilizce/Turkce docs, generated locale docs ve
+  `context-budget-planner` referansi token-safe ve agent-auto davranisini
+  kurulum yuzeyi boyunca anlatir.
+- `npm run chef -- --processes` ve `npm run chef:processes`, Serena, MCP,
+  browser, Python ve Node sureclerini read-only sayar; hicbir sureci durdurmaz.
+- Kurulu runtime backup-backed managed refresh ile esitlendi; runtime
+  verification artik `38/38` managed dosyanin current oldugunu gosterir.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run token:audit
+npm run chef -- --processes --plain --no-log
+npm run chef -- --diagnostics --plain --no-log
+npm run verify:install:runtime -- --redact-paths
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.29 - 2026-06-20
 
 Bu release Chef CLI'a read-only tanilama merkezini ekler. Operator artik

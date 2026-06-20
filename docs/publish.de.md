@@ -31,6 +31,7 @@ npm run verify:skills:online
 ## Verifikation
 
 - `npm run check` vor einer Veröffentlichung ausführen.
+- `npm run token:audit` nutzen, um die groessten Context- und Token-Flaechen sichtbar zu machen.
 - `git diff --check` nutzen, um Whitespace- und Markdown-Probleme zu erkennen.
 - `gitleaks detect --redact --no-banner --no-git --verbose` nutzen, wenn Gitleaks verfügbar ist.
 

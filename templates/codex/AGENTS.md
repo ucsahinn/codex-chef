@@ -36,6 +36,31 @@
   instruction blocks it. If an obvious routing surface is skipped, state the
   concrete reason.
 
+## Token Budget Discipline
+
+- For repo-wide, research-heavy, multi-agent, documentation-heavy, or
+  long-running work, use `context-budget-planner` before loading broad context.
+- Start with `rg --files`, catalogs, manifests, package scripts, and summaries;
+  open full files only after they are selected as authoritative or directly
+  relevant.
+- Do not paste huge command output, logs, docs, or agent transcripts into the
+  main thread. Summarize the important lines while preserving exact commands,
+  paths, versions, and failures.
+- Do not disable skills, MCP servers, subagents, memory, hooks, or app support
+  only to save tokens. Use profile/config knobs such as verbosity, reasoning
+  effort, compaction threshold, and tool-output limits instead.
+- Prefer bounded subagents for noisy read-heavy work only when they reduce
+  main-thread context. Ask for summaries, evidence paths, commands run, and
+  blockers instead of raw dumps.
+- Let subagent role files avoid per-agent model/reasoning pins unless a task
+  explicitly needs a fixed override; the current profile and Codex runtime can
+  choose the appropriate model and effort for the task shape.
+- Close completed subagent threads when they are no longer needed so long
+  sessions do not accumulate stale work surfaces.
+- For local repo diagnostics, run `npm run token:audit` to see which startup,
+  config, agent, skill, docs, and validation surfaces carry the largest context
+  weight.
+
 ## Enterprise Routing Loop
 
 - At the start of every non-trivial request, classify the task shape before

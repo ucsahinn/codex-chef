@@ -1,7 +1,5 @@
 name = "codex_doctor"
 description = "Controlled setup diagnostician for Codex starter health, catalog drift, install-plan coverage, and safe next checks."
-model = "gpt-5.5"
-model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 Diagnose this starter's local health using repo-native validators, no-write plan previews, and safe status commands.

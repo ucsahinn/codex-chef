@@ -12,7 +12,8 @@ const configFiles = [
 ];
 const agentDir = path.join(root, "templates", "codex", "agents");
 const allowedSandboxModes = new Set(["read-only", "workspace-write"]);
-const allowedReasoningEfforts = new Set(["medium", "high"]);
+const allowedModelSelections = new Set(["auto"]);
+const allowedReasoningEfforts = new Set(["auto", "low", "medium", "high", "xhigh"]);
 const minimumSourceBackedItems = 100;
 const minimumDistinctSourceMarkers = 20;
 
@@ -129,6 +130,7 @@ if (!fs.existsSync(catalogPath)) {
         "templateDescription",
         "configFile",
         "sandboxMode",
+        "modelSelection",
         "modelReasoningEffort",
         "risk",
         "defaultReason",
@@ -142,6 +144,9 @@ if (!fs.existsSync(catalogPath)) {
       }
       if (!allowedSandboxModes.has(agent.sandboxMode)) {
         fail(`Agent ${agent.name} has unsupported sandboxMode: ${agent.sandboxMode}`);
+      }
+      if (!allowedModelSelections.has(agent.modelSelection)) {
+        fail(`Agent ${agent.name} has unsupported modelSelection: ${agent.modelSelection}`);
       }
       if (!allowedReasoningEfforts.has(agent.modelReasoningEffort)) {
         fail(`Agent ${agent.name} has unsupported modelReasoningEffort: ${agent.modelReasoningEffort}`);
@@ -158,13 +163,21 @@ if (!fs.existsSync(catalogPath)) {
         if (readTomlString(template, "description") !== agent.templateDescription) {
           fail(`Agent template description drift for ${agent.name}.`);
         }
-        if (readTomlString(template, "model") !== catalog.defaults.model) {
+        const templateModel = readTomlString(template, "model");
+        if (agent.modelSelection === "auto") {
+          if (templateModel) fail(`Agent template must not pin model when modelSelection is auto for ${agent.name}.`);
+        } else if (templateModel !== catalog.defaults.model) {
           fail(`Agent template model drift for ${agent.name}.`);
         }
         if (readTomlString(template, "sandbox_mode") !== agent.sandboxMode) {
           fail(`Agent template sandbox_mode drift for ${agent.name}.`);
         }
-        if (readTomlString(template, "model_reasoning_effort") !== agent.modelReasoningEffort) {
+        const templateReasoningEffort = readTomlString(template, "model_reasoning_effort");
+        if (agent.modelReasoningEffort === "auto") {
+          if (templateReasoningEffort) {
+            fail(`Agent template must not pin model_reasoning_effort when modelReasoningEffort is auto for ${agent.name}.`);
+          }
+        } else if (templateReasoningEffort !== agent.modelReasoningEffort) {
           fail(`Agent template model_reasoning_effort drift for ${agent.name}.`);
         }
         const webSearch = readTomlString(template, "web_search") === "live";

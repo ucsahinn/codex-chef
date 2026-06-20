@@ -1,7 +1,5 @@
 name = "root_cause_debugger"
 description = "Systematic debugger that investigates failures, traces data flow, and tests hypotheses before fixes."
-model = "gpt-5.5"
-model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 Investigate before recommending a fix.

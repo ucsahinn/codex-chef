@@ -18,6 +18,9 @@ Codex safety model.
   a reviewed app-specific override changes them.
 - Global command rules are narrow and biased toward read-only discovery and
   local verification.
+- `token-safe.config.toml` reduces verbosity, default reasoning, compaction
+  threshold, and tool-output size without disabling skills, agents, MCP
+  servers, memory, hooks, or apps.
 - Deletion, cleanup, pruning, uninstall, overwrite, database drop/truncate, and
   other destructive operations require explicit user approval. Safe
   non-destructive work can continue while the destructive part waits.
@@ -76,6 +79,10 @@ Agent templates must not use `danger-full-access`,
 `approval_policy = "never"`, or embedded token environment variable names.
 Read-only specialists stay read-only, while verifier/release roles can use
 `workspace-write` only for local evidence such as smoke-test output.
+Agent role templates also avoid per-agent `model` and
+`model_reasoning_effort` pins when the catalog marks those fields as `auto`.
+That lets the active profile and Codex runtime choose the model/effort balance
+without weakening role boundaries or approval gates.
 
 ## Install Planning And Collision Policy
 

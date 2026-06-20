@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+## v0.5.30 - 2026-06-20
+
+This release makes token/context control a first-class Codex Chef surface and
+keeps the enterprise setup autonomous without turning off the features that make
+it useful. Token guidance now lives in a profile, audit command, validator, docs,
+and installed runtime path, while agent model/reasoning selection is left to the
+active profile instead of being pinned per role.
+
+## Highlights
+
+- Added `token-safe.config.toml` as an optional Codex profile for lower
+  reasoning verbosity, compact summaries, auto compaction, and tool-output caps.
+- Added `npm run token:audit`, `npm run token:audit:json`, and
+  `npm run validate:tokens`.
+- Added release-gate checks so CI and docs explicitly syntax-check
+  `scripts/analyze-token-surfaces.mjs` and `scripts/validate-token-surfaces.mjs`.
+- Updated all 21 specialist agent role files to avoid per-agent model/reasoning
+  pins when the catalog declares automatic selection.
+- Updated README files, English/Turkish docs, generated localized docs, and the
+  `context-budget-planner` reference so token-safe and agent-auto behavior is
+  documented across the install surface.
+- Added `npm run chef -- --processes` and `npm run chef:processes` for read-only
+  Serena, MCP, browser, Python, and Node process counts without stopping
+  anything.
+- Repaired the installed runtime with a backup-backed managed refresh; runtime
+  verification now reports `38/38` managed files current.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:release
+npm run token:audit
+npm run chef -- --processes --plain --no-log
+npm run chef -- --diagnostics --plain --no-log
+npm run verify:install:runtime -- --redact-paths
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.29 - 2026-06-20
 
 This release adds a read-only diagnostics hub to the Chef CLI. Operators can now

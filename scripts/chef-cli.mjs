@@ -82,6 +82,7 @@ const ACTION_FLAGS = new Map([
   ["--routing", "routing"],
   ["--diagnostics", "diagnostics"],
   ["--diagnose", "diagnostics"],
+  ["--processes", "processes"],
   ["--auth", "auth"],
   ["--logs", "logs"]
 ]);
@@ -290,6 +291,12 @@ const MENU_ITEMS = [
     description: "Show read-only evidence commands, log locations, backups, and lifecycle cleanup notes."
   },
   {
+    id: "processes",
+    label: "Processes",
+    writes: "none",
+    description: "Read-only Serena, MCP, browser, Python, and Node process count."
+  },
+  {
     id: "auth",
     label: "Auth",
     writes: "none/account guidance",
@@ -375,6 +382,11 @@ const MENU_TEXT_TR = {
     description: "Read-only kanit komutlari, log konumlari, yedekler ve lifecycle temizlik notlari.",
     writes: "yok"
   },
+  processes: {
+    label: "Surecler",
+    description: "Read-only Serena, MCP, browser, Python ve Node surec sayimi.",
+    writes: "yok"
+  },
   auth: {
     label: "Auth",
     description: "Public-safe GitHub auth sinirlari ve dogrulama notlari.",
@@ -425,6 +437,7 @@ Kullanim:
   npm run chef -- --routing
   npm run chef -- --routing --profile starter-health
   npm run chef -- --diagnostics
+  npm run chef -- --processes
   npm run chef -- --auth
   npm run chef -- --logs
 
@@ -445,7 +458,7 @@ Secenekler:
   --help         Bu yardimi gosterir
 
 Aksiyonlar:
-  Durum, Doctor, On izleme, Guncelle, Kur, Reset, Onar, Yedekler, Skill'ler, MCP, Yonlendirme, Tanilama, Auth, Loglar
+  Durum, Doctor, On izleme, Guncelle, Kur, Reset, Onar, Yedekler, Skill'ler, MCP, Yonlendirme, Tanilama, Surecler, Auth, Loglar
 
 Loglar:
   tmp/chef-cli/logs
@@ -471,6 +484,7 @@ Usage:
   npm run chef -- --routing
   npm run chef -- --routing --profile starter-health
   npm run chef -- --diagnostics
+  npm run chef -- --processes
   npm run chef -- --auth
   npm run chef -- --logs
 
@@ -1879,11 +1893,159 @@ function diagnosticCommandRows() {
     },
     {
       area: localText("Serena/MCP process audit", "Serena/MCP surec denetimi"),
-      command: "Get-Process | Where-Object { $_.ProcessName -match 'serena|uvx|python|chrome' } | Group-Object ProcessName | Select-Object Name,Count",
+      command: "npm run chef -- --processes --no-log",
       writes: localText("none", "yok"),
       reason: localText("Read-only count before asking for any process stop.", "Herhangi bir surec durdurma onayi istemeden once read-only sayim.")
     }
   ];
+}
+
+const PROCESS_AUDIT_NAMES = new Set(["serena", "uvx", "python", "python3", "chrome", "chromium", "msedge", "node"]);
+
+function parseCsvLine(line) {
+  const values = [];
+  let current = "";
+  let inQuote = false;
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    const next = line[index + 1];
+    if (char === "\"" && inQuote && next === "\"") {
+      current += "\"";
+      index += 1;
+    } else if (char === "\"") {
+      inQuote = !inQuote;
+    } else if (char === "," && !inQuote) {
+      values.push(current);
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  values.push(current);
+  return values;
+}
+
+function normalizeProcessName(value) {
+  return String(value || "")
+    .trim()
+    .replace(/^.*[\\/]/, "")
+    .replace(/\.exe$/i, "")
+    .toLowerCase();
+}
+
+function processCommandNames() {
+  const attempts = process.platform === "win32"
+    ? [
+        {
+          command: "tasklist.exe",
+          args: ["/fo", "csv", "/nh"],
+          parse: (stdout) => String(stdout || "")
+            .split(/\r?\n/)
+            .filter((line) => line.trim())
+            .map((line) => parseCsvLine(line)[0])
+        },
+        {
+          command: "powershell.exe",
+          args: ["-NoProfile", "-Command", "Get-Process | Select-Object -ExpandProperty ProcessName"],
+          parse: (stdout) => String(stdout || "").split(/\r?\n/).filter((line) => line.trim())
+        }
+      ]
+    : [
+        {
+          command: "ps",
+          args: ["-axo", "comm="],
+          parse: (stdout) => String(stdout || "").split(/\r?\n/).filter((line) => line.trim())
+        }
+      ];
+  const errors = [];
+  for (const attempt of attempts) {
+    const result = spawnSync(attempt.command, attempt.args, {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true,
+    timeout: 30000
+    });
+    const display = commandForDisplay(attempt.command, attempt.args);
+    if (result.error || result.status !== 0) {
+      errors.push(`${display}: ${result.error?.message || String(result.stderr || result.stdout || `exit ${result.status}`).trim()}`);
+      continue;
+    }
+    const names = attempt.parse(result.stdout);
+    return {
+      ok: true,
+      command: display,
+      names: names.map(normalizeProcessName).filter(Boolean)
+    };
+  }
+  return {
+    ok: false,
+    command: attempts.map((attempt) => commandForDisplay(attempt.command, attempt.args)).join(" | "),
+    error: errors.join("; ")
+  };
+}
+
+function processAuditPayload() {
+  const collected = processCommandNames();
+  const counts = new Map();
+  if (collected.ok) {
+    for (const name of collected.names) {
+      if (!PROCESS_AUDIT_NAMES.has(name)) continue;
+      counts.set(name, (counts.get(name) || 0) + 1);
+    }
+  }
+  const matches = Array.from(counts.entries())
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([name, count]) => ({ name, count }));
+  return {
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    platform: process.platform,
+    command: collected.command,
+    status: collected.ok ? "ok" : "attention",
+    matches,
+    total: matches.reduce((sum, entry) => sum + entry.count, 0),
+    error: collected.ok ? null : redactSensitiveOutput(collected.error || ""),
+    safety: [
+      "Read-only process count.",
+      "No process is stopped or killed.",
+      "Ask before stopping persistent MCP, browser, Serena, Python, or Node processes."
+    ]
+  };
+}
+
+function runProcesses() {
+  const payload = processAuditPayload();
+  if (options.json) {
+    console.log(JSON.stringify(payload, null, 2));
+    return { ok: true };
+  }
+
+  console.log(`${ICONS.docs} ${localText("Codex Chef process audit", "Codex Chef surec denetimi")}`);
+  console.log(`${styleLabel(localText("Scope", "Kapsam"))}: ${localText("read-only count; no process is stopped.", "read-only sayim; hicbir surec durdurulmaz.")}`);
+  console.log(`${styleLabel(localText("Command", "Komut"))}: ${payload.command}`);
+  if (payload.error) {
+    console.log(`${ICONS.warn} ${localText("Process audit could not run:", "Surec denetimi calisamadi:")} ${payload.error}`);
+    return { ok: true };
+  }
+  console.log(`${styleLabel(localText("Total matching processes", "Eslesen toplam surec"))}: ${payload.total}`);
+  printRows(
+    payload.matches,
+    isTr()
+      ? [
+          { key: "name", label: "surec" },
+          { key: "count", label: "sayi" }
+        ]
+      : [
+          { key: "name", label: "process" },
+          { key: "count", label: "count" }
+        ],
+    localText("No Serena, uvx, browser, Python, or Node processes matched.", "Serena, uvx, browser, Python veya Node sureci eslesmedi.")
+  );
+  console.log("");
+  console.log(styleHeading(localText("Safety", "Guvenlik")));
+  for (const item of payload.safety) console.log(`- ${item}`);
+  return { ok: true };
 }
 
 function runDiagnostics() {
@@ -2015,6 +2177,8 @@ async function runAction(action) {
       return runRouting();
     case "diagnostics":
       return runDiagnostics();
+    case "processes":
+      return runProcesses();
     case "auth":
       return runAuth();
     case "logs":

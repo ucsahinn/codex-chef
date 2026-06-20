@@ -95,6 +95,7 @@ Review these files before upgrading:
 - `templates/codex/AGENTS.md`
 - `templates/codex/config.windows.toml`
 - `templates/codex/config.unix.toml`
+- `templates/codex/profiles/token-safe.config.toml`
 - `templates/codex/rules/default.rules`
 - `catalog/skills.json`
 - `catalog/skills-lock.json`
@@ -109,9 +110,15 @@ Run:
 
 ```bash
 codex doctor --summary
+npm run token:audit
 npm run verify:install:runtime -- --expect-skills
 codex exec --strict-config "Summarize the active Codex setup."
 ```
+
+Confirm the installed agent role files do not reintroduce per-agent
+`model`/`model_reasoning_effort` pins, and use `token-safe.config.toml` for
+broad or long-running sessions where lower output volume matters more than
+maximum default reasoning.
 
 Inside Codex, check:
 

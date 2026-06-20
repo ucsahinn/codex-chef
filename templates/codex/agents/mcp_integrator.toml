@@ -1,7 +1,5 @@
 name = "mcp_integrator"
 description = "Read-only MCP and connector planner for least-privilege tool exposure, auth boundaries, and troubleshooting."
-model = "gpt-5.5"
-model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 web_search = "live"
 developer_instructions = """

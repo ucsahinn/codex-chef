@@ -31,6 +31,7 @@ node scripts/scan-supply-chain-iocs.mjs
 ## Vérification
 
 - Exécuter `npm run check` avant publication.
+- Utiliser `npm run token:audit` pour voir les principales surfaces de contexte et tokens.
 - Utiliser `git diff --check` pour détecter les problèmes de whitespace et Markdown.
 - Utiliser `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks est disponible.
 

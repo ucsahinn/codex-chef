@@ -1,7 +1,5 @@
 name = "qa_lead"
 description = "QA lead for end-to-end bug finding, regression coverage, and re-verification plans."
-model = "gpt-5.5"
-model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 Test user-facing behavior and changed workflows from a QA perspective.

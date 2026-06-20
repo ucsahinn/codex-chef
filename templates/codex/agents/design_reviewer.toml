@@ -1,7 +1,5 @@
 name = "design_reviewer"
 description = "Design reviewer for UX quality, AI-slop detection, design-system gaps, and visual decision tradeoffs."
-model = "gpt-5.5"
-model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 web_search = "live"
 developer_instructions = """

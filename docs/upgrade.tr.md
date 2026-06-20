@@ -90,6 +90,7 @@ Upgrade öncesi şu dosyaları incele:
 - `templates/codex/AGENTS.md`
 - `templates/codex/config.windows.toml`
 - `templates/codex/config.unix.toml`
+- `templates/codex/profiles/token-safe.config.toml`
 - `templates/codex/rules/default.rules`
 - `catalog/skills.json`
 - `catalog/skills-lock.json`
@@ -104,9 +105,15 @@ Upgrade öncesi şu dosyaları incele:
 
 ```bash
 codex doctor --summary
+npm run token:audit
 npm run verify:install:runtime -- --expect-skills
 codex exec --strict-config "Summarize the active Codex setup."
 ```
+
+Kurulu agent role dosyalarinin agent bazli `model` /
+`model_reasoning_effort` pinlerini geri getirmedigini dogrula. Broad veya uzun
+session'larda maksimum default reasoning yerine daha dusuk cikti hacmi onemliyse
+`token-safe.config.toml` kullan.
 
 Codex içinde kontrol et:
 

@@ -1,0 +1,15 @@
+# Token-safe Codex profile.
+# Copy or merge when a session needs lower context spend without disabling the
+# Codex Chef agent, skill, MCP, memory, hook, or app surfaces.
+
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+model_reasoning_effort = "low"
+model_reasoning_summary = "none"
+model_verbosity = "low"
+model_auto_compact_token_limit = 64000
+tool_output_token_limit = 6000
+
+[sandbox_workspace_write]
+network_access = false
