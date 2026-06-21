@@ -83,7 +83,8 @@ function runCliSmokeRaw(name, cliArgs, extra = {}) {
   const result = spawnSync(process.execPath, [path.join(root, "scripts/chef-cli.mjs"), ...cliArgs], {
     cwd: extra.cwd || root,
     encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
+    input: extra.input,
+    stdio: [extra.input === undefined ? "ignore" : "pipe", "pipe", "pipe"],
     env: {
       ...process.env,
       ...(extra.env || {})
@@ -101,6 +102,58 @@ function runCliSmokeRaw(name, cliArgs, extra = {}) {
     return { ok: false, output, stdout: result.stdout || "", stderr: result.stderr || "" };
   }
   return { ok: true, output, stdout: result.stdout || "", stderr: result.stderr || "" };
+}
+
+function countOccurrences(value, needle) {
+  return String(value || "").split(needle).length - 1;
+}
+
+function runMenuTranscriptSmoke() {
+  const baseEnv = {
+    CODEX_CHEF_TEST_MENU: "1",
+    FORCE_COLOR: "0",
+    NO_COLOR: "1"
+  };
+  const invalid = runCliSmokeRaw("menu-invalid-input-transcript", ["--plain", "--no-log"], {
+    env: baseEnv,
+    input: "\nabc\n999\nq\n",
+    timeout: 30000
+  });
+  if (invalid.ok) {
+    if (!invalid.output.includes("Operator menu")) fail("chef-cli menu transcript must render the operator menu");
+    if (!invalid.output.includes("Shortcuts: l = language, q = quit")) fail("chef-cli menu transcript must show language and quit shortcuts");
+    if (countOccurrences(invalid.output, "Operator menu") !== 1) {
+      fail("chef-cli menu transcript must not repaint the full menu for empty or invalid input");
+    }
+    if (countOccurrences(invalid.output, "Choose 1-") < 3) {
+      fail("chef-cli menu transcript must give compact validation for empty and invalid input");
+    }
+  }
+
+  const language = runCliSmokeRaw("menu-language-toggle-transcript", ["--plain", "--no-log"], {
+    env: baseEnv,
+    input: "l\nq\n",
+    timeout: 30000
+  });
+  if (language.ok) {
+    for (const snippet of ["Running: Language", "Dil Turkce olarak ayarlandi", "Dil: tamam", "Operator menusu"]) {
+      if (!language.output.includes(snippet)) fail(`chef-cli menu language transcript missing output snippet: ${snippet}`);
+    }
+  }
+
+  const action = runCliSmokeRaw("menu-action-return-transcript", ["--plain", "--no-log"], {
+    env: baseEnv,
+    input: "2\n\nq\n",
+    timeout: 180000
+  });
+  if (action.ok) {
+    for (const snippet of ["Running: Repo-only status", "Press Enter to return to the menu.", "Repo-only status:"]) {
+      if (!action.output.includes(snippet)) fail(`chef-cli menu action transcript missing output snippet: ${snippet}`);
+    }
+    if (countOccurrences(action.output, "Operator menu") !== 2) {
+      fail("chef-cli menu action transcript must render one menu before action and one menu after explicit return");
+    }
+  }
 }
 
 function runCliJsonSmoke(name, cliArgs) {
@@ -400,6 +453,26 @@ if (!exists(cliPath)) {
     if (!cli.includes(required)) fail(`${cliPath} missing required CLI surface: ${required}`);
   }
 
+  for (const requiredMenuUx of [
+    "printMenu",
+    "printDivider",
+    "printActionStart",
+    "printActionEnd",
+    "pauseBeforeMenu",
+    "toggleLanguage",
+    "Operator menu",
+    "Operator menusu",
+    "Press Enter to return to the menu",
+    "Menuye donmek icin Enter'a basin",
+    "Shortcuts: l = language, q = quit",
+    "Kisayollar: l = dil, q = cikis",
+    "CODEX_CHEF_TEST_MENU",
+    "Language switched to English",
+    "Dil Turkce olarak ayarlandi"
+  ]) {
+    if (!cli.includes(requiredMenuUx)) fail(`${cliPath} missing interactive menu UX surface: ${requiredMenuUx}`);
+  }
+
   if (/update-install",\s*"\\.\\scripts\\install\.ps1",\s*\[[^\]]*"-All"/s.test(cli)) {
     fail(`${cliPath} update-install must not use -All because update is scoped to managed files, not curated skills`);
   }
@@ -426,6 +499,7 @@ if (!exists(cliPath)) {
     "Processes",
     "Auth",
     "Logs",
+    "Language",
     "Update"
   ]) {
     if (!new RegExp(`\\b${requiredLabel}\\b`).test(cli)) fail(`${cliPath} missing menu label: ${requiredLabel}`);
@@ -506,6 +580,7 @@ runCliSmoke("help-tr-env", ["--help", "--plain", "--no-log"], [
   },
   forbidAnsi: true
 });
+runMenuTranscriptSmoke();
 runBackupsFixtureSmokes();
 runCliErrorSmoke("unknown-option", ["--bad-flag", "--plain", "--no-log"], [
   "Codex Chef CLI error: Unknown option --bad-flag",
@@ -627,7 +702,7 @@ runCliSmoke("update-preview", ["--update", "--plain", "--no-log"], [
   "No managed or global files changed",
   "npm run chef -- --update --apply",
   "excludes curated global skill installs",
-  "Managed overwrite targets",
+  "Would affect",
   "Full evidence"
 ], {
   forbiddenSnippets: ["What if:"],
@@ -635,9 +710,9 @@ runCliSmoke("update-preview", ["--update", "--plain", "--no-log"], [
 });
 runCliSmoke("update-preview-tr", ["--update", "--tr", "--plain", "--no-log"], [
   "Guncelleme preview",
-  "Degisiklik yapilmadi",
+  "Managed veya global dosya degismedi",
   "npm run chef -- --update --apply",
-  "Managed overwrite hedefleri",
+  "Etkilenecek alanlar",
   "Tam kanit"
 ], {
   forbiddenSnippets: ["What if:"],

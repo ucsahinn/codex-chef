@@ -113,14 +113,14 @@ are selected:
 
 ### Subagent Visibility Contract
 
-- Treat subagents as explicit delegation, not background magic. When the user
-  asks for parallel or delegated work, or this global setup authorizes automatic
-  task-shape routing, deliberately spawn the matching specialist and wait for a
+- Treat subagents as explicit delegation, not background magic. Codex only
+  spawns subagents when the user explicitly asks for subagents, delegation, or
+  parallel agent work, or when the current runtime contract explicitly permits
+  delegation for the active task.
+- Treat this section as routing policy and preparation guidance, not hidden
+  auto-spawn permission. When delegation is allowed by the user request and the
+  current runtime, deliberately spawn the matching specialist and wait for a
   summarized result before relying on it.
-- Treat this section as the user's standing explicit request for matching
-  non-trivial task-shape delegation in this setup. Do not describe it as hidden
-  or platform-native auto-spawn; if the current Codex surface requires explicit
-  delegation, this policy and the user's prompt are the delegation request.
 - When delegation is used, make it visible. Before spawning, print an
   `Agent plan` that names each requested agent, its scope, why it is needed,
   expected output, and whether you will wait. After spawning, print

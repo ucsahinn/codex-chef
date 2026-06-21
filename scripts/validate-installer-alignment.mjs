@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { inspectMarketplaceEntry, writeMarketplaceEntry } from "./upsert-marketplace-entry.mjs";
 
 const root = path.resolve(process.cwd());
 const failures = [];
@@ -8,6 +10,7 @@ const failures = [];
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "manifests", "install-plan.json"), "utf8"));
 const ps = fs.readFileSync(path.join(root, "scripts", "install.ps1"), "utf8");
 const sh = fs.readFileSync(path.join(root, "scripts", "install.sh"), "utf8");
+const marketplaceHelper = fs.readFileSync(path.join(root, "scripts", "upsert-marketplace-entry.mjs"), "utf8");
 
 function fail(message) {
   failures.push(message);
@@ -23,6 +26,86 @@ function requireRegex(text, pattern, label) {
 
 function operation(id) {
   return manifest.operations.find((item) => item.id === id);
+}
+
+function runMarketplaceHelperSmokes() {
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-marketplace-"));
+  const marketplacePath = path.join(fixtureRoot, "agents", "plugins", "marketplace.json");
+  const pluginTarget = path.join(fixtureRoot, "codex", "plugins", "codex-chef-workflows");
+  fs.mkdirSync(path.dirname(marketplacePath), { recursive: true });
+
+  fs.writeFileSync(
+    marketplacePath,
+    `${JSON.stringify(
+      {
+        name: "personal",
+        plugins: [
+          {
+            name: "other-plugin",
+            source: { source: "local", path: "C:/other/plugin" },
+            policy: { installation: "AVAILABLE", authentication: "NONE" },
+            category: "Testing",
+            interface: { displayName: "Other Plugin", shortDescription: "Must survive." }
+          },
+          {
+            name: "codex-chef-workflows",
+            source: { source: "local", path: "C:/old/plugin" },
+            policy: { installation: "AVAILABLE", authentication: "NONE" },
+            category: "Productivity",
+            interface: { displayName: "Codex Chef Workflows", shortDescription: "Security-first Codex setup maintenance workflow." }
+          }
+        ]
+      },
+      null,
+      2
+    )}\n`,
+    "utf8"
+  );
+
+  const before = inspectMarketplaceEntry(marketplacePath, pluginTarget);
+  if (!before.changed) fail("Marketplace helper smoke must detect stale Codex Chef plugin path.");
+
+  writeMarketplaceEntry(marketplacePath, pluginTarget);
+  const written = JSON.parse(fs.readFileSync(marketplacePath, "utf8"));
+  const other = written.plugins.find((plugin) => plugin.name === "other-plugin");
+  const chef = written.plugins.find((plugin) => plugin.name === "codex-chef-workflows");
+  if (!other || other.interface?.displayName !== "Other Plugin") {
+    fail("Marketplace helper smoke must preserve unrelated plugin entries and interface metadata.");
+  }
+  if (!chef || chef.source?.path !== pluginTarget) {
+    fail("Marketplace helper smoke must update the Codex Chef plugin path.");
+  }
+  if (chef.interface?.shortDescription !== "Security-first Codex setup maintenance workflow.") {
+    fail("Marketplace helper smoke must preserve Codex Chef interface metadata.");
+  }
+  const after = inspectMarketplaceEntry(marketplacePath, pluginTarget);
+  if (after.changed) fail("Marketplace helper smoke must report current after write.");
+
+  const invalidPath = path.join(fixtureRoot, "invalid-marketplace.json");
+  fs.writeFileSync(invalidPath, "{not-json", "utf8");
+  try {
+    inspectMarketplaceEntry(invalidPath, pluginTarget);
+    fail("Marketplace helper smoke must fail closed on invalid JSON.");
+  } catch {
+    // Expected.
+  }
+
+  const badShapePath = path.join(fixtureRoot, "bad-shape-marketplace.json");
+  fs.writeFileSync(badShapePath, JSON.stringify({ name: "bad", plugins: "not-an-array" }), "utf8");
+  try {
+    inspectMarketplaceEntry(badShapePath, pluginTarget);
+    fail("Marketplace helper smoke must fail closed when plugins is not an array.");
+  } catch {
+    // Expected.
+  }
+
+  const bomPath = path.join(fixtureRoot, "bom-marketplace.json");
+  fs.writeFileSync(bomPath, `\uFEFF${JSON.stringify({ name: "bom", plugins: [] })}`, "utf8");
+  try {
+    inspectMarketplaceEntry(bomPath, pluginTarget);
+  } catch {
+    fail("Marketplace helper smoke must accept valid UTF-8 JSON with a BOM.");
+  }
 }
 
 for (const id of manifest.profiles.default || []) {
@@ -85,6 +168,9 @@ requireText(ps, "agents", "PowerShell installer");
 requireText(ps, "profiles", "PowerShell installer");
 requireText(ps, "plugins\\codex-chef-workflows", "PowerShell installer");
 requireText(ps, "marketplace.json", "PowerShell installer");
+requireText(ps, "upsert-marketplace-entry.mjs", "PowerShell installer");
+requireText(ps, "Upsert Codex Chef plugin marketplace entry", "PowerShell installer");
+requireText(ps, "Cannot update plugin marketplace because it is invalid or unreadable", "PowerShell installer");
 requireText(ps, "templates\\git\\.gitignore_global", "PowerShell installer");
 requireText(ps, "templates\\git\\pre-commit", "PowerShell installer");
 requireText(ps, "core.excludesfile", "PowerShell installer");
@@ -137,6 +223,11 @@ requireText(sh, "/agents", "Bash installer");
 requireText(sh, "/profiles", "Bash installer");
 requireText(sh, "plugins/codex-chef-workflows", "Bash installer");
 requireText(sh, "marketplace.json", "Bash installer");
+requireText(sh, "upsert-marketplace-entry.mjs", "Bash installer");
+requireText(sh, "Would upsert Codex Chef plugin marketplace entry", "Bash installer");
+requireText(sh, "Cannot update plugin marketplace because it is invalid or unreadable", "Bash installer");
+requireText(sh, "Backup failed; refusing to replace managed target without a backup", "Bash installer");
+requireText(sh, "Failed to replace existing managed directory", "Bash installer");
 requireText(sh, "templates/git/.gitignore_global", "Bash installer");
 requireText(sh, "templates/git/pre-commit", "Bash installer");
 requireText(sh, "core.excludesfile", "Bash installer");
@@ -167,6 +258,20 @@ for (const op of manifest.operations) {
     fail(`Only git operations should require InstallGitGuards: ${op.id}`);
   }
 }
+
+const marketplaceOperation = operation("plugin-marketplace");
+if (marketplaceOperation?.collision !== "upsert-entry-with-backup") {
+  fail("plugin-marketplace collision must be upsert-entry-with-backup.");
+}
+if (!/unrelated marketplace plugins are preserved/i.test(marketplaceOperation?.conflictPolicy || "")) {
+  fail("plugin-marketplace conflictPolicy must promise unrelated marketplace plugins are preserved.");
+}
+requireText(marketplaceHelper, ".agents", "Marketplace upsert helper");
+requireText(marketplaceHelper, "sourceMarketplacePath", "Marketplace upsert helper");
+requireText(marketplaceHelper, "--check", "Marketplace upsert helper");
+requireText(marketplaceHelper, "--write", "Marketplace upsert helper");
+requireText(marketplaceHelper, "stableJson", "Marketplace upsert helper");
+runMarketplaceHelperSmokes();
 
 if (failures.length > 0) {
   console.error("Installer alignment validation failed:");

@@ -18,6 +18,9 @@ Codex safety model.
   a reviewed app-specific override changes them.
 - Global command rules are narrow and biased toward read-only discovery and
   local verification.
+- Repository-controlled `npm run ...` scripts prompt instead of being
+  auto-approved by the global rule baseline, because package scripts can run
+  arbitrary shell code from the current repository.
 - `token-safe.config.toml` reduces verbosity, default reasoning, compaction
   threshold, and tool-output size without disabling skills, agents, MCP
   servers, memory, hooks, or apps.
@@ -41,6 +44,10 @@ Rules used in this starter:
 - Read-only documentation MCPs may use `default_tools_approval_mode =
   "approve"`; browser, account, filesystem, database, production, and mutating
   tools should use `"prompt"`.
+- Browser network listing can be approved for local QA, but request/response
+  detail tools such as Playwright `browser_network_request` and Chrome DevTools
+  `get_network_request` prompt because they may expose headers, cookies, or
+  response bodies.
 - Apps/connectors also have a separate `[apps._default]` gate:
   `enabled = false`, `destructive_enabled = false`, and
   `open_world_enabled = false` are part of the reviewed templates.
@@ -98,6 +105,10 @@ hook, telemetry, or skill catalogs are not imported by default.
 Codex, Agents, and optional Git-guard targets so adjacent harness homes such as
 `.claude`, `.cursor`, `.opencode`, `.zed`, and `.vscode` cannot drift into the
 install surface silently.
+
+Installers upsert only the `codex-chef-workflows` marketplace entry. They do
+not replace the full marketplace file, and they fail closed if an existing
+marketplace file is invalid, unreadable, or not a JSON object.
 
 ## Repair Mode
 
@@ -158,6 +169,8 @@ project-native verification commands. It prompts for:
 - global skill installation
 - package publishing
 - GitHub API operations
+- repository-controlled `npm run ...` script execution
+- broad `git config` reads and raw, unredacted `gitleaks dir`
 - git commit, push, reset, checkout, and restore
 - ad-hoc `npx` package execution outside exact allowlisted helpers
 

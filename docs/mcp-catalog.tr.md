@@ -19,6 +19,13 @@ Status kaniti bilincli olarak ayrilir:
 Bir connector'u sadece catalog'da var diye live kabul etme; live komut veya
 `/mcp` bunu dogrulamalidir.
 
+Varsayilan acik olmak, Codex Chef'in server config'ini yazdigi ve launcher'in
+makinede olmasini bekledigi anlamina gelir; mevcut makinede live MCP session
+oldugunun kaniti degildir. Node/npx tabanli default'lar pinned package'lar icin
+Node ve ilk calismada network ister. Serena ayrica `uvx` ister; fresh machine'de
+`uvx` yoksa Serena'yi disable et veya status notunu repo hatasi degil setup
+onkosulu olarak ele al.
+
 Resmi kaynak:
 
 https://developers.openai.com/codex/mcp
@@ -40,15 +47,15 @@ launcher'lar full commit SHA ve matching catalog `sourceRef` icermelidir.
 
 ## Varsayilan Acik
 
-| Server | Amac | Not |
+| Server | Amac | Startup onkosulu |
 | --- | --- | --- |
-| `openaiDeveloperDocs` | Resmi OpenAI developer docs | Streamable HTTP |
-| `context7` | Guncel library/framework dokumanlari | `npx` uzerinden stdio |
-| `sequential-thinking` | Yapilandirilmis dusunme/decomposition | Lokal stdio helper |
-| `playwright` | Browser otomasyonu ve UI dogrulama | Lokal browser kontrolu |
-| `chrome-devtools` | Chrome inspection ve audit | Isolated, network header redacted |
-| `serena` | Semantic code navigation | Pinned git source ref ile `uvx` kullanir |
-| `memory` | Lokal memory graph | Secret yazma |
+| `openaiDeveloperDocs` | Resmi OpenAI developer docs | Streamable HTTP; lokal launcher yok |
+| `context7` | Guncel library/framework dokumanlari | Node/npx first-run package download |
+| `sequential-thinking` | Yapilandirilmis dusunme/decomposition | Node/npx first-run package download |
+| `playwright` | Browser otomasyonu ve UI dogrulama | Node/npx ve lokal browser kontrolu |
+| `chrome-devtools` | Chrome inspection ve audit | Node/npx ve isolated Chrome/DevTools bridge |
+| `serena` | Semantic code navigation | `uvx` ve pinned git source ref; yoksa disable et |
+| `memory` | Lokal memory graph | Node/npx; secret yazma |
 
 ## Gerektiginde Ac
 

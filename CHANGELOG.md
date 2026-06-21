@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+## 0.5.31 - 2026-06-21
+
+- Clarified task-shape routing so Codex Chef's installed `AGENTS.md`, docs,
+  routing profiles, status board, and validators treat subagent delegation as
+  explicit user/runtime authorization instead of hidden auto-spawn behavior.
+- Hardened the default command and MCP approval baseline: repository-controlled
+  `npm run ...`, broad `git config`, raw `gitleaks dir`, and browser
+  request/response detail tools now prompt instead of being globally
+  auto-approved.
+- Changed PowerShell and Bash installers to upsert only the Codex Chef plugin
+  marketplace entry, preserving unrelated marketplace plugins and failing
+  closed on invalid marketplace JSON.
+- Improved `npm run chef` interactive UX with an in-menu language control,
+  aligned compact menu rows, selected-action separators, Enter-to-return flow
+  after long output, and terminal-safe compact tables for skills and MCP boards.
+- Added a shared marketplace-entry helper so installer and repair flows preserve
+  canonical plugin UI metadata and tolerate valid UTF-8 JSON files with a BOM
+  on Windows.
+- Tightened Bash installer replacement handling so backup and managed-directory
+  replacement failures fail closed while dry-run still prints the full preview.
+
 ## 0.5.30 - 2026-06-20
 
 - Added `token-safe.config.toml`, `npm run token:audit`,

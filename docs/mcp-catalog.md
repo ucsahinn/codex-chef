@@ -19,6 +19,13 @@ Status evidence is intentionally split:
 Do not treat a cataloged connector as live until the live command or `/mcp`
 confirms it.
 
+Default-enabled means Codex Chef writes the server config and expects the
+launcher to be present; it is not proof that the current machine already has a
+live MCP session. Node/npx-backed defaults need Node and first-run network
+access for pinned packages. Serena additionally needs `uvx`; if `uvx` is not
+available on a fresh machine, disable Serena or treat its status note as a setup
+prerequisite rather than a repo failure.
+
 Official Codex MCP reference:
 
 https://developers.openai.com/codex/mcp
@@ -40,15 +47,15 @@ must include a full commit SHA and matching catalog `sourceRef`.
 
 ## Enabled By Default
 
-| Server | Purpose | Notes |
+| Server | Purpose | Startup prerequisite |
 | --- | --- | --- |
-| `openaiDeveloperDocs` | Official OpenAI developer docs | Streamable HTTP, documentation-oriented |
-| `context7` | Current library/framework docs | Stdio through `npx`; useful for version-sensitive APIs |
-| `sequential-thinking` | Structured decomposition | Local stdio helper |
-| `playwright` | Browser automation and UI verification | Local browser control |
-| `chrome-devtools` | Chrome inspection and Lighthouse-style checks | Runs isolated and redacts network headers |
-| `serena` | Semantic code navigation | Uses `uvx` with a pinned git source ref; can be disabled if unavailable |
-| `memory` | Local MCP memory graph | Optional; avoid storing secrets |
+| `openaiDeveloperDocs` | Official OpenAI developer docs | Streamable HTTP; no local launcher |
+| `context7` | Current library/framework docs | Node/npx first-run package download |
+| `sequential-thinking` | Structured decomposition | Node/npx first-run package download |
+| `playwright` | Browser automation and UI verification | Node/npx plus local browser control |
+| `chrome-devtools` | Chrome inspection and Lighthouse-style checks | Node/npx plus isolated Chrome/DevTools bridge |
+| `serena` | Semantic code navigation | `uvx` plus pinned git source ref; disable if unavailable |
+| `memory` | Local MCP memory graph | Node/npx; avoid storing secrets |
 
 ## Disabled Until Needed
 

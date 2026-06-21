@@ -388,35 +388,24 @@ Install-Directory -Source $PluginSource -Destination $PluginTarget
 $MarketplaceDir = Join-Path $AgentsHome "plugins"
 Ensure-Dir $MarketplaceDir
 $MarketplacePath = Join-Path $MarketplaceDir "marketplace.json"
-if ((Test-Path -LiteralPath $MarketplacePath) -and -not $Force) {
-  $Script:SkippedExistingCount += 1
-} else {
+$MarketplaceHelper = Join-Path $RepoRoot "scripts\upsert-marketplace-entry.mjs"
+& node $MarketplaceHelper $MarketplacePath $PluginTarget --check
+$marketplaceCheckExit = $LASTEXITCODE
+if ($marketplaceCheckExit -eq 2) {
   Backup-Target $MarketplacePath
-  $marketplace = [ordered]@{
-    name = "codex-chef"
-    plugins = @(
-      [ordered]@{
-        name = "codex-chef-workflows"
-        source = [ordered]@{
-          source = "local"
-          path = $PluginTarget
-        }
-        policy = [ordered]@{
-          installation = "AVAILABLE"
-          authentication = "NONE"
-        }
-        category = "Productivity"
-      }
-    )
-  }
-  $json = $marketplace | ConvertTo-Json -Depth 10
-  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-  $changed = Invoke-Change -Target $MarketplacePath -Action "Install plugin marketplace" -ScriptBlock {
-    [System.IO.File]::WriteAllText($MarketplacePath, $json + [Environment]::NewLine, $utf8NoBom)
+  $changed = Invoke-Change -Target $MarketplacePath -Action "Upsert Codex Chef plugin marketplace entry" -ScriptBlock {
+    & node $MarketplaceHelper $MarketplacePath $PluginTarget --write
+    if ($LASTEXITCODE -ne 0) {
+      throw "Cannot update plugin marketplace because the helper failed with code $LASTEXITCODE`: $MarketplacePath"
+    }
   }
   if ($changed) {
-    Write-Action -Status "installed" -Message $MarketplacePath
+    Write-Action -Status "updated marketplace" -Message $MarketplacePath
   }
+} elseif ($marketplaceCheckExit -eq 0) {
+  $Script:SkippedExistingCount += 1
+} else {
+  throw "Cannot update plugin marketplace because it is invalid or unreadable: $MarketplacePath"
 }
 
 if ($InstallGitGuards) {

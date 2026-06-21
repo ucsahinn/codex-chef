@@ -168,7 +168,7 @@ approval_mode = "approve"
 approval_mode = "approve"
 
 [mcp_servers.playwright.tools.browser_network_request]
-approval_mode = "approve"
+approval_mode = "prompt"
 
 [mcp_servers.playwright.tools.browser_wait_for]
 approval_mode = "approve"
@@ -206,7 +206,7 @@ approval_mode = "approve"
 approval_mode = "approve"
 
 [mcp_servers.chrome-devtools.tools.get_network_request]
-approval_mode = "approve"
+approval_mode = "prompt"
 
 [mcp_servers.chrome-devtools.tools.wait_for]
 approval_mode = "approve"

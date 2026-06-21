@@ -87,6 +87,13 @@ npm run chef -- --help --lang tr
 npm run chef -- --status --repo-only --no-log
 ```
 
+Interaktif menu hizali kolonlar, terminal ANSI destekliyorsa renkli write
+siniri etiketleri ve mevcut oturumda Turkce/Ingilizce gecis icin yerlesik
+**Dil** satiri kullanir. Secilen komut uzun status, tanilama, backup, MCP veya
+routing panosu bastiktan sonra CLI menuye donmeden once Enter bekler; boylece
+yeni menu kanit ciktisinin ustune binmez. Kopyalanabilir ASCII cikti icin
+`--plain` kullan.
+
 Menu her aksiyonun write sinirini gosterir. `--status`, `--doctor`,
 `--preview`, `--skills`, `--mcp`, `--routing`, `--diagnostics`, `--processes`,
 `--auth` ve `--logs` varsayilan olarak
@@ -495,7 +502,7 @@ Faydali dogrulama komutlari:
 
 | Komut | Neyi kanitlar |
 | --- | --- |
-| `npm run codex:status` | Repo sagligini, kurulu runtime drift'ini, MCP setup notlarini, routing profillerini ve effective controls ozetini gosterir. |
+| `npm run codex:status` | Repo sagligini, kurulu runtime drift'ini, MCP setup notlarini, routing profillerini ve effective controls ozetini gosterir. Hizli lokal pano icin `-- --repo-only` ekle. |
 | `npm run codex:status:all` | Ayni status panosuna beklenen curated skill ve opsiyonel Git guard kontrollerini ekler. |
 | `npm run chef -- --diagnostics --no-log` | Canli saglik, attention nedenleri, sonraki guvenli adimlar, kanit komutlari, log kok dizini, backup/log ozetleri, update/repair preview girisleri ve surec denetimi rehberi iceren read-only tanilama menusu. |
 | `npm run chef -- --processes --no-log` | Serena, MCP, browser, Python ve Node sureclerini read-only sayar; surec durdurmaz. |

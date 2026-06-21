@@ -2,6 +2,47 @@
 
 ## Unreleased
 
+## v0.5.31 - 2026-06-21
+
+This release keeps Codex Chef autonomous where it is safe, but makes
+delegation, installer writes, and sensitive tool output boundaries more
+explicit.
+
+## Highlights
+
+- Routing profiles, `AGENTS.md`, docs, status output, and validators now state
+  that subagent delegation is explicit user/runtime authorization, not hidden
+  platform-native auto-spawn behavior.
+- Repository-controlled `npm run ...`, broad `git config`, raw `gitleaks dir`,
+  and browser request/response detail tools now prompt in the shipped baseline.
+- PowerShell and Bash installers upsert only the Codex Chef marketplace entry
+  instead of replacing unrelated plugin entries.
+- `npm run chef` now has an interactive language control, compact aligned menu
+  rows, action start/end separators, an Enter-to-return pause after long
+  evidence output, and compact terminal-safe tables instead of wide
+  `console.table` output for skills and MCP boards.
+- A shared marketplace-entry helper keeps installer and repair output aligned
+  with the canonical plugin UI metadata and accepts valid UTF-8 JSON with a BOM
+  on Windows.
+- Bash installer managed-directory replacement and backup failures fail closed,
+  while dry-run still previews the full managed directory install path.
+
+## Verification
+
+Release readiness for this version should include:
+
+```bash
+npm run validate
+npm run check
+npm run validate:routing
+npm run validate:mcp
+npm run validate:installer
+npm run audit:security
+npm run verify:install:runtime -- --expect-skills --expect-git-guards --redact-paths
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.30 - 2026-06-20
 
 This release makes token/context control a first-class Codex Chef surface and

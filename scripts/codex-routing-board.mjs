@@ -107,6 +107,9 @@ if (options.json) {
     console.log(`  Skills: ${profile.skills.length ? profile.skills.join(", ") : "none"}`);
     console.log(`  MCP: ${profile.mcp.length ? profile.mcp.join(", ") : "none"}`);
     console.log(`  Flags/checks: ${profile.flags.join(", ")}`);
+    console.log(`  Delegation mode: ${profile.delegationMode}`);
+    console.log(`  Skill mode: ${profile.skillMode}`);
+    console.log(`  MCP mode: ${profile.mcpMode}`);
     console.log(`  Owner: ${profile.owner}`);
     console.log(`  Surface: ${profile.primarySurface}`);
     console.log(`  Durability: ${profile.durability}`);

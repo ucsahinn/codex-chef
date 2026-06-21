@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { inspectMarketplaceEntry, writeMarketplaceEntry } from "./upsert-marketplace-entry.mjs";
 
 const root = path.resolve(process.cwd());
 const args = process.argv.slice(2);
@@ -446,85 +447,46 @@ function runConfigMerge() {
   };
 }
 
-function marketplaceEntry(pluginTarget) {
-  return {
-    name: "codex-chef-workflows",
-    source: {
-      source: "local",
-      path: pluginTarget
-    },
-    policy: {
-      installation: "AVAILABLE",
-      authentication: "NONE"
-    },
-    category: "Productivity",
-    interface: {
-      displayName: "Codex Chef Workflows",
-      shortDescription: "Security-first Codex setup maintenance workflow."
-    }
-  };
-}
-
-function stableJson(value) {
-  return JSON.stringify(value);
-}
-
 function repairMarketplace() {
   const marketplacePath = path.join(options.agentsHome, "plugins", "marketplace.json");
   const pluginTarget = path.join(options.codexHome, "plugins", "codex-chef-workflows");
-  const desired = marketplaceEntry(pluginTarget);
-  let marketplace = { name: "codex-chef", plugins: [] };
-  let parseError = null;
+  let state;
 
-  if (fs.existsSync(marketplacePath)) {
-    try {
-      marketplace = JSON.parse(fs.readFileSync(marketplacePath, "utf8"));
-    } catch (error) {
-      parseError = error;
-    }
-  }
-
-  if (parseError) {
-    failures.push(`Cannot repair plugin marketplace because it is invalid JSON: ${redact(marketplacePath)} (${parseError.message})`);
+  try {
+    state = inspectMarketplaceEntry(marketplacePath, pluginTarget);
+  } catch (error) {
+    failures.push(`Cannot repair plugin marketplace because it is invalid or unreadable: ${redact(marketplacePath)} (${error.message})`);
     return { inspected: true, status: "fail", path: redact(marketplacePath) };
   }
 
-  if (!Array.isArray(marketplace.plugins)) marketplace.plugins = [];
-  const beforeCount = marketplace.plugins.length;
-  const existingIndex = marketplace.plugins.findIndex((plugin) => plugin?.name === desired.name);
-  const before = existingIndex >= 0 ? marketplace.plugins[existingIndex] : null;
-  const needsUpdate = stableJson(before) !== stableJson(desired);
-
-  if (!needsUpdate) {
+  if (!state.changed) {
     return {
       inspected: true,
       status: "current",
       path: redact(marketplacePath),
-      preservedPlugins: beforeCount
+      preservedPlugins: state.beforeCount
     };
   }
 
   if (options.apply) {
     ensureDir(path.dirname(marketplacePath));
     const backup = backupTarget(marketplacePath);
-    if (existingIndex >= 0) marketplace.plugins[existingIndex] = desired;
-    else marketplace.plugins.push(desired);
-    fs.writeFileSync(marketplacePath, `${JSON.stringify(marketplace, null, 2)}\n`, "utf8");
+    writeMarketplaceEntry(marketplacePath, pluginTarget);
     recordAction({
       id: "plugin-marketplace",
-      kind: existingIndex >= 0 ? "update-marketplace-entry" : "add-marketplace-entry",
+      kind: state.existingIndex >= 0 ? "update-marketplace-entry" : "add-marketplace-entry",
       target: marketplacePath,
       backup,
       status: "applied",
-      reason: existingIndex >= 0 ? "stale Codex Chef plugin entry" : "missing Codex Chef plugin entry"
+      reason: state.existingIndex >= 0 ? "stale Codex Chef plugin entry" : "missing Codex Chef plugin entry"
     });
   } else {
     recordAction({
       id: "plugin-marketplace",
-      kind: existingIndex >= 0 ? "update-marketplace-entry" : "add-marketplace-entry",
+      kind: state.existingIndex >= 0 ? "update-marketplace-entry" : "add-marketplace-entry",
       target: marketplacePath,
       status: "planned",
-      reason: existingIndex >= 0 ? "stale Codex Chef plugin entry" : "missing Codex Chef plugin entry"
+      reason: state.existingIndex >= 0 ? "stale Codex Chef plugin entry" : "missing Codex Chef plugin entry"
     });
   }
 
@@ -532,8 +494,8 @@ function repairMarketplace() {
     inspected: true,
     status: options.apply ? "applied" : "planned",
     path: redact(marketplacePath),
-    preservedPlugins: beforeCount,
-    action: existingIndex >= 0 ? "update-entry" : "add-entry"
+    preservedPlugins: state.beforeCount,
+    action: state.existingIndex >= 0 ? "update-entry" : "add-entry"
   };
 }
 

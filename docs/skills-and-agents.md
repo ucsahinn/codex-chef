@@ -240,12 +240,12 @@ Agent catalog rule:
 
 Routing rule:
 
-- Subagents are explicit delegation. Codex should deliberately spawn them when
-  the user asks for parallel/delegated work or the active global setup
-  authorizes task-shape routing.
-- This starter treats the global AGENTS routing section as a standing explicit
-  request for matching non-trivial task-shape delegation. It does not claim that
-  Codex has a hidden background auto-spawn scheduler.
+- Subagents are explicit delegation. Codex should deliberately spawn them only
+  when the user asks for parallel/delegated work, or when the current runtime
+  contract explicitly permits delegation for the active task.
+- This starter treats the global AGENTS routing section as routing policy and
+  preparation guidance, not hidden auto-spawn permission. It does not claim that
+  Codex has a background scheduler that silently creates agents.
 - For non-trivial work that maps to a registered specialist, use that specialist
   and summarize the result before relying on it.
 - Visible routing output should include `Agent plan`, `Agent started`,
@@ -282,10 +282,10 @@ npm run codex:status
 npm run chef -- --routing --profile starter-health
 ```
 
-Each profile names the task trigger, required subagents, relevant skills,
-allowed MCPs, expected flags/checks, evidence signals, owner, durability,
-primary surface, privilege delta, validation gate, rollback path, and the safety
-boundary. This keeps Codex Chef autonomous in the useful sense: when a task
+Each profile names the task trigger, recommended subagents, delegation mode,
+skill mode, MCP mode, expected flags/checks, evidence signals, owner,
+durability, primary surface, privilege delta, validation gate, rollback path,
+and the safety boundary. This keeps Codex Chef autonomous in the useful sense: when a task
 clearly matches a profile, the matching specialist, skill, MCP, and flag
 guidance is required unless a higher-priority instruction blocks it. It does not
 create hidden hooks or silent execution. Destructive, credentialed, publishing,

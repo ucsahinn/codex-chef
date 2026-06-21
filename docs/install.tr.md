@@ -9,10 +9,12 @@ dizini kullanır.
 - Codex CLI veya Codex app.
 - Git.
 - Doğrulama ve isteğe bağlı skill kurulumu için Node.js 18 veya üzeri.
-- Stdio MCP sunucuları veya skill kurulumu için `npx`.
+- Varsayilan stdio MCP sunuculari ve skill kurulumu icin `npx`.
 - İsteğe bağlı: daha güçlü secret taraması için Gitleaks.
-- Windows için isteğe bağlı: en iyi native sandbox deneyimi için `winget`,
-  `uvx` ve güncel Windows 11.
+- Windows için isteğe bağlı: en iyi native sandbox deneyimi için `winget` ve
+  güncel Windows 11.
+- Varsayilan Serena semantic-code MCP acik kalacaksa `uvx`. `uvx` yoksa
+  Serena'yi disable et veya status panosunda setup notu gormeyi bekle.
 
 ## PowerShell Kurulumu
 
@@ -39,6 +41,12 @@ Plan managed target'lari, opsiyonel global Git degisikliklerini, curated skill
 komutlarini, collision policy'yi, backup davranisini ve risk seviyesini listeler.
 Profile copy operation `development.config.toml`, `review.config.toml`,
 `ci.config.toml` ve `token-safe.config.toml` dosyalarini kapsar.
+
+Varsayilan acik MCP'lerin de launcher onkosullari vardir. Node/npx tabanli
+MCP'ler, Node pinned package'lari indirebildiginde baslar. Serena semantic code
+navigation icin default aciktir ama `uvx` ve pinned git source ister. Fresh
+machine'de bu launcher yoksa `/mcp` icinde live gorunmesini beklemeden once
+`uvx` kur veya `mcp_servers.serena.enabled = false` yap.
 
 Ön izleme doğruysa kur:
 
@@ -121,8 +129,10 @@ Kullanışlı parametreler:
 - `-Force`: yedek aldıktan sonra yönetilen Codex dosyalarının üzerine yazar.
   Bunu sadece bilinçli upgrade için, `-WhatIf` çıktısını inceledikten sonra
   kullan. Vermezsen mevcut `config.toml` önce yedeklenir ve sadece eksik Codex
-  Chef bloklarını alır; mevcut ajan dosyaları, rule dosyaları ve marketplace
-  dosyası atlanır.
+  Chef bloklarını alır; mevcut ajan dosyaları ve rule dosyaları atlanır.
+  Kisisel plugin marketplace dosyasi komple degistirilmez; sadece Codex Chef
+  kaydi backup sonrasi eklenir veya guncellenir, ilgisiz plugin kayitlari
+  korunur.
 - `-Repair`: ortak repair motoruyla mevcut setup'i onarir. `-WhatIf` ile
   no-write repair plani basar. `-WhatIf` olmadan managed drift'i backup alip
   duzeltir. User skill'lerini silmez.
@@ -161,6 +171,9 @@ Kullanışlı flagler:
 - `--install-git-guards`: global Git ignore ve hook ayarlarına ayrıca opt-in.
 - `--force`: backup aldıktan sonra managed hedefleri değiştirir; vermezsen
   mevcut `config.toml` merge edilir ve diğer mevcut managed dosyalar atlanır.
+  Kisisel plugin marketplace dosyasi komple degistirilmez; sadece Codex Chef
+  kaydi backup sonrasi eklenir veya guncellenir, ilgisiz plugin kayitlari
+  korunur.
 - `--repair`: mevcut global Codex setup'i icin backup'li repair uygular;
   `--dry-run` ile no-write plan verir.
 - `--no-backup`
@@ -274,8 +287,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -R
 
 Repair temizse normal install komutuna gecebilirsin. Mevcut `config.toml`
 backup alınarak merge edilir; kullanıcıya ait tablolar korunur. Diğer mevcut
-managed dosyalar `-Force` / `--force` vermediğin sürece atlanır. Managed drift
-varsa `-Repair` / `--repair` force'tan daha guvenli ilk adımdır.
+managed dosyalar `-Force` / `--force` vermediğin sürece atlanır. Kisisel
+plugin marketplace ilgisiz kayitlari korur ve sadece Codex Chef kaydini backup
+sonrasi upsert eder. Managed drift varsa `-Repair` / `--repair` force'tan daha
+guvenli ilk adımdır.
 
 ## Geri Dönüş
 

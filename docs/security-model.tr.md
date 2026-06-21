@@ -17,6 +17,9 @@ için tasarlandı.
   destructive ve open-world tool'lari kapali tutar.
 - Global command rule'ları dar kapsamlıdır ve read-only discovery ile lokal
   verification komutlarına ağırlık verir.
+- Repository-controlled `npm run ...` script'leri global rule baseline'da
+  auto-approved olmaz; prompt ister. Cunku package script'leri mevcut repo
+  icinden arbitrary shell code calistirabilir.
 - `token-safe.config.toml` skill, agent, MCP server, memory, hook veya app
   kapatmadan verbosity, default reasoning, compaction threshold ve tool-output
   boyutunu dusurur.
@@ -39,6 +42,10 @@ Bu starter'ın kuralları:
 - Read-only documentation MCP'leri `default_tools_approval_mode = "approve"`
   kullanabilir; browser, account, filesystem, database, production ve mutating
   tool'lar `"prompt"` kullanmalıdır.
+- Browser network listing lokal QA icin approved olabilir; fakat Playwright
+  `browser_network_request` ve Chrome DevTools `get_network_request` gibi
+  request/response detail tool'lari prompt ister. Bu tool'lar header, cookie
+  veya response body gibi hassas icerik gosterebilir.
 - Apps/connectors icin ayri bir `[apps._default]` kapisi vardir:
   `enabled = false`, `destructive_enabled = false` ve
   `open_world_enabled = false` incelenmis template'lerin parcasidir.
@@ -104,6 +111,10 @@ Agents ve opsiyonel Git-guard alanlarinda tutar; `.claude`, `.cursor`,
 `.opencode`, `.zed` ve `.vscode` gibi komsu harness home path'leri install
 yuzeyine sessizce giremez.
 
+Installer'lar yalniz `codex-chef-workflows` marketplace kaydini upsert eder.
+Tum marketplace dosyasini bastan yazmaz; mevcut marketplace dosyasi invalid,
+okunamaz veya JSON object degilse fail-closed davranir.
+
 ## Repair Modu
 
 `scripts/repair-install.mjs`, zaten global Codex setup'i olan kullanicilar icin
@@ -163,6 +174,8 @@ verification komutlarına izin verir. Şunları prompt'a bağlar:
 - global skill installation
 - package publishing
 - GitHub API operations
+- repository-controlled `npm run ...` script execution
+- genis `git config` okumaları ve raw, unredacted `gitleaks dir`
 - git commit, push, reset, checkout ve restore
 - exact allowlist dışındaki ad-hoc `npx` package execution
 

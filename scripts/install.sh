@@ -194,7 +194,13 @@ backup_target() {
     *) rel="$(basename "$target")" ;;
   esac
   ensure_dir "$(dirname "$BACKUP_ROOT/$rel")"
-  run_change "$BACKUP_ROOT/$rel" "back up $target" cp -R "$target" "$BACKUP_ROOT/$rel" || true
+  if ! run_change "$BACKUP_ROOT/$rel" "back up $target" cp -R "$target" "$BACKUP_ROOT/$rel"; then
+    if [ "$DRY_RUN" -eq 1 ]; then
+      return
+    fi
+    echo "Backup failed; refusing to replace managed target without a backup: $target" >&2
+    exit 1
+  fi
 }
 
 install_file() {
@@ -243,7 +249,12 @@ install_directory() {
   backup_target "$destination"
   assert_managed_directory_target "$destination"
   if [ -e "$destination" ]; then
-    run_change "$destination" "replace existing managed directory" rm -rf "$destination" || true
+    if ! run_change "$destination" "replace existing managed directory" rm -rf "$destination"; then
+      if [ "$DRY_RUN" -ne 1 ]; then
+        echo "Failed to replace existing managed directory: $destination" >&2
+        exit 1
+      fi
+    fi
   fi
   if run_change "$destination" "install directory from $source" cp -R "$source" "$destination"; then
     action "installed" "$destination"
@@ -307,36 +318,25 @@ install_directory "$PLUGIN_SOURCE" "$PLUGIN_TARGET"
 MARKETPLACE_DIR="$AGENTS_HOME_DIR/plugins"
 MARKETPLACE_PATH="$MARKETPLACE_DIR/marketplace.json"
 ensure_dir "$MARKETPLACE_DIR"
-if [ -e "$MARKETPLACE_PATH" ] && [ "$FORCE" -ne 1 ]; then
-  SKIPPED_EXISTING_COUNT=$((SKIPPED_EXISTING_COUNT + 1))
+if [ "$DRY_RUN" -eq 1 ]; then
+  echo "Would upsert Codex Chef plugin marketplace entry: $MARKETPLACE_PATH"
 else
-  backup_target "$MARKETPLACE_PATH"
-  if [ "$DRY_RUN" -eq 1 ]; then
-    echo "Would install plugin marketplace: $MARKETPLACE_PATH"
+  MARKETPLACE_HELPER="$REPO_ROOT/scripts/upsert-marketplace-entry.mjs"
+  if node "$MARKETPLACE_HELPER" "$MARKETPLACE_PATH" "$PLUGIN_TARGET" --check
+  then
+    marketplace_status=0
   else
-    node - "$MARKETPLACE_PATH" "$PLUGIN_TARGET" <<'NODE'
-const fs = require("fs");
-const [marketplacePath, pluginTarget] = process.argv.slice(2);
-const marketplace = {
-  name: "codex-chef",
-  plugins: [
-    {
-      name: "codex-chef-workflows",
-      source: {
-        source: "local",
-        path: pluginTarget
-      },
-      policy: {
-        installation: "AVAILABLE",
-        authentication: "NONE"
-      },
-      category: "Productivity"
-    }
-  ]
-};
-fs.writeFileSync(marketplacePath, `${JSON.stringify(marketplace, null, 2)}\n`, "utf8");
-NODE
-    action "installed" "$MARKETPLACE_PATH"
+    marketplace_status=$?
+  fi
+  if [ "$marketplace_status" -eq 2 ]; then
+    backup_target "$MARKETPLACE_PATH"
+    node "$MARKETPLACE_HELPER" "$MARKETPLACE_PATH" "$PLUGIN_TARGET" --write
+    action "updated marketplace" "$MARKETPLACE_PATH"
+  elif [ "$marketplace_status" -eq 0 ]; then
+    SKIPPED_EXISTING_COUNT=$((SKIPPED_EXISTING_COUNT + 1))
+  else
+    echo "Cannot update plugin marketplace because it is invalid or unreadable: $MARKETPLACE_PATH" >&2
+    exit 1
   fi
 fi
 

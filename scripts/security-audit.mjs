@@ -181,7 +181,6 @@ const secretPatterns = [
 ];
 
 const forbiddenStatePatterns = [
-  { name: "local Windows user path", pattern: /C:\\Users\\ulasc|C:\/Users\/ulasc/i },
   { name: "non-placeholder drive user path", pattern: /[A-Za-z]:[\\/]Users[\\/](?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i },
   { name: "non-placeholder Windows user path", pattern: /C:\\Users\\(?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i },
   { name: "non-placeholder macOS user path", pattern: /\/Users\/(?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i },
@@ -342,11 +341,33 @@ if (/prefix_rule\(pattern\s*=\s*\["npx\.cmd",\s*"-y",\s*"[^"]+@latest"\],\s*deci
 if (/prefix_rule\(pattern\s*=\s*\["npm\.cmd",\s*"run",\s*"clean"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
   failures.push("templates/codex/rules/default.rules must not auto-allow cleanup scripts");
 }
+if (/prefix_rule\(pattern\s*=\s*\["npm\.cmd",\s*"run"(?:,\s*"[^"]+")?\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
+  failures.push("templates/codex/rules/default.rules must not auto-allow repository-controlled npm scripts");
+}
+if (/prefix_rule\(pattern\s*=\s*\["git",\s*"config"(?:,\s*"[^"]+")?.*?\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
+  failures.push("templates/codex/rules/default.rules must not auto-allow broad git config reads");
+}
+if (/prefix_rule\(pattern\s*=\s*\["gitleaks",\s*"dir"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
+  failures.push("templates/codex/rules/default.rules must not auto-allow bare gitleaks dir without redaction");
+}
 if (/prefix_rule\(pattern\s*=\s*\["npx\.cmd",\s*"skills",\s*"add"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
   failures.push("templates/codex/rules/default.rules must not auto-allow global skill installation");
 }
 if (/prefix_rule\(pattern\s*=\s*\["npx\.cmd",\s*"skills"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
   failures.push("templates/codex/rules/default.rules must not auto-allow broad Skills CLI commands");
+}
+
+for (const configFile of ["templates/codex/config.windows.toml", "templates/codex/config.unix.toml"]) {
+  const configText = read(configFile);
+  for (const [server, tool] of [
+    ["playwright", "browser_network_request"],
+    ["chrome-devtools", "get_network_request"]
+  ]) {
+    const pattern = new RegExp(`\\[mcp_servers\\.${server.replace("-", "\\-")}\\.tools\\.${tool}\\]\\s+approval_mode\\s*=\\s*"approve"`, "m");
+    if (pattern.test(configText)) {
+      failures.push(`${configFile} must keep ${server}.${tool} prompt-gated because request details can include sensitive data`);
+    }
+  }
 }
 
 const installPlan = JSON.parse(read("manifests/install-plan.json"));

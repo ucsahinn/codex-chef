@@ -80,7 +80,6 @@ function checkPublicSafeText(filePath) {
   const rel = posix(path.relative(root, filePath));
   const text = readText(filePath);
   const forbiddenPatterns = [
-    { name: "local Windows user path", pattern: /C:\\Users\\ulasc|C:\/Users\/ulasc/i },
     { name: "non-placeholder drive user path", pattern: /[A-Za-z]:[\\/]Users[\\/](?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i },
     { name: "non-placeholder macOS user path", pattern: /\/Users\/(?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i },
     { name: "non-placeholder Linux home path", pattern: /\/home\/(?!user\b|username\b|you\b|yourname\b|yourusername\b|runner\b)[A-Za-z0-9._-]+/i },

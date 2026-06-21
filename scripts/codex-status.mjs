@@ -29,6 +29,11 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--redact-paths") options.redactPaths = true;
   else if (arg === "--expect-skills") options.expectSkills = true;
   else if (arg === "--expect-git-guards") options.expectGitGuards = true;
+  else if (arg === "--repo-only") {
+    options.skipRuntime = true;
+    options.skipCodexDoctorChecks = true;
+    options.skipCodexCli = true;
+  }
   else if (arg === "--skip-runtime") options.skipRuntime = true;
   else if (arg === "--skip-codex-doctor-checks") options.skipCodexDoctorChecks = true;
   else if (arg === "--skip-codex-cli") options.skipCodexCli = true;
@@ -61,6 +66,7 @@ Options:
   --force-output               Allow --output to replace an existing report
   --expect-skills              Fail runtime status if curated global skills are missing
   --expect-git-guards          Fail runtime status if optional Git guards are missing
+  --repo-only                  Skip installed runtime, Codex doctor, and live Codex CLI probes
   --skip-runtime               Skip installed runtime verification
   --skip-codex-doctor-checks   Skip direct Codex CLI doctor check summary
   --skip-codex-cli             Skip Codex CLI version/login/MCP probes
@@ -315,7 +321,10 @@ function inspectRoutingBoard() {
       agents: [...new Set(profiles.flatMap((profile) => profile.agents || []))].sort(),
       skills: [...new Set(profiles.flatMap((profile) => profile.skills || []))].sort(),
       mcp: [...new Set(profiles.flatMap((profile) => profile.mcp || []))].sort(),
-      flags: [...new Set(profiles.flatMap((profile) => profile.flags || []))].sort()
+      flags: [...new Set(profiles.flatMap((profile) => profile.flags || []))].sort(),
+      delegationModes: [...new Set(profiles.map((profile) => profile.delegationMode))].sort(),
+      skillModes: [...new Set(profiles.map((profile) => profile.skillMode))].sort(),
+      mcpModes: [...new Set(profiles.map((profile) => profile.mcpMode))].sort()
     },
     boundary: "Routing profiles are guidance and status evidence, not hidden execution hooks; destructive, credentialed, publishing, deployment, database, and broad filesystem actions remain approval-gated."
   };
@@ -1034,6 +1043,9 @@ if (options.json) {
   console.log(`Skills context: ${skillsContext.status} (${skillsInstalledText}; curated baseline ${skillsContext.curatedExpected})`);
   console.log(
     `Enterprise routing: ${routingBoard.profileCount} profiles (agents ${routingBoard.requiredSurfaces.agents.length}, skills ${routingBoard.requiredSurfaces.skills.length}, MCP ${routingBoard.requiredSurfaces.mcp.length}, flags/checks ${routingBoard.requiredSurfaces.flags.length})`
+  );
+  console.log(
+    `Routing modes: delegation=${routingBoard.requiredSurfaces.delegationModes.join(", ")}, skills=${routingBoard.requiredSurfaces.skillModes.join(", ")}, MCP=${routingBoard.requiredSurfaces.mcpModes.join(", ")}`
   );
   console.log(
     `Effective controls: multi_agent=${effectiveControls.features.multiAgent}, max_depth=${effectiveControls.agents.maxDepth}, approval=${effectiveControls.approvalPolicy}, sandbox=${effectiveControls.sandboxMode}, network=${effectiveControls.workspaceNetwork}, hooks=${effectiveControls.features.hooks}, managed hooks=${effectiveControls.managedHooks}, apps default=${effectiveControls.appsDefault.enabled}/destructive=${effectiveControls.appsDefault.destructiveEnabled}/open_world=${effectiveControls.appsDefault.openWorldEnabled}`

@@ -177,6 +177,9 @@ const chefPlugin = repairedMarketplace.plugins.find((plugin) => plugin.name === 
 if (!chefPlugin || chefPlugin.source?.path !== pluginTarget) {
   fail("repair apply must update the Codex Chef marketplace entry to the managed plugin target.");
 }
+if (chefPlugin?.interface?.shortDescription !== "Security-first Codex setup maintenance workflow.") {
+  fail("repair apply must preserve Codex Chef marketplace interface metadata.");
+}
 
 const repairedConfig = fs.readFileSync(path.join(codexHome, "config.toml"), "utf8");
 if (!repairedConfig.includes("# user setting must stay") || !repairedConfig.includes("[mcp_servers.")) {

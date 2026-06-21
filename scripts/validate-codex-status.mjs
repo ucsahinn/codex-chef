@@ -66,6 +66,22 @@ if (jsonResult.error) {
   fail(`codex status JSON validation exited ${jsonResult.status}: ${(jsonResult.stderr || jsonResult.stdout).trim()}`);
 }
 
+const repoOnlyResult = run(["--json", "--redact-paths", "--repo-only"]);
+if (repoOnlyResult.error) {
+  fail(`codex status repo-only alias validation could not run: ${repoOnlyResult.error.message}`);
+} else if (repoOnlyResult.status !== 0) {
+  fail(`codex status repo-only alias exited ${repoOnlyResult.status}: ${(repoOnlyResult.stderr || repoOnlyResult.stdout).trim()}`);
+} else {
+  try {
+    const repoOnly = JSON.parse(repoOnlyResult.stdout);
+    if (repoOnly.runtime?.status !== "skipped") fail("codex status --repo-only must skip installed runtime checks.");
+    if (repoOnly.codexDoctor?.status !== "skipped") fail("codex status --repo-only must skip direct Codex doctor checks.");
+    if (repoOnly.codexCliRuntime?.status !== "skipped") fail("codex status --repo-only must skip Codex CLI probes.");
+  } catch (error) {
+    fail(`codex status repo-only alias did not emit parseable JSON: ${error.message}`);
+  }
+}
+
 let report;
 if (failures.length === 0) {
   try {

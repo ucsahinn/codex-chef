@@ -2,6 +2,48 @@
 
 ## Unreleased
 
+## v0.5.31 - 2026-06-21
+
+Bu release Codex Chef'i guvenli oldugu yerde otonom tutar; ama delegation,
+installer write ve hassas tool output sinirlarini daha acik hale getirir.
+
+## One cikanlar
+
+- Routing profile'lari, `AGENTS.md`, docs, status ciktisi ve validator'lar
+  subagent delegation davranisini hidden platform-native auto-spawn gibi degil,
+  acik kullanici/runtime yetkisi olarak anlatir.
+- Repository-controlled `npm run ...`, genis `git config`, raw `gitleaks dir`
+  ve browser request/response detail tool'lari shipped baseline icinde prompt
+  ister.
+- PowerShell ve Bash installer'lari ilgisiz plugin kayitlarini ezmeden yalniz
+  Codex Chef marketplace kaydini upsert eder.
+- `npm run chef` artik interaktif dil kontrolu, hizali kompakt menu satirlari,
+  aksiyon baslangic/bitis ayraclari, uzun kanit ciktisindan sonra Enter ile
+  menuye donus ve skill/MCP panolari icin genis `console.table` yerine
+  terminal-safe kompakt tablolar kullanir.
+- Ortak marketplace-entry helper'i installer ve repair ciktilarini canonical
+  plugin UI metadata'siyle ayni tutar; Windows'ta valid UTF-8 BOM'lu JSON
+  dosyalarini da kabul eder.
+- Bash installer managed-directory replacement ve backup failure durumlarinda
+  fail-closed davranir; dry-run yine full managed directory install preview'u
+  basar.
+
+## Dogrulama
+
+Bu surum icin release hazirligi sunlari icermelidir:
+
+```bash
+npm run validate
+npm run check
+npm run validate:routing
+npm run validate:mcp
+npm run validate:installer
+npm run audit:security
+npm run verify:install:runtime -- --expect-skills --expect-git-guards --redact-paths
+gitleaks detect --redact --no-banner --no-git --verbose
+git diff --check
+```
+
 ## v0.5.30 - 2026-06-20
 
 Bu release token/context kontrolunu Codex Chef icinde birinci sinif yuzey yapar

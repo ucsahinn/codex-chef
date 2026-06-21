@@ -153,6 +153,8 @@ const COLOR_CODES = {
   cyan: "\x1b[36m"
 };
 
+const ANSI_PATTERN = /\x1b\[[0-9;]*m/g;
+
 const ICON_COLORS = {
   chef: "cyan",
   ok: "green",
@@ -195,6 +197,45 @@ function styleLabel(value) {
 
 function styleMuted(value) {
   return colorize(value, "dim");
+}
+
+function stripAnsi(value) {
+  return String(value).replace(ANSI_PATTERN, "");
+}
+
+function visualLength(value) {
+  return stripAnsi(value).length;
+}
+
+function padVisual(value, width) {
+  const text = String(value);
+  const missing = width - visualLength(text);
+  return missing > 0 ? `${text}${" ".repeat(missing)}` : text;
+}
+
+function truncateVisual(value, width) {
+  const text = String(value ?? "");
+  if (visualLength(text) <= width) return text;
+  if (width <= 3) return ".".repeat(Math.max(1, width));
+  const plain = stripAnsi(text);
+  return `${plain.slice(0, Math.max(0, width - 3))}...`;
+}
+
+function terminalWidth() {
+  return Math.max(72, Math.min(120, Number(process.stdout.columns || 96)));
+}
+
+function divider(title = "") {
+  const width = terminalWidth();
+  if (!title) return colorize("-".repeat(width), "dim");
+  const text = ` ${title} `;
+  const side = Math.max(3, Math.floor((width - visualLength(text)) / 2));
+  const line = `${"-".repeat(side)}${text}${"-".repeat(Math.max(3, width - side - visualLength(text)))}`;
+  return colorize(line, "dim");
+}
+
+function printDivider(title = "") {
+  console.log(divider(title));
 }
 
 function styleWriteBoundary(boundary) {
@@ -309,6 +350,12 @@ const MENU_ITEMS = [
     description: "List recent Codex Chef CLI log files."
   },
   {
+    id: "language",
+    label: "Language",
+    writes: "none",
+    description: "Switch the interactive CLI between English and Turkish."
+  },
+  {
     id: "exit",
     label: "Exit",
     writes: "none",
@@ -395,6 +442,11 @@ const MENU_TEXT_TR = {
   logs: {
     label: "Loglar",
     description: "Son Codex Chef CLI log dosyalarini listele.",
+    writes: "yok"
+  },
+  language: {
+    label: "Dil",
+    description: "Interaktif CLI dilini Turkce ve Ingilizce arasinda degistir.",
     writes: "yok"
   },
   exit: {
@@ -645,12 +697,74 @@ async function confirmWriteAction(action, detail) {
 }
 
 function printHeader() {
+  printDivider("Codex Chef");
   console.log(`${ICONS.chef} Codex Chef`);
   console.log(styleMuted(localText(
     "One menu for install, update, repair, diagnostics, skills, MCP notes, auth, and logs.",
     "Kurulum, guncelleme, onarim, diagnostic, skill, MCP notlari, auth ve loglar icin tek menu."
   )));
+  console.log(styleMuted(localText(
+    `Language: English | Safety: write actions require --apply or typed confirmation.`,
+    `Dil: Turkce | Guvenlik: yazan islemler --apply veya yazili onay ister.`
+  )));
   console.log("");
+}
+
+function printMenu() {
+  printDivider(localText("Operator menu", "Operator menusu"));
+  const numberWidth = String(MENU_ITEMS.length).length + 1;
+  const labelWidth = Math.max(...MENU_ITEMS.map((item) => menuLabel(item).length), localText("Action", "Islem").length);
+  const writesWidth = Math.max(
+    ...MENU_ITEMS.map((item) => menuWrites(item).length),
+    localText("Writes", "Yazar").length
+  );
+  const header = [
+    padVisual(styleMuted("#"), numberWidth),
+    padVisual(styleMuted(localText("Action", "Islem")), labelWidth),
+    padVisual(styleMuted(localText("Writes", "Yazar")), writesWidth),
+    styleMuted(localText("Purpose", "Amac"))
+  ].join("  ");
+  console.log(header);
+  console.log(styleMuted("-".repeat(Math.min(terminalWidth(), visualLength(stripAnsi(header))))));
+  for (let index = 0; index < MENU_ITEMS.length; index += 1) {
+    const item = MENU_ITEMS[index];
+    const number = padVisual(`${index + 1}.`, numberWidth);
+    const labelText = menuLabel(item);
+    const labelColor = item.id === "exit" ? "dim" : item.id === "language" ? "magenta" : "cyan";
+    const label = padVisual(colorize(labelText, labelColor), labelWidth);
+    const writes = padVisual(styleWriteBoundary(menuWrites(item)), writesWidth);
+    console.log(`${number}  ${label}  ${writes}  ${styleMuted(menuDescription(item))}`);
+  }
+  console.log("");
+  console.log(styleMuted(localText(
+    "Shortcuts: l = language, q = quit. Empty input repeats this prompt without repainting the menu.",
+    "Kisayollar: l = dil, q = cikis. Bos giris menuyu yeniden basmadan promptu tekrarlar."
+  )));
+}
+
+function printActionStart(item) {
+  const label = menuLabel(item) || item.label || item.id;
+  console.log("");
+  printDivider(localText(`Running: ${label}`, `Calisiyor: ${label}`));
+}
+
+function printActionEnd(item, result) {
+  const label = menuLabel(item) || item.label || item.id;
+  const status = result?.ok === false && !result.skipped
+    ? localText("attention", "dikkat")
+    : localText("done", "tamam");
+  printDivider(localText(`${label}: ${status}`, `${label}: ${status}`));
+}
+
+async function pauseBeforeMenu(question) {
+  await question(`\n${styleMuted(localText("Press Enter to return to the menu.", "Menuye donmek icin Enter'a basin."))} `);
+  console.log("");
+}
+
+function toggleLanguage() {
+  options.lang = isTr() ? "en" : "tr";
+  console.log(`${ICONS.ok} ${localText("Language switched to English.", "Dil Turkce olarak ayarlandi.")}`);
+  return { ok: true };
 }
 
 function runStatus(overrides = {}) {
@@ -752,26 +866,21 @@ const MANAGED_REFRESH_TARGETS = [
 ];
 
 function printManagedRefreshSummary() {
-  console.log(`${ICONS.info} ${localText(
-    `Managed overwrite targets: ${MANAGED_REFRESH_TARGETS.join(", ")}.`,
-    `Managed overwrite hedefleri: ${MANAGED_REFRESH_TARGETS.join(", ")}.`
-  )}`);
-  console.log(`${ICONS.info} ${localText(
-    "Backup behavior: update apply backs up replaced managed files before refreshing them; it does not delete, prune, or clean user data.",
-    "Yedekleme davranisi: update apply yenilemeden once degisecek managed dosyalari yedekler; user data silmez, prune/clean yapmaz."
-  )}`);
-  console.log(`${ICONS.info} ${localText(
-    "Update preview excludes curated global skill installs and optional global Git guards; use --install or --skills for those explicit surfaces.",
-    "Update preview curated global skill kurulumlarini ve opsiyonel global Git guard'larini disarida tutar; bu yuzeyler icin --install veya --skills kullanin."
-  )}`);
-  console.log(`${ICONS.info} ${localText(
-    "Next: npm run chef -- --update --apply",
-    "Sonraki komut: npm run chef -- --update --apply"
-  )}`);
-  console.log(`${ICONS.info} ${localText(
-    "Full evidence: npm run chef -- --update --verbose-plan",
-    "Tam kanit: npm run chef -- --update --verbose-plan"
-  )}`);
+  console.log("");
+  console.log(styleHeading(localText("Would affect", "Etkilenecek alanlar")));
+  for (const target of MANAGED_REFRESH_TARGETS) console.log(`- ${target}`);
+  console.log(styleMuted(localText(
+    "Apply backs up replaced managed files first; it does not delete, prune, or clean user data.",
+    "Apply once degisecek managed dosyalari yedekler; user data silmez, prune/clean yapmaz."
+  )));
+  console.log(styleMuted(localText(
+    "Update excludes curated global skill installs and optional global Git guards; use --install or --skills for those explicit surfaces.",
+    "Update curated global skill kurulumlarini ve opsiyonel global Git guard'larini disarida tutar; bu yuzeyler icin --install veya --skills kullanin."
+  )));
+  console.log("");
+  console.log(styleHeading(localText("Next", "Sonraki adim")));
+  console.log(`- ${localText("Apply after review", "Incelemeden sonra uygula")}: npm run chef -- --update --apply`);
+  console.log(`- ${localText("Full evidence", "Tam kanit")}: npm run chef -- --update --verbose-plan`);
 }
 
 function inspectGitDirty() {
@@ -818,11 +927,14 @@ function gitHead() {
 
 async function runUpdate() {
   if (!options.apply) {
-    console.log(`${ICONS.update} ${localText("Update preview first. No managed or global files changed.", "Guncelleme preview'i. Degisiklik yapilmadi.")}`);
-    console.log(`${ICONS.info} ${localText(
-      "Use npm run chef -- --update --apply to pull the latest Codex Chef and refresh managed files after backup.",
-      "Son Codex Chef'i cekip managed dosyalari yedekten sonra yenilemek icin npm run chef -- --update --apply kullanin."
-    )}`);
+    console.log(`${ICONS.update} ${localText("Update preview", "Guncelleme preview")}`);
+    console.log("");
+    console.log(styleHeading(localText("Result", "Sonuc")));
+    console.log(`${ICONS.ok} ${localText("No managed or global files changed.", "Managed veya global dosya degismedi.")}`);
+    console.log(styleMuted(localText(
+      "Use apply only after reviewing the target list and backup behavior.",
+      "Apply'i yalniz hedef listesini ve yedek davranisini inceledikten sonra kullanin."
+    )));
     printManagedRefreshSummary();
     if (options.verbosePlan) return runPreview(true, false);
     return { ok: true };
@@ -1293,17 +1405,36 @@ function printRows(rows, columns, emptyMessage = null) {
     if (emptyMessage) console.log(`${ICONS.info} ${emptyMessage}`);
     return;
   }
-  if (!options.plain) {
-    console.table(rows.map((row) => Object.fromEntries(
-      columns.map((column) => [column.label, row[column.key] ?? ""])
-    )));
+  if (options.plain) {
+    rows.forEach((row, index) => {
+      const primary = columns[0];
+      console.log(`${index + 1}. ${row[primary.key] ?? ""}`);
+      for (const column of columns.slice(1)) {
+        console.log(`   ${column.label}: ${row[column.key] ?? ""}`);
+      }
+    });
     return;
   }
+  const width = terminalWidth();
+  const compactRows = rows.map((row) => Object.fromEntries(
+    columns.map((column) => [column.key, String(row[column.key] ?? "")])
+  ));
+  const primary = columns[0];
+  const secondary = columns.slice(1);
+  const primaryWidth = Math.min(
+    Math.max(primary.label.length, ...compactRows.map((row) => visualLength(row[primary.key]))) + 2,
+    Math.max(18, Math.floor(width * 0.35))
+  );
+  const labelWidth = Math.max(...secondary.map((column) => column.label.length), 6);
+  printDivider("");
+  console.log(`${padVisual(styleMuted(primary.label), primaryWidth)}${secondary.length ? styleMuted(localText("details", "detaylar")) : ""}`);
+  console.log(styleMuted("-".repeat(Math.min(width, primaryWidth + 64))));
   rows.forEach((row, index) => {
-    const primary = columns[0];
-    console.log(`${index + 1}. ${row[primary.key] ?? ""}`);
-    for (const column of columns.slice(1)) {
-      console.log(`   ${column.label}: ${row[column.key] ?? ""}`);
+    const primaryValue = `${index + 1}. ${truncateVisual(row[primary.key] ?? "", primaryWidth - 4)}`;
+    console.log(padVisual(primaryValue, primaryWidth));
+    for (const column of secondary) {
+      const valueWidth = Math.max(16, width - labelWidth - 8);
+      console.log(`   ${padVisual(styleMuted(`${column.label}:`), labelWidth + 1)} ${truncateVisual(row[column.key] ?? "", valueWidth)}`);
     }
   });
 }
@@ -1603,13 +1734,30 @@ async function runSkills() {
   const installable = (catalog.skills || []).filter((skill) => skill.install === true);
   const profileCount = (routing.profiles || []).length;
   console.log(`${ICONS.docs} Curated installable skills: ${installable.length}`);
-  console.table(installable.map((skill) => ({
-    name: skill.name,
-    source: skill.source,
-    risk: skill.risk,
-    auth: skill.authRequired ? "yes" : "no",
-    checked: skill.lastChecked
-  })));
+  printRows(
+    installable.map((skill) => ({
+      name: skill.name,
+      source: skill.source,
+      risk: skill.risk,
+      auth: skill.authRequired ? "yes" : "no",
+      checked: skill.lastChecked
+    })),
+    isTr()
+      ? [
+          { key: "name", label: "skill" },
+          { key: "source", label: "kaynak" },
+          { key: "risk", label: "risk" },
+          { key: "auth", label: "auth" },
+          { key: "checked", label: "kontrol" }
+        ]
+      : [
+          { key: "name", label: "skill" },
+          { key: "source", label: "source" },
+          { key: "risk", label: "risk" },
+          { key: "auth", label: "auth" },
+          { key: "checked", label: "checked" }
+        ]
+  );
   console.log("");
   console.log(styleHeading("Skill activation contract"));
   console.log("- Installed skills do not run by themselves or grant hidden permissions.");
@@ -1651,19 +1799,48 @@ async function runMcp() {
   const servers = catalog.servers || [];
   console.log(`${ICONS.docs} MCP servers: ${servers.length}`);
   console.log(styleMuted("Evidence levels: documented=catalog, configured=template/installed config, verified=only after /mcp or codex mcp live check."));
-  console.table(servers.map((server) => ({
-    name: server.name,
-    category: server.category,
-    documented: server.defaultEnabled ? "ready_by_default" : "disabled_by_default",
-    configured: "configured_unverified",
-    verified: "not_checked",
-    transport: server.transport,
-    target: mcpTarget(server),
-    auth: server.auth,
-    approval: server.approval,
-    setup: server.setupKind,
-    source: server.sourceUrl
-  })));
+  printRows(
+    servers.map((server) => ({
+      name: server.name,
+      category: server.category,
+      documented: server.defaultEnabled ? "ready_by_default" : "disabled_by_default",
+      configured: "configured_unverified",
+      verified: "not_checked",
+      transport: server.transport,
+      target: mcpTarget(server),
+      auth: server.auth,
+      approval: server.approval,
+      setup: server.setupKind,
+      source: server.sourceUrl
+    })),
+    isTr()
+      ? [
+          { key: "name", label: "mcp" },
+          { key: "category", label: "kategori" },
+          { key: "documented", label: "doc" },
+          { key: "configured", label: "config" },
+          { key: "verified", label: "canli" },
+          { key: "transport", label: "tasima" },
+          { key: "target", label: "hedef" },
+          { key: "auth", label: "auth" },
+          { key: "approval", label: "onay" },
+          { key: "setup", label: "setup" },
+          { key: "source", label: "kaynak" }
+        ]
+      : [
+          { key: "name", label: "mcp" },
+          { key: "category", label: "category" },
+          { key: "documented", label: "documented" },
+          { key: "configured", label: "configured" },
+          { key: "verified", label: "verified" },
+          { key: "transport", label: "transport" },
+          { key: "target", label: "target" },
+          { key: "auth", label: "auth" },
+          { key: "approval", label: "approval" },
+          { key: "setup", label: "setup" },
+          { key: "source", label: "source" }
+        ]
+  );
   console.log(styleMuted("Timeouts and per-tool exposure live in templates/codex/config.windows.toml and templates/codex/config.unix.toml."));
   for (const server of servers.filter((item) => item.setupHint)) {
     console.log(`- ${styleAction(server.name)}: ${server.setupHint}`);
@@ -2183,6 +2360,8 @@ async function runAction(action) {
       return runAuth();
     case "logs":
       return runLogs();
+    case "language":
+      return toggleLanguage();
     case "exit":
       return { ok: true };
     default:
@@ -2192,29 +2371,56 @@ async function runAction(action) {
 
 async function runMenu() {
   printHeader();
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const scriptedMenu = process.env.CODEX_CHEF_TEST_MENU === "1"
+    ? fs.readFileSync(0, "utf8").split(/\r?\n/)
+    : null;
+  const rl = scriptedMenu ? null : createInterface({ input: process.stdin, output: process.stdout });
+  const question = async (prompt) => {
+    if (scriptedMenu) {
+      process.stdout.write(prompt);
+      return scriptedMenu.length > 0 ? scriptedMenu.shift() : "q";
+    }
+    return rl.question(prompt);
+  };
   try {
+    let shouldRenderMenu = true;
     while (true) {
-      for (let index = 0; index < MENU_ITEMS.length; index += 1) {
-        const item = MENU_ITEMS[index];
-        const labelText = menuLabel(item);
-        const label = item.id === "exit" ? colorize(labelText, "dim") : styleAction(labelText);
-        console.log(`${index + 1}. ${label} [writes: ${styleWriteBoundary(menuWrites(item))}] - ${styleMuted(menuDescription(item))}`);
+      if (shouldRenderMenu) {
+        printMenu();
+        shouldRenderMenu = false;
       }
-      const answer = await rl.question(`\n${localText(`Select 1-${MENU_ITEMS.length}:`, `Sec 1-${MENU_ITEMS.length}:`)} `);
-      const index = Number(answer.trim());
-      const item = MENU_ITEMS[index - 1];
-      if (!item) {
-        console.log(`${ICONS.warn} ${localText(`Choose a number from 1 to ${MENU_ITEMS.length}.`, `1 ile ${MENU_ITEMS.length} arasinda bir sayi secin.`)}`);
+      const answer = await question(`\n${styleLabel(localText(`Select 1-${MENU_ITEMS.length}`, `Sec 1-${MENU_ITEMS.length}`))}${styleMuted(localText(" / l language / q quit:", " / l dil / q cikis:"))} `);
+      const normalizedAnswer = answer.trim().toLowerCase();
+      if (!normalizedAnswer) {
+        console.log(`${ICONS.warn} ${localText(`Choose 1-${MENU_ITEMS.length}, l for language, or q to quit.`, `1-${MENU_ITEMS.length} secin, dil icin l, cikis icin q.`)}`);
         continue;
       }
-      console.log("");
+      if (["q", "quit", "exit"].includes(normalizedAnswer)) break;
+      if (["l", "lang", "language", "dil"].includes(normalizedAnswer)) {
+        const languageItem = MENU_ITEMS.find((candidate) => candidate.id === "language");
+        printActionStart(languageItem);
+        const result = toggleLanguage();
+        printActionEnd(languageItem, result);
+        console.log("");
+        shouldRenderMenu = true;
+        continue;
+      }
+      const index = Number(normalizedAnswer);
+      const item = MENU_ITEMS[index - 1];
+      if (!item) {
+        console.log(`${ICONS.warn} ${localText(`Choose 1-${MENU_ITEMS.length}, l for language, or q to quit.`, `1-${MENU_ITEMS.length} secin, dil icin l, cikis icin q.`)}`);
+        continue;
+      }
       if (item.id === "exit") break;
-      await runAction(item.id);
-      console.log("");
+      printActionStart(item);
+      const result = await runAction(item.id);
+      printActionEnd(item, result);
+      if (item.id !== "language") await pauseBeforeMenu(question);
+      else console.log("");
+      shouldRenderMenu = true;
     }
   } finally {
-    rl.close();
+    if (rl) rl.close();
   }
 }
 
@@ -2223,7 +2429,7 @@ if (options.help) {
 } else if (options.action) {
   const result = await runAction(options.action);
   if (result?.ok === false && !result.skipped) process.exit(1);
-} else if (!process.stdin.isTTY) {
+} else if (!process.stdin.isTTY && process.env.CODEX_CHEF_TEST_MENU !== "1") {
   printHelp();
 } else {
   await runMenu();

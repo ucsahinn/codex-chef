@@ -8,11 +8,13 @@ Codex uses `~/.codex`; if `CODEX_HOME` is set, the installer uses that path.
 - Codex CLI or Codex app installed.
 - Git installed.
 - Node.js 18 or newer for validation and optional skill installation.
-- `npx` available if you use stdio MCP servers or install verified public
-  skills.
+- `npx` available for the default stdio MCP servers and verified public skill
+  installation.
 - Optional: Gitleaks for stronger pre-commit and pre-push scanning.
-- Optional on Windows: `winget`, `uvx`, and current Windows 11 for the best
-  native sandbox path.
+- Optional on Windows: `winget` and current Windows 11 for the best native
+  sandbox path.
+- `uvx` if you keep the default Serena semantic-code MCP enabled. Without
+  `uvx`, disable Serena or expect the status board to report its setup note.
 
 ## PowerShell Install
 
@@ -39,6 +41,12 @@ The plan lists managed targets, optional global Git changes, curated skill
 commands, collision policy, backup behavior, and risk level.
 The profile copy operation includes `development.config.toml`,
 `review.config.toml`, `ci.config.toml`, and `token-safe.config.toml`.
+
+Default-enabled MCPs still have launcher prerequisites. Node/npx-backed MCPs
+start after Node can download their pinned packages. Serena is default-enabled
+for semantic code navigation, but it needs `uvx` and the pinned git source. If a
+fresh machine does not have that launcher, either install `uvx` or set
+`mcp_servers.serena.enabled = false` before expecting `/mcp` to show it live.
 
 Install after the preview is correct:
 
@@ -124,7 +132,9 @@ Useful switches:
 - `-Force`: overwrite managed Codex files after creating backups. Use this for
   deliberate upgrades only after reviewing `-WhatIf`; without it, existing
   `config.toml` is backed up and receives only missing Codex Chef blocks, while
-  existing agent files, rules, and marketplace files are skipped.
+  existing agent files and rules are skipped. The personal plugin marketplace
+  file is not replaced; only the Codex Chef entry is added or updated after
+  backup and unrelated plugin entries are preserved.
 - `-Repair`: repair an existing setup with the shared repair engine. With
   `-WhatIf`, it prints a no-write repair plan. Without `-WhatIf`, it backs up
   and repairs managed drift. It does not delete user skills.
@@ -162,7 +172,9 @@ Useful flags:
 - `--install-skills`
 - `--install-git-guards`: opt in to global Git ignore and hook settings.
 - `--force`: replace managed targets after backup; without it, existing
-  `config.toml` is merged and other existing managed files are skipped.
+  `config.toml` is merged and other existing managed files are skipped. The
+  personal plugin marketplace file is not replaced; only the Codex Chef entry
+  is added or updated after backup and unrelated plugin entries are preserved.
 - `--repair`: preview or apply backup-backed repair for an existing global
   Codex setup. Use it with `--dry-run` for a no-write plan.
 - `--no-backup`
@@ -278,8 +290,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -R
 If repair is clean, continue with the normal install command. Existing
 `config.toml` is backed up and merged; existing user tables are preserved.
 Other existing managed files are skipped unless you use `-Force` / `--force`
-after reviewing the preview. When managed drift exists, `-Repair` / `--repair`
-is the safer first step before force replacement.
+after reviewing the preview. The personal plugin marketplace keeps unrelated
+entries and receives only the Codex Chef entry upsert after backup. When managed
+drift exists, `-Repair` / `--repair` is the safer first step before force
+replacement.
 
 ## Rollback
 

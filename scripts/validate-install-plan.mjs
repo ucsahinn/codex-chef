@@ -271,6 +271,14 @@ for (const operation of manifest.operations || []) {
 
   if (operation.kind === "write-marketplace") {
     validateDestinationPath(operation, "destination", operation.destination);
+    if (operation.id === "plugin-marketplace") {
+      if (operation.collision !== "upsert-entry-with-backup") {
+        fail("plugin-marketplace must use upsert-entry-with-backup collision policy.");
+      }
+      if (!/unrelated marketplace plugins are preserved/i.test(operation.conflictPolicy || "")) {
+        fail("plugin-marketplace conflictPolicy must say unrelated marketplace plugins are preserved.");
+      }
+    }
   }
 
   if (operation.kind === "git-config") {

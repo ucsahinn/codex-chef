@@ -105,6 +105,13 @@ npm run chef -- --help --lang tr
 npm run chef -- --status --repo-only --no-log
 ```
 
+The interactive menu uses aligned columns, colored write-boundary labels when
+the terminal supports ANSI, and a built-in **Language** row for switching the
+current session between English and Turkish. After a selected command prints a
+long status, diagnostic, backup, MCP, or routing board, the CLI waits for Enter
+before returning to the menu so the next menu does not stack on top of the
+evidence. Use `--plain` when you want copy-pasteable ASCII output.
+
 The menu labels every action with its write boundary. `--status`,
 `--doctor`, `--preview`, `--skills`, `--mcp`, `--routing`, `--diagnostics`,
 `--processes`, `--auth`, and `--logs` are
@@ -514,7 +521,7 @@ Useful verification commands:
 
 | Command | What it proves |
 | --- | --- |
-| `npm run codex:status` | Repo health, installed runtime drift, MCP setup notes, routing profiles, and effective controls. |
+| `npm run codex:status` | Repo health, installed runtime drift, MCP setup notes, routing profiles, and effective controls. Add `-- --repo-only` for the fast local-only board. |
 | `npm run codex:status:all` | Same status board plus expected curated skills and optional Git guard checks. |
 | `npm run chef -- --diagnostics --no-log` | Read-only diagnostic menu with current health, attention reasons, next safe actions, evidence commands, log root, backup/log summaries, update/repair preview entry points, and process-audit guidance. |
 | `npm run chef -- --processes --no-log` | Read-only Serena, MCP, browser, Python, and Node process count; it does not stop processes. |

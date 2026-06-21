@@ -36,23 +36,14 @@ prefix_rule(pattern = ["git", "ls-files"], decision = "allow")
 prefix_rule(pattern = ["git", "ls-remote"], decision = "allow")
 prefix_rule(pattern = ["git", "check-ignore"], decision = "allow")
 prefix_rule(pattern = ["git", "fetch"], decision = "allow")
-prefix_rule(pattern = ["git", "config", "--get"], decision = "allow")
-prefix_rule(pattern = ["git", "config", "--get-all"], decision = "allow")
-prefix_rule(pattern = ["git", "config", "--list"], decision = "allow")
-prefix_rule(pattern = ["git", "config", "--show-origin"], decision = "allow")
-prefix_rule(pattern = ["git", "config", "--global", "--get"], decision = "allow")
+prefix_rule(pattern = ["git", "config"], decision = "prompt", justification = "Git config can expose user identity, signing paths, credential helpers, or extra headers and requires approval.")
 
-# Common local verification.
+# Common local verification. npm scripts are repository-controlled shell
+# commands, so they remain prompt-gated in the global template.
 prefix_rule(pattern = ["node", "-v"], decision = "allow")
 prefix_rule(pattern = ["node", "--check"], decision = "allow")
 prefix_rule(pattern = ["npm.cmd", "ls"], decision = "allow")
-prefix_rule(pattern = ["npm.cmd", "run", "test"], decision = "allow")
-prefix_rule(pattern = ["npm.cmd", "run", "lint"], decision = "allow")
-prefix_rule(pattern = ["npm.cmd", "run", "typecheck"], decision = "allow")
-prefix_rule(pattern = ["npm.cmd", "run", "build"], decision = "allow")
-prefix_rule(pattern = ["npm.cmd", "run", "ui:smoke"], decision = "allow")
-prefix_rule(pattern = ["npm.cmd", "run", "check"], decision = "allow")
-prefix_rule(pattern = ["npm.cmd", "run", "validate"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "run"], decision = "prompt", justification = "npm scripts execute repository-controlled shell commands and require approval in the global rules template.")
 
 # Codex-local skill and MCP helpers. Keep package execution narrow.
 prefix_rule(pattern = ["npx.cmd", "skills", "find"], decision = "allow")
@@ -64,7 +55,7 @@ prefix_rule(pattern = ["npx.cmd", "-y", "chrome-devtools-mcp@1.2.0"], decision =
 prefix_rule(pattern = ["New-Item", "-ItemType", "Directory"], decision = "allow")
 prefix_rule(pattern = ["sc.exe", "query"], decision = "allow")
 prefix_rule(pattern = ["gitleaks", "version"], decision = "allow")
-prefix_rule(pattern = ["gitleaks", "dir"], decision = "allow")
+prefix_rule(pattern = ["gitleaks", "dir"], decision = "prompt", justification = "Bare gitleaks dir can print unredacted findings; use the redacted detect commands when possible.")
 prefix_rule(pattern = ["gitleaks", "detect", "--redact", "--no-banner", "--verbose"], decision = "allow")
 prefix_rule(pattern = ["gitleaks", "detect", "--redact", "--no-banner", "--no-git", "--verbose"], decision = "allow")
 

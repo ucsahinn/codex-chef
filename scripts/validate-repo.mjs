@@ -227,8 +227,6 @@ for (const file of files) {
   }
 
   const forbiddenLocalPaths = [
-    /C:\\Users\\ulasc/i,
-    /C:\/Users\/ulasc/i,
     /[A-Za-z]:[\\/]Users[\\/](?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i,
     /C:\\Users\\(?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i,
     /\/Users\/(?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i,

@@ -32,13 +32,22 @@ const localSkillNames = fs.existsSync(localSkillRoot)
       .map((entry) => entry.name))
   : new Set();
 const allowedSkills = new Set([...catalogSkillNames, ...localSkillNames]);
+const allowedDelegationModes = new Set(["explicit-only", "runtime-permitted", "none"]);
+const allowedSkillModes = new Set(["mandatory-when-triggered", "recommended", "none"]);
+const allowedMcpModes = new Set(["use-when-available-and-approved", "optional", "none"]);
 
-if (routing.version !== "0.1.0") fail("routing profile catalog version must stay 0.1.0 until schema changes.");
+if (routing.version !== "0.2.0") fail("routing profile catalog version must stay 0.2.0 until schema changes.");
 if (!Array.isArray(routing.profiles) || routing.profiles.length < 10) {
   fail("routing profile catalog must define at least 10 enterprise task-shape profiles.");
 }
 if (!routing.sourcePolicy || !/not hidden execution hooks/i.test(routing.sourcePolicy)) {
   fail("routing profile sourcePolicy must state that profiles are not hidden execution hooks.");
+}
+if (!/subagent delegation stays explicit/i.test(routing.sourcePolicy || "")) {
+  fail("routing profile sourcePolicy must state that subagent delegation stays explicit.");
+}
+if (/standing explicit request/i.test(agentsTemplate)) {
+  fail("templates/codex/AGENTS.md must not claim a standing explicit request for subagent spawning.");
 }
 
 for (const required of [
@@ -66,6 +75,9 @@ for (const required of [
   "agents=...",
   "Use /agent in Codex CLI",
   "wait for requested subagent results",
+  "Delegation mode",
+  "Skill mode",
+  "MCP mode",
   "Privilege delta",
   "Validation",
   "Rollback"
@@ -77,7 +89,7 @@ for (const required of [
 
 const seenIds = new Set();
 for (const profile of routing.profiles || []) {
-  for (const key of ["id", "title", "trigger", "agents", "skills", "mcp", "flags", "evidence", "boundary", "owner", "primarySurface", "durability", "privilegeDelta", "validationGate", "rollback"]) {
+  for (const key of ["id", "title", "trigger", "agents", "skills", "mcp", "flags", "delegationMode", "skillMode", "mcpMode", "evidence", "boundary", "owner", "primarySurface", "durability", "privilegeDelta", "validationGate", "rollback"]) {
     if (!Object.prototype.hasOwnProperty.call(profile, key)) {
       fail(`routing profile missing ${key}: ${profile.id || "<unknown>"}`);
     }
@@ -103,6 +115,24 @@ for (const profile of routing.profiles || []) {
 
   if (!Array.isArray(profile.flags) || profile.flags.length === 0) {
     fail(`routing profile must name at least one flag/config mode: ${profile.id}`);
+  }
+  if (!allowedDelegationModes.has(profile.delegationMode)) {
+    fail(`routing profile ${profile.id} has invalid delegationMode: ${profile.delegationMode}`);
+  }
+  if (profile.agents.length > 0 && profile.delegationMode === "none") {
+    fail(`routing profile ${profile.id} names agents but sets delegationMode=none`);
+  }
+  if (!allowedSkillModes.has(profile.skillMode)) {
+    fail(`routing profile ${profile.id} has invalid skillMode: ${profile.skillMode}`);
+  }
+  if (profile.skills.length > 0 && profile.skillMode === "none") {
+    fail(`routing profile ${profile.id} names skills but sets skillMode=none`);
+  }
+  if (!allowedMcpModes.has(profile.mcpMode)) {
+    fail(`routing profile ${profile.id} has invalid mcpMode: ${profile.mcpMode}`);
+  }
+  if (profile.mcp.length > 0 && profile.mcpMode === "none") {
+    fail(`routing profile ${profile.id} names MCP servers but sets mcpMode=none`);
   }
   if (!Array.isArray(profile.evidence) || profile.evidence.length < 2) {
     fail(`routing profile must include at least two evidence signals: ${profile.id}`);

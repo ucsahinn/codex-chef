@@ -104,10 +104,10 @@
       "summary": "Register the local workflow plugin in the personal marketplace file.",
       "destination": "${AGENTS_HOME}/plugins/marketplace.json",
       "platforms": ["windows", "unix"],
-      "collision": "skip-unless-force-backup-before-replace",
+      "collision": "upsert-entry-with-backup",
       "backup": true,
       "risk": "medium",
-      "conflictPolicy": "The marketplace points at the starter-managed local plugin and does not claim official OpenAI publication."
+      "conflictPolicy": "Only the Codex Chef plugin entry is added or updated after backup; unrelated marketplace plugins are preserved and invalid marketplace JSON fails closed."
     },
     {
       "id": "git-ignore-global",

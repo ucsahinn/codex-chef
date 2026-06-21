@@ -241,12 +241,12 @@ Agent katalog kurali:
 
 Routing kurali:
 
-- Subagent kullanimi acik delegasyondur. Kullanici paralel/delege is isterse
-  veya aktif global setup task-shape routing'e izin veriyorsa Codex uygun uzman
-  ajani bilerek spawn etmelidir.
-- Bu starter global AGENTS routing bolumunu, eslesen non-trivial task shape icin
-  standing explicit delegation istegi gibi ele alir. Codex'in gizli background
-  auto-spawn scheduler'i varmis gibi anlatmaz.
+- Subagent kullanimi acik delegasyondur. Codex uygun uzman ajani yalnizca
+  kullanici paralel/delege is isterse veya current runtime aktif gorev icin
+  delegasyona acikca izin veriyorsa bilerek spawn etmelidir.
+- Bu starter global AGENTS routing bolumunu routing policy ve hazirlik rehberi
+  olarak ele alir; gizli auto-spawn izni degildir. Codex'in agent'lari sessizce
+  olusturan background scheduler'i varmis gibi anlatmaz.
 - Non-trivial is kayitli bir uzmana denk geliyorsa o uzman kullanilir ve sonucu
   kullanmadan once ozetlenir.
 - Gorunur routing ciktisi `Agent plan`, `Agent started`, `Agent result`,
@@ -287,8 +287,8 @@ npm run codex:status
 npm run chef -- --routing --profile starter-health
 ```
 
-Her profil task trigger'ini, gerekli subagent'lari, ilgili skill'leri,
-kullanilacak MCP'leri, beklenen flag/check'leri, evidence sinyallerini, owner,
+Her profil task trigger'ini, onerilen subagent'lari, delegation mode'u, skill
+mode'u, MCP mode'u, beklenen flag/check'leri, evidence sinyallerini, owner,
 durability, primary surface, privilege delta, validation gate, rollback path ve
 guvenlik sinirini yazar. Bu Codex Chef'i faydali anlamda otonom yapar: task
 shape profile uydugunda eslesen uzman, skill, MCP ve flag rehberligi zorunlu
