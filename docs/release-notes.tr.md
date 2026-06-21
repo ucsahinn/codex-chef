@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+## v0.5.34 - 2026-06-21
+
+Bu patch menu/status polish isinden sonra CLI kanit ve localization sertlestirme
+gecisini tamamlar.
+
+## One cikanlar
+
+- `npm run chef -- --diagnostics` ve `npm run chef -- --logs` artik gecmis log
+  sinyal taramasi gosterir: hata/uyari/dikkat/eski ham deger sayilari ve en
+  yeni eslesen log satirlari gorunur. Ekran, guncel sagligin hala Durum ve
+  Doctor tarafindan raporlandigini acikca soyler.
+- Log classifier daha sikidir; eski `0 fail` ozetleri ve connector rehber
+  metinleri guncel hata gibi okunmaz.
+- Turkce MCP ekrani default tooling, browser MCP'leri, Serena, memory,
+  filesystem, account connector'lari ve Supabase icin setup notlarini artik
+  Turkce gosterir.
+- CLI validation Turkce MCP ekranini, gecmis log kanitini, diagnostics,
+  surec/tunel denetimini, menu transcript'lerini ve install/update/reset/repair
+  write-gated preview akislarini kapsar.
+
+## Verification
+
+- `npm run validate:chef-cli`
+- `npm run check`
+- `npm run validate:release`
+- `npm run verify:install:runtime -- --expect-skills --expect-git-guards --redact-paths`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.33 - 2026-06-21
 
 Bu patch Turkce CLI status polish gecisini tamamlar.

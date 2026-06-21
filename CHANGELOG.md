@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.5.34 - 2026-06-21
+
+- Added a historical log signal scan to `npm run chef -- --diagnostics` and
+  `npm run chef -- --logs`, including fail/warn/attention/raw-value counts,
+  newest matching lines, and explicit wording that current health still comes
+  from Status and Doctor.
+- Tightened CLI log classification so historical `0 fail` summaries and
+  account-connector warning text do not read as current failures.
+- Completed the Turkish MCP operator screen by localizing setup hints for
+  default, browser, account, filesystem, memory, Serena, and database
+  connectors.
+- Expanded CLI validation to cover the Turkish MCP screen, historical log
+  signal output, menu transcripts, process/tunnel audit, diagnostics, and
+  write-gated install/update/reset/repair previews.
+
 ## 0.5.33 - 2026-06-21
 
 - Passed the selected CLI language through to the status subprocess so Turkish

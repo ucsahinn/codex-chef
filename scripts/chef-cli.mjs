@@ -1872,18 +1872,18 @@ async function runSkills() {
 function explainMcpServer(server) {
   console.log("");
   console.log(styleHeading(server.name));
-  console.log(`- ${styleLabel("status")}: ${server.defaultEnabled ? colorize("ready_by_default", "green") : colorize("disabled_by_default", "yellow")}`);
-  console.log(`- ${styleLabel("transport")}: ${server.transport}`);
-  console.log(`- ${styleLabel("target")}: ${mcpTarget(server)}`);
-  console.log(`- ${styleLabel("auth")}: ${server.auth}`);
-  console.log(`- ${styleLabel("approval")}: ${server.approval}`);
+  console.log(`- ${styleLabel(localText("status", "durum"))}: ${displayValue(server.defaultEnabled ? "ready_by_default" : "disabled_by_default")}`);
+  console.log(`- ${styleLabel(localText("transport", "tasima"))}: ${server.transport}`);
+  console.log(`- ${styleLabel(localText("target", "hedef"))}: ${mcpTarget(server)}`);
+  console.log(`- ${styleLabel("auth")}: ${displayValue(server.auth)}`);
+  console.log(`- ${styleLabel(localText("approval", "onay"))}: ${server.approval}`);
   console.log(`- ${styleLabel("risk")}: ${server.risk}`);
-  console.log(`- ${styleLabel("setup")}: ${server.setupKind} - ${server.setupHint}`);
-  console.log(`- ${styleLabel("reason")}: ${server.defaultReason}`);
-  console.log(`- ${styleLabel("source")}: ${server.sourceUrl}`);
-  console.log(`- ${styleLabel("config details")}: see templates/codex/config.windows.toml and templates/codex/config.unix.toml for timeouts and per-tool exposure.`);
-  console.log(`- ${styleLabel("verified")}: not_checked until /mcp, codex mcp, or a safe read-only probe succeeds.`);
-  console.log(`- ${styleLabel("rollback")}: set this connector's enabled flag to false and restart Codex.`);
+  console.log(`- ${styleLabel("setup")}: ${server.setupKind} - ${translateSetupHint(server.setupHint)}`);
+  console.log(`- ${styleLabel(localText("reason", "neden"))}: ${server.defaultReason}`);
+  console.log(`- ${styleLabel(localText("source", "kaynak"))}: ${server.sourceUrl}`);
+  console.log(`- ${styleLabel(localText("config details", "config detayi"))}: ${localText("see templates/codex/config.windows.toml and templates/codex/config.unix.toml for timeouts and per-tool exposure.", "timeout ve tool bazli yetkiler icin templates/codex/config.windows.toml ve templates/codex/config.unix.toml dosyalarina bakin.")}`);
+  console.log(`- ${styleLabel(localText("verified", "canli"))}: ${localText("not live-checked until /mcp, codex mcp, or a safe read-only probe succeeds.", "/mcp, codex mcp veya guvenli read-only probe basarili olana kadar canli kontrol yok.")}`);
+  console.log(`- ${styleLabel("rollback")}: ${localText("set this connector's enabled flag to false and restart Codex.", "bu connector icin enabled flag'ini false yapin ve Codex'i yeniden baslatin.")}`);
 }
 
 function mcpTarget(server) {
@@ -1948,7 +1948,7 @@ async function runMcp() {
     "Timeout ve tool bazli yetkiler templates/codex/config.windows.toml ve templates/codex/config.unix.toml icindedir."
   )));
   for (const server of servers.filter((item) => item.setupHint)) {
-    console.log(`- ${styleAction(server.name)}: ${server.setupHint}`);
+    console.log(`- ${styleAction(server.name)}: ${translateSetupHint(server.setupHint)}`);
   }
   console.log("");
   console.log(colorize(localText(
@@ -2127,6 +2127,91 @@ function logSummary(logs) {
     contentPrinted: false,
     note: "Only repo-local log metadata is shown; raw log contents are intentionally not printed."
   };
+}
+
+function translateCliMessage(message) {
+  let text = String(message || "");
+  if (!isTr()) return text;
+  return text
+    .replace("No action needed.", "Ek aksiyon gerekmiyor.")
+    .replace("Review attention items; they do not necessarily mean Codex Chef install is broken.", "Dikkat maddelerini inceleyin; bunlar her zaman Codex Chef kurulumunun bozuk oldugu anlamina gelmez.")
+    .replace("git status --short is clean.", "git status --short temiz.")
+    .replace(/git status --short reports (\d+) changed line\(s\)\./, "git status --short $1 degisen satir bildiriyor.")
+    .replace("Runtime, MCP, Git, routing, and log metadata checks.", "Kurulu ortam, MCP, Git, yonlendirme ve log metadata kontrolleri.")
+    .replace("Fast repo health without installed runtime probes.", "Kurulu ortam probu olmadan hizli repo sagligi.")
+    .replace("Repo doctor plus install/runtime expectations.", "Repo doctor ve kurulum/kurulu ortam beklentileri.")
+    .replace("Source/runtime managed file, agent, MCP, and skill parity.", "Kaynak/kurulu ortam yonetilen dosya, agent, MCP ve skill esligi.")
+    .replace("Read-only count before asking for any process stop.", "Herhangi bir surec durdurma onayi istemeden once yazmasiz sayim.")
+    .replace("Recent repo-local CLI log metadata; file contents are not printed.", "Son repo-local CLI log metadata'si; dosya icerigi basilmaz.")
+    .replace("Backup archive inventory and restore/delete preview entry points.", "Yedek arsiv envanteri ve restore/delete preview girisleri.")
+    .replace("Shows drift repair actions before any backup-backed write.", "Yedekli write oncesi drift onarim adimlarini gosterir.")
+    .replace("Shows repo/global refresh plan and validation gates without changing managed files.", "Managed dosyalari degistirmeden repo/global refresh plani ve validation gate'lerini gosterir.")
+    .replace("Agent, skill, MCP, and wait-policy routing contract.", "Agent, skill, MCP ve bekleme politikasi yonlendirme kontrati.");
+}
+
+function translateSetupHint(message) {
+  if (!isTr()) return String(message || "");
+  return String(message || "")
+    .replace("No credential or extra input is required.", "Kimlik bilgisi veya ek girdi gerekmez.")
+    .replace("Requires npm/npx network access on first startup; no credential is required.", "Ilk calismada npm/npx ag erisimi gerekir; kimlik bilgisi gerekmez.")
+    .replace("Requires npm/npx network access and local browser control; no credential is required.", "npm/npx ag erisimi ve lokal browser kontrolu gerekir; kimlik bilgisi gerekmez.")
+    .replace("Requires npm/npx network access and starts an isolated Chrome/DevTools bridge; no credential is required.", "npm/npx ag erisimi gerekir ve izole Chrome/DevTools koprusu baslatir; kimlik bilgisi gerekmez.")
+    .replace("Requires uvx and the pinned Serena git source; disable if uvx is unavailable.", "uvx ve pinlenmis Serena git kaynagi gerekir; uvx yoksa kapali tutun.")
+    .replace("No credential is required; use only for non-secret local memory.", "Kimlik bilgisi gerekmez; yalniz gizli olmayan lokal memory icin kullanin.")
+    .replace("Choose a deliberate local root path in config args before enabling.", "Acmadan once config argumanlarinda bilincli bir lokal kok path secin.")
+    .replace("Requires GitHub/Copilot account authorization; keep disabled until private GitHub context is needed.", "GitHub/Copilot hesap yetkilendirmesi gerekir; private GitHub context gerekene kadar kapali tutun.")
+    .replace("Requires Figma account or workspace authorization.", "Figma hesap veya workspace yetkilendirmesi gerekir.")
+    .replace("Requires Linear workspace authorization.", "Linear workspace yetkilendirmesi gerekir.")
+    .replace("Requires Notion workspace authorization.", "Notion workspace yetkilendirmesi gerekir.")
+    .replace("Requires Sentry organization authorization and may expose production error data.", "Sentry organization yetkilendirmesi gerekir ve production hata verisini aciga cikarabilir.")
+    .replace("Requires Vercel account/team authorization and may expose project or deployment data.", "Vercel hesap/team yetkilendirmesi gerekir ve proje veya deployment verisini aciga cikarabilir.")
+    .replace("Set SUPABASE_DB_URL in the shell environment before enabling; never commit the value.", "Acmadan once shell ortaminda SUPABASE_DB_URL ayarlayin; degeri asla commit etmeyin.");
+}
+
+function scanRecentCliLogSignals(logs) {
+  const patterns = [
+    { kind: "failure", pattern: /^(?:Failure|Error|Hata):|Overall:\s*fail\b|Status:\s*fail\b|exitCode=(?!0\b)|\b(?:EPERM|ETIMEDOUT)\b|Command failed/i },
+    { kind: "warning", pattern: /^(?:Warning|Uyari):|\[warn\]|Overall:\s*warning\b/i },
+    { kind: "attention", pattern: /^(?:Attention|Dikkat):|Overall:\s*attention\b|Repo Git:\s*attention\b|Codex CLI:\s*attention\b|Codex doctor checks:\s*attention\b/i },
+    { kind: "legacy-raw-value", pattern: /\b(none|null|not_checked|configured_unverified|skipped\/skipped|MCP 0)\b/i }
+  ];
+  const counts = Object.fromEntries(patterns.map((item) => [item.kind, 0]));
+  const newest = [];
+  for (const log of logs) {
+    const filePath = path.join(root, log.file);
+    if (!fs.existsSync(filePath)) continue;
+    const lines = fs.readFileSync(filePath, "utf8").split(/\r?\n/);
+    for (const line of lines) {
+      for (const item of patterns) {
+        if (!item.pattern.test(line)) continue;
+        counts[item.kind] += 1;
+        if (newest.length < 8) {
+          newest.push({
+            file: log.file,
+            kind: item.kind,
+            line: truncateVisual(redactSensitiveOutput(line.trim()), 120)
+          });
+        }
+      }
+    }
+  }
+  return {
+    scannedFiles: logs.length,
+    counts,
+    newest,
+    rawContentsPrinted: false
+  };
+}
+
+function printLogSignalSummary(signalSummary) {
+  console.log(`${styleLabel(localText("Historical log signal scan", "Gecmis log sinyal taramasi"))}: ${localText(
+    `${signalSummary.scannedFiles} recent files; failures=${signalSummary.counts.failure}, warnings=${signalSummary.counts.warning}, attention=${signalSummary.counts.attention}, legacy raw values=${signalSummary.counts["legacy-raw-value"]}`,
+    `${signalSummary.scannedFiles} son dosya; hata=${signalSummary.counts.failure}, uyari=${signalSummary.counts.warning}, dikkat=${signalSummary.counts.attention}, eski ham deger=${signalSummary.counts["legacy-raw-value"]}`
+  )}`);
+  console.log(styleMuted(localText(
+    "These counts are historical log evidence; current health is reported by Status and Doctor.",
+    "Bu sayilar gecmis log kanitidir; guncel saglik Durum ve Doctor tarafindan raporlanir."
+  )));
 }
 
 function diagnosticCommandRows() {
@@ -2369,6 +2454,7 @@ function runProcesses() {
 function runDiagnostics() {
   const commands = diagnosticCommandRows();
   const logs = recentCliLogs(12);
+  const logSignals = scanRecentCliLogSignals(logs);
   const status = readRepoStatusSnapshot();
   const backups = listBackupArchives();
   const attentionReasons = [
@@ -2397,12 +2483,13 @@ function runDiagnostics() {
     nextActions,
     backupSummary: backupSummary(backups),
     logSummary: logSummary(logs),
+    logSignals,
     commands,
     recentLogs: logs,
     safety: [
-      "Read-only by default.",
-      "Use --apply only on explicit install, update, repair, restore, or delete flows.",
-      "Ask before stopping persistent MCP/browser/process state."
+    localText("Read-only by default.", "Varsayilan olarak yazmasiz."),
+    localText("Use --apply only on explicit install, update, repair, restore, or delete flows.", "--apply yalniz acik install, update, repair, restore veya delete akislarinda kullanilir."),
+    localText("Ask before stopping persistent MCP/browser/process state.", "Kalici MCP/browser/surec durumunu durdurmadan once onay isteyin.")
     ]
   };
 
@@ -2417,21 +2504,22 @@ function runDiagnostics() {
   console.log(`${styleLabel(localText("Backup root", "Yedek kok dizini"))}: ${payload.backupRoot}`);
   console.log("");
   console.log(styleHeading(localText("Current health", "Canli saglik")));
-  console.log(`${styleLabel(localText("Overall", "Genel"))}: ${payload.status.overall}`);
+  console.log(`${styleLabel(localText("Overall", "Genel"))}: ${displayValue(payload.status.overall)}`);
   if (payload.status.git?.summary) {
-    console.log(`${styleLabel("Git")}: ${payload.status.git.summary}`);
+    console.log(`${styleLabel("Git")}: ${translateCliMessage(payload.status.git.summary)}`);
   }
   if (payload.attentionReasons.length > 0) {
     console.log(`${ICONS.warn} ${localText("Attention reasons:", "Dikkat nedenleri:")}`);
-    for (const reason of payload.attentionReasons) console.log(`- ${reason}`);
+    for (const reason of payload.attentionReasons) console.log(`- ${translateCliMessage(reason)}`);
   } else {
     console.log(`${ICONS.ok} ${localText("No repo-only attention reasons.", "Repo-only dikkat nedeni yok.")}`);
   }
   console.log(`${styleLabel(localText("Backups", "Yedekler"))}: ${payload.backupSummary.count}${payload.backupSummary.latestRestorable ? `; ${localText("latest restorable", "son geri yuklenebilir")}: ${payload.backupSummary.latestRestorable.id}` : ""}`);
   console.log(`${styleLabel(localText("CLI logs", "CLI loglari"))}: ${payload.logSummary.count}${payload.logSummary.latest ? `; ${localText("latest", "son")}: ${payload.logSummary.latest.file}` : ""}`);
+  printLogSignalSummary(payload.logSignals);
   console.log("");
   console.log(styleHeading(localText("Next safe actions", "Sonraki guvenli adimlar")));
-  for (const action of payload.nextActions.slice(0, 6)) console.log(`- ${action}`);
+  for (const action of payload.nextActions.slice(0, 6)) console.log(`- ${translateCliMessage(action)}`);
   console.log("");
   console.log(styleHeading(localText("Diagnostic evidence commands", "Tanilama kanit komutlari")));
   printRows(
@@ -2451,6 +2539,27 @@ function runDiagnostics() {
         ]
   );
   console.log("");
+  console.log(styleHeading(localText("Recent historical log signals", "Son gecmis log sinyalleri")));
+  printRows(
+    payload.logSignals.newest,
+    isTr()
+      ? [
+          { key: "kind", label: "tur" },
+          { key: "file", label: "dosya" },
+          { key: "line", label: "satir" }
+        ]
+      : [
+          { key: "kind", label: "kind" },
+          { key: "file", label: "file" },
+          { key: "line", label: "line" }
+        ],
+    localText("No fail/warn/attention signals in scanned recent logs.", "Taranan son loglarda fail/warn/attention sinyali yok.")
+  );
+  console.log(styleMuted(localText(
+    "Raw log contents stay local and are not printed by diagnostics.",
+    "Raw log icerigi lokal kalir ve diagnostics tarafindan basilmaz."
+  )));
+  console.log("");
   console.log(styleHeading(localText("Recent CLI logs", "Son CLI loglari")));
   printRecentCliLogs(logs);
   console.log("");
@@ -2463,7 +2572,14 @@ function runDiagnostics() {
 }
 
 function runLogs() {
-  printRecentCliLogs(recentCliLogs(12));
+  const logs = recentCliLogs(12);
+  printLogSignalSummary(scanRecentCliLogSignals(logs));
+  console.log(styleMuted(localText(
+    "Raw log contents stay local; this screen shows metadata and signal counts only.",
+    "Raw log icerigi lokal kalir; bu ekran yalniz metadata ve sinyal sayilarini gosterir."
+  )));
+  console.log("");
+  printRecentCliLogs(logs);
   return { ok: true };
 }
 

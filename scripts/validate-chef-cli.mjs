@@ -614,6 +614,20 @@ runCliSmoke("mcp", ["--mcp", "--plain", "--no-log"], [
   "Timeouts and per-tool exposure live in templates/codex/config.windows.toml",
   "Authenticated account, database, and broad filesystem MCP connectors stay disabled by default."
 ], { forbidAnsi: true });
+runCliSmoke("mcp-tr", ["--mcp", "--tr", "--plain", "--no-log"], [
+  "MCP server'lari: 15",
+  "Kimlik bilgisi veya ek girdi gerekmez.",
+  "Ilk calismada npm/npx ag erisimi gerekir",
+  "GitHub/Copilot hesap yetkilendirmesi gerekir",
+  "Auth isteyen hesap, database ve genis filesystem MCP connector'lari varsayilan olarak kapali kalir."
+], {
+  forbidAnsi: true,
+  forbiddenSnippets: [
+    "No credential or extra input is required.",
+    "Requires npm/npx network access on first startup",
+    "Requires GitHub/Copilot account authorization"
+  ]
+});
 runCliSmoke("mcp-forced-color", ["--mcp", "--no-log"], [
   "MCP servers: 15",
   "Authenticated account, database, and broad filesystem MCP connectors stay disabled by default."
@@ -656,6 +670,9 @@ runCliSmoke("diagnostics", ["--diagnostics", "--plain", "--no-log"], [
   "npm run chef -- --processes --no-log",
   "npm run verify:install:runtime -- --expect-skills --redact-paths",
   "Serena/MCP process audit",
+  "Historical log signal scan",
+  "These counts are historical log evidence",
+  "Recent historical log signals",
   "Recent CLI logs",
   "Log root"
 ], { forbidAnsi: true });
@@ -671,6 +688,9 @@ runCliSmoke("diagnostics-tr", ["--diagnostics", "--tr", "--plain", "--no-log"], 
   "npm run chef -- --processes --no-log",
   "npm run verify:install:runtime -- --expect-skills --redact-paths",
   "Serena/MCP surec denetimi",
+  "Gecmis log sinyal taramasi",
+  "Bu sayilar gecmis log kanitidir",
+  "Son gecmis log sinyalleri",
   "Son CLI loglari",
   "Log kok dizini"
 ], { forbidAnsi: true });

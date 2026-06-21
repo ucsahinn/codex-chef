@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## v0.5.34 - 2026-06-21
+
+This patch finishes the CLI evidence and localization hardening pass after the
+menu/status polish work.
+
+## Highlights
+
+- `npm run chef -- --diagnostics` and `npm run chef -- --logs` now show a
+  historical log signal scan with fail/warn/attention/raw-value counts and the
+  newest matching log lines, while making clear that current health still comes
+  from Status and Doctor.
+- The log classifier is stricter, so old `0 fail` summaries and connector
+  guidance text are not misread as current failures.
+- The Turkish MCP screen now localizes setup hints for default tooling,
+  browser MCPs, Serena, memory, filesystem, account connectors, and Supabase.
+- CLI validation now covers the Turkish MCP screen, historical log evidence,
+  diagnostics, process/tunnel audit, menu transcripts, and write-gated preview
+  flows for install/update/reset/repair.
+
+## Verification
+
+- `npm run validate:chef-cli`
+- `npm run check`
+- `npm run validate:release`
+- `npm run verify:install:runtime -- --expect-skills --expect-git-guards --redact-paths`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.33 - 2026-06-21
 
 This patch completes the Turkish CLI status polish pass.
