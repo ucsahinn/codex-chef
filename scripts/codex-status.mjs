@@ -118,6 +118,26 @@ function redactDeep(value) {
   return value;
 }
 
+function humanStatusValue(value, context = "") {
+  if (value === undefined || value === null || value === "") return "not inspected";
+  const text = String(value);
+  const normalized = text.trim().toLowerCase();
+  const replacements = {
+    none: context === "skillMode" ? "profile-specific; some profiles do not need skills" : "not applicable",
+    "not_checked_here": "not checked in this status run",
+    "not_inferred_from_catalog": "not inferred from catalog",
+    skipped: "skipped by this mode",
+    true: "enabled",
+    false: "disabled"
+  };
+  return replacements[normalized] || text;
+}
+
+function humanList(values, context = "") {
+  const list = (values || []).map((value) => humanStatusValue(value, context));
+  return list.length ? list.join(", ") : "not configured";
+}
+
 function run(command, commandArgs, extra = {}) {
   const executable = process.platform === "win32" && command.endsWith(".cmd") ? "cmd.exe" : command;
   const argsForSpawn = process.platform === "win32" && command.endsWith(".cmd")
@@ -1000,13 +1020,21 @@ if (options.json) {
   console.log(`Use: ${cliQuickStart.interactiveMenu} (or ${cliQuickStart.auditMode} for no repo-local log)`);
   console.log(`Numbered menu: ${cliQuickStart.numberedActions ? "yes" : "no"}; write actions require --apply or typed confirmation.`);
   console.log(`Target Codex home: ${codexCliRuntime.target.codexHome}`);
+  const ambientMcpText = codexCliRuntime.ambient.mcp.inspected === false
+    ? "MCP skipped"
+    : `MCP ${codexCliRuntime.ambient.mcp.configuredCount}`;
   console.log(
-    `Ambient Codex: ${codexCliRuntime.ambient.relationshipToTarget} (login ${codexCliRuntime.ambient.login.status}, MCP ${codexCliRuntime.ambient.mcp.configuredCount}; CODEX_HOME env ${codexCliRuntime.ambient.codexHomeEnv || "unset"})`
+    `Ambient Codex: ${codexCliRuntime.ambient.relationshipToTarget} (login ${codexCliRuntime.ambient.login.status}, ${ambientMcpText}; CODEX_HOME env ${codexCliRuntime.ambient.codexHomeEnv || "unset"})`
   );
   console.log(`Repo Git: ${gitRepository.status} - ${gitRepository.summary}`);
   if (gitRepository.remediation) console.log(`Repo Git remediation: ${gitRepository.remediation}`);
+  const targetMcpText = codexCliRuntime.mcp.inspected === false
+    ? "MCP probe skipped"
+    : `MCP configured ${codexCliRuntime.mcp.configuredCount}`;
   console.log(
-    `Codex CLI: ${codexCliRuntime.status} (strict config ${codexCliRuntime.version.status}, login ${codexCliRuntime.login.status}, MCP ${codexCliRuntime.mcp.status}; MCP configured ${codexCliRuntime.mcp.configuredCount})`
+    codexCliRuntime.mcp.inspected === false
+      ? `Codex CLI: ${codexCliRuntime.status} (strict config ${codexCliRuntime.version.status}, login ${codexCliRuntime.login.status}, ${targetMcpText})`
+      : `Codex CLI: ${codexCliRuntime.status} (strict config ${codexCliRuntime.version.status}, login ${codexCliRuntime.login.status}, MCP ${codexCliRuntime.mcp.status}; ${targetMcpText})`
   );
   console.log(
     `Logs: Chef ${logSummary.repoCliLogs.recent.length} recent metadata record(s), content not inspected; ${logSummary.codexLogs.inspected === false ? "Codex skipped" : `Codex ${logSummary.codexLogs.recent.length} recent metadata record(s), content not inspected`}`
@@ -1030,7 +1058,10 @@ if (options.json) {
       );
     }
   } else {
-    console.log(`Installed runtime: ${runtime.status}/${runtimeInstallState}`);
+    const runtimeText = runtime.status === "skipped"
+      ? "skipped by this mode"
+      : `${runtime.status}/${runtimeInstallState}`;
+    console.log(`Installed runtime: ${runtimeText}`);
   }
   if (!runtime.report?.skills?.inspected && skillInventory.inspected) {
     console.log(`Skills: ${skillInventory.installed} total installed across global roots (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} missing, ${skillInventory.extraCount} other/user-installed)`);
@@ -1045,10 +1076,13 @@ if (options.json) {
     `Enterprise routing: ${routingBoard.profileCount} profiles (agents ${routingBoard.requiredSurfaces.agents.length}, skills ${routingBoard.requiredSurfaces.skills.length}, MCP ${routingBoard.requiredSurfaces.mcp.length}, flags/checks ${routingBoard.requiredSurfaces.flags.length})`
   );
   console.log(
-    `Routing modes: delegation=${routingBoard.requiredSurfaces.delegationModes.join(", ")}, skills=${routingBoard.requiredSurfaces.skillModes.join(", ")}, MCP=${routingBoard.requiredSurfaces.mcpModes.join(", ")}`
+    `Routing modes: delegation=${humanList(routingBoard.requiredSurfaces.delegationModes, "delegationMode")}, skills=${humanList(routingBoard.requiredSurfaces.skillModes, "skillMode")}, MCP=${humanList(routingBoard.requiredSurfaces.mcpModes, "mcpMode")}`
   );
   console.log(
-    `Effective controls: multi_agent=${effectiveControls.features.multiAgent}, max_depth=${effectiveControls.agents.maxDepth}, approval=${effectiveControls.approvalPolicy}, sandbox=${effectiveControls.sandboxMode}, network=${effectiveControls.workspaceNetwork}, hooks=${effectiveControls.features.hooks}, managed hooks=${effectiveControls.managedHooks}, apps default=${effectiveControls.appsDefault.enabled}/destructive=${effectiveControls.appsDefault.destructiveEnabled}/open_world=${effectiveControls.appsDefault.openWorldEnabled}`
+    `MCP quick view: ready=${mcpSetupBoard.enabledByDefault.join(", ") || "not configured"}, opt-in=${mcpSetupBoard.disabledByDefault.join(", ") || "not configured"}`
+  );
+  console.log(
+    `Effective controls: multi_agent=${humanStatusValue(effectiveControls.features.multiAgent)}, max_depth=${humanStatusValue(effectiveControls.agents.maxDepth)}, approval=${humanStatusValue(effectiveControls.approvalPolicy)}, sandbox=${humanStatusValue(effectiveControls.sandboxMode)}, network=${humanStatusValue(effectiveControls.workspaceNetwork)}, hooks=${humanStatusValue(effectiveControls.features.hooks)}, managed hooks=${humanStatusValue(effectiveControls.managedHooks)}, apps default=${humanStatusValue(effectiveControls.appsDefault.enabled)}/destructive=${humanStatusValue(effectiveControls.appsDefault.destructiveEnabled)}/open_world=${humanStatusValue(effectiveControls.appsDefault.openWorldEnabled)}`
   );
   console.log(
     `MCP setup: ${mcpSetupBoard.serverCount} servers (${mcpSetupBoard.enabledByDefault.length} enabled, ${mcpSetupBoard.disabledByDefault.length} disabled, ${mcpSetupBoard.setupRequiredCount} with setup notes)`

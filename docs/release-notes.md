@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## v0.5.32 - 2026-06-21
+
+This patch focuses on the operator CLI polish pass after the v0.5.31 release.
+
+## Highlights
+
+- `npm run chef` now presents read-only, optional network, account guidance,
+  live-check, and skipped-probe states in human language instead of leaking raw
+  internal sentinel values such as `none`, `null`, `not_checked`, or
+  `configured_unverified`.
+- The update preview now shows the current Codex Chef version, branch, commit,
+  release-note target, affected managed surfaces, and the exact safety behavior
+  before any `--apply` action.
+- Repo-only status now explains skipped runtime/Codex probes without misleading
+  zero counts, shows a compact MCP ready/opt-in view, and clarifies
+  profile-specific skill routing.
+
+## Verification
+
+- `npm run validate:chef-cli`
+- `npm run check`
+- `npm run validate:release`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.31 - 2026-06-21
 
 This release keeps Codex Chef autonomous where it is safe, but makes

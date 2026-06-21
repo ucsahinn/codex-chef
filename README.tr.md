@@ -136,8 +136,10 @@ attention nedenlerini, sonraki guvenli adimlari, backup/log ozetini, update ve
 repair preview komutlarini, runtime parity ve Serena/MCP surec denetimi
 komutlarini tek yerde toplar. Log kok dizinini ve son CLI log metadata'sini
 basar; surec durdurmaz, log icerigi basmaz ve global dosya degistirmez. Direkt
-read-only Serena, MCP, browser, Python ve Node surec sayimi icin
-`npm run chef -- --processes --no-log` kullan. npm
+read-only Serena, MCP, browser, tunel, Python ve Node surec sayimi icin
+`npm run chef -- --processes --no-log` kullan. Surec denetimi `cloudflared`,
+`ngrok`, `ssh`, `tailscale`, `wstunnel` veya `localtunnel` gibi yaygin tunel
+sureclerinin acik/kapali kanitini verir, ama hicbirini durdurmaz. npm
 uzerinden machine-readable JSON icin `npm run --silent chef -- --diagnostics
 --json --no-log` kullan; boylece npm script banner'i JSON'u bozmaz. CLI loglari
 ignored kalir ve source package'a girmez.

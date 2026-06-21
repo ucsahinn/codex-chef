@@ -159,7 +159,10 @@ change global files. For machine-readable JSON through npm, use
 `npm run --silent chef -- --diagnostics --json --no-log` so npm does not prepend
 script banners. CLI logs are ignored and not part of the source package.
 Use `npm run chef -- --processes --no-log` for direct read-only Serena, MCP,
-browser, Python, and Node process counts.
+browser, tunnel, Python, and Node process counts. The process audit reports
+whether common tunnel processes such as `cloudflared`, `ngrok`, `ssh`,
+`tailscale`, `wstunnel`, or `localtunnel` are open or closed, but it never
+stops them.
 
 If PowerShell reports `Could not read package.json` from another directory,
 run the command from the repository or use npm's prefix form:

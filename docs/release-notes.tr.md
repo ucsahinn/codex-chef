@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## v0.5.32 - 2026-06-21
+
+Bu patch v0.5.31 release'inden sonra operator CLI polish gecisine odaklanir.
+
+## One cikanlar
+
+- `npm run chef` artik read-only, opsiyonel ag, hesap rehberi, canli kontrol
+  ve atlanan prob durumlarini `none`, `null`, `not_checked` veya
+  `configured_unverified` gibi internal sentinel degerleri sizdirmeden dogal
+  dille gosterir.
+- Update preview artik herhangi bir `--apply` oncesinde mevcut Codex Chef
+  versiyonunu, branch'i, commit'i, release-note hedefini, etkilenecek managed
+  yuzeyleri ve safety davranisini gosterir.
+- Repo-only status yaniltici sifir sayilari yerine atlanan runtime/Codex
+  problarini aciklar, kompakt MCP ready/opt-in gorunumu verir ve
+  profile-specific skill routing'i daha net anlatir.
+
+## Verification
+
+- `npm run validate:chef-cli`
+- `npm run check`
+- `npm run validate:release`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.31 - 2026-06-21
 
 Bu release Codex Chef'i guvenli oldugu yerde otonom tutar; ama delegation,

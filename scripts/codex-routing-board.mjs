@@ -40,6 +40,10 @@ function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.join(root, relativePath), "utf8"));
 }
 
+function listOrFallback(values, fallback) {
+  return values.length ? values.join(", ") : fallback;
+}
+
 const routing = readJson("catalog/routing-profiles.json");
 const profiles = options.profile
   ? routing.profiles.filter((profile) => profile.id === options.profile)
@@ -103,10 +107,10 @@ if (options.json) {
     console.log("");
     console.log(`- ${profile.title} (${profile.id})`);
     console.log(`  Trigger: ${profile.trigger}`);
-    console.log(`  Agents: ${profile.agents.join(", ")}`);
-    console.log(`  Skills: ${profile.skills.length ? profile.skills.join(", ") : "none"}`);
-    console.log(`  MCP: ${profile.mcp.length ? profile.mcp.join(", ") : "none"}`);
-    console.log(`  Flags/checks: ${profile.flags.join(", ")}`);
+    console.log(`  Agents: ${listOrFallback(profile.agents, "No specialist agent route")}`);
+    console.log(`  Skills: ${listOrFallback(profile.skills, "No matching skill route")}`);
+    console.log(`  MCP: ${listOrFallback(profile.mcp, "No MCP route")}`);
+    console.log(`  Flags/checks: ${listOrFallback(profile.flags, "No extra flags/checks")}`);
     console.log(`  Delegation mode: ${profile.delegationMode}`);
     console.log(`  Skill mode: ${profile.skillMode}`);
     console.log(`  MCP mode: ${profile.mcpMode}`);

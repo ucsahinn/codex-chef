@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.5.32 - 2026-06-21
+
+- Reworked `npm run chef` human output so menu write boundaries, MCP evidence
+  states, diagnostics tables, and repo-only status no longer expose raw
+  `none`, `null`, `not_checked`, or `configured_unverified` sentinel values.
+- Added current package version, branch, commit, release-note target, and
+  update safety behavior to the `--update` preview so users can see what they
+  are on before applying a backup-backed managed refresh.
+- Improved status readability with an MCP quick view, clearer skipped-probe
+  wording, and safer display labels for profile-specific skill routing and
+  uninspected managed hooks.
+
 ## 0.5.31 - 2026-06-21
 
 - Clarified task-shape routing so Codex Chef's installed `AGENTS.md`, docs,

@@ -680,12 +680,16 @@ runCliSmoke("processes", ["--processes", "--plain", "--no-log"], [
   "Codex Chef process audit",
   "read-only count",
   "Total matching processes",
+  "Tunnel processes",
+  "MCP/runtime processes",
   "No process is stopped"
 ], { forbidAnsi: true });
 runCliSmoke("processes-tr", ["--processes", "--tr", "--plain", "--no-log"], [
   "Codex Chef surec denetimi",
   "read-only sayim",
   "Eslesen toplam surec",
+  "Tunel surecleri",
+  "MCP/runtime surecleri",
   "hicbir surec durdurulmaz"
 ], { forbidAnsi: true });
 runCliJsonSmoke("processes-json", ["--processes", "--json", "--no-log"]);
@@ -728,8 +732,11 @@ runCliJsonSmoke("status-repo-only-json-tr", ["--status", "--repo-only", "--json"
 runCliSmoke("status-repo-only", ["--status", "--repo-only", "--plain", "--no-log"], [
   "Codex Chef status",
   "Codex CLI: skipped",
-  "Installed runtime: skipped/skipped",
+  "MCP probe skipped",
+  "Installed runtime: skipped by this mode",
   "Skills: skipped",
+  "MCP quick view:",
+  "managed hooks=not inspected",
   "Codex skipped",
   "Log disabled by --no-log"
 ], { timeout: 180000 });

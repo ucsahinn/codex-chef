@@ -238,10 +238,65 @@ function printDivider(title = "") {
   console.log(divider(title));
 }
 
+function writeBoundaryKind(boundary) {
+  const normalized = stripAnsi(String(boundary || "")).toLowerCase();
+  if (
+    normalized === "none" ||
+    normalized === "read-only" ||
+    normalized === "yazmaz" ||
+    normalized.includes("read-only") ||
+    normalized.includes("yazmasiz") ||
+    normalized.includes("yazmaz")
+  ) {
+    return "safe";
+  }
+  if (
+    normalized.includes("optional") ||
+    normalized.includes("guidance") ||
+    normalized.includes("opsiyonel") ||
+    normalized.includes("rehberi")
+  ) {
+    return "guidance";
+  }
+  return "write";
+}
+
 function styleWriteBoundary(boundary) {
-  if (boundary === "none") return colorize(boundary, "green");
-  if (boundary.includes("optional") || boundary.includes("guidance")) return colorize(boundary, "yellow");
+  const kind = writeBoundaryKind(boundary);
+  if (kind === "safe") return colorize(boundary, "green");
+  if (kind === "guidance") return colorize(boundary, "yellow");
   return colorize(boundary, "red");
+}
+
+function displayValue(value, column = {}) {
+  if (value === undefined || value === null || value === "") return localText("Not set", "Belirtilmedi");
+  const text = String(value);
+  const normalized = text.trim().toLowerCase();
+  const key = String(column.key || "").toLowerCase();
+  const label = String(column.label || "").toLowerCase();
+  const isWrites = key === "writes" || label === "writes" || label === "yazar";
+  const isSetup = key === "setup" || label === "setup";
+  const replacements = {
+    none: isWrites
+      ? localText("Read-only", "Yazmaz")
+      : isSetup
+        ? localText("No setup required", "Kurulum gerekmez")
+        : localText("Not applicable", "Uygulanmaz"),
+    "network optional": localText("Optional network", "Ag opsiyonel"),
+    "none/account guidance": localText("Read-only + account guidance", "Yazmaz + hesap rehberi"),
+    "none/global with --restore --apply": localText("Read-only; global only with --restore --apply", "Yazmaz; global sadece --restore --apply ile"),
+    "none without --apply": localText("Read-only until --apply", "--apply yoksa yazmaz"),
+    "ready_by_default": localText("Ready by default", "Varsayilan hazir"),
+    "disabled_by_default": localText("Disabled by default", "Varsayilan kapali"),
+    "configured_unverified": localText("Configured, not live-checked", "Config var, canli kontrol yok"),
+    "not_checked": localText("Not live-checked", "Canli kontrol yok"),
+    "yes": localText("Yes", "Evet"),
+    "no": localText("No", "Hayir"),
+    "missing": localText("Missing", "Eksik"),
+    "present": localText("Present", "Var"),
+    "skipped": localText("Skipped", "Atlandi")
+  };
+  return replacements[normalized] || text;
 }
 
 function makeIcons() {
@@ -256,25 +311,25 @@ const MENU_ITEMS = [
   {
     id: "status",
     label: "Status",
-    writes: "none",
+    writes: "Read-only",
     description: "Read-only installed runtime and repo status board."
   },
   {
     id: "status:repo-only",
     label: "Repo-only status",
-    writes: "none",
+    writes: "Read-only",
     description: "Fast local repo checks without installed runtime or Codex CLI probes."
   },
   {
     id: "doctor",
     label: "Doctor",
-    writes: "none",
+    writes: "Read-only",
     description: "Repo doctor plus full installed runtime expectations."
   },
   {
     id: "preview",
     label: "Preview",
-    writes: "none",
+    writes: "Read-only",
     description: "No-write install plan and PowerShell/Bash dry run."
   },
   {
@@ -304,61 +359,61 @@ const MENU_ITEMS = [
   {
     id: "backups",
     label: "Backups",
-    writes: "none/global with --restore --apply",
+    writes: "Read-only; global only with --restore --apply",
     description: "List, inspect, or restore Codex Chef backup archives."
   },
   {
     id: "skills",
     label: "Skills",
-    writes: "network optional",
+    writes: "Optional network",
     description: "Show curated skill catalog and verify sources."
   },
   {
     id: "mcp",
     label: "MCP",
-    writes: "none/account guidance",
+    writes: "Read-only + account guidance",
     description: "Show MCP defaults, disabled account connectors, and setup notes."
   },
   {
     id: "routing",
     label: "Routing",
-    writes: "none",
+    writes: "Read-only",
     description: "Show task-shape routing, agent wait policy, skills, and MCP usage contract."
   },
   {
     id: "diagnostics",
     label: "Diagnostics",
-    writes: "none",
+    writes: "Read-only",
     description: "Show read-only evidence commands, log locations, backups, and lifecycle cleanup notes."
   },
   {
     id: "processes",
     label: "Processes",
-    writes: "none",
+    writes: "Read-only",
     description: "Read-only Serena, MCP, browser, Python, and Node process count."
   },
   {
     id: "auth",
     label: "Auth",
-    writes: "none/account guidance",
+    writes: "Read-only + account guidance",
     description: "Show public-safe GitHub auth boundaries and verification notes."
   },
   {
     id: "logs",
     label: "Logs",
-    writes: "none",
+    writes: "Read-only",
     description: "List recent Codex Chef CLI log files."
   },
   {
     id: "language",
     label: "Language",
-    writes: "none",
+    writes: "Read-only",
     description: "Switch the interactive CLI between English and Turkish."
   },
   {
     id: "exit",
     label: "Exit",
-    writes: "none",
+    writes: "Read-only",
     description: "Close the menu."
   }
 ];
@@ -367,37 +422,37 @@ const MENU_TEXT_TR = {
   status: {
     label: "Durum",
     description: "Read-only kurulu runtime ve repo durum panosu.",
-    writes: "yok"
+    writes: "Yazmaz"
   },
   "status:repo-only": {
     label: "Sadece repo durumu",
     description: "Kurulu runtime veya Codex CLI probu olmadan hizli lokal repo kontrolleri.",
-    writes: "yok"
+    writes: "Yazmaz"
   },
   doctor: {
     label: "Doctor",
     description: "Repo doctor ve tam kurulu runtime beklentileri.",
-    writes: "yok"
+    writes: "Yazmaz"
   },
   preview: {
     label: "On izleme",
     description: "Yazmasiz kurulum plani ve PowerShell/Bash dry run.",
-    writes: "yok"
+    writes: "Yazmaz"
   },
   update: {
     label: "Guncelle",
     description: "Git fast-forward ve yedekli managed refresh on izlemesi ya da apply.",
-    writes: "repo/global/ag"
+    writes: "Repo + global + ag"
   },
   install: {
     label: "Kur",
     description: "Tam kurulum. --apply veya onay ister.",
-    writes: "global/ag"
+    writes: "Global + ag"
   },
   reset: {
     label: "Reset",
     description: "Yedekli managed refresh/reinstall. --apply veya onay ister.",
-    writes: "global/ag"
+    writes: "Global + ag"
   },
   repair: {
     label: "Onar",
@@ -407,52 +462,52 @@ const MENU_TEXT_TR = {
   backups: {
     label: "Yedekler",
     description: "Codex Chef yedek arsivlerini listele, incele veya geri yukle.",
-    writes: "yok / --restore --apply ile global"
+    writes: "Yazmaz; global sadece --restore --apply ile"
   },
   skills: {
     label: "Skill'ler",
     description: "Curated skill katalogunu goster ve kaynaklari dogrula.",
-    writes: "ag opsiyonel"
+    writes: "Ag opsiyonel"
   },
   mcp: {
     label: "MCP",
     description: "MCP varsayilanlari, kapali hesap connector'lari ve setup notlari.",
-    writes: "yok / hesap rehberi"
+    writes: "Yazmaz + hesap rehberi"
   },
   routing: {
     label: "Yonlendirme",
     description: "Gorev tipi routing, agent bekleme politikalari, skill ve MCP kontrati.",
-    writes: "yok"
+    writes: "Yazmaz"
   },
   diagnostics: {
     label: "Tanilama",
     description: "Read-only kanit komutlari, log konumlari, yedekler ve lifecycle temizlik notlari.",
-    writes: "yok"
+    writes: "Yazmaz"
   },
   processes: {
     label: "Surecler",
     description: "Read-only Serena, MCP, browser, Python ve Node surec sayimi.",
-    writes: "yok"
+    writes: "Yazmaz"
   },
   auth: {
     label: "Auth",
     description: "Public-safe GitHub auth sinirlari ve dogrulama notlari.",
-    writes: "yok / hesap rehberi"
+    writes: "Yazmaz + hesap rehberi"
   },
   logs: {
     label: "Loglar",
     description: "Son Codex Chef CLI log dosyalarini listele.",
-    writes: "yok"
+    writes: "Yazmaz"
   },
   language: {
     label: "Dil",
     description: "Interaktif CLI dilini Turkce ve Ingilizce arasinda degistir.",
-    writes: "yok"
+    writes: "Yazmaz"
   },
   exit: {
     label: "Cikis",
     description: "Menuyu kapat.",
-    writes: "yok"
+    writes: "Yazmaz"
   }
 };
 
@@ -925,6 +980,47 @@ function gitHead() {
   return { ok: true, message: null, value: String(result.stdout || "").trim() };
 }
 
+function gitBranch() {
+  const result = spawnSync("git", ["branch", "--show-current"], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: 30000,
+    windowsHide: true
+  });
+  if (result.error || result.status !== 0) return localText("unknown branch", "branch bilinmiyor");
+  return String(result.stdout || "").trim() || localText("detached HEAD", "detached HEAD");
+}
+
+function latestReleaseNoteTitle() {
+  const notesPath = path.join(root, "docs", isTr() ? "release-notes.tr.md" : "release-notes.md");
+  if (!fs.existsSync(notesPath)) return localText("release notes not found", "release note bulunamadi");
+  const version = currentPackageVersion();
+  const lines = fs.readFileSync(notesPath, "utf8")
+    .split(/\r?\n/)
+    .map((item) => item.trim());
+  const line = lines.find((item) => item.startsWith(`## v${version}`))
+    || lines.find((item) => /^##\s+v\d+\.\d+\.\d+/.test(item));
+  return line ? line.replace(/^#+\s+/, "").trim() : localText("release notes available", "release note var");
+}
+
+function currentPackageVersion() {
+  return readJson("package.json").version;
+}
+
+function printUpdateContext() {
+  const head = gitHead();
+  console.log(styleHeading(localText("Current repo", "Mevcut repo")));
+  console.log(`- ${localText("Version", "Versiyon")}: ${currentPackageVersion()}`);
+  console.log(`- ${localText("Branch", "Branch")}: ${gitBranch()}`);
+  console.log(`- ${localText("Commit", "Commit")}: ${head.ok && head.value ? head.value.slice(0, 12) : localText("not inspected", "kontrol edilmedi")}`);
+  console.log(`- ${localText("Release notes", "Release notu")}: ${latestReleaseNoteTitle()}`);
+  console.log(styleMuted(localText(
+    "Preview does not contact the remote. Apply uses git pull --ff-only first, then refreshes managed files only after backup and validation.",
+    "Preview remote'a baglanmaz. Apply once git pull --ff-only kullanir, sonra validation ve yedekten sonra sadece managed dosyalari yeniler."
+  )));
+}
+
 async function runUpdate() {
   if (!options.apply) {
     console.log(`${ICONS.update} ${localText("Update preview", "Guncelleme preview")}`);
@@ -935,6 +1031,7 @@ async function runUpdate() {
       "Use apply only after reviewing the target list and backup behavior.",
       "Apply'i yalniz hedef listesini ve yedek davranisini inceledikten sonra kullanin."
     )));
+    printUpdateContext();
     printManagedRefreshSummary();
     if (options.verbosePlan) return runPreview(true, false);
     return { ok: true };
@@ -1408,16 +1505,16 @@ function printRows(rows, columns, emptyMessage = null) {
   if (options.plain) {
     rows.forEach((row, index) => {
       const primary = columns[0];
-      console.log(`${index + 1}. ${row[primary.key] ?? ""}`);
+      console.log(`${index + 1}. ${displayValue(row[primary.key], primary)}`);
       for (const column of columns.slice(1)) {
-        console.log(`   ${column.label}: ${row[column.key] ?? ""}`);
+        console.log(`   ${column.label}: ${displayValue(row[column.key], column)}`);
       }
     });
     return;
   }
   const width = terminalWidth();
   const compactRows = rows.map((row) => Object.fromEntries(
-    columns.map((column) => [column.key, String(row[column.key] ?? "")])
+    columns.map((column) => [column.key, displayValue(row[column.key], column)])
   ));
   const primary = columns[0];
   const secondary = columns.slice(1);
@@ -1429,12 +1526,12 @@ function printRows(rows, columns, emptyMessage = null) {
   printDivider("");
   console.log(`${padVisual(styleMuted(primary.label), primaryWidth)}${secondary.length ? styleMuted(localText("details", "detaylar")) : ""}`);
   console.log(styleMuted("-".repeat(Math.min(width, primaryWidth + 64))));
-  rows.forEach((row, index) => {
-    const primaryValue = `${index + 1}. ${truncateVisual(row[primary.key] ?? "", primaryWidth - 4)}`;
+  compactRows.forEach((row, index) => {
+    const primaryValue = `${index + 1}. ${truncateVisual(row[primary.key], primaryWidth - 4)}`;
     console.log(padVisual(primaryValue, primaryWidth));
     for (const column of secondary) {
       const valueWidth = Math.max(16, width - labelWidth - 8);
-      console.log(`   ${padVisual(styleMuted(`${column.label}:`), labelWidth + 1)} ${truncateVisual(row[column.key] ?? "", valueWidth)}`);
+      console.log(`   ${padVisual(styleMuted(`${column.label}:`), labelWidth + 1)} ${truncateVisual(row[column.key], valueWidth)}`);
     }
   });
 }
@@ -1733,7 +1830,7 @@ async function runSkills() {
   const routing = readJson("catalog/routing-profiles.json");
   const installable = (catalog.skills || []).filter((skill) => skill.install === true);
   const profileCount = (routing.profiles || []).length;
-  console.log(`${ICONS.docs} Curated installable skills: ${installable.length}`);
+  console.log(`${ICONS.docs} ${localText("Curated installable skills", "Kurulabilir curated skill'ler")}: ${installable.length}`);
   printRows(
     installable.map((skill) => ({
       name: skill.name,
@@ -1759,12 +1856,12 @@ async function runSkills() {
         ]
   );
   console.log("");
-  console.log(styleHeading("Skill activation contract"));
-  console.log("- Installed skills do not run by themselves or grant hidden permissions.");
-  console.log("- A skill enters context when the user names it, for example $SkillName, or when the task clearly matches its description.");
-  console.log("- Codex reads the selected skill's SKILL.md before acting, then loads only referenced files needed for the task.");
-  console.log(`- ${profileCount} routing profiles map task shapes to recommended skills; inspect them with npm run chef -- --routing.`);
-  console.log(`${ICONS.info} Offline verification runs by default. Online resolution: npm run verify:skills:online -- --timeout-ms=90000`);
+  console.log(styleHeading(localText("Skill activation contract", "Skill aktivasyon kontrati")));
+  console.log(`- ${localText("Installed skills do not run by themselves or grant hidden permissions.", "Kurulu skill'ler kendiliginden calismaz ve gizli yetki vermez.")}`);
+  console.log(`- ${localText("A skill enters context when the user names it, for example $SkillName, or when the task clearly matches its description.", "Skill, kullanici adini soylediginde veya gorev acikca aciklamasina uydugunda context'e girer.")}`);
+  console.log(`- ${localText("Codex reads the selected skill's SKILL.md before acting, then loads only referenced files needed for the task.", "Codex harekete gecmeden once secilen skill'in SKILL.md dosyasini okur, sonra yalniz gorev icin gereken referanslari yukler.")}`);
+  console.log(`- ${localText(`${profileCount} routing profiles map task shapes to recommended skills; inspect them with npm run chef -- --routing.`, `${profileCount} routing profile'i gorev tiplerini onerilen skill'lere baglar; npm run chef -- --routing ile inceleyin.`)}`);
+  console.log(`${ICONS.info} ${localText("Offline verification runs by default. Online resolution: npm run verify:skills:online -- --timeout-ms=90000", "Varsayilan dogrulama offline calisir. Online cozumleme: npm run verify:skills:online -- --timeout-ms=90000")}`);
   const verification = runNode("skills", "scripts/verify-skill-sources.mjs");
   if (!verification.ok || !process.stdin.isTTY) return verification;
   return selectSkill(installable);
@@ -1797,8 +1894,11 @@ function mcpTarget(server) {
 async function runMcp() {
   const catalog = readJson("catalog/mcp-servers.json");
   const servers = catalog.servers || [];
-  console.log(`${ICONS.docs} MCP servers: ${servers.length}`);
-  console.log(styleMuted("Evidence levels: documented=catalog, configured=template/installed config, verified=only after /mcp or codex mcp live check."));
+  console.log(`${ICONS.docs} ${localText("MCP servers", "MCP server'lari")}: ${servers.length}`);
+  console.log(styleMuted(localText(
+    "Evidence levels: documented=catalog, configured=template/installed config, verified=only after /mcp or codex mcp live check.",
+    "Kanit seviyeleri: doc=catalog, config=template/kurulu config, canli=yalniz /mcp veya codex mcp live check basariliysa."
+  )));
   printRows(
     servers.map((server) => ({
       name: server.name,
@@ -1841,20 +1941,35 @@ async function runMcp() {
           { key: "source", label: "source" }
         ]
   );
-  console.log(styleMuted("Timeouts and per-tool exposure live in templates/codex/config.windows.toml and templates/codex/config.unix.toml."));
+  console.log(styleMuted(localText(
+    "Timeouts and per-tool exposure live in templates/codex/config.windows.toml and templates/codex/config.unix.toml.",
+    "Timeout ve tool bazli yetkiler templates/codex/config.windows.toml ve templates/codex/config.unix.toml icindedir."
+  )));
   for (const server of servers.filter((item) => item.setupHint)) {
     console.log(`- ${styleAction(server.name)}: ${server.setupHint}`);
   }
   console.log("");
-  console.log(colorize("Authenticated account, database, and broad filesystem MCP connectors stay disabled by default.", "yellow"));
-  console.log(styleMuted("Enable them only for a concrete task in ~/.codex/config.toml, restart Codex, then verify with /mcp or codex mcp."));
-  console.log(styleMuted("Rollback: set the connector's enabled flag back to false and restart Codex."));
+  console.log(colorize(localText(
+    "Authenticated account, database, and broad filesystem MCP connectors stay disabled by default.",
+    "Auth isteyen hesap, database ve genis filesystem MCP connector'lari varsayilan olarak kapali kalir."
+  ), "yellow"));
+  console.log(styleMuted(localText(
+    "Enable them only for a concrete task in ~/.codex/config.toml, restart Codex, then verify with /mcp or codex mcp.",
+    "Yalniz somut bir gorev icin ~/.codex/config.toml icinde acin, Codex'i yeniden baslatin, sonra /mcp veya codex mcp ile dogrulayin."
+  )));
+  console.log(styleMuted(localText(
+    "Rollback: set the connector's enabled flag back to false and restart Codex.",
+    "Rollback: connector enabled flag'ini tekrar false yapin ve Codex'i yeniden baslatin."
+  )));
   if (process.stdin.isTTY) {
     console.log("");
     servers.forEach((server, index) => {
       console.log(`${index + 1}. ${styleAction(server.name)}`);
     });
-    const selected = await askSelection(servers, "\nSelect an MCP number to explain, or press Enter to skip: ");
+    const selected = await askSelection(servers, localText(
+      "\nSelect an MCP number to explain, or press Enter to skip: ",
+      "\nAciklamak icin MCP numarasi secin veya atlamak icin Enter'a basin: "
+    ));
     if (selected) explainMcpServer(selected);
   }
   return { ok: true };
@@ -2017,67 +2132,74 @@ function diagnosticCommandRows() {
     {
       area: localText("Repo status", "Repo durumu"),
       command: "npm run chef -- --status --repo-only --no-log",
-      writes: localText("none", "yok"),
+      writes: localText("Read-only", "Yazmaz"),
       reason: localText("Fast repo health without installed runtime probes.", "Kurulu runtime probu olmadan hizli repo sagligi.")
     },
     {
       area: localText("Full status", "Tam durum"),
       command: "npm run chef -- --status --no-log",
-      writes: localText("none", "yok"),
+      writes: localText("Read-only", "Yazmaz"),
       reason: localText("Runtime, MCP, Git, routing, and log metadata checks.", "Runtime, MCP, Git, routing ve log metadata kontrolleri.")
     },
     {
       area: "Doctor",
       command: "npm run chef -- --doctor --no-log",
-      writes: localText("none", "yok"),
+      writes: localText("Read-only", "Yazmaz"),
       reason: localText("Repo doctor plus install/runtime expectations.", "Repo doctor ve kurulum/runtime beklentileri.")
     },
     {
       area: localText("Routing", "Yonlendirme"),
       command: "npm run chef -- --routing --no-log",
-      writes: localText("none", "yok"),
+      writes: localText("Read-only", "Yazmaz"),
       reason: localText("Agent, skill, MCP, and wait-policy routing contract.", "Agent, skill, MCP ve bekleme politikasi routing kontrati.")
     },
     {
       area: localText("Update preview", "Guncelleme preview"),
       command: "npm run chef -- --update --no-log",
-      writes: localText("none without --apply", "--apply yoksa yok"),
+      writes: localText("Read-only until --apply", "--apply yoksa yazmaz"),
       reason: localText("Shows repo/global refresh plan and validation gates without changing managed files.", "Managed dosyalari degistirmeden repo/global refresh plani ve validation gate'lerini gosterir.")
     },
     {
       area: localText("Repair preview", "Onarim preview"),
       command: "npm run chef -- --repair --no-log",
-      writes: localText("none without --apply", "--apply yoksa yok"),
+      writes: localText("Read-only until --apply", "--apply yoksa yazmaz"),
       reason: localText("Shows drift repair actions before any backup-backed write.", "Yedekli write oncesi drift onarim adimlarini gosterir.")
     },
     {
       area: localText("Backups", "Yedekler"),
       command: "npm run chef -- --backups --no-log",
-      writes: localText("none", "yok"),
+      writes: localText("Read-only", "Yazmaz"),
       reason: localText("Backup archive inventory and restore/delete preview entry points.", "Yedek arsiv envanteri ve restore/delete preview girisleri.")
     },
     {
       area: localText("CLI logs", "CLI loglari"),
       command: "npm run chef -- --logs --no-log",
-      writes: localText("none", "yok"),
+      writes: localText("Read-only", "Yazmaz"),
       reason: localText("Recent repo-local CLI log metadata; file contents are not printed.", "Son repo-local CLI log metadata'si; dosya icerigi basilmaz.")
     },
     {
       area: localText("Runtime parity", "Runtime esligi"),
       command: "npm run verify:install:runtime -- --expect-skills --redact-paths",
-      writes: localText("none", "yok"),
+      writes: localText("Read-only", "Yazmaz"),
       reason: localText("Source/runtime managed file, agent, MCP, and skill parity.", "Source/runtime managed file, agent, MCP ve skill esligi.")
     },
     {
       area: localText("Serena/MCP process audit", "Serena/MCP surec denetimi"),
       command: "npm run chef -- --processes --no-log",
-      writes: localText("none", "yok"),
+      writes: localText("Read-only", "Yazmaz"),
       reason: localText("Read-only count before asking for any process stop.", "Herhangi bir surec durdurma onayi istemeden once read-only sayim.")
     }
   ];
 }
 
-const PROCESS_AUDIT_NAMES = new Set(["serena", "uvx", "python", "python3", "chrome", "chromium", "msedge", "node"]);
+const PROCESS_AUDIT_GROUPS = {
+  codex: new Set(["codex", "codex-command-runner", "codex-command-runner-0.141.0"]),
+  mcp: new Set(["serena", "uvx", "python", "python3", "node"]),
+  browser: new Set(["chrome", "chromium", "msedge"]),
+  tunnel: new Set(["cloudflared", "ngrok", "ssh", "tailscale", "wstunnel", "lt", "localtunnel"])
+};
+
+const PROCESS_AUDIT_NAMES = new Set(Object.values(PROCESS_AUDIT_GROUPS).flatMap((group) => [...group]));
 
 function parseCsvLine(line) {
   const values = [];
@@ -2165,10 +2287,14 @@ function processCommandNames() {
 function processAuditPayload() {
   const collected = processCommandNames();
   const counts = new Map();
+  const groupCounts = Object.fromEntries(Object.keys(PROCESS_AUDIT_GROUPS).map((group) => [group, 0]));
   if (collected.ok) {
     for (const name of collected.names) {
       if (!PROCESS_AUDIT_NAMES.has(name)) continue;
       counts.set(name, (counts.get(name) || 0) + 1);
+      for (const [group, names] of Object.entries(PROCESS_AUDIT_GROUPS)) {
+        if (names.has(name)) groupCounts[group] += 1;
+      }
     }
   }
   const matches = Array.from(counts.entries())
@@ -2181,13 +2307,23 @@ function processAuditPayload() {
     command: collected.command,
     status: collected.ok ? "ok" : "attention",
     matches,
+    groupCounts,
+    tunnelStatus: groupCounts.tunnel > 0 ? "open" : "closed",
     total: matches.reduce((sum, entry) => sum + entry.count, 0),
     error: collected.ok ? null : redactSensitiveOutput(collected.error || ""),
-    safety: [
-      "Read-only process count.",
-      "No process is stopped or killed.",
-      "Ask before stopping persistent MCP, browser, Serena, Python, or Node processes."
-    ]
+    safety: isTr()
+      ? [
+          "Read-only surec sayimi.",
+          "Hicbir surec durdurulmaz veya kill edilmez.",
+          "Tunel surecleri yalniz acik/kapali kaniti olarak raporlanir.",
+          "Kalici MCP, browser, tunel, Serena, Python veya Node sureclerini durdurmadan once onay isteyin."
+        ]
+      : [
+          "Read-only process count.",
+          "No process is stopped or killed.",
+          "Tunnel processes are reported as open/closed evidence only.",
+          "Ask before stopping persistent MCP, browser, tunnel, Serena, Python, or Node processes."
+        ]
   };
 }
 
@@ -2206,6 +2342,9 @@ function runProcesses() {
     return { ok: true };
   }
   console.log(`${styleLabel(localText("Total matching processes", "Eslesen toplam surec"))}: ${payload.total}`);
+  console.log(`${styleLabel(localText("Tunnel processes", "Tunel surecleri"))}: ${payload.groupCounts.tunnel} (${localText(payload.tunnelStatus === "open" ? "open" : "closed", payload.tunnelStatus === "open" ? "acik" : "kapali")})`);
+  console.log(`${styleLabel(localText("MCP/runtime processes", "MCP/runtime surecleri"))}: ${payload.groupCounts.mcp}`);
+  console.log(`${styleLabel(localText("Browser processes", "Browser surecleri"))}: ${payload.groupCounts.browser}`);
   printRows(
     payload.matches,
     isTr()
@@ -2217,7 +2356,7 @@ function runProcesses() {
           { key: "name", label: "process" },
           { key: "count", label: "count" }
         ],
-    localText("No Serena, uvx, browser, Python, or Node processes matched.", "Serena, uvx, browser, Python veya Node sureci eslesmedi.")
+    localText("No Codex, MCP, browser, tunnel, Python, or Node processes matched.", "Codex, MCP, browser, tunel, Python veya Node sureci eslesmedi.")
   );
   console.log("");
   console.log(styleHeading(localText("Safety", "Guvenlik")));
