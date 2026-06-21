@@ -19,6 +19,7 @@ const options = {
   skipCodexCli: false,
   output: null,
   forceOutput: false,
+  lang: "en",
   codexHome: process.env.CODEX_HOME || path.join(os.homedir(), ".codex"),
   agentsHome: process.env.AGENTS_HOME || path.join(os.homedir(), ".agents")
 };
@@ -26,6 +27,13 @@ const options = {
 for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
   if (arg === "--json") options.json = true;
+  else if (arg === "--tr") options.lang = "tr";
+  else if (arg === "--lang") {
+    const value = args[index + 1];
+    if (!["en", "tr"].includes(value)) throw new Error("--lang must be en or tr");
+    options.lang = value;
+    index += 1;
+  }
   else if (arg === "--redact-paths") options.redactPaths = true;
   else if (arg === "--expect-skills") options.expectSkills = true;
   else if (arg === "--expect-git-guards") options.expectGitGuards = true;
@@ -72,20 +80,42 @@ Options:
   --skip-codex-cli             Skip Codex CLI version/login/MCP probes
   --codex-home <path>          Installed Codex home to inspect
   --agents-home <path>         Installed Agents home to inspect
+  --lang <en|tr>               Human-readable output language
+  --tr                         Shortcut for --lang tr
   --redact-paths               Redact home and repository paths in output
 `);
 }
 
+function isTr() {
+  return options.lang === "tr";
+}
+
+function localText(en, tr) {
+  return isTr() ? tr : en;
+}
+
 const progressEnabled = !options.json;
 if (progressEnabled) {
-  console.log("Codex Chef status");
+  console.log(localText("Codex Chef status", "Codex Chef durumu"));
   console.log(options.skipRuntime && options.skipCodexDoctorChecks && options.skipCodexCli
-    ? "Collecting local repository checks; installed runtime, global skill-root inventory, Codex log metadata, and live Codex CLI probes are skipped."
-    : "Collecting repo, runtime, Codex CLI, MCP, Git, and log metadata checks; this can take 30-60 seconds.");
+    ? localText(
+        "Collecting local repository checks; installed runtime, global skill-root inventory, Codex log metadata, and live Codex CLI probes are skipped.",
+        "Lokal repo kontrolleri toplaniyor; kurulu ortam, global skill envanteri, Codex log metadata'si ve canli Codex CLI problari atlandi."
+      )
+    : localText(
+        "Collecting repo, runtime, Codex CLI, MCP, Git, and log metadata checks; this can take 30-60 seconds.",
+        "Repo, kurulu ortam, Codex CLI, MCP, Git ve log metadata kontrolleri toplaniyor; 30-60 saniye surebilir."
+      ));
 }
 
 function progress(message) {
-  if (progressEnabled) console.log(`[status] ${message}`);
+  if (!progressEnabled) return;
+  const translated = isTr()
+    ? String(message)
+        .replace(/^running /, "calisiyor: ")
+        .replace(/\(timeout (\d+)s\)/, "(zaman siniri $1s)")
+    : message;
+  console.log(`[${localText("status", "durum")}] ${translated}`);
 }
 
 function skipInstalledRuntimeAndCliMetadata() {
@@ -119,16 +149,18 @@ function redactDeep(value) {
 }
 
 function humanStatusValue(value, context = "") {
-  if (value === undefined || value === null || value === "") return "not inspected";
+  if (value === undefined || value === null || value === "") return localText("not inspected", "kontrol edilmedi");
   const text = String(value);
   const normalized = text.trim().toLowerCase();
   const replacements = {
-    none: context === "skillMode" ? "profile-specific; some profiles do not need skills" : "not applicable",
-    "not_checked_here": "not checked in this status run",
-    "not_inferred_from_catalog": "not inferred from catalog",
-    skipped: "skipped by this mode",
-    true: "enabled",
-    false: "disabled"
+    none: context === "skillMode"
+      ? localText("profile-specific; some profiles do not need skills", "profile gore degisir; bazi profiller skill istemez")
+      : localText("not applicable", "uygulanmaz"),
+    "not_checked_here": localText("not checked in this status run", "bu durum turunda kontrol edilmedi"),
+    "not_inferred_from_catalog": localText("not inferred from catalog", "catalogdan varsayilmadi"),
+    skipped: localText("skipped by this mode", "bu modda atlandi"),
+    true: localText("enabled", "acik"),
+    false: localText("disabled", "kapali")
   };
   return replacements[normalized] || text;
 }
@@ -136,6 +168,57 @@ function humanStatusValue(value, context = "") {
 function humanList(values, context = "") {
   const list = (values || []).map((value) => humanStatusValue(value, context));
   return list.length ? list.join(", ") : "not configured";
+}
+
+function stateText(value) {
+  const normalized = String(value ?? "").toLowerCase();
+  const replacements = {
+    ok: localText("ok", "tamam"),
+    attention: localText("attention", "dikkat"),
+    fail: localText("fail", "hata"),
+    warning: localText("warning", "uyari"),
+    skipped: localText("skipped", "atlandi"),
+    same: localText("same", "ayni"),
+    different: localText("different", "farkli"),
+    installed: localText("installed", "kurulu"),
+    not_installed: localText("not installed", "kurulu degil"),
+    current: localText("current", "guncel")
+  };
+  return replacements[normalized] || String(value ?? localText("not inspected", "kontrol edilmedi"));
+}
+
+function translateStatusMessage(message) {
+  let text = String(message || "");
+  if (!isTr()) return text;
+  text = text
+    .replace("git status --short is clean.", "git status --short temiz.")
+    .replace(/git status --short reports (\d+) changed line\(s\)\./, "git status --short $1 degisen satir bildiriyor.")
+    .replace("one or more required provider endpoints are unreachable over HTTP", "bir veya daha fazla gerekli provider endpoint'i HTTP uzerinden erisilemiyor")
+    .replace("MCP configuration has optional issues", "MCP config icinde opsiyonel uyarilar var")
+    .replace("update configuration is locally consistent", "update yapilandirmasi lokal olarak tutarli")
+    .replace("Ambient Codex runtime home differs from installed target; verifying with explicit CODEX_HOME=", "Ortam Codex runtime home kurulu hedeften farkli; explicit CODEX_HOME ile dogrulaniyor: ")
+    .replace("Skipped installed/global skill roots because installed-runtime and live Codex CLI probes are disabled.", "Kurulu ortam ve canli Codex CLI problari kapali oldugu icin kurulu/global skill kokleri atlandi.");
+  return text;
+}
+
+function translateSetupHint(message) {
+  let text = String(message || "");
+  if (!isTr()) return text;
+  return text
+    .replace("No credential or extra input is required.", "Kimlik bilgisi veya ek girdi gerekmez.")
+    .replace("Requires npm/npx network access on first startup; no credential is required.", "Ilk calismada npm/npx ag erisimi gerekir; kimlik bilgisi gerekmez.")
+    .replace("Requires npm/npx network access and local browser control; no credential is required.", "npm/npx ag erisimi ve lokal browser kontrolu gerekir; kimlik bilgisi gerekmez.")
+    .replace("Requires npm/npx network access and starts an isolated Chrome/DevTools bridge; no credential is required.", "npm/npx ag erisimi gerekir ve izole Chrome/DevTools koprusu baslatir; kimlik bilgisi gerekmez.")
+    .replace("Requires uvx and the pinned Serena git source; disable if uvx is unavailable.", "uvx ve pinlenmis Serena git kaynagi gerekir; uvx yoksa kapatin.")
+    .replace("No credential is required; use only for non-secret local memory.", "Kimlik bilgisi gerekmez; yalniz gizli olmayan lokal memory icin kullanin.")
+    .replace("Choose a deliberate local root path in config args before enabling.", "Acmadan once config argumanlarinda bilincli bir lokal kok path secin.")
+    .replace("Requires GitHub/Copilot account authorization; keep disabled until private GitHub context is needed.", "GitHub/Copilot hesap yetkilendirmesi gerekir; private GitHub context gerekene kadar kapali tutun.")
+    .replace("Requires Figma account or workspace authorization.", "Figma hesap veya workspace yetkilendirmesi gerekir.")
+    .replace("Requires Linear workspace authorization.", "Linear workspace yetkilendirmesi gerekir.")
+    .replace("Requires Notion workspace authorization.", "Notion workspace yetkilendirmesi gerekir.")
+    .replace("Requires Sentry organization authorization and may expose production error data.", "Sentry organizasyon yetkilendirmesi gerekir ve production hata verisini aciga cikarabilir.")
+    .replace("Requires Vercel account/team authorization and may expose project or deployment data.", "Vercel hesap/takim yetkilendirmesi gerekir ve proje/deploy verisini aciga cikarabilir.")
+    .replace("Set SUPABASE_DB_URL in the shell environment before enabling; never commit the value.", "Acmadan once shell ortaminda SUPABASE_DB_URL ayarlayin; degeri asla commit etmeyin.");
 }
 
 function run(command, commandArgs, extra = {}) {
@@ -1015,95 +1098,95 @@ writeOutput(report);
 if (options.json) {
   console.log(JSON.stringify(report, null, 2));
 } else {
-  if (!progressEnabled) console.log("Codex Chef status");
-  console.log(`Overall: ${report.status}`);
-  console.log(`Use: ${cliQuickStart.interactiveMenu} (or ${cliQuickStart.auditMode} for no repo-local log)`);
-  console.log(`Numbered menu: ${cliQuickStart.numberedActions ? "yes" : "no"}; write actions require --apply or typed confirmation.`);
-  console.log(`Target Codex home: ${codexCliRuntime.target.codexHome}`);
+  if (!progressEnabled) console.log(localText("Codex Chef status", "Codex Chef durumu"));
+  console.log(`${localText("Overall", "Genel")}: ${stateText(report.status)}`);
+  console.log(`${localText("Use", "Kullanim")}: ${cliQuickStart.interactiveMenu} (${localText("or", "veya")} ${cliQuickStart.auditMode} ${localText("for no repo-local log", "repo-local log istemiyorsan")})`);
+  console.log(`${localText("Numbered menu", "Numarali menu")}: ${cliQuickStart.numberedActions ? localText("yes", "evet") : localText("no", "hayir")}; ${localText("write actions require --apply or typed confirmation", "yazan islemler --apply veya yazili onay ister")}.`);
+  console.log(`${localText("Target Codex home", "Hedef Codex home")}: ${codexCliRuntime.target.codexHome}`);
   const ambientMcpText = codexCliRuntime.ambient.mcp.inspected === false
-    ? "MCP skipped"
+    ? localText("MCP skipped", "MCP atlandi")
     : `MCP ${codexCliRuntime.ambient.mcp.configuredCount}`;
   console.log(
-    `Ambient Codex: ${codexCliRuntime.ambient.relationshipToTarget} (login ${codexCliRuntime.ambient.login.status}, ${ambientMcpText}; CODEX_HOME env ${codexCliRuntime.ambient.codexHomeEnv || "unset"})`
+    `${localText("Ambient Codex", "Ortam Codex")}: ${stateText(codexCliRuntime.ambient.relationshipToTarget)} (login ${stateText(codexCliRuntime.ambient.login.status)}, ${ambientMcpText}; CODEX_HOME env ${codexCliRuntime.ambient.codexHomeEnv || localText("unset", "atanmamis")})`
   );
-  console.log(`Repo Git: ${gitRepository.status} - ${gitRepository.summary}`);
-  if (gitRepository.remediation) console.log(`Repo Git remediation: ${gitRepository.remediation}`);
+  console.log(`${localText("Repo Git", "Repo Git")}: ${stateText(gitRepository.status)} - ${translateStatusMessage(gitRepository.summary)}`);
+  if (gitRepository.remediation) console.log(`${localText("Repo Git remediation", "Repo Git onerisi")}: ${translateStatusMessage(gitRepository.remediation)}`);
   const targetMcpText = codexCliRuntime.mcp.inspected === false
-    ? "MCP probe skipped"
-    : `MCP configured ${codexCliRuntime.mcp.configuredCount}`;
+    ? localText("MCP probe skipped", "MCP probu atlandi")
+    : localText(`MCP configured ${codexCliRuntime.mcp.configuredCount}`, `MCP config ${codexCliRuntime.mcp.configuredCount}`);
   console.log(
     codexCliRuntime.mcp.inspected === false
-      ? `Codex CLI: ${codexCliRuntime.status} (strict config ${codexCliRuntime.version.status}, login ${codexCliRuntime.login.status}, ${targetMcpText})`
-      : `Codex CLI: ${codexCliRuntime.status} (strict config ${codexCliRuntime.version.status}, login ${codexCliRuntime.login.status}, MCP ${codexCliRuntime.mcp.status}; ${targetMcpText})`
+      ? `Codex CLI: ${stateText(codexCliRuntime.status)} (strict config ${stateText(codexCliRuntime.version.status)}, login ${stateText(codexCliRuntime.login.status)}, ${targetMcpText})`
+      : `Codex CLI: ${stateText(codexCliRuntime.status)} (strict config ${stateText(codexCliRuntime.version.status)}, login ${stateText(codexCliRuntime.login.status)}, MCP ${stateText(codexCliRuntime.mcp.status)}; ${targetMcpText})`
   );
   console.log(
-    `Logs: Chef ${logSummary.repoCliLogs.recent.length} recent metadata record(s), content not inspected; ${logSummary.codexLogs.inspected === false ? "Codex skipped" : `Codex ${logSummary.codexLogs.recent.length} recent metadata record(s), content not inspected`}`
+    `${localText("Logs", "Loglar")}: Chef ${logSummary.repoCliLogs.recent.length} ${localText("recent metadata record(s), content not inspected", "son metadata kaydi, icerik incelenmedi")}; ${logSummary.codexLogs.inspected === false ? localText("Codex skipped", "Codex atlandi") : `Codex ${logSummary.codexLogs.recent.length} ${localText("recent metadata record(s), content not inspected", "son metadata kaydi, icerik incelenmedi")}`}`
   );
   if (repoDoctor.report) {
     console.log(
-      `Repo starter: ${repoDoctor.status} (${repoDoctor.report.agents?.count || 0} agents, ${repoDoctor.report.mcp?.count || 0} MCP, ${repoDoctor.report.docs?.baseGuides || 0} docs x ${repoDoctor.report.docs?.languages || 0})`
+      `${localText("Repo starter", "Repo starter")}: ${stateText(repoDoctor.status)} (${repoDoctor.report.agents?.count || 0} agents, ${repoDoctor.report.mcp?.count || 0} MCP, ${repoDoctor.report.docs?.baseGuides || 0} docs x ${repoDoctor.report.docs?.languages || 0})`
     );
   } else {
-    console.log(`Repo starter: ${repoDoctor.status}`);
+    console.log(`${localText("Repo starter", "Repo starter")}: ${stateText(repoDoctor.status)}`);
   }
   if (runtime.report) {
     const installed = runtime.report.installed || {};
     const managed = runtime.report.managedFiles || {};
     console.log(
-      `Installed runtime: ${runtime.status}/${runtimeInstallState} (agents ${installed.agents?.installed || 0}/${installed.agents?.expected || 0}, MCP ${installed.mcp?.installed || 0}/${installed.mcp?.expected || 0}, managed files ${managed.matched || 0}/${managed.expected || 0})`
+      `${localText("Installed runtime", "Kurulu ortam")}: ${stateText(runtime.status)}/${stateText(runtimeInstallState)} (agents ${installed.agents?.installed || 0}/${installed.agents?.expected || 0}, MCP ${installed.mcp?.installed || 0}/${installed.mcp?.expected || 0}, ${localText("managed files", "yonetilen dosyalar")} ${managed.matched || 0}/${managed.expected || 0})`
     );
     if (runtime.report.skills?.inspected) {
       console.log(
-        `Skills: ${runtime.report.skills.installed} installed, ${runtime.report.skills.missing.length} missing from curated set`
+        `Skills: ${runtime.report.skills.installed} ${localText("installed", "kurulu")}, ${runtime.report.skills.missing.length} ${localText("missing from curated set", "curated set icinde eksik")}`
       );
     }
   } else {
     const runtimeText = runtime.status === "skipped"
-      ? "skipped by this mode"
+      ? localText("skipped by this mode", "bu modda atlandi")
       : `${runtime.status}/${runtimeInstallState}`;
-    console.log(`Installed runtime: ${runtimeText}`);
+    console.log(`${localText("Installed runtime", "Kurulu ortam")}: ${runtimeText}`);
   }
   if (!runtime.report?.skills?.inspected && skillInventory.inspected) {
-    console.log(`Skills: ${skillInventory.installed} total installed across global roots (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} missing, ${skillInventory.extraCount} other/user-installed)`);
+    console.log(`Skills: ${skillInventory.installed} ${localText("total installed across global roots", "global koklerde toplam kurulu")} (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} ${localText("missing", "eksik")}, ${skillInventory.extraCount} ${localText("other/user-installed", "diger/kullanici kurulu")})`);
   } else if (!runtime.report?.skills?.inspected && skillInventory.inspected === false) {
-    console.log(`Skills: skipped (${skillInventory.note})`);
+    console.log(`Skills: ${localText("skipped", "atlandi")} (${skillInventory.note})`);
   }
   const skillsInstalledText = skillsContext.installed === null || skillsContext.installed === undefined
-    ? "installed not inspected"
-    : `${skillsContext.installed} installed`;
-  console.log(`Skills context: ${skillsContext.status} (${skillsInstalledText}; curated baseline ${skillsContext.curatedExpected})`);
+    ? localText("installed not inspected", "kurulu skill sayisi kontrol edilmedi")
+    : `${skillsContext.installed} ${localText("installed", "kurulu")}`;
+  console.log(`${localText("Skills context", "Skill context")}: ${stateText(skillsContext.status)} (${skillsInstalledText}; curated baseline ${skillsContext.curatedExpected})`);
   console.log(
-    `Enterprise routing: ${routingBoard.profileCount} profiles (agents ${routingBoard.requiredSurfaces.agents.length}, skills ${routingBoard.requiredSurfaces.skills.length}, MCP ${routingBoard.requiredSurfaces.mcp.length}, flags/checks ${routingBoard.requiredSurfaces.flags.length})`
+    `${localText("Enterprise routing", "Enterprise yonlendirme")}: ${routingBoard.profileCount} profiles (agents ${routingBoard.requiredSurfaces.agents.length}, skills ${routingBoard.requiredSurfaces.skills.length}, MCP ${routingBoard.requiredSurfaces.mcp.length}, flags/checks ${routingBoard.requiredSurfaces.flags.length})`
   );
   console.log(
-    `Routing modes: delegation=${humanList(routingBoard.requiredSurfaces.delegationModes, "delegationMode")}, skills=${humanList(routingBoard.requiredSurfaces.skillModes, "skillMode")}, MCP=${humanList(routingBoard.requiredSurfaces.mcpModes, "mcpMode")}`
+    `${localText("Routing modes", "Yonlendirme modlari")}: delegation=${humanList(routingBoard.requiredSurfaces.delegationModes, "delegationMode")}, skills=${humanList(routingBoard.requiredSurfaces.skillModes, "skillMode")}, MCP=${humanList(routingBoard.requiredSurfaces.mcpModes, "mcpMode")}`
   );
   console.log(
-    `MCP quick view: ready=${mcpSetupBoard.enabledByDefault.join(", ") || "not configured"}, opt-in=${mcpSetupBoard.disabledByDefault.join(", ") || "not configured"}`
+    `${localText("MCP quick view", "MCP hizli gorunum")}: ${localText("ready", "hazir")}=${mcpSetupBoard.enabledByDefault.join(", ") || localText("not configured", "yapilandirilmadi")}, opt-in=${mcpSetupBoard.disabledByDefault.join(", ") || localText("not configured", "yapilandirilmadi")}`
   );
   console.log(
-    `Effective controls: multi_agent=${humanStatusValue(effectiveControls.features.multiAgent)}, max_depth=${humanStatusValue(effectiveControls.agents.maxDepth)}, approval=${humanStatusValue(effectiveControls.approvalPolicy)}, sandbox=${humanStatusValue(effectiveControls.sandboxMode)}, network=${humanStatusValue(effectiveControls.workspaceNetwork)}, hooks=${humanStatusValue(effectiveControls.features.hooks)}, managed hooks=${humanStatusValue(effectiveControls.managedHooks)}, apps default=${humanStatusValue(effectiveControls.appsDefault.enabled)}/destructive=${humanStatusValue(effectiveControls.appsDefault.destructiveEnabled)}/open_world=${humanStatusValue(effectiveControls.appsDefault.openWorldEnabled)}`
+    `${localText("Effective controls", "Etkin kontroller")}: multi_agent=${humanStatusValue(effectiveControls.features.multiAgent)}, max_depth=${humanStatusValue(effectiveControls.agents.maxDepth)}, approval=${humanStatusValue(effectiveControls.approvalPolicy)}, sandbox=${humanStatusValue(effectiveControls.sandboxMode)}, network=${humanStatusValue(effectiveControls.workspaceNetwork)}, hooks=${humanStatusValue(effectiveControls.features.hooks)}, managed hooks=${humanStatusValue(effectiveControls.managedHooks)}, apps default=${humanStatusValue(effectiveControls.appsDefault.enabled)}/destructive=${humanStatusValue(effectiveControls.appsDefault.destructiveEnabled)}/open_world=${humanStatusValue(effectiveControls.appsDefault.openWorldEnabled)}`
   );
   console.log(
-    `MCP setup: ${mcpSetupBoard.serverCount} servers (${mcpSetupBoard.enabledByDefault.length} enabled, ${mcpSetupBoard.disabledByDefault.length} disabled, ${mcpSetupBoard.setupRequiredCount} with setup notes)`
+    `MCP setup: ${mcpSetupBoard.serverCount} servers (${mcpSetupBoard.enabledByDefault.length} ${localText("enabled", "acik")}, ${mcpSetupBoard.disabledByDefault.length} ${localText("disabled", "kapali")}, ${mcpSetupBoard.setupRequiredCount} ${localText("with setup notes", "kurulum notlu")})`
   );
   for (const server of mcpSetupBoard.servers.filter((item) => !["none", "local-state"].includes(item.setupKind))) {
-    console.log(`MCP setup note: ${server.name} [${server.setupKind}] - ${server.setupHint}`);
+    console.log(`${localText("MCP setup note", "MCP kurulum notu")}: ${server.name} [${server.setupKind}] - ${translateSetupHint(server.setupHint)}`);
   }
   if (codexDoctor.inspected) {
     console.log(
-      `Codex doctor checks: ${codexDoctor.status} (${codexDoctor.counts.ok} ok, ${codexDoctor.counts.fail} fail, ${codexDoctor.counts.warning} warning)`
+      `${localText("Codex doctor checks", "Codex doctor kontrolleri")}: ${stateText(codexDoctor.status)} (${codexDoctor.counts.ok} ok, ${codexDoctor.counts.fail} fail, ${codexDoctor.counts.warning} warning)`
     );
   } else {
-    console.log(`Codex doctor checks: ${codexDoctor.status}`);
+    console.log(`${localText("Codex doctor checks", "Codex doctor kontrolleri")}: ${stateText(codexDoctor.status)}`);
   }
-  for (const warning of warnings) console.log(`Warning: ${warning}`);
-  if (skillsContext.status === "attention") console.log(`Attention: ${skillsContext.impact}`);
-  for (const check of codexDoctor.failedChecks || []) console.log(`Attention: ${check.id} - ${check.summary}`);
-  for (const check of codexDoctor.blockingWarningChecks || codexDoctor.warningChecks || []) console.log(`Attention: ${check.id} - ${check.summary}`);
-  for (const check of codexDoctor.nonBlockingWarningChecks || []) console.log(`Warning: ${check.id} - ${check.summary}`);
-  for (const failure of failures) console.error(`Failure: ${failure}`);
-  if (options.output) console.log(`Report: ${redact(path.resolve(root, options.output))}`);
+  for (const warning of warnings) console.log(`${localText("Warning", "Uyari")}: ${translateStatusMessage(warning)}`);
+  if (skillsContext.status === "attention") console.log(`${localText("Attention", "Dikkat")}: ${translateStatusMessage(skillsContext.impact)}`);
+  for (const check of codexDoctor.failedChecks || []) console.log(`${localText("Attention", "Dikkat")}: ${check.id} - ${translateStatusMessage(check.summary)}`);
+  for (const check of codexDoctor.blockingWarningChecks || codexDoctor.warningChecks || []) console.log(`${localText("Attention", "Dikkat")}: ${check.id} - ${translateStatusMessage(check.summary)}`);
+  for (const check of codexDoctor.nonBlockingWarningChecks || []) console.log(`${localText("Warning", "Uyari")}: ${check.id} - ${translateStatusMessage(check.summary)}`);
+  for (const failure of failures) console.error(`${localText("Failure", "Hata")}: ${translateStatusMessage(failure)}`);
+  if (options.output) console.log(`${localText("Report", "Rapor")}: ${redact(path.resolve(root, options.output))}`);
 }
 
 if (status === "fail") process.exit(1);

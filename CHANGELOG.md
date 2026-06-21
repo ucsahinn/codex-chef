@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.5.33 - 2026-06-21
+
+- Passed the selected CLI language through to the status subprocess so Turkish
+  mode no longer falls back to an English status body.
+- Localized the status board progress lines, state labels, MCP setup notes,
+  warning summaries, and no-log footer while preserving machine-readable JSON
+  values.
+- Polished Turkish menu copy for managed-file repair, process audit, auth,
+  diagnostics, and update actions.
+
 ## 0.5.32 - 2026-06-21
 
 - Reworked `npm run chef` human output so menu write boundaries, MCP evidence

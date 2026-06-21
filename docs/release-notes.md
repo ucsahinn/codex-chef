@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+## v0.5.33 - 2026-06-21
+
+This patch completes the Turkish CLI status polish pass.
+
+## Highlights
+
+- The selected CLI language is now passed into the status subprocess, so
+  `npm run chef`, `Language`, then `Status` keeps the status body in Turkish.
+- Turkish status output now localizes progress lines, state labels, MCP setup
+  notes, warning summaries, and the no-log footer.
+- Turkish menu descriptions were tightened for repair, process audit,
+  diagnostics, auth, skills, and update actions.
+
+## Verification
+
+- `npm run validate:chef-cli`
+- `npm run check`
+- `npm run validate:release`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.32 - 2026-06-21
 
 This patch focuses on the operator CLI polish pass after the v0.5.31 release.

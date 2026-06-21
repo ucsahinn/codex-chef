@@ -421,27 +421,27 @@ const MENU_ITEMS = [
 const MENU_TEXT_TR = {
   status: {
     label: "Durum",
-    description: "Read-only kurulu runtime ve repo durum panosu.",
+    description: "Yazmasiz kurulu ortam ve repo durum panosu.",
     writes: "Yazmaz"
   },
   "status:repo-only": {
     label: "Sadece repo durumu",
-    description: "Kurulu runtime veya Codex CLI probu olmadan hizli lokal repo kontrolleri.",
+    description: "Kurulu ortam veya Codex CLI probu olmadan hizli lokal repo kontrolleri.",
     writes: "Yazmaz"
   },
   doctor: {
     label: "Doctor",
-    description: "Repo doctor ve tam kurulu runtime beklentileri.",
+    description: "Repo doctor ve tam kurulu ortam beklentileri.",
     writes: "Yazmaz"
   },
   preview: {
     label: "On izleme",
-    description: "Yazmasiz kurulum plani ve PowerShell/Bash dry run.",
+    description: "Yazmasiz kurulum plani ve PowerShell/Bash prova calistirmasi.",
     writes: "Yazmaz"
   },
   update: {
     label: "Guncelle",
-    description: "Git fast-forward ve yedekli managed refresh on izlemesi ya da apply.",
+    description: "Git fast-forward ve yedekli yonetilen dosya yenileme on izlemesi ya da uygulamasi.",
     writes: "Repo + global + ag"
   },
   install: {
@@ -451,47 +451,47 @@ const MENU_TEXT_TR = {
   },
   reset: {
     label: "Reset",
-    description: "Yedekli managed refresh/reinstall. --apply veya onay ister.",
+    description: "Yedekli yonetilen dosya yenileme/yeniden kurulum. --apply veya onay ister.",
     writes: "Global + ag"
   },
   repair: {
     label: "Onar",
-    description: "Yedekten sonra managed drift onarimi. --apply veya onay ister.",
-    writes: "global"
+    description: "Yedek aldiktan sonra yonetilen dosya farklarini onarir. --apply veya onay ister.",
+    writes: "Global"
   },
   backups: {
     label: "Yedekler",
-    description: "Codex Chef yedek arsivlerini listele, incele veya geri yukle.",
+    description: "Codex Chef yedek arsivlerini listeler, inceler veya geri yukler.",
     writes: "Yazmaz; global sadece --restore --apply ile"
   },
   skills: {
     label: "Skill'ler",
-    description: "Curated skill katalogunu goster ve kaynaklari dogrula.",
+    description: "Secili skill katalogunu gosterir ve kaynaklari dogrular.",
     writes: "Ag opsiyonel"
   },
   mcp: {
     label: "MCP",
-    description: "MCP varsayilanlari, kapali hesap connector'lari ve setup notlari.",
+    description: "MCP varsayilanlari, kapali hesap baglayicilari ve kurulum notlari.",
     writes: "Yazmaz + hesap rehberi"
   },
   routing: {
     label: "Yonlendirme",
-    description: "Gorev tipi routing, agent bekleme politikalari, skill ve MCP kontrati.",
+    description: "Gorev tipi yonlendirme, agent bekleme politikasi, skill ve MCP kontrati.",
     writes: "Yazmaz"
   },
   diagnostics: {
     label: "Tanilama",
-    description: "Read-only kanit komutlari, log konumlari, yedekler ve lifecycle temizlik notlari.",
+    description: "Yazmasiz kanit komutlari, log konumlari, yedekler ve oturum temizlik notlari.",
     writes: "Yazmaz"
   },
   processes: {
     label: "Surecler",
-    description: "Read-only Serena, MCP, browser, Python ve Node surec sayimi.",
+    description: "Yazmasiz Serena, MCP, browser, tunel, Python ve Node surec sayimi.",
     writes: "Yazmaz"
   },
   auth: {
     label: "Auth",
-    description: "Public-safe GitHub auth sinirlari ve dogrulama notlari.",
+    description: "Public-safe GitHub kimlik dogrulama sinirlari ve kontrol notlari.",
     writes: "Yazmaz + hesap rehberi"
   },
   logs: {
@@ -501,7 +501,7 @@ const MENU_TEXT_TR = {
   },
   language: {
     label: "Dil",
-    description: "Interaktif CLI dilini Turkce ve Ingilizce arasinda degistir.",
+    description: "Interaktif CLI dilini Turkce ve Ingilizce arasinda degistirir.",
     writes: "Yazmaz"
   },
   exit: {
@@ -716,7 +716,7 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
     return { ok: false, status: result.status, logPath };
   }
   if (logPath && !options.json) console.log(`${ICONS.ok} Log: ${toPosix(path.relative(root, logPath))}`);
-  else if (!options.json) console.log(`${ICONS.ok} Log disabled by --no-log`);
+  else if (!options.json) console.log(`${ICONS.ok} ${localText("Log disabled by --no-log", "Log --no-log ile kapali")}`);
   return { ok: true, status: result.status, logPath };
 }
 
@@ -826,6 +826,8 @@ function runStatus(overrides = {}) {
   const repoOnly = Boolean(overrides.repoOnly || options.repoOnly);
   return runNode(repoOnly ? "status-repo-only" : "status", "scripts/codex-status.mjs", [
     "--redact-paths",
+    "--lang",
+    options.lang,
     ...(repoOnly ? ["--skip-runtime", "--skip-codex-doctor-checks", "--skip-codex-cli"] : []),
     ...(options.json ? ["--json"] : [])
   ], {

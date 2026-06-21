@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+## v0.5.33 - 2026-06-21
+
+Bu patch Turkce CLI status polish gecisini tamamlar.
+
+## One cikanlar
+
+- Secili CLI dili artik status alt surecine de aktarilir; `npm run chef`,
+  `Dil`, sonra `Durum` akisinda status govdesi Ingilizceye dusmez.
+- Turkce status ciktisi progress satirlarini, durum etiketlerini, MCP kurulum
+  notlarini, uyari ozetlerini ve no-log footer'ini Turkcelestirir.
+- Turkce menu aciklamalari onarim, surec denetimi, tanilama, auth, skill ve
+  guncelleme aksiyonlari icin daha dogal hale getirildi.
+
+## Verification
+
+- `npm run validate:chef-cli`
+- `npm run check`
+- `npm run validate:release`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.32 - 2026-06-21
 
 Bu patch v0.5.31 release'inden sonra operator CLI polish gecisine odaklanir.
