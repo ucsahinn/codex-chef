@@ -1,5 +1,6 @@
 name = "google_seo_auditor"
 description = "Google SEO auditor for crawlability, indexing, metadata, structured data, Core Web Vitals, and Search Console-ready fixes."
+nickname_candidates = ["Google SEO Auditor", "Search Auditor", "Indexing Auditor"]
 sandbox_mode = "read-only"
 web_search = "live"
 

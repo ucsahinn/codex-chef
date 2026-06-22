@@ -199,7 +199,7 @@ manifest-backed install plan.
 
 | Surface | What lands on your machine |
 | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent team | 21 registered Codex subagent role files under `~/.codex/agents/*.toml`, with per-agent model/reasoning left unpinned for profile-aware selection. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent team | 21 registered Codex subagent role files under `~/.codex/agents/*.toml`, readable `nickname_candidates` for UI labels, and per-agent model/reasoning left unpinned for profile-aware selection. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Durable guidance | Global `~/.codex/AGENTS.md` with safe routing, verification, and approval rules. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP defaults | 7 useful MCP servers enabled and 8 authenticated/high-risk connectors parked disabled. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skills | Local `codex-chef-workflows` plugin, three bundled skills, and sixteen optional curated global skills. |
@@ -229,11 +229,12 @@ npm run codex:status
 npm run chef -- --routing --profile starter-health
 ```
 
-This is safe autonomy, not hidden execution. Matching agents, skills, MCPs, and
-flags are required when the task shape appears, but destructive, credentialed,
-publishing, deployment, database, and broad filesystem actions stay
-approval-gated. The board also prints `Agent plan`, `Agent started`,
-`Agent result`, `Skill selected`, `MCP selected`, and
+This is safe autonomy, not hidden execution. Matching agents and skills are
+selected automatically and visibly when the prompt clearly matches a registered
+task shape; MCPs and flags are used when available and approval-appropriate.
+Destructive, credentialed, publishing, deployment, database, and broad
+filesystem actions stay approval-gated. The board also prints `Agent plan`,
+`Agent started`, `Agent result`, `Skill selected`, `MCP selected`, and
 `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`
 so operator-facing routing evidence is visible.
 

@@ -1,5 +1,6 @@
 name = "prompt_architect"
 description = "Read-only prompt and instruction designer for reliable task briefs, mode contracts, and reusable agent workflows."
+nickname_candidates = ["Prompt Architect", "Instruction Architect", "Prompt Designer"]
 sandbox_mode = "read-only"
 web_search = "live"
 developer_instructions = """

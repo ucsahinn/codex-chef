@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 0.5.35 - 2026-06-22
+
+- Changed the enterprise routing profiles to `runtime-permitted` delegation so
+  clear, non-trivial prompt shapes can visibly spawn the matching specialist
+  agents while destructive, credentialed, publishing, deployment, database,
+  broad filesystem, and global mutation actions remain approval-gated.
+- Updated the installed `AGENTS.md` contract, routing board, status boundary,
+  README files, and skills/agents docs so matching agents and skills are
+  selected automatically and visibly from prompt shape rather than requiring the
+  user to manually name every surface.
+- Added readable `nickname_candidates` to all 21 bundled custom agent role files
+  and extended agent validation so future releases cannot drop the UI-label
+  contract.
+
 ## 0.5.34 - 2026-06-21
 
 - Added a historical log signal scan to `npm run chef -- --diagnostics` and

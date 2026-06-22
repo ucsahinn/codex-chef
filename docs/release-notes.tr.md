@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+## v0.5.35 - 2026-06-22
+
+Bu patch Codex Chef'in guvenli otonomi kontratini temiz makinede beklenen
+davranisla hizalar: net prompt shape'leri, kullanicinin her yuzeyi tek tek
+adlandirmasini beklemeden dogru agent, skill, MCP ve flag yuzeylerine
+yonlenebilir.
+
+## One cikanlar
+
+- Routing profilleri artik `runtime-permitted` delegation kullanir. Boylece
+  non-trivial prompt shape'leri uygun uzman agent'lari gorunur sekilde spawn
+  edebilir; destructive, credential, account, database, deploy, publish, genis
+  filesystem ve global mutation aksiyonlari yine approval gate'te kalir.
+- Kurulan global `AGENTS.md` template'i, bounded non-destructive kanit isleri
+  icin uygun uzmanlarin otomatik ve gorunur kullanilmasini, `Agent plan`,
+  `Agent started`, `Agent result` ve `Surfaces used` kanit satirlarini artik
+  acikca ister.
+- Matching skill'ler tetiklendiginde zorunlu kalir; docs artik asistanin
+  `Skill selected` basmasini, ilgili `SKILL.md` dosyasini okumasini ve
+  aksiyondan once workflow'u izlemesini acikca soyler.
+- 21 shipped custom agent role dosyasinin tamamina okunabilir
+  `nickname_candidates` eklendi. Codex UI destekledigi yerde `Code Mapper` veya
+  `Test Verifier` gibi etiketler gosterebilir; routing kimligi yine agent
+  `name` alanidir.
+- Routing, status, docs ve agent validator'lari prompt-shape routing ve
+  nickname kontratini release oncesi zorunlu tutar.
+
+## Verification
+
+- `npm run validate:routing`
+- `npm run validate:agents`
+- `npm run validate:status`
+- `npm run validate:chef-cli`
+- `npm run check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.34 - 2026-06-21
 
 Bu patch menu/status polish isinden sonra CLI kanit ve localization sertlestirme

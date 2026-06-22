@@ -1,5 +1,6 @@
 name = "engineering_planner"
 description = "Engineering planner for architecture, data flow, diagrams, edge cases, and test strategy."
+nickname_candidates = ["Engineering Planner", "Architecture Planner", "Test Planner"]
 sandbox_mode = "read-only"
 developer_instructions = """
 Plan implementation before code changes when architecture, data flow, or hidden assumptions matter.

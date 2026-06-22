@@ -197,6 +197,11 @@ Agent catalog rule:
   `modelReasoningEffort: auto`; role TOML files must not pin `model` or
   `model_reasoning_effort`, so the active profile and Codex runtime can choose
   the right balance for the task.
+- Role TOML files also include readable `nickname_candidates` so Codex UI
+  surfaces can show labels such as `Code Mapper` or `Test Verifier` instead of
+  only opaque runtime thread identifiers where nickname display is supported.
+  Nicknames are presentation-only; the agent `name` remains the spawn and
+  routing identity.
 - `catalog/agent-research-corpus.json` records each specialist agent's domain
   focus, primary source types, refresh triggers, handoff targets, and reviewed
   authority-reference metadata.
@@ -223,9 +228,9 @@ Agent catalog rule:
 - `scripts/validate-agent-config.mjs` checks that every cataloged agent exists
   in both Windows and Unix config templates and that each `config_file` points
   at a matching `templates/codex/agents/*.toml` role file. It also enforces
-  unpinned model/reasoning selection, one copy of each required runtime contract
-  and guardrail block, plus at least 100 source-backed instruction items and 20
-  distinct source markers per role file.
+  readable nickname candidates, unpinned model/reasoning selection, one copy of
+  each required runtime contract and guardrail block, plus at least 100
+  source-backed instruction items and 20 distinct source markers per role file.
 - `scripts/validate-agent-research-corpus.mjs` checks the machine-readable
   corpus index against `catalog/agents.json`, reviewed authority metadata, and
   the role TOML files. It also requires each per-agent authority key to match a
@@ -240,14 +245,15 @@ Agent catalog rule:
 
 Routing rule:
 
-- Subagents are explicit delegation. Codex should deliberately spawn them only
-  when the user asks for parallel/delegated work, or when the current runtime
-  contract explicitly permits delegation for the active task.
-- This starter treats the global AGENTS routing section as routing policy and
-  preparation guidance, not hidden auto-spawn permission. It does not claim that
-  Codex has a background scheduler that silently creates agents.
+- Subagents are explicit, visible delegation. This starter's global AGENTS
+  routing contract permits Codex to spawn matching specialist agents for clear,
+  non-trivial prompt shapes even when the user did not manually name the agent.
+- This is prompt-shape matched safe autonomy, not hidden background execution:
+  the assistant must print `Agent plan`, `Agent started`, and `Agent result`,
+  then summarize the specialist result before relying on it.
 - For non-trivial work that maps to a registered specialist, use that specialist
-  and summarize the result before relying on it.
+  automatically and visibly. Do not silently keep all exploration,
+  verification, review, or release-readiness work in the main thread.
 - Visible routing output should include `Agent plan`, `Agent started`,
   `Agent result`, `Skill selected`, `MCP selected`, and
   `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`.
@@ -261,6 +267,9 @@ Routing rule:
   current docs, context placement, prompt design, MCP planning, review, UI
   verification, security audit, test/build evidence, setup diagnostics, and
   release readiness.
+- Skills follow the same prompt-shape rule: when the task clearly matches an
+  installed skill description, the assistant must select it, print
+  `Skill selected`, read its `SKILL.md`, and follow its workflow before acting.
 - Keep write-heavy implementation in the main thread unless the user explicitly
   asks to split write scopes. If multiple agents edit, assign non-overlapping
   files and reconcile before verification.

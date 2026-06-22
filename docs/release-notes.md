@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+## v0.5.35 - 2026-06-22
+
+This patch makes Codex Chef's safe autonomy contract match the intended fresh
+machine behavior: clear prompt shapes can route to the right agents, skills,
+MCPs, and flags without requiring the user to manually name every surface.
+
+## Highlights
+
+- Routing profiles now use `runtime-permitted` delegation, so non-trivial
+  prompt shapes may visibly spawn the matching specialist agents while
+  destructive, credentialed, account, database, deploy, publish, broad
+  filesystem, and global mutation actions stay approval-gated.
+- The shipped global `AGENTS.md` template now states that matching specialists
+  should be used automatically and visibly for bounded non-destructive
+  evidence work, with `Agent plan`, `Agent started`, `Agent result`, and
+  `Surfaces used` evidence.
+- Matching skills remain mandatory when triggered, and the docs now spell out
+  that the assistant must print `Skill selected`, read the relevant
+  `SKILL.md`, and follow the workflow before acting.
+- All 21 shipped custom agent role files now include readable
+  `nickname_candidates` so supported Codex UI surfaces can show labels such as
+  `Code Mapper` or `Test Verifier` while preserving the underlying agent
+  `name` as the routing identity.
+- Routing, status, docs, and agent validators now enforce the prompt-shape
+  routing and nickname contract before release.
+
+## Verification
+
+- `npm run validate:routing`
+- `npm run validate:agents`
+- `npm run validate:status`
+- `npm run validate:chef-cli`
+- `npm run check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.34 - 2026-06-21
 
 This patch finishes the CLI evidence and localization hardening pass after the

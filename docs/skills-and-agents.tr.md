@@ -198,6 +198,10 @@ Agent katalog kurali:
 - Catalog'daki ajanlar `modelSelection: auto` ve `modelReasoningEffort: auto`
   tasir; role TOML dosyalari `model` veya `model_reasoning_effort` pinlemez.
   Boylece aktif profil ve Codex runtime task'a uygun dengeyi secebilir.
+- Role TOML dosyalari okunabilir `nickname_candidates` de tasir. Boylece
+  Codex UI destekledigi yerde yalnizca opak runtime thread id'leri yerine
+  `Code Mapper` veya `Test Verifier` gibi etiketler gosterebilir. Nickname'ler
+  sadece gorunum icindir; spawn ve routing kimligi yine agent `name` alanidir.
 - `catalog/agent-research-corpus.json`, her uzman ajanin domain focus, primary
   source type, refresh trigger, handoff hedefi ve reviewed authority-reference
   metadata'sini kaydeder.
@@ -223,10 +227,10 @@ Agent katalog kurali:
 - `scripts/validate-agent-config.mjs`, katalogdaki her ajanin hem Windows hem
   Unix config template'inde yer aldigini ve her `config_file` alaninin eslesen
   `templates/codex/agents/*.toml` role dosyasina gittigini kontrol eder. Ayrica
-  pinlenmeyen model/reasoning secimini, her zorunlu runtime contract ve
-  guardrail blogundan bir tane bulunmasini, rol dosyasi basina en az 100
-  source-backed instruction item'i ve 20 distinct source marker olmasini
-  zorunlu tutar.
+  okunabilir nickname candidate'larini, pinlenmeyen model/reasoning secimini,
+  her zorunlu runtime contract ve guardrail blogundan bir tane bulunmasini, rol
+  dosyasi basina en az 100 source-backed instruction item'i ve 20 distinct
+  source marker olmasini zorunlu tutar.
 - `scripts/validate-agent-research-corpus.mjs`, machine-readable corpus index'i
   `catalog/agents.json`, reviewed authority metadata'si ve role TOML
   dosyalariyla karsilastirir. Ayrica her ajan icin authority key'in o ajanin
@@ -241,14 +245,16 @@ Agent katalog kurali:
 
 Routing kurali:
 
-- Subagent kullanimi acik delegasyondur. Codex uygun uzman ajani yalnizca
-  kullanici paralel/delege is isterse veya current runtime aktif gorev icin
-  delegasyona acikca izin veriyorsa bilerek spawn etmelidir.
-- Bu starter global AGENTS routing bolumunu routing policy ve hazirlik rehberi
-  olarak ele alir; gizli auto-spawn izni degildir. Codex'in agent'lari sessizce
-  olusturan background scheduler'i varmis gibi anlatmaz.
-- Non-trivial is kayitli bir uzmana denk geliyorsa o uzman kullanilir ve sonucu
-  kullanmadan once ozetlenir.
+- Subagent kullanimi acik ve gorunur delegasyondur. Bu starter'in global
+  AGENTS routing kontrati, kullanici ajani elle adlandirmasa bile net,
+  non-trivial prompt shape'leri icin uygun uzman agent'in spawn edilmesine izin
+  verir.
+- Bu prompt-shape'e gore guvenli otonomidir; gizli background execution
+  degildir. Asistan `Agent plan`, `Agent started` ve `Agent result` satirlarini
+  basmali, sonra uzman sonucunu kullanmadan once ozetlemelidir.
+- Non-trivial is kayitli bir uzmana denk geliyorsa o uzman otomatik ve gorunur
+  sekilde kullanilir. Kesif, dogrulama, review veya release-readiness isleri
+  sessizce sadece ana thread'de tutulmaz.
 - Gorunur routing ciktisi `Agent plan`, `Agent started`, `Agent result`,
   `Skill selected`, `MCP selected` ve
   `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`
@@ -263,6 +269,9 @@ Routing kurali:
   docs, context yerlestirme, prompt tasarimi, MCP planlama, review, UI
   dogrulama, security audit, test/build kaniti, setup tanilama ve release
   hazirligi.
+- Skill'ler de ayni prompt-shape kuralini izler: task acikca kurulu bir skill
+  description'ina denk geliyorsa asistan `Skill selected` basmali, ilgili
+  `SKILL.md` dosyasini okumali ve aksiyondan once o workflow'u izlemelidir.
 - Yazma agirlikli uygulama ana thread'de kalir. Kullanici acikca bolmeyi
   istemediyse birden fazla ajan ayni dosyalari edit etmemelidir.
 - Subagent'lar onay, sandbox ve connector auth sinirlarini miras alir. Kullanici

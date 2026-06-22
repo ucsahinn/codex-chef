@@ -63,6 +63,18 @@ function readTomlString(block, key) {
   return match ? match[1] : null;
 }
 
+function readTomlStringArray(block, key) {
+  const match = block.match(new RegExp(`^${key}\\s*=\\s*\\[([^\\]]*)\\]\\s*$`, "m"));
+  if (!match) return null;
+  const values = [];
+  const itemPattern = /"([^"]*)"/g;
+  let item;
+  while ((item = itemPattern.exec(match[1]))) {
+    values.push(item[1]);
+  }
+  return values;
+}
+
 function readAgentTemplate(rel) {
   const full = path.join(root, "templates", "codex", rel);
   if (!fs.existsSync(full)) {
@@ -162,6 +174,19 @@ if (!fs.existsSync(catalogPath)) {
         }
         if (readTomlString(template, "description") !== agent.templateDescription) {
           fail(`Agent template description drift for ${agent.name}.`);
+        }
+        const nicknameCandidates = readTomlStringArray(template, "nickname_candidates");
+        if (!nicknameCandidates || nicknameCandidates.length < 3) {
+          fail(`Agent template ${agent.name} must include at least three nickname_candidates.`);
+        } else {
+          if (new Set(nicknameCandidates).size !== nicknameCandidates.length) {
+            fail(`Agent template ${agent.name} nickname_candidates must be unique.`);
+          }
+          for (const nickname of nicknameCandidates) {
+            if (!/^[A-Za-z0-9 _-]+$/.test(nickname)) {
+              fail(`Agent template ${agent.name} has invalid nickname_candidate: ${nickname}`);
+            }
+          }
         }
         const templateModel = readTomlString(template, "model");
         if (agent.modelSelection === "auto") {

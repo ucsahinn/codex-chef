@@ -178,7 +178,7 @@ repo içindeki `templates/codex/config.*.toml`, `templates/codex/agents/*.toml`,
 
 | Yüzey | Makineye ne kurulur? |
 | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Ajan ekibi | `~/.codex/agents/*.toml` altinda 21 kayitli Codex subagent rol dosyasi; agent bazli model/reasoning pinlenmez, aktif profile gore secilir. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Ajan ekibi | `~/.codex/agents/*.toml` altinda 21 kayitli Codex subagent rol dosyasi; UI etiketleri icin okunabilir `nickname_candidates` vardir, agent bazli model/reasoning pinlenmez ve aktif profile gore secilir. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Kalıcı rehberlik | Güvenli routing, doğrulama ve onay kuralları içeren global `~/.codex/AGENTS.md`. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP varsayılanları | 7 faydalı MCP açık, 8 auth/high-risk connector kapalı bekler. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skill'ler | Yerel `codex-chef-workflows` plugin'i, üç bundled skill ve on altı opsiyonel global skill. |
@@ -227,11 +227,12 @@ npm run codex:status
 npm run chef -- --routing --profile starter-health
 ```
 
-Bu guvenli otonomidir; gizli calisan bir auto-executor degildir. Task shape
-uydugunda dogru ajan, skill, MCP ve flag zorunlu hale gelir; ama destructive,
-credential, publish, deploy, database ve genis filesystem aksiyonlari yine
-onay kapisinda kalir. Pano `Agent plan`, `Agent started`, `Agent result`,
-`Skill selected`, `MCP selected` ve
+Bu guvenli otonomidir; gizli calisan bir auto-executor degildir. Prompt net bir
+task shape'e uydugunda dogru ajan ve skill otomatik ve gorunur secilir; MCP ve
+flag'ler uygun olduklari ve approval modlari izin verdigi yerde kullanilir. Ama
+destructive, credential, publish, deploy, database ve genis filesystem
+aksiyonlari yine onay kapisinda kalir. Pano `Agent plan`, `Agent started`,
+`Agent result`, `Skill selected`, `MCP selected` ve
 `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`
 satirlarini da gosterir; hangi yuzeyin kullanildigi final raporda kaybolmaz.
 

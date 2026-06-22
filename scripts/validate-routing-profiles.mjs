@@ -43,15 +43,16 @@ if (!Array.isArray(routing.profiles) || routing.profiles.length < 10) {
 if (!routing.sourcePolicy || !/not hidden execution hooks/i.test(routing.sourcePolicy)) {
   fail("routing profile sourcePolicy must state that profiles are not hidden execution hooks.");
 }
-if (!/subagent delegation stays explicit/i.test(routing.sourcePolicy || "")) {
-  fail("routing profile sourcePolicy must state that subagent delegation stays explicit.");
+if (!/runtime-permitted routing guidance/i.test(routing.sourcePolicy || "")) {
+  fail("routing profile sourcePolicy must state that profiles are runtime-permitted routing guidance.");
 }
-if (/standing explicit request/i.test(agentsTemplate)) {
-  fail("templates/codex/AGENTS.md must not claim a standing explicit request for subagent spawning.");
+if (!/explicitly permits Codex to spawn matching\s+specialist subagents/i.test(agentsTemplate)) {
+  fail("templates/codex/AGENTS.md must explicitly permit prompt-shape matched specialist subagents.");
 }
 
 for (const required of [
   "Subagent Visibility Contract",
+  "prompt-shape matched delegation",
   "Agent plan",
   "Agent started",
   "Agent result",
@@ -59,7 +60,8 @@ for (const required of [
   "MCP selected",
   "Surfaces used",
   "/agent",
-  "wait for all requested subagents"
+  "wait for all requested subagents",
+  "automatically and visibly"
 ]) {
   if (!agentsTemplate.includes(required)) {
     fail(`templates/codex/AGENTS.md missing subagent visibility contract snippet: ${required}`);
@@ -74,7 +76,7 @@ for (const required of [
   "Surfaces used",
   "agents=...",
   "Use /agent in Codex CLI",
-  "wait for requested subagent results",
+  "runtime-permitted subagent results",
   "Delegation mode",
   "Skill mode",
   "MCP mode",
@@ -121,6 +123,9 @@ for (const profile of routing.profiles || []) {
   }
   if (profile.agents.length > 0 && profile.delegationMode === "none") {
     fail(`routing profile ${profile.id} names agents but sets delegationMode=none`);
+  }
+  if (profile.agents.length > 0 && profile.delegationMode !== "runtime-permitted") {
+    fail(`routing profile ${profile.id} must allow runtime-permitted specialist delegation.`);
   }
   if (!allowedSkillModes.has(profile.skillMode)) {
     fail(`routing profile ${profile.id} has invalid skillMode: ${profile.skillMode}`);
