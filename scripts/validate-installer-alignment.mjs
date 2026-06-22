@@ -171,6 +171,8 @@ requireText(ps, "marketplace.json", "PowerShell installer");
 requireText(ps, "upsert-marketplace-entry.mjs", "PowerShell installer");
 requireText(ps, "Upsert Codex Chef plugin marketplace entry", "PowerShell installer");
 requireText(ps, "Cannot update plugin marketplace because it is invalid or unreadable", "PowerShell installer");
+requireText(ps, "successful dry run or install", "PowerShell installer");
+requireRegex(ps, /exit\s+0\s*$/m, "PowerShell installer");
 requireText(ps, "templates\\git\\.gitignore_global", "PowerShell installer");
 requireText(ps, "templates\\git\\pre-commit", "PowerShell installer");
 requireText(ps, "core.excludesfile", "PowerShell installer");

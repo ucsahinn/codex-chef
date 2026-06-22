@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## v0.5.36 - 2026-06-22
+
+This patch supersedes v0.5.35 with a focused PowerShell installer CI fix. The
+prompt-shape agent and skill routing behavior from v0.5.35 is unchanged.
+
+## Highlights
+
+- `scripts/install.ps1 -All -WhatIf` now exits with code `0` after a successful
+  dry run, even if an earlier native helper left `$LASTEXITCODE` set.
+- Installer alignment validation now checks the explicit successful PowerShell
+  exit contract so the CI dry-run smoke cannot regress silently.
+
+## Verification
+
+- `npm run validate:installer`
+- `npm run check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.35 - 2026-06-22
 
 This patch makes Codex Chef's safe autonomy contract match the intended fresh

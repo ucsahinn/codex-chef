@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.5.36 - 2026-06-22
+
+- Fixed the PowerShell installer success path so `-All -WhatIf` exits with
+  code `0` after a successful dry run instead of leaking a previous native
+  command exit code into CI.
+- Added installer alignment validation for the explicit successful PowerShell
+  exit contract.
+
 ## 0.5.35 - 2026-06-22
 
 - Changed the enterprise routing profiles to `runtime-permitted` delegation so

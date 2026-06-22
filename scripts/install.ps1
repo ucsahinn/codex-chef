@@ -556,3 +556,7 @@ if (-not $NoBackup -and (Test-Path -LiteralPath $BackupRoot)) {
   }
   Write-Note "Backup: $BackupRoot"
 }
+
+# PowerShell can otherwise propagate the last native command exit code after a
+# successful dry run or install, which makes CI report a false failure.
+exit 0

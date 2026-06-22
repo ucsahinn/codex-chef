@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+## v0.5.36 - 2026-06-22
+
+Bu patch v0.5.35'i dar bir PowerShell installer CI duzeltmesiyle supersede
+eder. v0.5.35'te gelen prompt-shape agent ve skill routing davranisi aynen
+korunur.
+
+## One cikanlar
+
+- `scripts/install.ps1 -All -WhatIf`, basarili dry-run sonunda artik exit code
+  `0` dondurur; onceki native helper `$LASTEXITCODE` biraksa bile CI false
+  failure uretmez.
+- Installer alignment validation, PowerShell'in acik successful exit kontratini
+  kontrol eder; CI dry-run smoke bu konuda sessizce gerileyemez.
+
+## Verification
+
+- `npm run validate:installer`
+- `npm run check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.35 - 2026-06-22
 
 Bu patch Codex Chef'in guvenli otonomi kontratini temiz makinede beklenen
