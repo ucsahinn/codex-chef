@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+## v0.5.37 - 2026-06-24
+
+Bu release installer hardening isini tam enterprise dogrulama kapisina tasir.
+Codex Chef artik temiz home, mevcut user config, mevcut kurulum, stale managed
+plugin dosyalari, garip Windows path'leri ve ambient `CODEX_HOME` drift'i
+senaryolarinda ana setup vaadini release oncesi kanitlar.
+
+## One cikanlar
+
+- `validate:installer-smoke` eklendi. Gercek temp-home kurulumlariyla no-write
+  full preview, explicit `CODEX_HOME` ve `AGENTS_HOME` hedefleme, root config
+  default'lari, MCP config, specialist agent'lar, profile dosyalari, rules,
+  bundled plugin ve personal marketplace entry dogrulanir.
+- Mevcut `config.toml` dosyalari artik eksik managed root default'lari TOML
+  root seviyesinde alir; kullanicinin root ayarlari ve custom MCP tabloları
+  korunur.
+- Reinstall akisinda managed Codex Chef plugin dosyalari backup sonrasi
+  yenilenir; extra user dosyalari default olarak korunur.
+- Ambient/sandbox Codex runtime drift'i, explicit kurulu hedef temiz
+  dogrulandiginda hata degil warning olarak raporlanir.
+- PowerShell ve Bash installer hedef path'leri normalize eder; Bash installer
+  gerekli POSIX tooling eksikse erken ve acik prerequisite mesaji verir.
+- GitHub Actions'a mevcut validation ve shell dry-run gate'lerinin yanina
+  Windows installer job'u eklendi.
+
+## Verification
+
+- `npm run check`
+- `npm run verify:install:runtime -- --redact-paths --expect-skills --expect-git-guards`
+- `npm run verify:skills:online -- --timeout-ms=90000`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.36 - 2026-06-22
 
 Bu patch v0.5.35'i dar bir PowerShell installer CI duzeltmesiyle supersede

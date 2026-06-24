@@ -112,6 +112,14 @@ function Read-YesNo {
   return $Answer.Trim().ToLowerInvariant().StartsWith("y")
 }
 
+function Resolve-InstallPath {
+  param([Parameter(Mandatory=$true)][string]$Path)
+  if ($Path.StartsWith("~")) {
+    $Path = Join-Path $HOME $Path.Substring(1).TrimStart('\', '/')
+  }
+  return [System.IO.Path]::GetFullPath($Path)
+}
+
 function Test-AnyManagedTargetExists {
   $managedTargets = @(
     (Join-Path $CodexHome "AGENTS.md"),
@@ -136,6 +144,8 @@ if ($Interactive) {
 
 $CodexHome = Read-OptionalPath -Label "Codex home" -CurrentValue $CodexHome
 $AgentsHome = Read-OptionalPath -Label "Agents home" -CurrentValue $AgentsHome
+$CodexHome = Resolve-InstallPath $CodexHome
+$AgentsHome = Resolve-InstallPath $AgentsHome
 
 if ($Repair) {
   Write-Section "Codex Chef repair"
@@ -312,7 +322,26 @@ function Install-Directory {
   )
 
   if ((Test-Path -LiteralPath $Destination) -and -not $Force) {
-    $Script:SkippedExistingCount += 1
+    Ensure-Dir (Split-Path -Parent $Destination)
+    Backup-Target $Destination
+    Assert-ManagedDirectoryTarget $Destination
+    $changed = Invoke-Change -Target $Destination -Action "Sync managed directory files from $Source" -ScriptBlock {
+      $sourceFull = [System.IO.Path]::GetFullPath($Source).TrimEnd([char[]]@('\', '/'))
+      $destinationFull = [System.IO.Path]::GetFullPath($Destination)
+      Get-ChildItem -LiteralPath $Source -Recurse -File -Force | ForEach-Object {
+        $fileFull = [System.IO.Path]::GetFullPath($_.FullName)
+        $relative = $fileFull.Substring($sourceFull.Length).TrimStart([char[]]@('\', '/'))
+        $target = [System.IO.Path]::Combine($destinationFull, $relative)
+        $targetParent = Split-Path -Parent $target
+        if ($targetParent) {
+          [System.IO.Directory]::CreateDirectory($targetParent) | Out-Null
+        }
+        [System.IO.File]::Copy($_.FullName, $target, $true)
+      }
+    }
+    if ($changed) {
+      Write-Action -Status "synced directory" -Message $Destination
+    }
     return
   }
 

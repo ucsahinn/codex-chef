@@ -394,6 +394,7 @@ if (!exists(cliPath)) {
     "--logs",
     "--apply",
     "tmp/chef-cli/logs",
+    "CODEX_HOME/plugins/codex-chef-workflows",
     "codex-status.mjs",
     "codex-doctor.mjs",
     "plan-install.mjs",
@@ -478,6 +479,9 @@ if (!exists(cliPath)) {
   }
   if (/update-install",\s*"scripts\/install\.sh",\s*\[[^\]]*"--all"/s.test(cli)) {
     fail(`${cliPath} update-install must not use --all because update is scoped to managed files, not curated skills`);
+  }
+  if (cli.includes("AGENTS_HOME/plugins/codex-chef-workflows")) {
+    fail(`${cliPath} must describe the Codex Chef plugin target under CODEX_HOME, not AGENTS_HOME`);
   }
 
   if (/TERM:\s*"dumb"/.test(cli)) {

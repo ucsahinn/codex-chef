@@ -32,9 +32,44 @@ const managedTablePatterns = [
   /^windows$/,
   /^mcp_servers\.[A-Za-z0-9_-]+(?:\.tools\.[A-Za-z0-9_-]+)?$/
 ];
+const managedRootKeys = new Set([
+  "model",
+  "review_model",
+  "model_reasoning_effort",
+  "model_reasoning_summary",
+  "model_verbosity",
+  "personality",
+  "approval_policy",
+  "sandbox_mode"
+]);
 
 function normalizeNewlines(text) {
   return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+}
+
+function parseRootAssignments(text) {
+  const normalized = normalizeNewlines(text);
+  const assignments = new Map();
+  const lines = normalized.split("\n");
+  for (const line of lines) {
+    if (/^\s*\[/.test(line)) break;
+    const match = /^\s*([A-Za-z0-9_.-]+)\s*=/.exec(line);
+    if (match) assignments.set(match[1], line);
+  }
+  return assignments;
+}
+
+function insertBeforeFirstTable(text, insertion) {
+  const normalized = normalizeNewlines(text).trimEnd();
+  if (!insertion) return normalized;
+  const firstTableMatch = /^\s*\[/m.exec(normalized);
+  if (!firstTableMatch) {
+    return `${normalized}${normalized ? "\n\n" : ""}${insertion}`;
+  }
+
+  const before = normalized.slice(0, firstTableMatch.index).trimEnd();
+  const after = normalized.slice(firstTableMatch.index).trimStart();
+  return `${before}${before ? "\n\n" : ""}${insertion}\n\n${after}`;
 }
 
 function parseTables(text) {
@@ -70,9 +105,12 @@ function isManagedTable(tableName) {
 const template = normalizeNewlines(fs.readFileSync(templatePath, "utf8"));
 const destinationExists = fs.existsSync(destinationPath);
 const destination = destinationExists ? normalizeNewlines(fs.readFileSync(destinationPath, "utf8")) : "";
+const templateRootAssignments = parseRootAssignments(template);
+const destinationRootAssignments = parseRootAssignments(destination);
 const templateTables = parseTables(template);
 const destinationTables = parseTables(destination);
 const missing = [];
+const missingRootAssignments = [];
 const removedDeprecatedFields = [];
 const updatedManagedFields = [];
 const fullTemplateInstall = !destinationExists;
@@ -148,6 +186,12 @@ for (const [tableName, tableText] of templateTables.entries()) {
   missing.push({ tableName, tableText });
 }
 
+for (const [key, line] of templateRootAssignments.entries()) {
+  if (!managedRootKeys.has(key)) continue;
+  if (destinationRootAssignments.has(key)) continue;
+  missingRootAssignments.push({ key, line });
+}
+
 const sanitizedDestination = normalizeManagedFields(destination);
 
 const report = {
@@ -157,6 +201,8 @@ const report = {
   destinationExists,
   fullTemplateInstall,
   dryRun: options.dryRun,
+  addedRootKeys: missingRootAssignments.map((entry) => entry.key),
+  addedRootKeyCount: missingRootAssignments.length,
   addedTables: missing.map((entry) => entry.tableName),
   addedTableCount: missing.length,
   removedDeprecatedFields,
@@ -166,12 +212,19 @@ const report = {
 if (fullTemplateInstall && !options.dryRun) {
   fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
   fs.writeFileSync(destinationPath, `${template.trimEnd()}\n`, "utf8");
-} else if ((missing.length > 0 || removedDeprecatedFields.length > 0 || updatedManagedFields.length > 0) && !options.dryRun) {
-  const prefix = sanitizedDestination.trimEnd();
+} else if ((missingRootAssignments.length > 0 || missing.length > 0 || removedDeprecatedFields.length > 0 || updatedManagedFields.length > 0) && !options.dryRun) {
+  const base = sanitizedDestination.trimEnd();
+  const rootAddition = missingRootAssignments.map((entry) => entry.line).join("\n");
   const addition = missing.map((entry) => entry.tableText).join("\n\n");
-  const next = missing.length > 0
-    ? `${prefix}${prefix ? "\n\n" : ""}# Codex Chef merged config blocks. Existing user-defined tables were preserved.\n${addition}\n`
-    : `${prefix}\n`;
+  const withRootDefaults = rootAddition
+    ? insertBeforeFirstTable(
+        base,
+        `# Codex Chef merged root defaults. Existing user-defined root settings were preserved.\n${rootAddition}`
+      )
+    : base;
+  const next = addition
+    ? `${withRootDefaults}${withRootDefaults ? "\n\n" : ""}# Codex Chef merged config blocks. Existing user-defined tables were preserved.\n${addition}\n`
+    : `${withRootDefaults}\n`;
   fs.writeFileSync(destinationPath, next, "utf8");
 }
 
@@ -181,16 +234,18 @@ if (options.json) {
   console.log("Would install full Codex Chef config template.");
 } else if (fullTemplateInstall) {
   console.log("Installed full Codex Chef config template.");
-} else if (missing.length === 0 && removedDeprecatedFields.length === 0 && updatedManagedFields.length === 0) {
+} else if (missingRootAssignments.length === 0 && missing.length === 0 && removedDeprecatedFields.length === 0 && updatedManagedFields.length === 0) {
   console.log("Codex config already contains all managed Codex Chef blocks.");
 } else if (options.dryRun) {
   const parts = [];
+  if (missingRootAssignments.length > 0) parts.push(`merge ${missingRootAssignments.length} missing Codex Chef root default(s): ${missingRootAssignments.map((entry) => entry.key).join(", ")}`);
   if (missing.length > 0) parts.push(`merge ${missing.length} missing Codex Chef config block(s): ${missing.map((entry) => entry.tableName).join(", ")}`);
   if (removedDeprecatedFields.length > 0) parts.push(`remove deprecated managed field(s): ${removedDeprecatedFields.join(", ")}`);
   if (updatedManagedFields.length > 0) parts.push(`update managed field(s): ${updatedManagedFields.join(", ")}`);
   console.log(`Would ${parts.join("; ")}`);
 } else {
   const parts = [];
+  if (missingRootAssignments.length > 0) parts.push(`merged ${missingRootAssignments.length} missing Codex Chef root default(s): ${missingRootAssignments.map((entry) => entry.key).join(", ")}`);
   if (missing.length > 0) parts.push(`merged ${missing.length} missing Codex Chef config block(s): ${missing.map((entry) => entry.tableName).join(", ")}`);
   if (removedDeprecatedFields.length > 0) parts.push(`removed deprecated managed field(s): ${removedDeprecatedFields.join(", ")}`);
   if (updatedManagedFields.length > 0) parts.push(`updated managed field(s): ${updatedManagedFields.join(", ")}`);

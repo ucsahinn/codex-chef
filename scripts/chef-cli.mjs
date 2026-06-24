@@ -918,7 +918,7 @@ const MANAGED_REFRESH_TARGETS = [
   "CODEX_HOME/rules/default.rules",
   "CODEX_HOME/*.config.toml profiles",
   "CODEX_HOME/agents/*.toml role files",
-  "AGENTS_HOME/plugins/codex-chef-workflows",
+  "CODEX_HOME/plugins/codex-chef-workflows",
   "AGENTS_HOME/plugins/marketplace.json"
 ];
 

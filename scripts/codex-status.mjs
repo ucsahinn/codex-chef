@@ -664,13 +664,13 @@ function inspectCodexCliRuntime() {
     ? (ambientSameAsTarget ? "same" : "different")
     : "unknown";
 
+  const ambientWarnings = ambientRelationship === "different"
+    ? ["Ambient Codex CLI status differs from the explicit Codex Chef target; restart Codex or set CODEX_HOME for direct shell diagnostics."]
+    : [];
   const issues = [
     ...(version.status === "ok" ? [] : [version.summary || `${version.label} needs attention.`]),
     ...(login.status === "ok" ? [] : ["Codex login is not confirmed by `codex login status`; refresh auth outside repo files if needed."]),
-    ...(mcp.status === "ok" ? [] : [mcp.summary || "`codex mcp list --json` needs attention."]),
-    ...(ambientRelationship === "different"
-      ? ["Ambient Codex CLI status differs from the explicit Codex Chef target; restart Codex or set CODEX_HOME for direct shell diagnostics."]
-      : [])
+    ...(mcp.status === "ok" ? [] : [mcp.summary || "`codex mcp list --json` needs attention."])
   ];
 
   return {
@@ -721,6 +721,7 @@ function inspectCodexCliRuntime() {
       }
     },
     issues,
+    ambientWarnings,
     note: "Auth and MCP status use official Codex CLI commands; this script does not read auth.json, keyrings, OAuth caches, or token values."
   };
 }
@@ -1043,11 +1044,20 @@ const failures = [
 ];
 const warnings = [
   ...(runtime.report?.warnings || []),
-  ...(codexDoctor.warnings || [])
+  ...(codexDoctor.warnings || []),
+  ...(codexCliRuntime.ambientWarnings || [])
 ];
+const nonBlockingWarningPatterns = [
+  "Ambient Codex runtime home differs",
+  "Ambient Codex CLI status differs"
+];
+const attentionWarnings = warnings.filter((warning) => {
+  const text = String(warning || "");
+  return !nonBlockingWarningPatterns.some((pattern) => text.includes(pattern));
+});
 
 const attentionReasons = [
-  ...(warnings.length > 0 ? warnings : []),
+  ...attentionWarnings,
   ...(skillsContext.status === "attention" ? [skillsContext.impact] : []),
   ...(codexCliRuntime.status === "attention" ? codexCliRuntime.issues : []),
   ...(gitRepository.status === "ok" ? [] : [gitRepository.summary]),

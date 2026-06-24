@@ -93,10 +93,10 @@
       "source": "plugins/codex-chef-workflows",
       "destination": "${CODEX_HOME}/plugins/codex-chef-workflows",
       "platforms": ["windows", "unix"],
-      "collision": "managed-directory-replace-with-backup-when-force",
+      "collision": "sync-managed-files-preserve-extras-backup-before-sync",
       "backup": true,
       "risk": "medium",
-      "conflictPolicy": "Only the starter-managed plugin directory may be replaced; unrelated plugin directories are out of scope."
+      "conflictPolicy": "Managed plugin files are refreshed after backup while extra files are preserved by default; destructive pruning requires an explicit repair flag."
     },
     {
       "id": "plugin-marketplace",

@@ -147,6 +147,7 @@ if (result.error) {
     "scripts/validate-agent-research-corpus.mjs",
     "scripts/validate-codex-doctor.mjs",
     "scripts/validate-codex-status.mjs",
+    "scripts/validate-installer-smoke.mjs",
     "scripts/validate-routing-profiles.mjs",
     "scripts/validate-repair-install.mjs",
     "scripts/validate-chef-cli.mjs",
@@ -157,6 +158,9 @@ if (result.error) {
     "scripts/validate-workflow-security.mjs",
     "manifests/install-plan.json",
     "catalog/mcp-servers.json",
+    "templates/codex/profiles/ci.config.toml",
+    "templates/codex/profiles/development.config.toml",
+    "templates/codex/profiles/review.config.toml",
     "templates/codex/profiles/token-safe.config.toml"
   ]) {
     if (!fileSet.has(required)) fail(`npm pack dry-run surface missing required source file: ${required}`);

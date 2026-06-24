@@ -65,6 +65,15 @@ function write(filePath, text) {
   fs.writeFileSync(filePath, text, "utf8");
 }
 
+function assertRootAssignment(text, key, expectedValue, label) {
+  const firstTableIndex = text.search(/^\s*\[/m);
+  const rootText = firstTableIndex >= 0 ? text.slice(0, firstTableIndex) : text;
+  const pattern = new RegExp(`^${key}\\s*=\\s*${expectedValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "m");
+  if (!pattern.test(rootText)) {
+    fail(`${label} must define root-level ${key} = ${expectedValue}.`);
+  }
+}
+
 const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-"));
 const codexHome = path.join(fixtureRoot, ".codex");
 const agentsHome = path.join(fixtureRoot, ".agents");
@@ -223,6 +232,48 @@ if (missingConfigApplied) {
   }
   if (!/\[apps\._default\][\s\S]*?\nenabled\s*=\s*false/.test(installedConfig)) {
     fail("repair apply must install app connector defaults when config.toml is missing.");
+  }
+}
+
+const minimalExistingConfigRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-minimal-existing-config-"));
+const minimalExistingConfigCodexHome = path.join(minimalExistingConfigRoot, ".codex");
+const minimalExistingConfigAgentsHome = path.join(minimalExistingConfigRoot, ".agents");
+write(
+  path.join(minimalExistingConfigCodexHome, "config.toml"),
+  [
+    "# user config must survive",
+    "model = \"local-custom-model\"",
+    "",
+    "[mcp_servers.user-local]",
+    "command = \"node\"",
+    "args = [\"server.js\"]",
+    ""
+  ].join("\n")
+);
+ensureDir(minimalExistingConfigAgentsHome);
+const minimalExistingApplied = parseResult(
+  runRepair(["--apply"], minimalExistingConfigCodexHome, minimalExistingConfigAgentsHome),
+  "repair minimal existing config apply"
+);
+if (minimalExistingApplied) {
+  const minimalConfig = fs.readFileSync(path.join(minimalExistingConfigCodexHome, "config.toml"), "utf8");
+  if (!minimalConfig.includes('model = "local-custom-model"')) {
+    fail("repair apply must preserve an existing root-level model setting.");
+  }
+  if (!minimalConfig.includes('approval_policy = "on-request"')) {
+    fail("repair apply must backfill missing root-level approval policy in existing config.toml.");
+  }
+  if (!minimalConfig.includes('sandbox_mode = "workspace-write"')) {
+    fail("repair apply must backfill missing root-level sandbox mode in existing config.toml.");
+  }
+  if (!minimalConfig.includes('model_reasoning_effort = "medium"')) {
+    fail("repair apply must backfill missing root-level reasoning effort in existing config.toml.");
+  }
+  assertRootAssignment(minimalConfig, "approval_policy", '"on-request"', "repair apply minimal existing config");
+  assertRootAssignment(minimalConfig, "sandbox_mode", '"workspace-write"', "repair apply minimal existing config");
+  assertRootAssignment(minimalConfig, "model_reasoning_effort", '"medium"', "repair apply minimal existing config");
+  if (!/\[mcp_servers\.user-local\][\s\S]*?command\s*=\s*"node"/.test(minimalConfig)) {
+    fail("repair apply must preserve user-defined MCP tables while backfilling root defaults.");
   }
 }
 

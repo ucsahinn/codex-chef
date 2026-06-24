@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.5.37 - 2026-06-24
+
+- Hardened independent install behavior for zero-config, existing-config,
+  existing-install, stale-plugin, odd-path, and ambient `CODEX_HOME` scenarios.
+- Added installer smoke validation that proves no-write full previews,
+  explicit `CODEX_HOME`/`AGENTS_HOME` targeting, agent/profile/rule/plugin
+  installation, marketplace registration, idempotent refresh, and default
+  approval boundaries.
+- Backfilled missing managed root config defaults at the real TOML root while
+  preserving user-defined root settings and custom MCP tables.
+- Changed existing plugin installs to refresh managed files after backup while
+  preserving extra user files unless a destructive prune is explicitly chosen.
+- Added Windows-native installer CI coverage and package/repo gates for the new
+  smoke validator, profile files, and installer path/prerequisite guards.
+
 ## 0.5.36 - 2026-06-22
 
 - Fixed the PowerShell installer success path so `-All -WhatIf` exits with

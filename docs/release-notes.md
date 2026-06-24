@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+## v0.5.37 - 2026-06-24
+
+This release turns the installer hardening work into a full enterprise-grade
+verification gate. Codex Chef now proves the core setup promise against clean
+homes, existing user config, existing installs, stale managed plugin files,
+odd Windows paths, and ambient `CODEX_HOME` drift before release.
+
+## Highlights
+
+- Added `validate:installer-smoke`, which runs real temp-home installs and
+  verifies no-write full previews, explicit `CODEX_HOME` and `AGENTS_HOME`
+  targeting, root config defaults, MCP config, specialist agents, profile
+  files, rules, the bundled plugin, and the personal marketplace entry.
+- Existing `config.toml` files now receive missing managed root defaults at the
+  TOML root while preserving user-defined root settings and custom MCP tables.
+- Reinstalls now refresh managed Codex Chef plugin files after backup while
+  preserving extra user files by default.
+- Ambient/sandbox Codex runtime drift is reported as a warning when the
+  explicit installed target verifies cleanly.
+- PowerShell and Bash installers normalize target paths, and the Bash installer
+  now fails early with a clear prerequisite message if required POSIX tooling
+  is missing.
+- GitHub Actions now includes a Windows installer job in addition to the
+  existing validation and shell dry-run gates.
+
+## Verification
+
+- `npm run check`
+- `npm run verify:install:runtime -- --redact-paths --expect-skills --expect-git-guards`
+- `npm run verify:skills:online -- --timeout-ms=90000`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.36 - 2026-06-22
 
 This patch supersedes v0.5.35 with a focused PowerShell installer CI fix. The

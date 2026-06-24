@@ -59,6 +59,47 @@ function writeFakeCodexCommand() {
   return commandPath;
 }
 
+function writeAmbientDriftCodexCommand() {
+  const fixtureDir = path.resolve("tmp/validate-codex-status");
+  fs.mkdirSync(fixtureDir, { recursive: true });
+  const expectedServers = JSON.parse(fs.readFileSync(path.resolve("catalog/mcp-servers.json"), "utf8"))
+    .servers
+    .map((server) => ({ name: server.name }));
+  const expectedServersPath = path.join(fixtureDir, "ambient-drift-target-mcp.json");
+  const ambientServersPath = path.join(fixtureDir, "ambient-drift-ambient-mcp.json");
+  fs.writeFileSync(expectedServersPath, `${JSON.stringify(expectedServers)}\n`, "utf8");
+  fs.writeFileSync(ambientServersPath, `${JSON.stringify([{ name: "teststdio" }])}\n`, "utf8");
+
+  if (process.platform === "win32") {
+    const commandPath = path.join(fixtureDir, "ambient-drift-codex.cmd");
+    fs.writeFileSync(commandPath, [
+      "@echo off",
+      "if \"%1\"==\"--strict-config\" echo codex-cli 0.142.0 && exit /b 0",
+      "if \"%1\"==\"login\" echo Logged in && exit /b 0",
+      `if "%1"=="mcp" if "%CODEX_HOME%"=="" type "${ambientServersPath}" && exit /b 0`,
+      `if "%1"=="mcp" type "${expectedServersPath}" && exit /b 0`,
+      "echo unexpected ambient drift fake codex args %*",
+      "exit /b 1",
+      ""
+    ].join("\r\n"), "utf8");
+    return commandPath;
+  }
+
+  const commandPath = path.join(fixtureDir, "ambient-drift-codex.sh");
+  fs.writeFileSync(commandPath, [
+    "#!/bin/sh",
+    "if [ \"$1\" = \"--strict-config\" ]; then printf 'codex-cli 0.142.0\\n'; exit 0; fi",
+    "if [ \"$1\" = \"login\" ]; then printf 'Logged in\\n'; exit 0; fi",
+    `if [ "$1" = "mcp" ] && [ -z "$CODEX_HOME" ]; then cat '${ambientServersPath.replaceAll("'", "'\\''")}'; exit 0; fi`,
+    `if [ "$1" = "mcp" ]; then cat '${expectedServersPath.replaceAll("'", "'\\''")}'; exit 0; fi`,
+    "printf 'unexpected ambient drift fake codex args %s\\n' \"$*\"",
+    "exit 1",
+    ""
+  ].join("\n"), "utf8");
+  fs.chmodSync(commandPath, 0o755);
+  return commandPath;
+}
+
 const jsonResult = run(["--json", "--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks"]);
 if (jsonResult.error) {
   fail(`codex status JSON validation could not run: ${jsonResult.error.message}`);
@@ -229,6 +270,43 @@ if (fakeCodexResult.error) {
   }
   if (serialized.includes("codex-status-private") || serialized.includes("C:\\\\Users\\\\codex-status-private")) {
     fail("codex status --redact-paths must redact escaped Windows user profile paths in command previews.");
+  }
+}
+
+const ambientDriftCodexCommand = writeAmbientDriftCodexCommand();
+const ambientDriftResult = run([
+  "--json",
+  "--redact-paths",
+  "--skip-runtime",
+  "--skip-codex-doctor-checks"
+], {
+  env: {
+    ...process.env,
+    CODEX_STATUS_CODEX_COMMAND: ambientDriftCodexCommand,
+    CODEX_HOME: ""
+  }
+});
+if (ambientDriftResult.error) {
+  fail(`codex status ambient drift validation could not run: ${ambientDriftResult.error.message}`);
+} else if (ambientDriftResult.status !== 0) {
+  fail(`codex status ambient drift validation exited ${ambientDriftResult.status}: ${(ambientDriftResult.stderr || ambientDriftResult.stdout).trim()}`);
+} else {
+  try {
+    const driftReport = JSON.parse(ambientDriftResult.stdout);
+    if (driftReport.codexCliRuntime?.status !== "ok") {
+      fail("codex status Codex CLI summary must stay ok when target checks pass and only ambient status differs.");
+    }
+    if (driftReport.codexCliRuntime?.ambient?.relationshipToTarget !== "different") {
+      fail("codex status ambient drift validation must keep the ambient relationship visible as different.");
+    }
+    if (!Array.isArray(driftReport.warnings) || !driftReport.warnings.some((warning) => warning.includes("Ambient Codex CLI status differs"))) {
+      fail("codex status ambient drift validation must report ambient drift as a warning.");
+    }
+    if (Array.isArray(driftReport.attentionReasons) && driftReport.attentionReasons.some((reason) => reason.includes("Ambient Codex CLI status differs"))) {
+      fail("codex status ambient drift validation must not turn ambient drift warnings into attention reasons.");
+    }
+  } catch (error) {
+    fail(`codex status ambient drift validation did not emit parseable JSON: ${error.message}`);
   }
 }
 

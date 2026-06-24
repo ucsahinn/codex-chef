@@ -34,6 +34,18 @@ if [ "$ALL" -eq 1 ]; then
   INSTALL_SKILLS=1
 fi
 
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Required command not found for Codex Chef Bash install: $1" >&2
+    echo "Install Git Bash, WSL, or a POSIX shell environment with coreutils, then rerun the installer." >&2
+    exit 127
+  fi
+}
+
+for command_name in dirname date node; do
+  require_command "$command_name"
+done
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
 AGENTS_HOME_DIR="${AGENTS_HOME:-$HOME/.agents}"
@@ -94,6 +106,18 @@ optional_path() {
   fi
 }
 
+normalize_install_path() {
+  local target="$1"
+  case "$target" in
+    "~") target="$HOME" ;;
+    "~"/*) target="$HOME/${target#"~/"}" ;;
+  esac
+  case "$target" in
+    /*) printf "%s" "$target" ;;
+    *) printf "%s/%s" "$PWD" "$target" ;;
+  esac
+}
+
 any_managed_target_exists() {
   [ -e "$CODEX_HOME_DIR/AGENTS.md" ] ||
   [ -e "$CODEX_HOME_DIR/config.toml" ] ||
@@ -110,6 +134,8 @@ fi
 
 CODEX_HOME_DIR="$(optional_path "Codex home" "$CODEX_HOME_DIR")"
 AGENTS_HOME_DIR="$(optional_path "Agents home" "$AGENTS_HOME_DIR")"
+CODEX_HOME_DIR="$(normalize_install_path "$CODEX_HOME_DIR")"
+AGENTS_HOME_DIR="$(normalize_install_path "$AGENTS_HOME_DIR")"
 
 if [ "$REPAIR" -eq 1 ]; then
   section "Codex Chef repair"
@@ -214,6 +240,9 @@ install_file() {
   backup_target "$destination"
   if run_change "$destination" "install file from $source" cp "$source" "$destination"; then
     action "installed" "$destination"
+  elif [ "$DRY_RUN" -ne 1 ]; then
+    echo "Failed to install file from $source to $destination" >&2
+    exit 1
   fi
 }
 
@@ -242,7 +271,17 @@ install_directory() {
   local source="$1"
   local destination="$2"
   if [ -e "$destination" ] && [ "$FORCE" -ne 1 ]; then
-    SKIPPED_EXISTING_COUNT=$((SKIPPED_EXISTING_COUNT + 1))
+    ensure_dir "$(dirname "$destination")"
+    backup_target "$destination"
+    assert_managed_directory_target "$destination"
+    if run_change "$destination" "sync managed directory files from $source" true; then
+      (cd "$source" && find . -type f -print) | while IFS= read -r rel; do
+        rel="${rel#./}"
+        ensure_dir "$(dirname "$destination/$rel")"
+        cp "$source/$rel" "$destination/$rel"
+      done
+      action "synced directory" "$destination"
+    fi
     return
   fi
   ensure_dir "$(dirname "$destination")"
@@ -258,6 +297,9 @@ install_directory() {
   fi
   if run_change "$destination" "install directory from $source" cp -R "$source" "$destination"; then
     action "installed" "$destination"
+  elif [ "$DRY_RUN" -ne 1 ]; then
+    echo "Failed to install directory from $source to $destination" >&2
+    exit 1
   fi
 }
 

@@ -58,11 +58,11 @@ GitHub social preview image olarak `assets/social-preview.svg` kullan.
 
 ## Release Metadata
 
-v0.5.36 icin:
+v0.5.37 icin:
 
 ```text
-Title: Codex Chef v0.5.36
-Tag: v0.5.36
+Title: Codex Chef v0.5.37
+Tag: v0.5.37
 Notes: docs/release-notes.md
 ```
 

@@ -86,6 +86,7 @@ const requiredFiles = [
   "scripts/validate-install-plan.mjs",
   "scripts/validate-install-state-preview.mjs",
   "scripts/validate-installer-alignment.mjs",
+  "scripts/validate-installer-smoke.mjs",
   "scripts/validate-agent-config.mjs",
   "scripts/validate-agent-research-corpus.mjs",
   "scripts/validate-mcp-config.mjs",

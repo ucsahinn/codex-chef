@@ -148,10 +148,13 @@ requireText(ps, "CODEX_HOME", "PowerShell installer");
 requireText(ps, "AGENTS_HOME", "PowerShell installer");
 requireText(ps, "Backup-Target", "PowerShell installer");
 requireText(ps, "Assert-ManagedDirectoryTarget", "PowerShell installer");
+requireText(ps, "Sync managed directory files from", "PowerShell installer");
+requireText(ps, "synced directory", "PowerShell installer");
 requireText(ps, "Install-CodexConfig", "PowerShell installer");
 requireText(ps, "merge-codex-config.mjs", "PowerShell installer");
 requireText(ps, "repair-install.mjs", "PowerShell installer");
 requireText(ps, "Read-OptionalPath", "PowerShell installer");
+requireText(ps, "Resolve-InstallPath", "PowerShell installer");
 requireText(ps, "Read-YesNo", "PowerShell installer");
 requireText(ps, "Write-Section", "PowerShell installer");
 requireText(ps, "Write-NameList", "PowerShell installer");
@@ -200,10 +203,14 @@ requireText(sh, "--plain-output", "Bash installer");
 requireText(sh, "--repair", "Bash installer");
 requireText(sh, "INTERACTIVE=0", "Bash installer");
 requireText(sh, "--interactive", "Bash installer");
+requireText(sh, "require_command()", "Bash installer");
+requireText(sh, "Required command not found for Codex Chef Bash install", "Bash installer");
 requireText(sh, "CODEX_HOME_DIR", "Bash installer");
 requireText(sh, "AGENTS_HOME_DIR", "Bash installer");
 requireText(sh, "backup_target", "Bash installer");
 requireText(sh, "assert_managed_directory_target", "Bash installer");
+requireText(sh, "sync managed directory files from", "Bash installer");
+requireText(sh, "synced directory", "Bash installer");
 requireText(sh, "install_codex_config", "Bash installer");
 requireText(sh, "merge-codex-config.mjs", "Bash installer");
 requireText(sh, "repair-install.mjs", "Bash installer");
@@ -211,6 +218,7 @@ requireText(sh, "section()", "Bash installer");
 requireText(sh, "action()", "Bash installer");
 requireText(sh, "yes_no()", "Bash installer");
 requireText(sh, "optional_path()", "Bash installer");
+requireText(sh, "normalize_install_path()", "Bash installer");
 requireText(sh, "Capability board", "Bash installer");
 requireText(sh, "catalog/routing-profiles.json", "Bash installer");
 requireText(sh, "Enterprise routing profiles", "Bash installer");
@@ -267,6 +275,13 @@ if (marketplaceOperation?.collision !== "upsert-entry-with-backup") {
 }
 if (!/unrelated marketplace plugins are preserved/i.test(marketplaceOperation?.conflictPolicy || "")) {
   fail("plugin-marketplace conflictPolicy must promise unrelated marketplace plugins are preserved.");
+}
+const pluginOperation = operation("codex-plugin");
+if (pluginOperation?.collision !== "sync-managed-files-preserve-extras-backup-before-sync") {
+  fail("codex-plugin collision must sync managed files while preserving extras.");
+}
+if (!/extra files are preserved/i.test(pluginOperation?.conflictPolicy || "")) {
+  fail("codex-plugin conflictPolicy must promise extra files are preserved by default.");
 }
 requireText(marketplaceHelper, ".agents", "Marketplace upsert helper");
 requireText(marketplaceHelper, "sourceMarketplacePath", "Marketplace upsert helper");

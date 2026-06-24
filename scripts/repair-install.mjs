@@ -143,8 +143,15 @@ function backupTarget(targetPath) {
   if (!options.apply || options.noBackup || !fs.existsSync(targetPath)) return null;
   assertManagedTarget(targetPath);
   const destination = path.join(backupRoot, relativeBackupPath(targetPath));
-  fs.mkdirSync(path.dirname(destination), { recursive: true });
-  fs.cpSync(targetPath, destination, { recursive: true, force: true });
+  try {
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.cpSync(targetPath, destination, { recursive: true, force: true });
+  } catch (error) {
+    throw new Error(
+      `Could not back up managed target before repair: ${targetPath} -> ${destination}. ` +
+      `Fix filesystem permissions or rerun the repair from an elevated shell. Cause: ${error.message}`
+    );
+  }
   return destination;
 }
 
@@ -391,8 +398,13 @@ function runConfigMerge() {
 
   const removedDeprecatedFields = report.removedDeprecatedFields || [];
   const updatedManagedFields = report.updatedManagedFields || [];
+  const addedRootKeys = report.addedRootKeys || [];
   const fullTemplateInstall = report.fullTemplateInstall === true;
-  const configNeedsApply = fullTemplateInstall || report.addedTableCount > 0 || removedDeprecatedFields.length > 0 || updatedManagedFields.length > 0;
+  const configNeedsApply = fullTemplateInstall
+    || report.addedRootKeyCount > 0
+    || report.addedTableCount > 0
+    || removedDeprecatedFields.length > 0
+    || updatedManagedFields.length > 0;
 
   if (options.apply && configNeedsApply) {
     if (fs.existsSync(destination)) backupTarget(destination);
@@ -429,6 +441,7 @@ function runConfigMerge() {
       status: options.apply ? "applied" : "planned",
       reason: [
         fullTemplateInstall ? "missing config.toml" : null,
+        report.addedRootKeyCount > 0 ? `missing ${report.addedRootKeyCount} managed root setting(s)` : null,
         report.addedTableCount > 0 ? `missing ${report.addedTableCount} managed config table(s)` : null,
         removedDeprecatedFields.length > 0 ? `deprecated managed field(s): ${removedDeprecatedFields.join(", ")}` : null,
         updatedManagedFields.length > 0 ? `managed field update(s): ${updatedManagedFields.join(", ")}` : null
@@ -440,6 +453,8 @@ function runConfigMerge() {
     inspected: true,
     status: configNeedsApply ? (options.apply ? "applied" : "planned") : "current",
     fullTemplateInstall,
+    addedRootKeys,
+    addedRootKeyCount: report.addedRootKeyCount || 0,
     addedTables: report.addedTables || [],
     addedTableCount: report.addedTableCount || 0,
     removedDeprecatedFields,
