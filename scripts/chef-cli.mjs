@@ -529,24 +529,16 @@ function printHelp() {
 
 Kullanim:
   npm run chef
-  npm run chef -- --status
-  npm run chef -- --doctor
-  npm run chef -- --preview
-  npm run chef -- --update [--apply]
-  npm run chef -- --update --verbose-plan
   npm run chef -- --status --repo-only
-  npm run chef -- --reset [--apply]
-  npm run chef -- --repair [--apply]
-  npm run chef -- --backups [--backup ID] [--restore|--delete --apply]
-  npm run chef -- --install [--apply]
-  npm run chef -- --skills
-  npm run chef -- --mcp
-  npm run chef -- --routing
-  npm run chef -- --routing --profile starter-health
+  npm run chef -- --preview
   npm run chef -- --diagnostics
-  npm run chef -- --processes
-  npm run chef -- --auth
-  npm run chef -- --logs
+
+Referans aksiyonlar:
+  Read-only: --status, --doctor, --preview, --skills, --mcp, --routing, --diagnostics, --processes, --auth, --logs
+  Write gated: --update [--apply], --reset [--apply], --repair [--apply], --install [--apply]
+  Backups: --backups [--backup ID] [--restore|--delete --apply]
+  Routing: --routing --profile starter-health
+  Verbose update: --update --verbose-plan
 
 Secenekler:
   --json          Desteklenen yerlerde JSON cikti verir
@@ -567,6 +559,9 @@ Secenekler:
 Aksiyonlar:
   Durum, Doctor, On izleme, Guncelle, Kur, Reset, Onar, Yedekler, Skill'ler, MCP, Yonlendirme, Tanilama, Surecler, Auth, Loglar
 
+Detay:
+  README hizli yolu gosterir; tam CLI referansi docs/install.tr.md icindedir.
+
 Loglar:
   tmp/chef-cli/logs
 `);
@@ -576,24 +571,16 @@ Loglar:
 
 Usage:
   npm run chef
-  npm run chef -- --status
-  npm run chef -- --doctor
-  npm run chef -- --preview
-  npm run chef -- --update [--apply]
-  npm run chef -- --update --verbose-plan
   npm run chef -- --status --repo-only
-  npm run chef -- --reset [--apply]
-  npm run chef -- --repair [--apply]
-  npm run chef -- --backups [--backup ID] [--restore|--delete --apply]
-  npm run chef -- --install [--apply]
-  npm run chef -- --skills
-  npm run chef -- --mcp
-  npm run chef -- --routing
-  npm run chef -- --routing --profile starter-health
+  npm run chef -- --preview
   npm run chef -- --diagnostics
-  npm run chef -- --processes
-  npm run chef -- --auth
-  npm run chef -- --logs
+
+Reference actions:
+  Read-only: --status, --doctor, --preview, --skills, --mcp, --routing, --diagnostics, --processes, --auth, --logs
+  Write gated: --update [--apply], --reset [--apply], --repair [--apply], --install [--apply]
+  Backups: --backups [--backup ID] [--restore|--delete --apply]
+  Routing: --routing --profile starter-health
+  Verbose update: --update --verbose-plan
 
 Options:
   --json          Emit JSON where supported
@@ -610,6 +597,9 @@ Options:
   --verbose-plan Print the full install dry-run evidence for --update previews
   --apply        Allow write actions for update, install, reset, repair, or selected skill install
   --help         Show this help
+
+Details:
+  README shows the short path; the full CLI reference lives in docs/install.md.
 
 Logs:
   tmp/chef-cli/logs

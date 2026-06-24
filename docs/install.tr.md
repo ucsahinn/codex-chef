@@ -97,6 +97,7 @@ Codex Chef backup archive'larini ayni CLI ile incele veya geri yukle:
 
 ```powershell
 npm run chef -- --backups
+npm run chef:backups
 npm run chef -- --backups --backup <id>
 npm run chef -- --backups --backup <id> --restore
 npm run chef -- --backups --backup <id> --delete
@@ -112,6 +113,53 @@ kopyalamadan once mevcut target'lar icin yeni rollback backup olusturur. Delete
 de preview-first calisir: `--delete` resolved archive path'ini gosterir ama
 silmez; `--delete --apply` yalniz canonical backup root altindaki secili Codex
 Chef backup archive'ini kaldirir.
+
+## Codex Chef CLI Referansi
+
+Root README ilk kurulumu kisa tutar. Tam operator referansi gerektiginde bu
+bolumu kullan.
+
+```powershell
+npm run chef
+npm run chef -- --status
+npm run chef -- --status --repo-only
+npm run chef -- --preview
+npm run chef -- --update
+npm run chef -- --update --verbose-plan
+npm run chef -- --backups
+npm run chef:backups
+npm run chef -- --backups --backup <id> --delete
+npm run chef -- --reset --apply
+npm run chef -- --repair --apply
+npm run chef -- --install --apply
+npm run chef -- --skills
+npm run chef -- --mcp
+npm run chef -- --routing
+npm run chef -- --diagnostics
+npm run chef -- --processes
+npm run chef -- --auth
+npm run chef -- --logs
+npm run chef -- --help --lang tr
+npm run chef -- --status --repo-only --no-log
+```
+
+`--routing` task-shape haritasini, beklenen skill ve MCP yuzeylerini ve operator
+raporlama sozlesmesini gosterir. Tamamlanan agent thread'lerini incelemek ve kapatmak
+icin `/agent`; current Codex session tarafindan baslatilan terminal
+isleri icin `/ps` ve `/stop` kullan. `--diagnostics` Serena/MCP surec audit
+komutunu ve diger read-only kanit komutlarini gosterir, ama surec durdurmaz ve
+global dosya degistirmez.
+
+Kurulu skill'ler kendiliginden calismaz. Kullanici skill adini yazdiginda veya
+is skill aciklamasina net uydugunda Codex context'ine girer; canli aktivasyon
+asistanin `Skill selected` yazmasi ve aksiyondan once ilgili `SKILL.md`
+dosyasini okumasiyla kanitlanir.
+
+GitHub release, push veya workflow check'leri lokal GitHub authentication bayat
+oldugu icin fail ederse GitHub CLI veya Git Credential Manager'i kendi kurum politikaniza
+gore yenile. Account-scoped credential repair'i bu reponun disinda
+tut; token'lari repo dosyalarina, loglara, promptlara, skill'lere, rule'lara
+veya shell history'ye yapistirma.
 
 Kullanışlı parametreler:
 

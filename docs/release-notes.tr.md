@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+## v0.5.38 - 2026-06-24
+
+Bu release public girisi daha sade, operator odakli ve ilk bakista anlasilir
+hale getirir; tam Codex Chef referansi install rehberlerinde kalir. Agent,
+skill, MCP ve routing dili de runtime'in kanitlayabildigi davranisla
+hizalanir.
+
+## One cikanlar
+
+- Ingilizce ve Turkce README sayfalari daha kisa install yolu, daha net guvenlik
+  siniri, kompakt CLI haritasi ve korunmus gorsel asset'lerle yeniden
+  duzenlendi.
+- Tam CLI komut envanteri README dosyalarindan alindi ve `docs/install.md` ile
+  `docs/install.tr.md` icine tasindi.
+- `npm run chef -- --help` ciktisi sadelestirildi; once kisa yolu, gerekirse
+  tam referansi gosterir.
+- Yeni dokuman sekli icin validator'lar guncellendi: routing/status dili, CLI
+  referans kapsami ve release readiness kapilari tekrar kontrol edilir.
+- Release oncesi asset diff'i, whitespace, token yuzeyleri, secret scan ve tum
+  repo validation gate'i yeniden calistirildi.
+
+## Verification
+
+- `npm run check`
+- `npm run validate`
+- `npm run validate:tokens`
+- `npm run token:audit`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.37 - 2026-06-24
 
 Bu release installer hardening isini tam enterprise dogrulama kapisina tasir.

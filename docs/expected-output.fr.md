@@ -62,6 +62,9 @@ node scripts/plan-install.mjs --all --json
 
 Ce fichier localisé suit les sections du fichier source anglais. Source: [expected-output.md](expected-output.md).
 
+Source routing policy line:
+Policy: task-shape routing names matching specialists, selects matching skills when applicable, and only spawns subagents when the current runtime permits delegation; risky actions remain approval-gated.
+
 - Expected Output
 - Install Plan Preview
 - Routing Board

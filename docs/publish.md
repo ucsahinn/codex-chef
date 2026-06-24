@@ -56,11 +56,11 @@ After explicit commit/push/release approval:
 ```bash
 git add <reviewed files>
 git diff --cached
-git commit -m "Release Codex Chef v0.5.37"
+git commit -m "Release Codex Chef v0.5.38"
 git push origin main
-git tag v0.5.37
-git push origin v0.5.37
-gh release create v0.5.37 --title "Codex Chef v0.5.37" --notes-file docs/release-notes.md
+git tag v0.5.38
+git push origin v0.5.38
+gh release create v0.5.38 --title "Codex Chef v0.5.38" --notes-file docs/release-notes.md
 ```
 
 After pushing, verify remote equality and CI:

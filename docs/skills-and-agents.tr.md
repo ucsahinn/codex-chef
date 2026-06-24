@@ -246,15 +246,15 @@ Agent katalog kurali:
 Routing kurali:
 
 - Subagent kullanimi acik ve gorunur delegasyondur. Bu starter'in global
-  AGENTS routing kontrati, kullanici ajani elle adlandirmasa bile net,
-  non-trivial prompt shape'leri icin uygun uzman agent'in spawn edilmesine izin
-  verir.
-- Bu prompt-shape'e gore guvenli otonomidir; gizli background execution
-  degildir. Asistan `Agent plan`, `Agent started` ve `Agent result` satirlarini
-  basmali, sonra uzman sonucunu kullanmadan once ozetlemelidir.
-- Non-trivial is kayitli bir uzmana denk geliyorsa o uzman otomatik ve gorunur
-  sekilde kullanilir. Kesif, dogrulama, review veya release-readiness isleri
-  sessizce sadece ana thread'de tutulmaz.
+  AGENTS routing kontrati net, non-trivial prompt shape'leri icin uygun uzman
+  agent'i isimlendirir, ama Codex runtime politikasini override etmez.
+- Guncel Codex surumleri subagent'i yalnizca kullanici subagent veya paralel
+  ajan calismasini acikca istediginde spawn eder. Bu oldugunda asistan
+  `Agent plan`, `Agent started` ve `Agent result` satirlarini basmali, sonra
+  uzman sonucunu kullanmadan once ozetlemelidir.
+- Non-trivial is kayitli bir uzmana denk geliyorsa o uzman plan veya
+  `Surfaces used` ciktisinda gorunur yapilir. Runtime veya kullanici istegi izin
+  vermedigi halde agent spawn edilmis gibi ima edilmez.
 - Gorunur routing ciktisi `Agent plan`, `Agent started`, `Agent result`,
   `Skill selected`, `MCP selected` ve
   `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`
@@ -301,5 +301,6 @@ mode'u, MCP mode'u, beklenen flag/check'leri, evidence sinyallerini, owner,
 durability, primary surface, privilege delta, validation gate, rollback path ve
 guvenlik sinirini yazar. Bu Codex Chef'i faydali anlamda otonom yapar: task
 shape profile uydugunda eslesen uzman, skill, MCP ve flag rehberligi zorunlu
-olur. Gizli hook veya sessiz executor olusturmaz. Destructive, credential,
-publish, deploy, database ve genis filesystem aksiyonlari onay kapisinda kalir.
+olur. Subagent spawn acik istek ve runtime izniyle sinirlidir; routing kontrati
+gizli hook veya sessiz executor olusturmaz. Destructive, credential, publish,
+deploy, database ve genis filesystem aksiyonlari onay kapisinda kalir.

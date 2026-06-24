@@ -246,14 +246,15 @@ Agent catalog rule:
 Routing rule:
 
 - Subagents are explicit, visible delegation. This starter's global AGENTS
-  routing contract permits Codex to spawn matching specialist agents for clear,
-  non-trivial prompt shapes even when the user did not manually name the agent.
-- This is prompt-shape matched safe autonomy, not hidden background execution:
-  the assistant must print `Agent plan`, `Agent started`, and `Agent result`,
-  then summarize the specialist result before relying on it.
-- For non-trivial work that maps to a registered specialist, use that specialist
-  automatically and visibly. Do not silently keep all exploration,
-  verification, review, or release-readiness work in the main thread.
+  routing contract names matching specialist agents for clear, non-trivial
+  prompt shapes, but it does not override Codex runtime policy.
+- Current Codex releases spawn subagents only when the user explicitly asks for
+  subagents or parallel agent work. When that happens, the assistant must print
+  `Agent plan`, `Agent started`, and `Agent result`, then summarize the
+  specialist result before relying on it.
+- For non-trivial work that maps to a registered specialist, make the specialist
+  visible in the plan or `Surfaces used` output. Do not silently imply an agent
+  was spawned when the runtime or user request did not permit one.
 - Visible routing output should include `Agent plan`, `Agent started`,
   `Agent result`, `Skill selected`, `MCP selected`, and
   `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`.
@@ -294,8 +295,10 @@ npm run chef -- --routing --profile starter-health
 Each profile names the task trigger, recommended subagents, delegation mode,
 skill mode, MCP mode, expected flags/checks, evidence signals, owner,
 durability, primary surface, privilege delta, validation gate, rollback path,
-and the safety boundary. This keeps Codex Chef autonomous in the useful sense: when a task
-clearly matches a profile, the matching specialist, skill, MCP, and flag
-guidance is required unless a higher-priority instruction blocks it. It does not
-create hidden hooks or silent execution. Destructive, credentialed, publishing,
-deployment, database, and broad filesystem actions remain approval-gated.
+and the safety boundary. This keeps Codex Chef autonomous in the useful sense:
+when a task clearly matches a profile, the matching specialist, skill, MCP, and
+flag guidance is required unless a higher-priority instruction blocks it.
+Subagent spawning stays explicit and runtime-bounded; the routing contract does
+not create hidden hooks or silent execution. Destructive, credentialed,
+publishing, deployment, database, and broad filesystem actions remain
+approval-gated.

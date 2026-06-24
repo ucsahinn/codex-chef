@@ -11,7 +11,7 @@ Discovery ciktisi no-write ve okunabilir kalir:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.37
+Package: codex-chef@0.5.38
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -53,7 +53,7 @@ node scripts/plan-install.mjs --all --json --redact-paths
 ```text
 Codex Chef enterprise routing board
 Profiles: 12
-Policy: task-shape routing is required when applicable, but risky actions remain approval-gated.
+Policy: task-shape routing names matching specialists, selects matching skills when applicable, and only spawns subagents when the current runtime permits delegation; risky actions remain approval-gated.
 
 Subagent visibility contract:
 - Agent plan: name each requested agent, scope, reason, expected output, and wait policy before spawning.

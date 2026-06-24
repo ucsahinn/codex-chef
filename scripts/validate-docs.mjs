@@ -6,6 +6,8 @@ const root = path.resolve(process.cwd());
 const failures = [];
 const ignoredDirs = new Set([".git", ".serena", "node_modules", "dist", "build", "coverage", ".next", "tmp", "temp"]);
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+const routingPolicyLine =
+  "Policy: task-shape routing names matching specialists, selects matching skills when applicable, and only spawns subagents when the current runtime permits delegation; risky actions remain approval-gated.";
 
 function posix(filePath) {
   return filePath.split(path.sep).join("/");
@@ -100,6 +102,9 @@ function validateDocText(file) {
       if (match[1] !== packageJson.version) {
         failures.push(`${rel} has stale package example codex-chef@${match[1]}; expected codex-chef@${packageJson.version}`);
       }
+    }
+    if (!text.includes(routingPolicyLine)) {
+      failures.push(`${rel} has stale routing policy expected-output; expected the runtime-bounded delegation policy line`);
     }
   }
 }

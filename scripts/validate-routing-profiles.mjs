@@ -46,13 +46,13 @@ if (!routing.sourcePolicy || !/not hidden execution hooks/i.test(routing.sourceP
 if (!/runtime-permitted routing guidance/i.test(routing.sourcePolicy || "")) {
   fail("routing profile sourcePolicy must state that profiles are runtime-permitted routing guidance.");
 }
-if (!/explicitly permits Codex to spawn matching\s+specialist subagents/i.test(agentsTemplate)) {
-  fail("templates/codex/AGENTS.md must explicitly permit prompt-shape matched specialist subagents.");
+if (!/Current Codex releases spawn subagents only\s+when the user explicitly asks/i.test(agentsTemplate)) {
+  fail("templates/codex/AGENTS.md must state that current Codex releases require explicit user subagent requests.");
 }
 
 for (const required of [
   "Subagent Visibility Contract",
-  "prompt-shape matched delegation",
+  "not override Codex runtime policy",
   "Agent plan",
   "Agent started",
   "Agent result",
@@ -60,8 +60,8 @@ for (const required of [
   "MCP selected",
   "Surfaces used",
   "/agent",
-  "wait for all requested subagents",
-  "automatically and visibly"
+  "for all requested subagents",
+  "explicitly asks for subagents"
 ]) {
   if (!agentsTemplate.includes(required)) {
     fail(`templates/codex/AGENTS.md missing subagent visibility contract snippet: ${required}`);
@@ -76,7 +76,7 @@ for (const required of [
   "Surfaces used",
   "agents=...",
   "Use /agent in Codex CLI",
-  "runtime-permitted subagent results",
+  "requested subagent results",
   "Delegation mode",
   "Skill mode",
   "MCP mode",

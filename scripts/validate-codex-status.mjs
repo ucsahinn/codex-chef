@@ -160,8 +160,8 @@ if (report) {
   if (!report.routingBoard?.requiredSurfaces?.mcp?.includes("openaiDeveloperDocs")) {
     fail("codex status routing board must include OpenAI Docs MCP in required MCP surfaces.");
   }
-  if (!report.routingBoard?.boundary?.includes("not hidden execution hooks")) {
-    fail("codex status routing board must preserve the no-hidden-hooks boundary.");
+  if (!report.routingBoard?.boundary?.includes("subagent spawning still requires the current runtime to permit delegation")) {
+    fail("codex status routing board must preserve the runtime-bounded subagent boundary.");
   }
   if (!report.mcpSetupBoard || report.mcpSetupBoard.serverCount !== 15) {
     fail("codex status must include the MCP setup board with all 15 servers.");

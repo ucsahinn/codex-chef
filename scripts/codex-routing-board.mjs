@@ -59,9 +59,9 @@ const report = {
   sourcePolicy: routing.sourcePolicy,
   visibilityContract: {
     subagents: [
-      "Agent plan: before spawning, name each requested or prompt-shape matched agent, scope, reason, expected output, and wait policy.",
+      "Agent plan: before spawning, name each requested agent, scope, reason, expected output, and wait policy.",
       "Agent started: after spawning, repeat the visible agent name or nickname and the assigned task.",
-      "Agent result: wait for requested or runtime-permitted subagent results before continuing unless the user explicitly says to run in the background.",
+      "Agent result: wait for requested subagent results before continuing unless the user explicitly says to run in the background.",
       "Skill selected: name every selected skill and why it matches the task before acting on it.",
       "MCP selected: name every selected MCP/tool surface, why it is needed, and whether it is read-only or approval-gated.",
       "Surfaces used: final summaries use agents=..., skills=..., mcp=..., commands=..., skipped=... so evidence is explicit."
@@ -74,7 +74,7 @@ const report = {
       "Close browser/MCP pages or sessions when the selected tool exposes a close operation.",
       "If an external MCP process such as Serena persists after the task, report it and ask before killing processes or deleting state."
     ],
-    boundary: "Routing profiles permit visible prompt-shape matched delegation for safe non-destructive work; they do not silently enable account, database, production, destructive, or broad filesystem actions."
+    boundary: "Routing profiles name visible prompt-shape matched specialists, but subagent spawning still requires the current runtime to permit delegation; they do not silently enable account, database, production, destructive, or broad filesystem actions."
   },
   profileCount: profiles.length,
   profiles
@@ -85,17 +85,17 @@ if (options.json) {
 } else {
   console.log("Codex Chef enterprise routing board");
   console.log(`Profiles: ${profiles.length}`);
-  console.log("Policy: task-shape routing may spawn matching specialists and must select matching skills when applicable; risky actions remain approval-gated.");
+  console.log("Policy: task-shape routing names matching specialists, selects matching skills when applicable, and only spawns subagents when the current runtime permits delegation; risky actions remain approval-gated.");
   console.log("");
   console.log("Subagent visibility contract:");
-  console.log("- Agent plan: name each requested or prompt-shape matched agent, scope, reason, expected output, and wait policy before spawning.");
+  console.log("- Agent plan: name each requested agent, scope, reason, expected output, and wait policy before spawning.");
   console.log("- Agent started: show the visible agent name or nickname and assigned task after spawning.");
-  console.log("- Agent result: wait for requested or runtime-permitted subagent results before continuing unless the user explicitly asks for background work.");
+  console.log("- Agent result: wait for requested subagent results before continuing unless the user explicitly asks for background work.");
   console.log("- Skill selected: name every selected skill and why it matches the task before acting on it.");
   console.log("- MCP selected: name every selected MCP/tool surface, why it is needed, and whether it is read-only or approval-gated.");
   console.log("- Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...");
   console.log("- Use /agent in Codex CLI to inspect active agent threads, switch to one, or steer/close it.");
-  console.log("- Boundary: routing profiles allow visible safe delegation, not hidden permission to enable risky tools.");
+  console.log("- Boundary: routing profiles make specialists visible, not hidden permission to spawn agents or enable risky tools.");
   console.log("");
   console.log("Lifecycle hygiene:");
   console.log("- Close completed subagent threads when they are no longer needed.");

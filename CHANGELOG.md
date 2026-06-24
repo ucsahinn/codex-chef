@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.5.38 - 2026-06-24
+
+- Simplified the English and Turkish landing pages so first-run users see the
+  install path, operating boundary, and trust signals before the detailed CLI
+  reference.
+- Moved the full Codex Chef CLI command inventory into the install guides while
+  keeping the README command path short and scannable.
+- Clarified agent, skill, MCP, and runtime routing language so visible
+  delegation is documented as an explicit runtime/user-authorized flow rather
+  than a hidden automatic promise.
+- Updated CLI help, routing/status validators, and release gates so the new
+  documentation shape is enforced before publication.
+
 ## 0.5.37 - 2026-06-24
 
 - Hardened independent install behavior for zero-config, existing-config,

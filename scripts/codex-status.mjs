@@ -429,7 +429,7 @@ function inspectRoutingBoard() {
       skillModes: [...new Set(profiles.map((profile) => profile.skillMode))].sort(),
       mcpModes: [...new Set(profiles.map((profile) => profile.mcpMode))].sort()
     },
-    boundary: "Routing profiles permit visible prompt-shape matched delegation for safe non-destructive work, not hidden execution hooks; destructive, credentialed, publishing, deployment, database, and broad filesystem actions remain approval-gated."
+    boundary: "Routing profiles name visible prompt-shape matched specialists, but subagent spawning still requires the current runtime to permit delegation; destructive, credentialed, publishing, deployment, database, and broad filesystem actions remain approval-gated."
   };
 }
 

@@ -114,15 +114,16 @@ are selected:
 ### Subagent Visibility Contract
 
 - Treat subagents as explicit, visible delegation, not background magic. This
-  installed AGENTS contract explicitly permits Codex to spawn matching
-  specialist subagents for clear, non-trivial prompt shapes listed in the
-  Enterprise Routing Loop, even when the user did not name an agent manually.
+  installed AGENTS contract names the matching specialist subagents for clear,
+  non-trivial prompt shapes listed in the Enterprise Routing Loop, but it does
+  not override Codex runtime policy. Current Codex releases spawn subagents only
+  when the user explicitly asks for subagents or parallel agent work.
 - Treat prompt-shape matched delegation as safe autonomy only for bounded,
   non-destructive evidence work: mapping, research, planning, review,
   verification, browser evidence, security audit, release readiness, and setup
   diagnostics. Destructive, credentialed, account, database, deploy, publish,
   broad filesystem, and global mutation actions still need explicit approval.
-- When delegation is permitted by the prompt shape, deliberately spawn the
+- When the user explicitly asks for subagents or parallel agent work, spawn the
   matching specialist and wait for a summarized result before relying on it.
 - When delegation is used, make it visible. Before spawning, print an
   `Agent plan` that names each requested or prompt-shape matched agent, its
@@ -137,12 +138,11 @@ are selected:
   is selected for docs, browser evidence, code navigation, or external context,
   print `MCP selected` with the server name and reason. If an obvious skill or
   MCP is skipped, state the reason instead of staying silent.
-- If the user asks for agent work, or the prompt shape matches a
-  runtime-permitted specialist route, and the user does not explicitly say
-  "background", wait for all requested subagents before continuing or
-  finalizing. If the user sends another prompt while agents are running, first
-  report which agents are still running, completed, failed, or blocked, then
-  continue without losing the later agent results.
+- If the user asks for agent work and does not explicitly say "background", wait
+  for all requested subagents before continuing or finalizing. If the user sends
+  another prompt while agents are running, first report which agents are still
+  running, completed, failed, or blocked, then continue without losing the later
+  agent results.
 - In Codex CLI, tell the user they can use `/agent` to inspect active agent
   threads, switch to one, steer it, or close completed threads.
 - Close completed subagent threads when they are no longer needed. Before
@@ -155,9 +155,10 @@ are selected:
   Serena persists after the task, report it and ask before killing processes or
   deleting local state.
 - Do not spawn subagents for trivial, single-file, low-risk changes.
-- For non-trivial work that matches a registered specialist, use the specialist
-  automatically and visibly instead of silently doing all exploration or
-  verification in the main thread.
+- For non-trivial work that matches a registered specialist, name the specialist
+  visibly in the plan or `Surfaces used` output. Spawn it only when the user
+  explicitly asks for subagents or parallel agent work and the current runtime
+  permits delegation.
 - Prefer `code_mapper` before broad implementation, refactors, unfamiliar
   repositories, or architecture questions.
 - Prefer `docs_researcher` for current/version-sensitive APIs, Codex behavior,

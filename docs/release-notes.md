@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+## v0.5.38 - 2026-06-24
+
+This release turns the public entry point into a cleaner operator-facing
+welcome path while keeping the full Codex Chef reference available in the
+install guides. It also tightens the agent, skill, MCP, and routing language so
+the documented experience matches what the runtime can prove.
+
+## Highlights
+
+- Rebuilt the English and Turkish README pages around a shorter install path,
+  clearer safety boundary, compact CLI map, and preserved visual assets.
+- Moved the complete CLI command inventory out of the README files and into
+  `docs/install.md` and `docs/install.tr.md`.
+- Simplified `npm run chef -- --help` output so it points users to the short
+  path first and the full reference when they need depth.
+- Updated validators for the new docs shape, including routing/status wording,
+  CLI reference coverage, and release readiness.
+- Rechecked assets, whitespace, token surfaces, secret scan, and the full repo
+  validation gate before release.
+
+## Verification
+
+- `npm run check`
+- `npm run validate`
+- `npm run validate:tokens`
+- `npm run token:audit`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.37 - 2026-06-24
 
 This release turns the installer hardening work into a full enterprise-grade

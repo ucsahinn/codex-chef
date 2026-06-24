@@ -100,6 +100,7 @@ Inspect or restore Codex Chef backup archives through the same CLI:
 
 ```powershell
 npm run chef -- --backups
+npm run chef:backups
 npm run chef -- --backups --backup <id>
 npm run chef -- --backups --backup <id> --restore
 npm run chef -- --backups --backup <id> --delete
@@ -115,6 +116,53 @@ known Codex Chef-managed files back from the selected archive. Delete is also
 preview-first: `--delete` prints the resolved archive path without removing it,
 and `--delete --apply` removes only the selected Codex Chef backup archive under
 the canonical backup root.
+
+## Codex Chef CLI Reference
+
+The root README keeps the first-run path short. Use this section when you need
+the full operator reference.
+
+```powershell
+npm run chef
+npm run chef -- --status
+npm run chef -- --status --repo-only
+npm run chef -- --preview
+npm run chef -- --update
+npm run chef -- --update --verbose-plan
+npm run chef -- --backups
+npm run chef:backups
+npm run chef -- --backups --backup <id> --delete
+npm run chef -- --reset --apply
+npm run chef -- --repair --apply
+npm run chef -- --install --apply
+npm run chef -- --skills
+npm run chef -- --mcp
+npm run chef -- --routing
+npm run chef -- --diagnostics
+npm run chef -- --processes
+npm run chef -- --auth
+npm run chef -- --logs
+npm run chef -- --help --lang tr
+npm run chef -- --status --repo-only --no-log
+```
+
+`--routing` shows the task-shape map, expected skills and MCPs, and the
+operator reporting contract. Use `/agent` to inspect and close completed agent threads;
+use `/ps` and `/stop` for live terminal work started by the current
+Codex session. `--diagnostics` includes the Serena/MCP process-audit command
+and other read-only evidence commands, but it does not stop processes or mutate
+global files.
+
+Installed skills do not execute by themselves. A skill enters Codex context
+when the user names it or the task clearly matches its description; live activation is
+proven when the assistant prints `Skill selected` and reads the
+skill's `SKILL.md` before acting.
+
+If GitHub release, push, or workflow checks fail because local GitHub
+authentication is stale, refresh GitHub CLI or Git Credential Manager according
+to your organization policy. Keep account-scoped credential repair outside this
+repository and never paste tokens into repo files, logs, prompts, skills, rules,
+or shell history.
 
 Useful switches:
 

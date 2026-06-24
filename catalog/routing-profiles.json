@@ -1,7 +1,7 @@
 {
   "version": "0.2.0",
   "dateChecked": "2026-06-16",
-  "sourcePolicy": "Enterprise routing profiles map task shapes to the safest useful Codex surfaces. They are runtime-permitted routing guidance for clear, non-trivial prompt matches, not hidden execution hooks: matching specialist agents may be spawned visibly, matching skills are mandatory when triggered, MCP use is bounded by availability and approval mode, and destructive, credentialed, publishing, deployment, database, and broad filesystem actions remain approval-gated.",
+  "sourcePolicy": "Enterprise routing profiles map task shapes to the safest useful Codex surfaces. They are runtime-permitted routing guidance for clear, non-trivial prompt matches, not hidden execution hooks: matching specialist agents are named visibly and may be spawned only when the current Codex runtime permits subagent delegation, which current Codex releases require the user to ask for explicitly. Matching skills are mandatory when triggered, MCP use is bounded by availability and approval mode, and destructive, credentialed, publishing, deployment, database, and broad filesystem actions remain approval-gated.",
   "profiles": [
     {
       "id": "repo-map-before-change",
