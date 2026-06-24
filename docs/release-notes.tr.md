@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## v0.5.39 - 2026-06-24
+
+Bu patch, Codex Chef'in ilk bakista tam bir uzman setup'i gibi gorunmesini
+saglayan gorsel capability panolarini geri getirir. README eski uzun referans
+sayfasina donmez; ama emojili ajan ekibi, skill katalogu ve MCP connector
+tablolari Ingilizce ve Turkce girislerde tekrar yer alir.
+
+## One cikanlar
+
+- 21 ajanlik ekip tablosu, gorunur rol adlari ve Codex routing kimlikleriyle
+  geri geldi.
+- Yerel plugin skill'leri ve reviewed global skill katalogu icin kompakt skill
+  tablosu geri geldi.
+- Varsayilan hazir lokal/arastirma MCP'leri ile opt-in bekleyen high-risk hesap,
+  filesystem, deploy ve database connector'larini gosteren emojili MCP panosu
+  geri geldi.
+- v0.5.38'in daha net kurulum akisi korundu; agent, skill ve MCP connector'lari
+  gizli background automation degil, gorunur capability olarak anlatilmaya devam
+  eder.
+
+## Verification
+
+- `npm run check`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.38 - 2026-06-24
 
 Bu release public girisi daha sade, operator odakli ve ilk bakista anlasilir

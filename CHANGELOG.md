@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.5.39 - 2026-06-24
+
+- Restored the emoji-rich agent team, skill catalog, and MCP connector tables on
+  the English and Turkish README entry points while keeping the shorter
+  first-run install flow from v0.5.38.
+- Kept the restored tables explicit about runtime boundaries: agents are role
+  definitions for visible delegation, skills do not execute by themselves, and
+  high-risk MCP connectors remain disabled until opt-in.
+
 ## 0.5.38 - 2026-06-24
 
 - Simplified the English and Turkish landing pages so first-run users see the

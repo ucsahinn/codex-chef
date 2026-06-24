@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## v0.5.39 - 2026-06-24
+
+This patch restores the visual capability boards that make Codex Chef feel like
+a complete specialist setup at first glance. The README stays shorter than the
+old reference-heavy page, but the emoji agent team, skill catalog, and MCP
+connector tables are back on the English and Turkish entry points.
+
+## Highlights
+
+- Restored the 21-agent team table with visible role names and Codex routing
+  identifiers.
+- Restored a compact skills table for the local plugin skills and the reviewed
+  global skill catalog.
+- Restored the emoji MCP connector board, including ready-by-default local and
+  research servers plus disabled high-risk account, filesystem, deployment, and
+  database connectors.
+- Preserved the clearer v0.5.38 install flow and the explicit boundary that
+  agents, skills, and MCP connectors are visible capabilities rather than hidden
+  background automation.
+
+## Verification
+
+- `npm run check`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.38 - 2026-06-24
 
 This release turns the public entry point into a cleaner operator-facing
