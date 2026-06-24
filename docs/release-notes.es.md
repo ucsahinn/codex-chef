@@ -34,13 +34,12 @@ npm run verify:skills:online
 - Usar `git diff --check` para detectar problemas de whitespace y Markdown.
 - Usar `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks está disponible.
 
-## v0.5.40 - 2026-06-24
+## v0.5.41 - 2026-06-24
 
 Este patch actualiza la version actual en las notas de version en espanol.
-Documenta el hook pre-commit Node seguro para Windows, el extractor de notas
-solo para la seccion actual, el requisito de PNG para social preview, limites
-mas estrictos para timeout/credenciales MCP y la redaccion mas clara sobre
-Memory MCP.
+Documenta el arreglo del ciclo readline en la CLI interactiva, la misma funcion
+de pregunta del menu para prompts anidados y las regresiones contra stacks de
+AbortError y warnings de unsettled top-level-await.
 
 ### Verification
 
@@ -112,7 +111,7 @@ Este archivo localizado sigue las secciones del archivo fuente en inglés. Sourc
 
 - Release Notes
 - Unreleased
-- v0.5.40 - 2026-06-24
+- v0.5.41 - 2026-06-24
 - Verification
 - v0.5.14 - 2026-06-16
 - Highlights

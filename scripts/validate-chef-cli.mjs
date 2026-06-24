@@ -80,6 +80,7 @@ function runCliSmoke(name, cliArgs, expectedSnippets, extra = {}) {
 }
 
 function runCliSmokeRaw(name, cliArgs, extra = {}) {
+  const expectedStatus = extra.expectedStatus ?? 0;
   const result = spawnSync(process.execPath, [path.join(root, "scripts/chef-cli.mjs"), ...cliArgs], {
     cwd: extra.cwd || root,
     encoding: "utf8",
@@ -97,8 +98,8 @@ function runCliSmokeRaw(name, cliArgs, extra = {}) {
     fail(`chef-cli smoke ${name} failed: ${result.error.message}`);
     return { ok: false, output, stdout: result.stdout || "", stderr: result.stderr || "" };
   }
-  if (result.status !== 0) {
-    fail(`chef-cli smoke ${name} exited ${result.status}: ${output.trim()}`);
+  if (result.status !== expectedStatus) {
+    fail(`chef-cli smoke ${name} exited ${result.status}, expected ${expectedStatus}: ${output.trim()}`);
     return { ok: false, output, stdout: result.stdout || "", stderr: result.stderr || "" };
   }
   return { ok: true, output, stdout: result.stdout || "", stderr: result.stderr || "" };
@@ -152,6 +153,43 @@ function runMenuTranscriptSmoke() {
     }
     if (countOccurrences(action.output, "Operator menu") !== 2) {
       fail("chef-cli menu action transcript must render one menu before action and one menu after explicit return");
+    }
+  }
+
+  const skillSelection = runCliSmokeRaw("menu-skills-selection-transcript", ["--plain", "--no-log"], {
+    env: baseEnv,
+    input: "10\n\n\nq\n",
+    timeout: 30000
+  });
+  if (skillSelection.ok) {
+    for (const snippet of [
+      "Running: Skills",
+      "Skill selection:",
+      "Select a skill number to install with --apply, or press Enter to skip:",
+      "No skill selected.",
+      "Press Enter to return to the menu."
+    ]) {
+      if (!skillSelection.output.includes(snippet)) {
+        fail(`chef-cli menu skills transcript missing output snippet: ${snippet}`);
+      }
+    }
+    if (/unsettled top-level await|AbortError|ABORT_ERR/i.test(skillSelection.output)) {
+      fail("chef-cli menu skills transcript must not leak readline lifecycle warnings");
+    }
+  }
+
+  const interrupt = runCliSmokeRaw("menu-interrupt-transcript", ["--plain", "--no-log"], {
+    env: baseEnv,
+    input: "__ABORT__\n",
+    expectedStatus: 130,
+    timeout: 30000
+  });
+  if (interrupt.ok) {
+    if (!interrupt.output.includes("Interrupted by user.")) {
+      fail("chef-cli menu interrupt transcript must show a controlled interruption message");
+    }
+    if (/node:internal|unsettled top-level await|AbortError|ABORT_ERR/i.test(interrupt.output)) {
+      fail("chef-cli menu interrupt transcript must not leak readline lifecycle stack traces");
     }
   }
 }

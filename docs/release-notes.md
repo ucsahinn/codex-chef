@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+## v0.5.41 - 2026-06-24
+
+This patch fixes the interactive menu behavior on newer Node runtimes. The CLI
+now keeps one readline owner while nested actions ask follow-up questions, so
+Skills and MCP selection prompts return to the operator menu without leaking
+`AbortError` stacks or unsettled top-level-await warnings.
+
+## Highlights
+
+- Reused the active menu question function for nested Skills, MCP, backup, and
+  write-confirmation prompts instead of opening competing readline interfaces.
+- Normalized Ctrl+C-style `readline/promises` aborts into a controlled user
+  interrupt message.
+- Added CLI transcript regressions for the Skills selection skip path and the
+  interrupt path that previously printed Node internals.
+
+## Verification
+
+- `npm run validate:chef-cli`
+- `npm run check`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.40 - 2026-06-24
 
 This patch closes the remaining audit gaps found after the v0.5.39 visual

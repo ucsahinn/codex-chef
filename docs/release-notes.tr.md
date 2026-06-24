@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+## v0.5.41 - 2026-06-24
+
+Bu patch yeni Node runtime'larinda interaktif menu davranisini duzeltir. CLI
+artik nested action'lar follow-up soru sordugunda tek readline sahibini
+kullanir; Skill ve MCP secim promptlari operator menusune `AbortError` stack'i
+veya unsettled top-level-await uyarisi basmadan doner.
+
+## One cikanlar
+
+- Nested Skill, MCP, yedek ve write-confirmation promptlari icin ikinci bir
+  readline interface acmak yerine aktif menu soru fonksiyonu yeniden kullanildi.
+- Ctrl+C benzeri `readline/promises` abort'lari kontrollu user interrupt
+  mesajina normalize edildi.
+- Daha once Node internal'lari basan Skill skip akisi ve interrupt yolu icin CLI
+  transcript regresyonlari eklendi.
+
+## Verification
+
+- `npm run validate:chef-cli`
+- `npm run check`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.40 - 2026-06-24
 
 Bu patch v0.5.39 gorsel pano geri yuklemesinden sonra kalan audit bosluklarini

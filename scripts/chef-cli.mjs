@@ -68,6 +68,52 @@ function cliError(en, tr = en) {
   process.exit(2);
 }
 
+class UserInterrupt extends Error {
+  constructor() {
+    super("User interrupted");
+    this.name = "UserInterrupt";
+    this.code = "CODEX_CHEF_USER_INTERRUPT";
+  }
+}
+
+function isQuestionAbort(error) {
+  return error?.name === "AbortError" || error?.code === "ABORT_ERR";
+}
+
+function isUserInterrupt(error) {
+  return error instanceof UserInterrupt || error?.code === "CODEX_CHEF_USER_INTERRUPT";
+}
+
+function questionAbortError() {
+  const error = new Error("Aborted");
+  error.name = "AbortError";
+  error.code = "ABORT_ERR";
+  return error;
+}
+
+async function normalizeQuestionAbort(task) {
+  try {
+    return await task();
+  } catch (error) {
+    if (isQuestionAbort(error)) throw new UserInterrupt();
+    throw error;
+  }
+}
+
+async function readQuestion(rl, prompt) {
+  return normalizeQuestionAbort(() => rl.question(prompt));
+}
+
+async function askInteractive(prompt, interaction = {}) {
+  if (interaction.question) return interaction.question(prompt);
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    return await readQuestion(rl, prompt);
+  } finally {
+    rl.close();
+  }
+}
+
 const ACTION_FLAGS = new Map([
   ["--status", "status"],
   ["--doctor", "doctor"],
@@ -729,15 +775,16 @@ function runBash(action, script, scriptArgs = []) {
   return runLoggedCommand(action, "bash", [script, ...scriptArgs], { timeout: 300000 });
 }
 
-async function confirmWriteAction(action, detail) {
+async function confirmWriteAction(action, detail, interaction = {}) {
   if (options.apply) return true;
-  if (!process.stdin.isTTY) {
+  if (!process.stdin.isTTY && !interaction.question) {
     console.log(`${ICONS.warn} ${localText(`${action} is a write action. Re-run with --apply to execute it.`, `${action} write action'dir. Calistirmak icin --apply ile tekrar deneyin.`)}`);
     return false;
   }
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  const answer = await rl.question(`${ICONS.warn} ${detail} ${localText("Type APPLY to continue:", "Devam etmek icin APPLY yazin:")} `);
-  rl.close();
+  const answer = await askInteractive(
+    `${ICONS.warn} ${detail} ${localText("Type APPLY to continue:", "Devam etmek icin APPLY yazin:")} `,
+    interaction
+  );
   return answer.trim() === "APPLY";
 }
 
@@ -1013,7 +1060,7 @@ function printUpdateContext() {
   )));
 }
 
-async function runUpdate() {
+async function runUpdate(interaction = {}) {
   if (!options.apply) {
     console.log(`${ICONS.update} ${localText("Update preview", "Guncelleme preview")}`);
     console.log("");
@@ -1050,7 +1097,8 @@ async function runUpdate() {
     localText(
       "Update pulls latest Codex Chef changes with git pull --ff-only, then refreshes managed Codex files after a same-tree preview.",
       "Guncelleme git pull --ff-only ile son Codex Chef degisikliklerini ceker, sonra ayni agac preview'inden sonra managed Codex dosyalarini yeniler."
-    )
+    ),
+    interaction
   );
   if (!allowed) return { ok: false, skipped: true };
   const pull = runLoggedCommand("update-pull", "git", ["pull", "--ff-only"], {
@@ -1079,10 +1127,11 @@ async function runUpdate() {
   return runBash("update-install", "scripts/install.sh", ["--force", "--plain-output"]);
 }
 
-async function runInstall() {
+async function runInstall(interaction = {}) {
   const allowed = await confirmWriteAction(
     "Install",
-    "Full install can write managed Codex files after backup and can install curated global skills."
+    "Full install can write managed Codex files after backup and can install curated global skills.",
+    interaction
   );
   if (!allowed) return { ok: false, skipped: true };
   if (process.platform === "win32") {
@@ -1091,14 +1140,15 @@ async function runInstall() {
   return runBash("install", "scripts/install.sh", ["--all", "--interactive", "--plain-output"]);
 }
 
-async function runReset() {
+async function runReset(interaction = {}) {
   if (!options.apply) {
     console.log(`${ICONS.info} Reset preview first. Use npm run chef -- --reset --apply for a backup-backed managed refresh.`);
     return runPreview(true);
   }
   const allowed = await confirmWriteAction(
     "Reset",
-    "Reset refreshes managed Codex Chef files after backup with installer force mode; unrelated user files remain out of scope."
+    "Reset refreshes managed Codex Chef files after backup with installer force mode; unrelated user files remain out of scope.",
+    interaction
   );
   if (!allowed) return { ok: false, skipped: true };
   if (process.platform === "win32") {
@@ -1107,14 +1157,15 @@ async function runReset() {
   return runBash("reset-apply", "scripts/install.sh", ["--all", "--force", "--interactive", "--plain-output"]);
 }
 
-async function runRepair() {
+async function runRepair(interaction = {}) {
   if (!options.apply) {
     console.log(`${ICONS.info} Repair preview first. Use npm run chef -- --repair --apply to modify managed files after backup.`);
     return runNode("repair-preview", "scripts/repair-install.mjs", ["--redact-paths"]);
   }
   const allowed = await confirmWriteAction(
     "Repair",
-    "Repair can update managed Codex Chef files after backup while preserving unrelated user files."
+    "Repair can update managed Codex Chef files after backup while preserving unrelated user files.",
+    interaction
   );
   if (!allowed) return { ok: false, skipped: true };
   return runNode("repair-apply", "scripts/repair-install.mjs", ["--redact-paths", "--apply"]);
@@ -1648,7 +1699,7 @@ function printBackupInspect(archivePath, plan) {
   )}`);
 }
 
-async function runBackups() {
+async function runBackups(interaction = {}) {
   try {
     if (!options.backupId) {
       if (options.restore || options.deleteBackup) {
@@ -1707,7 +1758,8 @@ async function runBackups() {
         localText(
           "Delete removes the selected Codex Chef backup archive. This does not touch live managed files, but the deleted archive cannot be restored unless you have another copy.",
           "Silme secili Codex Chef yedek arsivini kaldirir. Live managed dosyalara dokunmaz, ama baska kopya yoksa bu arsivden geri donemezsiniz."
-        )
+        ),
+        interaction
       );
       if (!allowed) return { ok: false, skipped: true };
       deleteBackupArchive(archivePath);
@@ -1735,7 +1787,8 @@ async function runBackups() {
       localText(
         "Restore copies selected managed Codex Chef files from the backup archive after creating a rollback backup of current targets.",
         "Geri yukleme, mevcut hedeflerin rollback yedegini olusturduktan sonra secili managed Codex Chef dosyalarini arsivden kopyalar."
-      )
+      ),
+      interaction
     );
     if (!allowed) return { ok: false, skipped: true };
     const result = restoreBackupArchive(archivePath, plan);
@@ -1754,6 +1807,7 @@ async function runBackups() {
     console.log(`${ICONS.info} ${localText("Restart Codex, then run npm run chef -- --status --repo-only --no-log.", "Codex'i yeniden baslatin, sonra npm run chef -- --status --repo-only --no-log calistirin.")}`);
     return { ok: true };
   } catch (error) {
+    if (isUserInterrupt(error)) throw error;
     console.error(`${ICONS.warn} ${error.message}`);
     return { ok: false };
   }
@@ -1763,23 +1817,19 @@ function npxCommand() {
   return process.platform === "win32" ? "npx.cmd" : "npx";
 }
 
-async function askSelection(items, prompt) {
-  if (!process.stdin.isTTY) return null;
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  try {
-    const answer = await rl.question(prompt);
-    const index = Number(answer.trim());
-    if (!Number.isInteger(index) || index < 1 || index > items.length) return null;
-    return items[index - 1];
-  } finally {
-    rl.close();
-  }
+async function askSelection(items, prompt, interaction = {}) {
+  if (!process.stdin.isTTY && !interaction.question) return null;
+  const answer = await askInteractive(prompt, interaction);
+  const index = Number(answer.trim());
+  if (!Number.isInteger(index) || index < 1 || index > items.length) return null;
+  return items[index - 1];
 }
 
-async function installSelectedSkill(skill) {
+async function installSelectedSkill(skill, interaction = {}) {
   const allowed = await confirmWriteAction(
     "Skill install",
-    `Install selected global skill ${skill.name} from ${skill.source}.`
+    `Install selected global skill ${skill.name} from ${skill.source}.`,
+    interaction
   );
   if (!allowed) return { ok: false, skipped: true };
   return runLoggedCommand("skill-install", npxCommand(), [
@@ -1796,7 +1846,7 @@ async function installSelectedSkill(skill) {
   ], { timeout: 300000 });
 }
 
-async function selectSkill(installable) {
+async function selectSkill(installable, interaction = {}) {
   console.log("");
   console.log(styleHeading("Skill selection:"));
   installable.forEach((skill, index) => {
@@ -1804,7 +1854,8 @@ async function selectSkill(installable) {
   });
   const selected = await askSelection(
     installable,
-    "\nSelect a skill number to install with --apply, or press Enter to skip: "
+    "\nSelect a skill number to install with --apply, or press Enter to skip: ",
+    interaction
   );
   if (!selected) {
     console.log(`${ICONS.info} No skill selected.`);
@@ -1814,10 +1865,10 @@ async function selectSkill(installable) {
     console.log(`${ICONS.warn} Selected ${selected.name}. Re-run npm run chef -- --skills --apply and choose it to install.`);
     return { ok: false, skipped: true };
   }
-  return installSelectedSkill(selected);
+  return installSelectedSkill(selected, interaction);
 }
 
-async function runSkills() {
+async function runSkills(interaction = {}) {
   const catalog = readJson("catalog/skills.json");
   const routing = readJson("catalog/routing-profiles.json");
   const installable = (catalog.skills || []).filter((skill) => skill.install === true);
@@ -1855,8 +1906,8 @@ async function runSkills() {
   console.log(`- ${localText(`${profileCount} routing profiles map task shapes to recommended skills; inspect them with npm run chef -- --routing.`, `${profileCount} routing profile'i gorev tiplerini onerilen skill'lere baglar; npm run chef -- --routing ile inceleyin.`)}`);
   console.log(`${ICONS.info} ${localText("Offline verification runs by default. Online resolution: npm run verify:skills:online -- --timeout-ms=90000", "Varsayilan dogrulama offline calisir. Online cozumleme: npm run verify:skills:online -- --timeout-ms=90000")}`);
   const verification = runNode("skills", "scripts/verify-skill-sources.mjs");
-  if (!verification.ok || !process.stdin.isTTY) return verification;
-  return selectSkill(installable);
+  if (!verification.ok || (!process.stdin.isTTY && !interaction.question)) return verification;
+  return selectSkill(installable, interaction);
 }
 
 function explainMcpServer(server) {
@@ -1883,7 +1934,7 @@ function mcpTarget(server) {
   return "configured in template";
 }
 
-async function runMcp() {
+async function runMcp(interaction = {}) {
   const catalog = readJson("catalog/mcp-servers.json");
   const servers = catalog.servers || [];
   console.log(`${ICONS.docs} ${localText("MCP servers", "MCP server'lari")}: ${servers.length}`);
@@ -1953,7 +2004,7 @@ async function runMcp() {
     "Rollback: set the connector's enabled flag back to false and restart Codex.",
     "Rollback: connector enabled flag'ini tekrar false yapin ve Codex'i yeniden baslatin."
   )));
-  if (process.stdin.isTTY) {
+  if (process.stdin.isTTY || interaction.question) {
     console.log("");
     servers.forEach((server, index) => {
       console.log(`${index + 1}. ${styleAction(server.name)}`);
@@ -1961,7 +2012,7 @@ async function runMcp() {
     const selected = await askSelection(servers, localText(
       "\nSelect an MCP number to explain, or press Enter to skip: ",
       "\nAciklamak icin MCP numarasi secin veya atlamak icin Enter'a basin: "
-    ));
+    ), interaction);
     if (selected) explainMcpServer(selected);
   }
   return { ok: true };
@@ -2573,7 +2624,7 @@ function runLogs() {
   return { ok: true };
 }
 
-async function runAction(action) {
+async function runAction(action, interaction = {}) {
   switch (action) {
     case "status":
       return runStatus();
@@ -2584,19 +2635,19 @@ async function runAction(action) {
     case "preview":
       return runPreview();
     case "update":
-      return runUpdate();
+      return runUpdate(interaction);
     case "reset":
-      return runReset();
+      return runReset(interaction);
     case "install":
-      return runInstall();
+      return runInstall(interaction);
     case "repair":
-      return runRepair();
+      return runRepair(interaction);
     case "backups":
-      return runBackups();
+      return runBackups(interaction);
     case "skills":
-      return runSkills();
+      return runSkills(interaction);
     case "mcp":
-      return runMcp();
+      return runMcp(interaction);
     case "routing":
       return runRouting();
     case "diagnostics":
@@ -2624,11 +2675,16 @@ async function runMenu() {
   const rl = scriptedMenu ? null : createInterface({ input: process.stdin, output: process.stdout });
   const question = async (prompt) => {
     if (scriptedMenu) {
-      process.stdout.write(prompt);
-      return scriptedMenu.length > 0 ? scriptedMenu.shift() : "q";
+      return normalizeQuestionAbort(async () => {
+        process.stdout.write(prompt);
+        const answer = scriptedMenu.length > 0 ? scriptedMenu.shift() : "q";
+        if (answer === "__ABORT__") throw questionAbortError();
+        return answer;
+      });
     }
-    return rl.question(prompt);
+    return readQuestion(rl, prompt);
   };
+  const interaction = { question };
   try {
     let shouldRenderMenu = true;
     while (true) {
@@ -2660,7 +2716,7 @@ async function runMenu() {
       }
       if (item.id === "exit") break;
       printActionStart(item);
-      const result = await runAction(item.id);
+      const result = await runAction(item.id, interaction);
       printActionEnd(item, result);
       if (item.id !== "language") await pauseBeforeMenu(question);
       else console.log("");
@@ -2671,13 +2727,20 @@ async function runMenu() {
   }
 }
 
-if (options.help) {
-  printHelp();
-} else if (options.action) {
-  const result = await runAction(options.action);
-  if (result?.ok === false && !result.skipped) process.exit(1);
-} else if (!process.stdin.isTTY && process.env.CODEX_CHEF_TEST_MENU !== "1") {
-  printHelp();
-} else {
-  await runMenu();
+try {
+  if (options.help) {
+    printHelp();
+  } else if (options.action) {
+    const result = await runAction(options.action);
+    if (result?.ok === false && !result.skipped) process.exit(1);
+  } else if (!process.stdin.isTTY && process.env.CODEX_CHEF_TEST_MENU !== "1") {
+    printHelp();
+  } else {
+    await runMenu();
+  }
+} catch (error) {
+  if (!isUserInterrupt(error)) throw error;
+  console.log("");
+  console.log(`${ICONS.info} ${localText("Interrupted by user.", "Kullanici tarafindan kesildi.")}`);
+  process.exitCode = 130;
 }

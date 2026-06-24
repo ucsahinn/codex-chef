@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.5.41 - 2026-06-24
+
+- Fixed the interactive CLI readline lifecycle so menu actions that ask follow-up
+  questions reuse the active menu prompt instead of opening a second stdin
+  owner.
+- Added regression coverage for the Skills selection flow returning cleanly to
+  the menu and for Ctrl+C-style question aborts exiting without Node stack
+  traces or unsettled top-level-await warnings.
+
 ## 0.5.40 - 2026-06-24
 
 - Replaced the global Git pre-commit hook with a Windows-safe Node guard so

@@ -34,13 +34,13 @@ npm run verify:skills:online
 - Utiliser `git diff --check` pour détecter les problèmes de whitespace et Markdown.
 - Utiliser `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks est disponible.
 
-## v0.5.40 - 2026-06-24
+## v0.5.41 - 2026-06-24
 
 Ce patch met a jour la version actuelle dans les notes de publication
-francaises. Il couvre le hook pre-commit Node compatible Windows, l'extracteur
-de notes limite a la section courante, l'image PNG de social preview, les
-limites MCP plus strictes pour timeout/credentials et la formulation plus
-claire autour de Memory MCP.
+francaises. Il couvre le correctif readline de la CLI interactive, la meme
+fonction de question du menu pour les prompts imbriques et les regressions
+contre les stacks AbortError ainsi que les avertissements unsettled
+top-level-await.
 
 ### Verification
 
@@ -114,7 +114,7 @@ Ce fichier localisé suit les sections du fichier source anglais. Source: [relea
 
 - Release Notes
 - Unreleased
-- v0.5.40 - 2026-06-24
+- v0.5.41 - 2026-06-24
 - Verification
 - v0.5.14 - 2026-06-16
 - Highlights
