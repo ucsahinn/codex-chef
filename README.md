@@ -147,7 +147,7 @@ Run `npm run codex:status` after install to see MCP setup notes, effective contr
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> What It Does Not Do
 
-- It does not store tokens, cookies, auth files, private keys, sessions, memories, or local project state.
+- It does not store secrets, copy private memory state, or import existing sessions; Memory MCP is only for non-secret local context when you use it deliberately.
 - It does not enable authenticated account, database, production, or broad filesystem MCP connectors by default.
 - It does not commit, push, tag, release, publish packages, deploy, rotate secrets, or change GitHub settings.
 - It does not delete user data as a cleanup shortcut; repair and force flows are previewed and backup-backed.

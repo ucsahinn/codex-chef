@@ -212,6 +212,27 @@ for (const configFile of configFiles) {
     if (server.risk === "critical" && enabled !== "false") {
       fail(`${configFile} must keep critical MCP disabled: ${server.name}`);
     }
+    if (["high", "critical"].includes(server.risk)) {
+      const startupTimeout = readTomlValue(block, "startup_timeout_sec") || readTomlValue(block, "startup_timeout_ms");
+      const toolTimeout = readTomlValue(block, "tool_timeout_sec");
+      if (!startupTimeout) fail(`${configFile} high-risk MCP must declare startup_timeout_sec: ${server.name}`);
+      if (!toolTimeout) fail(`${configFile} high-risk MCP must declare tool_timeout_sec: ${server.name}`);
+      if (approval !== "prompt") fail(`${configFile} high-risk MCP must use prompt approval mode: ${server.name}`);
+    }
+    if (server.setupKind === "env") {
+      const envName = String(server.auth || "").split(":")[1];
+      if (!envName) {
+        fail(`${configFile} env MCP must declare auth=env:<NAME>: ${server.name}`);
+      } else {
+        if (!block.includes(`env_vars = ["${envName}"]`)) {
+          fail(`${configFile} env MCP must whitelist ${envName} with env_vars: ${server.name}`);
+        }
+        const argsLine = readTomlValue(block, "args") || "";
+        if (argsLine.includes(`%${envName}%`) || argsLine.includes(`$${envName}`)) {
+          fail(`${configFile} env MCP must not expand ${envName} directly in launcher args: ${server.name}`);
+        }
+      }
+    }
   }
 }
 

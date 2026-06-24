@@ -113,6 +113,7 @@ const missing = [];
 const missingRootAssignments = [];
 const removedDeprecatedFields = [];
 const updatedManagedFields = [];
+const updatedManagedTables = [];
 const fullTemplateInstall = !destinationExists;
 
 function addUnique(list, value) {
@@ -180,6 +181,57 @@ function normalizeManagedFields(text) {
   return next.join("\n");
 }
 
+function syncManagedTables(text) {
+  const normalized = normalizeNewlines(text);
+  const lines = normalized.split("\n");
+  const next = [];
+  let currentTable = null;
+  let currentLines = [];
+
+  function flush() {
+    if (!currentTable) {
+      if (currentLines.length > 0) next.push(...currentLines);
+      currentLines = [];
+      return;
+    }
+
+    const currentBlock = currentLines.join("\n").trimEnd();
+    const templateBlock = templateTables.get(currentTable);
+    if (currentTable === "apps._default") {
+      next.push(...currentLines);
+      currentTable = null;
+      currentLines = [];
+      return;
+    }
+    if (templateBlock && isManagedTable(currentTable)) {
+      if (currentBlock !== templateBlock) {
+        addUnique(updatedManagedTables, currentTable);
+        next.push(...templateBlock.split("\n"));
+      } else {
+        next.push(...currentLines);
+      }
+    } else {
+      next.push(...currentLines);
+    }
+    currentTable = null;
+    currentLines = [];
+  }
+
+  for (const line of lines) {
+    const tableMatch = /^\s*\[([^\]]+)\]\s*$/.exec(line);
+    if (tableMatch) {
+      flush();
+      currentTable = tableMatch[1].trim();
+      currentLines = [line];
+      continue;
+    }
+    currentLines.push(line);
+  }
+  flush();
+
+  return next.join("\n");
+}
+
 for (const [tableName, tableText] of templateTables.entries()) {
   if (!isManagedTable(tableName)) continue;
   if (destinationTables.has(tableName)) continue;
@@ -192,7 +244,7 @@ for (const [key, line] of templateRootAssignments.entries()) {
   missingRootAssignments.push({ key, line });
 }
 
-const sanitizedDestination = normalizeManagedFields(destination);
+const sanitizedDestination = syncManagedTables(normalizeManagedFields(destination));
 
 const report = {
   schemaVersion: "codex-chef.config-merge.v1",
@@ -206,13 +258,14 @@ const report = {
   addedTables: missing.map((entry) => entry.tableName),
   addedTableCount: missing.length,
   removedDeprecatedFields,
-  updatedManagedFields
+  updatedManagedFields,
+  updatedManagedTables
 };
 
 if (fullTemplateInstall && !options.dryRun) {
   fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
   fs.writeFileSync(destinationPath, `${template.trimEnd()}\n`, "utf8");
-} else if ((missingRootAssignments.length > 0 || missing.length > 0 || removedDeprecatedFields.length > 0 || updatedManagedFields.length > 0) && !options.dryRun) {
+} else if ((missingRootAssignments.length > 0 || missing.length > 0 || removedDeprecatedFields.length > 0 || updatedManagedFields.length > 0 || updatedManagedTables.length > 0) && !options.dryRun) {
   const base = sanitizedDestination.trimEnd();
   const rootAddition = missingRootAssignments.map((entry) => entry.line).join("\n");
   const addition = missing.map((entry) => entry.tableText).join("\n\n");
@@ -234,7 +287,7 @@ if (options.json) {
   console.log("Would install full Codex Chef config template.");
 } else if (fullTemplateInstall) {
   console.log("Installed full Codex Chef config template.");
-} else if (missingRootAssignments.length === 0 && missing.length === 0 && removedDeprecatedFields.length === 0 && updatedManagedFields.length === 0) {
+} else if (missingRootAssignments.length === 0 && missing.length === 0 && removedDeprecatedFields.length === 0 && updatedManagedFields.length === 0 && updatedManagedTables.length === 0) {
   console.log("Codex config already contains all managed Codex Chef blocks.");
 } else if (options.dryRun) {
   const parts = [];
@@ -242,6 +295,7 @@ if (options.json) {
   if (missing.length > 0) parts.push(`merge ${missing.length} missing Codex Chef config block(s): ${missing.map((entry) => entry.tableName).join(", ")}`);
   if (removedDeprecatedFields.length > 0) parts.push(`remove deprecated managed field(s): ${removedDeprecatedFields.join(", ")}`);
   if (updatedManagedFields.length > 0) parts.push(`update managed field(s): ${updatedManagedFields.join(", ")}`);
+  if (updatedManagedTables.length > 0) parts.push(`sync managed table(s): ${updatedManagedTables.join(", ")}`);
   console.log(`Would ${parts.join("; ")}`);
 } else {
   const parts = [];
@@ -249,5 +303,6 @@ if (options.json) {
   if (missing.length > 0) parts.push(`merged ${missing.length} missing Codex Chef config block(s): ${missing.map((entry) => entry.tableName).join(", ")}`);
   if (removedDeprecatedFields.length > 0) parts.push(`removed deprecated managed field(s): ${removedDeprecatedFields.join(", ")}`);
   if (updatedManagedFields.length > 0) parts.push(`updated managed field(s): ${updatedManagedFields.join(", ")}`);
+  if (updatedManagedTables.length > 0) parts.push(`synced managed table(s): ${updatedManagedTables.join(", ")}`);
   console.log(parts.join("; "));
 }

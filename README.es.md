@@ -67,7 +67,7 @@ Los installers gestionan:
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> Lo Que No Hace
 
-- No guarda tokens, cookies, auth files, memories, sessions ni rutas locales privadas.
+- No guarda secretos, no copia memory state privado ni importa sessions existentes; Memory MCP es solo para contexto local sin secretos cuando lo usas deliberadamente.
 - No activa por defecto conectores de cuenta, base de datos, produccion o filesystem amplio.
 - No hace commit, push, release, deploy, package publish ni secret rotation.
 
@@ -128,7 +128,7 @@ codex exec --strict-config "Summarize the active Codex setup."
 
 | Senal | Evidencia |
 | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Public-safe | Sin secretos, auth files, sessions, memories ni estado especifico de maquina. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Public-safe | Sin secretos, auth files, sessions privadas ni estado especifico de maquina; Memory MCP solo para contexto local no secreto. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Validacion real | `npm run check` cubre repo, docs, install-plan, MCP drift, skills, token surfaces, supply-chain y security; `npm run token:audit` da el diagnostico de tokens. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCPs conservadores | Los conectores autenticados quedan desactivados por defecto. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa7a.svg" alt="" aria-hidden="true" width="20"> Doctor | `npm run codex:doctor` resume health repo-only sin escrituras globales. |

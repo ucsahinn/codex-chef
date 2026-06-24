@@ -11,6 +11,7 @@ npm run validate:release
 npm run verify:skills:online
 node scripts/plan-install.mjs --all --json --redact-paths
 npm run validate:install-state
+npm run release:notes
 git status --short
 git diff --check
 git diff --cached --check
@@ -27,6 +28,7 @@ For a release, also confirm:
 - `package.json` version matches the intended tag.
 - `CHANGELOG.md` has a dated version section.
 - [docs/release-notes.md](release-notes.md) matches the release.
+- `tmp/release-notes-current.md` contains only the current release section.
 - [docs/github-settings.md](github-settings.md) has the intended repository
   description, topics, and release metadata.
 - `git diff --cached` contains only reviewed source/docs/config files.
@@ -56,11 +58,12 @@ After explicit commit/push/release approval:
 ```bash
 git add <reviewed files>
 git diff --cached
-git commit -m "Release Codex Chef v0.5.39"
+npm run release:notes
+git commit -m "Release Codex Chef v0.5.40"
 git push origin main
-git tag v0.5.39
-git push origin v0.5.39
-gh release create v0.5.39 --title "Codex Chef v0.5.39" --notes-file docs/release-notes.md
+git tag v0.5.40
+git push origin v0.5.40
+gh release create v0.5.40 --title "Codex Chef v0.5.40" --notes-file tmp/release-notes-current.md
 ```
 
 After pushing, verify remote equality and CI:

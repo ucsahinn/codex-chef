@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+## v0.5.40 - 2026-06-24
+
+Bu patch v0.5.39 gorsel pano geri yuklemesinden sonra kalan audit bosluklarini
+kapatir. Odak noktasi global Windows hook davranisi, release publish hijyeni,
+MCP credential sinirlari, Memory metni ve GitHub uyumlu social preview
+metadata'sidir.
+
+## One cikanlar
+
+- Opsiyonel global Git pre-commit hook'u Node tabanli hale geldi; Windows'ta
+  `sh` veya `grep` gerektirmeden staged `.env`, key, database, dump ve lokal
+  state dosya adlarini bloklar.
+- `scripts/extract-release-notes.mjs` ve `npm run release:notes` eklendi; GitHub
+  Releases artik full historical release notes dosyasi yerine yalnizca current
+  version bolumunu kullanir.
+- Current localized release note bolumleri, Windows-safe hook icerigi, GitHub
+  social preview PNG boyutu ve high-risk MCP timeout/credential boundary
+  default'lari validator kapsaminda.
+- Mevcut lokal release gate'e ek olarak full-SHA pinli Gitleaks GitHub Actions
+  adimi eklendi.
+- Supabase MCP default block'u artik disabled starter config icinde
+  `SUPABASE_DB_URL` degerini launcher argumanina genisletmez.
+- Memory MCP'nin bilincli non-secret lokal context tutabilecegi, Codex Chef'in
+  private memory/session state veya secret kopyalamadigi netlestirildi.
+
+## Verification
+
+- `npm run check`
+- `npm run release:notes`
+- `npm run verify:install:runtime -- --redact-paths --expect-skills --expect-git-guards`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.39 - 2026-06-24
 
 Bu patch, Codex Chef'in ilk bakista tam bir uzman setup'i gibi gorunmesini
@@ -112,20 +145,20 @@ korunur.
 ## v0.5.35 - 2026-06-22
 
 Bu patch Codex Chef'in guvenli otonomi kontratini temiz makinede beklenen
-davranisla hizalar: net prompt shape'leri, kullanicinin her yuzeyi tek tek
-adlandirmasini beklemeden dogru agent, skill, MCP ve flag yuzeylerine
-yonlenebilir.
+rehberlikle hizaladi: net prompt shape'leri dogru agent, skill, MCP ve flag
+yuzeylerine yonlenebilir; fakat current Codex runtime'da gercek subagent spawn
+icin explicit subagent/delegation destegi gerekir.
 
 ## One cikanlar
 
-- Routing profilleri artik `runtime-permitted` delegation kullanir. Boylece
-  non-trivial prompt shape'leri uygun uzman agent'lari gorunur sekilde spawn
-  edebilir; destructive, credential, account, database, deploy, publish, genis
-  filesystem ve global mutation aksiyonlari yine approval gate'te kalir.
+- Routing profilleri artik runtime-bounded visible delegation dilini kullanir.
+  Boylece non-trivial prompt shape'leri uygun uzman agent'lari gorunur sekilde
+  yuzeye cikarir; destructive, credential, account, database, deploy, publish,
+  genis filesystem ve global mutation aksiyonlari yine approval gate'te kalir.
 - Kurulan global `AGENTS.md` template'i, bounded non-destructive kanit isleri
-  icin uygun uzmanlarin otomatik ve gorunur kullanilmasini, `Agent plan`,
-  `Agent started`, `Agent result` ve `Surfaces used` kanit satirlarini artik
-  acikca ister.
+  icin uygun uzmanlarin gorunur yuzeye cikmasini, runtime ve user request izin
+  verdiginde de `Agent plan`, `Agent started`, `Agent result` ve `Surfaces used`
+  kanit satirlarini artik acikca ister.
 - Matching skill'ler tetiklendiginde zorunlu kalir; docs artik asistanin
   `Skill selected` basmasini, ilgili `SKILL.md` dosyasini okumasini ve
   aksiyondan once workflow'u izlemesini acikca soyler.

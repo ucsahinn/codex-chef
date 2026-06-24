@@ -168,6 +168,11 @@ function assertInstalledBaseline(codexHome, agentsHome, label) {
     assertIncludes(config, "[mcp_servers.context7]", `${label} config`);
     assertIncludes(config, "[mcp_servers.sequential-thinking]", `${label} config`);
     assertIncludes(config, "[mcp_servers.serena]", `${label} config`);
+    assertIncludes(config, "[mcp_servers.supabase]", `${label} config`);
+    assertIncludes(config, 'env_vars = ["SUPABASE_DB_URL"]', `${label} config`);
+    if (/%SUPABASE_DB_URL%|\$SUPABASE_DB_URL/.test(config)) {
+      fail(`${label} config must not commit direct SUPABASE_DB_URL launcher args.`);
+    }
   }
 
   if (fs.existsSync(marketplacePath)) {

@@ -46,6 +46,7 @@ const requiredFiles = [
   "assets/icon.svg",
   "assets/banner.svg",
   "assets/social-preview.svg",
+  "assets/social-preview.png",
   "assets/workflow-overview.svg",
   ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
@@ -97,6 +98,7 @@ const requiredFiles = [
   "scripts/validate-diagram-triplet.mjs",
   "scripts/validate-plugin-skills.mjs",
   "scripts/validate-chef-cli.mjs",
+  "scripts/extract-release-notes.mjs",
   "scripts/analyze-token-surfaces.mjs",
   "scripts/validate-token-surfaces.mjs",
   "scripts/validate-package-surface.mjs",
@@ -144,9 +146,51 @@ const deniedExtensions = new Set([
 ]);
 
 const ignoredDirs = new Set([".git", ".serena", "node_modules", "dist", "build", "coverage", ".next", "tmp", "temp"]);
+const textExtensions = new Set([
+  ".css",
+  ".gitignore",
+  ".js",
+  ".json",
+  ".md",
+  ".mjs",
+  ".ps1",
+  ".rules",
+  ".sh",
+  ".svg",
+  ".toml",
+  ".txt",
+  ".yaml",
+  ".yml"
+]);
 
 function toPosix(filePath) {
   return filePath.split(path.sep).join("/");
+}
+
+function isTextFile(filePath, rel) {
+  if (rel === "templates/git/pre-commit") return true;
+  const base = path.basename(filePath);
+  const ext = path.extname(filePath).toLowerCase();
+  return textExtensions.has(ext) || base.startsWith(".");
+}
+
+function validatePng(relativePath, expectedWidth, expectedHeight, maxBytes) {
+  const full = path.join(root, relativePath);
+  if (!fs.existsSync(full)) return;
+  const buffer = fs.readFileSync(full);
+  const signature = "89504e470d0a1a0a";
+  if (buffer.subarray(0, 8).toString("hex") !== signature) {
+    failures.push(`${relativePath} must be a PNG file.`);
+    return;
+  }
+  if (buffer.length > maxBytes) {
+    failures.push(`${relativePath} must stay under ${maxBytes} bytes for GitHub social preview upload.`);
+  }
+  const width = buffer.readUInt32BE(16);
+  const height = buffer.readUInt32BE(20);
+  if (width !== expectedWidth || height !== expectedHeight) {
+    failures.push(`${relativePath} must be ${expectedWidth}x${expectedHeight}; found ${width}x${height}.`);
+  }
 }
 
 function walk(dir) {
@@ -221,9 +265,9 @@ for (const file of files) {
     failures.push(`Denied file should not be versioned: ${rel}`);
   }
 
-  const text = fs.readFileSync(file, "utf8");
+  const text = isTextFile(file, rel) ? fs.readFileSync(file, "utf8") : "";
 
-  if (mojibakePattern.test(text)) {
+  if (text && mojibakePattern.test(text)) {
     failures.push(`Likely mojibake or corrupted UTF-8 text in ${rel}`);
   }
 
@@ -238,7 +282,7 @@ for (const file of files) {
     /\/\.codex\/memories\//i
   ];
   for (const pattern of forbiddenLocalPaths) {
-    if (pattern.test(text)) {
+    if (text && pattern.test(text)) {
       failures.push(`Forbidden local state/path pattern in ${rel}: ${pattern}`);
     }
   }
@@ -249,12 +293,12 @@ for (const file of files) {
     /-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/
   ];
   for (const pattern of riskyAssignments) {
-    if (pattern.test(text)) {
+    if (text && pattern.test(text)) {
       failures.push(`Secret-like assignment or private key marker in ${rel}`);
     }
   }
 
-  if (rel.endsWith(".toml")) {
+  if (text && rel.endsWith(".toml")) {
     const tripleQuoteCount = (text.match(/"""/g) || []).length;
     if (tripleQuoteCount % 2 !== 0) {
       failures.push(`Unbalanced TOML triple-quoted string in ${rel}`);
@@ -264,7 +308,7 @@ for (const file of files) {
     }
   }
 
-  if (rel.endsWith(".json")) {
+  if (text && rel.endsWith(".json")) {
     try {
       JSON.parse(text);
     } catch (error) {
@@ -272,13 +316,13 @@ for (const file of files) {
     }
   }
 
-  if (rel.endsWith("SKILL.md")) {
+  if (text && rel.endsWith("SKILL.md")) {
     if (!text.startsWith("---\n") || !/\nname:\s*[a-z0-9-]+/i.test(text) || !/\ndescription:\s*/i.test(text)) {
       failures.push(`Invalid skill front matter in ${rel}`);
     }
   }
 
-  if (rel.startsWith("assets/") && rel.endsWith(".svg")) {
+  if (text && rel.startsWith("assets/") && rel.endsWith(".svg")) {
     if (!/<title[\s>]/.test(text) || !/<desc[\s>]/.test(text)) {
       failures.push(`SVG asset must include title and desc for accessibility: ${rel}`);
     }
@@ -288,6 +332,28 @@ for (const file of files) {
     if (!/prefers-reduced-motion/.test(text)) {
       failures.push(`SVG asset must include reduced-motion fallback: ${rel}`);
     }
+  }
+}
+
+validatePng("assets/social-preview.png", 1280, 640, 1024 * 1024);
+
+const preCommitHook = fs.readFileSync(path.join(root, "templates/git/pre-commit"), "utf8");
+if (!preCommitHook.startsWith("#!/usr/bin/env node")) {
+  failures.push("templates/git/pre-commit must be Node-based for Windows-safe global hooks.");
+}
+for (const forbidden of ["#!/usr/bin/env sh", "grep -E", "grep -Ei", "command -v gitleaks"]) {
+  if (preCommitHook.includes(forbidden)) {
+    failures.push(`templates/git/pre-commit must not depend on POSIX shell tooling: ${forbidden}`);
+  }
+}
+for (const required of [
+  "git\", [\"diff\", \"--cached\", \"--name-only\", \"--diff-filter=ACMR\"]",
+  "gitleaks\", [\"detect\", \"--redact\", \"--no-banner\", \"--verbose\"]",
+  "sqlite3",
+  "Blocked staged secret-like or local-state files"
+]) {
+  if (!preCommitHook.includes(required)) {
+    failures.push(`templates/git/pre-commit missing required guard signal: ${required}`);
   }
 }
 

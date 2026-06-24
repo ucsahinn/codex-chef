@@ -37,7 +37,8 @@ veya private workspace URL kullanma.
 
 ## Social Preview
 
-GitHub social preview image olarak `assets/social-preview.svg` kullan.
+GitHub social preview image olarak `assets/social-preview.png` kullan.
+`assets/social-preview.svg` editable source artwork olarak kalsin.
 
 ## Özellikler
 
@@ -58,12 +59,12 @@ GitHub social preview image olarak `assets/social-preview.svg` kullan.
 
 ## Release Metadata
 
-v0.5.39 icin:
+v0.5.40 icin:
 
 ```text
-Title: Codex Chef v0.5.39
-Tag: v0.5.39
-Notes: docs/release-notes.md
+Title: Codex Chef v0.5.40
+Tag: v0.5.40
+Notes: tmp/release-notes-current.md
 ```
 
 Release oluşturmadan önce doğrula:
@@ -71,6 +72,7 @@ Release oluşturmadan önce doğrula:
 ```bash
 npm run check
 npm run verify:skills:online
+npm run release:notes
 gitleaks detect --redact --no-banner --no-git --verbose
 git rev-parse HEAD
 git -c http.sslBackend=openssl ls-remote origin refs/heads/main

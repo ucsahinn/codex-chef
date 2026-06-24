@@ -398,13 +398,15 @@ function runConfigMerge() {
 
   const removedDeprecatedFields = report.removedDeprecatedFields || [];
   const updatedManagedFields = report.updatedManagedFields || [];
+  const updatedManagedTables = report.updatedManagedTables || [];
   const addedRootKeys = report.addedRootKeys || [];
   const fullTemplateInstall = report.fullTemplateInstall === true;
   const configNeedsApply = fullTemplateInstall
     || report.addedRootKeyCount > 0
     || report.addedTableCount > 0
     || removedDeprecatedFields.length > 0
-    || updatedManagedFields.length > 0;
+    || updatedManagedFields.length > 0
+    || updatedManagedTables.length > 0;
 
   if (options.apply && configNeedsApply) {
     if (fs.existsSync(destination)) backupTarget(destination);
@@ -444,7 +446,8 @@ function runConfigMerge() {
         report.addedRootKeyCount > 0 ? `missing ${report.addedRootKeyCount} managed root setting(s)` : null,
         report.addedTableCount > 0 ? `missing ${report.addedTableCount} managed config table(s)` : null,
         removedDeprecatedFields.length > 0 ? `deprecated managed field(s): ${removedDeprecatedFields.join(", ")}` : null,
-        updatedManagedFields.length > 0 ? `managed field update(s): ${updatedManagedFields.join(", ")}` : null
+        updatedManagedFields.length > 0 ? `managed field update(s): ${updatedManagedFields.join(", ")}` : null,
+        updatedManagedTables.length > 0 ? `managed table sync(s): ${updatedManagedTables.join(", ")}` : null
       ].filter(Boolean).join("; ")
     });
   }
@@ -458,7 +461,8 @@ function runConfigMerge() {
     addedTables: report.addedTables || [],
     addedTableCount: report.addedTableCount || 0,
     removedDeprecatedFields,
-    updatedManagedFields
+    updatedManagedFields,
+    updatedManagedTables
   };
 }
 

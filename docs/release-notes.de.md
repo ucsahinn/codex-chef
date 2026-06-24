@@ -34,6 +34,22 @@ npm run verify:skills:online
 - `git diff --check` nutzen, um Whitespace- und Markdown-Probleme zu erkennen.
 - `gitleaks detect --redact --no-banner --no-git --verbose` nutzen, wenn Gitleaks verfügbar ist.
 
+## v0.5.40 - 2026-06-24
+
+Dieser Patch aktualisiert die aktuelle Release-Spitze fuer die deutsche
+Release-Notes-Seite. Er dokumentiert den Windows-sicheren Node pre-commit
+Guard, den Current-Section Release-Notes-Extractor, die PNG Social Preview
+Anforderung, strengere MCP Timeout/Credential-Grenzen und die klarere
+Memory-MCP-Formulierung.
+
+### Verification
+
+```bash
+npm run check
+npm run release:notes
+gitleaks detect --redact --no-banner --no-git --verbose
+```
+
 ## v0.5.14 - 2026-06-16
 
 Diese Version schliesst die letzten Connector- und Dokumentationsluecken aus
@@ -98,6 +114,8 @@ Diese lokalisierte Datei folgt den Abschnitten der englischen Quelldatei. Source
 
 - Release Notes
 - Unreleased
+- v0.5.40 - 2026-06-24
+- Verification
 - v0.5.14 - 2026-06-16
 - Highlights
 - Verification

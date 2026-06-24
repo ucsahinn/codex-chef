@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+## v0.5.40 - 2026-06-24
+
+This patch closes the remaining audit gaps found after the v0.5.39 visual
+board restore. It focuses on global Windows hook behavior, release publication
+hygiene, MCP credential boundaries, Memory wording, and GitHub-compatible
+social preview metadata.
+
+## Highlights
+
+- Replaced the optional global Git pre-commit hook with a Node-based guard that
+  blocks staged `.env`, key, database, dump, and local-state filenames on
+  Windows without depending on `sh` or `grep`.
+- Added `scripts/extract-release-notes.mjs` and `npm run release:notes` so
+  GitHub Releases use only the current version section instead of the full
+  historical release notes file.
+- Added validators for current localized release-note sections, Windows-safe
+  hook content, GitHub social preview PNG dimensions, and high-risk MCP
+  timeout/credential-boundary defaults.
+- Added a full-SHA-pinned Gitleaks GitHub Actions step alongside the existing
+  local release gate.
+- Changed the Supabase MCP default block so disabled starter config no longer
+  expands `SUPABASE_DB_URL` directly in committed launcher args.
+- Clarified that Memory MCP can hold deliberate non-secret local context, while
+  Codex Chef does not copy private memory/session state or secrets.
+
+## Verification
+
+- `npm run check`
+- `npm run release:notes`
+- `npm run verify:install:runtime -- --redact-paths --expect-skills --expect-git-guards`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.39 - 2026-06-24
 
 This patch restores the visual capability boards that make Codex Chef feel like
@@ -108,20 +141,21 @@ prompt-shape agent and skill routing behavior from v0.5.35 is unchanged.
 
 ## v0.5.35 - 2026-06-22
 
-This patch makes Codex Chef's safe autonomy contract match the intended fresh
-machine behavior: clear prompt shapes can route to the right agents, skills,
-MCPs, and flags without requiring the user to manually name every surface.
+This patch made Codex Chef's safe autonomy contract match the intended fresh
+machine guidance: clear prompt shapes can route to the right agents, skills,
+MCPs, and flags, while current Codex runtimes still require explicit
+subagent/delegation support before a worker thread is actually spawned.
 
 ## Highlights
 
-- Routing profiles now use `runtime-permitted` delegation, so non-trivial
-  prompt shapes may visibly spawn the matching specialist agents while
+- Routing profiles now describe runtime-bounded visible delegation, so
+  non-trivial prompt shapes surface the matching specialist agents while
   destructive, credentialed, account, database, deploy, publish, broad
   filesystem, and global mutation actions stay approval-gated.
 - The shipped global `AGENTS.md` template now states that matching specialists
-  should be used automatically and visibly for bounded non-destructive
-  evidence work, with `Agent plan`, `Agent started`, `Agent result`, and
-  `Surfaces used` evidence.
+  should be surfaced visibly for bounded non-destructive evidence work, with
+  `Agent plan`, `Agent started`, `Agent result`, and `Surfaces used` evidence
+  whenever the current runtime and user request permit subagent work.
 - Matching skills remain mandatory when triggered, and the docs now spell out
   that the assistant must print `Skill selected`, read the relevant
   `SKILL.md`, and follow the workflow before acting.

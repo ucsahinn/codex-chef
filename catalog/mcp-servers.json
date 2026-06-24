@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "dateChecked": "2026-06-14",
+  "dateChecked": "2026-06-24",
   "sourcePolicy": "Authenticated account, database, and broad filesystem connectors stay disabled by default. Each server records sourceUrl, risk, auth, approval, and why it is enabled or disabled.",
   "servers": [
     {
@@ -222,12 +222,12 @@
       "package": "@modelcontextprotocol/server-postgres@0.6.2",
       "auth": "env:SUPABASE_DB_URL",
       "setupKind": "env",
-      "setupHint": "Set SUPABASE_DB_URL in the shell environment before enabling; never commit the value.",
+      "setupHint": "Set SUPABASE_DB_URL in the shell environment, then add a task-specific local launcher only after explicit database approval; never commit the value.",
       "approval": "prompt",
       "risk": "critical",
       "sourceUrl": "https://github.com/modelcontextprotocol/servers",
       "defaultReason": "Disabled because database access must be task-specific and explicit.",
-      "notes": "Database access. Enable only with explicit task need."
+      "notes": "Database access. Enable only with explicit task need; keep the DB URL out of committed launcher args."
     }
   ]
 }

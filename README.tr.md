@@ -132,7 +132,7 @@ Kurulumdan sonra `npm run codex:status` çalıştırarak MCP setup notlarını, 
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> Ne Yapmaz?
 
-- Token, cookie, auth dosyası, private key, session, memory veya lokal proje state'i saklamaz.
+- Secret saklamaz, private memory state'i kopyalamaz ve mevcut session'lari import etmez; Memory MCP yalnizca bilincli kullandiginda secret icermeyen lokal context icindir.
 - Auth isteyen account, database, production veya geniş filesystem MCP connector'larını varsayılan olarak açmaz.
 - Commit, push, tag, release, package publish, deploy, secret rotation veya GitHub settings değişikliği yapmaz.
 - User datasını cleanup kısayolu olarak silmez; repair ve force akışları preview ve backup üstünden ilerler.

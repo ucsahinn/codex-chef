@@ -29,6 +29,7 @@ const requiredFiles = [
   "scripts/validate-agent-config.mjs",
   "scripts/validate-agent-research-corpus.mjs",
   "scripts/validate-package-surface.mjs",
+  "scripts/extract-release-notes.mjs",
   ".github/CODEOWNERS",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
   ".github/ISSUE_TEMPLATE/question.yml",
@@ -118,6 +119,19 @@ if (!publish.includes("npm run verify:skills:online")) fail("docs/publish.md mus
 if (!publishTr.includes("npm run verify:skills:online")) fail("docs/publish.tr.md must include online skill verification before release");
 if (!publish.includes("node scripts/plan-install.mjs --all --json --redact-paths")) fail("docs/publish.md must include redacted install-state preview command");
 if (!publishTr.includes("node scripts/plan-install.mjs --all --json --redact-paths")) fail("docs/publish.tr.md must include redacted install-state preview command");
+if (!publish.includes("npm run release:notes")) fail("docs/publish.md must generate current-section release notes before release");
+if (!publishTr.includes("npm run release:notes")) fail("docs/publish.tr.md must generate current-section release notes before release");
+
+for (const [label, text] of [
+  ["docs/publish.md", publish],
+  ["docs/publish.tr.md", publishTr],
+  ["docs/github-settings.md", githubSettings],
+  ["docs/github-settings.tr.md", githubSettingsTr]
+]) {
+  if (/--notes-file\s+docs\/release-notes(?:\.tr)?\.md/.test(text)) {
+    fail(`${label} must not publish the full historical release notes file; use tmp/release-notes-current.md`);
+  }
+}
 
 const status = run("git", ["status", "--short"]);
 if (status.status !== 0) {

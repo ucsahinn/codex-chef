@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 0.5.40 - 2026-06-24
+
+- Replaced the global Git pre-commit hook with a Windows-safe Node guard so
+  staged secret-like filenames are blocked without requiring `sh` or `grep`.
+- Added release-note extraction, release-readiness checks, localized release
+  note freshness checks, and CI Gitleaks coverage so releases publish only the
+  current section and keep secret scanning independent of local hooks.
+- Added a GitHub-compatible PNG social preview asset requirement while keeping
+  the SVG as editable source artwork.
+- Tightened high-risk MCP connector defaults with timeout checks and a safer
+  Supabase boundary that does not commit `SUPABASE_DB_URL` into launcher args.
+- Clarified Memory MCP wording so the docs distinguish non-secret local memory
+  use from copying private memory/session state.
+
 ## 0.5.39 - 2026-06-24
 
 - Restored the emoji-rich agent team, skill catalog, and MCP connector tables on
@@ -49,14 +63,14 @@
 
 ## 0.5.35 - 2026-06-22
 
-- Changed the enterprise routing profiles to `runtime-permitted` delegation so
-  clear, non-trivial prompt shapes can visibly spawn the matching specialist
-  agents while destructive, credentialed, publishing, deployment, database,
-  broad filesystem, and global mutation actions remain approval-gated.
+- Changed the enterprise routing profiles to document visible specialist
+  routing for clear, non-trivial prompt shapes while keeping actual subagent
+  spawning bounded by the current runtime and explicit user/delegation request
+  support.
 - Updated the installed `AGENTS.md` contract, routing board, status boundary,
   README files, and skills/agents docs so matching agents and skills are
-  selected automatically and visibly from prompt shape rather than requiring the
-  user to manually name every surface.
+  surfaced visibly without treating subagents as hidden always-on background
+  automation.
 - Added readable `nickname_candidates` to all 21 bundled custom agent role files
   and extended agent validation so future releases cannot drop the UI-label
   contract.

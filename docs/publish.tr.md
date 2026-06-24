@@ -10,6 +10,7 @@ npm run validate:release
 npm run verify:skills:online
 node scripts/plan-install.mjs --all --json --redact-paths
 npm run validate:install-state
+npm run release:notes
 git status --short
 git diff --check
 git diff --cached --check
@@ -56,11 +57,12 @@ Açık commit/push/release onayından sonra:
 ```bash
 git add <review edilmiş dosyalar>
 git diff --cached
-git commit -m "Release Codex Chef v0.5.39"
+npm run release:notes
+git commit -m "Release Codex Chef v0.5.40"
 git push origin main
-git tag v0.5.39
-git push origin v0.5.39
-gh release create v0.5.39 --title "Codex Chef v0.5.39" --notes-file docs/release-notes.md
+git tag v0.5.40
+git push origin v0.5.40
+gh release create v0.5.40 --title "Codex Chef v0.5.40" --notes-file tmp/release-notes-current.md
 ```
 
 Push sonrasında remote eşitliği ve CI durumunu doğrula:

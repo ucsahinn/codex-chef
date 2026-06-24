@@ -2155,7 +2155,7 @@ function translateSetupHint(message) {
     .replace("Requires Notion workspace authorization.", "Notion workspace yetkilendirmesi gerekir.")
     .replace("Requires Sentry organization authorization and may expose production error data.", "Sentry organization yetkilendirmesi gerekir ve production hata verisini aciga cikarabilir.")
     .replace("Requires Vercel account/team authorization and may expose project or deployment data.", "Vercel hesap/team yetkilendirmesi gerekir ve proje veya deployment verisini aciga cikarabilir.")
-    .replace("Set SUPABASE_DB_URL in the shell environment before enabling; never commit the value.", "Acmadan once shell ortaminda SUPABASE_DB_URL ayarlayin; degeri asla commit etmeyin.");
+    .replace("Set SUPABASE_DB_URL in the shell environment, then add a task-specific local launcher only after explicit database approval; never commit the value.", "Shell ortaminda SUPABASE_DB_URL ayarlayin; task-specific lokal launcher'i yalnizca acik database onayindan sonra ekleyin ve degeri asla commit etmeyin.");
 }
 
 function scanRecentCliLogSignals(logs) {

@@ -5,6 +5,8 @@ import path from "node:path";
 const root = path.resolve(process.cwd());
 const docsDir = path.join(root, "docs");
 const failures = [];
+const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+const expectedReleaseHeading = `## v${packageJson.version} - `;
 
 const localeCodes = ["de", "es", "pt-BR", "tr", "fr"];
 const languageLabels = ["Deutsch", "Español", "English", "Português (Brasil)", "Türkçe", "Français"];
@@ -62,6 +64,13 @@ if (!fs.existsSync(docsDir)) {
     }
     if (/(?:TODO|TBD|translation needed|lorem ipsum)/i.test(text)) {
       failures.push(`Localized doc docs/${file} contains placeholder localization text.`);
+    }
+  }
+
+  for (const file of docFiles.filter((entry) => /^release-notes\.(?:de|es|pt-BR|tr|fr)\.md$/.test(entry))) {
+    const text = fs.readFileSync(path.join(docsDir, file), "utf8");
+    if (!text.includes(expectedReleaseHeading)) {
+      failures.push(`Localized release notes docs/${file} missing current ${expectedReleaseHeading.trim()} section.`);
     }
   }
 }

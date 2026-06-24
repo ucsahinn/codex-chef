@@ -297,34 +297,51 @@ tool_timeout_sec = 60
 enabled = false
 url = "https://api.githubcopilot.com/mcp/readonly"
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 60
 
 [mcp_servers.figma]
 enabled = false
 url = "https://mcp.figma.com/mcp"
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 60
 
 [mcp_servers.linear]
 enabled = false
 url = "https://mcp.linear.app/mcp"
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 60
 
 [mcp_servers.notion]
 enabled = false
 url = "https://mcp.notion.com/mcp"
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 60
 
 [mcp_servers.sentry]
 enabled = false
 url = "https://mcp.sentry.dev/mcp"
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 60
 
 [mcp_servers.vercel]
 enabled = false
 url = "https://mcp.vercel.com"
 default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+tool_timeout_sec = 60
 
 [mcp_servers.supabase]
 enabled = false
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-postgres@0.6.2", "%SUPABASE_DB_URL%"]
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-postgres@0.6.2"]
+# Add the DB URL argument only after explicit database-task approval.
+# Keep SUPABASE_DB_URL out of committed args because this upstream server uses a DB URL argument.
 default_tools_approval_mode = "prompt"
+env_vars = ["SUPABASE_DB_URL"]
+startup_timeout_sec = 20
+tool_timeout_sec = 60

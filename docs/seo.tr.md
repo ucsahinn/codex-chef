@@ -63,7 +63,7 @@ automation
 Social preview:
 
 ```text
-assets/social-preview.svg
+assets/social-preview.png
 ```
 
 ## README Gereklilikleri

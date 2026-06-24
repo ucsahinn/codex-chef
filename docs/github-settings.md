@@ -37,7 +37,8 @@ temporary preview URL, or private workspace URL.
 
 ## Social Preview
 
-Use `assets/social-preview.svg` as the GitHub social preview image.
+Use `assets/social-preview.png` as the GitHub social preview image. Keep
+`assets/social-preview.svg` as the editable source artwork.
 
 ## Features
 
@@ -59,12 +60,12 @@ Use `assets/social-preview.svg` as the GitHub social preview image.
 
 ## Release Metadata
 
-For v0.5.39, use:
+For v0.5.40, use:
 
 ```text
-Title: Codex Chef v0.5.39
-Tag: v0.5.39
-Notes: docs/release-notes.md
+Title: Codex Chef v0.5.40
+Tag: v0.5.40
+Notes: tmp/release-notes-current.md
 ```
 
 Before creating the release, verify:
@@ -72,6 +73,7 @@ Before creating the release, verify:
 ```bash
 npm run check
 npm run verify:skills:online
+npm run release:notes
 gitleaks detect --redact --no-banner --no-git --verbose
 git rev-parse HEAD
 git -c http.sslBackend=openssl ls-remote origin refs/heads/main

@@ -82,7 +82,21 @@ const pluginTarget = path.join(codexHome, "plugins", "codex-chef-workflows");
 write(path.join(codexHome, "AGENTS.md"), "# stale guidance\n");
 write(
   path.join(codexHome, "config.toml"),
-  "# user setting must stay\nmodel = \"gpt-5\"\n\n[apps._default]\nenabled = true\ndefault_tools_enabled = true\n"
+  [
+    "# user setting must stay",
+    "model = \"gpt-5\"",
+    "",
+    "[apps._default]",
+    "enabled = true",
+    "default_tools_enabled = true",
+    "",
+    "[mcp_servers.supabase]",
+    "enabled = false",
+    "command = \"cmd.exe\"",
+    "args = [\"/c\", \"npx\", \"-y\", \"@modelcontextprotocol/server-postgres@0.6.2\", \"%SUPABASE_DB_URL%\"]",
+    "default_tools_approval_mode = \"prompt\"",
+    ""
+  ].join("\n")
 );
 write(
   path.join(codexHome, "rules", "default.rules"),
@@ -206,6 +220,12 @@ if (!/\[apps\._default\][\s\S]*?\ndestructive_enabled\s*=\s*false/.test(repaired
 if (!/\[apps\._default\][\s\S]*?\nopen_world_enabled\s*=\s*false/.test(repairedConfig)) {
   fail("repair apply must backfill apps._default.open_world_enabled = false.");
 }
+if (/%SUPABASE_DB_URL%|\$SUPABASE_DB_URL/.test(repairedConfig)) {
+  fail("repair apply must sync managed Supabase config and remove direct SUPABASE_DB_URL launcher args.");
+}
+if (!/\[mcp_servers\.supabase\][\s\S]*?env_vars\s*=\s*\["SUPABASE_DB_URL"\]/.test(repairedConfig)) {
+  fail("repair apply must preserve Supabase credential boundary through env_vars.");
+}
 
 const missingConfigRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-missing-config-"));
 const missingConfigCodexHome = path.join(missingConfigRoot, ".codex");
@@ -305,6 +325,51 @@ if (inlineCommentApplied) {
     if (!new RegExp(`${key}\\s*=\\s*false\\s*#`).test(appsBlock)) {
       fail(`repair apply must rewrite apps._default.${key} to false while preserving inline comments.`);
     }
+  }
+}
+
+const managedTableDriftRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-managed-table-drift-"));
+const managedTableDriftCodexHome = path.join(managedTableDriftRoot, ".codex");
+const managedTableDriftAgentsHome = path.join(managedTableDriftRoot, ".agents");
+write(
+  path.join(managedTableDriftCodexHome, "config.toml"),
+  [
+    "model = \"local-custom-model\"",
+    "",
+    "[mcp_servers.user-local]",
+    "command = \"node\"",
+    "args = [\"server.js\"]",
+    "",
+    "[mcp_servers.supabase]",
+    "enabled = false",
+    "command = \"cmd.exe\"",
+    "args = [\"/c\", \"npx\", \"-y\", \"@modelcontextprotocol/server-postgres@0.6.2\", \"%SUPABASE_DB_URL%\"]",
+    "default_tools_approval_mode = \"prompt\"",
+    ""
+  ].join("\n")
+);
+ensureDir(managedTableDriftAgentsHome);
+const managedTableDriftPlan = parseResult(
+  runRepair([], managedTableDriftCodexHome, managedTableDriftAgentsHome),
+  "repair managed table drift plan"
+);
+if (managedTableDriftPlan && !managedTableDriftPlan.config?.updatedManagedTables?.includes("mcp_servers.supabase")) {
+  fail("repair plan must report drifted managed MCP tables.");
+}
+const managedTableDriftApplied = parseResult(
+  runRepair(["--apply"], managedTableDriftCodexHome, managedTableDriftAgentsHome),
+  "repair managed table drift apply"
+);
+if (managedTableDriftApplied) {
+  const driftConfig = fs.readFileSync(path.join(managedTableDriftCodexHome, "config.toml"), "utf8");
+  if (!/\[mcp_servers\.user-local\][\s\S]*?command\s*=\s*"node"/.test(driftConfig)) {
+    fail("repair managed table drift must preserve user-defined MCP tables.");
+  }
+  if (/%SUPABASE_DB_URL%|\$SUPABASE_DB_URL/.test(driftConfig)) {
+    fail("repair managed table drift must remove stale Supabase launcher args.");
+  }
+  if (!/\[mcp_servers\.supabase\][\s\S]*?env_vars\s*=\s*\["SUPABASE_DB_URL"\]/.test(driftConfig)) {
+    fail("repair managed table drift must sync Supabase env_vars boundary.");
   }
 }
 
