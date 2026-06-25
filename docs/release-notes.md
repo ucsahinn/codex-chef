@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## v0.5.43 - 2026-06-25
+
+This patch finishes the CLI operator experience across the whole menu surface,
+not just the first screen. The main board, submenus, preview screens, and
+localized Turkish output now share the same natural-language terminology,
+summary-first layout, and safe write-boundary framing.
+
+## Highlights
+
+- Grouped the interactive menu into operator-focused sections and added a
+  stacked layout for narrower terminals so action labels, impact, and purpose
+  stay readable.
+- Reworked Skills, MCP, Backups, Diagnostics, Process Audit, Auth, and update
+  preview screens around summaries, safe next steps, and human-readable labels.
+- Added locale-aware Turkish headings and tightened Turkish submenu copy so
+  `--tr` no longer feels polished only on the first board.
+- Extended CLI validation with menu transcript, localized submenu, and
+  no-write preview coverage for the new operator contract.
+
+## Verification
+
+- `npm run validate:chef-cli`
+- `npm run check`
+- `git diff --check`
+- `npm run chef -- --doctor --plain --no-log`
+- `npm run chef -- --status --repo-only --plain --no-log`
+
 ## v0.5.42 - 2026-06-25
 
 This patch cleans up the repair experience after the readline fix. A healthy

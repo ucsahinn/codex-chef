@@ -34,6 +34,21 @@ npm run verify:skills:online
 - `git diff --check` nutzen, um Whitespace- und Markdown-Probleme zu erkennen.
 - `gitleaks detect --redact --no-banner --no-git --verbose` nutzen, wenn Gitleaks verfügbar ist.
 
+## v0.5.43 - 2026-06-25
+
+Dieser Patch bringt die CLI Operator Experience auf die gesamte Menue- und
+Untermenue-Oberflaeche. Skills, MCP, Backups, Diagnostics, Process Audit, Auth
+und Preview-Screens nutzen jetzt dieselbe zusammenfassende Struktur,
+natuerliche Sprache und sichere Write-Boundary-Hinweise wie das Hauptmenue.
+
+### Verification
+
+```bash
+npm run validate:chef-cli
+npm run check
+git diff --check
+```
+
 ## v0.5.42 - 2026-06-25
 
 Dieser Patch stuft nicht kuratierte globale User-Skills im Repair-Report als

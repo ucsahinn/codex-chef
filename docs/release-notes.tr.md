@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## v0.5.43 - 2026-06-25
+
+Bu patch CLI operator deneyimini sadece ilk ekranla sınırlı bırakmadan bütün
+menü yüzeyine taşır. Ana pano, alt menüler, preview ekranları ve Türkçe çıktı
+artık aynı doğal dil, özet öncelikli düzen ve güvenli yazma sınırı diliyle
+çalışır.
+
+## Öne çıkanlar
+
+- İnteraktif menü, operatör odaklı gruplara ayrıldı; dar terminallerde action
+  etiketi, etki ve amaç okunur kalsın diye stacked görünüm eklendi.
+- Skill, MCP, Yedekler, Tanılama, Süreç denetimi, Auth ve update preview
+  ekranları özet, güvenli sonraki adım ve insan okunur etiketlerle yenilendi.
+- Türkçe başlıklarda locale-aware casing eklendi; `--tr` çıktısı yalnızca ilk
+  panoda değil alt ekranlarda da temiz ve tutarlı hale getirildi.
+- Yeni operatör sözleşmesi için CLI transcript, lokalize submenu ve yazmasız
+  preview regresyon kapsamı genişletildi.
+
+## Verification
+
+- `npm run validate:chef-cli`
+- `npm run check`
+- `git diff --check`
+- `npm run chef -- --doctor --plain --no-log`
+- `npm run chef -- --status --repo-only --plain --no-log`
+
 ## v0.5.42 - 2026-06-25
 
 Bu patch readline fix'inden sonra repair deneyimini toparlar. Ek user-managed

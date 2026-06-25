@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.5.43 - 2026-06-25
+
+- Refined the interactive Chef CLI into a grouped operator board with
+  responsive stacked rows, clearer write-boundary wording, and locale-aware
+  Turkish headings.
+- Reworked Skills, MCP, Backups, Diagnostics, Process Audit, Auth, and preview
+  screens so submenus use the same summary-first natural-language UX as the
+  main menu.
+- Expanded CLI transcript and localized smoke coverage so menu/submenu wording,
+  Turkish copy, and safe no-write preview behavior stay under regression tests.
+
 ## 0.5.42 - 2026-06-25
 
 - Changed repair previews so non-curated user-installed skills are reported as

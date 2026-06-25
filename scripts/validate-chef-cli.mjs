@@ -122,6 +122,12 @@ function runMenuTranscriptSmoke() {
   });
   if (invalid.ok) {
     if (!invalid.output.includes("Operator menu")) fail("chef-cli menu transcript must render the operator menu");
+    if (!invalid.output.includes("OPERATOR BOARD")) fail("chef-cli menu transcript must render the enterprise operator board title");
+    if (!invalid.output.includes("Mode: Local operator")) fail("chef-cli menu transcript must show the local operator status strip");
+    if (!invalid.output.includes("Legend: SAFE")) fail("chef-cli menu transcript must show the write-boundary legend");
+    if (!invalid.output.includes("Check")) fail("chef-cli menu transcript must group actions by operator intent");
+    if (!invalid.output.includes("System status")) fail("chef-cli menu transcript must use natural-language action labels");
+    if (!invalid.output.includes("Impact")) fail("chef-cli menu transcript must use natural-language impact wording instead of raw write jargon");
     if (!invalid.output.includes("Shortcuts: l = language, q = quit")) fail("chef-cli menu transcript must show language and quit shortcuts");
     if (countOccurrences(invalid.output, "Operator menu") !== 1) {
       fail("chef-cli menu transcript must not repaint the full menu for empty or invalid input");
@@ -137,7 +143,7 @@ function runMenuTranscriptSmoke() {
     timeout: 30000
   });
   if (language.ok) {
-    for (const snippet of ["Running: Language", "Dil Turkce olarak ayarlandi", "Dil: tamam", "Operator menusu"]) {
+    for (const snippet of ["Opening: Language", "Dil Türkçe olarak ayarlandı", "Dil: hazir", "Operatör menüsü"]) {
       if (!language.output.includes(snippet)) fail(`chef-cli menu language transcript missing output snippet: ${snippet}`);
     }
   }
@@ -148,7 +154,7 @@ function runMenuTranscriptSmoke() {
     timeout: 180000
   });
   if (action.ok) {
-    for (const snippet of ["Running: Repo-only status", "Press Enter to return to the menu.", "Repo-only status:"]) {
+    for (const snippet of ["Opening: Repo health", "Press Enter to return to the operator board.", "Repo health: ready"]) {
       if (!action.output.includes(snippet)) fail(`chef-cli menu action transcript missing output snippet: ${snippet}`);
     }
     if (countOccurrences(action.output, "Operator menu") !== 2) {
@@ -163,11 +169,11 @@ function runMenuTranscriptSmoke() {
   });
   if (skillSelection.ok) {
     for (const snippet of [
-      "Running: Skills",
-      "Skill selection:",
-      "Select a skill number to install with --apply, or press Enter to skip:",
-      "No skill selected.",
-      "Press Enter to return to the menu."
+      "Opening: Skills catalog",
+      "Choose a skill to install",
+      "Select a skill number, or press Enter to leave everything unchanged:",
+      "No skill selected; nothing changed.",
+      "Press Enter to return to the operator board."
     ]) {
       if (!skillSelection.output.includes(snippet)) {
         fail(`chef-cli menu skills transcript missing output snippet: ${snippet}`);
@@ -190,6 +196,24 @@ function runMenuTranscriptSmoke() {
     }
     if (/node:internal|unsettled top-level await|AbortError|ABORT_ERR/i.test(interrupt.output)) {
       fail("chef-cli menu interrupt transcript must not leak readline lifecycle stack traces");
+    }
+  }
+
+  const rich = runCliSmokeRaw("menu-rich-transcript", ["--no-log"], {
+    env: {
+      CODEX_CHEF_TEST_MENU: "1",
+      FORCE_COLOR: "1",
+      NO_COLOR: ""
+    },
+    input: "q\n",
+    timeout: 30000
+  });
+  if (rich.ok) {
+    for (const snippet of ["🍳", "📊", "OPERATOR BOARD", "SAFE", "APPLY-GATED", "ACCOUNT-GUIDED"]) {
+      if (!rich.output.includes(snippet)) fail(`chef-cli rich menu transcript missing output snippet: ${snippet}`);
+    }
+    if (!/\x1b\[[0-9;]*m/.test(rich.output)) {
+      fail("chef-cli rich menu transcript must include ANSI color when color is forced");
     }
   }
 }
@@ -281,33 +305,33 @@ function runBackupsFixtureSmokes() {
   const env = { CODEX_HOME: codexHome, AGENTS_HOME: agentsHome };
   const list = runCliSmokeRaw("backups-list-fixture", ["--backups", "--plain", "--no-log"], { env });
   if (list.ok) {
-    for (const snippet of ["Codex Chef backups", backupId, "Backup root"]) {
+    for (const snippet of ["Backup library", backupId, "Backup root"]) {
       if (!list.output.includes(snippet)) fail(`chef-cli smoke backups-list-fixture missing output snippet: ${snippet}`);
     }
   }
   const listTr = runCliSmokeRaw("backups-list-tr-fixture", ["--backups", "--tr", "--plain", "--no-log"], { env });
   if (listTr.ok) {
-    for (const snippet of ["Codex Chef yedekleri", backupId, "Yedek kok dizini", "read-only envanter"]) {
+    for (const snippet of ["Yedek kütüphanesi", backupId, "Yedek kök dizini", "Bu liste ekranında dosya değişmez"]) {
       if (!listTr.output.includes(snippet)) fail(`chef-cli smoke backups-list-tr-fixture missing output snippet: ${snippet}`);
     }
   }
 
   const inspect = runCliSmokeRaw("backups-inspect-fixture", ["--backups", "--backup", backupId, "--plain", "--no-log"], { env });
   if (inspect.ok) {
-    for (const snippet of ["Backup archive", "AGENTS.md", "rules/default.rules", "marketplace.json"]) {
+    for (const snippet of ["Backup details", "AGENTS.md", "rules/default.rules", "marketplace.json"]) {
       if (!inspect.output.includes(snippet)) fail(`chef-cli smoke backups-inspect-fixture missing output snippet: ${snippet}`);
     }
   }
 
   const preview = runCliSmokeRaw("backups-restore-preview-fixture", ["--backups", "--backup", backupId, "--restore", "--plain", "--no-log"], { env });
   if (preview.ok) {
-    for (const snippet of ["Restore preview", "No files restored", "Rerun with --apply"]) {
+    for (const snippet of ["Backup restore preview", "No files restored", "Rerun with --apply"]) {
       if (!preview.output.includes(snippet)) fail(`chef-cli smoke backups-restore-preview-fixture missing output snippet: ${snippet}`);
     }
   }
   const previewTr = runCliSmokeRaw("backups-restore-preview-tr-fixture", ["--backups", "--backup", backupId, "--restore", "--tr", "--plain", "--no-log"], { env });
   if (previewTr.ok) {
-    for (const snippet of ["Geri yukleme preview", "Dosya geri yuklenmedi", "--apply"]) {
+    for (const snippet of ["Yedek geri yükleme ön izlemesi", "Dosya geri yüklenmedi", "--apply"]) {
       if (!previewTr.output.includes(snippet)) fail(`chef-cli smoke backups-restore-preview-tr-fixture missing output snippet: ${snippet}`);
     }
   }
@@ -445,11 +469,11 @@ if (!exists(cliPath)) {
     "processAuditPayload",
     "recentCliLogs",
     "Diagnostic evidence commands",
-    "Tanilama kanit komutlari",
+    "Tanılama kanıt komutları",
     "install.ps1",
     "install.sh",
-    "GitHub authentication boundary",
-    "GitHub kimlik dogrulama siniri",
+    "Authentication notes",
+    "Kimlik doğrulama notları",
     "CODEX_CHEF_LANG",
     "languageFromEnvironment",
     "localText",
@@ -499,15 +523,20 @@ if (!exists(cliPath)) {
     "printActionEnd",
     "pauseBeforeMenu",
     "toggleLanguage",
+    "OPERATOR BOARD",
+    "Legend: SAFE",
+    "menuIcon",
+    "printSurfaceHeader",
+    "operatorPrompt",
     "Operator menu",
-    "Operator menusu",
-    "Press Enter to return to the menu",
-    "Menuye donmek icin Enter'a basin",
+    "Operatör menüsü",
+    "Press Enter to return to the operator board",
+    "Operatör paneline dönmek için Enter'a basın",
     "Shortcuts: l = language, q = quit",
-    "Kisayollar: l = dil, q = cikis",
+    "Kısayollar: l = dil, q = çıkış",
     "CODEX_CHEF_TEST_MENU",
     "Language switched to English",
-    "Dil Turkce olarak ayarlandi"
+    "Dil Türkçe olarak ayarlandı"
   ]) {
     if (!cli.includes(requiredMenuUx)) fail(`${cliPath} missing interactive menu UX surface: ${requiredMenuUx}`);
   }
@@ -527,22 +556,23 @@ if (!exists(cliPath)) {
   }
 
   for (const requiredLabel of [
-    "Status",
-    "Doctor",
-    "Preview",
-    "Install",
-    "Reset",
-    "Repair",
+    "System status",
+    "Repo health",
+    "Full checkup",
+    "Install preview",
+    "Full install",
+    "Refresh setup",
+    "Repair setup",
     "Backups",
-    "Skills",
-    "MCP",
-    "Routing",
-    "Diagnostics",
-    "Processes",
-    "Auth",
-    "Logs",
+    "Skills catalog",
+    "MCP connectors",
+    "Routing guide",
+    "Diagnostics hub",
+    "Process audit",
+    "Auth notes",
+    "Recent logs",
     "Language",
-    "Update"
+    "Update Codex Chef"
   ]) {
     if (!new RegExp(`\\b${requiredLabel}\\b`).test(cli)) fail(`${cliPath} missing menu label: ${requiredLabel}`);
   }
@@ -600,8 +630,8 @@ runCliSmoke("help", ["--help", "--plain", "--no-log"], [
 ], { forbidAnsi: true });
 runCliSmoke("help-tr", ["--help", "--lang", "tr", "--plain", "--no-log"], [
   "Codex Chef CLI",
-  "Kullanim:",
-  "Secenekler:",
+  "Kullanım:",
+  "Seçenekler:",
   "--diagnostics",
   "--processes",
   "--lang tr",
@@ -609,13 +639,13 @@ runCliSmoke("help-tr", ["--help", "--lang", "tr", "--plain", "--no-log"], [
   "tmp/chef-cli/logs"
 ], { forbidAnsi: true });
 runCliSmoke("help-tr-alias", ["--help", "--tr", "--plain", "--no-log"], [
-  "Kullanim:",
-  "Secenekler:",
-  "Guncelle"
+  "Kullanım:",
+  "Seçenekler:",
+  "güncelle"
 ], { forbidAnsi: true });
 runCliSmoke("help-tr-env", ["--help", "--plain", "--no-log"], [
-  "Kullanim:",
-  "Secenekler:"
+  "Kullanım:",
+  "Seçenekler:"
 ], {
   env: {
     CODEX_CHEF_LANG: "tr"
@@ -629,7 +659,7 @@ runCliErrorSmoke("unknown-option", ["--bad-flag", "--plain", "--no-log"], [
   "npm run chef -- --help"
 ]);
 runCliErrorSmoke("unknown-option-tr", ["--bad-flag", "--tr", "--plain", "--no-log"], [
-  "Codex Chef CLI hatasi: Bilinmeyen secenek --bad-flag",
+  "Codex Chef CLI hatasi: Bilinmeyen seçenek --bad-flag",
   "npm run chef -- --help"
 ]);
 runCliErrorSmoke("missing-lang-value", ["--lang", "--plain", "--no-log"], [
@@ -650,18 +680,20 @@ runCliSmoke("forced-color", ["--help", "--no-log"], [
   expectAnsi: true
 });
 runCliSmoke("mcp", ["--mcp", "--plain", "--no-log"], [
-  "MCP servers: 15",
-  "transport",
-  "target",
+  "MCP connectors",
+  "15 connectors",
+  "Credential need",
+  "Disabled by default",
   "Timeouts and per-tool exposure live in templates/codex/config.windows.toml",
   "Authenticated account, database, and broad filesystem MCP connectors stay disabled by default."
 ], { forbidAnsi: true });
 runCliSmoke("mcp-tr", ["--mcp", "--tr", "--plain", "--no-log"], [
-  "MCP server'lari: 15",
+  "MCP bağlayıcıları",
+  "15 bağlayıcı",
   "Kimlik bilgisi veya ek girdi gerekmez.",
-  "Ilk calismada npm/npx ag erisimi gerekir",
+  "İlk çalışmada npm/npx ağ erişimi gerekir",
   "GitHub/Copilot hesap yetkilendirmesi gerekir",
-  "Auth isteyen hesap, database ve genis filesystem MCP connector'lari varsayilan olarak kapali kalir."
+  "Auth isteyen hesap, database ve geniş filesystem MCP connector'ları varsayılan olarak kapalı kalır."
 ], {
   forbidAnsi: true,
   forbiddenSnippets: [
@@ -671,7 +703,7 @@ runCliSmoke("mcp-tr", ["--mcp", "--tr", "--plain", "--no-log"], [
   ]
 });
 runCliSmoke("mcp-forced-color", ["--mcp", "--no-log"], [
-  "MCP servers: 15",
+  "MCP connectors",
   "Authenticated account, database, and broad filesystem MCP connectors stay disabled by default."
 ], {
   env: {
@@ -681,8 +713,9 @@ runCliSmoke("mcp-forced-color", ["--mcp", "--no-log"], [
   expectAnsi: true
 });
 runCliSmoke("skills", ["--skills", "--plain", "--no-log"], [
-  "Curated installable skills: 16",
-  "Skill activation contract",
+  "Skills catalog",
+  "16 curated installable skills",
+  "How skill activation works",
   "Installed skills do not run by themselves",
   "A skill enters context when the user names it",
   "Codex reads the selected skill's SKILL.md before acting",
@@ -701,7 +734,7 @@ runCliSmoke("routing", ["--routing", "--plain", "--no-log"], [
   "Use /agent in Codex CLI"
 ]);
 runCliSmoke("diagnostics", ["--diagnostics", "--plain", "--no-log"], [
-  "Codex Chef diagnostics",
+  "Diagnostics hub",
   "Current health",
   "Next safe actions",
   "Diagnostic evidence commands",
@@ -719,40 +752,40 @@ runCliSmoke("diagnostics", ["--diagnostics", "--plain", "--no-log"], [
   "Log root"
 ], { forbidAnsi: true });
 runCliSmoke("diagnostics-tr", ["--diagnostics", "--tr", "--plain", "--no-log"], [
-  "Codex Chef tanilama",
-  "Canli saglik",
-  "Sonraki guvenli adimlar",
-  "Tanilama kanit komutlari",
+  "Tanılama merkezi",
+  "Canlı sağlık",
+  "Sonraki güvenli adımlar",
+  "Tanılama kanıt komutları",
   "npm run chef -- --status --repo-only --no-log",
   "npm run chef -- --update --no-log",
   "npm run chef -- --repair --no-log",
   "npm run chef -- --logs --no-log",
   "npm run chef -- --processes --no-log",
   "npm run verify:install:runtime -- --expect-skills --redact-paths",
-  "Serena/MCP surec denetimi",
-  "Gecmis log sinyal taramasi",
-  "Bu sayilar gecmis log kanitidir",
-  "Son gecmis log sinyalleri",
-  "Son CLI loglari",
-  "Log kok dizini"
+  "Serena/MCP süreç denetimi",
+  "Geçmiş log sinyal taraması",
+  "Bu sayılar geçmiş log kanıtıdır",
+  "Son geçmiş log sinyalleri",
+  "Son CLI logları",
+  "Log kök dizini"
 ], { forbidAnsi: true });
 runCliJsonSmoke("diagnostics-json", ["--diagnostics", "--json", "--no-log"]);
 runNpmSilentJsonSmoke("diagnostics-npm-silent-json", ["chef", "--", "--diagnostics", "--json", "--no-log"], ["status", "overall"]);
 runCliSmoke("processes", ["--processes", "--plain", "--no-log"], [
-  "Codex Chef process audit",
-  "read-only count",
+  "Process audit",
+  "Read-only count",
   "Total matching processes",
   "Tunnel processes",
   "MCP/runtime processes",
   "No process is stopped"
 ], { forbidAnsi: true });
 runCliSmoke("processes-tr", ["--processes", "--tr", "--plain", "--no-log"], [
-  "Codex Chef surec denetimi",
-  "read-only sayim",
-  "Eslesen toplam surec",
-  "Tunel surecleri",
-  "MCP/runtime surecleri",
-  "hicbir surec durdurulmaz"
+  "Süreç denetimi",
+  "Yazmasız sayım",
+  "Eşleşen toplam süreç",
+  "Tünel süreçleri",
+  "MCP/runtime süreçleri",
+  "Hiçbir süreç durdurulmaz"
 ], { forbidAnsi: true });
 runCliJsonSmoke("processes-json", ["--processes", "--json", "--no-log"]);
 runNpmSilentJsonSmoke("status-npm-silent-json", ["chef", "--", "--status", "--repo-only", "--json", "--no-log"], ["cliQuickStart", "readOnlyCommands"]);
@@ -768,18 +801,18 @@ runCliSmoke("update-preview", ["--update", "--plain", "--no-log"], [
   "No managed or global files changed",
   "npm run chef -- --update --apply",
   "excludes curated global skill installs",
-  "Would affect",
+  "Managed targets",
   "Full evidence"
 ], {
   forbiddenSnippets: ["What if:"],
   maxLines: 80
 });
 runCliSmoke("update-preview-tr", ["--update", "--tr", "--plain", "--no-log"], [
-  "Guncelleme preview",
-  "Managed veya global dosya degismedi",
+  "Güncelleme ön izlemesi",
+  "Managed veya global dosya değişmedi",
   "npm run chef -- --update --apply",
-  "Etkilenecek alanlar",
-  "Tam kanit"
+  "Yönetilen hedefler",
+  "Tam kanıt"
 ], {
   forbiddenSnippets: ["What if:"],
   maxLines: 80
@@ -803,21 +836,21 @@ runCliSmoke("status-repo-only", ["--status", "--repo-only", "--plain", "--no-log
   "Log disabled by --no-log"
 ], { timeout: 180000 });
 runCliSmoke("reset-preview", ["--reset", "--plain", "--no-log"], [
-  "Reset preview first",
+  "Refresh preview",
   "--force",
   "completed: Codex Chef dry run",
   "Log disabled by --no-log"
 ]);
 runCliSmoke("auth", ["--auth", "--plain", "--no-log"], [
-  "GitHub authentication boundary",
+  "Authentication notes",
   "does not print account-scoped re-auth",
   "organization policy",
   "git ls-remote origin HEAD"
 ], { forbidAnsi: true });
 runCliSmoke("auth-tr", ["--auth", "--tr", "--plain", "--no-log"], [
-  "GitHub kimlik dogrulama siniri",
+  "Kimlik doğrulama notları",
   "token",
-  "kurum politikaniza",
+  "kurum politikanıza",
   "git ls-remote origin HEAD"
 ], { forbidAnsi: true });
 
