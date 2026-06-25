@@ -71,6 +71,7 @@ const backupRoot = path.join(
 );
 const actions = [];
 const warnings = [];
+const notes = [];
 const failures = [];
 
 function timestamp() {
@@ -549,7 +550,7 @@ function inspectSkills() {
     .map(([name, skillRoots]) => ({ name, roots: skillRoots.map(redact) }));
 
   if (extra.length > 0) {
-    warnings.push(`${extra.length} non-curated global skill(s) are installed; repair reports them but does not delete user skills.`);
+    notes.push(`${extra.length} non-curated global skill(s) are installed; repair reports them but does not delete user skills.`);
   }
   if (duplicates.length > 0) {
     warnings.push(`${duplicates.length} duplicate global skill name(s) are visible across skill roots.`);
@@ -653,6 +654,7 @@ const report = {
   skills,
   actions,
   warnings,
+  notes,
   attentionReasons,
   failures,
   nextActions: status === "fail"
@@ -689,6 +691,7 @@ if (options.json) {
   for (const action of actions) {
     console.log(`Action: ${action.status} ${action.kind} ${action.target || ""}`.trim());
   }
+  for (const note of notes) console.log(`Note: ${note}`);
   for (const warning of warnings) console.log(`Warning: ${warning}`);
   for (const failure of failures) console.error(`Failure: ${failure}`);
   if (report.backupRoot) console.log(`Backup: ${report.backupRoot}`);

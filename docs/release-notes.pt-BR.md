@@ -34,6 +34,22 @@ npm run verify:skills:online
 - Usar `git diff --check` para encontrar problemas de whitespace e Markdown.
 - Usar `gitleaks detect --redact --no-banner --no-git --verbose` quando Gitleaks estiver disponível.
 
+## v0.5.42 - 2026-06-25
+
+Este patch classifica skills globais nao curadas do usuario como nota no
+relatorio de repair, nao como motivo de attention. Um runtime limpo permanece
+`Overall: ok`, enquanto skills curadas ausentes, duplicadas e drift real seguem
+visiveis.
+
+### Verification
+
+```bash
+npm run check
+npm run validate:repair
+npm run release:notes
+gitleaks detect --redact --no-banner --no-git --verbose
+```
+
 ## v0.5.41 - 2026-06-24
 
 Este patch atualiza a versao atual nas notas de release em portugues do Brasil.
@@ -112,6 +128,8 @@ Este arquivo localizado acompanha as seções do arquivo fonte em inglês. Sourc
 
 - Release Notes
 - Unreleased
+- v0.5.42 - 2026-06-25
+- Verification
 - v0.5.41 - 2026-06-24
 - Verification
 - v0.5.14 - 2026-06-16

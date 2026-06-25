@@ -380,6 +380,31 @@ if (pruned) {
   }
 }
 
+const noteOnlyRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-note-only-"));
+const noteOnlyCodexHome = path.join(noteOnlyRoot, ".codex");
+const noteOnlyAgentsHome = path.join(noteOnlyRoot, ".agents");
+ensureDir(noteOnlyCodexHome);
+ensureDir(noteOnlyAgentsHome);
+for (const skill of JSON.parse(read("catalog/skills.json")).skills.filter((entry) => entry.install === true)) {
+  ensureDir(path.join(noteOnlyAgentsHome, "skills", skill.name));
+}
+const noteOnlyApplied = parseResult(runRepair(["--apply"], noteOnlyCodexHome, noteOnlyAgentsHome), "repair note-only apply");
+if (noteOnlyApplied) {
+  ensureDir(path.join(noteOnlyAgentsHome, "skills", "user-extra-skill"));
+  const noteOnlyPlan = parseResult(runRepair([], noteOnlyCodexHome, noteOnlyAgentsHome), "repair note-only plan");
+  if (noteOnlyPlan) {
+    if (noteOnlyPlan.status !== "ok") {
+      fail(`repair note-only plan should stay ok when only non-curated user skills are present, got ${noteOnlyPlan.status}.`);
+    }
+    if (noteOnlyPlan.attentionReasons?.some((reason) => /non-curated/.test(reason))) {
+      fail("repair note-only plan must not classify non-curated user skills as attention.");
+    }
+    if (!noteOnlyPlan.notes?.some((note) => /non-curated/.test(note))) {
+      fail("repair note-only plan must report non-curated user skills as notes.");
+    }
+  }
+}
+
 if (failures.length > 0) {
   console.error("Repair install validation failed:");
   for (const failure of failures) console.error(`- ${failure}`);

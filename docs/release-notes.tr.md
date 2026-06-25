@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## v0.5.42 - 2026-06-25
+
+Bu patch readline fix'inden sonra repair deneyimini toparlar. Ek user-managed
+skill'leri olan saglikli kurulum artik gorunur sekilde saglikli kalir:
+`repair`, bu skill'leri tum preview'i attention durumuna cevirmek yerine note
+olarak raporlar.
+
+## One cikanlar
+
+- Non-curated global skill inventory'si `scripts/repair-install.mjs` icinde
+  `Warning` yerine `Note` olarak siniflandirildi.
+- Eksik curated skill, duplicate skill adi, managed plugin extra dosyalari,
+  config drift ve failed repair gibi gercek problemler attention/failure
+  yollarinda kaldi.
+- Temiz managed install + bir user skill senaryosu icin status'un `ok`
+  kalmasini garanti eden regresyon testi eklendi.
+
+## Verification
+
+- `npm run validate:repair`
+- `npm run check`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.41 - 2026-06-24
 
 Bu patch yeni Node runtime'larinda interaktif menu davranisini duzeltir. CLI

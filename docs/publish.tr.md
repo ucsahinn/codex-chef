@@ -58,11 +58,11 @@ Açık commit/push/release onayından sonra:
 git add <review edilmiş dosyalar>
 git diff --cached
 npm run release:notes
-git commit -m "Release Codex Chef v0.5.41"
+git commit -m "Release Codex Chef v0.5.42"
 git push origin main
-git tag v0.5.41
-git push origin v0.5.41
-gh release create v0.5.41 --title "Codex Chef v0.5.41" --notes-file tmp/release-notes-current.md
+git tag v0.5.42
+git push origin v0.5.42
+gh release create v0.5.42 --title "Codex Chef v0.5.42" --notes-file tmp/release-notes-current.md
 ```
 
 Push sonrasında remote eşitliği ve CI durumunu doğrula:

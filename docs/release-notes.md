@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## v0.5.42 - 2026-06-25
+
+This patch cleans up the repair experience after the readline fix. A healthy
+install with additional user-managed skills now stays visibly healthy:
+`repair` reports those skills as notes instead of turning the whole repair
+preview into an attention state.
+
+## Highlights
+
+- Reclassified non-curated global skill inventory from `Warning` to `Note` in
+  `scripts/repair-install.mjs`.
+- Kept true repair problems such as missing curated skills, duplicate skill
+  names, managed plugin extras, config drift, and failed repairs in the
+  attention/failure paths.
+- Added regression coverage for a clean managed install with one user skill so
+  the status remains `ok`.
+
+## Verification
+
+- `npm run validate:repair`
+- `npm run check`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.41 - 2026-06-24
 
 This patch fixes the interactive menu behavior on newer Node runtimes. The CLI

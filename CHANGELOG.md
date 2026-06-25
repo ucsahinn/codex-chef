@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.5.42 - 2026-06-25
+
+- Changed repair previews so non-curated user-installed skills are reported as
+  notes instead of attention, keeping clean managed installs visibly clean.
+- Added regression coverage for the note-only repair state so user skill
+  inventory does not look like a repair problem.
+
 ## 0.5.41 - 2026-06-24
 
 - Fixed the interactive CLI readline lifecycle so menu actions that ask follow-up
