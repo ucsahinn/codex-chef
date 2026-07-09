@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+## v0.5.45 - 2026-07-09
+
+Bu patch specialist agent ekibini daha guclu ve validator destekli bir runtime
+sozlesmesine tasir; release review sirasinda bulunan package hygiene acigini da
+kapatir. Tum bundled agent'lar artik failure-mode adlandirma, evidence grading,
+senior peer challenge, role-boundary disiplini ve is baska uzmana aitse handoff
+zorlayan acik bir specialist upgrade blogu tasir.
+
+## One cikanlar
+
+- `World-class specialist upgrade`, 21 Codex agent role dosyasinin tamaminda
+  katalogdaki `primaryUse` ve `mustNot` degerleriyle role-specific hale geldi.
+- `validate-agent-config` ve research-corpus validator yeni blogun tam bir kez
+  bulunmasini, expertise signal sonrasinda gelmesini, source-backed kalmasini,
+  evidence-grade ve senior challenge dili tasimasini, her role boundary icin
+  acik `do not` ifadesi kullanmasini denetler.
+- `validate-package-surface`, `npm pack --dry-run` icinde untracked, ignored,
+  local-state, nested `tmp`, build, coverage veya dependency artifact'i
+  gonderilecekse release gate'i fail eder.
+- `templates/.npmignore` eklendi; cunku npm root ignore kurallari package
+  manifest'teki `files` alaninin include ettigi `templates/` agaci icin yeterli
+  degildir.
+
+## Verification
+
+- `npm run validate:agents`
+- `npm run validate:agent-corpus`
+- `npm run validate:package-surface`
+- `npm run check`
+- `npm run verify:skills:online`
+- `npm run verify:install:runtime -- --expect-skills --expect-git-guards`
+- `npm run codex:status:all`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.44 - 2026-07-09
 
 Bu patch, starter default'larini zayiflatmadan graph destekli repo mapping

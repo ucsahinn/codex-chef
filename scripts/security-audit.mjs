@@ -238,7 +238,10 @@ for (const file of files) {
   }
 
   for (const { name, pattern } of forbiddenStatePatterns) {
-    if (pattern.test(rel) || pattern.test(text)) failures.push(`${name} pattern found in ${rel}`);
+    const scanText = rel === "templates/.npmignore"
+      ? text.replace(/^\*\*\/\.codex\/(?:sessions|memories)\/\*\*\r?\n?/gm, "")
+      : text;
+    if (pattern.test(rel) || pattern.test(scanText)) failures.push(`${name} pattern found in ${rel}`);
   }
 }
 

@@ -1,0 +1,26 @@
+# npm root .npmignore does not override package.json "files"; this subdirectory
+# ignore file keeps local template smoke-test residue out of source packs.
+**/tmp/**
+**/temp/**
+**/node_modules/**
+**/dist/**
+**/build/**
+**/coverage/**
+**/.next/**
+**/out/**
+
+**/.serena/**
+**/.codebase-memory/**
+**/.codex/sessions/**
+**/.codex/memories/**
+**/.codex/cache/**
+**/.codex/logs/**
+**/.codex/auth*
+**/.codex/*.local.toml
+
+*.zip
+*.tar.gz
+*.tgz
+*.msi
+*.exe
+*.dmg

@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+## v0.5.45 - 2026-07-09
+
+This patch turns the specialist agent team into a stronger, validator-backed
+runtime contract and closes a package hygiene gap found during release review.
+Every bundled agent now has an explicit senior specialist upgrade block that
+forces failure-mode naming, evidence grading, peer challenge, role-boundary
+discipline, and handoff when the work belongs to another specialist.
+
+## Highlights
+
+- Added `World-class specialist upgrade` to all 21 Codex agent role files, using
+  each catalog entry's `primaryUse` and `mustNot` so the guidance is role
+  specific instead of generic excellence prose.
+- Tightened `validate-agent-config` and the research-corpus validator so the new
+  block is present exactly once, appears after expertise signals, stays
+  source-backed, includes evidence-grade and senior challenge language, and
+  explicitly says `do not` for each role boundary.
+- Hardened `validate-package-surface` so `npm pack --dry-run` fails if any
+  untracked, ignored, local-state, nested `tmp`, build, coverage, or dependency
+  artifact would ship inside the package.
+- Added `templates/.npmignore` because npm root ignores do not override a
+  package manifest `files` entry for the included `templates/` tree.
+
+## Verification
+
+- `npm run validate:agents`
+- `npm run validate:agent-corpus`
+- `npm run validate:package-surface`
+- `npm run check`
+- `npm run verify:skills:online`
+- `npm run verify:install:runtime -- --expect-skills --expect-git-guards`
+- `npm run codex:status:all`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.44 - 2026-07-09
 
 This patch adds a reviewed code-intelligence MCP for users who want

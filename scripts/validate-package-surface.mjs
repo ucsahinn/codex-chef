@@ -41,6 +41,59 @@ function runNpmPackDryRun() {
   });
 }
 
+function gitTrackedFiles() {
+  const result = spawnSync("git", ["ls-files", "-z"], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: 30000,
+    windowsHide: true
+  });
+  if (result.error) {
+    fail(`git ls-files failed: ${result.error.message}`);
+    return new Set();
+  }
+  if (result.status !== 0) {
+    fail(`git ls-files failed: ${(result.stderr || result.stdout || `exit ${result.status}`).trim()}`);
+    return new Set();
+  }
+  return new Set(result.stdout.split("\0").filter(Boolean).map(posix));
+}
+
+function requireTrackedIgnoreControls(trackedFiles) {
+  const nestedCodexStateRules = ["sessions", "memories", "cache", "logs"].map(
+    (stateDir) => `**/.codex/${stateDir}/**`
+  );
+  const requiredIgnoreControls = [
+    {
+      file: "templates/.npmignore",
+      requiredLines: [
+        "**/tmp/**",
+        "**/temp/**",
+        ...nestedCodexStateRules,
+        "**/.codex/auth*"
+      ]
+    }
+  ];
+
+  for (const control of requiredIgnoreControls) {
+    const absolute = path.join(root, control.file);
+    if (!fs.existsSync(absolute)) {
+      fail(`Required package ignore-control file is missing: ${control.file}`);
+      continue;
+    }
+    if (!trackedFiles.has(control.file)) {
+      fail(`Required package ignore-control file must be tracked before release: ${control.file}`);
+    }
+    const text = fs.readFileSync(absolute, "utf8");
+    for (const line of control.requiredLines) {
+      if (!text.split(/\r?\n/).includes(line)) {
+        fail(`${control.file} must include package ignore rule: ${line}`);
+      }
+    }
+  }
+}
+
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 if (packageJson.private !== true) {
   fail("package.json must keep private=true; this repo is source-first and must not be accidentally published.");
@@ -122,6 +175,8 @@ if (result.error) {
 
   const files = packs.flatMap((pack) => pack.files || []).map((file) => posix(file.path || ""));
   const fileSet = new Set(files);
+  const trackedFiles = gitTrackedFiles();
+  requireTrackedIgnoreControls(trackedFiles);
 
   for (const required of [
     "README.md",
@@ -167,14 +222,17 @@ if (result.error) {
   }
 
   const forbiddenPathPatterns = [
-    /^(?:tmp|temp|node_modules|dist|build|coverage|\.next|out)\//,
-    /^(?:\.serena|\.codex\/sessions|\.codex\/memories|\.codex\/cache|\.codex\/logs)\//,
+    /(?:^|\/)(?:tmp|temp|node_modules|dist|build|coverage|\.next|out)(?:\/|$)/,
+    /(?:^|\/)(?:\.serena|\.codebase-memory|\.codex\/sessions|\.codex\/memories|\.codex\/cache|\.codex\/logs)(?:\/|$)/,
     /\.(?:zip|tar\.gz|tgz|msi|exe|dmg)$/i,
     /(?:^|\/)(?:auth|credentials|cookies)\.(?:json|toml|txt)$/i,
     /(?:^|\/)\.env(?:\.|$)/i
   ];
 
   for (const file of files) {
+    if (!trackedFiles.has(file)) {
+      fail(`npm pack dry-run includes untracked or ignored file: ${file}`);
+    }
     for (const pattern of forbiddenPathPatterns) {
       if (pattern.test(file)) fail(`npm pack dry-run includes forbidden source surface path: ${file}`);
     }

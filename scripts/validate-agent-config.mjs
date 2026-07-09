@@ -104,6 +104,79 @@ function collectSourceMarkers(text) {
   return markers;
 }
 
+function normalizeSentence(value) {
+  return String(value || "").trim().replace(/[.;:!?]+$/u, "").replace(/\s+/g, " ");
+}
+
+function lowerFirst(value) {
+  const normalized = normalizeSentence(value);
+  return normalized ? `${normalized[0].toLowerCase()}${normalized.slice(1)}` : normalized;
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function sectionBetween(text, startNeedle, endNeedle) {
+  const start = text.indexOf(startNeedle);
+  if (start === -1) return "";
+  const contentStart = start + startNeedle.length;
+  const end = text.indexOf(endNeedle, contentStart);
+  if (end === -1) return "";
+  return text.slice(contentStart, end).trim();
+}
+
+function validateWorldClassBlock(agent, template) {
+  const orderedSections = [
+    "Authority metadata contract:",
+    "Expertise signal contract:",
+    "World-class specialist upgrade:",
+    "Research-backed playbook:"
+  ];
+  let previousIndex = -1;
+  for (const section of orderedSections) {
+    const index = template.indexOf(section);
+    if (index === -1) continue;
+    if (index <= previousIndex) {
+      fail(`Agent template ${agent.name} must order ${orderedSections.join(" -> ")}.`);
+      break;
+    }
+    previousIndex = index;
+  }
+
+  const block = sectionBetween(template, "World-class specialist upgrade:", "Research-backed playbook:");
+  const bullets = block.split(/\r?\n/).filter((line) => line.startsWith("- "));
+  if (bullets.length < 4 || bullets.length > 6) {
+    fail(`Agent template ${agent.name} world-class specialist upgrade must contain 4-6 bullets; found ${bullets.length}.`);
+  }
+  for (const bullet of bullets) {
+    if (!bullet.includes("[Source:")) {
+      fail(`Agent template ${agent.name} world-class specialist upgrade bullet must be source-backed: ${bullet}`);
+    }
+  }
+  for (const required of [
+    "senior specialist level",
+    "domain-specific failure mode",
+    "strictest applicable evidence grade",
+    "senior peer reviewer",
+    "unproven, unsafe, overbroad, stale, or unverifiable",
+    "decision heuristics, failure modes, and verification signals",
+    "mark a corpus gap"
+  ]) {
+    if (!block.includes(required)) {
+      fail(`Agent template ${agent.name} world-class specialist upgrade must include: ${required}`);
+    }
+  }
+  const primaryUse = normalizeSentence(agent.primaryUse);
+  if (!block.includes(primaryUse)) {
+    fail(`Agent template ${agent.name} world-class specialist upgrade must include primaryUse text.`);
+  }
+  const boundary = lowerFirst(agent.mustNot);
+  if (!new RegExp(`do not\\s+${escapeRegExp(boundary)}`, "i").test(block)) {
+    fail(`Agent template ${agent.name} world-class specialist upgrade must negate mustNot boundary with "do not ${boundary}".`);
+  }
+}
+
 if (!fs.existsSync(catalogPath)) {
   fail("Missing catalog/agents.json");
 } else {
@@ -215,6 +288,7 @@ if (!fs.existsSync(catalogPath)) {
         const requiredRoleSections = [
           ["Authority metadata contract:", "authority metadata contract"],
           ["Expertise signal contract:", "expertise signal contract"],
+          ["World-class specialist upgrade:", "world-class specialist upgrade"],
           ["Source refresh protocol:", "source refresh protocol"],
           ["Cross-repo transfer protocol:", "cross-repo transfer protocol"],
           ["Research synthesis protocol:", "research synthesis protocol"],
@@ -240,6 +314,7 @@ if (!fs.existsSync(catalogPath)) {
             fail(`Agent template must include exactly one ${label} for ${agent.name}; found ${occurrences}.`);
           }
         }
+        validateWorldClassBlock(agent, template);
         const sourceBackedItems = countOccurrences(template, "[Source:");
         if (sourceBackedItems < minimumSourceBackedItems) {
           fail(`Agent template ${agent.name} must include at least ${minimumSourceBackedItems} source-backed instruction items; found ${sourceBackedItems}.`);

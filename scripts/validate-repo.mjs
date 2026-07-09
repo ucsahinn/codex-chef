@@ -273,6 +273,9 @@ for (const file of files) {
     failures.push(`Likely mojibake or corrupted UTF-8 text in ${rel}`);
   }
 
+  const localPathScanText = rel === "templates/.npmignore"
+    ? text.replace(/^\*\*\/\.codex\/(?:sessions|memories)\/\*\*\r?\n?/gm, "")
+    : text;
   const forbiddenLocalPaths = [
     /[A-Za-z]:[\\/]Users[\\/](?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i,
     /C:\\Users\\(?!user\b|username\b|you\b|yourname\b|yourusername\b)[A-Za-z0-9._-]+/i,
@@ -284,7 +287,7 @@ for (const file of files) {
     /\/\.codex\/memories\//i
   ];
   for (const pattern of forbiddenLocalPaths) {
-    if (text && pattern.test(text)) {
+    if (localPathScanText && pattern.test(localPathScanText)) {
       failures.push(`Forbidden local state/path pattern in ${rel}: ${pattern}`);
     }
   }

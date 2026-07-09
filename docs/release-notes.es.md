@@ -34,6 +34,16 @@ npm run verify:skills:online
 - Usar `git diff --check` para detectar problemas de whitespace y Markdown.
 - Usar `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks está disponible.
 
+## v0.5.45 - 2026-07-09
+
+Esta version refuerza los 21 agentes especialistas con un bloque
+`World-class specialist upgrade` exigido por validadores. Cada agente nombra el
+failure mode de su dominio, aplica evidence grading, ejecuta un senior
+challenge, conserva su role boundary y deriva trabajo adyacente al especialista
+correcto. La validacion de package surface tambien bloquea archivos untracked,
+ignored, local-state, `tmp` anidado, build, coverage y artefactos de
+dependencias dentro de npm pack.
+
 ## v0.5.44 - 2026-07-09
 
 Esta version agrega `codebase-memory` como MCP habilitado por defecto pero

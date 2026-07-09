@@ -5,6 +5,7 @@
   "minimumDistinctSourceMarkers": 20,
   "requiredGuardrailBlocks": ["Source refresh protocol:", "Cross-repo transfer protocol:", "Research synthesis protocol:", "Adversarial validation protocol:", "Source currency protocol:", "Corpus expansion protocol:", "Expert calibration protocol:"],
   "requiredRuntimeContracts": ["Authority metadata contract:", "Expertise signal contract:"],
+  "requiredOperationalBlocks": ["World-class specialist upgrade:", "Evidence output contract:", "Tool and delegation routing:", "Verification checklist:", "Escalation and refusal guardrails:", "Primary reference anchors:", "Senior blind-spot checks:", "Decision thresholds:", "Handoff payload contract:", "Evidence grading rubric:", "Invocation intake checklist:", "Corpus acquisition map:"],
   "requiredExpertiseSignalGroups": ["decisionHeuristics", "failureModes", "verificationSignals"],
   "minimumExpertiseSignalsPerGroup": 3,
   "minimumSupplementalResearchRefs": 20,

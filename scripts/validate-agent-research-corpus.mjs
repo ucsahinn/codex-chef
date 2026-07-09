@@ -211,6 +211,7 @@ if (corpus && catalog) {
     "Expert calibration protocol:"
   ];
   const expectedOperationalBlocks = [
+    "World-class specialist upgrade:",
     "Evidence output contract:",
     "Tool and delegation routing:",
     "Verification checklist:",
@@ -231,6 +232,10 @@ if (corpus && catalog) {
   const runtimeContracts = requireArray(corpus.requiredRuntimeContracts, "requiredRuntimeContracts", expectedRuntimeContracts.length);
   if (JSON.stringify(runtimeContracts) !== JSON.stringify(expectedRuntimeContracts)) {
     fail("agent-research-corpus.json requiredRuntimeContracts must match the reviewed runtime contract order.");
+  }
+  const operationalBlocks = requireArray(corpus.requiredOperationalBlocks, "requiredOperationalBlocks", expectedOperationalBlocks.length);
+  if (JSON.stringify(operationalBlocks) !== JSON.stringify(expectedOperationalBlocks)) {
+    fail("agent-research-corpus.json requiredOperationalBlocks must match the reviewed operational block order.");
   }
   const expectedExpertiseSignalGroups = ["decisionHeuristics", "failureModes", "verificationSignals"];
   const expertiseSignalGroups = requireArray(corpus.requiredExpertiseSignalGroups, "requiredExpertiseSignalGroups", expectedExpertiseSignalGroups.length);

@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 0.5.45 - 2026-07-09
+
+- Added a validator-enforced `World-class specialist upgrade` block to all 21
+  specialist agent role files so each agent names its domain failure mode,
+  applies evidence grading, challenges its own output, preserves its role
+  boundary, and routes adjacent work instead of drifting into a generalist.
+- Hardened agent validation so the new specialist block must appear in the
+  correct order, stay source-backed, include role-specific catalog context, and
+  negate each agent's `mustNot` boundary with explicit `do not` language.
+- Hardened npm package-surface validation so ignored or untracked files inside
+  packaged `files` entries fail the release gate, including nested template
+  `tmp`, `node_modules`, build, coverage, Codex local-state, and auth/log
+  residue.
+- Added `templates/.npmignore` so npm pack honors local template ignore rules
+  even though the root package manifest intentionally includes `templates/`.
+
 ## 0.5.44 - 2026-07-09
 
 - Added `codebase-memory` as a default-enabled but tool-narrowed MCP connector
