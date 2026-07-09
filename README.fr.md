@@ -88,7 +88,7 @@ Bash ou WSL:
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install Plan
 
 ```bash
-node scripts/plan-install.mjs --all --json
+node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
 Le plan vient de `manifests/install-plan.json` et decrit chaque operation, politique de collision, backup, risque et flag requis. ECC a inspire le pattern de manifests, mais ce repo reste Codex-only.
@@ -139,6 +139,7 @@ codex exec --strict-config "Summarize the active Codex setup."
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Documentation
 
 - [Install](docs/install.fr.md)
+- [How to run the setup](docs/how-to.fr.md)
 - [Verification](docs/verification.fr.md)
 - [Codex capability map](docs/codex-capability-map.fr.md)
 - [Workflow surface map](docs/workflow-surface-map.fr.md)
@@ -147,6 +148,8 @@ codex exec --strict-config "Summarize the active Codex setup."
 - [ECC compatibility](docs/ecc-compatibility.fr.md)
 - [SEO et decouvrabilite](docs/seo.fr.md)
 - [Advisory sources](docs/advisory-sources.fr.md)
+- [Knowledge base](kb/README.md)
+- [Turkish knowledge base](kb/README.tr.md)
 - [Index pour agents](llms.txt)
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Limite De Publication

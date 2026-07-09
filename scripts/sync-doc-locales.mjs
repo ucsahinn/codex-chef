@@ -412,7 +412,7 @@ const commandBlocks = {
     "```bash\n./scripts/install.sh --all --dry-run\n```",
     "```bash\n./scripts/install.sh --all --interactive\n```",
     "```bash\n./scripts/install.sh --all --plain-output\n```",
-    "```bash\nnode scripts/plan-install.mjs --all --json\n```"
+    "```bash\nnode scripts/plan-install.mjs --all --json --redact-paths\n```"
   ],
   codex: [
     "```bash\nnpm run token:audit\n```",

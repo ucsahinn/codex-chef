@@ -63,7 +63,7 @@ node scripts/plan-install.mjs --all --json
 Este archivo localizado sigue las secciones del archivo fuente en inglés. Source: [how-to.md](how-to.md).
 
 - How To Run The Setup
-- One-Shot Setup
+- Preview-First Setup
 - First Verification
 - Operating Model
 - MCP Defaults

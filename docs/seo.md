@@ -76,7 +76,7 @@ assets/social-preview.png
 - The install surface must list what writes to `~/.codex`, `~/.agents`, and
   optional Git global config.
 - The docs list must expose install, verification, security, capability map,
-  workflow surface map, and SEO/discoverability.
+  workflow surface map, knowledge base, and SEO/discoverability.
 - Claims must be specific and verified: agent count, skill count, docs language
   count, validation gates, and release state.
 

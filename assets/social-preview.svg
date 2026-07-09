@@ -34,7 +34,8 @@
   <g font-family="Segoe UI, Arial, sans-serif">
     <text x="520" y="204" font-size="76" font-weight="850" fill="#ecfeff">Codex Chef</text>
     <text x="526" y="272" font-size="32" font-weight="600" fill="#ccfbf1">Windows-first Codex setup kit</text>
-    <text x="526" y="326" font-size="30" fill="#dbeafe">Agents, skills, MCP connectors, safe installers, validation gates, and multilingual docs.</text>
+    <text x="526" y="322" font-size="29" fill="#dbeafe">Agents, skills, MCP connectors, and safe installers.</text>
+    <text x="526" y="362" font-size="29" fill="#dbeafe">Validation gates, KB, and multilingual docs.</text>
     <g font-size="24" font-weight="750">
       <rect x="526" y="390" width="126" height="52" rx="16" fill="#ecfeff"/>
       <text x="560" y="424" fill="#0f172a">Agents</text>

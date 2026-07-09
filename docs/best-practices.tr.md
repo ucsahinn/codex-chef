@@ -1,67 +1,67 @@
 # Senior Codex Best Practices
 
-Bu rehber, ilk kurulumdan sonra bu starter reposunun kalitesini korumak icin
-standart isletim modelidir. Resmi Codex yuzey modelini, bu reponun lokal
-dogrulama gate'lerini ve bizim diger prompt-engineering / best-practice
-repolarindan gelen pratikleri birlestirir.
+Bu rehber, ilk kurulumdan sonra bu starter reposunun kalitesini korumak için
+standart işletim modelidir. Resmi Codex yüzey modelini, bu reponun lokal
+doğrulama gate'lerini ve bizim diğer prompt-engineering / best-practice
+repolarından gelen pratikleri birleştirir.
 
-Yeni skill, MCP, ajan, profil, hook, installer secenegi veya public dokuman
-eklerken burayi kullan.
+Yeni skill, MCP, ajan, profil, hook, installer seçeneği veya public doküman
+eklerken burayı kullan.
 
-## Hizli Basla
+## Hızlı Başla
 
 | Hedef | Kullan |
 | --- | --- |
-| Tum starter'i kur | `./scripts/install.sh --all` veya `.\scripts\install.ps1 -All` |
-| Neyin nereye ait oldugunu anla | Asagidaki yuzey haritasi ve [docs/codex-surfaces.tr.md](codex-surfaces.tr.md) |
-| Tekrar kullanilabilir workflow ekle | Once skill; bundle olarak dagitilacaksa plugin |
-| Canli dis baglam ekle | Auth gerekiyorsa varsayilan disabled MCP veya connector |
-| Mekanik zorunluluk ekle | Sadece prose degil; hook veya validation script |
-| Managed install yuzeyini incele | `node scripts/plan-install.mjs --all --json` |
-| Push ya da release hazirla | [docs/verification.tr.md](verification.tr.md), sonra release gate |
+| Tüm starter'i kur | Önce preview al, sonra `./scripts/install.sh --all --interactive` veya `.\scripts\install.ps1 -All -Interactive` çalıştır |
+| Neyin nereye ait olduğunu anla | Aşağıdaki yüzey haritası ve [docs/codex-surfaces.tr.md](codex-surfaces.tr.md) |
+| Tekrar kullanılabilir workflow ekle | Önce skill; bundle olarak dağıtılacaksa plugin |
+| Canlı dış bağlam ekle | Auth gerekiyorsa varsayılan disabled MCP veya connector |
+| Mekanik zorunluluk ekle | Sadece prose değil; hook veya validation script |
+| Managed install yüzeyini incele | `node scripts/plan-install.mjs --all --json --redact-paths` |
+| Push ya da release hazırla | [docs/verification.tr.md](verification.tr.md), sonra release gate |
 
 ## Kaynak Kalitesi
 
-Kaynak sirasi:
+Kaynak sırası:
 
-1. Guncel resmi Codex dokumantasyonu veya fetch edilmis Codex manual.
-2. Repo kaniti: scriptler, template'ler, kataloglar, CI ve installer ciktisi.
-3. Ayni paketleme veya prompt mimarisi problemini cozmus yakin yerel repolar.
-4. Dis makaleler sadece genel muhendislik baglami icindir; Codex urun davranisi
-   icin otorite degildir.
+1. Güncel resmi Codex dokümantasyonu veya fetch edilmiş Codex manual.
+2. Repo kanıtı: scriptler, template'ler, kataloglar, CI ve installer çıktısı.
+3. Aynı paketleme veya prompt mimarisi problemini çözmüş yakın yerel repolar.
+4. Dış makaleler sadece genel mühendislik bağlamı içindir; Codex ürün davranışı
+   için otorite değildir.
 
-Bir iddia kurulum davranisini, guvenlik durusunu, connector erisimini veya
-release akislarini degistiriyorsa repo seviyesinde dogrulama adimi gerekir.
+Bir iddia kurulum davranışını, güvenlik duruşunu, connector erişimini veya
+release akışlarını değiştiriyorsa repo seviyesinde doğrulama adımı gerekir.
 
-## Yuzey Haritasi
+## Yüzey Haritası
 
-| Ihtiyac | Nereye konur |
+| İhtiyaç | Nereye konur |
 | --- | --- |
-| Tek seferlik gorev kisiti | Mevcut prompt |
-| Kalici repo konvansiyonu | `AGENTS.md` |
-| Kisisel/global Codex varsayilani | `~/.codex/AGENTS.md` veya global config |
-| Proje sandbox, model, MCP, profil, hook veya tool varsayilani | `templates/codex/config.*.toml` |
-| Tekrar kullanilabilir gorev workflow'u | `SKILL.md`, opsiyonel script, reference ve asset iceren skill |
-| Kurulabilir bundle | `.codex-plugin/plugin.json` iceren plugin |
-| Canli private veya harici veri | MCP server veya app connector |
-| Deterministik lifecycle kontrolu | Hook, validation script veya CI workflow |
-| Push, release, package veya deploy kaniti | Verification docs, changelog ve release gate ciktisi |
+| Tek seferlik görev kısıtı | Mevcut prompt |
+| Kalıcı repo konvansiyonu | `AGENTS.md` |
+| Kişisel/global Codex varsayılanı | `~/.codex/AGENTS.md` veya global config |
+| Proje sandbox, model, MCP, profil, hook veya tool varsayılanı | `templates/codex/config.*.toml` |
+| Tekrar kullanılabilir görev workflow'u | `SKILL.md`, opsiyonel script, reference ve asset içeren skill |
+| Kurulabilir bundle | `.codex-plugin/plugin.json` içeren plugin |
+| Canlı private veya harici veri | MCP server veya app connector |
+| Deterministik lifecycle kontrolü | Hook, validation script veya CI workflow |
+| Push, release, package veya deploy kanıtı | Verification docs, changelog ve release gate çıktısı |
 
-Her davranisi `AGENTS.md` icine zorla koyma. Kural mekanik enforcement
-gerektiriyorsa script veya hook yap. Workflow tekrar kullanilabilir baglam
-gerektiriyorsa skill yap. Tool veya dagitim gerekiyorsa plugin olarak paketle.
+Her davranışı `AGENTS.md` içine zorla koyma. Kural mekanik enforcement
+gerektiriyorsa script veya hook yap. Workflow tekrar kullanılabilir bağlam
+gerektiriyorsa skill yap. Tool veya dağıtım gerekiyorsa plugin olarak paketle.
 
-## Senior Calisma Dongusu
+## Senior Çalışma Döngüsü
 
-1. Dosya degistirmeden once gercek repo durumunu incele.
-2. Genis uygulama oncesi bilinmeyen alanlari haritala.
-3. Guncel API ve urun davranisini resmi veya birincil kaynaklardan dogrula.
-4. Kok problemi cozen en kucuk tutarli degisikligi uygula.
-5. Once en dar anlamli kontrolu, sonra risk buyudukce genis gate'leri calistir.
-6. Diff'i secret, lokal state, uretilmis artifact ve alakasiz churn icin incele.
-7. Commit, push, publish, deploy veya tag sadece kullanici acikca istediyse yap.
+1. Dosya değiştirmeden önce gerçek repo durumunu incele.
+2. Geniş uygulama öncesi bilinmeyen alanları haritala.
+3. Güncel API ve ürün davranışını resmi veya birincil kaynaklardan doğrula.
+4. Kök problemi çözen en küçük tutarlı değişikliği uygula.
+5. Önce en dar anlamlı kontrolü, sonra risk büyüdükçe geniş gate'leri çalıştır.
+6. Diff'i secret, lokal state, üretilmiş artifact ve alakasız churn için incele.
+7. Commit, push, publish, deploy veya tag sadece kullanıcı açıkça istediyse yap.
 
-## Skill Ve Package Kurallari
+## Skill Ve Package Kuralları
 
 - `catalog/skills.json` istek listesi degildir. Kurulabilir kayitlar bilinen
   package/skill ciftleri olmalidir.
@@ -76,7 +76,7 @@ gerektiriyorsa skill yap. Tool veya dagitim gerekiyorsa plugin olarak paketle.
 - Zaten lokal olan veya public package'tan guvenle kurulamayan skill'ler
   `install: false` kalmali ve nedeni yazmalidir.
 
-## Uzman Ajan Kurallari
+## Uzman Ajan Kuralları
 
 - `catalog/agents.json`, paketlenen uzman ajanlar icin incelenmis source of
   truth'tur.
@@ -108,7 +108,7 @@ gerektiriyorsa skill yap. Tool veya dagitim gerekiyorsa plugin olarak paketle.
 - Yazma agirlikli uygulama, kullanici acikca bolmeyi istemedigi surece ana
   thread'de kalmalidir.
 
-## Harici Starter Ve ECC Import Kurallari
+## Harici Starter Ve ECC Import Kuralları
 
 Buyuk agent starter repolari faydali desenler verebilir, ama toptan import
 edilmemelidir. Guncel ECC kaynakli politika
@@ -131,56 +131,56 @@ Engellenenler:
 - raw prompt/tool telemetry hook'lari
 - credential sekilli ornek import'u
 
-## Dogrulama Gate'i
+## Doğrulama Gate'i
 
-Bir maintainer baska kullaniciya setup hazir demeden once:
+Bir maintainer başka kullanıcıya setup hazır demeden önce:
 
 ```bash
 npm run check
-node scripts/plan-install.mjs --all --json
+node scripts/plan-install.mjs --all --json --redact-paths
 git status --short
 git diff --cached --check
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
-Kurulabilir skill kaynaklari degismeden once:
+Kurulabilir skill kaynakları değişmeden önce:
 
 ```bash
 npm run verify:skills
 npm run verify:skills:online
 ```
 
-`verify:skills` offline ve CI icin guvenlidir. `verify:skills:online`, Skills
-CLI'a her kurulabilir package/skill ciftini cozdurur; boylece yalniz skill adini
-repo sanip clone etmeye calisan hatalar tekrar etmez.
+`verify:skills` offline ve CI için güvenlidir. `verify:skills:online`, Skills
+CLI'a her kurulabilir package/skill çiftini çözdürür; böylece yalnız skill adını
+repo sanıp clone etmeye çalışan hatalar tekrar etmez.
 
 ## Public-Safe Kurallar
 
-- Token, auth dosyasi, cookie, private key, memory, session, makineye ozel path,
-  lokal trust state, installer, arsiv veya build output yayinlama.
-- Authenticated MCP'ler varsayilan disabled kalir.
-- Repo bilerek npm paketi yapilmadikca `package.json` private kalir.
-- Public dokumanlar bunun resmi OpenAI urunu degil community starter oldugunu
-  soylemelidir.
-- Ingilizce ve Turkce docs esli kalir.
+- Token, auth dosyası, cookie, private key, memory, session, makineye özel path,
+  lokal trust state, installer, arşiv veya build output yayınlama.
+- Authenticated MCP'ler varsayılan disabled kalır.
+- Repo bilerek npm paketi yapılmadıkça `package.json` private kalır.
+- Public dokümanlar bunun resmi OpenAI ürünü değil community starter olduğunu
+  söylemelidir.
+- İngilizce ve Türkçe docs eşli kalır.
 
 ## UI Ve Frontend Kalitesi
 
-Gorev website, app, dashboard, gorsel asset veya screenshot iceriyorsa:
+Görev website, app, dashboard, görsel asset veya screenshot içeriyorsa:
 
-- Once mevcut icerigi ve markayi koru; yeni copy eklemeden once hiyerarsi,
-  bosluk, responsive davranis, state'ler ve donus netligini iyilestir.
-- Mumkunse gercek browser veya screenshot destekli akista dogrula.
-- Mobil genislik, uzun metin, focus state, loading/empty/error state ve console
-  hatalarini kontrol et.
-- Motion amacli olsun: kisa transform/opacity gecisleri, reduced-motion fallback
+- Önce mevcut içeriği ve markayı koru; yeni copy eklemeden önce hiyerarşi,
+  boşluk, responsive davranış, state'ler ve dönüş netliğini iyileştir.
+- Mümkünse gerçek browser veya screenshot destekli akışta doğrula.
+- Mobil genişlik, uzun metin, focus state, loading/empty/error state ve console
+  hatalarını kontrol et.
+- Motion amaçlı olsun: kısa transform/opacity geçişleri, reduced-motion fallback
   ve bloklayan dekoratif animasyon yok.
 
-## Bakim Kontrol Listesi
+## Bakım Kontrol Listesi
 
-- Yeni docs Ingilizce ve Turkce eslidir.
-- README ilk ekrani dogru isletim dokumanlarina link verir.
-- Yeni katalog kayitlari sadece elle degil script ile dogrulanir.
-- Installer davranisi gecici `CODEX_HOME` ve `AGENTS_HOME` ile smoke-test edilir.
-- Changelog kullaniciyi etkileyen degisiklikleri kaydeder.
-- Stage oncesi git status incelenir, sadece niyetli dosyalar stage edilir.
+- Yeni docs İngilizce ve Türkçe eşlidir.
+- README ilk ekranı doğru işletim dokümanlarına link verir.
+- Yeni katalog kayıtları sadece elle değil script ile doğrulanır.
+- Installer davranışı geçici `CODEX_HOME` ve `AGENTS_HOME` ile smoke-test edilir.
+- Changelog kullanıcıyı etkileyen değişiklikleri kaydeder.
+- Stage öncesi git status incelenir, sadece niyetli dosyalar stage edilir.

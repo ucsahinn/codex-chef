@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+## v0.5.48 - 2026-07-09
+
+Bu patch public repo yuzeyini daha net bir handoff paketine tasir. Kisa KB
+makaleleri artik tekrar eden kurulum, routing, release ve drift sorularini
+kapsar; release gate'leri de bilingual KB'nin sessizce senkron disina cikmasini
+engeller.
+
+## One cikanlar
+
+- `kb/` altinda kurulum on izleme guvenligi, runtime dogrulamasi, ajan/MCP
+  routing, public release hijyeni, PowerShell policy, Skills CLI cache
+  sorunlari, custom home drift, MCP no-tools tanisi, managed-file drift ve
+  public gorsel asset'ler icin English ve Turkce makaleler eklendi.
+- `npm run validate:kb-locales` eklendi; `npm run check`, CI,
+  package-surface validation, release-readiness validation ve approval-rule
+  harmony icine baglandi.
+- Public README/docs handoff komutlari, makineye ozel path'leri public issue
+  veya release notuna tasimamasi icin
+  `node scripts/plan-install.mjs --all --json --redact-paths` kullanacak
+  sekilde duzeltildi.
+- `assets/social-preview.svg` ve `assets/social-preview.png` yenilendi; GitHub
+  social preview 1280x640 boyutta kirpilmadan okunabilir kalir.
+
+## Verification
+
+- `npm run check`
+- `npm run validate:package-surface`
+- `npm run validate:release`
+- `git diff --check`
+- `git diff --cached --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.47 - 2026-07-09
 
 Bu patch v0.5.46 release dogrulamasi sirasinda yakalanan post-release status

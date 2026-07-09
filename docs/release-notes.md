@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+## v0.5.48 - 2026-07-09
+
+This patch turns the public repository surface into a clearer handoff package:
+short KB articles now cover the recurring install, routing, release, and drift
+questions, and the release gates verify that the bilingual KB cannot silently
+fall out of sync.
+
+## Highlights
+
+- Added a first-class `kb/` directory with English and Turkish articles for
+  install preview safety, runtime verification, agent/MCP routing, public
+  release hygiene, PowerShell policy, Skills CLI cache issues, custom home
+  drift, MCP no-tools diagnostics, managed-file drift, and public visual
+  assets.
+- Added `npm run validate:kb-locales` and wired it into `npm run check`, CI,
+  package-surface validation, release-readiness validation, and approval-rule
+  harmony.
+- Updated public README/docs handoff commands to use
+  `node scripts/plan-install.mjs --all --json --redact-paths` where raw JSON
+  could otherwise expose machine-specific paths.
+- Refreshed `assets/social-preview.svg` and `assets/social-preview.png` so the
+  GitHub social preview stays readable at 1280x640.
+
+## Verification
+
+- `npm run check`
+- `npm run validate:package-surface`
+- `npm run validate:release`
+- `git diff --check`
+- `git diff --cached --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.47 - 2026-07-09
 
 This patch fixes a post-release status false negative found while verifying

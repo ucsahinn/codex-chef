@@ -180,6 +180,8 @@ prefix_rule(pattern = ["npm.cmd", "run", "validate:doc-locales"], decision = "al
 prefix_rule(pattern = ["npm", "run", "validate:doc-locales"], decision = "allow")
 prefix_rule(pattern = ["npm.cmd", "run", "validate:locales"], decision = "allow")
 prefix_rule(pattern = ["npm", "run", "validate:locales"], decision = "allow")
+prefix_rule(pattern = ["npm.cmd", "run", "validate:kb-locales"], decision = "allow")
+prefix_rule(pattern = ["npm", "run", "validate:kb-locales"], decision = "allow")
 prefix_rule(pattern = ["npm.cmd", "run", "validate:workflow"], decision = "allow")
 prefix_rule(pattern = ["npm", "run", "validate:workflow"], decision = "allow")
 prefix_rule(pattern = ["npm.cmd", "run", "validate:content"], decision = "allow")

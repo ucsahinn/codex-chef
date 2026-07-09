@@ -23,6 +23,7 @@ jobs:
       - run: node --check scripts/validate-doc-locales.mjs
       - run: node --check scripts/validate-docs.mjs
       - run: node --check scripts/validate-readme-locales.mjs
+      - run: node --check scripts/validate-kb-locales.mjs
       - run: node --check scripts/validate-workflow-security.mjs
       - run: node --check scripts/validate-content-safety.mjs
       - run: node --check scripts/validate-install-plan.mjs

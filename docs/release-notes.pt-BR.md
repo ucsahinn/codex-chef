@@ -34,6 +34,12 @@ npm run verify:skills:online
 - Usar `git diff --check` para encontrar problemas de whitespace e Markdown.
 - Usar `gitleaks detect --redact --no-banner --no-git --verbose` quando Gitleaks estiver disponível.
 
+## v0.5.48 - 2026-07-09
+
+Esta versao amplia a entrega publica do repo com uma knowledge base bilingue,
+um novo validador de locales para KB, exemplos de install-plan redigidos e uma
+imagem social preview atualizada.
+
 ## v0.5.47 - 2026-07-09
 
 Esta versao corrige um falso `fail` de `codex:status:all` encontrado depois da

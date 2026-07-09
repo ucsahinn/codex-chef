@@ -12,12 +12,12 @@ or public-facing document.
 
 | Goal | Use |
 | --- | --- |
-| Install the full starter | `./scripts/install.sh --all` or `.\scripts\install.ps1 -All` |
+| Install the full starter | Preview first, then run `./scripts/install.sh --all --interactive` or `.\scripts\install.ps1 -All -Interactive` |
 | Understand what belongs where | The surface map below and [docs/codex-surfaces.md](codex-surfaces.md) |
 | Add a reusable workflow | A skill first; package it as a plugin only when it should be installed as a bundle |
 | Add live external context | An MCP server or connector, disabled by default when it needs auth |
 | Add mechanical enforcement | A hook or validation script, not prose alone |
-| Inspect the managed install surface | `node scripts/plan-install.mjs --all --json` |
+| Inspect the managed install surface | `node scripts/plan-install.mjs --all --json --redact-paths` |
 | Prepare for push or release | [docs/verification.md](verification.md), then the release gate |
 
 ## Source Quality
@@ -141,7 +141,7 @@ Before a maintainer tells another user that the setup is ready:
 
 ```bash
 npm run check
-node scripts/plan-install.mjs --all --json
+node scripts/plan-install.mjs --all --json --redact-paths
 git status --short
 git diff --cached --check
 gitleaks detect --redact --no-banner --no-git --verbose

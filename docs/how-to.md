@@ -7,14 +7,16 @@ agents, profiles, rules, a local plugin, and repo-only doctor diagnostics. Git
 hygiene guardrails are available as a separate opt-in because they change
 global Git behavior.
 
-## One-Shot Setup
+## Preview-First Setup
 
 PowerShell:
 
 ```powershell
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
+node scripts/plan-install.mjs --all --json --redact-paths
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
 
 Bash or WSL:
@@ -23,8 +25,13 @@ Bash or WSL:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
-./scripts/install.sh --all
+./scripts/install.sh --all --dry-run
+node scripts/plan-install.mjs --all --json --redact-paths
+./scripts/install.sh --all --interactive
 ```
+
+Use plain noninteractive `-All` or `--all` only in reviewed automation where the
+install plan is already known and the target Codex/Agents homes are controlled.
 
 Use the narrower flags only when you intentionally want a partial setup:
 

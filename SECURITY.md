@@ -29,7 +29,7 @@ include real secrets in issue text, screenshots, logs, or reproduction steps.
 
 ## Pre-Push Checklist
 
-Run:
+For a quick local check, run:
 
 ```bash
 npm run validate
@@ -37,7 +37,18 @@ git status --short
 git diff --cached
 ```
 
-If available:
+For security-sensitive changes, release work, or public handoff, run the broader
+gate:
+
+```bash
+npm run check
+npm run validate:release
+npm run release:notes:check
+node scripts/plan-install.mjs --all --json --redact-paths
+git diff --check
+```
+
+If available, include the current-tree secret scan:
 
 ```bash
 gitleaks detect --redact --no-banner --no-git --verbose

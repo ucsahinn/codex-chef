@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.5.48 - 2026-07-09
+
+- Added a first-class bilingual `kb/` surface for task-shaped install preview,
+  runtime verification, agent/MCP routing, public release hygiene,
+  Windows/PowerShell setup, Skills CLI cache, custom home drift, MCP no-tools,
+  managed-file drift, and public visual-asset guidance.
+- Added `npm run validate:kb-locales` to enforce English/Turkish KB article
+  pairing, index coverage, headings, placeholder checks, and Turkish-language
+  content signals.
+- Updated public handoff docs and generated locale templates to use redacted
+  install-plan JSON examples so maintainers do not paste machine-specific paths
+  into public issues or releases.
+- Refreshed the social preview SVG and PNG so the GitHub preview copy fits the
+  image without clipping.
+
 ## 0.5.47 - 2026-07-09
 
 - Increased the Codex status aggregator budget for installed runtime

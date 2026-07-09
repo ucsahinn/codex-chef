@@ -54,6 +54,9 @@ scope.
   online with `npm run verify:skills:online` before publication.
 - Versioned release notes live in [docs/release-notes.md](release-notes.md) and
   stay aligned with `CHANGELOG.md`.
+- Task-focused knowledge-base articles live under [kb/](../kb/README.md) in
+  English and Turkish so common operator decisions do not bloat the README or
+  release notes.
 - GitHub repository description, topics, feature toggles, and release metadata
   are documented in [docs/github-settings.md](github-settings.md).
 - MCP catalog entries are checked against Windows and Unix Codex config

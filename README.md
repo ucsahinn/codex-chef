@@ -42,7 +42,7 @@
 
 This is an unofficial community starter, not an OpenAI product. It is mapped to current official Codex documentation and keeps destructive, credentialed, publishing, deployment, database, and broad filesystem actions approval-gated.
 
-The multilingual README entry points and six-language deep docs coverage are part of the release surface. English and Turkish keep the most complete operator flow; Deutsch, Español, Português (Brasil), and Français provide concise local entry points and links into the same deep docs.
+The multilingual README entry points, six-language deep docs coverage, and bilingual knowledge base are part of the release surface. English and Turkish keep the most complete operator flow; Deutsch, Español, Português (Brasil), and Français provide concise local entry points and links into the same deep docs.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Copy-Paste Install
 
@@ -178,6 +178,7 @@ Run `npm run codex:status` after install to see MCP setup notes, effective contr
 | --- | --- |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Real validation | `npm run check` runs repo, docs, install-plan, installer smoke, agent drift, MCP drift, token-surface, skill-source, supply-chain, package-surface, release-readiness, and security checks. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> Multilingual surface | Six root READMEs plus six-language deep docs are validated. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d8.svg" alt="" aria-hidden="true" width="20"> Operator KB | `kb/` keeps short English and Turkish task articles for install preview, runtime verification, routing, and release hygiene. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> Conservative connectors | Account, database, production, and broad filesystem connectors stay disabled until a task explicitly needs them. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install plan | `manifests/install-plan.json` and `schemas/install-plan.schema.json` define the managed write surface. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context budget | `npm run token:audit` reports the largest context surfaces; `token-safe.config.toml` lowers verbosity and tool-output budgets without disabling skills, MCPs, memory, hooks, or automatic agent model/reasoning selection. |
@@ -191,6 +192,7 @@ assets/                  Public-safe README visuals
 catalog/                 Agent, skill, MCP, and routing metadata
 README*.md               Multilingual public entry points
 docs/                    Six-language setup and verification guides
+kb/                      English and Turkish task-focused knowledge base
 manifests/               No-write install plan metadata
 plugins/                 Bundled local Codex plugin and skills
 schemas/                 Lightweight validation schemas
@@ -218,6 +220,7 @@ npm run verify:skills:online
 Use the README for orientation; use the docs for operator detail:
 
 - [Install](docs/install.md)
+- [How to run the setup](docs/how-to.md)
 - [Expected output](docs/expected-output.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Upgrade guide](docs/upgrade.md)
@@ -235,6 +238,8 @@ Use the README for orientation; use the docs for operator detail:
 - [Research notes](docs/research-notes.md)
 - [Advisory sources](docs/advisory-sources.md)
 - [Publishing](docs/publish.md)
+- [Knowledge base](kb/README.md)
+- [Turkish knowledge base](kb/README.tr.md)
 - [Agent-readable index](llms.txt)
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Official Codex References

@@ -213,7 +213,7 @@ Install after the preview is correct:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
-./scripts/install.sh --all
+./scripts/install.sh --all --interactive
 ```
 
 Useful flags:

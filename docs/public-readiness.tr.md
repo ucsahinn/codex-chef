@@ -46,14 +46,17 @@ anlatmalıdır.
 - CODEOWNERS review routing için varsayılan public owner bilgisini tutar.
 - Dependabot, GitHub Actions ve npm manifest update PR'ları için ayarlıdır.
 - GitHub Actions dependency'leri full commit SHA ile pinlidir ve workflow
-  validation tag-based action ref'lerini publish oncesi reddeder.
+  validation tag-based action ref'lerini publish öncesi reddeder.
 - Workflow validation, validation workflow'larinda herhangi bir `*: write`
   permission satirini reddeder; publish/release automation manuel kalir.
 - Installable skill kaynakları `npm run verify:skills` ile offline kontrol
   edilir, `catalog/skills-lock.json` kaynak allowlist'ine yansitilir ve
-  publication oncesi `npm run verify:skills:online` ile online cozdurulur.
+  publication öncesi `npm run verify:skills:online` ile online çözdürülür.
 - Version'lı release notları [docs/release-notes.tr.md](release-notes.tr.md)
   içinde tutulur ve `CHANGELOG.md` ile hizalı kalır.
+- Task odaklı bilgi bankası makaleleri [kb/](../kb/README.tr.md) altında
+  Türkçe ve İngilizce tutulur; böylece sık operatör kararları README veya
+  release notes dosyalarını şişirmez.
 - GitHub repo açıklaması, topic'leri, feature toggle'ları ve release metadata'sı
   [docs/github-settings.tr.md](github-settings.tr.md) içinde dokümante edilir.
 - MCP katalog entry'leri Windows ve Unix Codex config template'leriyle
@@ -63,7 +66,7 @@ anlatmalıdır.
 - Supply-chain IOC taraması default check pipeline'ının parçasıdır.
 - Release-readiness validation; release notes, GitHub settings docs, workflow
   hardening, Gitleaks gate dokumantasyonu ve artifact hygiene kontrol eder.
-- Workflow-security validation checkout credential persistence, genis write
+- Workflow-security validation checkout credential persistence, geniş write
   permission, implicit dependency install ve workflow icinden push/release/auth
   aksiyonlarini reddeder.
 - Package-surface validation npm source payload'ini scripts disabled ve

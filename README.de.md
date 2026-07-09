@@ -88,7 +88,7 @@ Bash oder WSL:
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install Plan
 
 ```bash
-node scripts/plan-install.mjs --all --json
+node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
 Der Plan kommt aus `manifests/install-plan.json` und beschreibt jede Operation, Kollisionsregel, Backup-Strategie, Risikostufe und benoetigte Flag. ECC hat die Manifest-Idee inspiriert; dieses Repo bleibt aber Codex-only.
@@ -139,6 +139,7 @@ codex exec --strict-config "Summarize the active Codex setup."
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Dokumentation
 
 - [Install](docs/install.de.md)
+- [How to run the setup](docs/how-to.de.md)
 - [Verification](docs/verification.de.md)
 - [Codex capability map](docs/codex-capability-map.de.md)
 - [Workflow surface map](docs/workflow-surface-map.de.md)
@@ -147,6 +148,8 @@ codex exec --strict-config "Summarize the active Codex setup."
 - [ECC compatibility](docs/ecc-compatibility.de.md)
 - [SEO und Discoverability](docs/seo.de.md)
 - [Advisory sources](docs/advisory-sources.de.md)
+- [Knowledge base](kb/README.md)
+- [Turkish knowledge base](kb/README.tr.md)
 - [Agent-readable index](llms.txt)
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Publishing Boundary

@@ -88,7 +88,7 @@ Bash ou WSL:
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install Plan
 
 ```bash
-node scripts/plan-install.mjs --all --json
+node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
 O plano vem de `manifests/install-plan.json` e descreve cada operacao, politica de colisao, backup, risco e flag necessaria. ECC inspirou o padrao de manifests, mas este repo continua Codex-only.
@@ -139,6 +139,7 @@ codex exec --strict-config "Summarize the active Codex setup."
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Documentacao
 
 - [Install](docs/install.pt-BR.md)
+- [How to run the setup](docs/how-to.pt-BR.md)
 - [Verification](docs/verification.pt-BR.md)
 - [Codex capability map](docs/codex-capability-map.pt-BR.md)
 - [Workflow surface map](docs/workflow-surface-map.pt-BR.md)
@@ -147,6 +148,8 @@ codex exec --strict-config "Summarize the active Codex setup."
 - [ECC compatibility](docs/ecc-compatibility.pt-BR.md)
 - [SEO e descoberta](docs/seo.pt-BR.md)
 - [Advisory sources](docs/advisory-sources.pt-BR.md)
+- [Knowledge base](kb/README.md)
+- [Turkish knowledge base](kb/README.tr.md)
 - [Indice para agents](llms.txt)
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Limite De Publicacao

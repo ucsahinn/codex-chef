@@ -130,6 +130,7 @@ for (const script of [
   "validate:docs",
   "validate:doc-locales",
   "validate:locales",
+  "validate:kb-locales",
   "validate:workflow",
   "validate:content",
   "validate:install-plan",

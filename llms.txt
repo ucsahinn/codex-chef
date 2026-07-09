@@ -15,6 +15,7 @@ Primary human entry points:
 - [Verification guide](docs/verification.md)
 - [Security model](docs/security-model.md)
 - [Skills and agents](docs/skills-and-agents.md)
+- [Knowledge base](kb/README.md)
 - [Workflow surface map](docs/workflow-surface-map.md)
 - [ECC compatibility](docs/ecc-compatibility.md)
 - [Completion audit](docs/completion-audit.md)
@@ -52,6 +53,7 @@ explicit `-InstallGitGuards` or `--install-git-guards` flag.
   `catalog/skills-lock.json`.
 - Conservative MCP defaults in `catalog/mcp-servers.json` and
   `templates/codex/config.*.toml`.
+- Bilingual task-focused knowledge base under `kb/`.
 - No-write installer previews for PowerShell and Bash.
 - Repo-only doctor command:
 

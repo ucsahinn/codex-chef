@@ -52,6 +52,10 @@ const requiredSignalGroups = [
     "docs/advisory-sources.pt-BR.md",
     "docs/advisory-sources.tr.md",
     "docs/advisory-sources.fr.md"
+  ],
+  [
+    "kb/README.md",
+    "kb/README.tr.md"
   ]
 ];
 

@@ -75,7 +75,7 @@ assets/social-preview.png
 - Install surface `~/.codex`, `~/.agents` ve opsiyonel global Git config
   yazimlarini acik listelemeli.
 - Docs listesi install, verification, security, capability map, workflow
-  surface map ve SEO/discoverability rehberlerini gostermeli.
+  surface map, bilgi bankası ve SEO/discoverability rehberlerini göstermeli.
 - Iddialar spesifik ve dogrulanmis olmali: agent sayisi, skill sayisi, docs dil
   sayisi, validation gate'leri ve release state.
 

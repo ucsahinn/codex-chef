@@ -6,14 +6,16 @@ skill'leri, uzman ajanları, profilleri, kuralları, yerel plugin'i ve repo-only
 doctor tanılaması hazır olur. Git hijyen guard'ları ayrı opt-in olarak durur
 çünkü global Git davranışını değiştirir.
 
-## Tek Seferlik Kurulum
+## Ön İzleme Öncelikli Kurulum
 
 PowerShell:
 
 ```powershell
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
+node scripts/plan-install.mjs --all --json --redact-paths
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
 
 Bash veya WSL:
@@ -22,8 +24,13 @@ Bash veya WSL:
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
-./scripts/install.sh --all
+./scripts/install.sh --all --dry-run
+node scripts/plan-install.mjs --all --json --redact-paths
+./scripts/install.sh --all --interactive
 ```
+
+Yalın `-All` veya `--all` komutunu yalnızca install planının zaten incelendiği
+ve hedef Codex/Agents klasörlerinin kontrollü olduğu otomasyonlarda kullan.
 
 Sadece belirli parçaları kurmak istiyorsan dar bayrakları kullan:
 

@@ -43,6 +43,17 @@ const mojibakePatterns = [
   { label: "mojibake punctuation or symbol lead", pattern: /\u00e2[\u20ac\u0153\u201e\u2122\u0161\u017e\u0178]/ }
 ];
 
+const publicHandoffDocs = new Set([
+  "README.md",
+  "README.de.md",
+  "README.es.md",
+  "README.fr.md",
+  "README.pt-BR.md",
+  "README.tr.md",
+  "docs/best-practices.md",
+  "docs/best-practices.tr.md"
+]);
+
 function posix(filePath) {
   return filePath.split(path.sep).join("/");
 }
@@ -89,6 +100,13 @@ for (const file of walk(root).filter(isTextFile)) {
     if (codePoint === 0xfeff && index === 0) continue;
     const location = locationForIndex(text, index);
     failures.push(`${rel}:${location.line}:${location.column} contains ${dangerousCodePoints.get(codePoint)} (U+${codePoint.toString(16).toUpperCase().padStart(4, "0")})`);
+  }
+  if (publicHandoffDocs.has(rel)) {
+    const rawInstallPlan = /node scripts\/plan-install\.mjs --all --json(?![^\r\n`]*--redact-paths)/.exec(text);
+    if (rawInstallPlan) {
+      const location = locationForIndex(text, rawInstallPlan.index);
+      failures.push(`${rel}:${location.line}:${location.column} must use --redact-paths for public install-plan JSON examples`);
+    }
   }
 }
 

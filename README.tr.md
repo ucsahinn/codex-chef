@@ -27,12 +27,12 @@ Codex Chef, Windows tarafında güçlü ama kontrollü bir Codex zemini isteyenl
 
 Bu repo resmi olmayan bir community starter'dır; OpenAI ürünü değildir. Güncel resmi Codex dokümantasyonuyla eşlenir ve destructive, credential, publish, deploy, database ve geniş filesystem aksiyonlarını onay kapısında tutar.
 
-Çok dilli README girişleri ve altı dilde derin dokümantasyon release yüzeyinin parçasıdır. Türkçe ve İngilizce en detaylı operatör akışını taşır; Deutsch, Español, Português (Brasil) ve Français kısa girişler ve aynı derin rehberlere bağlantılar sunar.
+Çok dilli README girişleri, altı dilde derin dokümantasyon ve iki dilli bilgi bankası release yüzeyinin parçasıdır. Türkçe ve İngilizce en detaylı operatör akışını taşır; Deutsch, Español, Português (Brasil) ve Français kısa girişler ve aynı derin rehberlere bağlantılar sunar.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Hızlı Kurulum
 
-Paste etmeden once lokal gereksinimleri dogrula; boylece setup hatasi repo mu
-makine mi daha net gorunur:
+Paste etmeden önce lokal gereksinimleri doğrula; böylece setup hatası repo mu
+makine mi daha net görünür:
 
 ```powershell
 Get-Command git
@@ -43,7 +43,7 @@ node -v
 ```
 
 Node.js 18 veya daha yeni surum gerekir. Bu komutlardan biri eksikse repoyu
-bozuk saymadan once [Sorun giderme](docs/troubleshooting.tr.md) rehberine bak.
+bozuk saymadan önce [Sorun giderme](docs/troubleshooting.tr.md) rehberine bak.
 
 Önce preview al:
 
@@ -162,6 +162,7 @@ Kurulumdan sonra `npm run codex:status` çalıştırarak MCP setup notlarını, 
 | --- | --- |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Gerçek doğrulama | `npm run check` repo, docs, install-plan, installer smoke, agent drift, MCP drift, token-surface, skill-source, supply-chain, package-surface, release-readiness ve security kontrollerini çalıştırır. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> Çok dilli yüzey | Altı root README ve altı dilde derin dokümantasyon validation ile korunur. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d8.svg" alt="" aria-hidden="true" width="20"> Bilgi bankası | `kb/` install preview, runtime doğrulama, routing ve release hijyeni için kısa Türkçe ve İngilizce task makaleleri tutar. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> Konservatif connector'lar | Account, database, production ve geniş filesystem connector'ları görev açıkça istemedikçe disabled kalır. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install plan | `manifests/install-plan.json` ve `schemas/install-plan.schema.json` managed write yüzeyini tanımlar. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context budget | `npm run token:audit` en büyük context yüzeylerini gösterir; `token-safe.config.toml` skill, MCP, memory, hook veya otomatik agent model/reasoning seçimini kapatmadan verbosity ve tool-output budget'ını düşürür. |
@@ -175,6 +176,7 @@ assets/                  Public-safe README görselleri
 catalog/                 Agent, skill, MCP ve routing metadata'sı
 README*.md               Çok dilli public girişler
 docs/                    Altı dilli kurulum ve doğrulama rehberleri
+kb/                      Türkçe ve İngilizce iş odaklı bilgi bankası
 manifests/               No-write install plan metadata'sı
 plugins/                 Bundled lokal Codex plugin ve skill'ler
 schemas/                 Hafif validation schema'ları
@@ -202,6 +204,7 @@ npm run verify:skills:online
 README yön bulmak içindir; operatör detayı docs altında:
 
 - [Kurulum](docs/install.tr.md)
+- [Kurulumu nasıl kullanmalı](docs/how-to.tr.md)
 - [Beklenen çıktı](docs/expected-output.tr.md)
 - [Sorun giderme](docs/troubleshooting.tr.md)
 - [Upgrade rehberi](docs/upgrade.tr.md)
@@ -219,6 +222,8 @@ README yön bulmak içindir; operatör detayı docs altında:
 - [Research notes](docs/research-notes.tr.md)
 - [Advisory kaynakları](docs/advisory-sources.tr.md)
 - [Publishing](docs/publish.tr.md)
+- [Bilgi bankası](kb/README.tr.md)
+- [English knowledge base](kb/README.md)
 - [Ajan-okunur indeks](llms.txt)
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Resmi Codex Kaynakları
