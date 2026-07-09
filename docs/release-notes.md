@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## v0.5.44 - 2026-07-05
+## v0.5.44 - 2026-07-09
 
 This patch adds a reviewed code-intelligence MCP for users who want
 graph-backed repository mapping without weakening the starter defaults.

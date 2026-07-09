@@ -34,7 +34,7 @@ npm run verify:skills:online
 - Usar `git diff --check` para detectar problemas de whitespace y Markdown.
 - Usar `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks está disponible.
 
-## v0.5.44 - 2026-07-05
+## v0.5.44 - 2026-07-09
 
 Esta version agrega `codebase-memory` como MCP habilitado por defecto pero
 restringido por herramientas para analisis de codebase con grafo local. Las

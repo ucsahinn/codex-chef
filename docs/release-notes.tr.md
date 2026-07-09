@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## v0.5.44 - 2026-07-05
+## v0.5.44 - 2026-07-09
 
 Bu patch, starter default'larini zayiflatmadan graph destekli repo mapping
 isteyen kullanicilar icin review edilmis bir code-intelligence MCP ekler.

@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## 0.5.44 - 2026-07-05
+## 0.5.44 - 2026-07-09
 
 - Added `codebase-memory` as a default-enabled but tool-narrowed MCP connector
   for graph-backed repository mapping, architecture queries, and diff impact
