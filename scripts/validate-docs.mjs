@@ -7,7 +7,7 @@ const failures = [];
 const ignoredDirs = new Set([".git", ".serena", "node_modules", "dist", "build", "coverage", ".next", "tmp", "temp"]);
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const routingPolicyLine =
-  "Policy: task-shape routing names matching specialists, selects matching skills when applicable, and only spawns subagents when the current runtime permits delegation; risky actions remain approval-gated.";
+  "Policy: task-shape routing names matching specialists, selects matching skills when applicable, and may spawn bounded local subagents when the current runtime permits delegation; risky actions remain approval-gated.";
 
 function posix(filePath) {
   return filePath.split(path.sep).join("/");
@@ -105,6 +105,19 @@ function validateDocText(file) {
     }
     if (!text.includes(routingPolicyLine)) {
       failures.push(`${rel} has stale routing policy expected-output; expected the runtime-bounded delegation policy line`);
+    }
+    if (rel === "docs/expected-output.md" || rel === "docs/expected-output.tr.md") {
+      for (const requiredExpectedOutput of [
+        "PowerShell Non-Interactive Dry Run",
+        "PowerShell Interactive Dry Run",
+        "[*] Codex Chef installer",
+        "Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled."
+      ]) {
+        if (!text.includes(requiredExpectedOutput)) failures.push(`${rel} missing current expected-output snippet: ${requiredExpectedOutput}`);
+      }
+    }
+    if (text.includes("Authenticated/account MCP connectors remain disabled by default")) {
+      failures.push(`${rel} has stale narrow MCP connector boundary text`);
     }
   }
 }

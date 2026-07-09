@@ -2,6 +2,60 @@
 
 ## Unreleased
 
+## v0.5.44 - 2026-07-05
+
+Bu patch, starter default'larini zayiflatmadan graph destekli repo mapping
+isteyen kullanicilar icin review edilmis bir code-intelligence MCP ekler.
+`codebase-memory` catalog ve config template'lerine varsayilan acik ama
+tool-daraltilmis lokal graph yuzeyi olarak girer: read/query tool'lari
+allowlist edilir, indexing ve broad/destructive graph tool'lari prompt-gated
+veya disabled kalir.
+
+## One cikanlar
+
+- `codebase-memory-mcp@0.8.1`, exact package pinning, prompt approval,
+  startup/tool timeout ve generated graph artifact'lari source control disinda
+  tutan sinirlarla MCP catalog ve iki Codex config template'ine eklendi.
+- Dusuk riskli query tool'lari daha akici inspection icin allowlist edilirken
+  project indexing prompt-gated kaldi; `delete_project`, `manage_adr`,
+  `ingest_traces` ve `index_repository` disabled tutuldu.
+- `npm run codex:status`, aktif context-budget kontrollerini ve token-safe
+  profil hatirlatmasini gosterir; boylece uzun repo-wide islerde skill, agent,
+  MCP, memory, hook veya app kapatmadan token baskisi dusurulebilir.
+- Token audit artik kategori budget'lari ve top-offender raporu verir; maintainer
+  script, release-doc, catalog, startup, skill ve agent-role baskisini capability
+  silmeden gorebilir.
+- Token audit runtime operator script'lerini deferred validator/helper
+  script'lerinden ayirir; boylece `script-large` budget'i normal Chef
+  kullaniminda temas edilen yuzeyi olcer.
+- Normal `npm run chef -- --preview` artik summary-first cikar; full operasyon
+  listesi `npm run chef -- --preview --verbose-plan` ile hala alinabilir.
+- `codebase-memory` graph indexing ve admin tool'lari prompt-gated veya
+  disabled kalir; daha dusuk riskli graph/status query approval'lari korunur ve
+  graph-indexing sinirlari routing, status, README, MCP catalog ve installed
+  AGENTS rehberinde gorunur hale gelir.
+- `release:notes:check` read-only release-note dogrulamasi icin eklendi,
+  artifact olusturma `npm run release:notes` arkasinda kaldi ve Chef update,
+  managed dosyalari yenilemeden once full `npm run check` calistirir.
+- README ilk kurulum akisi `git`, `node`, `npx` ve `codex` prerequisite
+  kontrollerini gosterir; boylece first-run hatalari repo bozukmus gibi
+  gorunmeden makine setup katmanina ayrilir.
+- Yeni opsiyonel connector icin README sayilari, MCP catalog docs, install
+  rehberi, security model notlari, expected-output ornekleri ve release metadata
+  guncellendi.
+
+## Verification
+
+- `npm run validate:mcp`
+- `npm run validate:status`
+- `npm run validate:chef-cli`
+- `npm run validate:release`
+- `npm run audit:security`
+- `npm run validate`
+- `npm run check`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.43 - 2026-06-25
 
 Bu patch CLI operator deneyimini sadece ilk ekranla sınırlı bırakmadan bütün

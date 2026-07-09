@@ -3,9 +3,12 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { findProblemRules, significantRulesLines } from "./lib/approval-rules.mjs";
 import { inspectMarketplaceEntry, writeMarketplaceEntry } from "./upsert-marketplace-entry.mjs";
 
-const root = path.resolve(process.cwd());
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
 
 const options = {
@@ -22,6 +25,9 @@ const options = {
 for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
   if (arg === "--apply") options.apply = true;
+  else if (arg === "--preview") {
+    // Explicit dry-run alias for operator copy-paste flows; preview is the default mode.
+  }
   else if (arg === "--json") options.json = true;
   else if (arg === "--no-backup") options.noBackup = true;
   else if (arg === "--prune-managed-plugin-extras") options.pruneManagedPluginExtras = true;
@@ -53,6 +59,7 @@ function printHelp() {
 Repair or preview repair for an existing Codex Chef global install.
 
 Options:
+  --preview                       Preview repairs without writing (default)
   --apply                         Write backup-backed repairs
   --no-backup                     Skip backups when --apply is used
   --prune-managed-plugin-extras   Delete extra files only inside the managed Codex Chef plugin directory
@@ -73,6 +80,7 @@ const actions = [];
 const warnings = [];
 const notes = [];
 const failures = [];
+let preflight;
 
 function timestamp() {
   const date = new Date();
@@ -213,46 +221,72 @@ function repairFile(sourceRel, targetPath, id) {
   return { status: action.status, source: sourceRel, target: redact(targetPath), reason: action.reason };
 }
 
-function significantRulesLines(text) {
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-}
-
 function repairRulesFile(sourceRel, targetPath, id) {
   const sourcePath = path.join(root, sourceRel);
   const exists = fs.existsSync(targetPath);
   const sourceText = fs.readFileSync(sourcePath, "utf8");
   const targetText = exists ? fs.readFileSync(targetPath, "utf8") : "";
+  const sourceLines = significantRulesLines(sourceText);
   const targetLines = new Set(significantRulesLines(targetText));
-  const missingLines = significantRulesLines(sourceText).filter((line) => !targetLines.has(line));
-  if (exists && missingLines.length === 0) {
-    return { status: "current", source: sourceRel, target: redact(targetPath) };
+  const missingLines = sourceLines.filter((line) => !targetLines.has(line));
+  const problemRules = exists ? findProblemRules(targetText, { sourceText }) : [];
+  if (exists && missingLines.length === 0 && problemRules.length === 0) {
+    return { id, status: "current", source: sourceRel, target: redact(targetPath) };
   }
 
+  const reasons = [];
+  if (!exists) reasons.push("missing");
+  if (missingLines.length > 0) reasons.push(`missing ${missingLines.length} managed rules baseline line(s)`);
+  if (problemRules.length > 0) reasons.push(`${problemRules.length} conflicting local approval rule(s)`);
   const action = {
     id,
     kind: "merge-rules-baseline",
     source: sourceRel,
     target: targetPath,
     status: options.apply ? "applied" : "planned",
-    reason: exists ? `missing ${missingLines.length} managed rules baseline line(s)` : "missing"
+    reason: reasons.join("; "),
+    problemRules: problemRules.map((rule) => ({
+      lineNumber: rule.lineNumber,
+      pattern: rule.pattern,
+      decision: rule.decision,
+      reason: rule.reason
+    }))
   };
 
   if (options.apply) {
     assertManagedTarget(targetPath);
     ensureDir(path.dirname(targetPath));
     action.backup = backupTarget(targetPath);
+    const sourceLineSet = new Set(sourceLines);
+    const problemLineSet = new Set(problemRules.map((rule) => rule.line));
     const extra = exists
-      ? targetText.split(/\r?\n/).filter((line) => !significantRulesLines(sourceText).includes(line.trim())).join("\n").trim()
+      ? targetText
+          .split(/\r?\n/)
+          .filter((line) => {
+            const trimmed = line.trim();
+            return !sourceLineSet.has(trimmed) && !problemLineSet.has(trimmed);
+          })
+          .join("\n")
+          .trim()
       : "";
+    if (problemRules.length > 0) {
+      action.removedConflictingLocalRules = problemRules.length;
+      notes.push(`Removed ${problemRules.length} conflicting local approval rule(s) from ${redact(targetPath)} during repair.`);
+    }
     const next = extra ? `${sourceText.trimEnd()}\n\n# Local approval rules preserved by Codex Chef repair.\n${extra}\n` : sourceText;
     fs.writeFileSync(targetPath, next, "utf8");
   }
 
   recordAction(action);
-  return { status: action.status, source: sourceRel, target: redact(targetPath), reason: action.reason };
+  return {
+    id,
+    status: action.status,
+    source: sourceRel,
+    target: redact(targetPath),
+    reason: action.reason,
+    problemRules: action.problemRules,
+    removedConflictingLocalRules: action.removedConflictingLocalRules || 0
+  };
 }
 
 function repairManagedFiles() {
@@ -361,6 +395,44 @@ function repairManagedFiles() {
   };
 }
 
+function runPreflightValidators() {
+  const checks = [
+    ["agent-config", "scripts/validate-agent-config.mjs"],
+    ["mcp-config", "scripts/validate-mcp-config.mjs"],
+    ["approval-harmony", "scripts/validate-approval-harmony.mjs"]
+  ];
+  const results = [];
+
+  for (const [id, script] of checks) {
+    const result = spawnSync(process.execPath, [script], {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+      timeout: 120000
+    });
+    const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
+    const ok = !result.error && result.status === 0;
+    results.push({
+      id,
+      status: ok ? "ok" : "fail",
+      exitCode: result.status,
+      outputPreview: output ? output.split(/\r?\n/).slice(0, 8) : []
+    });
+    if (result.error) {
+      failures.push(`Repair preflight ${id} could not run: ${result.error.message}`);
+    } else if (result.status !== 0) {
+      failures.push(`Repair preflight ${id} failed: ${output}`);
+    }
+  }
+
+  return {
+    inspected: true,
+    status: results.every((result) => result.status === "ok") ? "ok" : "fail",
+    checks: results
+  };
+}
+
 function runConfigMerge() {
   const template = path.join(root, "templates", "codex", options.platform === "windows" ? "config.windows.toml" : "config.unix.toml");
   const destination = path.join(options.codexHome, "config.toml");
@@ -368,6 +440,7 @@ function runConfigMerge() {
     "scripts/merge-codex-config.mjs",
     template,
     destination,
+    "--sync-managed-tables",
     "--json",
     "--dry-run"
   ];
@@ -416,6 +489,7 @@ function runConfigMerge() {
       "scripts/merge-codex-config.mjs",
       template,
       destination,
+      "--sync-managed-tables",
       "--json"
     ], {
       cwd: root,
@@ -605,6 +679,10 @@ let marketplace;
 let skills;
 
 try {
+  preflight = runPreflightValidators();
+  if (preflight.status !== "ok") {
+    throw new Error("Repair preflight failed; refusing to plan or apply managed global changes until validators pass.");
+  }
   managedFiles = repairManagedFiles();
   config = runConfigMerge();
   marketplace = repairMarketplace();
@@ -648,6 +726,7 @@ const report = {
   codexHome: redact(options.codexHome),
   agentsHome: redact(options.agentsHome),
   backupRoot: options.apply && !options.noBackup && fs.existsSync(backupRoot) ? redact(backupRoot) : null,
+  preflight,
   managedFiles,
   config,
   marketplace,

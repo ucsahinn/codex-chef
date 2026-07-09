@@ -13,8 +13,7 @@ PowerShell:
 ```powershell
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
-Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All
 ```
 
 Bash veya WSL:

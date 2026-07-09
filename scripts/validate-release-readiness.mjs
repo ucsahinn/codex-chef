@@ -28,6 +28,7 @@ const requiredFiles = [
   "scripts/validate-workflow-security.mjs",
   "scripts/validate-agent-config.mjs",
   "scripts/validate-agent-research-corpus.mjs",
+  "scripts/validate-approval-harmony.mjs",
   "scripts/validate-package-surface.mjs",
   "scripts/extract-release-notes.mjs",
   ".github/CODEOWNERS",
@@ -68,8 +69,12 @@ for (const file of requiredFiles) {
 const packageJson = JSON.parse(read("package.json"));
 const version = packageJson.version;
 const expectedTag = `v${version}`;
+const scripts = packageJson.scripts || {};
 if (!/^\d+\.\d+\.\d+$/.test(version)) fail("package.json version must be plain semver for release");
 if (packageJson.private !== true) fail("package.json must keep private=true before public source release");
+if (scripts["release:notes:check"] !== "node scripts/extract-release-notes.mjs --check") {
+  fail("package.json must expose release:notes:check as the read-only release notes verifier.");
+}
 
 const changelog = read("CHANGELOG.md");
 const releaseNotes = read("docs/release-notes.md");
@@ -107,6 +112,7 @@ for (const required of [
   "node --check scripts/validate-workflow-security.mjs",
   "node --check scripts/validate-agent-config.mjs",
   "node --check scripts/validate-agent-research-corpus.mjs",
+  "node --check scripts/validate-approval-harmony.mjs",
   "node --check scripts/validate-package-surface.mjs",
   "npm run check",
   "bash scripts/install.sh --all --dry-run",
@@ -121,6 +127,8 @@ if (!publish.includes("node scripts/plan-install.mjs --all --json --redact-paths
 if (!publishTr.includes("node scripts/plan-install.mjs --all --json --redact-paths")) fail("docs/publish.tr.md must include redacted install-state preview command");
 if (!publish.includes("npm run release:notes")) fail("docs/publish.md must generate current-section release notes before release");
 if (!publishTr.includes("npm run release:notes")) fail("docs/publish.tr.md must generate current-section release notes before release");
+if (!publish.includes("npm run release:notes:check")) fail("docs/publish.md must include read-only release notes check before artifact generation");
+if (!publishTr.includes("npm run release:notes:check")) fail("docs/publish.tr.md must include read-only release notes check before artifact generation");
 
 for (const [label, text] of [
   ["docs/publish.md", publish],

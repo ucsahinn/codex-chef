@@ -119,10 +119,10 @@ if (!fs.existsSync(catalogPath)) {
       fail("catalog/agents.json must point at the official Codex config reference.");
     }
     if (catalog.defaults?.model !== "gpt-5.5") fail("catalog/agents.json defaults.model must stay gpt-5.5.");
-    if (catalog.defaults?.maxThreads !== 6) fail("catalog/agents.json defaults.maxThreads must stay 6.");
+    if (catalog.defaults?.maxThreads !== 10) fail("catalog/agents.json defaults.maxThreads must stay 10.");
     if (catalog.defaults?.maxDepth !== 1) fail("catalog/agents.json defaults.maxDepth must stay 1.");
-    if (catalog.defaults?.jobMaxRuntimeSeconds !== 1800) {
-      fail("catalog/agents.json defaults.jobMaxRuntimeSeconds must stay 1800.");
+    if (catalog.defaults?.jobMaxRuntimeSeconds !== 3600) {
+      fail("catalog/agents.json defaults.jobMaxRuntimeSeconds must stay 3600.");
     }
     if (!Array.isArray(catalog.agents) || catalog.agents.length === 0) {
       fail("catalog/agents.json must define a non-empty agents array.");
@@ -270,9 +270,9 @@ if (!fs.existsSync(catalogPath)) {
       const configNames = new Set(blocks.keys());
 
       validateTextContains(configFile, text, "multi_agent = true");
-      validateTextContains(configFile, text, "max_threads = 6");
+      validateTextContains(configFile, text, "max_threads = 10");
       validateTextContains(configFile, text, "max_depth = 1");
-      validateTextContains(configFile, text, "job_max_runtime_seconds = 1800");
+      validateTextContains(configFile, text, "job_max_runtime_seconds = 3600");
       if (/\[apps\._default\][\s\S]*?\ndefault_tools_enabled\s*=/.test(text)) {
         fail(`${configFile} must not use apps._default.default_tools_enabled; Codex strict config rejects it.`);
       }

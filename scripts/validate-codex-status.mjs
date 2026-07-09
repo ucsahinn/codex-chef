@@ -6,6 +6,7 @@ import path from "node:path";
 const failures = [];
 const fixtureCodexHome = path.resolve("tmp/nonexistent-codex-status-codex-home");
 const fixtureAgentsHome = path.resolve("tmp/nonexistent-codex-status-agents-home");
+const outputFixtureDir = path.resolve("tmp/validate-codex-status-output");
 
 function fail(message) {
   failures.push(message);
@@ -123,6 +124,54 @@ if (repoOnlyResult.error) {
   }
 }
 
+const plainCompatResult = run(["--json", "--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks", "--plain", "--plain-output", "--no-log"]);
+if (plainCompatResult.error) {
+  fail(`codex status plain/no-log compatibility validation could not run: ${plainCompatResult.error.message}`);
+} else if (plainCompatResult.status !== 0) {
+  fail(`codex status must accept shared Chef CLI plain/no-log flags: ${(plainCompatResult.stderr || plainCompatResult.stdout).trim()}`);
+}
+
+const outputFixtureId = `${process.pid}-${Date.now()}`;
+const insideOutputRel = `tmp/validate-codex-status-output/status-${outputFixtureId}.json`;
+const insideOutputResult = run(["--json", "--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks", "--output", insideOutputRel]);
+if (insideOutputResult.error) {
+  fail(`codex status --output inside repo could not run: ${insideOutputResult.error.message}`);
+} else if (insideOutputResult.status !== 0) {
+  fail(`codex status --output inside repo exited ${insideOutputResult.status}: ${(insideOutputResult.stderr || insideOutputResult.stdout).trim()}`);
+} else if (!fs.existsSync(path.resolve(insideOutputRel))) {
+  fail("codex status --output must write JSON reports inside the repository.");
+} else {
+  try {
+    const writtenReport = JSON.parse(fs.readFileSync(path.resolve(insideOutputRel), "utf8"));
+    if (writtenReport.schemaVersion !== "codex-chef.status.v1") {
+      fail("codex status --output must write the status JSON report.");
+    }
+  } catch (error) {
+    fail(`codex status --output report was not parseable JSON: ${error.message}`);
+  }
+}
+
+fs.mkdirSync(outputFixtureDir, { recursive: true });
+const existingOutputRel = `tmp/validate-codex-status-output/existing-${outputFixtureId}.json`;
+fs.writeFileSync(path.resolve(existingOutputRel), "{\"existing\":true}\n", "utf8");
+const existingOutputResult = run(["--json", "--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks", "--output", existingOutputRel]);
+if (existingOutputResult.error) {
+  fail(`codex status --output existing-file check could not run: ${existingOutputResult.error.message}`);
+} else if (existingOutputResult.status === 0) {
+  fail("codex status --output must refuse existing reports unless --force-output is used.");
+} else if (!String(existingOutputResult.stderr || existingOutputResult.stdout).includes("Refusing to overwrite existing report without --force-output")) {
+  fail("codex status --output existing-file refusal must explain --force-output.");
+}
+
+const outsideOutputResult = run(["--json", "--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks", "--output", "../codex-status-outside.json"]);
+if (outsideOutputResult.error) {
+  fail(`codex status --output outside-repo check could not run: ${outsideOutputResult.error.message}`);
+} else if (outsideOutputResult.status === 0) {
+  fail("codex status --output must refuse paths outside the repository.");
+} else if (!String(outsideOutputResult.stderr || outsideOutputResult.stdout).includes("Refusing to write status report outside repository")) {
+  fail("codex status --output outside-repo refusal must explain the repository boundary.");
+}
+
 let report;
 if (failures.length === 0) {
   try {
@@ -163,8 +212,11 @@ if (report) {
   if (!report.routingBoard?.boundary?.includes("subagent spawning still requires the current runtime to permit delegation")) {
     fail("codex status routing board must preserve the runtime-bounded subagent boundary.");
   }
-  if (!report.mcpSetupBoard || report.mcpSetupBoard.serverCount !== 15) {
-    fail("codex status must include the MCP setup board with all 15 servers.");
+  if (!report.routingBoard?.boundary?.includes("graph-indexing")) {
+    fail("codex status routing board must include graph-indexing in the approval boundary.");
+  }
+  if (!report.mcpSetupBoard || report.mcpSetupBoard.serverCount !== 16) {
+    fail("codex status must include the MCP setup board with all 16 servers.");
   }
   if (!Array.isArray(report.mcpSetupBoard.servers) || !report.mcpSetupBoard.servers.some((server) => server.name === "supabase" && server.setupKind === "env" && String(server.setupHint || "").includes("SUPABASE_DB_URL"))) {
     fail("codex status MCP setup board must explain Supabase SUPABASE_DB_URL setup.");
@@ -174,6 +226,15 @@ if (report) {
   }
   if (report.effectiveControls?.agents?.maxDepth !== 1) {
     fail("codex status effective controls must report the bounded subagent depth.");
+  }
+  if (!report.effectiveControls?.contextBudget?.longRunningRecommendation?.includes("token-safe.config.toml")) {
+    fail("codex status must report token-safe context-budget guidance.");
+  }
+  if (report.effectiveControls?.contextBudget?.tokenSafeProfileAvailable !== true) {
+    fail("codex status must confirm the token-safe profile is available.");
+  }
+  if (typeof report.effectiveControls?.contextBudget?.tokenSafeProfileActive !== "boolean") {
+    fail("codex status must report whether the token-safe profile is active.");
   }
   if (report.effectiveControls?.appsDefault?.enabled !== false) {
     fail("codex status effective controls must report app connectors disabled by default.");
@@ -352,7 +413,7 @@ if (textResult.error) {
 } else if (textResult.status !== 0) {
   fail(`codex status text validation exited ${textResult.status}: ${(textResult.stderr || textResult.stdout).trim()}`);
 } else {
-  for (const required of ["Codex Chef status", "Use:", "Numbered menu:", "Target Codex home:", "Ambient Codex:", "Repo Git:", "Logs:", "Repo starter:", "Installed runtime:", "Skills context:", "Enterprise routing:", "Effective controls:", "MCP setup:", "MCP setup note: serena", "MCP setup note: supabase"]) {
+  for (const required of ["Codex Chef status", "Use:", "Numbered menu:", "Target Codex home:", "Ambient Codex:", "Repo Git:", "Logs:", "Repo starter:", "Installed runtime:", "Skills context:", "Enterprise routing:", "Effective controls:", "Context budget:", "Token-safe profile: available=", "active=", "target=low/none/low/64000/6000", "MCP setup:", "MCP setup note: serena", "MCP setup note: codebase-memory", "MCP setup note: supabase"]) {
     if (!textResult.stdout.includes(required)) fail(`codex status text output missing: ${required}`);
   }
   if (!textResult.stdout.includes("[status] running repo:doctor")) {
@@ -360,6 +421,23 @@ if (textResult.error) {
   }
   if (textResult.stdout.includes("[status] running codex:doctor")) {
     fail("codex status repo-only output must not imply direct Codex CLI doctor checks are running.");
+  }
+}
+
+const turkishTextResult = run(["--tr", "--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks"]);
+if (turkishTextResult.error) {
+  fail(`codex status Turkish text validation could not run: ${turkishTextResult.error.message}`);
+} else if (turkishTextResult.status !== 0) {
+  fail(`codex status Turkish text validation exited ${turkishTextResult.status}: ${(turkishTextResult.stderr || turkishTextResult.stdout).trim()}`);
+} else {
+  for (const required of ["Context butcesi:", "Token-safe profil:", "MCP kurulum notu: codebase-memory", "Ilk calismada Node/npx paket indirmesi gerekir"]) {
+    if (!turkishTextResult.stdout.includes(required)) fail(`codex status Turkish text output missing: ${required}`);
+  }
+  if (turkishTextResult.stdout.includes("Requires Node/npx first-run package download")) {
+    fail("codex status Turkish text output must translate the codebase-memory setup hint.");
+  }
+  if (turkishTextResult.stdout.includes("Skipped installed/global skill roots because installed-runtime and live Codex CLI probes are disabled.")) {
+    fail("codex status Turkish text output must translate skipped skill inventory notes.");
   }
 }
 

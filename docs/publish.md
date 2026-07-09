@@ -11,7 +11,7 @@ npm run validate:release
 npm run verify:skills:online
 node scripts/plan-install.mjs --all --json --redact-paths
 npm run validate:install-state
-npm run release:notes
+npm run release:notes:check
 git status --short
 git diff --check
 git diff --cached --check
@@ -34,6 +34,13 @@ For a release, also confirm:
 - `git diff --cached` contains only reviewed source/docs/config files.
 - ignored `.serena/`, `tmp/`, logs, caches, screenshots, and generated archives
   are not staged.
+
+Generate the release-note artifact only after the read-only checks pass and a
+release is actually being prepared:
+
+```bash
+npm run release:notes
+```
 
 ## Create A Repository
 
@@ -59,11 +66,11 @@ After explicit commit/push/release approval:
 git add <reviewed files>
 git diff --cached
 npm run release:notes
-git commit -m "Release Codex Chef v0.5.43"
+git commit -m "Release Codex Chef v0.5.44"
 git push origin main
-git tag v0.5.43
-git push origin v0.5.43
-gh release create v0.5.43 --title "Codex Chef v0.5.43" --notes-file tmp/release-notes-current.md
+git tag v0.5.44
+git push origin v0.5.44
+gh release create v0.5.44 --title "Codex Chef v0.5.44" --notes-file tmp/release-notes-current.md
 ```
 
 After pushing, verify remote equality and CI:

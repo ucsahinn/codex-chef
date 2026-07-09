@@ -11,7 +11,7 @@ Discovery ciktisi no-write ve okunabilir kalir:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.43
+Package: codex-chef@0.5.44
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -53,7 +53,7 @@ node scripts/plan-install.mjs --all --json --redact-paths
 ```text
 Codex Chef enterprise routing board
 Profiles: 12
-Policy: task-shape routing names matching specialists, selects matching skills when applicable, and only spawns subagents when the current runtime permits delegation; risky actions remain approval-gated.
+Policy: task-shape routing names matching specialists, selects matching skills when applicable, and may spawn bounded local subagents when the current runtime permits delegation; risky actions remain approval-gated.
 
 Subagent visibility contract:
 - Agent plan: name each requested agent, scope, reason, expected output, and wait policy before spawning.
@@ -70,7 +70,46 @@ Tek profil icin:
 npm run chef -- --routing --profile starter-health --plain --no-log
 ```
 
-## PowerShell Dry Run
+## PowerShell Non-Interactive Dry Run
+
+```text
+[*] Codex Chef installer
+  - Codex home: ...
+  - Agents home: ...
+  - Mode: preserve existing files; merge missing config blocks
+  - Skills: install reviewed catalog entries with --agent codex
+  - Git guards: disabled by default
+  - Dry run: no files, Git settings, or skills will be changed
+[*] Managed Codex files
+What if: Performing the operation ...
+
+[*] Curated skills
+  - would install skill: dependency-upgrade from wshobson/agents --skill dependency-upgrade
+  - ...
+  - Skipped skill installation because -WhatIf is active
+
+[*] Capability board
+  - Agents ready (21):
+    code_mapper, docs_researcher, ...
+  - MCP ready by default (7):
+    sequential-thinking, context7, ...
+  - MCP opt-in / disabled by default (9):
+    github, figma, ...
+  - MCP setup notes (14):
+    context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
+  - Local plugin skills (3):
+    codex-chef-operator, context-budget-planner, ...
+  - Reviewed global skills (16):
+    dependency-upgrade, gh-fix-ci, ...
+  - Enterprise routing profiles (12):
+    repo-map-before-change, current-docs-research, ...
+  - Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.
+
+[*] Next steps
+  - completed: Codex Chef dry run
+```
+
+## PowerShell Interactive Dry Run
 
 ```text
 [chef] Guided setup
@@ -90,31 +129,8 @@ Install optional global Git guards for this Windows user? [y/N]:
   - Git guards: disabled by default
   - Dry run: no files, Git settings, or skills will be changed
   - Existing config policy: backup + merge missing Codex Chef blocks unless Force is enabled
-  - Authenticated/account MCP connectors remain disabled by default
+  - Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.
 Continue with this plan? [Y/n]:
-
-[chef] Managed Codex files
-What if: Performing the operation ...
-
-[chef] Capability board
-  - Agents ready (21):
-    code_mapper, docs_researcher, ...
-  - MCP ready by default (7):
-    sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
-    github, figma, ...
-  - MCP setup notes (13):
-    context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
-  - Local plugin skills (3):
-    codex-chef-operator, context-budget-planner, ...
-  - Reviewed global skills (16):
-    dependency-upgrade, gh-fix-ci, ...
-  - Enterprise routing profiles (12):
-    repo-map-before-change, current-docs-research, ...
-  - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
-
-[chef] Next steps
-  [ok] completed: Codex Chef dry run
 ```
 
 ## PowerShell Başarılı Kurulum
@@ -133,9 +149,9 @@ What if: Performing the operation ...
     code_mapper, docs_researcher, ...
   - MCP ready by default (7):
     sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
+  - MCP opt-in / disabled by default (9):
     github, figma, ...
-  - MCP setup notes (13):
+  - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
   - Local plugin skills (3):
     codex-chef-operator, context-budget-planner, ...
@@ -143,7 +159,7 @@ What if: Performing the operation ...
     dependency-upgrade, gh-fix-ci, ...
   - Enterprise routing profiles (12):
     repo-map-before-change, current-docs-research, ...
-  - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
+  - Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.
 
 [chef] Next steps
   - 28 existing managed target(s) were preserved; use -Force only for a deliberate backup-backed replacement
@@ -182,6 +198,22 @@ ve `npm run repair:install -- --json` no-write kalir. `-Repair` ve
 `npm run repair:install -- --apply` managed drift'i duzeltmeden once backup
 olusturur.
 
+## Status Panosu
+
+```text
+Codex Chef status
+Overall: attention
+Kullanim: npm run chef (veya npm run chef -- --status --repo-only --no-log repo-local log istemiyorsan)
+Numarali menu: evet; yazan islemler --apply veya yazili onay ister.
+
+Etkin kontroller: multi_agent=true, max_depth=1, approval=on-request, sandbox=workspace-write, network=restricted, hooks=true, managed hooks=advisory_only, apps default=false/destructive=false/open_world=false
+Context butcesi: reasoning=medium, summary=auto, verbosity=medium, compact=not inspected, tool_output=not inspected
+Token-safe profil: available=yes, active=no, target=low/none/low/64000/6000. Repo-wide veya uzun islerde Codex'i --profile token-safe ile calistir ya da token-safe.config.toml ayarlarini merge et; bu, skill, agent, MCP, memory, hook veya app kapatmadan verbosity, default reasoning, compaction ve tool-output limitlerini dusurur.
+
+MCP setup:
+MCP kurulum notu: codebase-memory [local-state] - Ilk calismada Node/npx paket indirmesi gerekir; lokal repo graph state'i bu makinede kalir. Indexing, destructive graph ve admin tool'lari prompt-gated veya disabled kalir.
+```
+
 ## Bash Dry Run
 
 ```text
@@ -199,9 +231,9 @@ Would install file from ...
     code_mapper, docs_researcher, ...
   - MCP ready by default (7):
     sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
+  - MCP opt-in / disabled by default (9):
     github, figma, ...
-  - MCP setup notes (13):
+  - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
   - Local plugin skills (3):
     codex-chef-operator, context-budget-planner, ...
@@ -209,7 +241,7 @@ Would install file from ...
     dependency-upgrade, gh-fix-ci, ...
   - Enterprise routing profiles (12):
     repo-map-before-change, current-docs-research, ...
-  - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
+  - Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.
 
 [*] Next steps
   - completed: Codex Chef dry run
@@ -231,9 +263,9 @@ Would install file from ...
     code_mapper, docs_researcher, ...
   - MCP ready by default (7):
     sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
+  - MCP opt-in / disabled by default (9):
     github, figma, ...
-  - MCP setup notes (13):
+  - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
   - Local plugin skills (3):
     codex-chef-operator, context-budget-planner, ...
@@ -241,7 +273,7 @@ Would install file from ...
     dependency-upgrade, gh-fix-ci, ...
   - Enterprise routing profiles (12):
     repo-map-before-change, current-docs-research, ...
-  - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.
+  - Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.
 
 [*] Next steps
   - 28 existing managed target(s) were preserved; use --force only for a deliberate backup-backed replacement

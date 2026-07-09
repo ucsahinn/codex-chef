@@ -3,6 +3,7 @@
 # Codex Chef agent, skill, MCP, memory, hook, or app surfaces.
 
 approval_policy = "on-request"
+approvals_reviewer = "auto_review"
 sandbox_mode = "workspace-write"
 
 model_reasoning_effort = "low"

@@ -805,7 +805,7 @@ Komut kısayolları:
   Onaylı yazan işlemler: --update [--apply], --reset [--apply], --repair [--apply], --install [--apply]
   Yedekler: --backups [--backup ID] [--restore|--delete --apply]
   Yönlendirme profili: --routing --profile starter-health
-  Ayrıntılı güncelleme kanıtı: --update --verbose-plan
+  Ayrıntılı preview kanıtı: --preview --verbose-plan
 
 Seçenekler:
   --json          Desteklenen yerlerde JSON çıktı verir
@@ -819,7 +819,7 @@ Seçenekler:
   --backup ID    Belirli Codex Chef yedek arşivini inceler veya geri yükler
   --restore      --backup ID için geri yükleme preview'i; dosya kopyalamak için --apply ekle
   --delete       --backup ID için silme preview'i; arşivi silmek için --apply ekle
-  --verbose-plan --update preview'de tam install dry-run kanıtını basar
+  --verbose-plan Preview ekranlarında tam install dry-run kanıtını basar
   --apply        Update, install, reset, repair veya seçili skill install için write action izni verir
   --help         Bu yardımı gösterir
 
@@ -850,7 +850,7 @@ Reference actions:
   Write gated: --update [--apply], --reset [--apply], --repair [--apply], --install [--apply]
   Backups: --backups [--backup ID] [--restore|--delete --apply]
   Routing: --routing --profile starter-health
-  Verbose update: --update --verbose-plan
+  Verbose preview: --preview --verbose-plan
 
 Operator screens:
   System status, Repo health, Full checkup, Install preview, Update Codex Chef,
@@ -870,7 +870,7 @@ Options:
   --backup ID    Inspect or restore a specific Codex Chef backup archive
   --restore      Preview restore for --backup ID; add --apply to copy files back
   --delete       Preview deletion for --backup ID; add --apply to remove the archive
-  --verbose-plan Print the full install dry-run evidence for --update previews
+  --verbose-plan Print the full install dry-run evidence for preview screens
   --apply        Allow write actions for update, install, reset, repair, or selected skill install
   --help         Show this help
 
@@ -1114,10 +1114,11 @@ function runDoctor() {
   });
 }
 
-function runPreview(force = false, includeSkills = true) {
+function runPreview(force = false, includeSkills = true, compact = !options.verbosePlan) {
   const plan = runNode("preview-plan", "scripts/plan-install.mjs", [
     ...(includeSkills ? ["--all"] : []),
     ...(force ? ["--force"] : []),
+    ...(compact ? ["--summary"] : []),
     ...(options.json ? ["--json"] : []),
     "--redact-paths"
   ]);
@@ -1148,19 +1149,11 @@ function runPackageScript(action, scriptName, extra = {}) {
 
 function runUpdateValidation() {
   console.log(`${ICONS.info} ${localText("Checking the repo before managed files are refreshed.", "Yonetilen dosyalar yenilenmeden once repo kontrol ediliyor.")}`);
-  const validate = runPackageScript("update-validate", "validate", {
+  return runPackageScript("update-check", "check", {
     timeout: 300000,
     waitNote: localText(
-      "Checking repository structure before global managed files are refreshed.",
-      "Global managed dosyalar yenilenmeden once repo yapisi kontrol ediliyor."
-    )
-  });
-  if (!validate.ok) return validate;
-  return runPackageScript("update-security-audit", "audit:security", {
-    timeout: 300000,
-    waitNote: localText(
-      "Checking tracked release/security surfaces before global managed files are refreshed.",
-      "Global managed dosyalar yenilenmeden once release/security yuzeyleri kontrol ediliyor."
+      "Running the full repo check before global managed files are refreshed.",
+      "Global managed dosyalar yenilenmeden once tam repo check calistiriliyor."
     )
   });
 }
@@ -2270,8 +2263,8 @@ async function runMcp(interaction = {}) {
   }
   console.log("");
   console.log(colorize(localText(
-    "Authenticated account, database, and broad filesystem MCP connectors stay disabled by default.",
-    "Auth isteyen hesap, database ve geniş filesystem MCP connector'ları varsayılan olarak kapalı kalır."
+    "Authenticated account, database, production, broad filesystem, and graph-indexing MCP connectors stay disabled by default.",
+    "Auth isteyen hesap, database, production, geniş filesystem ve graph-indexing MCP connector'ları varsayılan olarak kapalı kalır."
   ), "yellow"));
   console.log(styleMuted(localText(
     "Enable them only for a concrete task in ~/.codex/config.toml, restart Codex, then verify with /mcp or codex mcp.",
@@ -2479,6 +2472,8 @@ function translateSetupHint(message) {
     .replace("Requires npm/npx network access and starts an isolated Chrome/DevTools bridge; no credential is required.", "npm/npx ağ erişimi gerekir ve izole Chrome/DevTools köprüsü başlatır; kimlik bilgisi gerekmez.")
     .replace("Requires uvx and the pinned Serena git source; disable if uvx is unavailable.", "uvx ve pinlenmiş Serena git kaynağı gerekir; uvx yoksa kapalı tutun.")
     .replace("No credential is required; use only for non-secret local memory.", "Kimlik bilgisi gerekmez; yalnız gizli olmayan lokal memory için kullanın.")
+    .replace("Requires Node/npx first-run package download; keeps local repository graph state on this machine. Indexing, destructive graph, and admin tools stay prompt-gated or disabled.", "İlk çalışmada Node/npx paket indirmesi gerekir; lokal repo graph state'i bu makinede kalır. Indexing, destructive graph ve admin tool'ları prompt-gated veya disabled kalır.")
+    .replace("Requires Node/npx first-run package download; indexes local repositories into a persistent graph. Enable only for tasks that need graph-backed code intelligence.", "İlk çalışmada Node/npx paket indirmesi gerekir; lokal repoları kalıcı bir grafa indexler. Yalnız graph destekli code intelligence gereken işlerde açın.")
     .replace("Choose a deliberate local root path in config args before enabling.", "Açmadan önce config argümanlarında bilinçli bir lokal kök path seçin.")
     .replace("Requires GitHub/Copilot account authorization; keep disabled until private GitHub context is needed.", "GitHub/Copilot hesap yetkilendirmesi gerekir; private GitHub context gerekene kadar kapalı tutun.")
     .replace("Requires Figma account or workspace authorization.", "Figma hesap veya workspace yetkilendirmesi gerekir.")

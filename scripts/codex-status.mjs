@@ -14,6 +14,7 @@ const options = {
   redactPaths: false,
   expectSkills: false,
   expectGitGuards: false,
+  noLog: false,
   skipRuntime: false,
   skipCodexDoctorChecks: false,
   skipCodexCli: false,
@@ -37,6 +38,10 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--redact-paths") options.redactPaths = true;
   else if (arg === "--expect-skills") options.expectSkills = true;
   else if (arg === "--expect-git-guards") options.expectGitGuards = true;
+  else if (arg === "--no-log") options.noLog = true;
+  else if (arg === "--plain" || arg === "--plain-output") {
+    // Shared compatibility flag with the Chef CLI; status output is already plain text.
+  }
   else if (arg === "--repo-only") {
     options.skipRuntime = true;
     options.skipCodexDoctorChecks = true;
@@ -74,6 +79,8 @@ Options:
   --force-output               Allow --output to replace an existing report
   --expect-skills              Fail runtime status if curated global skills are missing
   --expect-git-guards          Fail runtime status if optional Git guards are missing
+  --no-log                     Accepted for shared Chef CLI no-log compatibility
+  --plain, --plain-output      Accepted for shared Chef CLI plain-output compatibility
   --repo-only                  Skip installed runtime, Codex doctor, and live Codex CLI probes
   --skip-runtime               Skip installed runtime verification
   --skip-codex-doctor-checks   Skip direct Codex CLI doctor check summary
@@ -197,7 +204,8 @@ function translateStatusMessage(message) {
     .replace("MCP configuration has optional issues", "MCP config icinde opsiyonel uyarilar var")
     .replace("update configuration is locally consistent", "update yapilandirmasi lokal olarak tutarli")
     .replace("Ambient Codex runtime home differs from installed target; verifying with explicit CODEX_HOME=", "Ortam Codex runtime home kurulu hedeften farkli; explicit CODEX_HOME ile dogrulaniyor: ")
-    .replace("Skipped installed/global skill roots because installed-runtime and live Codex CLI probes are disabled.", "Kurulu ortam ve canli Codex CLI problari kapali oldugu icin kurulu/global skill kokleri atlandi.");
+    .replace("Skipped installed/global skill roots because installed-runtime and live Codex CLI probes are disabled.", "Kurulu ortam ve canli Codex CLI problari kapali oldugu icin kurulu/global skill kokleri atlandi.")
+    .replace("For repo-wide or long-running work, run Codex with --profile token-safe or merge token-safe.config.toml; this lowers verbosity, default reasoning, compaction, and tool-output ceilings without disabling skills, agents, MCPs, memory, hooks, or apps.", "Repo-wide veya uzun islerde Codex'i --profile token-safe ile calistir ya da token-safe.config.toml ayarlarini merge et; bu, skill, agent, MCP, memory, hook veya app kapatmadan verbosity, default reasoning, compaction ve tool-output limitlerini dusurur.");
   return text;
 }
 
@@ -211,6 +219,7 @@ function translateSetupHint(message) {
     .replace("Requires npm/npx network access and starts an isolated Chrome/DevTools bridge; no credential is required.", "npm/npx ag erisimi gerekir ve izole Chrome/DevTools koprusu baslatir; kimlik bilgisi gerekmez.")
     .replace("Requires uvx and the pinned Serena git source; disable if uvx is unavailable.", "uvx ve pinlenmis Serena git kaynagi gerekir; uvx yoksa kapatin.")
     .replace("No credential is required; use only for non-secret local memory.", "Kimlik bilgisi gerekmez; yalniz gizli olmayan lokal memory icin kullanin.")
+    .replace("Requires Node/npx first-run package download; keeps local repository graph state on this machine. Indexing, destructive graph, and admin tools stay prompt-gated or disabled.", "Ilk calismada Node/npx paket indirmesi gerekir; lokal repo graph state'i bu makinede kalir. Indexing, destructive graph ve admin tool'lari prompt-gated veya disabled kalir.")
     .replace("Choose a deliberate local root path in config args before enabling.", "Acmadan once config argumanlarinda bilincli bir lokal kok path secin.")
     .replace("Requires GitHub/Copilot account authorization; keep disabled until private GitHub context is needed.", "GitHub/Copilot hesap yetkilendirmesi gerekir; private GitHub context gerekene kadar kapali tutun.")
     .replace("Requires Figma account or workspace authorization.", "Figma hesap veya workspace yetkilendirmesi gerekir.")
@@ -429,7 +438,7 @@ function inspectRoutingBoard() {
       skillModes: [...new Set(profiles.map((profile) => profile.skillMode))].sort(),
       mcpModes: [...new Set(profiles.map((profile) => profile.mcpMode))].sort()
     },
-    boundary: "Routing profiles name visible prompt-shape matched specialists, but subagent spawning still requires the current runtime to permit delegation; destructive, credentialed, publishing, deployment, database, and broad filesystem actions remain approval-gated."
+    boundary: "Routing profiles name visible prompt-shape matched specialists, but subagent spawning still requires the current runtime to permit delegation; destructive, credentialed, publishing, deployment, database, broad filesystem, and broad/destructive graph-indexing actions remain approval-gated."
   };
 }
 
@@ -438,7 +447,7 @@ function inspectMcpSetupBoard() {
   const servers = catalog.servers || [];
   const enabled = servers.filter((server) => server.defaultEnabled === true);
   const disabled = servers.filter((server) => server.defaultEnabled !== true);
-  const setupRequired = servers.filter((server) => !["none", "local-state"].includes(server.setupKind));
+  const setupRequired = servers.filter((server) => server.setupKind !== "none" && (server.setupKind !== "local-state" || server.name === "codebase-memory"));
 
   return {
     inspected: true,
@@ -477,6 +486,28 @@ function inspectMcpSetupBoard() {
 function inspectEffectiveControls(skipInstalled = false) {
   const config = skipInstalled ? readTemplateConfig() : readInstalledOrTemplateConfig();
   const text = config.text;
+  const tokenSafeTarget = {
+    reasoningEffort: "low",
+    reasoningSummary: "none",
+    verbosity: "low",
+    autoCompactTokenLimit: 64000,
+    toolOutputTokenLimit: 6000
+  };
+  const contextBudget = {
+    reasoningEffort: readTomlValue(text, "model_reasoning_effort"),
+    reasoningSummary: readTomlValue(text, "model_reasoning_summary"),
+    verbosity: readTomlValue(text, "model_verbosity"),
+    autoCompactTokenLimit: readTomlValue(text, "model_auto_compact_token_limit"),
+    toolOutputTokenLimit: readTomlValue(text, "tool_output_token_limit"),
+    tokenSafeProfileAvailable: fs.existsSync(path.join(root, "templates", "codex", "profiles", "token-safe.config.toml")),
+    tokenSafeTarget,
+    longRunningRecommendation: "For repo-wide or long-running work, run Codex with --profile token-safe or merge token-safe.config.toml; this lowers verbosity, default reasoning, compaction, and tool-output ceilings without disabling skills, agents, MCPs, memory, hooks, or apps."
+  };
+  contextBudget.tokenSafeProfileActive = contextBudget.reasoningEffort === tokenSafeTarget.reasoningEffort
+    && contextBudget.reasoningSummary === tokenSafeTarget.reasoningSummary
+    && contextBudget.verbosity === tokenSafeTarget.verbosity
+    && contextBudget.autoCompactTokenLimit === tokenSafeTarget.autoCompactTokenLimit
+    && contextBudget.toolOutputTokenLimit === tokenSafeTarget.toolOutputTokenLimit;
   const managedHooks = skipInstalled
     ? null
     : fs.existsSync(path.join(options.codexHome, "hooks"))
@@ -500,6 +531,7 @@ function inspectEffectiveControls(skipInstalled = false) {
       maxThreads: readTomlValue(text, "agents.max_threads"),
       maxDepth: readTomlValue(text, "agents.max_depth")
     },
+    contextBudget,
     appsDefault: {
       enabled: readTomlValue(text, "apps._default.enabled"),
       destructiveEnabled: readTomlValue(text, "apps._default.destructive_enabled"),
@@ -1159,7 +1191,7 @@ if (options.json) {
   if (!runtime.report?.skills?.inspected && skillInventory.inspected) {
     console.log(`Skills: ${skillInventory.installed} ${localText("total installed across global roots", "global koklerde toplam kurulu")} (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} ${localText("missing", "eksik")}, ${skillInventory.extraCount} ${localText("other/user-installed", "diger/kullanici kurulu")})`);
   } else if (!runtime.report?.skills?.inspected && skillInventory.inspected === false) {
-    console.log(`Skills: ${localText("skipped", "atlandi")} (${skillInventory.note})`);
+    console.log(`Skills: ${localText("skipped", "atlandi")} (${translateStatusMessage(skillInventory.note)})`);
   }
   const skillsInstalledText = skillsContext.installed === null || skillsContext.installed === undefined
     ? localText("installed not inspected", "kurulu skill sayisi kontrol edilmedi")
@@ -1178,9 +1210,15 @@ if (options.json) {
     `${localText("Effective controls", "Etkin kontroller")}: multi_agent=${humanStatusValue(effectiveControls.features.multiAgent)}, max_depth=${humanStatusValue(effectiveControls.agents.maxDepth)}, approval=${humanStatusValue(effectiveControls.approvalPolicy)}, sandbox=${humanStatusValue(effectiveControls.sandboxMode)}, network=${humanStatusValue(effectiveControls.workspaceNetwork)}, hooks=${humanStatusValue(effectiveControls.features.hooks)}, managed hooks=${humanStatusValue(effectiveControls.managedHooks)}, apps default=${humanStatusValue(effectiveControls.appsDefault.enabled)}/destructive=${humanStatusValue(effectiveControls.appsDefault.destructiveEnabled)}/open_world=${humanStatusValue(effectiveControls.appsDefault.openWorldEnabled)}`
   );
   console.log(
+    `${localText("Context budget", "Context butcesi")}: reasoning=${humanStatusValue(effectiveControls.contextBudget.reasoningEffort)}, summary=${humanStatusValue(effectiveControls.contextBudget.reasoningSummary)}, verbosity=${humanStatusValue(effectiveControls.contextBudget.verbosity)}, compact=${humanStatusValue(effectiveControls.contextBudget.autoCompactTokenLimit)}, tool_output=${humanStatusValue(effectiveControls.contextBudget.toolOutputTokenLimit)}`
+  );
+  const tokenSafeTarget = effectiveControls.contextBudget.tokenSafeTarget || {};
+  const tokenSafeTargetText = `${tokenSafeTarget.reasoningEffort}/${tokenSafeTarget.reasoningSummary}/${tokenSafeTarget.verbosity}/${tokenSafeTarget.autoCompactTokenLimit}/${tokenSafeTarget.toolOutputTokenLimit}`;
+  console.log(`${localText("Token-safe profile", "Token-safe profil")}: available=${effectiveControls.contextBudget.tokenSafeProfileAvailable ? "yes" : "no"}, active=${effectiveControls.contextBudget.tokenSafeProfileActive ? "yes" : "no"}, target=${tokenSafeTargetText}. ${translateStatusMessage(effectiveControls.contextBudget.longRunningRecommendation)}`);
+  console.log(
     `MCP setup: ${mcpSetupBoard.serverCount} servers (${mcpSetupBoard.enabledByDefault.length} ${localText("enabled", "acik")}, ${mcpSetupBoard.disabledByDefault.length} ${localText("disabled", "kapali")}, ${mcpSetupBoard.setupRequiredCount} ${localText("with setup notes", "kurulum notlu")})`
   );
-  for (const server of mcpSetupBoard.servers.filter((item) => !["none", "local-state"].includes(item.setupKind))) {
+  for (const server of mcpSetupBoard.servers.filter((item) => item.setupKind !== "none" && (item.setupKind !== "local-state" || item.name === "codebase-memory"))) {
     console.log(`${localText("MCP setup note", "MCP kurulum notu")}: ${server.name} [${server.setupKind}] - ${translateSetupHint(server.setupHint)}`);
   }
   if (codexDoctor.inspected) {

@@ -168,6 +168,7 @@ function assertInstalledBaseline(codexHome, agentsHome, label) {
     assertIncludes(config, "[mcp_servers.context7]", `${label} config`);
     assertIncludes(config, "[mcp_servers.sequential-thinking]", `${label} config`);
     assertIncludes(config, "[mcp_servers.serena]", `${label} config`);
+    assertIncludes(config, "[mcp_servers.codebase-memory]", `${label} config`);
     assertIncludes(config, "[mcp_servers.supabase]", `${label} config`);
     assertIncludes(config, 'env_vars = ["SUPABASE_DB_URL"]', `${label} config`);
     if (/%SUPABASE_DB_URL%|\$SUPABASE_DB_URL/.test(config)) {
@@ -197,7 +198,7 @@ function assertDefaultBoundaries(output, label) {
   if (!output.includes("Git guards: disabled by default")) {
     fail(`${label} default install must keep Git guards disabled by default.`);
   }
-  if (!output.includes("Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.")) {
+  if (!output.includes("Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.")) {
     fail(`${label} must print the account/database connector approval boundary.`);
   }
 }

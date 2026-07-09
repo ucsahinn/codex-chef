@@ -46,8 +46,15 @@ if (!routing.sourcePolicy || !/not hidden execution hooks/i.test(routing.sourceP
 if (!/runtime-permitted routing guidance/i.test(routing.sourcePolicy || "")) {
   fail("routing profile sourcePolicy must state that profiles are runtime-permitted routing guidance.");
 }
-if (!/Current Codex releases spawn subagents only\s+when the user explicitly asks/i.test(agentsTemplate)) {
-  fail("templates/codex/AGENTS.md must state that current Codex releases require explicit user subagent requests.");
+if (!/graph-indexing/i.test(routing.sourcePolicy || "")) {
+  fail("routing profile sourcePolicy must include the graph-indexing approval boundary.");
+}
+if (!/standing permission to spawn\s+matching specialist agents/i.test(agentsTemplate)
+  || !/current Codex runtime\s+permits it/i.test(agentsTemplate)) {
+  fail("templates/codex/AGENTS.md must state standing specialist-agent permission and the current runtime boundary.");
+}
+if (!/graph-indexing/i.test(agentsTemplate)) {
+  fail("templates/codex/AGENTS.md must include graph-indexing in approval boundaries.");
 }
 
 for (const required of [
@@ -61,9 +68,12 @@ for (const required of [
   "Surfaces used",
   "/agent",
   "for all requested subagents",
-  "explicitly asks for subagents"
+  "standing permission to spawn matching specialist agents",
+  "current Codex runtime"
 ]) {
-  if (!agentsTemplate.includes(required)) {
+  const normalizedTemplate = agentsTemplate.replace(/\s+/g, " ");
+  const normalizedRequired = required.replace(/\s+/g, " ");
+  if (!agentsTemplate.includes(required) && !normalizedTemplate.includes(normalizedRequired)) {
     fail(`templates/codex/AGENTS.md missing subagent visibility contract snippet: ${required}`);
   }
 }
@@ -87,6 +97,10 @@ for (const required of [
   if (!routingBoardScript.includes(required)) {
     fail(`scripts/codex-routing-board.mjs missing routing visibility output snippet: ${required}`);
   }
+}
+
+if (!/graph-indexing/i.test(routingBoardScript)) {
+  fail("scripts/codex-routing-board.mjs must include graph-indexing in the runtime routing boundary.");
 }
 
 const seenIds = new Set();

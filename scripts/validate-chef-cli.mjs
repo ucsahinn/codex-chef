@@ -431,6 +431,7 @@ if (!exists(cliPath)) {
     "--lang",
     "--tr",
     "--verbose-plan",
+    "--summary",
     "--plain",
     "--no-log",
     "--repo-only",
@@ -497,8 +498,8 @@ if (!exists(cliPath)) {
     "deleteBackupArchive",
     "createRollbackBackup",
     "runUpdateValidation",
-    "update-validate",
-    "update-security-audit",
+    "update-check",
+    "runPackageScript(\"update-check\", \"check\"",
     "gitHead",
     "Repository updated from",
     "same-tree preview",
@@ -553,6 +554,11 @@ if (!exists(cliPath)) {
 
   if (/TERM:\s*"dumb"/.test(cli)) {
     fail(`${cliPath} must not force TERM=dumb because codex doctor treats that as a terminal health issue.`);
+  }
+
+  const planInstall = read("scripts/plan-install.mjs");
+  for (const requiredPlanSurface of ["--summary", "printPlanSummary", "Codex Chef install plan summary"]) {
+    if (!planInstall.includes(requiredPlanSurface)) fail(`scripts/plan-install.mjs missing concise preview surface: ${requiredPlanSurface}`);
   }
 
   for (const requiredLabel of [
@@ -681,19 +687,19 @@ runCliSmoke("forced-color", ["--help", "--no-log"], [
 });
 runCliSmoke("mcp", ["--mcp", "--plain", "--no-log"], [
   "MCP connectors",
-  "15 connectors",
+  "16 connectors",
   "Credential need",
   "Disabled by default",
   "Timeouts and per-tool exposure live in templates/codex/config.windows.toml",
-  "Authenticated account, database, and broad filesystem MCP connectors stay disabled by default."
+  "Authenticated account, database, production, broad filesystem, and graph-indexing MCP connectors stay disabled by default."
 ], { forbidAnsi: true });
 runCliSmoke("mcp-tr", ["--mcp", "--tr", "--plain", "--no-log"], [
   "MCP bağlayıcıları",
-  "15 bağlayıcı",
+  "16 bağlayıcı",
   "Kimlik bilgisi veya ek girdi gerekmez.",
   "İlk çalışmada npm/npx ağ erişimi gerekir",
   "GitHub/Copilot hesap yetkilendirmesi gerekir",
-  "Auth isteyen hesap, database ve geniş filesystem MCP connector'ları varsayılan olarak kapalı kalır."
+  "Auth isteyen hesap, database, production, geniş filesystem ve graph-indexing MCP connector'ları varsayılan olarak kapalı kalır."
 ], {
   forbidAnsi: true,
   forbiddenSnippets: [
@@ -704,7 +710,7 @@ runCliSmoke("mcp-tr", ["--mcp", "--tr", "--plain", "--no-log"], [
 });
 runCliSmoke("mcp-forced-color", ["--mcp", "--no-log"], [
   "MCP connectors",
-  "Authenticated account, database, and broad filesystem MCP connectors stay disabled by default."
+  "Authenticated account, database, production, broad filesystem, and graph-indexing MCP connectors stay disabled by default."
 ], {
   env: {
     FORCE_COLOR: "1",
@@ -866,7 +872,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --status --repo-only --no-log",
     "Detailed CLI behavior lives in",
     "Installed skills do not execute by themselves",
-    "current Codex releases require the user to explicitly ask"
+    "standing permission for bounded, reversible local specialist delegation"
   ],
   "README.tr.md": [
     "npm run chef",
@@ -879,7 +885,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --status --repo-only --no-log",
     "Detaylı CLI davranışı",
     "Skill'ler kendiliğinden çalışmaz",
-    "güncel Codex sürümleri"
+    "kalıcı izin kaydeder"
   ],
   "docs/verification.md": [
     "npm run validate:chef-cli",

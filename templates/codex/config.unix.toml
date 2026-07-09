@@ -9,6 +9,7 @@ model_verbosity = "medium"
 personality = "pragmatic"
 
 approval_policy = "on-request"
+approvals_reviewer = "auto_review"
 sandbox_mode = "workspace-write"
 
 [features]
@@ -30,11 +31,12 @@ min_rate_limit_remaining_percent = 15
 enabled = false
 destructive_enabled = false
 open_world_enabled = false
+default_tools_approval_mode = "prompt"
 
 [agents]
-max_threads = 6
+max_threads = 10
 max_depth = 1
-job_max_runtime_seconds = 1800
+job_max_runtime_seconds = 3600
 
 [agents.code_mapper]
 description = "Read-only explorer that maps files, call paths, and existing patterns."
@@ -142,7 +144,7 @@ tool_timeout_sec = 120
 enabled = true
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-sequential-thinking@2025.12.18"]
-default_tools_approval_mode = "prompt"
+default_tools_approval_mode = "approve"
 startup_timeout_sec = 20
 tool_timeout_sec = 120
 
@@ -151,6 +153,7 @@ enabled = true
 command = "npx"
 args = ["-y", "@playwright/mcp@0.0.76"]
 default_tools_approval_mode = "prompt"
+enabled_tools = ["browser_snapshot", "browser_take_screenshot", "browser_console_messages", "browser_network_requests", "browser_wait_for", "browser_resize", "browser_navigate", "browser_navigate_back", "browser_close", "browser_tabs"]
 startup_timeout_sec = 20
 tool_timeout_sec = 180
 
@@ -181,6 +184,7 @@ enabled = true
 command = "npx"
 args = ["-y", "chrome-devtools-mcp@1.2.0", "--isolated", "--no-usage-statistics", "--redactNetworkHeaders", "--viewport", "1366x900"]
 default_tools_approval_mode = "prompt"
+enabled_tools = ["list_pages", "select_page", "take_snapshot", "take_screenshot", "list_console_messages", "get_console_message", "list_network_requests", "wait_for", "resize_page", "navigate_page", "navigate_page_history", "close_page"]
 startup_timeout_sec = 20
 tool_timeout_sec = 180
 
@@ -219,6 +223,7 @@ enabled = true
 command = "uvx"
 args = ["--from", "git+https://github.com/oraios/serena.git@22c135a881aaf17485e54ef0ccaedeaf51a202c0", "serena", "start-mcp-server", "--context", "codex"]
 default_tools_approval_mode = "prompt"
+enabled_tools = ["activate_project", "get_current_config", "initial_instructions", "list_memories", "read_memory", "search_for_pattern", "find_symbol", "find_declaration", "find_implementations", "find_referencing_symbols", "get_symbols_overview", "get_diagnostics_for_file"]
 startup_timeout_sec = 30
 tool_timeout_sec = 180
 
@@ -261,6 +266,12 @@ approval_mode = "approve"
 [mcp_servers.serena.tools.get_diagnostics_for_file]
 approval_mode = "approve"
 
+[mcp_servers.serena.tools.delete_memory]
+approval_mode = "prompt"
+
+[mcp_servers.serena.tools.write_memory]
+approval_mode = "prompt"
+
 [mcp_servers.memory]
 enabled = true
 command = "npx"
@@ -278,6 +289,48 @@ approval_mode = "approve"
 [mcp_servers.memory.tools.open_nodes]
 approval_mode = "approve"
 
+# Optional graph-backed code intelligence for broad repo mapping and impact analysis.
+# Enable only when a task needs local repository indexing.
+[mcp_servers.codebase-memory]
+enabled = true
+command = "npx"
+args = ["-y", "codebase-memory-mcp@0.8.1"]
+default_tools_approval_mode = "prompt"
+enabled_tools = ["list_projects", "index_status", "search_graph", "trace_path", "detect_changes", "query_graph", "get_graph_schema", "get_code_snippet", "get_architecture", "search_code"]
+disabled_tools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"]
+startup_timeout_sec = 30
+tool_timeout_sec = 300
+
+[mcp_servers.codebase-memory.tools.list_projects]
+approval_mode = "approve"
+
+[mcp_servers.codebase-memory.tools.index_status]
+approval_mode = "approve"
+
+[mcp_servers.codebase-memory.tools.search_graph]
+approval_mode = "approve"
+
+[mcp_servers.codebase-memory.tools.trace_path]
+approval_mode = "approve"
+
+[mcp_servers.codebase-memory.tools.detect_changes]
+approval_mode = "approve"
+
+[mcp_servers.codebase-memory.tools.query_graph]
+approval_mode = "approve"
+
+[mcp_servers.codebase-memory.tools.get_graph_schema]
+approval_mode = "approve"
+
+[mcp_servers.codebase-memory.tools.get_code_snippet]
+approval_mode = "approve"
+
+[mcp_servers.codebase-memory.tools.get_architecture]
+approval_mode = "approve"
+
+[mcp_servers.codebase-memory.tools.search_code]
+approval_mode = "approve"
+
 [mcp_servers.filesystem]
 enabled = false
 command = "npx"
@@ -289,7 +342,7 @@ tool_timeout_sec = 60
 [mcp_servers.github]
 enabled = false
 url = "https://api.githubcopilot.com/mcp/readonly"
-default_tools_approval_mode = "prompt"
+default_tools_approval_mode = "approve"
 startup_timeout_sec = 20
 tool_timeout_sec = 60
 

@@ -136,6 +136,23 @@ function Test-AnyManagedTargetExists {
   return $false
 }
 
+function Invoke-PreflightValidators {
+  Write-Section "Preflight validation"
+  $Checks = @(
+    @{ Label = "agent config"; Script = "scripts\validate-agent-config.mjs" },
+    @{ Label = "MCP config"; Script = "scripts\validate-mcp-config.mjs" },
+    @{ Label = "approval harmony"; Script = "scripts\validate-approval-harmony.mjs" }
+  )
+  foreach ($Check in $Checks) {
+    $ScriptPath = Join-Path $RepoRoot $Check.Script
+    & node $ScriptPath
+    if ($LASTEXITCODE -ne 0) {
+      throw "Preflight validation failed for $($Check.Label); refusing to install managed global files."
+    }
+    Write-Action -Status "validated" -Message $Check.Label
+  }
+}
+
 if ($Interactive) {
   Write-Section "Guided setup"
   Write-Note "Press Enter to accept the safe default shown in brackets."
@@ -384,11 +401,13 @@ if ($WhatIfPreference) {
 }
 if ($Interactive) {
   Write-Note "Existing config policy: backup + merge missing Codex Chef blocks unless Force is enabled"
-  Write-Note "Authenticated/account MCP connectors remain disabled by default"
+  Write-Note "Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled."
   if (-not (Read-YesNo -Prompt "Continue with this plan?" -Default $true)) {
     throw "Codex Chef install cancelled by user."
   }
 }
+
+Invoke-PreflightValidators
 
 Write-Section "Managed Codex files"
 Ensure-Dir $CodexHome
@@ -546,7 +565,7 @@ try {
   $AgentNames = @($AgentCatalog.agents | ForEach-Object { $_.name })
   $McpReady = @($McpCatalog.servers | Where-Object { $_.defaultEnabled -eq $true } | ForEach-Object { $_.name })
   $McpOptIn = @($McpCatalog.servers | Where-Object { $_.defaultEnabled -ne $true } | ForEach-Object { $_.name })
-  $McpSetupNotes = @($McpCatalog.servers | Where-Object { $_.setupKind -notin @("none", "local-state") } | ForEach-Object { "$($_.name) [$($_.setupKind)]: $($_.setupHint)" })
+  $McpSetupNotes = @($McpCatalog.servers | Where-Object { $_.setupKind -ne "none" -and ($_.setupKind -ne "local-state" -or $_.name -eq "codebase-memory") } | ForEach-Object { "$($_.name) [$($_.setupKind)]: $($_.setupHint)" })
   $PluginSkills = @(Get-ChildItem -Path $PluginSkillRoot -Directory | ForEach-Object { $_.Name })
   $ReviewedSkills = @($SkillCatalog.skills | Where-Object { $_.install -eq $true } | ForEach-Object { $_.name })
   $RoutingProfiles = @($RoutingCatalog.profiles | ForEach-Object { $_.id })
@@ -557,7 +576,7 @@ try {
   Write-NameList -Label "Local plugin skills" -Names $PluginSkills -Color "White"
   Write-NameList -Label "Reviewed global skills" -Names $ReviewedSkills -Color "White"
   Write-NameList -Label "Enterprise routing profiles" -Names $RoutingProfiles -Color "White"
-  Write-Note "Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled."
+  Write-Note "Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled."
 } catch {
   Write-Warning "Could not render capability board: $($_.Exception.Message)"
 }

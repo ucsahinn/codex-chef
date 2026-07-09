@@ -184,8 +184,14 @@ if (exists("catalog/agents.json")) {
 
 if (exists("scripts/analyze-token-surfaces.mjs")) {
   const analyzer = read("scripts/analyze-token-surfaces.mjs");
-  for (const required of ["runtime-startup", "agent-role", "skill-trigger", "skill-deferred", "chars/4"]) {
+  for (const required of ["runtime-startup", "agent-role", "skill-trigger", "skill-deferred", "docs-release", "catalog-corpus", "script-large", "chars/4", "categoryBudgets", "budgetFindings"]) {
     if (!analyzer.includes(required)) fail(`Token analyzer missing expected category or note: ${required}`);
+  }
+  if (!analyzer.includes('if (/^scripts\\/(?:chef-cli|codex-status)\\.mjs$/.test(rel)) return "script-large";')) {
+    fail("Token analyzer must keep only runtime operator scripts in script-large.");
+  }
+  if (!analyzer.includes('if (/^scripts\\//.test(rel)) return "scripts-validators";')) {
+    fail("Token analyzer must classify validator and helper scripts as scripts-validators.");
   }
 }
 

@@ -27,6 +27,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 Installer'lari cagirmadan manifest-backed operasyon planini incele:
 
 ```bash
+node scripts/plan-install.mjs --all --summary --redact-paths
 node scripts/plan-install.mjs --all --json
 ```
 
@@ -37,8 +38,9 @@ node scripts/plan-install.mjs --list-profiles
 node scripts/plan-install.mjs --list-operations
 ```
 
-Plan managed target'lari, opsiyonel global Git degisikliklerini, curated skill
-komutlarini, collision policy'yi, backup davranisini ve risk seviyesini listeler.
+Summary normal preview'i kisa tutar; JSON ve full human plan managed
+target'lari, opsiyonel global Git degisikliklerini, curated skill komutlarini,
+collision policy'yi, backup davranisini ve risk seviyesini listeler.
 Profile copy operation `development.config.toml`, `review.config.toml`,
 `ci.config.toml` ve `token-safe.config.toml` dosyalarini kapsar.
 
@@ -53,21 +55,20 @@ machine'de bu launcher yoksa `/mcp` icinde live gorunmesini beklemeden once
 ```powershell
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
-Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Interactive
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
 
 Soru sormayan otomasyon dostu kurulum:
 
 ```powershell
-.\scripts\install.ps1 -All
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All
 ```
 
 Mevcut global Codex kurulumunu onar:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
-.\scripts\install.ps1 -Repair
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair
 ```
 
 Repair modu, zaten Codex setup'i olan makineler icindir. Codex Chef'in
@@ -124,6 +125,7 @@ npm run chef
 npm run chef -- --status
 npm run chef -- --status --repo-only
 npm run chef -- --preview
+npm run chef -- --preview --verbose-plan
 npm run chef -- --update
 npm run chef -- --update --verbose-plan
 npm run chef -- --backups
@@ -234,9 +236,11 @@ Kullanışlı flagler:
 varsayılan hazır MCP server'ları, disabled/opt-in MCP connector'ları, bundled
 plugin skill'leri, reviewed global skill'ler, enterprise routing profile'lari
 ve MCP setup notlari. Bu notlar local tooling, OAuth authorization, filesystem
-path secimi ve `SUPABASE_DB_URL` gibi gereksinimleri connector'a ihtiyac
-duymadan once gosterir. Account, database, production ve geniş filesystem
-connector'ları sen açıkça enable edene kadar kapalı kalır.
+path secimi, broad/destructive graph-indexing ve `SUPABASE_DB_URL` gibi
+gereksinimleri connector'a ihtiyac duymadan once gosterir. Account, database,
+production, genis filesystem ve broad/destructive graph-indexing connector'lari
+sen acikca enable edene kadar kapali kalir. Lokal codebase graph okumalari
+yalniz destructive/admin graph tool'lari kapaliyken acik olur.
 Agent role dosyalari agent bazli model/reasoning pinlemeden kurulur. Aktif
 profil ve Codex runtime task'a uygun dengeyi secebilir; broad veya uzun islerde
 skill, agent ya da MCP kapatmadan daha dusuk verbosity ve daha dar tool-output

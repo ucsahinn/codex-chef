@@ -10,7 +10,7 @@ npm run validate:release
 npm run verify:skills:online
 node scripts/plan-install.mjs --all --json --redact-paths
 npm run validate:install-state
-npm run release:notes
+npm run release:notes:check
 git status --short
 git diff --check
 git diff --cached --check
@@ -50,6 +50,9 @@ git remote add origin https://github.com/<owner>/codex-chef.git
 git push -u origin main
 ```
 
+Release-note artifact'ini yalnizca read-only kontroller gectikten ve gercekten
+release hazirlanirken olustur.
+
 ## Mevcut Repo Release Akışı
 
 Açık commit/push/release onayından sonra:
@@ -58,11 +61,11 @@ Açık commit/push/release onayından sonra:
 git add <review edilmiş dosyalar>
 git diff --cached
 npm run release:notes
-git commit -m "Release Codex Chef v0.5.43"
+git commit -m "Release Codex Chef v0.5.44"
 git push origin main
-git tag v0.5.43
-git push origin v0.5.43
-gh release create v0.5.43 --title "Codex Chef v0.5.43" --notes-file tmp/release-notes-current.md
+git tag v0.5.44
+git push origin v0.5.44
+gh release create v0.5.44 --title "Codex Chef v0.5.44" --notes-file tmp/release-notes-current.md
 ```
 
 Push sonrasında remote eşitliği ve CI durumunu doğrula:

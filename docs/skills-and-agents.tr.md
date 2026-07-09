@@ -248,10 +248,10 @@ Routing kurali:
 - Subagent kullanimi acik ve gorunur delegasyondur. Bu starter'in global
   AGENTS routing kontrati net, non-trivial prompt shape'leri icin uygun uzman
   agent'i isimlendirir, ama Codex runtime politikasini override etmez.
-- Guncel Codex surumleri subagent'i yalnizca kullanici subagent veya paralel
-  ajan calismasini acikca istediginde spawn eder. Bu oldugunda asistan
-  `Agent plan`, `Agent started` ve `Agent result` satirlarini basmali, sonra
-  uzman sonucunu kullanmadan once ozetlemelidir.
+- Bu starter, mevcut Codex runtime subagent calismasina izin verdiginde
+  bounded ve geri alinabilir lokal uzman delegasyonu icin kalici izin kaydeder.
+  Bu oldugunda asistan `Agent plan`, `Agent started` ve `Agent result`
+  satirlarini basmali, sonra uzman sonucunu kullanmadan once ozetlemelidir.
 - Non-trivial is kayitli bir uzmana denk geliyorsa o uzman plan veya
   `Surfaces used` ciktisinda gorunur yapilir. Runtime veya kullanici istegi izin
   vermedigi halde agent spawn edilmis gibi ima edilmez.
@@ -301,6 +301,7 @@ mode'u, MCP mode'u, beklenen flag/check'leri, evidence sinyallerini, owner,
 durability, primary surface, privilege delta, validation gate, rollback path ve
 guvenlik sinirini yazar. Bu Codex Chef'i faydali anlamda otonom yapar: task
 shape profile uydugunda eslesen uzman, skill, MCP ve flag rehberligi zorunlu
-olur. Subagent spawn acik istek ve runtime izniyle sinirlidir; routing kontrati
-gizli hook veya sessiz executor olusturmaz. Destructive, credential, publish,
-deploy, database ve genis filesystem aksiyonlari onay kapisinda kalir.
+olur. Bounded lokal subagent spawn kalici izin ve runtime izniyle sinirlidir;
+routing kontrati gizli hook veya sessiz executor olusturmaz. Destructive,
+credential, publish, deploy, database ve genis filesystem aksiyonlari onay
+kapisinda kalir.

@@ -74,7 +74,7 @@ const report = {
       "Close browser/MCP pages or sessions when the selected tool exposes a close operation.",
       "If an external MCP process such as Serena persists after the task, report it and ask before killing processes or deleting state."
     ],
-    boundary: "Routing profiles name visible prompt-shape matched specialists, but subagent spawning still requires the current runtime to permit delegation; they do not silently enable account, database, production, destructive, or broad filesystem actions."
+    boundary: "Routing profiles name visible prompt-shape matched specialists and the user has standing permission for bounded local delegation when the runtime permits it; they do not silently enable account, database, production, destructive, broad filesystem, or broad/destructive graph-indexing actions."
   },
   profileCount: profiles.length,
   profiles
@@ -85,7 +85,7 @@ if (options.json) {
 } else {
   console.log("Codex Chef enterprise routing board");
   console.log(`Profiles: ${profiles.length}`);
-  console.log("Policy: task-shape routing names matching specialists, selects matching skills when applicable, and only spawns subagents when the current runtime permits delegation; risky actions remain approval-gated.");
+  console.log("Policy: task-shape routing names matching specialists, selects matching skills when applicable, and may spawn bounded local subagents when the current runtime permits delegation; risky actions remain approval-gated.");
   console.log("");
   console.log("Subagent visibility contract:");
   console.log("- Agent plan: name each requested agent, scope, reason, expected output, and wait policy before spawning.");

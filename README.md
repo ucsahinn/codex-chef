@@ -46,6 +46,21 @@ The multilingual README entry points and six-language deep docs coverage are par
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Copy-Paste Install
 
+Before you paste, confirm the local prerequisites so setup failures point to the
+right layer:
+
+```powershell
+Get-Command git
+Get-Command node
+Get-Command npx
+Get-Command codex
+node -v
+```
+
+Node.js 18 or newer is required. If one of these commands is missing, use
+[Troubleshooting](docs/troubleshooting.md) before treating the repository as
+broken.
+
 Preview first:
 
 ```powershell
@@ -58,8 +73,7 @@ node scripts/plan-install.mjs --all --json --redact-paths
 Install after reviewing the preview:
 
 ```powershell
-Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Interactive
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
 
 Bash or WSL:
@@ -109,11 +123,11 @@ Codex Chef installs a reviewed Codex baseline, not a hidden copy of someone else
 | --- | --- |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent team | 21 Codex subagent role files under `~/.codex/agents/*.toml`, including readable `nickname_candidates`. They are role definitions, not always-on services. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Durable guidance | Global `~/.codex/AGENTS.md` with routing, verification, safety, and approval rules. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP defaults | 7 useful MCP entries enabled for docs, code navigation, browser evidence, reasoning, and non-secret memory; 8 account/database/high-risk connectors disabled. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP defaults | 8 useful MCP entries enabled for docs, code navigation, browser evidence, reasoning, non-secret memory, and local codebase graph reads; mutating tools are prompt-gated or disabled, and 8 account/database/high-risk connectors stay disabled. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skills | Local `codex-chef-workflows` plugin, three bundled skills, and sixteen reviewed optional global skills. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Safety gates | Dry runs, backups, validation, secret scanning, and approval gates before risky actions. |
 
-Installed skills do not execute by themselves. They enter context when named by the user or when a task clearly matches their description. Codex subagents also do not spawn from every prompt; current Codex releases require the user to explicitly ask for subagents or parallel agent work.
+Installed skills do not execute by themselves. They enter context when named by the user or when a task clearly matches their description. Codex subagents also do not spawn from every prompt, but this starter records standing permission for bounded, reversible local specialist delegation whenever the current Codex runtime permits it.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Installed Agent Team
 
@@ -140,7 +154,7 @@ These are the visible specialist names Codex Chef installs. They are role files 
 
 | Status | MCPs | Boundary |
 | --- | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Enabled by default | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="18"> OpenAI Docs · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ed.svg" alt="" aria-hidden="true" width="18"> Context7 · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="18"> Sequential Thinking · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ad.svg" alt="" aria-hidden="true" width="18"> Playwright · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f0.svg" alt="" aria-hidden="true" width="18"> Chrome DevTools · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5fa.svg" alt="" aria-hidden="true" width="18"> Serena · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="18"> Memory | Research, code navigation, browser evidence, and non-secret local context. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Default-enabled narrowed tools | OpenAI Docs · Context7 · Sequential Thinking · Playwright · Chrome DevTools · Serena · Memory · `codebase-memory` | Docs and reasoning run smoothly; browser evidence, semantic navigation, local memory reads, and local graph reads are allowlisted, while interaction, symbol edits, graph indexing, and writes stay prompt-gated or disabled. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f512.svg" alt="" aria-hidden="true" width="20"> Disabled until opt-in | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c1.svg" alt="" aria-hidden="true" width="18"> Filesystem · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f419.svg" alt="" aria-hidden="true" width="18"> GitHub · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" alt="" aria-hidden="true" width="18"> Figma · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4cc.svg" alt="" aria-hidden="true" width="18"> Linear · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5d2.svg" alt="" aria-hidden="true" width="18"> Notion · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a8.svg" alt="" aria-hidden="true" width="18"> Sentry · ▲ Vercel · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5c4.svg" alt="" aria-hidden="true" width="18"> Supabase | These can expose private files, accounts, deployments, telemetry, or databases. |
 
 Run `npm run codex:status` after install to see MCP setup notes, effective controls, routing profiles, and installed-runtime drift without mutating global Codex state.

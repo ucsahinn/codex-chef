@@ -1,7 +1,7 @@
 {
   "version": "0.2.0",
-  "dateChecked": "2026-06-24",
-  "sourcePolicy": "Enterprise routing profiles map task shapes to the safest useful Codex surfaces. They are runtime-permitted routing guidance for clear, non-trivial prompt matches, not hidden execution hooks: matching specialist agents are named visibly and may be spawned only when the current Codex runtime permits subagent delegation, which current Codex releases require the user to ask for explicitly. Matching skills are mandatory when triggered, MCP use is bounded by availability and approval mode, and destructive, credentialed, publishing, deployment, database, and broad filesystem actions remain approval-gated.",
+  "dateChecked": "2026-07-05",
+  "sourcePolicy": "Enterprise routing profiles map task shapes to the safest useful Codex surfaces. They are runtime-permitted routing guidance for clear, non-trivial prompt matches, not hidden execution hooks: matching specialist agents are named visibly and may be spawned for bounded reversible local work because the user granted standing permission, as long as the current Codex runtime permits subagent delegation. Matching skills are mandatory when triggered, MCP use is bounded by availability and approval mode, and destructive, credentialed, publishing, deployment, database, broad filesystem, and broad/destructive graph-indexing actions remain approval-gated.",
   "profiles": [
     {
       "id": "repo-map-before-change",
@@ -9,7 +9,7 @@
       "trigger": "Broad implementation, refactor, unfamiliar repository, architecture question, or ownership uncertainty.",
       "agents": ["code_mapper", "engineering_planner"],
       "skills": ["context-budget-planner"],
-      "mcp": ["serena", "sequential-thinking"],
+      "mcp": ["serena", "sequential-thinking", "codebase-memory"],
       "flags": ["workspace-write", "approval:on-request"],
       "delegationMode": "runtime-permitted",
       "skillMode": "mandatory-when-triggered",
@@ -154,12 +154,12 @@
       "delegationMode": "runtime-permitted",
       "skillMode": "mandatory-when-triggered",
       "mcpMode": "use-when-available-and-approved",
-      "evidence": ["Connector risk, auth boundary, enabled tools, and approval mode are documented.", "Authenticated/account/database connectors remain disabled unless explicitly needed."],
-      "boundary": "Do not enable account, database, production, or broad filesystem connectors silently.",
+      "evidence": ["Connector risk, auth boundary, enabled tools, and approval mode are documented.", "Authenticated/account/database/broad-destructive graph connectors remain disabled unless explicitly needed."],
+      "boundary": "Do not enable account, database, production, broad filesystem, or broad/destructive graph-indexing connectors silently.",
       "owner": "mcp_integrator with security_auditor",
       "primarySurface": "catalog/mcp-servers.json, config templates, and MCP docs",
       "durability": "Durable only in catalog/config templates; live connectors remain session/config controlled.",
-      "privilegeDelta": "disabled-by-default account/database connectors unless explicitly enabled.",
+      "privilegeDelta": "disabled-by-default account/database/broad-destructive graph connectors unless explicitly enabled.",
       "validationGate": "npm run validate:mcp plus documented auth, approval, and rollback notes.",
       "rollback": "Set connector enabled=false or remove the catalog/config entry, then restart Codex."
     },

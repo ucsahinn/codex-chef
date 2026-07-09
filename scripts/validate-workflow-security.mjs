@@ -97,6 +97,7 @@ if (!fs.existsSync(validateWorkflow)) {
     "node --check scripts/validate-readme-locales.mjs",
     "node --check scripts/validate-content-safety.mjs",
     "node --check scripts/validate-agent-config.mjs",
+    "node --check scripts/validate-approval-harmony.mjs",
     "node --check scripts/extract-release-notes.mjs",
     "gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e",
     "bash scripts/install.sh --all --dry-run",

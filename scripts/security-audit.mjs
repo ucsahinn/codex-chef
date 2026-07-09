@@ -72,11 +72,13 @@ const requiredPublicFiles = [
   "scripts/validate-agent-config.mjs",
   "scripts/validate-agent-research-corpus.mjs",
   "scripts/validate-mcp-config.mjs",
+  "scripts/validate-approval-harmony.mjs",
   "scripts/validate-plugin-skills.mjs",
   "scripts/validate-chef-cli.mjs",
   "scripts/validate-package-surface.mjs",
   "scripts/validate-release-readiness.mjs",
   "scripts/scan-supply-chain-iocs.mjs",
+  "scripts/lib/approval-rules.mjs",
   ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/docs_improvement.yml",
@@ -341,11 +343,12 @@ if (/prefix_rule\(pattern\s*=\s*\["npx\.cmd",\s*"-y",\s*"[^"]+@latest"\],\s*deci
 if (/prefix_rule\(pattern\s*=\s*\["npm\.cmd",\s*"run",\s*"clean"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
   failures.push("templates/codex/rules/default.rules must not auto-allow cleanup scripts");
 }
-if (/prefix_rule\(pattern\s*=\s*\["npm\.cmd",\s*"run"(?:,\s*"[^"]+")?\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
-  failures.push("templates/codex/rules/default.rules must not auto-allow repository-controlled npm scripts");
+if (/prefix_rule\(pattern\s*=\s*\["npm\.cmd",\s*"run"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)
+  || /prefix_rule\(pattern\s*=\s*\["npm",\s*"run"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
+  failures.push("templates/codex/rules/default.rules must not auto-allow all repository-controlled npm scripts");
 }
-if (/prefix_rule\(pattern\s*=\s*\["git",\s*"config"(?:,\s*"[^"]+")?.*?\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
-  failures.push("templates/codex/rules/default.rules must not auto-allow broad git config reads");
+if (/prefix_rule\(pattern\s*=\s*\["git",\s*"config"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
+  failures.push("templates/codex/rules/default.rules must not auto-allow broad git config commands");
 }
 if (/prefix_rule\(pattern\s*=\s*\["gitleaks",\s*"dir"\],\s*decision\s*=\s*"allow"\)/.test(defaultRules)) {
   failures.push("templates/codex/rules/default.rules must not auto-allow bare gitleaks dir without redaction");

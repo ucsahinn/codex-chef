@@ -34,6 +34,16 @@ npm run verify:skills:online
 - `git diff --check` nutzen, um Whitespace- und Markdown-Probleme zu erkennen.
 - `gitleaks detect --redact --no-banner --no-git --verbose` nutzen, wenn Gitleaks verfügbar ist.
 
+## v0.5.44 - 2026-07-05
+
+Diese Version fuegt `codebase-memory` als standardmaessig aktivierten, aber
+werkzeug-eingegrenzten MCP fuer graph-basierte Codebase-Analyse hinzu.
+Read/query-Tools sind allowlisted, Indexing und riskantere Projekt-State-Tools
+bleiben prompt-gated oder deaktiviert, und generierte `.codebase-memory/`
+Artefakte bleiben aus dem Source Control. Das Status Board zeigt jetzt auch
+Context-Budget Controls und den `token-safe` Profilhinweis fuer lange
+repo-weite Arbeiten.
+
 ## v0.5.43 - 2026-06-25
 
 Dieser Patch bringt die CLI Operator Experience auf die gesamte Menue- und

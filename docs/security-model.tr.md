@@ -17,8 +17,11 @@ için tasarlandı.
   destructive ve open-world tool'lari kapali tutar.
 - Global command rule'ları dar kapsamlıdır ve read-only discovery ile lokal
   verification komutlarına ağırlık verir.
-- Repository-controlled `npm run ...` script'leri global rule baseline'da
-  auto-approved olmaz; prompt ister. Cunku package script'leri mevcut repo
+- `npm run build`, `npm run check`, `npm run validate`, `npm run dev` ve
+  `npm run codex:status` gibi incelenmis lokal dogrulama script'leri
+  auto-approved olur. Rastgele repository-controlled `npm run ...` script'leri
+  unmatched kalir; cleanup, deploy, publish, release, migration, dependency ve
+  destructive script adlari prompt ister. Cunku package script'leri mevcut repo
   icinden arbitrary shell code calistirabilir.
 - `token-safe.config.toml` skill, agent, MCP server, memory, hook veya app
   kapatmadan verbosity, default reasoning, compaction threshold ve tool-output
@@ -34,14 +37,25 @@ dokümantasyon helper'ı gibi değil, güçlü connector boundary'leri gibi ele 
 Bu starter'ın kuralları:
 
 - OpenAI Docs ve Context7 dokümantasyon odaklı default'lardır.
-- Playwright ve Chrome DevTools lokal browser verification içindir.
+- Playwright ve Chrome DevTools lokal browser verification icindir; varsayilan
+  olarak yalniz evidence/navigation tool'lari allowlist edilir. Interaction,
+  evaluation, upload ve request-detail tool'lari prompt-gated veya disabled
+  kalir.
+- Codebase Memory lokal code-intelligence connector olarak paketlenir. Graph
+  read/query tool'lari allowlist edilir; indexing ve destructive/admin graph
+  tool'lari lokal graph state yazdigi icin prompt-gated veya disabled kalir.
 - GitHub, Figma, Linear, Notion, Sentry, Vercel ve Supabase kullanıcı bilinçli
   olarak açana kadar disabled kalır.
 - Token değerleri repo dosyalarından değil environment variable'lardan gelmelidir.
 - External write-capable tool'lar prompt approval kullanmalıdır.
-- Read-only documentation MCP'leri `default_tools_approval_mode = "approve"`
-  kullanabilir; browser, account, filesystem, database, production ve mutating
-  tool'lar `"prompt"` kullanmalıdır.
+- Incelenmis dokumantasyon ve reasoning MCP tool'lari
+  `default_tools_approval_mode = "approve"` kullanabilir. Browser,
+  semantic-code ve codebase-graph MCP server'lari
+  `default_tools_approval_mode = "prompt"` ile calisir; evidence, navigation ve
+  read-only graph query tool'lari `enabled_tools` allowlist'iyle acilir.
+  Browser request/response detail, browser interaction, symbol edit, graph
+  indexing, memory write, filesystem, account, database, production, deploy,
+  publish ve mutating tool'lar `"prompt"` kullanmali ya da disabled kalmalidir.
 - Browser network listing lokal QA icin approved olabilir; fakat Playwright
   `browser_network_request` ve Chrome DevTools `get_network_request` gibi
   request/response detail tool'lari prompt ister. Bu tool'lar header, cookie
@@ -52,6 +66,9 @@ Bu starter'ın kuralları:
 - Yeni MCP server eklerken `enabled_tools`, `disabled_tools`,
   `startup_timeout_sec` ve `tool_timeout_sec` gibi dar config flag'leri prose-only
   talimatlara tercih edilmelidir.
+- `.codebase-memory/` gibi generated code-intelligence graph state source
+  control disinda kalir; ancak private workflow icin acik review edilirse
+  kaynak materyal sayilabilir.
 - `catalog/mcp-servers.json` her starter connector icin source URL, auth mode,
   setup kind, setup hint, risk, approval mode ve default-enable gerekcesi tutar.
   Installer ve `npm run codex:status` setup gereksinimlerini credential
@@ -174,8 +191,9 @@ verification komutlarına izin verir. Şunları prompt'a bağlar:
 - global skill installation
 - package publishing
 - GitHub API operations
-- repository-controlled `npm run ...` script execution
-- genis `git config` okumaları ve raw, unredacted `gitleaks dir`
+- reviewed lokal verification allowlist disindaki rastgele repository-controlled
+  `npm run ...` script execution
+- genis `git config` komutlari ve raw, unredacted `gitleaks dir`
 - git commit, push, reset, checkout ve restore
 - exact allowlist dışındaki ad-hoc `npx` package execution
 

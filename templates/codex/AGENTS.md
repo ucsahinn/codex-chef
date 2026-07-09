@@ -4,6 +4,15 @@
 
 - Treat each request as a task to complete end to end: inspect, plan when
   useful, implement, verify, and report only the important outcome.
+- Default to high autonomy for reversible local work: read, map, search, edit,
+  lint, test, build, run local dev/smoke workflows, gather browser evidence,
+  use relevant skills, use enabled read-heavy MCPs, and delegate to configured
+  specialist agents without asking for repeated confirmation.
+- Keep the approval boundary focused on irreversible or high-blast-radius
+  actions: delete/remove/clean/prune, dependency install/update/uninstall,
+  credential/auth changes, database or account writes, production/external
+  writes, push/merge/release/publish/deploy, broad filesystem connectors, and
+  commands that can overwrite or stop user work.
 - Prefer the repository's own `AGENTS.md`, scripts, package manager, helpers,
   and naming conventions over new abstractions.
 - Use `rg` or `rg --files` first for search. Keep file reads and edits scoped
@@ -67,7 +76,8 @@
   acting. Match it against the installed agent team, available skills, enabled
   MCPs, and relevant config/profile flags.
 - Apply the narrowest matching route:
-  repo mapping -> `code_mapper` plus Serena/sequential-thinking; current docs
+  repo mapping -> `code_mapper` plus Serena/sequential-thinking and
+  `codebase-memory` when enabled; current docs
   -> `docs_researcher` plus OpenAI Docs or Context7; context placement ->
   `context_architect` plus prompt/skill/context starter skills; bug or failing
   test -> `root_cause_debugger`, `test_verifier`, and systematic debugging;
@@ -83,7 +93,8 @@
 - Treat this as safe autonomy, not hidden execution. It is required to use the
   matching reasoning, skill, MCP, and flag guidance; it is never permission to
   commit, push, publish, deploy, delete, rotate credentials, enable account or
-  database connectors, or broaden filesystem access without explicit approval.
+  database connectors, broaden filesystem access, or enable broad/destructive
+  graph-indexing without explicit approval.
 - If more than one route matches, prefer the lower-risk read-only specialist
   first, then implement in the main thread after evidence is gathered.
 - For non-trivial tasks, state the selected route, specialist, skill, MCP, or
@@ -115,16 +126,20 @@ are selected:
 
 - Treat subagents as explicit, visible delegation, not background magic. This
   installed AGENTS contract names the matching specialist subagents for clear,
-  non-trivial prompt shapes listed in the Enterprise Routing Loop, but it does
-  not override Codex runtime policy. Current Codex releases spawn subagents only
-  when the user explicitly asks for subagents or parallel agent work.
+  non-trivial prompt shapes listed in the Enterprise Routing Loop. It does
+  not override Codex runtime policy. The user has standing permission to spawn
+  matching specialist agents for non-trivial, bounded, reversible local work
+  when the current Codex runtime permits it; do not ask again just to use the
+  appropriate specialist.
 - Treat prompt-shape matched delegation as safe autonomy only for bounded,
   non-destructive evidence work: mapping, research, planning, review,
-  verification, browser evidence, security audit, release readiness, and setup
-  diagnostics. Destructive, credentialed, account, database, deploy, publish,
-  broad filesystem, and global mutation actions still need explicit approval.
-- When the user explicitly asks for subagents or parallel agent work, spawn the
-  matching specialist and wait for a summarized result before relying on it.
+  verification, browser evidence, security audit, release readiness, setup
+  diagnostics, and scoped implementation support. Destructive, credentialed,
+  account, database, deploy, publish, broad filesystem, broad/destructive
+  graph-indexing, and global mutation actions still need explicit approval.
+- When a task shape clearly matches a configured specialist, spawn the matching
+  specialist and wait for a summarized result before relying on it, unless the
+  task is trivial or the current runtime/tool surface cannot spawn agents.
 - When delegation is used, make it visible. Before spawning, print an
   `Agent plan` that names each requested or prompt-shape matched agent, its
   scope, why it is needed, expected output, and whether you will wait. After
@@ -156,9 +171,9 @@ are selected:
   deleting local state.
 - Do not spawn subagents for trivial, single-file, low-risk changes.
 - For non-trivial work that matches a registered specialist, name the specialist
-  visibly in the plan or `Surfaces used` output. Spawn it only when the user
-  explicitly asks for subagents or parallel agent work and the current runtime
-  permits delegation.
+  visibly in the plan or `Surfaces used` output. Spawn it when the current
+  runtime permits delegation and the work benefits from parallel evidence,
+  review, planning, verification, or browser checks.
 - Prefer `code_mapper` before broad implementation, refactors, unfamiliar
   repositories, or architecture questions.
 - Prefer `docs_researcher` for current/version-sensitive APIs, Codex behavior,
@@ -276,6 +291,10 @@ are selected:
   complex decomposition, Playwright or Chrome DevTools for UI/browser evidence,
   Serena for semantic code navigation, and memory only for non-secret local
   context.
+- Treat enabled read-heavy MCPs as autonomous support surfaces. Use OpenAI
+  Docs, Context7, sequential-thinking, Playwright/Chrome DevTools evidence,
+  Serena reads/semantic edits, memory reads, and codebase-memory reads without
+  asking when they fit the task.
 - Treat these MCP choices and their config flags as required when their task
   shape appears; do not replace current docs, browser verification, or semantic
   code navigation with guesswork when the matching MCP is available.
@@ -284,11 +303,15 @@ are selected:
   filesystems, databases, production logs, billing, or deployments.
 - Keep MCP configuration in `~/.codex/config.toml` or trusted project
   `.codex/config.toml`. Use `enabled = false` to park authenticated,
-  database, production, and broad filesystem connectors until the task needs
-  them.
-- Use `default_tools_approval_mode = "approve"` only for read-only
-  documentation lookups. Use `"prompt"` for browser, filesystem, account,
-  database, production, or potentially mutating tools.
+  database, production, broad filesystem, and external-state connectors until
+  the task needs them. Local codebase graph reads can be enabled when
+  destructive/admin graph tools remain disabled.
+- Use `default_tools_approval_mode = "approve"` for reviewed read-heavy
+  surfaces such as documentation lookup, reasoning helpers, browser evidence,
+  semantic code navigation, and local codebase graph reads. Keep browser
+  request/response detail, memory writes, filesystem, account, database,
+  production, deploy, publish, and potentially mutating tools on `"prompt"` or
+  disabled until the task explicitly needs them.
 - Prefer precise config flags over prose-only safety rules: `enabled`,
   `enabled_tools`, `disabled_tools`, `startup_timeout_sec`, `tool_timeout_sec`,
   `bearer_token_env_var`, `env_vars`, and per-tool approval overrides.

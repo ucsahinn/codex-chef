@@ -60,6 +60,11 @@ function unquote(value) {
   return value.replace(/^"|"$/g, "");
 }
 
+function parseInlineStringArray(value) {
+  if (!value || !/^\[.*\]$/.test(value)) return [];
+  return [...value.matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+}
+
 function fail(message) {
   failures.push(message);
 }
@@ -124,9 +129,56 @@ function validateMcpJsonFile(filePath) {
     validateLauncherArgs(`${rel}:${name}`, Array.isArray(server?.args) ? server.args : []);
   }
 }
+function validateUniqueTomlAssignments(configFile, text) {
+  let currentTable = "<root>";
+  const seen = new Map();
+  const lines = text.split(/\r?\n/);
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const tableMatch = /^\s*\[([^\]]+)\]\s*$/.exec(line);
+    if (tableMatch) {
+      currentTable = tableMatch[1].trim();
+      continue;
+    }
+
+    const assignmentMatch = /^\s*([A-Za-z0-9_.-]+)\s*=/.exec(line);
+    if (!assignmentMatch) continue;
+
+    const key = `${currentTable}.${assignmentMatch[1]}`;
+    if (seen.has(key)) {
+      fail(`${configFile} duplicate TOML assignment for ${key} on lines ${seen.get(key)} and ${index + 1}.`);
+    } else {
+      seen.set(key, index + 1);
+    }
+  }
+}
 
 const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
 const catalogNames = new Set((catalog.servers || []).map((server) => server.name));
+const codebaseMemoryDisabledTools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"];
+const expectedEnabledTools = {
+  playwright: ["browser_snapshot", "browser_take_screenshot", "browser_console_messages", "browser_network_requests", "browser_wait_for", "browser_resize", "browser_navigate", "browser_navigate_back", "browser_close", "browser_tabs"],
+  "chrome-devtools": ["list_pages", "select_page", "take_snapshot", "take_screenshot", "list_console_messages", "get_console_message", "list_network_requests", "wait_for", "resize_page", "navigate_page", "navigate_page_history", "close_page"],
+  serena: ["activate_project", "get_current_config", "initial_instructions", "list_memories", "read_memory", "search_for_pattern", "find_symbol", "find_declaration", "find_implementations", "find_referencing_symbols", "get_symbols_overview", "get_diagnostics_for_file"],
+  "codebase-memory": ["list_projects", "index_status", "search_graph", "trace_path", "detect_changes", "query_graph", "get_graph_schema", "get_code_snippet", "get_architecture", "search_code"]
+};
+const codebaseMemory = (catalog.servers || []).find((server) => server.name === "codebase-memory");
+
+if (!codebaseMemory) {
+  fail("MCP catalog must include codebase-memory.");
+} else {
+  if (codebaseMemory.category !== "code-intelligence") fail("codebase-memory catalog category must stay code-intelligence.");
+  if (codebaseMemory.setupKind !== "local-state") fail("codebase-memory catalog setupKind must stay local-state.");
+  if (codebaseMemory.defaultEnabled !== true) fail("codebase-memory must stay enabled by default for local read-heavy repo intelligence.");
+  if (codebaseMemory.approval !== "prompt") fail("codebase-memory default approval must stay prompt so indexing is not silently approved.");
+  if (codebaseMemory.risk !== "medium") fail("codebase-memory catalog risk must stay medium while destructive/admin tools are disabled.");
+}
+
+const gitignore = read(".gitignore");
+if (!gitignore.split(/\r?\n/).includes(".codebase-memory/")) {
+  fail(".gitignore must exclude generated .codebase-memory/ graph artifacts.");
+}
 
 for (const server of catalog.servers || []) {
   if (server.package?.includes("@latest")) {
@@ -163,6 +215,7 @@ for (const server of catalog.servers || []) {
 
 for (const configFile of configFiles) {
   const text = read(configFile);
+  validateUniqueTomlAssignments(configFile, text);
   const blocks = parseMcpBlocks(text);
   const configNames = new Set(blocks.keys());
 
@@ -178,6 +231,10 @@ for (const configFile of configFiles) {
     if (!isPinnedGitSpec(gitSpec)) {
       fail(`${configFile} git MCP launcher source must be pinned to a full commit SHA: ${gitSpec}`);
     }
+  }
+
+  if (!/\[apps\._default\][\s\S]*?\ndefault_tools_approval_mode\s*=\s*"prompt"/.test(text)) {
+    fail(`${configFile} apps._default must set default_tools_approval_mode = "prompt".`);
   }
 
   for (const name of catalogNames) {
@@ -200,6 +257,18 @@ for (const configFile of configFiles) {
     if (approval !== server.approval) {
       fail(`${configFile} approval drift for ${server.name}: expected ${server.approval}, found ${approval}`);
     }
+    if (expectedEnabledTools[server.name]) {
+      const enabledTools = parseInlineStringArray(readTomlValue(block, "enabled_tools"));
+      const expected = expectedEnabledTools[server.name];
+      for (const expectedTool of expected) {
+        if (!enabledTools.includes(expectedTool)) {
+          fail(`${configFile} ${server.name} must allowlist ${expectedTool}.`);
+        }
+      }
+      if (enabledTools.length !== expected.length) {
+        fail(`${configFile} ${server.name} enabled_tools must stay exact: ${expected.join(", ")}`);
+      }
+    }
     if (server.url && !block.includes(`url = "${server.url}"`)) {
       fail(`${configFile} URL drift for ${server.name}`);
     }
@@ -217,7 +286,12 @@ for (const configFile of configFiles) {
       const toolTimeout = readTomlValue(block, "tool_timeout_sec");
       if (!startupTimeout) fail(`${configFile} high-risk MCP must declare startup_timeout_sec: ${server.name}`);
       if (!toolTimeout) fail(`${configFile} high-risk MCP must declare tool_timeout_sec: ${server.name}`);
-      if (approval !== "prompt") fail(`${configFile} high-risk MCP must use prompt approval mode: ${server.name}`);
+      if (server.risk === "critical" && approval !== "prompt") {
+        fail(`${configFile} critical MCP must use prompt approval mode: ${server.name}`);
+      }
+      if (server.risk === "high" && server.defaultEnabled === true && approval !== "prompt") {
+        fail(`${configFile} enabled high-risk MCP must use prompt approval mode: ${server.name}`);
+      }
     }
     if (server.setupKind === "env") {
       const envName = String(server.auth || "").split(":")[1];
@@ -231,6 +305,17 @@ for (const configFile of configFiles) {
         if (argsLine.includes(`%${envName}%`) || argsLine.includes(`$${envName}`)) {
           fail(`${configFile} env MCP must not expand ${envName} directly in launcher args: ${server.name}`);
         }
+      }
+    }
+    if (server.name === "codebase-memory") {
+      const disabledTools = parseInlineStringArray(readTomlValue(block, "disabled_tools"));
+      for (const expectedTool of codebaseMemoryDisabledTools) {
+        if (!disabledTools.includes(expectedTool)) {
+          fail(`${configFile} codebase-memory must disable ${expectedTool}.`);
+        }
+      }
+      if (disabledTools.length !== codebaseMemoryDisabledTools.length) {
+        fail(`${configFile} codebase-memory disabled_tools must stay exact: ${codebaseMemoryDisabledTools.join(", ")}`);
       }
     }
   }

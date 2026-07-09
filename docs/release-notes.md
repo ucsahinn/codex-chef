@@ -2,6 +2,61 @@
 
 ## Unreleased
 
+## v0.5.44 - 2026-07-05
+
+This patch adds a reviewed code-intelligence MCP for users who want
+graph-backed repository mapping without weakening the starter defaults.
+`codebase-memory` is packaged in the catalog and config templates as a
+default-enabled but tool-narrowed local graph surface: read/query tools are
+allowlisted, while indexing and broad/destructive graph tools stay
+prompt-gated or disabled.
+
+## Highlights
+
+- Added `codebase-memory-mcp@0.8.1` to the MCP catalog and both Codex config
+  templates with exact package pinning, prompt approval, startup/tool timeouts,
+  and generated graph artifacts kept out of source control.
+- Allowlisted low-risk query tools for smoother inspection while keeping
+  project indexing prompt-gated and disabling `delete_project`, `manage_adr`,
+  `ingest_traces`, and `index_repository`.
+- Extended `npm run codex:status` with active context-budget controls and a
+  token-safe profile reminder so long repo-wide work can lower token pressure
+  without disabling skills, agents, MCPs, memory, hooks, or apps.
+- Added token-audit category budgets and top-offender reporting so maintainers
+  can see script, release-doc, catalog, startup, skill, and agent-role pressure
+  without deleting capabilities.
+- Split runtime operator scripts from deferred validator/helper scripts in the
+  token audit so the `script-large` budget measures the surface users actually
+  hit during normal Chef operation.
+- Made normal `npm run chef -- --preview` output summary-first, with the full
+  operation list still available through `npm run chef -- --preview
+  --verbose-plan`.
+- Kept `codebase-memory` graph indexing and admin tools prompt-gated or
+  disabled while preserving lower-risk graph/status query approvals, and made
+  graph-indexing boundaries visible in routing, status, README, MCP catalog,
+  and installed AGENTS guidance.
+- Added `release:notes:check` for read-only release-note verification, kept
+  artifact generation behind `npm run release:notes`, and made Chef update run
+  the full `npm run check` gate before managed files refresh.
+- Added README prerequisite checks for `git`, `node`, `npx`, and `codex` before
+  copy-paste install so first-run failures point at machine setup instead of
+  looking like repository breakage.
+- Updated README counts, MCP catalog docs, install guidance, security model
+  notes, expected-output examples, and release metadata for the new optional
+  connector.
+
+## Verification
+
+- `npm run validate:mcp`
+- `npm run validate:status`
+- `npm run validate:chef-cli`
+- `npm run validate:release`
+- `npm run audit:security`
+- `npm run validate`
+- `npm run check`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.43 - 2026-06-25
 
 This patch finishes the CLI operator experience across the whole menu surface,

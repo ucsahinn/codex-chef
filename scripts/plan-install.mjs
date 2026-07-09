@@ -11,6 +11,7 @@ function parseArgs(argv) {
     installSkills: false,
     installGitGuards: false,
     json: false,
+    summary: false,
     listProfiles: false,
     listOperations: false,
     force: false,
@@ -28,6 +29,7 @@ function parseArgs(argv) {
     else if (arg === "--install-skills") parsed.installSkills = true;
     else if (arg === "--install-git-guards") parsed.installGitGuards = true;
     else if (arg === "--json") parsed.json = true;
+    else if (arg === "--summary") parsed.summary = true;
     else if (arg === "--list-profiles") parsed.listProfiles = true;
     else if (arg === "--list-operations" || arg === "--list-components") parsed.listOperations = true;
     else if (arg === "--force") parsed.force = true;
@@ -74,6 +76,7 @@ Options:
   --list-profiles        List manifest profiles without planning writes
   --list-operations      List manifest operations without planning writes
   --list-components      Alias for --list-operations
+  --summary              Emit a concise human summary instead of every operation
   --force                Reflect force/replace behavior in the plan metadata
   --no-backup            Reflect no-backup behavior in the plan metadata
   --redact-paths         Replace local home paths with placeholders in output
@@ -368,6 +371,35 @@ function printPlan(plan) {
   }
 }
 
+function countBy(items, key) {
+  const counts = new Map();
+  for (const item of items) {
+    const value = key(item);
+    counts.set(value, (counts.get(value) || 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort((left, right) => left[0].localeCompare(right[0]))
+    .map(([name, count]) => `${name}: ${count}`)
+    .join(", ");
+}
+
+function printPlanSummary(plan) {
+  const highRisk = plan.operations.filter((operation) => operation.risk === "high").length;
+  const backupBacked = plan.operations.filter((operation) => operation.backup).length;
+  console.log("Codex Chef install plan summary\n");
+  console.log(`Package: ${plan.source.packageName}@${plan.source.packageVersion}`);
+  console.log(`Platform: ${plan.target.platform}`);
+  console.log(`Codex home: ${plan.target.codexHome}`);
+  console.log(`Agents home: ${plan.target.agentsHome}`);
+  console.log(`Selected components (${plan.selectedComponentIds.length}): ${plan.selectedComponentIds.join(", ")}`);
+  console.log(`Skipped components (${plan.skippedComponentIds.length}): ${plan.skippedComponentIds.join(", ") || "(none)"}`);
+  console.log(`Operations: ${plan.operations.length}; high risk: ${highRisk}; backup-backed: ${backupBacked}; force: ${plan.options.force ? "yes" : "no"}`);
+  console.log(`Kinds: ${countBy(plan.operations, (operation) => operation.kind)}`);
+  console.log(`Risks: ${countBy(plan.operations, (operation) => operation.risk)}`);
+  console.log("");
+  console.log("No files are changed by this plan command. Use --json for the machine-readable contract or omit --summary for the full operation list.");
+}
+
 function printProfiles(discovery) {
   console.log("Codex Chef install profiles\n");
   console.log(`Package: ${discovery.source.packageName}@${discovery.source.packageVersion}`);
@@ -408,6 +440,8 @@ try {
   const plan = createPlan(options);
   if (options.json) {
     console.log(JSON.stringify(plan, null, 2));
+  } else if (options.summary) {
+    printPlanSummary(plan);
   } else {
     printPlan(plan);
   }

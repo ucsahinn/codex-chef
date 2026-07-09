@@ -35,9 +35,13 @@ Resmi MCP specification:
 https://modelcontextprotocol.io/specification
 
 MCP server'lar tool, resource ve prompt sunabilir. Her server'i bir capability
-boundary olarak dusun: dokumantasyon server'lari dusuk riskli context saglar;
-browser, filesystem, database, hesap, production, billing veya deploy
-server'lari daha guclu approval default'u ve daha dar tool exposure ister.
+boundary olarak dusun: dokumantasyon ve reasoning helper'lari approved
+read-heavy default kullanabilir. Browser, semantic-code ve lokal codebase-graph
+server'lari `enabled_tools` ile daraltilmalidir; sadece evidence, navigation ve
+read tool'lar akici calisir. Browser interaction, symbol edit, graph indexing,
+filesystem, database, hesap, production, billing, deploy, secret-bearing veya
+diger mutating tool'lar prompt default, disabled state veya daha dar tool
+exposure ister.
 
 Npm tabanli tum MCP package spec'leri hem `catalog/mcp-servers.json` hem de
 `templates/codex/config.*.toml` icinde exact version ile pinlenir. Floating
@@ -56,6 +60,7 @@ launcher'lar full commit SHA ve matching catalog `sourceRef` icermelidir.
 | `chrome-devtools` | Chrome inspection ve audit | Node/npx ve isolated Chrome/DevTools bridge |
 | `serena` | Semantic code navigation | `uvx` ve pinned git source ref; yoksa disable et |
 | `memory` | Lokal memory graph | Node/npx; secret yazma |
+| `codebase-memory` | Graph destekli code intelligence, mimari sorgulari ve diff impact analysis | Node/npx first-run package download; lokal graph state source disinda kalir. |
 
 ## Gerektiginde Ac
 
@@ -78,7 +83,7 @@ ihtiyaci oldugunu dogrula, sonra sadece gereken connector'u ac:
 ```toml
 [mcp_servers.github]
 enabled = true
-default_tools_approval_mode = "prompt"
+default_tools_approval_mode = "approve"
 ```
 
 Rollback icin `enabled = false` yap ve Codex'i yeniden baslat.
@@ -101,6 +106,22 @@ $env:SUPABASE_DB_URL = "<repo disinda ayarla; commit etme>"
 Sonra sadece database inspection gereken task icin ac. Kalici workflow olarak
 bilerek secmedikce is bitince tekrar disabled hale getir.
 
+Codebase Memory icin Codex Chef read-heavy graph-backed code intelligence'i
+varsayilan acar, graph read/query tool'larini allowlist eder, indexing ve
+destructive/admin tool'lari prompt-gated veya disabled tutar:
+
+```toml
+[mcp_servers.codebase-memory]
+enabled = true
+default_tools_approval_mode = "prompt"
+enabled_tools = ["list_projects", "index_status", "search_graph", "trace_path", "detect_changes", "query_graph", "get_graph_schema", "get_code_snippet", "get_architecture", "search_code"]
+disabled_tools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"]
+```
+
+Rollback icin `enabled = false` yap ve Codex'i yeniden baslat.
+`.codebase-memory/` ignored kalmali; graph artifact ancak private team workflow
+icin bilerek review edilirse source material olarak ele alinabilir.
+
 Kural: Dokumantasyon MCP'leri iyi varsayilandir. Auth isteyen MCP'ler gorev
 gerektirmeden ve kullanici onayi olmadan acilmamalidir. Gorev enabled bir MCP
 server ile eslesiyorsa stale memory veya tahmin yerine o server kullanilir.
@@ -116,9 +137,9 @@ config degismeden once netlestirmelidir.
 
 | Config alani | Kullanim |
 | --- | --- |
-| `enabled` | Auth, database, production veya genis filesystem server'larini gerekene kadar kapali tutar. |
-| `default_tools_approval_mode` | Read-only docs icin `approve`; browser, account, filesystem, database, production veya mutating tool icin `prompt`. |
-| `enabled_tools` / `disabled_tools` | Server'i workflow icin gereken spesifik tool'larla sinirlar. |
+| `enabled` | Auth, database, production, genis filesystem veya broad/destructive graph-indexing server'larini gerekene kadar kapali tutar. |
+| `default_tools_approval_mode` | Incelenmis dokumantasyon ve reasoning helper'lari icin `approve`; browser interaction, symbol edit, indexing, request/response detail, memory write, account, filesystem, database, production, deploy, publish veya mutating tool sunan server'larda `prompt`. |
+| `enabled_tools` / `disabled_tools` | Server'i workflow icin gereken spesifik tool'larla sinirlar; faydali default-enabled bir server mutating tool da sunuyorsa bu sinirlama zorunludur. |
 | `startup_timeout_sec` | Stdio server'a baslama suresi verir ama Codex'i sonsuza kadar bekletmez. |
 | `tool_timeout_sec` | Yavas browser, code-intelligence, docs veya external-account cagrisini sinirlar. |
 | `bearer_token_env_var`, `env_vars`, `env_http_headers` | Credential'i commit edilen dosya yerine environment variable'dan okur. |

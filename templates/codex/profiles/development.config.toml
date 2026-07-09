@@ -1,4 +1,5 @@
 approval_policy = "on-request"
+approvals_reviewer = "auto_review"
 sandbox_mode = "workspace-write"
 model_reasoning_effort = "medium"
 

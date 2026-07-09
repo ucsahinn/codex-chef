@@ -248,10 +248,10 @@ Routing rule:
 - Subagents are explicit, visible delegation. This starter's global AGENTS
   routing contract names matching specialist agents for clear, non-trivial
   prompt shapes, but it does not override Codex runtime policy.
-- Current Codex releases spawn subagents only when the user explicitly asks for
-  subagents or parallel agent work. When that happens, the assistant must print
-  `Agent plan`, `Agent started`, and `Agent result`, then summarize the
-  specialist result before relying on it.
+- This starter records standing permission for bounded, reversible local
+  specialist delegation when the current Codex runtime permits subagent work.
+  When that happens, the assistant must print `Agent plan`, `Agent started`,
+  and `Agent result`, then summarize the specialist result before relying on it.
 - For non-trivial work that maps to a registered specialist, make the specialist
   visible in the plan or `Surfaces used` output. Do not silently imply an agent
   was spawned when the runtime or user request did not permit one.

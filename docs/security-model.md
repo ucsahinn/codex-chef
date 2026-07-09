@@ -18,9 +18,12 @@ Codex safety model.
   a reviewed app-specific override changes them.
 - Global command rules are narrow and biased toward read-only discovery and
   local verification.
-- Repository-controlled `npm run ...` scripts prompt instead of being
-  auto-approved by the global rule baseline, because package scripts can run
-  arbitrary shell code from the current repository.
+- Reviewed local verification scripts such as `npm run build`, `npm run check`,
+  `npm run validate`, `npm run dev`, and `npm run codex:status` are
+  auto-approved. Arbitrary repository-controlled `npm run ...` scripts stay
+  unmatched, and cleanup, deploy, publish, release, migration, dependency, and
+  destructive script names prompt because package scripts can run arbitrary
+  shell code from the current repository.
 - `token-safe.config.toml` reduces verbosity, default reasoning, compaction
   threshold, and tool-output size without disabling skills, agents, MCP
   servers, memory, hooks, or apps.
@@ -36,14 +39,24 @@ connectors, not harmless documentation helpers.
 Rules used in this starter:
 
 - OpenAI Docs and Context7 are documentation-oriented defaults.
-- Playwright and Chrome DevTools are local browser verification tools.
+- Playwright and Chrome DevTools are local browser verification tools; only
+  evidence/navigation tools are allowlisted by default, while interaction,
+  evaluation, upload, and request-detail tools stay prompt-gated or disabled.
+- Codebase Memory is packaged as a local code-intelligence connector. Graph
+  read/query tools are allowlisted, but indexing and destructive/admin graph
+  tools stay prompt-gated or disabled because they write local graph state.
 - GitHub, Figma, Linear, Notion, Sentry, Vercel, and Supabase are disabled until
   the user intentionally enables and authenticates them.
 - Token values must come from environment variables, not repo files.
 - External write-capable tools should use prompt approval.
-- Read-only documentation MCPs may use `default_tools_approval_mode =
-  "approve"`; browser, account, filesystem, database, production, and mutating
-  tools should use `"prompt"`.
+- Reviewed documentation and reasoning MCP tools may use
+  `default_tools_approval_mode = "approve"`. Browser, semantic-code, and
+  codebase-graph MCP servers use `default_tools_approval_mode = "prompt"` with
+  explicit `enabled_tools` allowlists for evidence, navigation, and read-only
+  graph queries. Browser request/response detail, browser interaction, symbol
+  edits, graph indexing, memory writes, filesystem, account, database,
+  production, deploy, publish, and mutating tools should use `"prompt"` or stay
+  disabled.
 - Browser network listing can be approved for local QA, but request/response
   detail tools such as Playwright `browser_network_request` and Chrome DevTools
   `get_network_request` prompt because they may expose headers, cookies, or
@@ -54,6 +67,8 @@ Rules used in this starter:
 - New MCP servers should prefer narrow config flags such as `enabled_tools`,
   `disabled_tools`, `startup_timeout_sec`, and `tool_timeout_sec` over broad
   prose-only instructions.
+- Generated code-intelligence graph state such as `.codebase-memory/` stays out
+  of source control unless it is explicitly reviewed for a private workflow.
 - `catalog/mcp-servers.json` records source URL, auth mode, setup kind, setup
   hint, risk, approval mode, and default-enable rationale for each starter
   connector. Installers and `npm run codex:status` surface setup requirements
@@ -169,8 +184,9 @@ project-native verification commands. It prompts for:
 - global skill installation
 - package publishing
 - GitHub API operations
-- repository-controlled `npm run ...` script execution
-- broad `git config` reads and raw, unredacted `gitleaks dir`
+- arbitrary repository-controlled `npm run ...` script execution outside the
+  reviewed local verification allowlist
+- broad `git config` commands and raw, unredacted `gitleaks dir`
 - git commit, push, reset, checkout, and restore
 - ad-hoc `npx` package execution outside exact allowlisted helpers
 

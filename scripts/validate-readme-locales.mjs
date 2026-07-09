@@ -102,6 +102,17 @@ if (!english.includes("multilingual README entry points")) {
 if (!english.includes("six-language deep docs")) {
   failures.push("README.md must describe six-language deep docs coverage.");
 }
+for (const [file, text] of [
+  ["README.md", english],
+  ["README.tr.md", read("README.tr.md")]
+]) {
+  for (const required of ["Get-Command git", "Get-Command node", "Get-Command npx", "Get-Command codex", "node -v", "docs/troubleshooting"]) {
+    if (!text.includes(required)) failures.push(`${file} must show first-run prerequisite checks before copy-paste install.`);
+  }
+  if (!text.includes("codebase-memory") || !/local codebase graph reads|lokal codebase graph okumalari/i.test(text)) {
+    failures.push(`${file} must list codebase-memory in the default-enabled local codebase graph read boundary.`);
+  }
+}
 
 if (failures.length > 0) {
   console.error("README locale validation failed:");

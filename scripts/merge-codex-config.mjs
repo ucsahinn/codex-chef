@@ -5,19 +5,21 @@ import path from "node:path";
 const args = process.argv.slice(2);
 const options = {
   dryRun: false,
-  json: false
+  json: false,
+  syncManagedTables: false
 };
 
 const positional = [];
 for (const arg of args) {
   if (arg === "--dry-run") options.dryRun = true;
   else if (arg === "--json") options.json = true;
+  else if (arg === "--sync-managed-tables") options.syncManagedTables = true;
   else positional.push(arg);
 }
 
 const [templatePath, destinationPath] = positional;
 if (!templatePath || !destinationPath) {
-  console.error("Usage: node scripts/merge-codex-config.mjs <template.toml> <destination.toml> [--dry-run] [--json]");
+  console.error("Usage: node scripts/merge-codex-config.mjs <template.toml> <destination.toml> [--dry-run] [--sync-managed-tables] [--json]");
   process.exit(2);
 }
 
@@ -40,6 +42,7 @@ const managedRootKeys = new Set([
   "model_verbosity",
   "personality",
   "approval_policy",
+  "approvals_reviewer",
   "sandbox_mode"
 ]);
 
@@ -114,6 +117,7 @@ const missingRootAssignments = [];
 const removedDeprecatedFields = [];
 const updatedManagedFields = [];
 const updatedManagedTables = [];
+const driftedManagedTables = [];
 const fullTemplateInstall = !destinationExists;
 
 function addUnique(list, value) {
@@ -140,6 +144,10 @@ function normalizeManagedFields(text) {
       addUnique(updatedManagedFields, "apps._default.open_world_enabled");
       next.push("open_world_enabled = false");
     }
+    if (!appsSeen.default_tools_approval_mode) {
+      addUnique(updatedManagedFields, "apps._default.default_tools_approval_mode");
+      next.push('default_tools_approval_mode = "prompt"');
+    }
     appsSeen = null;
   }
 
@@ -152,7 +160,8 @@ function normalizeManagedFields(text) {
         appsSeen = {
           enabled: false,
           destructive_enabled: false,
-          open_world_enabled: false
+          open_world_enabled: false,
+          default_tools_approval_mode: false
         };
       }
       next.push(line);
@@ -160,6 +169,18 @@ function normalizeManagedFields(text) {
     }
     if (appsSeen && /^\s*default_tools_enabled\s*=/.test(line)) {
       addUnique(removedDeprecatedFields, "apps._default.default_tools_enabled");
+      continue;
+    }
+    const approvalModeMatch = /^(\s*)default_tools_approval_mode(\s*=\s*)"([^"]+)"(\s*(?:#.*)?)$/.exec(line);
+    if (appsSeen && approvalModeMatch) {
+      const [, indent, separator, value, suffix] = approvalModeMatch;
+      appsSeen.default_tools_approval_mode = true;
+      if (value !== "prompt") {
+        addUnique(updatedManagedFields, "apps._default.default_tools_approval_mode");
+        next.push(`${indent}default_tools_approval_mode${separator}"prompt"${suffix}`);
+      } else {
+        next.push(line);
+      }
       continue;
     }
     const safetyMatch = /^(\s*)(enabled|destructive_enabled|open_world_enabled)(\s*=\s*)(true|false)(\s*(?:#.*)?)$/.exec(line);
@@ -205,8 +226,13 @@ function syncManagedTables(text) {
     }
     if (templateBlock && isManagedTable(currentTable)) {
       if (currentBlock !== templateBlock) {
-        addUnique(updatedManagedTables, currentTable);
-        next.push(...templateBlock.split("\n"));
+        if (options.syncManagedTables) {
+          addUnique(updatedManagedTables, currentTable);
+          next.push(...templateBlock.split("\n"));
+        } else {
+          addUnique(driftedManagedTables, currentTable);
+          next.push(...currentLines);
+        }
       } else {
         next.push(...currentLines);
       }
@@ -252,6 +278,7 @@ const report = {
   destination: path.resolve(destinationPath),
   destinationExists,
   fullTemplateInstall,
+  syncManagedTables: options.syncManagedTables,
   dryRun: options.dryRun,
   addedRootKeys: missingRootAssignments.map((entry) => entry.key),
   addedRootKeyCount: missingRootAssignments.length,
@@ -259,7 +286,8 @@ const report = {
   addedTableCount: missing.length,
   removedDeprecatedFields,
   updatedManagedFields,
-  updatedManagedTables
+  updatedManagedTables,
+  driftedManagedTables
 };
 
 if (fullTemplateInstall && !options.dryRun) {

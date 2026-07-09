@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { findProblemRules } from "./lib/approval-rules.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
@@ -140,6 +141,7 @@ function run(command, commandArgs, extra = {}) {
     ? ["/d", "/s", "/c", command, ...commandArgs]
     : commandArgs;
   return spawnSync(executable, args, {
+    cwd: extra.cwd || root,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
     timeout: extra.timeout || 60000,
@@ -284,9 +286,12 @@ function inspectManagedFileDrift(failures) {
       return;
     }
 
-    const targetLines = new Set(significantRulesLines(fs.readFileSync(targetPath, "utf8")));
-    const missingLines = significantRulesLines(fs.readFileSync(sourcePath, "utf8"))
+    const sourceText = fs.readFileSync(sourcePath, "utf8");
+    const targetText = fs.readFileSync(targetPath, "utf8");
+    const targetLines = new Set(significantRulesLines(targetText));
+    const missingLines = significantRulesLines(sourceText)
       .filter((line) => !targetLines.has(line));
+    const problemRules = findProblemRules(targetText, { sourceText });
     if (missingLines.length > 0) {
       mismatched.push({
         source: sourceRel,
@@ -295,6 +300,21 @@ function inspectManagedFileDrift(failures) {
         missingLines: missingLines.length
       });
       failures.push(`Installed rules file is missing ${missingLines.length} managed baseline line(s): ${sourceRel} -> ${redact(targetPath)}`);
+      return;
+    }
+    if (problemRules.length > 0) {
+      mismatched.push({
+        source: sourceRel,
+        target: redact(targetPath),
+        reason: "conflicting-local-approval-rules",
+        problemRules: problemRules.map((rule) => ({
+          lineNumber: rule.lineNumber,
+          pattern: rule.pattern,
+          decision: rule.decision,
+          reason: rule.reason
+        }))
+      });
+      failures.push(`Installed rules file has ${problemRules.length} conflicting local approval rule(s): ${sourceRel} -> ${redact(targetPath)}`);
       return;
     }
     matchedFiles += 1;
@@ -358,6 +378,67 @@ function inspectManagedFileDrift(failures) {
     mismatched,
     missing,
     extra
+  };
+}
+
+function inspectConfigDrift(failures) {
+  const template = path.join(
+    root,
+    "templates",
+    "codex",
+    process.platform === "win32" ? "config.windows.toml" : "config.unix.toml"
+  );
+  const destination = path.join(options.codexHome, "config.toml");
+  if (!fs.existsSync(destination)) {
+    return { inspected: false, status: "fail", reason: "config.toml missing" };
+  }
+
+  const result = run(process.execPath, [
+    "scripts/merge-codex-config.mjs",
+    template,
+    destination,
+    "--sync-managed-tables",
+    "--dry-run",
+    "--json"
+  ], { timeout: 60000 });
+
+  if (result.error) {
+    failures.push(`Installed Codex config drift check could not run: ${result.error.message}`);
+    return { inspected: false, status: "fail", error: result.error.message };
+  }
+  if (result.status !== 0) {
+    const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
+    failures.push(`Installed Codex config drift check failed: ${output}`);
+    return { inspected: true, status: "fail", exitCode: result.status };
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(result.stdout || "{}");
+  } catch (error) {
+    failures.push(`Installed Codex config drift check did not emit parseable JSON: ${error.message}`);
+    return { inspected: true, status: "fail", exitCode: result.status };
+  }
+
+  const drift = {
+    addedRootKeys: parsed.addedRootKeys || [],
+    addedTables: parsed.addedTables || [],
+    removedDeprecatedFields: parsed.removedDeprecatedFields || [],
+    updatedManagedFields: parsed.updatedManagedFields || [],
+    updatedManagedTables: parsed.updatedManagedTables || []
+  };
+  const driftCount = Object.values(drift).reduce((count, values) => count + values.length, 0)
+    + (parsed.fullTemplateInstall ? 1 : 0);
+
+  if (driftCount > 0) {
+    failures.push("Installed Codex config has managed drift; run `npm run repair:install -- --apply` to sync the safe automation template.");
+  }
+
+  return {
+    inspected: true,
+    status: driftCount > 0 ? "fail" : "ok",
+    fullTemplateInstall: parsed.fullTemplateInstall === true,
+    ...drift
   };
 }
 
@@ -512,6 +593,7 @@ const report = {
   generatedAt: new Date().toISOString(),
   installed: inspectInstalledFiles(failures),
   managedFiles: inspectManagedFileDrift(failures),
+  configDrift: inspectConfigDrift(failures),
   runtime: inspectCodexRuntime(failures, warnings),
   skills: inspectSkills(failures, warnings),
   gitGuards: inspectGitGuards(failures),

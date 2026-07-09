@@ -22,6 +22,7 @@
 .codex/auth*
 .codex/*.local.toml
 .serena/
+.codebase-memory/
 codex-manual.md
 codex-manual.outline.md
 

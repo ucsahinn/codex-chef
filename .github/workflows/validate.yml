@@ -36,6 +36,7 @@ jobs:
       - run: node --check scripts/validate-agent-config.mjs
       - run: node --check scripts/validate-agent-research-corpus.mjs
       - run: node --check scripts/validate-mcp-config.mjs
+      - run: node --check scripts/validate-approval-harmony.mjs
       - run: node --check scripts/validate-codex-doctor.mjs
       - run: node --check scripts/validate-diagram-triplet.mjs
       - run: node --check plugins/codex-chef-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs
@@ -47,6 +48,7 @@ jobs:
       - run: node --check scripts/verify-skill-sources.mjs
       - run: node --check scripts/validate-release-readiness.mjs
       - run: node --check scripts/security-audit.mjs
+      - run: node --check scripts/lib/approval-rules.mjs
       - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false

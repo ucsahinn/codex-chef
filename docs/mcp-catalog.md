@@ -35,9 +35,13 @@ Official MCP specification reference:
 https://modelcontextprotocol.io/specification
 
 MCP servers can expose tools, resources, and prompts. Treat each server as a
-capability boundary: documentation servers are low-risk context providers, while
-browser, filesystem, database, account, production, billing, or deployment
-servers need stronger approval defaults and narrower tool exposure.
+capability boundary: documentation and reasoning helpers can use approved
+read-heavy defaults. Browser, semantic-code, and local codebase-graph servers
+must be narrowed with `enabled_tools` so only evidence, navigation, and read
+tools run smoothly; browser interaction, symbol edits, graph indexing,
+filesystem, database, account, production, billing, deployment, secret-bearing,
+or other mutating tools need prompt defaults, disabled state, or narrower tool
+exposure.
 
 All npm-based MCP package specs are exact-version pinned in both
 `catalog/mcp-servers.json` and `templates/codex/config.*.toml`. Floating
@@ -56,6 +60,7 @@ must include a full commit SHA and matching catalog `sourceRef`.
 | `chrome-devtools` | Chrome inspection and Lighthouse-style checks | Node/npx plus isolated Chrome/DevTools bridge |
 | `serena` | Semantic code navigation | `uvx` plus pinned git source ref; disable if unavailable |
 | `memory` | Local MCP memory graph | Node/npx; avoid storing secrets |
+| `codebase-memory` | Graph-backed code intelligence, architecture queries, and diff impact analysis | Node/npx first-run package download; keeps local graph state out of source. |
 
 ## Disabled Until Needed
 
@@ -78,7 +83,7 @@ context, then change only that connector:
 ```toml
 [mcp_servers.github]
 enabled = true
-default_tools_approval_mode = "prompt"
+default_tools_approval_mode = "approve"
 ```
 
 Rollback is `enabled = false` followed by a Codex restart.
@@ -102,6 +107,22 @@ $env:SUPABASE_DB_URL = "<set outside the repo; do not commit>"
 Then enable only for the task that needs database inspection. Disable it again
 afterward unless it is a deliberate durable workflow.
 
+For Codebase Memory, Codex Chef enables read-heavy graph-backed code
+intelligence by default, allowlists graph read/query tools, and keeps indexing
+plus destructive/admin tools prompt-gated or disabled:
+
+```toml
+[mcp_servers.codebase-memory]
+enabled = true
+default_tools_approval_mode = "prompt"
+enabled_tools = ["list_projects", "index_status", "search_graph", "trace_path", "detect_changes", "query_graph", "get_graph_schema", "get_code_snippet", "get_architecture", "search_code"]
+disabled_tools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"]
+```
+
+Rollback is `enabled = false` followed by a Codex restart. Keep
+`.codebase-memory/` ignored unless a graph artifact is deliberately reviewed as
+source material for a private team workflow.
+
 ## Rule
 
 Documentation MCPs can be convenient defaults. Authenticated MCPs should remain
@@ -119,9 +140,9 @@ change is made.
 
 | Config field | Use |
 | --- | --- |
-| `enabled` | Disable authenticated, database, production, or broad filesystem servers until needed. |
-| `default_tools_approval_mode` | Use `approve` for read-only docs; use `prompt` for browser, account, filesystem, database, production, or mutating tools. |
-| `enabled_tools` / `disabled_tools` | Narrow a server to the specific tools a workflow needs. |
+| `enabled` | Disable authenticated, database, production, broad filesystem, or broad/destructive graph-indexing servers until needed. |
+| `default_tools_approval_mode` | Use `approve` for reviewed documentation and reasoning helpers. Use `prompt` when the server also exposes browser interaction, symbol edits, indexing, request/response detail, memory writes, account, filesystem, database, production, deploy, publish, or mutating tools. |
+| `enabled_tools` / `disabled_tools` | Narrow a server to the specific tools a workflow needs; this is required when a useful default-enabled server also exposes mutating tools. |
 | `startup_timeout_sec` | Give stdio servers enough startup time without hanging Codex forever. |
 | `tool_timeout_sec` | Bound slow browser, code-intelligence, docs, or external-account calls. |
 | `bearer_token_env_var`, `env_vars`, `env_http_headers` | Pull credentials from environment variables instead of committed files. |

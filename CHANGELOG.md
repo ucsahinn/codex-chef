@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## 0.5.44 - 2026-07-05
+
+- Added `codebase-memory` as a default-enabled but tool-narrowed MCP connector
+  for graph-backed repository mapping, architecture queries, and diff impact
+  analysis.
+- Kept the new code-intelligence connector prompt-gated outside its read/query
+  allowlist, with persistent graph state documented, generated
+  `.codebase-memory/` artifacts ignored, and indexing/project-state tools
+  disabled by default.
+- Added status-board context-budget visibility and token-safe profile guidance
+  for long repo-wide work without disabling any Codex capability surface.
+- Added token-audit category budgets, `token-safe` active/available status
+  visibility, runtime-vs-validator script classification, and stronger
+  `codex-status --output` regression coverage.
+- Made normal `npm run chef -- --preview` output summary-first while keeping
+  full install-plan evidence available through `--verbose-plan`.
+- Kept `codebase-memory` indexing and graph-admin tools prompt-gated or
+  disabled while allowlisting graph read/query tools, and made graph-indexing
+  approval boundaries visible across routing, status, README, MCP catalog, and
+  installed AGENTS guidance.
+- Tightened release and update gates with a read-only `release:notes:check`
+  script, full `npm run check` before managed refresh, and README prerequisite
+  checks before copy-paste install.
+- Updated MCP catalog, Windows/Unix config templates, security docs, install
+  copy, release metadata, and expected-output examples for the new opt-in
+  connector surface.
+
 ## 0.5.43 - 2026-06-25
 
 - Refined the interactive Chef CLI into a grouped operator board with

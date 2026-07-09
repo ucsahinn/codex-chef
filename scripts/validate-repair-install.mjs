@@ -19,9 +19,9 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
-function runRepair(args, codexHome, agentsHome) {
+function runRepair(args, codexHome, agentsHome, cwd = root) {
   return spawnSync(process.execPath, [
-    "scripts/repair-install.mjs",
+    path.join(root, "scripts", "repair-install.mjs"),
     "--json",
     "--platform",
     "windows",
@@ -31,7 +31,7 @@ function runRepair(args, codexHome, agentsHome) {
     agentsHome,
     ...args
   ], {
-    cwd: root,
+    cwd,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
     timeout: 120000,
@@ -100,7 +100,7 @@ write(
 );
 write(
   path.join(codexHome, "rules", "default.rules"),
-  `${read("templates/codex/rules/default.rules")}prefix_rule(pattern=["powershell.exe", "-NoProfile", "-Command"], decision="allow")\n`
+  `${read("templates/codex/rules/default.rules")}prefix_rule(pattern=["my-local-readonly"], decision="prompt")\nprefix_rule(pattern=["powershell.exe", "-NoProfile", "-Command"], decision="allow")\n`
 );
 write(path.join(codexHome, "agents", "code_mapper.toml"), "# stale agent\n");
 write(path.join(codexHome, "development.config.toml"), "# stale profile\n");
@@ -151,8 +151,30 @@ if (plan) {
   if (!plan.config?.updatedManagedFields?.includes("apps._default.open_world_enabled")) {
     fail("repair plan must report missing open-world app connector guard backfill.");
   }
+  if (!plan.config?.updatedManagedFields?.includes("apps._default.default_tools_approval_mode")) {
+    fail("repair plan must report missing apps._default default tool approval mode backfill.");
+  }
+  if (!plan.managedFiles?.changed?.some((entry) => entry.id === "codex-rules" && /conflicting local approval rule/.test(entry.reason || ""))) {
+    fail("repair plan must report conflicting local approval rules.");
+  }
   if (!plan.skills || plan.skills.extraCount < 1 || plan.skills.duplicateCount < 1) {
     fail("repair plan must report non-curated and duplicate skill inventory.");
+  }
+}
+
+const previewAliasPlan = parseResult(runRepair(["--preview"], codexHome, agentsHome), "repair preview alias");
+if (previewAliasPlan) {
+  if (previewAliasPlan.mode !== "plan") fail(`repair --preview must stay in plan mode, got ${previewAliasPlan.mode}.`);
+  if (previewAliasPlan.applied === true) fail("repair --preview must not apply writes.");
+}
+
+const externalCwdPlan = parseResult(runRepair([], codexHome, agentsHome, fixtureRoot), "repair plan from external cwd");
+if (externalCwdPlan) {
+  if (externalCwdPlan.schemaVersion !== "codex-chef.repair.v1") {
+    fail("repair plan from external cwd must still resolve source files from the repair script location.");
+  }
+  if (externalCwdPlan.managedFiles?.expected < 30 || !externalCwdPlan.actions?.some((action) => String(action.id || "").startsWith("codex-agent:"))) {
+    fail("repair plan from external cwd must still find managed Codex Chef source files.");
   }
 }
 
@@ -176,8 +198,11 @@ const repairedRules = fs.readFileSync(path.join(codexHome, "rules", "default.rul
 if (!repairedRules.includes(read("templates/codex/rules/default.rules").trim())) {
   fail("repair apply must preserve the managed default.rules baseline.");
 }
-if (!repairedRules.includes("powershell.exe")) {
-  fail("repair apply must preserve local approval rules in default.rules.");
+if (!repairedRules.includes("my-local-readonly")) {
+  fail("repair apply must preserve harmless local approval rules in default.rules.");
+}
+if (repairedRules.includes('prefix_rule(pattern=["powershell.exe", "-NoProfile", "-Command"], decision="allow")')) {
+  fail("repair apply must remove conflicting broad PowerShell approval rules in default.rules.");
 }
 if (fs.readFileSync(path.join(codexHome, "AGENTS.md"), "utf8") !== read("templates/codex/AGENTS.md")) {
   fail("repair apply must restore AGENTS.md from the managed template.");
@@ -220,6 +245,10 @@ if (!/\[apps\._default\][\s\S]*?\ndestructive_enabled\s*=\s*false/.test(repaired
 if (!/\[apps\._default\][\s\S]*?\nopen_world_enabled\s*=\s*false/.test(repairedConfig)) {
   fail("repair apply must backfill apps._default.open_world_enabled = false.");
 }
+if (!/\[apps\._default\][\s\S]*?\ndefault_tools_approval_mode\s*=\s*"prompt"/.test(repairedConfig)) {
+  fail("repair apply must backfill apps._default.default_tools_approval_mode = prompt.");
+}
+assertRootAssignment(repairedConfig, "approvals_reviewer", '"auto_review"', "repair apply config");
 if (/%SUPABASE_DB_URL%|\$SUPABASE_DB_URL/.test(repairedConfig)) {
   fail("repair apply must sync managed Supabase config and remove direct SUPABASE_DB_URL launcher args.");
 }
@@ -250,8 +279,14 @@ if (missingConfigApplied) {
   if (!installedConfig.includes('sandbox_mode = "workspace-write"')) {
     fail("repair apply must install root-level sandbox mode when config.toml is missing.");
   }
+  if (!installedConfig.includes('approvals_reviewer = "auto_review"')) {
+    fail("repair apply must install root-level approvals reviewer when config.toml is missing.");
+  }
   if (!/\[apps\._default\][\s\S]*?\nenabled\s*=\s*false/.test(installedConfig)) {
     fail("repair apply must install app connector defaults when config.toml is missing.");
+  }
+  if (!/\[apps\._default\][\s\S]*?\ndefault_tools_approval_mode\s*=\s*"prompt"/.test(installedConfig)) {
+    fail("repair apply must install app connector default approval mode when config.toml is missing.");
   }
 }
 
@@ -289,9 +324,13 @@ if (minimalExistingApplied) {
   if (!minimalConfig.includes('model_reasoning_effort = "medium"')) {
     fail("repair apply must backfill missing root-level reasoning effort in existing config.toml.");
   }
+  if (!minimalConfig.includes('approvals_reviewer = "auto_review"')) {
+    fail("repair apply must backfill missing root-level approvals reviewer in existing config.toml.");
+  }
   assertRootAssignment(minimalConfig, "approval_policy", '"on-request"', "repair apply minimal existing config");
   assertRootAssignment(minimalConfig, "sandbox_mode", '"workspace-write"', "repair apply minimal existing config");
   assertRootAssignment(minimalConfig, "model_reasoning_effort", '"medium"', "repair apply minimal existing config");
+  assertRootAssignment(minimalConfig, "approvals_reviewer", '"auto_review"', "repair apply minimal existing config");
   if (!/\[mcp_servers\.user-local\][\s\S]*?command\s*=\s*"node"/.test(minimalConfig)) {
     fail("repair apply must preserve user-defined MCP tables while backfilling root defaults.");
   }
@@ -325,6 +364,9 @@ if (inlineCommentApplied) {
     if (!new RegExp(`${key}\\s*=\\s*false\\s*#`).test(appsBlock)) {
       fail(`repair apply must rewrite apps._default.${key} to false while preserving inline comments.`);
     }
+  }
+  if (!/\ndefault_tools_approval_mode\s*=\s*"prompt"/.test(appsBlock)) {
+    fail("repair apply must backfill apps._default.default_tools_approval_mode when inline comments are present.");
   }
 }
 

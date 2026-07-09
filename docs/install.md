@@ -27,6 +27,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 Inspect the manifest-backed operation plan without invoking either installer:
 
 ```bash
+node scripts/plan-install.mjs --all --summary --redact-paths
 node scripts/plan-install.mjs --all --json
 ```
 
@@ -37,8 +38,9 @@ node scripts/plan-install.mjs --list-profiles
 node scripts/plan-install.mjs --list-operations
 ```
 
-The plan lists managed targets, optional global Git changes, curated skill
-commands, collision policy, backup behavior, and risk level.
+The summary keeps normal previews short; the JSON and full human plan list
+managed targets, optional global Git changes, curated skill commands, collision
+policy, backup behavior, and risk level.
 The profile copy operation includes `development.config.toml`,
 `review.config.toml`, `ci.config.toml`, and `token-safe.config.toml`.
 
@@ -53,21 +55,20 @@ Install after the preview is correct:
 ```powershell
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
-Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Interactive
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
 
 Automation-friendly install without questions:
 
 ```powershell
-.\scripts\install.ps1 -All
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All
 ```
 
 Repair an existing global Codex setup:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
-.\scripts\install.ps1 -Repair
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair
 ```
 
 Repair mode is for machines that already have a Codex setup. It previews or
@@ -127,6 +128,7 @@ npm run chef
 npm run chef -- --status
 npm run chef -- --status --repo-only
 npm run chef -- --preview
+npm run chef -- --preview --verbose-plan
 npm run chef -- --update
 npm run chef -- --update --verbose-plan
 npm run chef -- --backups
@@ -235,9 +237,12 @@ Both installers finish with a capability board that lists the specialist
 agents, default-ready MCP servers, disabled opt-in MCP connectors, bundled
 plugin skills, reviewed global skills, enterprise routing profiles, and MCP
 setup notes. The setup notes call out local tooling, OAuth authorization,
-filesystem-path selection, and `SUPABASE_DB_URL` requirements before a task
-needs that connector. Account, database, production, and broad filesystem
-connectors remain disabled unless you explicitly enable them later.
+filesystem-path selection, broad/destructive graph-indexing, and
+`SUPABASE_DB_URL` requirements before a task needs that connector. Account,
+database, production, broad filesystem, and broad/destructive graph-indexing
+connectors remain disabled unless you explicitly enable them later. Local
+codebase graph reads are enabled only with destructive/admin graph tools
+disabled.
 Agent role files are installed without per-agent model/reasoning pins. The
 active profile and Codex runtime choose the task-appropriate balance; use
 `token-safe.config.toml` for broad or long-running work that needs lower

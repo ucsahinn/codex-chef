@@ -31,6 +31,20 @@ Bu repo resmi olmayan bir community starter'dır; OpenAI ürünü değildir. Gü
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Hızlı Kurulum
 
+Paste etmeden once lokal gereksinimleri dogrula; boylece setup hatasi repo mu
+makine mi daha net gorunur:
+
+```powershell
+Get-Command git
+Get-Command node
+Get-Command npx
+Get-Command codex
+node -v
+```
+
+Node.js 18 veya daha yeni surum gerekir. Bu komutlardan biri eksikse repoyu
+bozuk saymadan once [Sorun giderme](docs/troubleshooting.tr.md) rehberine bak.
+
 Önce preview al:
 
 ```powershell
@@ -43,8 +57,7 @@ node scripts/plan-install.mjs --all --json --redact-paths
 Preview temiz görünüyorsa kur:
 
 ```powershell
-Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Interactive
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
 
 Bash veya WSL:
@@ -94,11 +107,11 @@ Codex Chef başka bir makinenin ayarlarını gizlice kopyalamaz; kaynağı bu re
 | --- | --- |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Ajan ekibi | `~/.codex/agents/*.toml` altında 21 Codex subagent rol dosyası ve okunabilir `nickname_candidates`. Bunlar servis değil, role tanımıdır. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Kalıcı talimatlar | Routing, doğrulama, güvenlik ve onay kuralları içeren global `~/.codex/AGENTS.md`. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP varsayılanları | Dokümantasyon, code navigation, browser evidence, reasoning ve secret içermeyen memory için 7 MCP açık; hesap/database/high-risk 8 connector kapalı. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP varsayılanları | Dokümantasyon, code navigation, browser evidence, reasoning, secret içermeyen memory ve lokal codebase graph okumalari için 8 MCP açık; mutating tool'lar prompt-gated veya disabled, hesap/database/high-risk 8 connector kapalı. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skill'ler | Yerel `codex-chef-workflows` plugin'i, üç bundled skill ve on altı reviewed opsiyonel global skill. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Güvenlik kapıları | Dry run, backup, validation, secret scan ve riskli aksiyonlar için approval gate. |
 
-Skill'ler kendiliğinden çalışmaz. Kullanıcı skill adını yazdığında veya iş skill açıklamasına net uyduğunda context'e girer. Codex subagent'leri de her promptta otomatik spawn olmaz; güncel Codex sürümleri subagent veya paralel ajan çalışması için kullanıcının açıkça istemesini gerektirir.
+Skill'ler kendiliğinden çalışmaz. Kullanıcı skill adını yazdığında veya iş skill açıklamasına net uyduğunda context'e girer. Codex subagent'leri de her promptta otomatik spawn olmaz; bu starter, mevcut Codex runtime izin verdiğinde bounded ve geri alınabilir lokal uzman delegasyonu için kalıcı izin kaydeder.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Kurulan Ajan Ekibi
 
@@ -125,7 +138,7 @@ Bunlar Codex Chef'in kurduğu görünür uzman isimleridir. Ayrı servis değil,
 
 | Durum | MCP'ler | Sınır |
 | --- | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Varsayılan açık | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="18"> OpenAI Docs · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ed.svg" alt="" aria-hidden="true" width="18"> Context7 · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="18"> Sequential Thinking · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ad.svg" alt="" aria-hidden="true" width="18"> Playwright · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f0.svg" alt="" aria-hidden="true" width="18"> Chrome DevTools · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5fa.svg" alt="" aria-hidden="true" width="18"> Serena · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="18"> Memory | Araştırma, code navigation, browser evidence ve secret içermeyen lokal context. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Varsayılan açık daraltılmış tool'lar | OpenAI Docs · Context7 · Sequential Thinking · Playwright · Chrome DevTools · Serena · Memory · `codebase-memory` | Docs ve reasoning akıcı çalışır; browser evidence, semantic navigation, local memory reads ve lokal graph okumalari allowlist edilir. Interaction, symbol edit, graph indexing ve write tool'lari prompt-gated veya disabled kalır. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f512.svg" alt="" aria-hidden="true" width="20"> Opt-in bekler | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c1.svg" alt="" aria-hidden="true" width="18"> Filesystem · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f419.svg" alt="" aria-hidden="true" width="18"> GitHub · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" alt="" aria-hidden="true" width="18"> Figma · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4cc.svg" alt="" aria-hidden="true" width="18"> Linear · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5d2.svg" alt="" aria-hidden="true" width="18"> Notion · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a8.svg" alt="" aria-hidden="true" width="18"> Sentry · ▲ Vercel · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5c4.svg" alt="" aria-hidden="true" width="18"> Supabase | Özel dosya, hesap, deploy, telemetry veya database verisi açabileceği için kapalı başlar. |
 
 Kurulumdan sonra `npm run codex:status` çalıştırarak MCP setup notlarını, effective controls bilgisini, routing profillerini ve installed-runtime drift durumunu global Codex state'ini değiştirmeden görebilirsin.

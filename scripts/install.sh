@@ -126,6 +126,25 @@ any_managed_target_exists() {
   [ -e "$AGENTS_HOME_DIR/plugins/marketplace.json" ]
 }
 
+run_preflight_validators() {
+  section "Preflight validation"
+  local checks=(
+    "agent config:scripts/validate-agent-config.mjs"
+    "MCP config:scripts/validate-mcp-config.mjs"
+    "approval harmony:scripts/validate-approval-harmony.mjs"
+  )
+  local check label script_path
+  for check in "${checks[@]}"; do
+    label="${check%%:*}"
+    script_path="${check#*:}"
+    if ! node "$REPO_ROOT/$script_path"; then
+      echo "Preflight validation failed for $label; refusing to install managed global files." >&2
+      exit 1
+    fi
+    action "validated" "$label"
+  done
+}
+
 if [ "$INTERACTIVE" -eq 1 ]; then
   section "Guided setup"
   note "Press Enter to accept the safe default shown in brackets."
@@ -326,12 +345,14 @@ if [ "$DRY_RUN" -eq 1 ]; then
 fi
 if [ "$INTERACTIVE" -eq 1 ]; then
   note "Existing config policy: backup + merge missing Codex Chef blocks unless force is enabled"
-  note "Authenticated/account MCP connectors remain disabled by default"
+  note "Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled."
   if ! yes_no "Continue with this plan?" "yes"; then
     echo "Codex Chef install cancelled by user." >&2
     exit 1
   fi
 fi
+
+run_preflight_validators
 
 section "Managed Codex files"
 ensure_dir "$CODEX_HOME_DIR"
@@ -495,7 +516,7 @@ const optInMcps = mcpCatalog.servers
   .filter((server) => server.defaultEnabled !== true)
   .map((server) => server.name);
 const mcpSetupNotes = mcpCatalog.servers
-  .filter((server) => !["none", "local-state"].includes(server.setupKind))
+  .filter((server) => server.setupKind !== "none" && (server.setupKind !== "local-state" || server.name === "codebase-memory"))
   .map((server) => `${server.name} [${server.setupKind}]: ${server.setupHint}`);
 const pluginSkills = fs
   .readdirSync(pluginSkillRoot, { withFileTypes: true })
@@ -518,7 +539,7 @@ for (const [label, names] of [
   console.log(`  - ${label} (${names.length}):`);
   console.log(`    ${names.join(", ")}`);
 }
-console.log("  - Account, database, production, and broad filesystem connectors stay disabled until explicitly enabled.");
+console.log("  - Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.");
 NODE
 
 section "Next steps"
