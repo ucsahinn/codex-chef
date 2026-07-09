@@ -53,7 +53,7 @@ machine'de bu launcher yoksa `/mcp` icinde live gorunmesini beklemeden once
 Ön izleme doğruysa kur:
 
 ```powershell
-git clone https://github.com/ucsahinn/codex-chef.git
+git clone https://github.com/vaultekbilisim/codex-chef.git
 cd codex-chef
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
@@ -208,7 +208,7 @@ Yazmadan önce ön izle:
 Ön izleme doğruysa kur:
 
 ```bash
-git clone https://github.com/ucsahinn/codex-chef.git
+git clone https://github.com/vaultekbilisim/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --interactive
