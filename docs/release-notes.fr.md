@@ -34,6 +34,13 @@ npm run verify:skills:online
 - Utiliser `git diff --check` pour détecter les problèmes de whitespace et Markdown.
 - Utiliser `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks est disponible.
 
+## v0.5.47 - 2026-07-09
+
+Cette version corrige un faux `fail` de `codex:status:all` trouve apres la
+verification de v0.5.46. Les sondes Codex/MCP plus lentes sous Windows ont plus
+de temps pour la verification runtime, mais une vraie derive des managed files,
+skills, Git guards ou MCP echoue toujours.
+
 ## v0.5.46 - 2026-07-09
 
 Cette version reduit les approval prompts inutiles pour la verification sure et

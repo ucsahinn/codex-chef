@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
+const DEFAULT_CHILD_TIMEOUT_MS = 120000;
+const RUNTIME_VERIFY_TIMEOUT_MS = 300000;
 
 const options = {
   json: false,
@@ -239,15 +241,16 @@ function run(command, commandArgs, extra = {}) {
     cwd: root,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
-    timeout: extra.timeout || 120000,
+    timeout: extra.timeout || DEFAULT_CHILD_TIMEOUT_MS,
     windowsHide: true,
     env: extra.env || process.env
   });
 }
 
-function runNodeScript(script, scriptArgs, label) {
-  progress(`running ${label} (timeout 120s)`);
-  const result = run(process.execPath, [script, ...scriptArgs], { timeout: 120000 });
+function runNodeScript(script, scriptArgs, label, extra = {}) {
+  const timeout = extra.timeout || DEFAULT_CHILD_TIMEOUT_MS;
+  progress(`running ${label} (timeout ${Math.round(timeout / 1000)}s)`);
+  const result = run(process.execPath, [script, ...scriptArgs], { timeout });
   const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
   if (result.error) {
     return { inspected: false, status: "fail", failures: [`${label} could not run: ${result.error.message}`] };
@@ -1038,7 +1041,8 @@ const runtime = options.skipRuntime
         ...(options.expectSkills ? ["--expect-skills"] : []),
         ...(options.expectGitGuards ? ["--expect-git-guards"] : [])
       ],
-      "verify:install:runtime"
+      "verify:install:runtime",
+      { timeout: RUNTIME_VERIFY_TIMEOUT_MS }
     );
 
 const codexDoctor = summarizeCodexDoctor();

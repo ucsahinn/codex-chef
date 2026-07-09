@@ -34,6 +34,13 @@ npm run verify:skills:online
 - `git diff --check` nutzen, um Whitespace- und Markdown-Probleme zu erkennen.
 - `gitleaks detect --redact --no-banner --no-git --verbose` nutzen, wenn Gitleaks verfügbar ist.
 
+## v0.5.47 - 2026-07-09
+
+Diese Version behebt einen falschen `codex:status:all` Fehler nach der
+Verifikation von v0.5.46. Langsamere Windows Codex/MCP Probes erhalten mehr
+Zeit fuer die Runtime-Pruefung, waehrend echte Drift bei Managed Files, Skills,
+Git Guards oder MCP weiterhin fehlschlaegt.
+
 ## v0.5.46 - 2026-07-09
 
 Diese Version reduziert unnoetige Approval Prompts fuer sichere Codex Chef

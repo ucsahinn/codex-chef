@@ -9,6 +9,7 @@ import { findProblemRules } from "./lib/approval-rules.mjs";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
+const CODEX_DOCTOR_TIMEOUT_MS = 120000;
 
 const options = {
   json: false,
@@ -447,7 +448,7 @@ function inspectCodexRuntime(failures, warnings) {
     return { inspected: false, note: "Skipped by --skip-codex-cli." };
   }
 
-  const ambientDoctor = run(codexCommand(), ["doctor", "--json"]);
+  const ambientDoctor = run(codexCommand(), ["doctor", "--json"], { timeout: CODEX_DOCTOR_TIMEOUT_MS });
   let ambient = { inspected: false };
   if (ambientDoctor.error) {
     warnings.push(`Could not run ambient codex doctor --json: ${ambientDoctor.error.message}`);
@@ -465,7 +466,10 @@ function inspectCodexRuntime(failures, warnings) {
   }
 
   const installedEnv = { ...process.env, CODEX_HOME: options.codexHome };
-  const doctor = run(codexCommand(), ["doctor", "--json"], { env: installedEnv });
+  const doctor = run(codexCommand(), ["doctor", "--json"], {
+    env: installedEnv,
+    timeout: CODEX_DOCTOR_TIMEOUT_MS
+  });
   if (doctor.error) {
     warnings.push(`Could not run codex doctor --json with installed CODEX_HOME: ${doctor.error.message}`);
     return { inspected: false, error: doctor.error.message, ambient };

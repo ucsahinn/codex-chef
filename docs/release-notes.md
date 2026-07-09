@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## v0.5.47 - 2026-07-09
+
+This patch fixes a post-release status false negative found while verifying
+v0.5.46. The installed runtime was healthy, but `codex:status:all` could still
+report `fail` when slower Windows Codex/MCP probes exceeded the aggregator's
+child timeout.
+
+## Highlights
+
+- Increased the `codex:status:all` installed-runtime child budget to 300
+  seconds, while keeping the normal repo/Codex CLI probes at 120 seconds.
+- Increased `verify-install-runtime` Codex doctor probe timeouts from 60 to 120
+  seconds so the runtime verifier matches the status health-check budget.
+- Kept the verification boundary strict: real drift in managed files, skills,
+  Git guards, MCP config, or installed runtime state still fails.
+
+## Verification
+
+- `node --check scripts/codex-status.mjs`
+- `node --check scripts/verify-install-runtime.mjs`
+- `npm run validate:status`
+- `npm run verify:install:runtime -- --expect-skills --expect-git-guards`
+- `npm run codex:status:all -- --plain --no-log`
+
 ## v0.5.46 - 2026-07-09
 
 This patch reduces unnecessary approval prompts during normal Codex Chef

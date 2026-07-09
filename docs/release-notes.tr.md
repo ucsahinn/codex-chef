@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+## v0.5.47 - 2026-07-09
+
+Bu patch v0.5.46 release dogrulamasi sirasinda yakalanan post-release status
+false negative'ini duzeltir. Installed runtime saglikliydi, fakat Windows'ta
+daha yavas Codex/MCP probe'lari aggregator child timeout'unu astiginda
+`codex:status:all` gereksiz `fail` yazabiliyordu.
+
+## One cikanlar
+
+- `codex:status:all` installed-runtime child budget'i 300 saniyeye cikarildi;
+  normal repo/Codex CLI probe'lari 120 saniyede kaldi.
+- `verify-install-runtime` Codex doctor probe timeout'lari 60 saniyeden 120
+  saniyeye cikarildi; runtime verifier status health-check budget'iyle
+  hizalandi.
+- Verification siniri sert kaldi: managed file, skill, Git guard, MCP config
+  veya installed runtime drift'i gercekse yine fail eder.
+
+## Verification
+
+- `node --check scripts/codex-status.mjs`
+- `node --check scripts/verify-install-runtime.mjs`
+- `npm run validate:status`
+- `npm run verify:install:runtime -- --expect-skills --expect-git-guards`
+- `npm run codex:status:all -- --plain --no-log`
+
 ## v0.5.46 - 2026-07-09
 
 Bu patch normal Codex Chef dogrulama ve release check akisi sirasinda gereksiz

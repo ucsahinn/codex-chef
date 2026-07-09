@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.5.47 - 2026-07-09
+
+- Increased the Codex status aggregator budget for installed runtime
+  verification so slower Windows Codex/MCP probes no longer turn a valid
+  runtime into a false `fail`.
+- Increased `verify-install-runtime` Codex doctor probe timeouts from 60s to
+  120s, matching the status probe budget and reducing noisy timeout warnings
+  during post-release health checks.
+- Preserved the same safety boundary: timeouts are more tolerant, but runtime
+  drift, missing managed files, missing skills, Git guard drift, and MCP
+  mismatches still fail verification.
+
 ## 0.5.46 - 2026-07-09
 
 - Expanded the default approval rules for safe Codex Chef verification and
