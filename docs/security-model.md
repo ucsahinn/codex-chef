@@ -175,7 +175,10 @@ automated; they remain manual, reviewed operator actions.
 ## Rules
 
 `templates/codex/rules/default.rules` allows fast read-only discovery and
-project-native verification commands. It prompts for:
+project-native verification commands. The reviewed allowlist includes granular
+validators, release-note checks, skill/runtime verification, package dry-runs,
+read-only Codex diagnostics, CI run watching, and read-only git object
+inspection. It prompts for:
 
 - destructive file operations
 - deletion, cleanup, pruning, overwrite, and uninstall actions
@@ -183,11 +186,13 @@ project-native verification commands. It prompts for:
 - dependency installation
 - global skill installation
 - package publishing
-- GitHub API operations
+- GitHub API operations, including auth status/token commands that can expose
+  credential material
 - arbitrary repository-controlled `npm run ...` script execution outside the
   reviewed local verification allowlist
-- broad `git config` commands and raw, unredacted `gitleaks dir`
+- broad `git config` value-dump commands and raw, unredacted `gitleaks dir`
 - git commit, push, reset, checkout, and restore
+- repair apply and managed plugin pruning
 - ad-hoc `npx` package execution outside exact allowlisted helpers
 
 Official reference: https://developers.openai.com/codex/rules

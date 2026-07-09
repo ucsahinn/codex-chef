@@ -34,6 +34,15 @@ npm run verify:skills:online
 - Usar `git diff --check` para encontrar problemas de whitespace e Markdown.
 - Usar `gitleaks detect --redact --no-banner --no-git --verbose` quando Gitleaks estiver disponível.
 
+## v0.5.46 - 2026-07-09
+
+Esta versao reduz approval prompts desnecessarios para verificacao segura e
+release-readiness do Codex Chef. Validadores granulares, checks de skills e
+runtime, package dry-runs, GitHub run watching e diagnosticos read-only do
+Codex ficam allowlisted; repair apply, cleanup, publish, deploy, release,
+credentials, mudancas de dependencias e package execution ad-hoc continuam
+prompt-gated.
+
 ## v0.5.45 - 2026-07-09
 
 Esta versao reforca os 21 agentes especialistas com um bloco

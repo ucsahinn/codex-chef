@@ -181,20 +181,23 @@ olarak kalir.
 
 ## Rules
 
-`templates/codex/rules/default.rules` hızlı read-only discovery ve project-native
-verification komutlarına izin verir. Şunları prompt'a bağlar:
-
+`templates/codex/rules/default.rules` hizli read-only discovery ve
+project-native verification komutlarina izin verir. Reviewed allowlist granular
+validator'lari, release-note check'lerini, skill/runtime verification'i, package
+dry-run'lari, read-only Codex diagnostics'i, CI run watch'i ve read-only git
+object inspection'i kapsar. Sunlari prompt'a baglar:
 - destructive file operations
 - deletion, cleanup, pruning, overwrite ve uninstall
 - broad shell wrapper'ları
 - dependency installation
 - global skill installation
 - package publishing
-- GitHub API operations
+- GitHub API operations; credential material basabilen auth status/token komutlari dahil
 - reviewed lokal verification allowlist disindaki rastgele repository-controlled
   `npm run ...` script execution
-- genis `git config` komutlari ve raw, unredacted `gitleaks dir`
+- broad `git config` value-dump komutlari ve raw, unredacted `gitleaks dir`
 - git commit, push, reset, checkout ve restore
+- repair apply ve managed plugin pruning
 - exact allowlist dışındaki ad-hoc `npx` package execution
 
 Resmi kaynak: https://developers.openai.com/codex/rules

@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+## v0.5.46 - 2026-07-09
+
+This patch reduces unnecessary approval prompts during normal Codex Chef
+verification and release checks without weakening the write boundary. Safe
+read-only and dry-run commands now have explicit rules, while global writes,
+publish/deploy/release actions, cleanup, dependency changes, credentials, and
+ad-hoc package execution remain prompt-gated.
+
+## Highlights
+
+- Added narrow allow rules for granular `validate:*` scripts, `verify:*`
+  checks, online skill source resolution, `audit:security`, `scan:supply-chain`,
+  `release:notes:check`, `npm pack --dry-run --json --ignore-scripts`,
+  `gh run watch`, read-only `git rev-parse`/`git cat-file`, and Codex CLI
+  read-only diagnostics.
+- Added exact prompt rules for `repair:install -- --apply` and managed plugin
+  pruning so global writes are clearly gated instead of relying on no-match
+  behavior.
+- Prompt-gated GitHub auth status/token commands and broad Git config value
+  dumps so credential-bearing output cannot be printed through an auto-allowed
+  prefix.
+- Extended `validate-approval-harmony` with execpolicy regression checks for the
+  new allow and prompt boundaries.
+
+## Verification
+
+- `npm run validate:approval-harmony`
+- `npm run check`
+- `npm run verify:skills:online`
+- `npm run verify:install:runtime -- --expect-skills --expect-git-guards`
+- `npm run codex:status:all -- --plain --no-log`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.45 - 2026-07-09
 
 This patch turns the specialist agent team into a stronger, validator-backed

@@ -55,6 +55,22 @@ function isBroadGitConfigPrefix(pattern) {
   return samePattern(pattern, ["git", "config"]);
 }
 
+function isCredentialGhAuthAllow(pattern) {
+  return samePattern(pattern, ["gh", "auth", "status"])
+    || samePattern(pattern, ["gh", "auth", "token"])
+    || samePattern(pattern, ["gh", "auth", "refresh"])
+    || samePattern(pattern, ["gh", "auth", "setup-git"])
+    || samePattern(pattern, ["gh", "auth", "switch"]);
+}
+
+function isGitConfigValueDumpAllow(pattern) {
+  return samePattern(pattern, ["git", "config", "--get"])
+    || samePattern(pattern, ["git", "config", "--get-all"])
+    || samePattern(pattern, ["git", "config", "--list"])
+    || samePattern(pattern, ["git", "config", "--show-origin"])
+    || samePattern(pattern, ["git", "config", "--global", "--get"]);
+}
+
 function isBroadGhPrefix(pattern) {
   return samePattern(pattern, ["gh"]);
 }
@@ -88,8 +104,10 @@ export function classifyRule(rule) {
 
   if (decision === "allow") {
     if (isBroadGhPrefix(pattern)) return "broad gh allow would permit external GitHub writes";
+    if (isCredentialGhAuthAllow(pattern)) return "GitHub auth commands can expose or change credentials and must not be auto-allowed";
     if (isBroadNpxPrefix(pattern)) return "broad npx allow would permit arbitrary package execution";
     if (isBroadGitConfigPrefix(pattern)) return "broad git config allow would permit config mutation";
+    if (isGitConfigValueDumpAllow(pattern)) return "broad git config value dumps can expose credential-bearing config and must not be auto-allowed";
     if (isPowerShellCommandPrefix(pattern)) return "broad PowerShell wrapper allow would permit arbitrary shell actions";
     if (isBroadNpmRunPrefix(pattern)) return "broad npm run allow would permit arbitrary repository scripts";
     if (isDestructiveAllow(pattern)) return "destructive or external-write command must not be auto-allowed";

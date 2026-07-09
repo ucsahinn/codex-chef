@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## 0.5.46 - 2026-07-09
+
+- Expanded the default approval rules for safe Codex Chef verification and
+  release-readiness commands so routine checks no longer create avoidable
+  allow prompts.
+- Added regression coverage for the new auto-allow surface: package dry-runs,
+  granular validators, online skill verification, runtime verification,
+  security audit, supply-chain scan, Codex read-only diagnostics, GitHub run
+  watching, and read-only git object inspection.
+- Removed auto-allow coverage from credential-bearing GitHub auth inspection and
+  broad Git config value dumps so `--show-token`, auth token output, and
+  credential-bearing config keys cannot run without review.
+- Kept write and high-blast-radius paths gated: repair apply/prune, cleanup,
+  publish, deploy, release creation, push, credentials, dependency installs,
+  destructive file operations, and ad-hoc package execution still require
+  approval.
+
 ## 0.5.45 - 2026-07-09
 
 - Added a validator-enforced `World-class specialist upgrade` block to all 21

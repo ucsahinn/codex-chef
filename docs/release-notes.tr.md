@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+## v0.5.46 - 2026-07-09
+
+Bu patch normal Codex Chef dogrulama ve release check akisi sirasinda gereksiz
+approval prompt'larini azaltir; yazma sinirini zayiflatmaz. Guvenli read-only
+ve dry-run komutlari artik explicit rule tasir; global write, publish/deploy/
+release, cleanup, dependency degisikligi, credential ve ad-hoc package execution
+yine prompt-gated kalir.
+
+## One cikanlar
+
+- Granular `validate:*` script'leri, `verify:*` check'leri, online skill source
+  resolution, `audit:security`, `scan:supply-chain`, `release:notes:check`,
+  `npm pack --dry-run --json --ignore-scripts`, `gh run watch`, read-only
+  `git rev-parse`/`git cat-file` ve Codex CLI read-only diagnostics icin dar
+  allow rule'lari eklendi.
+- `repair:install -- --apply` ve managed plugin prune icin exact prompt rule
+  eklendi; global write path'i no-match davranisina birakilmadan acik gate'e
+  baglandi.
+- GitHub auth status/token komutlari ve broad Git config value dump'lari
+  prompt-gated oldu; credential-bearing output auto-allowed prefix uzerinden
+  basilamaz.
+- `validate-approval-harmony`, yeni allow ve prompt sinirlari icin execpolicy
+  regresyon kontrolleriyle genisletildi.
+
+## Verification
+
+- `npm run validate:approval-harmony`
+- `npm run check`
+- `npm run verify:skills:online`
+- `npm run verify:install:runtime -- --expect-skills --expect-git-guards`
+- `npm run codex:status:all -- --plain --no-log`
+- `git diff --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.45 - 2026-07-09
 
 Bu patch specialist agent ekibini daha guclu ve validator destekli bir runtime
