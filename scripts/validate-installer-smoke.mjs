@@ -101,6 +101,40 @@ function runInstallerPreview(codexHome, agentsHome) {
   });
 }
 
+function envWithoutCodexCli() {
+  const env = {
+    ...process.env,
+    FORCE_COLOR: "0",
+    NO_COLOR: "1"
+  };
+  for (const key of Object.keys(env)) {
+    if (key.toLowerCase() === "path") delete env[key];
+  }
+
+  const pathEntries = [];
+  if (process.platform === "win32") {
+    const systemRoot = process.env.SystemRoot || "C:\\Windows";
+    pathEntries.push(path.dirname(process.execPath));
+    pathEntries.push(path.join(systemRoot, "System32"));
+    env.Path = pathEntries.join(path.delimiter);
+  } else {
+    pathEntries.push(path.dirname(process.execPath));
+    env.PATH = pathEntries.join(path.delimiter);
+  }
+  return env;
+}
+
+function runApprovalHarmonyWithoutCodexCli() {
+  return spawnSync(process.execPath, ["scripts/validate-approval-harmony.mjs"], {
+    cwd: root,
+    env: envWithoutCodexCli(),
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: 120000,
+    windowsHide: true
+  });
+}
+
 function assertIncludes(text, snippet, label) {
   if (!text.includes(snippet)) fail(`${label} missing snippet: ${snippet}`);
 }
@@ -219,6 +253,15 @@ const zeroAgentsHome = path.join(zeroRoot, ".agents");
 const previewRoot = fs.mkdtempSync(path.join(os.tmpdir(), "Codex Chef Install Smoke [preview] #-"));
 const previewCodexHome = path.join(previewRoot, ".codex");
 const previewAgentsHome = path.join(previewRoot, ".agents");
+const approvalHarmonyNoCodexOutput = assertRunOk(
+  runApprovalHarmonyWithoutCodexCli(),
+  "Approval harmony without Codex CLI smoke"
+);
+assertIncludes(
+  approvalHarmonyNoCodexOutput,
+  "Skipped execpolicy matrix because Codex CLI could not run",
+  "Approval harmony without Codex CLI smoke"
+);
 const previewOutput = assertRunOk(runInstallerPreview(previewCodexHome, previewAgentsHome), "Installer full preview smoke");
 if (!previewOutput.includes("Dry run: no files") && !previewOutput.includes("Dry run: no files, Git settings, or skills will be changed")) {
   fail("Installer full preview smoke must clearly state that no files, Git settings, or skills are changed.");

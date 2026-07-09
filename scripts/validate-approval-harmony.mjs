@@ -37,6 +37,32 @@ function codexCommand() {
   return process.platform === "win32" ? "codex.cmd" : "codex";
 }
 
+function envPath() {
+  const key = Object.keys(process.env).find((name) => name.toLowerCase() === "path");
+  return key ? process.env[key] || "" : "";
+}
+
+function candidateCommandNames(command) {
+  if (process.platform !== "win32" || path.extname(command)) return [command];
+  const pathExt = process.env.PATHEXT || ".COM;.EXE;.BAT;.CMD";
+  return pathExt
+    .split(";")
+    .filter(Boolean)
+    .map((extension) => `${command}${extension.toLowerCase()}`);
+}
+
+function commandExistsOnPath(command) {
+  if (/[\\/]/.test(command)) return fs.existsSync(command);
+  const pathEntries = envPath().split(path.delimiter).filter(Boolean);
+  const candidates = candidateCommandNames(command);
+  return pathEntries.some((entry) => {
+    for (const candidate of candidates) {
+      if (fs.existsSync(path.join(entry, candidate))) return true;
+    }
+    return false;
+  });
+}
+
 function inspectTemplateRules() {
   for (const issue of findProblemRules(rulesText)) {
     fail(`templates/codex/rules/default.rules:${issue.lineNumber} ${issue.reason}: ${issue.line}`);
@@ -123,7 +149,7 @@ for (const script of [
   assertContains(`npm run ${script} prompt`, `prefix_rule(pattern = ["npm", "run", "${script}"], decision = "prompt"`);
 }
 
-const matrixRan = [
+const matrix = [
   ["read-only PowerShell wrapper", ["powershell.exe", "-Command", "Get-Content", "-LiteralPath", "package.json"], "allow"],
   ["npm build", ["npm.cmd", "run", "build"], "allow"],
   ["npm check", ["npm.cmd", "run", "check"], "allow"],
@@ -138,7 +164,14 @@ const matrixRan = [
   ["mutating git config", ["git", "config", "--unset", "user.name"], "prompt"],
   ["direct deletion", ["Remove-Item", "foo", "-Recurse", "-Force"], "prompt"],
   ["PowerShell deletion wrapper", ["powershell.exe", "-Command", "Remove-Item", "foo", "-Recurse", "-Force"], "prompt"]
-].some(([label, commandTokens, expected]) => assertExecDecision(label, commandTokens, expected));
+];
+
+let matrixRan = false;
+if (!commandExistsOnPath(codexCommand())) {
+  warn(`Skipped execpolicy matrix because Codex CLI could not run: ${codexCommand()} was not found on PATH.`);
+} else {
+  matrixRan = matrix.some(([label, commandTokens, expected]) => assertExecDecision(label, commandTokens, expected));
+}
 
 if (!matrixRan && process.env.CODEX_CHEF_REQUIRE_CODEX === "1") {
   fail("Codex CLI is required by CODEX_CHEF_REQUIRE_CODEX=1 but execpolicy matrix could not run.");
