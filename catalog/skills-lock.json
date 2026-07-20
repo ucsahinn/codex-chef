@@ -113,28 +113,28 @@
     },
     {
       "name": "ai-project-starter",
-      "package": "vaultekbilisim/ai-project-starter",
+      "package": "ucsahinn/ai-project-starter",
       "skill": "ai-project-starter",
-      "source": "vaultekbilisim/ai-project-starter@ai-project-starter",
-      "sourceUrl": "https://github.com/vaultekbilisim/ai-project-starter",
-      "installCommand": "npx skills add vaultekbilisim/ai-project-starter --skill ai-project-starter --agent codex --yes --global"
+      "source": "ucsahinn/ai-project-starter@ai-project-starter",
+      "sourceUrl": "https://github.com/ucsahinn/ai-project-starter",
+      "installCommand": "npx skills add ucsahinn/ai-project-starter --skill ai-project-starter --agent codex --yes --global"
     },
     {
       "name": "prompt-architect",
-      "package": "vaultekbilisim/prompt-architect",
+      "package": "ucsahinn/prompt-architect",
       "skill": "prompt-architect",
-      "source": "vaultekbilisim/prompt-architect@prompt-architect",
-      "sourceUrl": "https://github.com/vaultekbilisim/prompt-architect",
-      "installCommand": "npx skills add vaultekbilisim/prompt-architect --skill prompt-architect --agent codex --yes --global"
+      "source": "ucsahinn/prompt-architect@prompt-architect",
+      "sourceUrl": "https://github.com/ucsahinn/prompt-architect",
+      "installCommand": "npx skills add ucsahinn/prompt-architect --skill prompt-architect --agent codex --yes --global"
     },
     {
       "name": "ai-skill-create",
-      "package": "vaultekbilisim/ai-skill-create",
+      "package": "ucsahinn/ai-skill-create",
       "skill": "ai-skill-create",
-      "source": "vaultekbilisim/ai-skill-create@ai-skill-create",
-      "sourceUrl": "https://github.com/vaultekbilisim/ai-skill-create",
+      "source": "ucsahinn/ai-skill-create@ai-skill-create",
+      "sourceUrl": "https://github.com/ucsahinn/ai-skill-create",
       "fullDepth": true,
-      "installCommand": "npx skills add vaultekbilisim/ai-skill-create --skill ai-skill-create --full-depth --agent codex --yes --global"
+      "installCommand": "npx skills add ucsahinn/ai-skill-create --skill ai-skill-create --full-depth --agent codex --yes --global"
     }
   ]
 }

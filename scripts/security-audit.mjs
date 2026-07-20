@@ -144,8 +144,8 @@ if (exists(".github/ISSUE_TEMPLATE/config.yml")) {
   }
 }
 
-if (exists(".github/CODEOWNERS") && !read(".github/CODEOWNERS").includes("@vaultekbilisim")) {
-  failures.push(".github/CODEOWNERS must keep @vaultekbilisim as the default public owner.");
+if (exists(".github/CODEOWNERS") && !read(".github/CODEOWNERS").includes("@ucsahinn")) {
+  failures.push(".github/CODEOWNERS must keep @ucsahinn as the default public owner.");
 }
 
 const docsDir = path.join(root, "docs");

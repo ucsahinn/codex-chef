@@ -248,8 +248,8 @@ if (fs.existsSync(issueConfigPath)) {
 }
 
 const codeownersPath = path.join(root, ".github/CODEOWNERS");
-if (fs.existsSync(codeownersPath) && !fs.readFileSync(codeownersPath, "utf8").includes("@vaultekbilisim")) {
-  failures.push(".github/CODEOWNERS must include the public repository owner @vaultekbilisim.");
+if (fs.existsSync(codeownersPath) && !fs.readFileSync(codeownersPath, "utf8").includes("@ucsahinn")) {
+  failures.push(".github/CODEOWNERS must include the public repository owner @ucsahinn.");
 }
 
 const files = walk(root);

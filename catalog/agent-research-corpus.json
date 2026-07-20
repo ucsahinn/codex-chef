@@ -451,7 +451,7 @@
       "appliesToAgents": ["docs_author", "code_reviewer", "engineering_planner", "devex_auditor"]
     },
     "context_engineering_project_starter": {
-      "url": "https://github.com/vaultekbilisim/ai-project-starter",
+      "url": "https://github.com/ucsahinn/ai-project-starter",
       "sourceLocation": "docs/research-notes.md:34",
       "sourceType": "primary project repositories",
       "confidence": "high",
@@ -467,7 +467,7 @@
       "appliesToAgents": ["context_architect", "prompt_architect", "docs_author", "codex_doctor"]
     },
     "prompt_architect": {
-      "url": "https://github.com/vaultekbilisim/prompt-architect",
+      "url": "https://github.com/ucsahinn/prompt-architect",
       "sourceLocation": "docs/research-notes.md:38",
       "sourceType": "primary project repositories",
       "confidence": "high",
@@ -483,7 +483,7 @@
       "appliesToAgents": ["prompt_architect", "context_architect", "security_auditor", "spec_author"]
     },
     "codex_skill_forge": {
-      "url": "https://github.com/vaultekbilisim/ai-skill-create",
+      "url": "https://github.com/ucsahinn/ai-skill-create",
       "sourceLocation": "docs/research-notes.md:36",
       "sourceType": "primary project repositories",
       "confidence": "high",
@@ -499,7 +499,7 @@
       "appliesToAgents": ["devex_auditor", "release_verifier", "codex_doctor", "context_architect"]
     },
     "codex_chef_local_synthesis": {
-      "url": "https://github.com/vaultekbilisim/codex-chef",
+      "url": "https://github.com/ucsahinn/codex-chef",
       "sourceLocation": "docs/research-notes.md:143",
       "sourceType": "local repo evidence",
       "confidence": "high",

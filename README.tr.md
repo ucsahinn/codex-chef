@@ -7,8 +7,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/vaultekbilisim/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/vaultekbilisim/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
-  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/vaultekbilisim/codex-chef?color=0f766e" /></a>
+  <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Dokümantasyon dilleri" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
   <img alt="Windows ve WSL hazır" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
 </p>
@@ -48,7 +48,7 @@ bozuk saymadan önce [Sorun giderme](docs/troubleshooting.tr.md) rehberine bak.
 Önce preview al:
 
 ```powershell
-git clone https://github.com/vaultekbilisim/codex-chef.git
+git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 node scripts/plan-install.mjs --all --json --redact-paths
@@ -63,7 +63,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 Bash veya WSL:
 
 ```bash
-git clone https://github.com/vaultekbilisim/codex-chef.git
+git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --interactive

@@ -12,7 +12,7 @@ global Git behavior.
 PowerShell:
 
 ```powershell
-git clone https://github.com/vaultekbilisim/codex-chef.git
+git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
 node scripts/plan-install.mjs --all --json --redact-paths
@@ -22,7 +22,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 Bash or WSL:
 
 ```bash
-git clone https://github.com/vaultekbilisim/codex-chef.git
+git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --dry-run

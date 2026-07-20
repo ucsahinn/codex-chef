@@ -53,7 +53,7 @@ fresh machine does not have that launcher, either install `uvx` or set
 Install after the preview is correct:
 
 ```powershell
-git clone https://github.com/vaultekbilisim/codex-chef.git
+git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
@@ -210,7 +210,7 @@ Preview without writing:
 Install after the preview is correct:
 
 ```bash
-git clone https://github.com/vaultekbilisim/codex-chef.git
+git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --interactive

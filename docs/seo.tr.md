@@ -102,7 +102,7 @@ Kacin:
 Yayindan sonra:
 
 1. GitHub'da `topic:codex-chef`, `codex chef` ve `windows codex setup` ara.
-2. Google'da `site:github.com/vaultekbilisim/codex-chef Codex Chef` ara.
+2. Google'da `site:github.com/ucsahinn/codex-chef Codex Chef` ara.
 3. README title, description ve social preview dogru gorunuyor mu kontrol et.
 4. Daha guclu exact-match topic ortaya cikarsa repository topics listesini
    guncelle.

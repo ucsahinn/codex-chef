@@ -5,7 +5,7 @@ reviewed global Codex guidance, conservative config templates, specialist
 subagents, curated skills, MCP defaults, a local plugin, dry-run installers, and
 validation gates.
 
-Canonical repository: https://github.com/vaultekbilisim/codex-chef
+Canonical repository: https://github.com/ucsahinn/codex-chef
 
 Primary human entry points:
 

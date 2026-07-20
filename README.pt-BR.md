@@ -5,8 +5,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/vaultekbilisim/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/vaultekbilisim/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
-  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/vaultekbilisim/codex-chef?color=0f766e" /></a>
+  <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Idiomas da documentacao" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
   <img alt="Windows and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
 </p>
@@ -98,7 +98,7 @@ O plano vem de `manifests/install-plan.json` e descreve cada operacao, politica 
 PowerShell:
 
 ```powershell
-git clone https://github.com/vaultekbilisim/codex-chef.git
+git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 Set-ExecutionPolicy -Scope Process Bypass -Force
 .\scripts\install.ps1 -All -Interactive
@@ -107,7 +107,7 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 Bash ou WSL:
 
 ```bash
-git clone https://github.com/vaultekbilisim/codex-chef.git
+git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --interactive

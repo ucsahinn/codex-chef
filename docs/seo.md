@@ -103,7 +103,7 @@ Avoid:
 After publication:
 
 1. Search GitHub for `topic:codex-chef`, `codex chef`, and `windows codex setup`.
-2. Search Google with `site:github.com/vaultekbilisim/codex-chef Codex Chef`.
+2. Search Google with `site:github.com/ucsahinn/codex-chef Codex Chef`.
 3. Check whether the README title, description, and social preview render as expected.
 4. Update repository topics if a stronger exact-match topic emerges.
 5. Do not rewrite the README repeatedly only for ranking; improve it when user
