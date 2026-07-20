@@ -7,6 +7,10 @@ coverage, and supplemental research-reference validation on 2026-06-15.
 Updated for PowerShell execution policy, Git config, GitHub supply-chain,
 SLSA, npm provenance, npm trusted publishing, and Sigstore source coverage on
 2026-06-16.
+High-risk supplemental sources were refreshed on 2026-07-20: ECC and GStack
+repository activity, the four documented Skills CLI public-index searches, and
+openai/codex issue signals. The refresh did not change their supplemental-only
+status, authority boundaries, or adopted runtime guardrails.
 
 Facts below come from official docs, standards, mature public repos, research
 papers, and practitioner issue signals. Practitioner feedback is used only as a
