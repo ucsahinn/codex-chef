@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+## v0.5.50 - 2026-07-21
+
+Bu patch operatör panelini eksiksiz bir interaktif akışa dönüştürür. Menü
+kullanıcısının artık parametreli `--apply` komutlarını ezberlemesi veya yeniden
+çalıştırması gerekmez; yazma yapabilen her işlem kapsamını ön izler, yazılı onay
+ister ve aynı oturumda devam eder.
+
+## Öne çıkanlar
+
+- Güncelleme, yenileme, onarım ve curated skill kurulumu işlem bazlı `APPLY`
+  onayından sonra menü içinde tamamlanır.
+- Backups artık arşiv seçici ile inceleme, geri yükleme ve silme işlemlerini
+  menüde sunar. Geri yükleme `APPLY`; silme ise seçili arşive bağlı tam
+  `DELETE <yedek-id>` ifadesini ister.
+- Menüyü `--apply` ile başlatmak işlem bazlı onayı atlamaz; doğrudan ve
+  non-interactive CLI komutlarının mevcut `--apply` sözleşmesi korunur.
+- Mevcut ikonlar, gruplu tablolar, iki dilli etiketler ve read-only/hesap rehberi
+  korunarak büyük `U.C.Ş` terminal imzası eklendi.
+- Aynı oturum akışları, iptal, yedek alt menüsü, hedefe bağlı onay ve terminal
+  imzası için CLI transkript testleri eklendi.
+
+## Doğrulama
+
+- `npm run check`
+- `npm run validate:chef-cli`
+- `npm run validate:package-surface`
+- `npm run validate:release`
+- `npm run verify:install:runtime -- --offline --redact-paths`
+- `git diff --check`
+- `git diff --cached --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.49 - 2026-07-21
 
 Bu patch Codex Chef ajan ekibini istekli fan-out yerine adaptif hale getirir:

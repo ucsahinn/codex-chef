@@ -34,6 +34,10 @@ npm run verify:skills:online
 - `git diff --check` nutzen, um Whitespace- und Markdown-Probleme zu erkennen.
 - `gitleaks detect --redact --no-banner --no-git --verbose` nutzen, wenn Gitleaks verfügbar ist.
 
+## v0.5.50 - 2026-07-21
+
+Diese Version macht das Operator-Menü zu einem vollständigen interaktiven Ablauf: Schreibende Aktionen zeigen zuerst den Plan, verlangen eine aktionsbezogene Bestätigung und werden ohne erneuten Parameteraufruf in derselben Sitzung abgeschlossen. Backups können im Menü ausgewählt, geprüft, wiederhergestellt oder mit zielgebundener Bestätigung gelöscht werden; die neue große `U.C.Ş`-Signatur erhält die vorhandenen Symbole und Tabellen.
+
 ## v0.5.49 - 2026-07-21
 
 Diese Version macht die Agent-Auswahl adaptiv: Spezialisten werden nur bei unabhängiger Parallelität, isolierter lauter Recherche oder auf ausdrücklichen Benutzerwunsch gestartet. Das aktive Profil behält die Kontrolle über Modell und Reasoning; die vollständige Routing-Referenz bleibt als gebündelter Skill erhalten.

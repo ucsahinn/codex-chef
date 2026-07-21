@@ -341,6 +341,20 @@ function printDivider(title = "") {
   console.log(divider(title));
 }
 
+function printBrandSignature() {
+  const lines = [
+    "██╗   ██╗   ██████╗   ███████╗",
+    "██║   ██║  ██╔════╝   ██╔════╝",
+    "██║   ██║  ██║        ███████╗",
+    "██║   ██║  ██║        ╚════██║",
+    "╚██████╔╝  ╚██████╗   ███████║",
+    " ╚═════╝    ╚═════╝   ╚══════╝"
+  ];
+  console.log("");
+  for (const line of lines) console.log(colorize(line, "cyan"));
+  console.log("");
+}
+
 function writeBoundaryKind(boundary) {
   const normalized = stripAnsi(String(boundary || "")).toLowerCase();
   if (
@@ -440,38 +454,38 @@ const MENU_ITEMS = [
   {
     id: "update",
     label: "Update Codex Chef",
-    writes: "Needs --apply: repo/global/network",
-    description: "Preview or apply a Git fast-forward and managed-file refresh after backup."
+    writes: "Typed confirmation: repo/global/network",
+    description: "Check, confirm, fast-forward, validate, and refresh managed files in one flow."
   },
   {
     id: "install",
     label: "Full install",
-    writes: "Needs --apply: global/network",
+    writes: "Typed confirmation: global/network",
     description: "Install managed Codex files and curated skills after explicit approval."
   },
   {
     id: "reset",
     label: "Refresh setup",
-    writes: "Needs --apply: global/network",
+    writes: "Typed confirmation: global/network",
     description: "Reinstall managed files from a backup-backed force refresh."
   },
   {
     id: "repair",
     label: "Repair setup",
-    writes: "Needs --apply: global",
+    writes: "Typed confirmation: global",
     description: "Fix managed-file drift after backing up anything that changes."
   },
   {
     id: "backups",
     label: "Backups",
-    writes: "No writes; restore/delete needs --apply",
-    description: "List and inspect backups; restore or delete only with explicit apply."
+    writes: "Restore/delete: typed confirmation",
+    description: "Choose a backup, inspect it, then restore or delete in the same session."
   },
   {
     id: "skills",
     label: "Skills catalog",
-    writes: "Optional network if you install",
-    description: "Review curated skills, activation rules, and source verification."
+    writes: "Install: typed confirmation",
+    description: "Review curated skills, choose one, and confirm installation in the same session."
   },
   {
     id: "mcp",
@@ -585,33 +599,33 @@ const MENU_TEXT_TR = {
   },
   update: {
     label: "Codex Chef'i güncelle",
-    description: "Git fast-forward ve yedekten sonra yönetilen dosya yenilemeyi ön izler ya da uygular.",
-    writes: "--apply gerekir: repo/global/ağ"
+    description: "Kontrol, onay, Git fast-forward, doğrulama ve yönetilen dosya yenilemeyi tek akışta tamamlar.",
+    writes: "Yazılı onay: repo/global/ağ"
   },
   install: {
     label: "Tam kurulum",
     description: "Açık onaydan sonra yönetilen Codex dosyalarını ve seçili skill'leri kurar.",
-    writes: "--apply gerekir: global/ağ"
+    writes: "Yazılı onay: global/ağ"
   },
   reset: {
     label: "Kurulumu yenile",
     description: "Yedekli yenileme ile yönetilen dosyaları yeniden kurar.",
-    writes: "--apply gerekir: global/ağ"
+    writes: "Yazılı onay: global/ağ"
   },
   repair: {
     label: "Kurulumu onar",
     description: "Değişecek dosyaları yedekleyip yönetilen dosya farklarını onarır.",
-    writes: "--apply gerekir: global"
+    writes: "Yazılı onay: global"
   },
   backups: {
     label: "Yedekler",
-    description: "Yedekleri listeler ve inceler; geri yükleme veya silme yalnızca açık --apply ile olur.",
-    writes: "Yazmaz; geri yükleme/silme --apply ister"
+    description: "Yedeği seçer ve inceler; geri yükleme veya silmeyi aynı oturumda onayla tamamlar.",
+    writes: "Geri yükleme/silme: yazılı onay"
   },
   skills: {
     label: "Skill kataloğu",
-    description: "Seçili skill'leri, aktivasyon kurallarını ve kaynak doğrulamasını gösterir.",
-    writes: "Kurulum seçilirse ağ kullanabilir"
+    description: "Skill'leri inceler; seçilen skill kurulumunu aynı oturumda onayla tamamlar.",
+    writes: "Kurulum: yazılı onay"
   },
   mcp: {
     label: "MCP bağlayıcıları",
@@ -726,7 +740,7 @@ function printOperatorStatusStrip() {
   const commit = head.ok && head.value ? head.value.slice(0, 7) : localText("unknown", "bilinmiyor");
   const legendLabel = isTr() ? "Lejant" : MENU_LEGEND_SOURCE_MARKER.split(":")[0];
   console.log(`${styleLabel(localText("Mode", "Mod"))}: ${localText("Local operator", "Yerel operatör")} | ${styleLabel(localText("Version", "Versiyon"))}: ${currentPackageVersion()} | ${styleLabel("Git")}: ${gitBranch()}@${commit}`);
-  console.log(`${styleLabel(localText("Safety", "Güvenlik"))}: ${localText("read-only first; writes require --apply or typed confirmation", "önce yazmasız; yazan işlemler --apply veya yazılı onay ister")}`);
+  console.log(`${styleLabel(localText("Safety", "Güvenlik"))}: ${localText("menu writes use typed confirmation; direct CLI writes require --apply", "menüde yazan işlemler yazılı onay; doğrudan CLI işlemleri --apply ister")}`);
   console.log(`${styleLabel(legendLabel)}: ${colorize("SAFE", "green")}=${localText("read-only", "yazmaz")} | ${colorize("APPLY-GATED", "red")}=${localText("backup/confirmation required", "yedek/onay gerekir")} | ${colorize("ACCOUNT-GUIDED", "yellow")}=${localText("guidance only", "yalnız rehberlik")}`);
 }
 
@@ -1005,8 +1019,16 @@ function runBash(action, script, scriptArgs = []) {
   return runLoggedCommand(action, "bash", [script, ...scriptArgs], { timeout: 300000 });
 }
 
+function isMenuInteraction(interaction = {}) {
+  return interaction.fromMenu === true;
+}
+
+function writeFlowRequested(interaction = {}) {
+  return options.apply || isMenuInteraction(interaction);
+}
+
 async function confirmWriteAction(action, detail, interaction = {}) {
-  if (options.apply) return true;
+  if (!interaction.fromMenu && options.apply) return true;
   if (!process.stdin.isTTY && !interaction.question) {
     console.log(`${ICONS.warn} ${localText(`${action} needs --apply before it can change files or global state.`, `${action} dosya veya global durum değiştirmeden önce --apply ister.`)}`);
     return false;
@@ -1019,6 +1041,7 @@ async function confirmWriteAction(action, detail, interaction = {}) {
 }
 
 function printHeader() {
+  printBrandSignature();
   printDivider("Codex Chef");
   console.log(`${ICONS.chef} Codex Chef`);
   console.log(styleMuted(localText(
@@ -1026,8 +1049,8 @@ function printHeader() {
     "Durum, kurulum, yedekler, skill'ler, MCP bağlayıcıları, tanılama, kimlik notları ve loglar için tek operatör paneli."
   )));
   console.log(styleMuted(localText(
-    `Language: English | Safety: write actions require --apply or typed confirmation.`,
-    `Dil: Türkçe | Güvenlik: yazan işlemler --apply veya yazılı onay ister.`
+    `Language: English | Safety: menu writes ask for APPLY; direct CLI writes require --apply.`,
+    `Dil: Türkçe | Güvenlik: menü işlemleri APPLY onayı; doğrudan CLI işlemleri --apply ister.`
   )));
   console.log("");
 }
@@ -1168,7 +1191,7 @@ const MANAGED_REFRESH_TARGETS = [
   "AGENTS_HOME/plugins/marketplace.json"
 ];
 
-function printManagedRefreshSummary() {
+function printManagedRefreshSummary(interaction = {}) {
   console.log("");
   console.log(styleHeading(localText("Managed targets", "Yönetilen hedefler")));
   for (const target of MANAGED_REFRESH_TARGETS) console.log(`- ${target}`);
@@ -1182,8 +1205,12 @@ function printManagedRefreshSummary() {
   )));
   console.log("");
   console.log(styleHeading(localText("Next safe step", "Sonraki güvenli adım")));
-  console.log(`- ${localText("Apply after review", "İncelemeden sonra uygula")}: npm run chef -- --update --apply`);
-  console.log(`- ${localText("Full evidence", "Tam kanıt")}: npm run chef -- --update --verbose-plan`);
+  if (isMenuInteraction(interaction)) {
+    console.log(`- ${localText("Continue here after reviewing the plan; the menu will ask for typed APPLY confirmation.", "Planı inceledikten sonra burada devam edin; menü yazılı APPLY onayı isteyecek.")}`);
+  } else {
+    console.log(`- ${localText("Apply after review", "İncelemeden sonra uygula")}: npm run chef -- --update --apply`);
+    console.log(`- ${localText("Full evidence", "Tam kanıt")}: npm run chef -- --update --verbose-plan`);
+  }
 }
 
 function inspectGitDirty() {
@@ -1270,7 +1297,7 @@ function printUpdateContext() {
 }
 
 async function runUpdate(interaction = {}) {
-  if (!options.apply) {
+  if (!writeFlowRequested(interaction)) {
     printSurfaceHeader(
       localText("Update preview", "Güncelleme ön izlemesi"),
       localText("No remote pull or managed file refresh happens in preview mode.", "Ön izleme modunda remote pull veya managed dosya yenileme yapılmaz."),
@@ -1283,9 +1310,20 @@ async function runUpdate(interaction = {}) {
       "Apply'i yalnız hedef listesini ve yedek davranışını inceledikten sonra kullanın."
     )));
     printUpdateContext();
-    printManagedRefreshSummary();
+    printManagedRefreshSummary(interaction);
     if (options.verbosePlan) return runPreview(true, false);
     return { ok: true };
+  }
+  if (isMenuInteraction(interaction)) {
+    printSurfaceHeader(
+      localText("Update plan", "Güncelleme planı"),
+      localText("Reviewing the current tree before any remote or managed write.", "Remote veya managed yazma işleminden önce mevcut ağaç inceleniyor."),
+      ICONS.update
+    );
+    printUpdateContext();
+    printManagedRefreshSummary(interaction);
+    const currentPreview = runPreview(true, false);
+    if (!currentPreview.ok) return currentPreview;
   }
   const dirty = inspectGitDirty();
   if (!dirty.ok) {
@@ -1296,7 +1334,14 @@ async function runUpdate(interaction = {}) {
   if (dirty.dirty) {
     console.log(`${ICONS.warn} ${localText("Update apply requires a clean worktree so local edits are not overwritten.", "Update apply lokal editlerin ustune yazmamak icin temiz worktree ister.")}`);
     process.stdout.write(dirty.output.endsWith("\n") ? dirty.output : `${dirty.output}\n`);
-    console.log(`${ICONS.info} ${localText("Commit, stash, or move local changes, then rerun npm run chef -- --update --apply.", "Lokal değişiklikleri commit/stash/move yapın, sonra npm run chef -- --update --apply tekrar çalıştırın.")}`);
+    console.log(`${ICONS.info} ${localText(
+      isMenuInteraction(interaction)
+        ? "Commit, stash, or move local changes, then choose Update Codex Chef again from this menu."
+        : "Commit, stash, or move local changes, then rerun npm run chef -- --update --apply.",
+      isMenuInteraction(interaction)
+        ? "Lokal değişiklikleri commit/stash/move yapın, ardından bu menüden Codex Chef'i güncelle seçeneğini yeniden seçin."
+        : "Lokal değişiklikleri commit/stash/move yapın, sonra npm run chef -- --update --apply tekrar çalıştırın."
+    )}`);
     return { ok: false };
   }
   const beforeHead = gitHead();
@@ -1325,12 +1370,20 @@ async function runUpdate(interaction = {}) {
   }
   if (beforeHead.value !== afterHead.value) {
     console.log(`${ICONS.update} ${localText(`Repository updated from ${beforeHead.value.slice(0, 7)} to ${afterHead.value.slice(0, 7)}.`, `Repo ${beforeHead.value.slice(0, 7)} -> ${afterHead.value.slice(0, 7)} güncellendi.`)}`);
-    console.log(`${ICONS.info} ${localText("Running a fresh preview from the updated tree. Review it, then rerun npm run chef -- --update --apply to refresh managed files.", "Güncel ağaçtan fresh preview basılıyor. İnceleyip managed dosyaları yenilemek için npm run chef -- --update --apply tekrar çalıştırın.")}`);
+    console.log(`${ICONS.info} ${localText(
+      isMenuInteraction(interaction)
+        ? "Running a fresh preview from the updated tree, then continuing validation and managed refresh in this session."
+        : "Running a fresh preview from the updated tree. Review it, then rerun npm run chef -- --update --apply to refresh managed files.",
+      isMenuInteraction(interaction)
+        ? "Güncel ağaçtan yeni ön izleme çalıştırılıyor; ardından doğrulama ve managed yenileme bu oturumda sürecek."
+        : "Güncel ağaçtan fresh preview basılıyor. İnceleyip managed dosyaları yenilemek için npm run chef -- --update --apply tekrar çalıştırın."
+    )}`);
     const preview = runPreview(true, false);
     if (!preview.ok) return preview;
-    return { ok: true, skipped: true };
+    if (!isMenuInteraction(interaction)) return { ok: true, skipped: true };
+  } else {
+    console.log(`${ICONS.ok} ${localText("Repository already up to date; applying the reviewed managed refresh.", "Repo zaten güncel; incelenmiş managed refresh uygulanıyor.")}`);
   }
-  console.log(`${ICONS.ok} ${localText("Repository already up to date; applying the reviewed managed refresh.", "Repo zaten guncel; incelenmis managed refresh uygulaniyor.")}`);
   const validation = runUpdateValidation();
   if (!validation.ok) return validation;
   if (process.platform === "win32") {
@@ -1353,13 +1406,22 @@ async function runInstall(interaction = {}) {
 }
 
 async function runReset(interaction = {}) {
-  if (!options.apply) {
+  if (!writeFlowRequested(interaction)) {
     printSurfaceHeader(
       localText("Refresh preview", "Yenileme ön izlemesi"),
       localText("No files are replaced in preview. Add --apply only after reviewing the backup-backed plan.", "Ön izlemede dosya değişmez. Yedekli planı inceledikten sonra --apply ekleyin."),
       ICONS.info
     );
     return runPreview(true);
+  }
+  if (isMenuInteraction(interaction)) {
+    printSurfaceHeader(
+      localText("Refresh plan", "Yenileme planı"),
+      localText("Reviewing the backup-backed managed-file refresh before confirmation.", "Yedekli managed dosya yenilemesi onaydan önce inceleniyor."),
+      ICONS.info
+    );
+    const preview = runPreview(true);
+    if (!preview.ok) return preview;
   }
   const allowed = await confirmWriteAction(
     "Reset",
@@ -1374,13 +1436,22 @@ async function runReset(interaction = {}) {
 }
 
 async function runRepair(interaction = {}) {
-  if (!options.apply) {
+  if (!writeFlowRequested(interaction)) {
     printSurfaceHeader(
       localText("Repair preview", "Onarım ön izlemesi"),
       localText("Shows managed drift without changing files. Add --apply only after review.", "Dosya değiştirmeden managed drift'i gösterir. Yalnız incelemeden sonra --apply ekleyin."),
       ICONS.info
     );
     return runNode("repair-preview", "scripts/repair-install.mjs", ["--redact-paths"]);
+  }
+  if (isMenuInteraction(interaction)) {
+    printSurfaceHeader(
+      localText("Repair plan", "Onarım planı"),
+      localText("Reviewing managed-file drift before confirmation.", "Managed dosya farkları onaydan önce inceleniyor."),
+      ICONS.info
+    );
+    const preview = runNode("repair-preview", "scripts/repair-install.mjs", ["--redact-paths"]);
+    if (!preview.ok) return preview;
   }
   const allowed = await confirmWriteAction(
     "Repair",
@@ -1607,7 +1678,7 @@ function restoreBackupPlan(archivePath) {
   return { files: planned, unsupported, issues };
 }
 
-function createRollbackBackup(plan) {
+function createRollbackBackup(plan, restoredFrom = "") {
   const restoreId = `codex-chef-restore-${compactTimestamp()}-${process.pid}`;
   const rollbackPath = path.join(backupRootPath(), restoreId);
   const entries = [];
@@ -1633,7 +1704,7 @@ function createRollbackBackup(plan) {
   if (entries.length > 0) {
     writeBackupManifest(rollbackPath, {
       operation: "restore-rollback",
-      restoredFrom: path.basename(options.backupId || ""),
+      restoredFrom: path.basename(restoredFrom),
       entries
     });
   }
@@ -1666,7 +1737,7 @@ function restoreBackupArchive(archivePath, plan) {
     assertInside(safeRealpath(item.path), safeRealpath(archivePath), "restore source");
     assertManagedRestoreTarget(item.target);
   }
-  const rollbackPath = createRollbackBackup(plan);
+  const rollbackPath = createRollbackBackup(plan, archivePath);
   for (const item of plan.files) {
     fs.mkdirSync(path.dirname(item.target), { recursive: true });
     fs.copyFileSync(item.path, item.target);
@@ -1796,10 +1867,10 @@ function printRows(rows, columns, emptyMessage = null) {
   });
 }
 
-function printBackupTable(backups) {
+function printBackupTable(backups, interaction = {}) {
   printSurfaceHeader(
     localText("Backup library", "Yedek kütüphanesi"),
-    localText("Read-only backup inventory. Restore and delete stay gated behind --apply.", "Yazmasız yedek envanteri. Geri yükleme ve silme --apply arkasında kalır."),
+    localText("Read-only backup inventory. Menu restore and delete use scoped typed confirmation.", "Yazmasız yedek envanteri. Menüde geri yükleme ve silme hedefe bağlı yazılı onay kullanır."),
     ICONS.logs
   );
   printSurfaceNote(localText("Backup root", "Yedek kök dizini"), redactLocalPaths(backupRootPath()));
@@ -1855,21 +1926,23 @@ function printBackupTable(backups) {
           { key: "modified", label: "Updated" }
         ]
   );
-  console.log(`${ICONS.info} ${localText(
-    "Inspect one archive: npm run chef -- --backups --backup <id>",
-    "Bir arşivi incele: npm run chef -- --backups --backup <id>"
-  )}`);
-  console.log(`${ICONS.info} ${localText(
-    "Preview a restore: npm run chef -- --backups --backup <id> --restore",
-    "Geri yüklemeyi ön izle: npm run chef -- --backups --backup <id> --restore"
-  )}`);
-  console.log(`${ICONS.info} ${localText(
-    "Preview a delete: npm run chef -- --backups --backup <id> --delete",
-    "Silmeyi ön izle: npm run chef -- --backups --backup <id> --delete"
-  )}`);
+  if (!isMenuInteraction(interaction)) {
+    console.log(`${ICONS.info} ${localText(
+      "Inspect one archive: npm run chef -- --backups --backup <id>",
+      "Bir arşivi incele: npm run chef -- --backups --backup <id>"
+    )}`);
+    console.log(`${ICONS.info} ${localText(
+      "Preview a restore: npm run chef -- --backups --backup <id> --restore",
+      "Geri yüklemeyi ön izle: npm run chef -- --backups --backup <id> --restore"
+    )}`);
+    console.log(`${ICONS.info} ${localText(
+      "Preview a delete: npm run chef -- --backups --backup <id> --delete",
+      "Silmeyi ön izle: npm run chef -- --backups --backup <id> --delete"
+    )}`);
+  }
 }
 
-function printBackupInspect(archivePath, plan) {
+function printBackupInspect(archivePath, plan, interaction = {}) {
   printSurfaceHeader(
     localText("Backup details", "Yedek ayrıntısı"),
     path.basename(archivePath),
@@ -1914,20 +1987,25 @@ function printBackupInspect(archivePath, plan) {
           { key: "sha256", label: "sha256" }
         ]
   );
-  console.log(`${ICONS.info} ${localText(
-    `Preview restore: npm run chef -- --backups --backup ${path.basename(archivePath)} --restore`,
-    `Geri yüklemeyi ön izle: npm run chef -- --backups --backup ${path.basename(archivePath)} --restore`
-  )}`);
-  console.log(`${ICONS.info} ${localText(
-    `Preview delete: npm run chef -- --backups --backup ${path.basename(archivePath)} --delete`,
-    `Silmeyi ön izle: npm run chef -- --backups --backup ${path.basename(archivePath)} --delete`
-  )}`);
+  if (!isMenuInteraction(interaction)) {
+    console.log(`${ICONS.info} ${localText(
+      `Preview restore: npm run chef -- --backups --backup ${path.basename(archivePath)} --restore`,
+      `Geri yüklemeyi ön izle: npm run chef -- --backups --backup ${path.basename(archivePath)} --restore`
+    )}`);
+    console.log(`${ICONS.info} ${localText(
+      `Preview delete: npm run chef -- --backups --backup ${path.basename(archivePath)} --delete`,
+      `Silmeyi ön izle: npm run chef -- --backups --backup ${path.basename(archivePath)} --delete`
+    )}`);
+  }
 }
 
-async function runBackups(interaction = {}) {
+async function runBackups(interaction = {}, requested = {}) {
   try {
-    if (!options.backupId) {
-      if (options.restore || options.deleteBackup) {
+    const backupId = requested.backupId || options.backupId;
+    const restore = requested.restore ?? options.restore;
+    const deleteBackup = requested.deleteBackup ?? options.deleteBackup;
+    if (!backupId) {
+      if (restore || deleteBackup) {
         console.error(`${ICONS.warn} ${localText("--restore and --delete require --backup ID.", "--restore ve --delete icin --backup ID gerekir.")}`);
         return { ok: false };
       }
@@ -1935,14 +2013,37 @@ async function runBackups(interaction = {}) {
       if (options.json) {
         console.log(JSON.stringify(backupJsonPayload(backups), null, 2));
       } else {
-        printBackupTable(backups);
+        printBackupTable(backups, interaction);
+      }
+      if (isMenuInteraction(interaction) && backups.length > 0) {
+        const selectableBackups = options.plain ? backups.slice(0, 10) : backups;
+        const selected = await askSelection(
+          selectableBackups,
+          localText("\nChoose a backup number, or press Enter to return: ", "\nBir yedek numarası seçin veya dönmek için Enter'a basın: "),
+          interaction
+        );
+        if (!selected) return { ok: true, skipped: true };
+        console.log("");
+        console.log(styleHeading(localText("Backup action", "Yedek işlemi")));
+        console.log(`1. ${localText("Inspect", "İncele")} (${localText("read-only", "yazmaz")})`);
+        console.log(`2. ${localText("Restore", "Geri yükle")} (${localText("typed APPLY confirmation", "yazılı APPLY onayı")})`);
+        console.log(`3. ${localText("Delete archive", "Arşivi sil")} (${localText(`type DELETE ${selected.id}`, `DELETE ${selected.id} yaz`)})`);
+        const action = await askInteractive(
+          localText("Choose 1-3, or press Enter to return: ", "1-3 seçin veya dönmek için Enter'a basın: "),
+          interaction
+        );
+        if (action.trim() === "1") return runBackups(interaction, { backupId: selected.id });
+        if (action.trim() === "2") return runBackups(interaction, { backupId: selected.id, restore: true });
+        if (action.trim() === "3") return runBackups(interaction, { backupId: selected.id, deleteBackup: true });
+        console.log(`${ICONS.info} ${localText("No backup action selected; nothing changed.", "Yedek işlemi seçilmedi; hiçbir şey değişmedi.")}`);
+        return { ok: true, skipped: true };
       }
       return { ok: true };
     }
 
-    const archivePath = resolveBackupArchive(options.backupId);
+    const archivePath = resolveBackupArchive(backupId);
     const plan = restoreBackupPlan(archivePath);
-    if (options.restore && options.deleteBackup) {
+    if (restore && deleteBackup) {
       console.error(`${ICONS.warn} ${localText("Choose either --restore or --delete for one backup archive.", "Tek yedek arşivi için --restore veya --delete seçin; ikisini birlikte kullanmayın.")}`);
       return { ok: false };
     }
@@ -1951,8 +2052,8 @@ async function runBackups(interaction = {}) {
         schemaVersion: 1,
         backup: path.basename(archivePath),
         backupPath: redactLocalPaths(archivePath),
-        restore: options.restore,
-        delete: options.deleteBackup,
+        restore,
+        delete: deleteBackup,
         apply: options.apply,
         restorableFiles: plan.files.map((file) => ({
           archiveFile: file.relative,
@@ -1967,7 +2068,7 @@ async function runBackups(interaction = {}) {
       return { ok: true };
     }
 
-    if (options.deleteBackup) {
+    if (deleteBackup) {
       printSurfaceHeader(
         localText("Backup delete preview", "Yedek silme ön izlemesi"),
         path.basename(archivePath),
@@ -1978,26 +2079,34 @@ async function runBackups(interaction = {}) {
         "Deletion is limited to this resolved Codex Chef backup archive under the canonical backup root.",
         "Silme yalnız canonical backup root altında resolve edilen bu Codex Chef yedek arşiviyle sınırlıdır."
       )}`);
-      if (!options.apply) {
+      if (!writeFlowRequested(interaction)) {
         console.log(`${ICONS.info} ${localText("No backup archive deleted. Rerun with --apply to delete this archive.", "Yedek arşivi silinmedi. Bu arşivi silmek için --apply ile tekrar çalıştırın.")}`);
         return { ok: true };
       }
-      const allowed = await confirmWriteAction(
-        localText("Backup delete", "Yedek silme"),
-        localText(
-          "Delete removes the selected Codex Chef backup archive. This does not touch live managed files, but the deleted archive cannot be restored unless you have another copy.",
-          "Silme secili Codex Chef yedek arsivini kaldirir. Live managed dosyalara dokunmaz, ama baska kopya yoksa bu arsivden geri donemezsiniz."
-        ),
-        interaction
-      );
+      const allowed = isMenuInteraction(interaction)
+        ? (await askInteractive(
+          `${ICONS.warn} ${localText(
+            `Delete permanently removes only ${path.basename(archivePath)}. Type DELETE ${path.basename(archivePath)} to continue, or press Enter to cancel:`,
+            `Silme yalnız ${path.basename(archivePath)} arşivini kalıcı kaldırır. Devam etmek için DELETE ${path.basename(archivePath)} yazın veya iptal için Enter'a basın:`
+          )} `,
+          interaction
+        )).trim() === `DELETE ${path.basename(archivePath)}`
+        : await confirmWriteAction(
+          localText("Backup delete", "Yedek silme"),
+          localText(
+            "Delete removes the selected Codex Chef backup archive. This does not touch live managed files, but the deleted archive cannot be restored unless you have another copy.",
+            "Silme seçili Codex Chef yedek arşivini kaldırır. Live managed dosyalara dokunmaz, ama başka kopya yoksa bu arşivden geri dönemezsiniz."
+          ),
+          interaction
+        );
       if (!allowed) return { ok: false, skipped: true };
       deleteBackupArchive(archivePath);
       console.log(`${ICONS.ok} ${localText(`Backup archive deleted: ${path.basename(archivePath)}.`, `Yedek arsivi silindi: ${path.basename(archivePath)}.`)}`);
       return { ok: true };
     }
 
-    if (!options.restore) {
-      printBackupInspect(archivePath, plan);
+    if (!restore) {
+      printBackupInspect(archivePath, plan, interaction);
       return { ok: true };
     }
 
@@ -2006,12 +2115,12 @@ async function runBackups(interaction = {}) {
       path.basename(archivePath),
       ICONS.info
     );
-    printBackupInspect(archivePath, plan);
+    printBackupInspect(archivePath, plan, interaction);
     if (plan.issues.length > 0) {
       console.error(`${ICONS.warn} ${localText("Restore blocked because the archive has unsafe entries.", "Arsiv guvensiz girdiler icerdigi icin geri yukleme bloklandi.")}`);
       return { ok: false };
     }
-    if (!options.apply) {
+    if (!writeFlowRequested(interaction)) {
       console.log(`${ICONS.info} ${localText("No files restored. Rerun with --apply to restore this backup.", "Dosya geri yüklenmedi. Bu yedeği geri yüklemek için --apply ile tekrar çalıştırın.")}`);
       return { ok: true };
     }
@@ -2099,7 +2208,14 @@ function summarizeNames(entries, limit = 3) {
 async function selectSkill(installable, interaction = {}) {
   printSurfaceHeader(
     localText("Choose a skill to install", "Kurulacak skill'i seç"),
-    localText("Selection only installs after --apply. Press Enter to keep everything unchanged.", "Kurulum yalnız --apply ile yapılır. Her şeyi olduğu gibi bırakmak için Enter'a basın."),
+    localText(
+      isMenuInteraction(interaction)
+        ? "Choose a skill, then confirm its installation with typed APPLY. Press Enter to keep everything unchanged."
+        : "Selection only installs after --apply. Press Enter to keep everything unchanged.",
+      isMenuInteraction(interaction)
+        ? "Bir skill seçin, ardından kurulumu yazılı APPLY ile onaylayın. Her şeyi olduğu gibi bırakmak için Enter'a basın."
+        : "Kurulum yalnız --apply ile yapılır. Her şeyi olduğu gibi bırakmak için Enter'a basın."
+    ),
     ICONS.docs
   );
   installable.forEach((skill, index) => {
@@ -2117,7 +2233,7 @@ async function selectSkill(installable, interaction = {}) {
     console.log(`${ICONS.info} ${localText("No skill selected; nothing changed.", "Skill seçilmedi; hiçbir şey değişmedi.")}`);
     return { ok: true };
   }
-  if (!options.apply) {
+  if (!writeFlowRequested(interaction)) {
     console.log(`${ICONS.warn} ${localText(`Selected ${selected.name}. Re-run npm run chef -- --skills --apply and choose it to install.`, `${selected.name} seçildi. Kurmak için npm run chef -- --skills --apply çalıştırıp tekrar seçin.`)}`);
     return { ok: false, skipped: true };
   }
@@ -2970,7 +3086,7 @@ async function runMenu() {
     }
     return readQuestion(rl, prompt);
   };
-  const interaction = { question };
+  const interaction = { question, fromMenu: true };
   try {
     let shouldRenderMenu = true;
     while (true) {

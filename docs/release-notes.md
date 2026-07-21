@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+## v0.5.50 - 2026-07-21
+
+This patch turns the operator board into a complete interactive workflow. Menu
+users no longer need to remember or rerun parameterized `--apply` commands;
+each write-capable action previews its scope, requests a typed confirmation,
+and continues in the same session.
+
+## Highlights
+
+- Update, refresh, repair, and curated skill installation now complete inside
+  the menu after action-scoped `APPLY` confirmation.
+- Backups now provide an in-menu archive picker with inspect, restore, and
+  delete actions. Restore uses `APPLY`; deletion requires the exact selected
+  archive phrase `DELETE <backup-id>`.
+- Starting the menu with `--apply` no longer bypasses per-action confirmation;
+  direct non-interactive CLI commands retain their existing `--apply` contract.
+- Added the large `U.C.Ş` terminal signature without removing the existing
+  icons, grouped tables, bilingual labels, or read-only/account guidance.
+- Added transcript tests for same-session actions, cancellation, backup
+  drill-down, scoped confirmation, and signature rendering.
+
+## Verification
+
+- `npm run check`
+- `npm run validate:chef-cli`
+- `npm run validate:package-surface`
+- `npm run validate:release`
+- `npm run verify:install:runtime -- --offline --redact-paths`
+- `git diff --check`
+- `git diff --cached --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.49 - 2026-07-21
 
 This patch makes Codex Chef's agent team adaptive instead of eager: matching a

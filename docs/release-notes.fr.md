@@ -34,6 +34,10 @@ npm run verify:skills:online
 - Utiliser `git diff --check` pour détecter les problèmes de whitespace et Markdown.
 - Utiliser `gitleaks detect --redact --no-banner --no-git --verbose` si Gitleaks est disponible.
 
+## v0.5.50 - 2026-07-21
+
+Cette version transforme le menu opérateur en un flux interactif complet : les actions d’écriture affichent leur plan, demandent une confirmation propre à l’action et se terminent dans la même session sans relancer de commande paramétrée. Les sauvegardes peuvent être sélectionnées, inspectées, restaurées ou supprimées avec une confirmation liée à la cible, et la nouvelle grande signature `U.C.Ş` conserve les icônes et tableaux existants.
+
 ## v0.5.49 - 2026-07-21
 
 Cette version rend la sélection des agents adaptative : les spécialistes ne sont lancés que pour un travail parallèle indépendant, une recherche bruyante à isoler ou une demande explicite. Le profil actif garde le contrôle du modèle et du raisonnement, tandis que la référence de routing complète reste disponible dans un skill intégré.

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.5.50 - 2026-07-21
+
+- Reworked the full operator menu so write-capable selections preview, request action-scoped typed confirmation, and complete in the same session while direct CLI automation keeps the `--apply` boundary.
+- Added same-session backup selection, inspection, restore, and archive deletion flows; restore requires `APPLY`, while deletion requires the exact `DELETE <backup-id>` phrase.
+- Kept menu confirmation action-scoped even when the process starts with `--apply`, preventing a session-wide write latch.
+- Added a large `U.C.Ş` terminal signature while preserving the existing icons, grouped operator tables, bilingual output, and compact return flow.
+- Expanded CLI transcript coverage for repair, refresh, skill installation, backup inspection/restore, signature rendering, and confirmation cancellation.
+
 ## 0.5.49 - 2026-07-21
 
 - Replaced unconditional prompt-shape agent spawning with conditional delegation for independent parallel work, noisy research isolation, or explicit user requests while preserving `max_threads = 10` as multi-window capacity.

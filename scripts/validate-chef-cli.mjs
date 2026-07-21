@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -126,6 +127,8 @@ function runMenuTranscriptSmoke() {
     if (!invalid.output.includes("Mode: Local operator")) fail("chef-cli menu transcript must show the local operator status strip");
     if (!invalid.output.includes("Legend: SAFE")) fail("chef-cli menu transcript must show the write-boundary legend");
     if (!invalid.output.includes("Check")) fail("chef-cli menu transcript must group actions by operator intent");
+    if (!invalid.output.includes("██╗   ██╗   ██████╗   ███████╗")) fail("chef-cli menu must render the large U.C.Ş signature before the operator board");
+    if (invalid.output.includes("U . C . Ş")) fail("chef-cli menu signature must not repeat U.C.Ş as a small caption");
     if (!invalid.output.includes("System status")) fail("chef-cli menu transcript must use natural-language action labels");
     if (!invalid.output.includes("Impact")) fail("chef-cli menu transcript must use natural-language impact wording instead of raw write jargon");
     if (!invalid.output.includes("Shortcuts: l = language, q = quit")) fail("chef-cli menu transcript must show language and quit shortcuts");
@@ -162,6 +165,56 @@ function runMenuTranscriptSmoke() {
     }
   }
 
+  const interactiveWriteRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-menu-write-"));
+  const interactiveRepair = runCliSmokeRaw("menu-repair-typed-apply-transcript", ["--plain", "--no-log"], {
+    env: {
+      ...baseEnv,
+      CODEX_HOME: path.join(interactiveWriteRoot, ".codex"),
+      AGENTS_HOME: path.join(interactiveWriteRoot, ".agents")
+    },
+    input: "8\nAPPLY\n\nq\n",
+    timeout: 120000
+  });
+  if (interactiveRepair.ok) {
+    for (const snippet of ["Opening: Repair setup", "Type APPLY to continue", "Mode: apply"]) {
+      if (!interactiveRepair.output.includes(snippet)) {
+        fail(`chef-cli menu repair must apply after typed confirmation without requiring a restart flag: ${snippet}`);
+      }
+    }
+    if (interactiveRepair.output.includes("Rerun with --apply")) {
+      fail("chef-cli menu repair must not tell interactive users to rerun with --apply.");
+    }
+  }
+
+  const menuApplyStillConfirms = runCliSmokeRaw("menu-apply-is-not-session-latch", ["--plain", "--no-log", "--apply"], {
+    env: {
+      ...baseEnv,
+      CODEX_HOME: path.join(interactiveWriteRoot, ".codex-latch-test"),
+      AGENTS_HOME: path.join(interactiveWriteRoot, ".agents-latch-test")
+    },
+    input: "8\n\n\nq\n",
+    timeout: 120000
+  });
+  if (menuApplyStillConfirms.ok && !menuApplyStillConfirms.output.includes("Type APPLY to continue")) {
+    fail("chef-cli menu must request per-action typed confirmation even when the process starts with --apply.");
+  }
+
+  const interactiveResetCancel = runCliSmokeRaw("menu-reset-typed-apply-transcript", ["--plain", "--no-log"], {
+    env: baseEnv,
+    input: "7\n\n\nq\n",
+    timeout: 120000
+  });
+  if (interactiveResetCancel.ok) {
+    for (const snippet of ["Opening: Refresh setup", "Type APPLY to continue"]) {
+      if (!interactiveResetCancel.output.includes(snippet)) {
+        fail(`chef-cli menu reset must request typed confirmation in the current session: ${snippet}`);
+      }
+    }
+    if (interactiveResetCancel.output.includes("Add --apply")) {
+      fail("chef-cli menu reset must not tell interactive users to add --apply.");
+    }
+  }
+
   const skillSelection = runCliSmokeRaw("menu-skills-selection-transcript", ["--plain", "--no-log"], {
     env: baseEnv,
     input: "10\n\n\nq\n",
@@ -181,6 +234,95 @@ function runMenuTranscriptSmoke() {
     }
     if (/unsettled top-level await|AbortError|ABORT_ERR/i.test(skillSelection.output)) {
       fail("chef-cli menu skills transcript must not leak readline lifecycle warnings");
+    }
+  }
+
+
+  const skillInstallCancel = runCliSmokeRaw("menu-skills-typed-apply-transcript", ["--plain", "--no-log"], {
+    env: baseEnv,
+    input: "10\n1\n\n\nq\n",
+    timeout: 30000
+  });
+  if (skillInstallCancel.ok) {
+    if (!skillInstallCancel.output.includes("Type APPLY to continue")) {
+      fail("chef-cli menu skill install must request typed confirmation in the current session.");
+    }
+    if (/Re-run .*--skills --apply/.test(skillInstallCancel.output)) {
+      fail("chef-cli menu skill install must not tell interactive users to rerun with --apply.");
+    }
+  }
+
+  const backupMenuRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-menu-backup-"));
+  const backupMenuCodexHome = path.join(backupMenuRoot, ".codex");
+  const backupMenuArchive = path.join(backupMenuCodexHome, "backups", "codex-chef-menu-test", "codex");
+  fs.mkdirSync(backupMenuArchive, { recursive: true });
+  fs.writeFileSync(path.join(backupMenuArchive, "AGENTS.md"), "menu backup fixture\n", "utf8");
+  const backupInspect = runCliSmokeRaw("menu-backup-inspect-transcript", ["--plain", "--no-log"], {
+    env: {
+      ...baseEnv,
+      CODEX_HOME: backupMenuCodexHome,
+      AGENTS_HOME: path.join(backupMenuRoot, ".agents")
+    },
+    input: "9\n1\n1\n\nq\n",
+    timeout: 30000
+  });
+  if (backupInspect.ok) {
+    for (const snippet of ["Choose a backup number", "Backup action", "Backup details", "codex-chef-menu-test"]) {
+      if (!backupInspect.output.includes(snippet)) {
+        fail(`chef-cli backup menu must support same-session selection and inspection: ${snippet}`);
+      }
+    }
+    if (backupInspect.output.includes("npm run chef -- --backups")) {
+      fail("chef-cli backup menu must not send interactive users back to parameterized backup commands.");
+    }
+  }
+
+  const backupRestoreCancel = runCliSmokeRaw("menu-backup-restore-confirmation-transcript", ["--plain", "--no-log"], {
+    env: {
+      ...baseEnv,
+      CODEX_HOME: backupMenuCodexHome,
+      AGENTS_HOME: path.join(backupMenuRoot, ".agents")
+    },
+    input: "9\n1\n2\n\n\nq\n",
+    timeout: 30000
+  });
+  if (backupRestoreCancel.ok && !backupRestoreCancel.output.includes("Type APPLY to continue")) {
+    fail("chef-cli backup restore menu must request typed APPLY confirmation in the current session.");
+  }
+
+  const backupDeleteWrong = runCliSmokeRaw("menu-backup-delete-wrong-confirmation", ["--plain", "--no-log"], {
+    env: {
+      ...baseEnv,
+      CODEX_HOME: backupMenuCodexHome,
+      AGENTS_HOME: path.join(backupMenuRoot, ".agents")
+    },
+    input: "9\n1\n3\nDELETE wrong-backup\n\nq\n",
+    timeout: 30000
+  });
+  if (backupDeleteWrong.ok) {
+    if (!backupDeleteWrong.output.includes("Type DELETE codex-chef-menu-test")) {
+      fail("chef-cli backup delete menu must bind confirmation to the selected archive id.");
+    }
+    if (!fs.existsSync(path.dirname(backupMenuArchive))) {
+      fail("chef-cli backup delete menu must preserve the archive after a wrong confirmation phrase.");
+    }
+  }
+
+  const backupDeleteExact = runCliSmokeRaw("menu-backup-delete-exact-confirmation", ["--plain", "--no-log"], {
+    env: {
+      ...baseEnv,
+      CODEX_HOME: backupMenuCodexHome,
+      AGENTS_HOME: path.join(backupMenuRoot, ".agents")
+    },
+    input: "9\n1\n3\nDELETE codex-chef-menu-test\n\nq\n",
+    timeout: 30000
+  });
+  if (backupDeleteExact.ok) {
+    if (!backupDeleteExact.output.includes("Backup archive deleted: codex-chef-menu-test")) {
+      fail("chef-cli backup delete menu must report the exact archive deleted after scoped confirmation.");
+    }
+    if (fs.existsSync(path.dirname(backupMenuArchive))) {
+      fail("chef-cli backup delete menu must delete the selected temp archive after the exact confirmation phrase.");
     }
   }
 
