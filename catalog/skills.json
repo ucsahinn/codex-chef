@@ -5,6 +5,11 @@
   "sourcePolicy": "Installable entries must declare package, skill, source, sourceUrl, license, risk, and lastChecked. Online resolution is verified separately with npm run verify:skills:online.",
   "lockSemantics": "source-allowlist",
   "immutability": "Skills CLI installation uses owner/repo plus skill name; this catalog is an allowlist, not a commit-pinned lock. Re-run online verification before release or after changing skill sources.",
+  "compatibilityAliases": {
+    "context-engineering-project-starter": "ai-project-starter",
+    "codex-skill-forge": "ai-skill-create",
+    "codex-enterprise-prompt-architect": "prompt-architect"
+  },
   "skills": [
     {
       "name": "mcp-connectors",
@@ -29,6 +34,12 @@
       "category": "context-engineering",
       "install": false,
       "reason": "Bundled local plugin skill for token/context budgeting, source prioritization, compaction handoff, and verification planning."
+    },
+    {
+      "name": "adaptive-agent-routing",
+      "category": "context-engineering",
+      "install": false,
+      "reason": "Bundled local plugin skill for conditional delegation, canonical skill ownership, profile-inherited agent model selection, and compact routing visibility."
     },
     {
       "name": "investigate",

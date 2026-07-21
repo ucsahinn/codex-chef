@@ -40,6 +40,22 @@ codex doctor --summary
 codex exec --strict-config "Summarize the active setup."
 ```
 
+For repository scripts, use the Windows command shims explicitly in
+PowerShell, especially from automation or agent-run processes:
+
+```powershell
+npm.cmd run check
+npm.cmd run token:audit
+npm.cmd run verify:install:runtime -- --no-mcp-probe
+npx.cmd --version
+codex.cmd --version
+```
+
+Codex Chef's programmatic command resolver selects `npm.cmd`, `npx.cmd`, and
+`codex.cmd` on Windows and the un-suffixed commands on Unix. This avoids the
+PowerShell script-policy and executable-resolution differences that can make a
+command work interactively but fail in an agent or child process.
+
 For additional temporary read access inside a session:
 
 ```text

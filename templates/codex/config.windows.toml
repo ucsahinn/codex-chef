@@ -174,14 +174,23 @@ approval_mode = "approve"
 [mcp_servers.playwright.tools.browser_network_requests]
 approval_mode = "approve"
 
-[mcp_servers.playwright.tools.browser_network_request]
-approval_mode = "prompt"
-
 [mcp_servers.playwright.tools.browser_wait_for]
 approval_mode = "approve"
 
 [mcp_servers.playwright.tools.browser_resize]
 approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_navigate]
+approval_mode = "prompt"
+
+[mcp_servers.playwright.tools.browser_navigate_back]
+approval_mode = "prompt"
+
+[mcp_servers.playwright.tools.browser_close]
+approval_mode = "prompt"
+
+[mcp_servers.playwright.tools.browser_tabs]
+approval_mode = "prompt"
 
 [mcp_servers.chrome-devtools]
 enabled = true
@@ -213,14 +222,20 @@ approval_mode = "approve"
 [mcp_servers.chrome-devtools.tools.list_network_requests]
 approval_mode = "approve"
 
-[mcp_servers.chrome-devtools.tools.get_network_request]
-approval_mode = "prompt"
-
 [mcp_servers.chrome-devtools.tools.wait_for]
 approval_mode = "approve"
 
 [mcp_servers.chrome-devtools.tools.resize_page]
 approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.navigate_page]
+approval_mode = "prompt"
+
+[mcp_servers.chrome-devtools.tools.navigate_page_history]
+approval_mode = "prompt"
+
+[mcp_servers.chrome-devtools.tools.close_page]
+approval_mode = "prompt"
 
 [mcp_servers.serena]
 enabled = true
@@ -238,9 +253,6 @@ approval_mode = "approve"
 approval_mode = "approve"
 
 [mcp_servers.serena.tools.initial_instructions]
-approval_mode = "approve"
-
-[mcp_servers.serena.tools.onboarding]
 approval_mode = "approve"
 
 [mcp_servers.serena.tools.list_memories]
@@ -269,12 +281,6 @@ approval_mode = "approve"
 
 [mcp_servers.serena.tools.get_diagnostics_for_file]
 approval_mode = "approve"
-
-[mcp_servers.serena.tools.delete_memory]
-approval_mode = "prompt"
-
-[mcp_servers.serena.tools.write_memory]
-approval_mode = "prompt"
 
 [mcp_servers.memory]
 enabled = true

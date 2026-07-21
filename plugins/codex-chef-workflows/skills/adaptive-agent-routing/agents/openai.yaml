@@ -1,0 +1,6 @@
+interface:
+  display_name: "Adaptive Agent Routing"
+  short_description: "Route agents only when delegation adds value."
+  default_prompt: "Use $adaptive-agent-routing to select the narrowest useful agent, skill, MCP, and config surfaces without unnecessary fan-out."
+policy:
+  allow_implicit_invocation: true

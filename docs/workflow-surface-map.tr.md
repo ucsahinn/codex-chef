@@ -31,6 +31,14 @@ Kaynaklar:
 | Lifecycle automation | Hook | Sadece incelenmis guardrail icindir; ana guvenlik siniri degildir. |
 | Push, release, deploy, external upload | Approval gate | `release_verifier` hazirlik kanitlar; aksiyon icin yine acik onay gerekir. |
 
+Subagent eslesmesi oneridir. Yalniz bagimsiz paralel is icin, gurultulu log
+veya arastirmayi ayirmak icin ya da kullanici acikca ajan istedigi icin spawn
+et. `max_threads = 10` birden fazla Codex penceresine kapasite birakir; normal
+fan-out bir ile dorttur. Routing'i bir kez `Routing plan:`, bir kez de
+`Routing result:` ile raporla; ajan/skill/MCP basina ayri lifecycle mesaji basma.
+
+Karar gerekcesi: [ADR-001](decisions/001-adaptive-routing-and-user-owned-config-overlay.md).
+
 ## GStack Tarzi Workflow Mapping
 
 | Workflow | Iyi Codex karsiligi | Bu starter'da destek | Guvenlik siniri |

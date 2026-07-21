@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+## v0.5.49 - 2026-07-21
+
+This patch makes Codex Chef's agent team adaptive instead of eager: matching a
+specialist recommends a route, while spawning happens only when delegation
+adds measurable value. It also reduces always-loaded global guidance without
+removing any routing, agent, skill, or MCP capability.
+
+## Highlights
+
+- Added conditional agent delegation for independent parallel work, noisy
+  research isolation, or explicit user requests. `max_threads = 10` remains a
+  multi-window capacity ceiling; normal tasks target one to four agents.
+- Kept all 21 role files unpinned so the active user profile controls model and
+  reasoning effort, and added canonical aliases for overlapping skills.
+- Reduced the global `AGENTS.md` contract to 103 lines and moved the complete
+  routing map into the bundled `adaptive-agent-routing` skill.
+- Added MCP allowlist/approval parity validation, layered token reporting,
+  bounded runtime probes, offline/no-MCP modes, and Windows command resolution.
+- Added a backup-backed migration for legacy profile model pins and preserved
+  user model, approval, sandbox, project trust, MCP, marketplace, and skill
+  overlay values during normal repair.
+
+## Verification
+
+- `npm run check`
+- `npm run validate:package-surface`
+- `npm run validate:release`
+- `npm run verify:install:runtime -- --offline --redact-paths`
+- `git diff --check`
+- `git diff --cached --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.48 - 2026-07-09
 
 This patch turns the public repository surface into a clearer handoff package:

@@ -120,6 +120,19 @@ Confirm the installed agent role files do not reintroduce per-agent
 broad or long-running sessions where lower output volume matters more than
 maximum default reasoning.
 
+Older local `conservative`, `trusted-project`, or `full-access` profile files
+may still contain hard model pins from earlier releases. Preview the repair,
+then opt in to the backup-backed migration only if those pins should be removed:
+
+```bash
+node scripts/repair-install.mjs --migrate-legacy-profile-pins
+node scripts/repair-install.mjs --apply --migrate-legacy-profile-pins
+```
+
+The migration removes only the legacy model/reasoning pin fields. It preserves
+the profile files, current default profile, project trust, approvals, sandbox
+settings, custom MCPs, and the rest of the user-owned config overlay.
+
 Inside Codex, check:
 
 ```text

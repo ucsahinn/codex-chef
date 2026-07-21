@@ -124,10 +124,18 @@ Codex Chef installs a reviewed Codex baseline, not a hidden copy of someone else
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent team | 21 Codex subagent role files under `~/.codex/agents/*.toml`, including readable `nickname_candidates`. They are role definitions, not always-on services. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Durable guidance | Global `~/.codex/AGENTS.md` with routing, verification, safety, and approval rules. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP defaults | 8 useful MCP entries enabled for docs, code navigation, browser evidence, reasoning, non-secret memory, and local codebase graph reads; mutating tools are prompt-gated or disabled, and 8 account/database/high-risk connectors stay disabled. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skills | Local `codex-chef-workflows` plugin, three bundled skills, and sixteen reviewed optional global skills. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skills | Local `codex-chef-workflows` plugin, four bundled skills, and sixteen reviewed optional global skills. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Safety gates | Dry runs, backups, validation, secret scanning, and approval gates before risky actions. |
 
-Installed skills do not execute by themselves. They enter context when named by the user or when a task clearly matches their description. Codex subagents also do not spawn from every prompt, but this starter records standing permission for bounded, reversible local specialist delegation whenever the current Codex runtime permits it.
+Installed skills do not execute by themselves. They enter context when named by
+the user or when a task clearly matches their description. Agent roles are
+selected automatically, but spawning is conditional: use a subagent only for
+genuinely independent parallel work, to isolate noisy logs or research from the
+main thread, or when the user explicitly requests delegation. `max_threads =
+10` remains a capacity ceiling for multi-window use; ordinary routing targets
+one to four focused agents. Agent files do not pin a model or reasoning effort,
+so `token-safe.config.toml` and the user's active profile model/reasoning choices
+remain authoritative.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Installed Agent Team
 
@@ -147,7 +155,7 @@ These are the visible specialist names Codex Chef installs. They are role files 
 
 | Set | Skills |
 | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> Local plugin | `codex-chef-operator`, `offline-diagram-triplet`, `context-budget-planner` |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> Local plugin | `codex-chef-operator`, `offline-diagram-triplet`, `context-budget-planner`, `adaptive-agent-routing` |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f0.svg" alt="" aria-hidden="true" width="20"> Reviewed global catalog | `dependency-upgrade`, `gh-fix-ci`, `systematic-debugging`, `request-refactor-plan`, `security-best-practices`, `frontend-skill`, `webapp-testing`, `web-quality-audit`, `seo`, `accessibility`, `test-driven-development`, `documentation-and-adrs`, `mcp-builder`, `ai-project-starter`, `prompt-architect`, `ai-skill-create` |
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP Defaults
@@ -181,7 +189,7 @@ Run `npm run codex:status` after install to see MCP setup notes, effective contr
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d8.svg" alt="" aria-hidden="true" width="20"> Operator KB | `kb/` keeps short English and Turkish task articles for install preview, runtime verification, routing, and release hygiene. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> Conservative connectors | Account, database, production, and broad filesystem connectors stay disabled until a task explicitly needs them. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install plan | `manifests/install-plan.json` and `schemas/install-plan.schema.json` define the managed write surface. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context budget | `npm run token:audit` reports the largest context surfaces; `token-safe.config.toml` lowers verbosity and tool-output budgets without disabling skills, MCPs, memory, hooks, or automatic agent model/reasoning selection. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context budget | `npm run token:audit` separates always-loaded instructions, discoverability metadata, invoked/deferred surfaces, repository maintenance size, tool schema/context, measured session telemetry when available, and per-agent cost. It is a context estimate, not provider billing. |
 | Agent-readable index | `llms.txt` gives agents a compact map of install targets, docs, safety boundaries, and comparison sources. |
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c1.svg" alt="" aria-hidden="true" width="20"> Repository Layout

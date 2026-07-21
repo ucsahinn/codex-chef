@@ -217,6 +217,7 @@ if (!fs.existsSync(catalogPath)) {
         "sandboxMode",
         "modelSelection",
         "modelReasoningEffort",
+        "neverOverrideUserProfile",
         "risk",
         "defaultReason",
         "primaryUse",
@@ -235,6 +236,9 @@ if (!fs.existsSync(catalogPath)) {
       }
       if (!allowedReasoningEfforts.has(agent.modelReasoningEffort)) {
         fail(`Agent ${agent.name} has unsupported modelReasoningEffort: ${agent.modelReasoningEffort}`);
+      }
+      if (agent.neverOverrideUserProfile !== true) {
+        fail(`Agent ${agent.name} must preserve the active user profile.`);
       }
       if (agent.sandboxMode === "read-only" && /modify|edit|write/i.test(agent.defaultReason || "")) {
         fail(`Agent ${agent.name} read-only defaultReason must not imply writes.`);

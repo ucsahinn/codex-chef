@@ -48,7 +48,7 @@
       "collision": "merge-missing-blocks-unless-force-backup-before-replace",
       "backup": true,
       "risk": "medium",
-      "conflictPolicy": "Existing user config is preserved by default: missing Codex Chef agent/MCP and safety tables are merged, while existing tables are not overwritten. Force replaces the file after backup."
+      "conflictPolicy": "Canonical template plus user-owned overlay: existing model, profile, approval, sandbox, project trust, and unrelated MCP values are preserved outside Force. Codex Chef-managed agent/MCP safety tables are synchronized explicitly; Force replaces the file only after backup."
     },
     {
       "id": "codex-rules",

@@ -106,6 +106,11 @@ Agent role templates also avoid per-agent `model` and
 That lets the active profile and Codex runtime choose the model/effort balance
 without weakening role boundaries or approval gates.
 
+`max_threads = 10` is a concurrency capacity ceiling, not permission to fan
+out every task. Conditional routing normally uses one to four agents and only
+for independent parallel work, noisy evidence isolation, or explicit user
+delegation. Automatic role selection never overrides the user's active profile.
+
 ## Install Planning And Collision Policy
 
 `manifests/install-plan.json` records the managed install surface, risk level,
@@ -116,6 +121,12 @@ installers or mutating global state.
 The manifest intentionally keeps ECC-inspired improvements narrow: plan/apply
 separation and collision metadata are allowed; broad external config, MCP,
 hook, telemetry, or skill catalogs are not imported by default.
+
+The canonical template and user-owned overlay are separate trust domains.
+Normal merge/repair preserves model/profile choice, approval and sandbox
+settings, project trust, custom MCPs, and unrelated marketplace entries.
+Chef-managed agent/MCP safety tables remain validated, while wholesale
+replacement requires the explicit force path and a backup.
 `scripts/validate-install-plan.mjs` also keeps destinations inside reviewed
 Codex, Agents, and optional Git-guard targets so adjacent harness homes such as
 `.claude`, `.cursor`, `.opencode`, `.zed`, and `.vscode` cannot drift into the

@@ -107,6 +107,12 @@ agent bazli `model` ve `model_reasoning_effort` pinlemez. Boylece aktif profil
 ve Codex runtime, role boundary ve approval gate'lerini zayiflatmadan uygun
 model/effort dengesini secebilir.
 
+`max_threads = 10` concurrency kapasite tavanidir; her task'i fan-out etme izni
+degildir. Kosullu routing normalde bir ile dort ajan kullanir ve yalniz
+bagimsiz paralel is, gurultulu kaniti ayirma veya acik kullanici delegasyonu
+durumunda spawn eder. Otomatik rol secimi aktif kullanici profilini override
+etmez.
+
 ## Install Planlama ve Çakışma Politikası
 
 `manifests/install-plan.json` installer'ın yönettiği her dosya, directory, Git
@@ -123,6 +129,12 @@ Bu yaklaşım external starter'lardan gelen iyi manifest/plan fikirlerini alır,
 ama geniş global sync, otomatik dependency install, auth connector enable etme
 veya kullanıcı dosyalarını sessizce overwrite etme davranışlarını dışarıda
 bırakır.
+
+Canonical template ile kullaniciya ait overlay ayri trust domain'leridir.
+Normal merge/repair model/profil secimini, approval ve sandbox ayarlarini,
+project trust kayitlarini, ozel MCP'leri ve ilgisiz marketplace kayitlarini
+korur. Chef-managed agent/MCP guvenlik tablolari dogrulanmaya devam eder;
+toplu replacement acik force yolu ve backup gerektirir.
 `scripts/validate-install-plan.mjs` hedefleri yalniz review edilmis Codex,
 Agents ve opsiyonel Git-guard alanlarinda tutar; `.claude`, `.cursor`,
 `.opencode`, `.zed` ve `.vscode` gibi komsu harness home path'leri install

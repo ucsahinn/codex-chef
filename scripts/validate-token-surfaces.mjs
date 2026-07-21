@@ -86,8 +86,8 @@ if (exists("templates/codex/AGENTS.md")) {
   for (const required of [
     "## Token Budget Discipline",
     "context-budget-planner",
-    "Do not disable skills, MCP servers, subagents, memory, hooks, or app support",
-    "Close completed subagent threads"
+    "Do not disable agents, skills, MCPs, memory, hooks, or apps",
+    "Close completed agent threads"
   ]) {
     if (!agents.includes(required)) fail(`templates/codex/AGENTS.md missing token guidance: ${required}`);
   }
@@ -184,7 +184,7 @@ if (exists("catalog/agents.json")) {
 
 if (exists("scripts/analyze-token-surfaces.mjs")) {
   const analyzer = read("scripts/analyze-token-surfaces.mjs");
-  for (const required of ["runtime-startup", "agent-role", "skill-trigger", "skill-deferred", "docs-release", "catalog-corpus", "script-large", "chars/4", "categoryBudgets", "budgetFindings"]) {
+  for (const required of ["codex-chef.token-surfaces.v2", "always_loaded_instruction_estimate", "registered_conditional_surface", "invoked_or_deferred_surface", "repository_maintenance_size", "real_session_telemetry", "tool_schema_context", "per_agent_runtime_cost", "runtime-startup", "agent-role", "skill-trigger", "skill-deferred", "docs-release", "catalog-corpus", "script-large", "chars/4", "categoryBudgets", "budgetFindings"]) {
     if (!analyzer.includes(required)) fail(`Token analyzer missing expected category or note: ${required}`);
   }
   if (!analyzer.includes('if (/^scripts\\/(?:chef-cli|codex-status)\\.mjs$/.test(rel)) return "script-large";')) {

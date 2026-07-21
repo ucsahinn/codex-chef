@@ -33,7 +33,12 @@ This runs:
   merge, skill cleanup reporting, and explicit managed-plugin pruning.
 - `scripts/validate-agent-config.mjs`: specialist-agent catalog/config drift
   checks across Windows and Unix Codex templates, including automatic
-  model/reasoning selection for role files.
+  model/reasoning selection for role files without overriding the active user
+  profile.
+- `scripts/validate-adaptive-runtime.mjs`: conditional spawn policy, compact
+  routing visibility, `max_threads = 10` capacity, one-to-four normal
+  parallelism, canonical skill aliases, user-owned config overlay, token-audit
+  layers, platform command resolution, and bounded runtime-probe contracts.
 - `scripts/validate-agent-research-corpus.mjs`: specialist-agent research
   corpus drift, authority-reference source markers, source freshness cadence,
   stale `dateChecked` checks, and per-agent expertise signal coverage.
@@ -73,6 +78,12 @@ gitleaks detect --redact --no-banner --no-git --verbose
 
 The repository `.gitleaks.toml` keeps default Gitleaks rules enabled while
 excluding ignored local scratch, dependency, build, and cache directories.
+
+`npm run token:audit` reports distinct cost surfaces: always-loaded
+instructions, discoverability metadata, invoked or deferred skill/agent
+content, repository maintenance size, tool schema/context, measured session
+telemetry when available, and per-agent cost. Repository byte/token estimates
+are diagnostic context weights, not provider billing or measured usage.
 
 When installable skills change, also run the network-backed resolver check:
 
@@ -273,6 +284,12 @@ Use `--expect-skills` only when the real install included `-All` or
 Codex CLI checks with `CODEX_HOME` explicitly set to the installed target,
 reports ambient sandbox/offline home drift as a warning, and fails only when
 the installed target itself cannot be verified.
+
+Every live probe has a short timeout and progress output. Use `--offline` when
+network-backed/live runtime checks are unavailable, or `--no-mcp-probe` when
+managed files and the Codex CLI should still be checked without starting the
+MCP probe. These modes skip only the named probe surface; they do not weaken
+source-drift validation.
 
 ## Remote Verification
 

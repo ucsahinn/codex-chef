@@ -34,6 +34,9 @@ This repo includes:
 - `plugins/codex-chef-workflows/skills/context-budget-planner`: a local
   token/context planning workflow for broad tasks, source prioritization,
   compaction handoff, and verification gates.
+- `plugins/codex-chef-workflows/skills/adaptive-agent-routing`: conditional
+  agent/skill/MCP routing, canonical aliases, compact visibility, and
+  profile-preserving automatic role selection.
 
 Each bundled skill follows the same shape:
 
@@ -60,7 +63,7 @@ This repo includes:
 The installer registers the local marketplace. Restart Codex, then open
 `/plugins` to inspect or install the plugin.
 
-The bundled plugin currently exposes three local skills:
+The bundled plugin currently exposes four local skills:
 
 - `codex-chef-operator`: maintain this starter without weakening safety
   boundaries.
@@ -68,6 +71,8 @@ The bundled plugin currently exposes three local skills:
   triplet with no network access.
 - `context-budget-planner`: plan token/context usage before broad repo,
   research, multi-agent, documentation, or long-running Codex work.
+- `adaptive-agent-routing`: select the narrowest useful surfaces and spawn
+  agents only when delegation materially helps.
 
 The installer only calls the Skills CLI for catalog entries with `install: true`,
 a verified `package` value such as `owner/repo`, and a matching `skill` name. It
@@ -245,32 +250,32 @@ Agent catalog rule:
 
 Routing rule:
 
-- Subagents are explicit, visible delegation. This starter's global AGENTS
-  routing contract names matching specialist agents for clear, non-trivial
-  prompt shapes, but it does not override Codex runtime policy.
-- This starter records standing permission for bounded, reversible local
-  specialist delegation when the current Codex runtime permits subagent work.
-  When that happens, the assistant must print `Agent plan`, `Agent started`,
-  and `Agent result`, then summarize the specialist result before relying on it.
-- For non-trivial work that maps to a registered specialist, make the specialist
-  visible in the plan or `Surfaces used` output. Do not silently imply an agent
-  was spawned when the runtime or user request did not permit one.
-- Visible routing output should include `Agent plan`, `Agent started`,
-  `Agent result`, `Skill selected`, `MCP selected`, and
-  `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`.
+- Agent matching is a recommendation, not a mandatory spawn. Spawn only when
+  there is genuinely independent parallel work, noisy logs or research should
+  be isolated from the main thread, or the user explicitly requests
+  delegation. A matching role may still guide main-thread work without opening
+  a subagent.
+- Keep routing visible without narrating every surface. Emit one compact
+  `Routing plan:` line before delegated work and one `Routing result:` summary
+  or table before finalizing. The result names agents, skills, MCPs, important
+  commands, evidence, and skipped obvious surfaces when relevant.
+- `max_threads = 10` is a capacity ceiling, retained for users running several
+  Codex windows. It is not a target fan-out. Normal tasks use one to four
+  focused agents, and only when one of the three spawn criteria is satisfied.
+- Role selection is automatic, but role files never override the active
+  profile's model or reasoning choice. Omitted per-agent pins let the user's
+  selected profile and Codex runtime adapt effort to the task.
 - Lifecycle hygiene is part of the contract: close completed agent threads
   when they are no longer needed, use `/agent` to inspect or close active
   threads before finalizing large work, use `/ps` for background terminals, and
   use `/stop` to cancel terminal work started by the current session. If an MCP
   process such as Serena remains after the task, report it and ask before
   killing processes or deleting local state.
-- Use them for noisy, read-heavy, or evidence-heavy side work: exploration,
-  current docs, context placement, prompt design, MCP planning, review, UI
-  verification, security audit, test/build evidence, setup diagnostics, and
-  release readiness.
-- Skills follow the same prompt-shape rule: when the task clearly matches an
-  installed skill description, the assistant must select it, print
-  `Skill selected`, read its `SKILL.md`, and follow its workflow before acting.
+- Use the narrowest owning skill for a task. Compatibility aliases route to the
+  canonical owner instead of loading duplicate skills together:
+  `context-engineering-project-starter` to `ai-project-starter`,
+  `codex-skill-forge` to `ai-skill-create`, and
+  `codex-enterprise-prompt-architect` to `prompt-architect`.
 - Keep write-heavy implementation in the main thread unless the user explicitly
   asks to split write scopes. If multiple agents edit, assign non-overlapping
   files and reconcile before verification.
@@ -292,13 +297,15 @@ npm run codex:status
 npm run chef -- --routing --profile starter-health
 ```
 
-Each profile names the task trigger, recommended subagents, delegation mode,
+Each profile names the task trigger, recommended subagents, conditional
+delegation mode,
 skill mode, MCP mode, expected flags/checks, evidence signals, owner,
 durability, primary surface, privilege delta, validation gate, rollback path,
 and the safety boundary. This keeps Codex Chef autonomous in the useful sense:
-when a task clearly matches a profile, the matching specialist, skill, MCP, and
-flag guidance is required unless a higher-priority instruction blocks it.
-Subagent spawning stays explicit and runtime-bounded; the routing contract does
-not create hidden hooks or silent execution. Destructive, credentialed,
+when a task clearly matches a profile, the narrowest useful specialist, skill,
+MCP, and flag guidance is selected unless a higher-priority instruction blocks
+it. Selection does not require spawning. Subagent work stays explicit,
+conditional, and runtime-bounded; the routing contract does not create hidden
+hooks or silent execution. Destructive, credentialed,
 publishing, deployment, database, and broad filesystem actions remain
 approval-gated.

@@ -454,10 +454,13 @@ if (routingResult.error) {
 } else {
   try {
     const routing = JSON.parse(routingResult.stdout);
-    if (routing.schemaVersion !== "codex-chef.routing.v1") fail("codex routing schemaVersion drifted.");
+    if (routing.schemaVersion !== "codex-chef.routing.v2") fail("codex routing schemaVersion drifted.");
     if (routing.profileCount < 10) fail("codex routing must include at least 10 profiles.");
-    if (!routing.sourcePolicy?.includes("not hidden execution hooks")) {
-      fail("codex routing must preserve the no-hidden-hooks source policy.");
+    if (routing.delegationPolicy?.mode !== "conditional") {
+      fail("codex routing must preserve conditional delegation policy.");
+    }
+    if (routing.agentRuntimePolicy?.neverOverrideUserProfile !== true) {
+      fail("codex routing must preserve active user profile choices.");
     }
   } catch (error) {
     fail(`codex routing did not emit parseable JSON: ${error.message}`);

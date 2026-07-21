@@ -249,6 +249,15 @@ active profile and Codex runtime choose the task-appropriate balance; use
 verbosity and tighter tool-output limits without disabling skills, agents, or
 MCPs.
 
+Codex Chef treats its template as the canonical managed baseline and the
+existing machine configuration as a user-owned overlay. Normal install and
+repair preserve the user's model and reasoning choice, approval and sandbox
+settings, project trust entries, custom MCP servers, and unrelated personal
+plugin marketplace entries. Chef-managed agent/MCP safety tables are merged
+and validated; `--force` remains the explicit replacement boundary. This keeps
+the package global and reusable without turning one machine's profile or trust
+state into a distributable default.
+
 ## What Gets Backed Up
 
 Existing files are copied into:
@@ -304,6 +313,10 @@ explicitly pointed at the installed target. If the ambient shell is reading a
 sandbox or alternate `CODEX_HOME`, the verifier reports that drift as a warning
 while still proving whether the installed target exposes the expected MCP
 config.
+
+Live probes print progress and use short per-probe timeouts. Add `--offline`
+when live/network checks are unavailable, or `--no-mcp-probe` to validate the
+managed install and Codex CLI without starting the MCP probe.
 
 Inside Codex, use:
 

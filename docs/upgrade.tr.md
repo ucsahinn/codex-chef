@@ -115,6 +115,20 @@ Kurulu agent role dosyalarinin agent bazli `model` /
 session'larda maksimum default reasoning yerine daha dusuk cikti hacmi onemliyse
 `token-safe.config.toml` kullan.
 
+Eski lokal `conservative`, `trusted-project` veya `full-access` profil
+dosyalarinda onceki release'lerden kalmis hard model pinleri bulunabilir. Once
+repair preview al; bu pinler kaldirilacaksa backup'li migration'i ayrica ac:
+
+```bash
+node scripts/repair-install.mjs --migrate-legacy-profile-pins
+node scripts/repair-install.mjs --apply --migrate-legacy-profile-pins
+```
+
+Migration yalniz legacy model/reasoning pin alanlarini kaldirir. Profil
+dosyalarini, aktif default profili, project trust kayitlarini, approval ve
+sandbox ayarlarini, ozel MCP'leri ve kullaniciya ait config overlay'in geri
+kalanini korur.
+
 Codex içinde kontrol et:
 
 ```text

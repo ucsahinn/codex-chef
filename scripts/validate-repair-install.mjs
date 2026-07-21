@@ -104,6 +104,9 @@ write(
 );
 write(path.join(codexHome, "agents", "code_mapper.toml"), "# stale agent\n");
 write(path.join(codexHome, "development.config.toml"), "# stale profile\n");
+for (const profile of ["conservative.config.toml", "trusted-project.config.toml", "full-access.config.toml"]) {
+  write(path.join(codexHome, profile), 'model = "legacy-model"\nreview_model = "legacy-review"\nmodel_reasoning_effort = "high"\n');
+}
 write(
   path.join(pluginTarget, ".codex-plugin", "plugin.json"),
   "{\n  \"name\": \"codex-chef-workflows\",\n  \"version\": \"0.0.0\"\n}\n"
@@ -191,6 +194,30 @@ if (applied) {
   if (!applied.backupRoot) fail("repair apply must create a backup root.");
   if (!applied.actions.some((action) => action.status === "applied")) {
     fail("repair apply must report applied actions.");
+  }
+}
+
+for (const profile of ["conservative.config.toml", "trusted-project.config.toml", "full-access.config.toml"]) {
+  const profileText = fs.readFileSync(path.join(codexHome, profile), "utf8");
+  if (!profileText.includes('model = "legacy-model"')) {
+    fail("ordinary repair apply must not migrate legacy profile pins without the explicit flag.");
+  }
+}
+
+const migrated = parseResult(
+  runRepair(["--apply", "--migrate-legacy-profile-pins"], codexHome, agentsHome),
+  "repair legacy profile migration"
+);
+if (migrated) {
+  if (!migrated.legacyProfileMigration?.requested) fail("legacy profile migration must report requested=true.");
+  for (const profile of ["conservative.config.toml", "trusted-project.config.toml", "full-access.config.toml"]) {
+    const profileText = fs.readFileSync(path.join(codexHome, profile), "utf8");
+    if (/^(?:model|review_model)\s*=/m.test(profileText)) {
+      fail(`legacy profile migration must remove model pins from ${profile}.`);
+    }
+    if (!profileText.includes('model_reasoning_effort = "high"')) {
+      fail(`legacy profile migration must preserve non-model profile behavior in ${profile}.`);
+    }
   }
 }
 

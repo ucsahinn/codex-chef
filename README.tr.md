@@ -108,10 +108,17 @@ Codex Chef başka bir makinenin ayarlarını gizlice kopyalamaz; kaynağı bu re
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Ajan ekibi | `~/.codex/agents/*.toml` altında 21 Codex subagent rol dosyası ve okunabilir `nickname_candidates`. Bunlar servis değil, role tanımıdır. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Kalıcı talimatlar | Routing, doğrulama, güvenlik ve onay kuralları içeren global `~/.codex/AGENTS.md`. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP varsayılanları | Dokümantasyon, code navigation, browser evidence, reasoning, secret içermeyen memory ve lokal codebase graph okumalari için 8 MCP açık; mutating tool'lar prompt-gated veya disabled, hesap/database/high-risk 8 connector kapalı. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skill'ler | Yerel `codex-chef-workflows` plugin'i, üç bundled skill ve on altı reviewed opsiyonel global skill. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skill'ler | Yerel `codex-chef-workflows` plugin'i, dört bundled skill ve on altı reviewed opsiyonel global skill. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Güvenlik kapıları | Dry run, backup, validation, secret scan ve riskli aksiyonlar için approval gate. |
 
-Skill'ler kendiliğinden çalışmaz. Kullanıcı skill adını yazdığında veya iş skill açıklamasına net uyduğunda context'e girer. Codex subagent'leri de her promptta otomatik spawn olmaz; bu starter, mevcut Codex runtime izin verdiğinde bounded ve geri alınabilir lokal uzman delegasyonu için kalıcı izin kaydeder.
+Skill'ler kendiliğinden çalışmaz. Kullanıcı skill adını yazdığında veya iş skill
+açıklamasına net uyduğunda context'e girer. Ajan rolü otomatik seçilir ama spawn
+koşulludur: yalnız gerçekten bağımsız paralel işler varsa, gürültülü log veya
+araştırmayı ana thread'den ayırmak gerekiyorsa ya da kullanıcı özellikle ajan
+istiyorsa kullanılır. `max_threads = 10`, birden fazla Codex penceresi için
+kapasite tavanı olarak korunur; normal routing bir ile dört odaklı ajanı
+hedefler. Rol dosyaları model veya reasoning effort pinlemez; `token-safe.config.toml`
+dahil kullanıcının aktif profil model/reasoning tercihleri belirleyici kalır.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Kurulan Ajan Ekibi
 
@@ -131,7 +138,7 @@ Bunlar Codex Chef'in kurduğu görünür uzman isimleridir. Ayrı servis değil,
 
 | Set | Skill'ler |
 | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> Yerel plugin | `codex-chef-operator`, `offline-diagram-triplet`, `context-budget-planner` |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> Yerel plugin | `codex-chef-operator`, `offline-diagram-triplet`, `context-budget-planner`, `adaptive-agent-routing` |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f0.svg" alt="" aria-hidden="true" width="20"> Reviewed global katalog | `dependency-upgrade`, `gh-fix-ci`, `systematic-debugging`, `request-refactor-plan`, `security-best-practices`, `frontend-skill`, `webapp-testing`, `web-quality-audit`, `seo`, `accessibility`, `test-driven-development`, `documentation-and-adrs`, `mcp-builder`, `ai-project-starter`, `prompt-architect`, `ai-skill-create` |
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP Varsayılanları
@@ -165,7 +172,7 @@ Kurulumdan sonra `npm run codex:status` çalıştırarak MCP setup notlarını, 
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d8.svg" alt="" aria-hidden="true" width="20"> Bilgi bankası | `kb/` install preview, runtime doğrulama, routing ve release hijyeni için kısa Türkçe ve İngilizce task makaleleri tutar. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> Konservatif connector'lar | Account, database, production ve geniş filesystem connector'ları görev açıkça istemedikçe disabled kalır. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install plan | `manifests/install-plan.json` ve `schemas/install-plan.schema.json` managed write yüzeyini tanımlar. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context budget | `npm run token:audit` en büyük context yüzeylerini gösterir; `token-safe.config.toml` skill, MCP, memory, hook veya otomatik agent model/reasoning seçimini kapatmadan verbosity ve tool-output budget'ını düşürür. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context budget | `npm run token:audit`; her oturumda yüklenen talimatları, discoverability metadata'sını, çağrılan/deferred yüzeyleri, repo bakım boyutunu, tool schema/context'i, varsa gerçek session telemetry'sini ve ajan başı maliyeti ayırır. Bu bir context tahminidir, sağlayıcı faturası değildir. |
 | Ajan-okunur indeks | `llms.txt`, ajanlara install hedeflerini, docs haritasını, güvenlik sınırlarını ve karşılaştırma kaynaklarını kısa verir. |
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c1.svg" alt="" aria-hidden="true" width="20"> Repo Yapısı

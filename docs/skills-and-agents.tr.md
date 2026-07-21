@@ -34,6 +34,9 @@ Bu repo şunları içerir:
 - `plugins/codex-chef-workflows/skills/context-budget-planner`: büyük işlerde
   token/context planı, kaynak önceliği, compaction handoff'u ve verification
   gate'leri çıkaran yerel workflow.
+- `plugins/codex-chef-workflows/skills/adaptive-agent-routing`: kosullu
+  ajan/skill/MCP routing'i, canonical alias'lar, kisa gorunurluk ve profili
+  koruyan otomatik rol secimi.
 
 ## Bundled Skill Yapisi
 
@@ -63,7 +66,7 @@ Bu repo şunları içerir:
 Installer yerel marketplace kaydını kurar. Codex'i yeniden başlatıp `/plugins`
 ile plugin'i inceleyebilir veya kurabilirsin.
 
-Bundled plugin şu anda üç yerel skill sunar:
+Bundled plugin şu anda dört yerel skill sunar:
 
 - `codex-chef-operator`: güvenlik sınırlarını zayıflatmadan bu starter'ı
   bakımda tutar.
@@ -71,6 +74,8 @@ Bundled plugin şu anda üç yerel skill sunar:
   diagram triplet'ine çevirir.
 - `context-budget-planner`: büyük repo, araştırma, çok ajanlı, dokümantasyon
   ağırlıklı veya uzun sürecek Codex işlerinde token/context kullanımını planlar.
+- `adaptive-agent-routing`: en dar faydali yuzeyleri secer ve yalniz delegasyon
+  gercekten fayda sagliyorsa ajan spawn eder.
 
 Installer sadece `install: true`, `owner/repo` formatında doğrulanmış `package`
 ve eşleşen `skill` adı taşıyan katalog kayıtları için Skills CLI çağırır.
@@ -245,33 +250,31 @@ Agent katalog kurali:
 
 Routing kurali:
 
-- Subagent kullanimi acik ve gorunur delegasyondur. Bu starter'in global
-  AGENTS routing kontrati net, non-trivial prompt shape'leri icin uygun uzman
-  agent'i isimlendirir, ama Codex runtime politikasini override etmez.
-- Bu starter, mevcut Codex runtime subagent calismasina izin verdiginde
-  bounded ve geri alinabilir lokal uzman delegasyonu icin kalici izin kaydeder.
-  Bu oldugunda asistan `Agent plan`, `Agent started` ve `Agent result`
-  satirlarini basmali, sonra uzman sonucunu kullanmadan once ozetlemelidir.
-- Non-trivial is kayitli bir uzmana denk geliyorsa o uzman plan veya
-  `Surfaces used` ciktisinda gorunur yapilir. Runtime veya kullanici istegi izin
-  vermedigi halde agent spawn edilmis gibi ima edilmez.
-- Gorunur routing ciktisi `Agent plan`, `Agent started`, `Agent result`,
-  `Skill selected`, `MCP selected` ve
-  `Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...`
-  satirlarini icermelidir.
+- Ajan eslesmesi oneridir; zorunlu spawn demek degildir. Yalniz gercekten
+  bagimsiz paralel is varsa, gurultulu log veya arastirma ana thread'den
+  ayrilmaliysa ya da kullanici ozellikle ajan istediyse spawn edilir. Eslesen
+  rol, subagent acmadan da ana thread'e rehberlik edebilir.
+- Routing gorunur kalir ama her yuzey icin ayri mesaj basılmaz. Delegasyon
+  oncesi tek bir `Routing plan:` satiri, finalden once de ajan, skill, MCP,
+  onemli komut, kanit ve gerekliyse atlanan yuzeyleri gosteren tek bir
+  `Routing result:` ozeti veya tablosu kullanilir.
+- `max_threads = 10`, birden fazla Codex penceresi kullananlar icin kapasite
+  tavanidir; hedef fan-out degildir. Normal gorevler, uc spawn kriterinden biri
+  karsilaniyorsa bir ile dort odakli ajan kullanir.
+- Rol secimi otomatiktir; rol dosyalari aktif profilin model veya reasoning
+  secimini override etmez. Ajan bazli pin olmamasi, kullanicinin sectigi profil
+  ile Codex runtime'in task'a gore effort ayarlamasina alan birakir.
 - Lifecycle hijyeni bu kontratin parcasidir: artik gerekmeyen tamamlanmis agent
   thread'lerini kapat, buyuk isleri finallemeden once `/agent` ile aktif
   thread'leri incele veya kapat, background terminaller icin `/ps`, current
   session tarafindan baslatilan terminal islerini durdurmak icin `/stop`
   kullan. Serena gibi bir MCP process'i is bittikten sonra kalirsa bunu raporla
   ve process kill veya local state delete oncesi onay iste.
-- En iyi alanlari gurultulu okuma ve kanit toplama isleridir: kesif, guncel
-  docs, context yerlestirme, prompt tasarimi, MCP planlama, review, UI
-  dogrulama, security audit, test/build kaniti, setup tanilama ve release
-  hazirligi.
-- Skill'ler de ayni prompt-shape kuralini izler: task acikca kurulu bir skill
-  description'ina denk geliyorsa asistan `Skill selected` basmali, ilgili
-  `SKILL.md` dosyasini okumali ve aksiyondan once o workflow'u izlemelidir.
+- Task icin en dar canonical skill sahibi kullanilir. Uyumluluk alias'lari
+  duplicate skill'leri birlikte yuklemek yerine canonical owner'a yonlenir:
+  `context-engineering-project-starter` -> `ai-project-starter`,
+  `codex-skill-forge` -> `ai-skill-create` ve
+  `codex-enterprise-prompt-architect` -> `prompt-architect`.
 - Yazma agirlikli uygulama ana thread'de kalir. Kullanici acikca bolmeyi
   istemediyse birden fazla ajan ayni dosyalari edit etmemelidir.
 - Subagent'lar onay, sandbox ve connector auth sinirlarini miras alir. Kullanici
@@ -296,12 +299,13 @@ npm run codex:status
 npm run chef -- --routing --profile starter-health
 ```
 
-Her profil task trigger'ini, onerilen subagent'lari, delegation mode'u, skill
+Her profil task trigger'ini, onerilen subagent'lari, kosullu delegation mode'u, skill
 mode'u, MCP mode'u, beklenen flag/check'leri, evidence sinyallerini, owner,
 durability, primary surface, privilege delta, validation gate, rollback path ve
 guvenlik sinirini yazar. Bu Codex Chef'i faydali anlamda otonom yapar: task
-shape profile uydugunda eslesen uzman, skill, MCP ve flag rehberligi zorunlu
-olur. Bounded lokal subagent spawn kalici izin ve runtime izniyle sinirlidir;
+shape profile uydugunda en dar faydali uzman, skill, MCP ve flag rehberligi
+secilir; eslesme spawn zorunlulugu yaratmaz. Lokal subagent spawn uc kosuldan
+biriyle ve runtime izniyle sinirlidir;
 routing kontrati gizli hook veya sessiz executor olusturmaz. Destructive,
 credential, publish, deploy, database ve genis filesystem aksiyonlari onay
 kapisinda kalir.

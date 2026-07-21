@@ -78,6 +78,13 @@ function categoryFor(rel) {
   return "other-source";
 }
 
+function layerFor(category) {
+  if (category === "runtime-startup") return "always_loaded_instruction_estimate";
+  if (["runtime-config", "skill-trigger"].includes(category)) return "registered_conditional_surface";
+  if (["agent-role", "skill-deferred"].includes(category)) return "invoked_or_deferred_surface";
+  return "repository_maintenance_size";
+}
+
 const files = [];
 for (const file of walk(root)) {
   const rel = toPosix(path.relative(root, file));
@@ -88,7 +95,8 @@ for (const file of walk(root)) {
     path: rel,
     category: categoryFor(rel),
     chars: text.length,
-    estimatedTokens: estimateTokens(text)
+    estimatedTokens: estimateTokens(text),
+    layer: layerFor(categoryFor(rel))
   });
 }
 
@@ -102,6 +110,15 @@ for (const file of files) {
 }
 
 const categoryRows = [...categories.values()].sort((a, b) => b.estimatedTokens - a.estimatedTokens);
+const layers = new Map();
+for (const file of files) {
+  const entry = layers.get(file.layer) || { layer: file.layer, files: 0, chars: 0, estimatedTokens: 0 };
+  entry.files += 1;
+  entry.chars += file.chars;
+  entry.estimatedTokens += file.estimatedTokens;
+  layers.set(file.layer, entry);
+}
+const layerRows = [...layers.values()].sort((a, b) => b.estimatedTokens - a.estimatedTokens);
 const budgetFindings = categoryRows.map((category) => {
   const budget = categoryBudgets[category.category] || null;
   const ratio = budget ? category.estimatedTokens / budget : null;
@@ -127,7 +144,23 @@ const budgetFindings = categoryRows.map((category) => {
 });
 
 const report = {
-  note: "Token estimates use a coarse chars/4 heuristic. Treat them as comparison signals, not provider billing counts.",
+  schemaVersion: "codex-chef.token-surfaces.v2",
+  note: "Token estimates use a coarse chars/4 heuristic for repository surfaces. They are not provider billing or measured session usage.",
+  telemetry: {
+    layer: "real_session_telemetry",
+    available: false,
+    note: "Provider/session telemetry is not available to this repository-native audit; compare it separately when the runtime exposes it."
+  },
+  toolSchemaContext: {
+    layer: "tool_schema_context",
+    available: false,
+    note: "Live tool schemas are runtime-owned and are not inferred from repository file size."
+  },
+  agentCost: {
+    layer: "per_agent_runtime_cost",
+    available: false,
+    note: "Per-agent cost depends on invocation, inherited profile, runtime context, and returned evidence; role-file size is only a deferred-surface estimate."
+  },
   generatedAt: new Date().toISOString(),
   totals: {
     files: files.length,
@@ -135,6 +168,7 @@ const report = {
     estimatedTokens: files.reduce((sum, file) => sum + file.estimatedTokens, 0)
   },
   categoryBudgets,
+  layers: layerRows,
   categories: categoryRows,
   budgetFindings,
   topFiles: [...files].sort((a, b) => b.estimatedTokens - a.estimatedTokens).slice(0, Number.isFinite(topCount) ? topCount : 12),
@@ -161,6 +195,11 @@ if (asJson) {
     const budgetText = finding?.budget ? ` / budget ~${finding.budget.toLocaleString("en-US")}` : "";
     const statusText = finding ? ` [${finding.status}]` : "";
     console.log(`- ${category.category}: ${category.files} files, ~${category.estimatedTokens.toLocaleString("en-US")} tokens${budgetText}${statusText}`);
+  }
+  console.log("");
+  console.log("By loading layer:");
+  for (const layer of report.layers) {
+    console.log(`- ${layer.layer}: ${layer.files} files, ~${layer.estimatedTokens.toLocaleString("en-US")} tokens`);
   }
   console.log("");
   console.log("Budget findings:");

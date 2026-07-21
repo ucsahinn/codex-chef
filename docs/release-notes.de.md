@@ -34,6 +34,10 @@ npm run verify:skills:online
 - `git diff --check` nutzen, um Whitespace- und Markdown-Probleme zu erkennen.
 - `gitleaks detect --redact --no-banner --no-git --verbose` nutzen, wenn Gitleaks verfügbar ist.
 
+## v0.5.49 - 2026-07-21
+
+Diese Version macht die Agent-Auswahl adaptiv: Spezialisten werden nur bei unabhängiger Parallelität, isolierter lauter Recherche oder auf ausdrücklichen Benutzerwunsch gestartet. Das aktive Profil behält die Kontrolle über Modell und Reasoning; die vollständige Routing-Referenz bleibt als gebündelter Skill erhalten.
+
 ## v0.5.48 - 2026-07-09
 
 Diese Version erweitert die Public-Repo-Uebergabe mit einer zweisprachigen

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.5.49 - 2026-07-21
+
+- Replaced unconditional prompt-shape agent spawning with conditional delegation for independent parallel work, noisy research isolation, or explicit user requests while preserving `max_threads = 10` as multi-window capacity.
+- Added adaptive agent role selection that inherits the active user profile's model and reasoning choices, plus canonical compatibility aliases for overlapping project-starter, skill-authoring, and prompt-architect skills.
+- Reduced the always-loaded global `AGENTS.md` contract to 103 lines and moved the complete routing catalog, specialist map, aliases, MCP guidance, and UI standards into the bundled `adaptive-agent-routing` skill.
+- Added catalog-backed MCP allowlist/approval parity, layered token-surface reporting, bounded runtime probes with offline/no-MCP modes, Windows command resolution, and backup-backed legacy profile pin migration.
+- Documented and validated the canonical-template plus user-owned-overlay boundary so model, approval, sandbox, project trust, user MCPs, marketplace entries, and installed skills survive normal repair updates.
+
 ## 0.5.48 - 2026-07-09
 
 - Added a first-class bilingual `kb/` surface for task-shaped install preview,

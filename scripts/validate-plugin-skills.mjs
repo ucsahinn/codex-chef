@@ -8,6 +8,7 @@ const failures = [];
 const pluginManifestRel = "plugins/codex-chef-workflows/.codex-plugin/plugin.json";
 const pluginManifestPath = path.join(root, pluginManifestRel);
 const expectedBundledSkills = new Set([
+  "adaptive-agent-routing",
   "codex-chef-operator",
   "context-budget-planner",
   "offline-diagram-triplet"

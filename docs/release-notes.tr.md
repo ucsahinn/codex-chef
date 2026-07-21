@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+## v0.5.49 - 2026-07-21
+
+Bu patch Codex Chef ajan ekibini istekli fan-out yerine adaptif hale getirir:
+uzman eşleşmesi artık bir routing önerisidir; spawn yalnızca delegasyon gerçekten
+değer kattığında yapılır. Always-loaded global talimatlar küçülürken hiçbir ajan,
+skill, MCP veya routing yeteneği kaybolmaz.
+
+## Öne çıkanlar
+
+- Koşullu ajan delegasyonu eklendi: bağımsız paralel işler, gürültülü araştırma
+  izolasyonu veya açık kullanıcı isteği. `max_threads = 10` çoklu pencere
+  kapasitesi olarak korunur; normal görevler bir ile dört ajanı hedefler.
+- 21 rol dosyası model/reasoning pinsiz bırakıldı; aktif kullanıcı profili
+  belirleyici olmaya devam eder. Örtüşen skill'ler için canonical aliaslar eklendi.
+- Global `AGENTS.md` 103 satıra indirildi; tam routing haritası bundled
+  `adaptive-agent-routing` skill'ine taşındı.
+- MCP allowlist/approval parity, katmanlı token raporu, bounded runtime probe,
+  offline/no-MCP modları ve Windows komut çözümlemesi eklendi.
+- Legacy profil model pinleri için backup'lı migration eklendi; normal repair
+  sırasında model, approval, sandbox, project trust, MCP, marketplace ve skill
+  overlay değerleri korunur.
+
+## Doğrulama
+
+- `npm run check`
+- `npm run validate:package-surface`
+- `npm run validate:release`
+- `npm run verify:install:runtime -- --offline --redact-paths`
+- `git diff --check`
+- `git diff --cached --check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.48 - 2026-07-09
 
 Bu patch public repo yuzeyini daha net bir handoff paketine tasir. Kisa KB

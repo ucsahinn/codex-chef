@@ -246,6 +246,15 @@ profil ve Codex runtime task'a uygun dengeyi secebilir; broad veya uzun islerde
 skill, agent ya da MCP kapatmadan daha dusuk verbosity ve daha dar tool-output
 limitleri icin `token-safe.config.toml` kullan.
 
+Codex Chef kendi template'ini canonical managed baseline, makinedeki mevcut
+config'i ise kullaniciya ait overlay olarak ele alir. Normal install ve repair;
+kullanicinin model/reasoning secimini, approval ve sandbox ayarlarini, project
+trust kayitlarini, ozel MCP server'larini ve ilgisiz personal plugin marketplace
+kayitlarini korur. Chef-managed agent/MCP guvenlik tablolari merge edilip
+dogrulanir; `--force` acik replacement siniri olarak kalir. Boylece paket global
+ve genel olur, tek bir makinenin profil veya trust durumu dagitilan default'a
+donusmez.
+
 ## Neler Yedeklenir?
 
 Mevcut dosyalar şu klasöre kopyalanır:
@@ -301,6 +310,10 @@ dosyalarında source drift olup olmadığına bakar; sonra Codex CLI kontrolleri
 `CODEX_HOME` açıkça kurulu hedefe ayarlanmış şekilde çalıştırır. Ambient shell
 bir sandbox veya farklı `CODEX_HOME` okuyorsa bu drift warning olarak raporlanır;
 verifier yine de kurulu hedefin beklenen MCP config'ini verdiğini kanıtlar.
+
+Live probe'lar ilerleme ciktisi basar ve probe basina kisa timeout kullanir.
+Live/network kontrolleri yoksa `--offline`; managed kurulum ile Codex CLI
+dogrulanirken MCP probe baslatilmasin isteniyorsa `--no-mcp-probe` ekle.
 
 Codex içinde:
 

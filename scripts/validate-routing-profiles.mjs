@@ -21,6 +21,7 @@ const mcp = readJson("catalog/mcp-servers.json");
 const skills = readJson("catalog/skills.json");
 const agentsTemplate = fs.readFileSync(path.join(root, "templates/codex/AGENTS.md"), "utf8");
 const routingBoardScript = fs.readFileSync(path.join(root, "scripts/codex-routing-board.mjs"), "utf8");
+const routingReference = fs.readFileSync(path.join(root, "plugins/codex-chef-workflows/skills/adaptive-agent-routing/references/global-working-agreements.md"), "utf8");
 
 const agentNames = new Set((agents.agents || []).map((agent) => agent.name));
 const mcpNames = new Set((mcp.servers || []).map((server) => server.name));
@@ -32,44 +33,32 @@ const localSkillNames = fs.existsSync(localSkillRoot)
       .map((entry) => entry.name))
   : new Set();
 const allowedSkills = new Set([...catalogSkillNames, ...localSkillNames]);
-const allowedDelegationModes = new Set(["explicit-only", "runtime-permitted", "none"]);
-const allowedSkillModes = new Set(["mandatory-when-triggered", "recommended", "none"]);
+const allowedDelegationModes = new Set(["conditional"]);
+const allowedSkillModes = new Set(["narrowest-owner"]);
 const allowedMcpModes = new Set(["use-when-available-and-approved", "optional", "none"]);
 
-if (routing.version !== "0.2.0") fail("routing profile catalog version must stay 0.2.0 until schema changes.");
+if (routing.version !== "0.3.0") fail("routing profile catalog version must be 0.3.0.");
 if (!Array.isArray(routing.profiles) || routing.profiles.length < 10) {
   fail("routing profile catalog must define at least 10 enterprise task-shape profiles.");
 }
-if (!routing.sourcePolicy || !/not hidden execution hooks/i.test(routing.sourcePolicy)) {
-  fail("routing profile sourcePolicy must state that profiles are not hidden execution hooks.");
+if (routing.delegationPolicy?.mode !== "conditional" || routing.delegationPolicy?.capacityCeiling !== 10) {
+  fail("routing catalog must define conditional delegation with capacity ceiling 10.");
 }
-if (!/runtime-permitted routing guidance/i.test(routing.sourcePolicy || "")) {
-  fail("routing profile sourcePolicy must state that profiles are runtime-permitted routing guidance.");
+if (routing.delegationPolicy?.recommendedParallelism?.max !== 4) {
+  fail("routing catalog must normally cap one task at four agents.");
 }
-if (!/graph-indexing/i.test(routing.sourcePolicy || "")) {
-  fail("routing profile sourcePolicy must include the graph-indexing approval boundary.");
-}
-if (!/standing permission to spawn\s+matching specialist agents/i.test(agentsTemplate)
-  || !/current Codex runtime\s+permits it/i.test(agentsTemplate)) {
-  fail("templates/codex/AGENTS.md must state standing specialist-agent permission and the current runtime boundary.");
-}
-if (!/graph-indexing/i.test(agentsTemplate)) {
-  fail("templates/codex/AGENTS.md must include graph-indexing in approval boundaries.");
+if (routing.agentRuntimePolicy?.modelSelection !== "inherit-profile-adaptive"
+  || routing.agentRuntimePolicy?.neverOverrideUserProfile !== true) {
+  fail("routing catalog must preserve adaptive profile-inherited model selection.");
 }
 
 for (const required of [
-  "Subagent Visibility Contract",
-  "not override Codex runtime policy",
-  "Agent plan",
-  "Agent started",
-  "Agent result",
-  "Skill selected",
-  "MCP selected",
-  "Surfaces used",
-  "/agent",
-  "for all requested subagents",
-  "standing permission to spawn matching specialist agents",
-  "current Codex runtime"
+  "independent parallel work",
+  "noisy logs or research",
+  "the user explicitly requests delegation",
+  "Routing plan:",
+  "Routing result:",
+  "adaptive-agent-routing"
 ]) {
   const normalizedTemplate = agentsTemplate.replace(/\s+/g, " ");
   const normalizedRequired = required.replace(/\s+/g, " ");
@@ -79,14 +68,8 @@ for (const required of [
 }
 
 for (const required of [
-  "Subagent visibility contract",
-  "Agent plan",
-  "Skill selected",
-  "MCP selected",
-  "Surfaces used",
-  "agents=...",
-  "Use /agent in Codex CLI",
-  "requested subagent results",
+  "Routing plan",
+  "Routing result",
   "Delegation mode",
   "Skill mode",
   "MCP mode",
@@ -97,10 +80,6 @@ for (const required of [
   if (!routingBoardScript.includes(required)) {
     fail(`scripts/codex-routing-board.mjs missing routing visibility output snippet: ${required}`);
   }
-}
-
-if (!/graph-indexing/i.test(routingBoardScript)) {
-  fail("scripts/codex-routing-board.mjs must include graph-indexing in the runtime routing boundary.");
 }
 
 const seenIds = new Set();
@@ -138,8 +117,8 @@ for (const profile of routing.profiles || []) {
   if (profile.agents.length > 0 && profile.delegationMode === "none") {
     fail(`routing profile ${profile.id} names agents but sets delegationMode=none`);
   }
-  if (profile.agents.length > 0 && profile.delegationMode !== "runtime-permitted") {
-    fail(`routing profile ${profile.id} must allow runtime-permitted specialist delegation.`);
+  if (profile.agents.length > 0 && profile.delegationMode !== "conditional") {
+    fail(`routing profile ${profile.id} must use conditional specialist delegation.`);
   }
   if (!allowedSkillModes.has(profile.skillMode)) {
     fail(`routing profile ${profile.id} has invalid skillMode: ${profile.skillMode}`);
@@ -164,11 +143,8 @@ for (const profile of routing.profiles || []) {
       fail(`routing profile ${key} must be explicit: ${profile.id}`);
     }
   }
-  if (!agentsTemplate.includes(`\`${profile.id}\``)) {
-    fail(`templates/codex/AGENTS.md must expose routing profile id: ${profile.id}`);
-  }
-  if (!agentsTemplate.includes(profile.title)) {
-    fail(`templates/codex/AGENTS.md must expose routing profile title: ${profile.title}`);
+  if (!routingReference.includes(`\`${profile.id}\``)) {
+    fail(`deferred routing reference must expose routing profile id: ${profile.id}`);
   }
 }
 

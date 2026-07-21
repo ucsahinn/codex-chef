@@ -54,18 +54,14 @@ if (options.profile && profiles.length === 0) {
 }
 
 const report = {
-  schemaVersion: "codex-chef.routing.v1",
+  schemaVersion: "codex-chef.routing.v2",
   generatedAt: new Date().toISOString(),
   sourcePolicy: routing.sourcePolicy,
+  delegationPolicy: routing.delegationPolicy,
+  agentRuntimePolicy: routing.agentRuntimePolicy,
   visibilityContract: {
-    subagents: [
-      "Agent plan: before spawning, name each requested agent, scope, reason, expected output, and wait policy.",
-      "Agent started: after spawning, repeat the visible agent name or nickname and the assigned task.",
-      "Agent result: wait for requested subagent results before continuing unless the user explicitly says to run in the background.",
-      "Skill selected: name every selected skill and why it matches the task before acting on it.",
-      "MCP selected: name every selected MCP/tool surface, why it is needed, and whether it is read-only or approval-gated.",
-      "Surfaces used: final summaries use agents=..., skills=..., mcp=..., commands=..., skipped=... so evidence is explicit."
-    ],
+    routingPlan: "Routing plan: one compact initial line with selected agents, skills, MCPs, commands, and skips.",
+    routingResult: "Routing result: one compact final table or line with state and evidence for each selected surface.",
     cli: "Use /agent in Codex CLI to inspect active agent threads, switch to one, or steer/close it.",
     lifecycle: [
       "Close completed subagent threads when the task no longer needs them.",
@@ -74,7 +70,7 @@ const report = {
       "Close browser/MCP pages or sessions when the selected tool exposes a close operation.",
       "If an external MCP process such as Serena persists after the task, report it and ask before killing processes or deleting state."
     ],
-    boundary: "Routing profiles name visible prompt-shape matched specialists and the user has standing permission for bounded local delegation when the runtime permits it; they do not silently enable account, database, production, destructive, broad filesystem, or broad/destructive graph-indexing actions."
+    boundary: "A route match recommends a specialist but spawns only for independent parallel work, noisy isolation, or explicit user-requested delegation."
   },
   profileCount: profiles.length,
   profiles
@@ -85,15 +81,11 @@ if (options.json) {
 } else {
   console.log("Codex Chef enterprise routing board");
   console.log(`Profiles: ${profiles.length}`);
-  console.log("Policy: task-shape routing names matching specialists, selects matching skills when applicable, and may spawn bounded local subagents when the current runtime permits delegation; risky actions remain approval-gated.");
+  console.log("Policy: route matches are recommendations; delegation is conditional and inherits the active user profile.");
   console.log("");
-  console.log("Subagent visibility contract:");
-  console.log("- Agent plan: name each requested agent, scope, reason, expected output, and wait policy before spawning.");
-  console.log("- Agent started: show the visible agent name or nickname and assigned task after spawning.");
-  console.log("- Agent result: wait for requested subagent results before continuing unless the user explicitly asks for background work.");
-  console.log("- Skill selected: name every selected skill and why it matches the task before acting on it.");
-  console.log("- MCP selected: name every selected MCP/tool surface, why it is needed, and whether it is read-only or approval-gated.");
-  console.log("- Surfaces used: agents=..., skills=..., mcp=..., commands=..., skipped=...");
+  console.log("Routing visibility contract:");
+  console.log("- Routing plan: selected agents, skills, MCPs, commands, and skips in one initial line.");
+  console.log("- Routing result: completion state and evidence in one final table or line.");
   console.log("- Use /agent in Codex CLI to inspect active agent threads, switch to one, or steer/close it.");
   console.log("- Boundary: routing profiles make specialists visible, not hidden permission to spawn agents or enable risky tools.");
   console.log("");

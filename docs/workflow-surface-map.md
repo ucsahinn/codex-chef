@@ -32,6 +32,15 @@ References:
 | Lifecycle automation | Hook | Use only for reviewed guardrails, not as the primary security boundary. |
 | Push, release, deploy, external upload | Approval gate | `release_verifier` can verify readiness; the action still needs explicit approval. |
 
+Subagent matching is advisory. Spawn only for independent parallel work, to
+isolate noisy logs or research, or because the user explicitly requested an
+agent. Keep the normal fan-out at one to four even though `max_threads = 10`
+preserves headroom for several Codex windows. Report routing once with
+`Routing plan:` and once with `Routing result:`; do not emit separate
+agent/skill/MCP lifecycle chatter.
+
+Decision rationale: [ADR-001](decisions/001-adaptive-routing-and-user-owned-config-overlay.md).
+
 ## GStack-Style Workflow Mapping
 
 | Workflow | Good Codex mapping | Bundled starter support | Safety boundary |

@@ -40,6 +40,22 @@ codex doctor --summary
 codex exec --strict-config "Summarize the active setup."
 ```
 
+Repo script'lerinde, ozellikle otomasyon veya ajan process'lerinden
+calistirirken PowerShell'de Windows command shim'lerini acikca kullan:
+
+```powershell
+npm.cmd run check
+npm.cmd run token:audit
+npm.cmd run verify:install:runtime -- --no-mcp-probe
+npx.cmd --version
+codex.cmd --version
+```
+
+Codex Chef'in programatik command resolver'i Windows'ta `npm.cmd`, `npx.cmd`
+ve `codex.cmd`; Unix'te uzantisiz komutlari secer. Boylece interaktif shell'de
+calisip ajan veya child process'te PowerShell script-policy ya da executable
+resolution farki nedeniyle bozulan komutlar onlenir.
+
 Bir oturum içinde geçici ek okuma izni gerekiyorsa:
 
 ```text

@@ -5,18 +5,23 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { findProblemRules } from "./lib/approval-rules.mjs";
+import { platformCommand } from "./lib/platform-command.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
-const CODEX_DOCTOR_TIMEOUT_MS = 120000;
-
 const options = {
   json: false,
   redactPaths: false,
   expectSkills: false,
   expectGitGuards: false,
   skipCodexCli: false,
+  offline: false,
+  noMcpProbe: false,
+  requireLiveRuntime: false,
+  probeTimeoutMs: 30000,
+  doctorTimeoutMs: 30000,
+  mcpTimeoutMs: 15000,
   codexHome: process.env.CODEX_HOME || path.join(os.homedir(), ".codex"),
   agentsHome: process.env.AGENTS_HOME || path.join(os.homedir(), ".agents")
 };
@@ -28,6 +33,15 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--expect-skills") options.expectSkills = true;
   else if (arg === "--expect-git-guards") options.expectGitGuards = true;
   else if (arg === "--skip-codex-cli") options.skipCodexCli = true;
+  else if (arg === "--offline") options.offline = true;
+  else if (arg === "--no-mcp-probe") options.noMcpProbe = true;
+  else if (arg === "--require-live-runtime") options.requireLiveRuntime = true;
+  else if (["--probe-timeout-ms", "--doctor-timeout-ms", "--mcp-timeout-ms"].includes(arg)) {
+    const key = arg === "--probe-timeout-ms" ? "probeTimeoutMs" : arg === "--doctor-timeout-ms" ? "doctorTimeoutMs" : "mcpTimeoutMs";
+    options[key] = Number.parseInt(args[index + 1], 10);
+    if (!Number.isFinite(options[key]) || options[key] < 1000) throw new Error(`${arg} must be at least 1000.`);
+    index += 1;
+  }
   else if (arg === "--codex-home") {
     options.codexHome = path.resolve(args[index + 1]);
     index += 1;
@@ -53,12 +67,19 @@ Options:
   --expect-skills         Fail if installable curated skills are missing
   --expect-git-guards     Fail if optional global Git guard files/settings are missing
   --skip-codex-cli        Do not call codex doctor or codex mcp list
+  --offline               Skip all live Codex CLI/runtime probes
+  --no-mcp-probe          Run doctor probes but skip codex mcp list
+  --probe-timeout-ms <n>  Default timeout for non-live helper probes (default: 30000)
+  --doctor-timeout-ms <n> Per-doctor timeout (default: 30000)
+  --mcp-timeout-ms <n>    MCP list timeout (default: 15000)
+  --require-live-runtime  Treat unavailable/timed-out live probes as failures
   --redact-paths          Redact home/repo paths in output
   --json                  Emit machine-readable JSON
 `);
 }
 
 const progressEnabled = !options.json;
+const probes = [];
 if (progressEnabled) {
   console.log("Codex Chef install runtime verification");
   console.log("Collecting installed file, Codex CLI, MCP, skill, and Git guard checks; this can take 30-60 seconds.");
@@ -145,14 +166,25 @@ function run(command, commandArgs, extra = {}) {
     cwd: extra.cwd || root,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
-    timeout: extra.timeout || 60000,
+    timeout: extra.timeout || options.probeTimeoutMs,
     windowsHide: true,
     env: extra.env || process.env
   });
 }
 
 function codexCommand() {
-  return process.platform === "win32" ? "codex.cmd" : "codex";
+  return platformCommand("codex");
+}
+
+function runProbe(name, command, commandArgs, extra = {}) {
+  if (progressEnabled) console.log(`Probe started: ${name}`);
+  const startedAt = Date.now();
+  const result = run(command, commandArgs, extra);
+  const timedOut = result.error?.code === "ETIMEDOUT";
+  const probe = { name, durationMs: Date.now() - startedAt, status: timedOut ? "timeout" : result.error ? "error" : result.status === 0 ? "ok" : "failed" };
+  probes.push(probe);
+  if (progressEnabled) console.log(`Probe finished: ${name} (${probe.status}, ${probe.durationMs}ms)`);
+  return result;
 }
 
 function parseCodexDoctorRuntime(doctor, warnings, label) {
@@ -444,14 +476,15 @@ function inspectConfigDrift(failures) {
 }
 
 function inspectCodexRuntime(failures, warnings) {
-  if (options.skipCodexCli) {
-    return { inspected: false, note: "Skipped by --skip-codex-cli." };
+  if (options.skipCodexCli || options.offline) {
+    return { inspected: false, note: options.offline ? "Skipped by --offline." : "Skipped by --skip-codex-cli." };
   }
 
-  const ambientDoctor = run(codexCommand(), ["doctor", "--json"], { timeout: CODEX_DOCTOR_TIMEOUT_MS });
+  const ambientDoctor = runProbe("ambient codex doctor", codexCommand(), ["doctor", "--json"], { timeout: options.doctorTimeoutMs });
   let ambient = { inspected: false };
   if (ambientDoctor.error) {
-    warnings.push(`Could not run ambient codex doctor --json: ${ambientDoctor.error.message}`);
+    const message = `Could not run ambient codex doctor --json: ${ambientDoctor.error.message}`;
+    (options.requireLiveRuntime ? failures : warnings).push(message);
     ambient = { inspected: false, error: ambientDoctor.error.message };
   } else {
     ambient = {
@@ -466,12 +499,13 @@ function inspectCodexRuntime(failures, warnings) {
   }
 
   const installedEnv = { ...process.env, CODEX_HOME: options.codexHome };
-  const doctor = run(codexCommand(), ["doctor", "--json"], {
+  const doctor = runProbe("installed-home codex doctor", codexCommand(), ["doctor", "--json"], {
     env: installedEnv,
-    timeout: CODEX_DOCTOR_TIMEOUT_MS
+    timeout: options.doctorTimeoutMs
   });
   if (doctor.error) {
-    warnings.push(`Could not run codex doctor --json with installed CODEX_HOME: ${doctor.error.message}`);
+    const message = `Could not run codex doctor --json with installed CODEX_HOME: ${doctor.error.message}`;
+    (options.requireLiveRuntime ? failures : warnings).push(message);
     return { inspected: false, error: doctor.error.message, ambient };
   }
 
@@ -487,11 +521,17 @@ function inspectCodexRuntime(failures, warnings) {
     );
   }
 
-  const mcpList = run(codexCommand(), ["mcp", "list", "--json"], {
-    env: installedEnv
+  if (options.noMcpProbe) {
+    runtime.mcpList = { inspected: false, note: "Skipped by --no-mcp-probe." };
+    return runtime;
+  }
+  const mcpList = runProbe("installed-home codex mcp list", codexCommand(), ["mcp", "list", "--json"], {
+    env: installedEnv,
+    timeout: options.mcpTimeoutMs
   });
   if (mcpList.error) {
-    warnings.push(`Could not run codex mcp list --json with installed CODEX_HOME: ${mcpList.error.message}`);
+    const message = `Could not run codex mcp list --json with installed CODEX_HOME: ${mcpList.error.message}`;
+    (options.requireLiveRuntime ? failures : warnings).push(message);
     runtime.mcpList = { inspected: false, error: mcpList.error.message };
     return runtime;
   }
@@ -593,6 +633,7 @@ const failures = [];
 const warnings = [];
 
 const report = {
+  probes,
   schemaVersion: "codex-chef.install-runtime.v1",
   generatedAt: new Date().toISOString(),
   installed: inspectInstalledFiles(failures),

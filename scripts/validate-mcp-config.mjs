@@ -49,6 +49,17 @@ function parseMcpBlocks(text) {
   return blocks;
 }
 
+function parseToolApprovalBlocks(text) {
+  const approvals = new Map();
+  const pattern = /^\[mcp_servers\.([A-Za-z0-9_-]+)\.tools\.([A-Za-z0-9_.-]+)\]\s*\r?\napproval_mode\s*=\s*"(approve|prompt)"/gm;
+  for (const match of text.matchAll(pattern)) {
+    const serverApprovals = approvals.get(match[1]) || new Map();
+    serverApprovals.set(match[2], match[3]);
+    approvals.set(match[1], serverApprovals);
+  }
+  return approvals;
+}
+
 function readTomlValue(block, key) {
   const match = block.match(new RegExp(`^${key}\\s*=\\s*(.+)$`, "m"));
   if (!match) return null;
@@ -157,12 +168,6 @@ function validateUniqueTomlAssignments(configFile, text) {
 const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
 const catalogNames = new Set((catalog.servers || []).map((server) => server.name));
 const codebaseMemoryDisabledTools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"];
-const expectedEnabledTools = {
-  playwright: ["browser_snapshot", "browser_take_screenshot", "browser_console_messages", "browser_network_requests", "browser_wait_for", "browser_resize", "browser_navigate", "browser_navigate_back", "browser_close", "browser_tabs"],
-  "chrome-devtools": ["list_pages", "select_page", "take_snapshot", "take_screenshot", "list_console_messages", "get_console_message", "list_network_requests", "wait_for", "resize_page", "navigate_page", "navigate_page_history", "close_page"],
-  serena: ["activate_project", "get_current_config", "initial_instructions", "list_memories", "read_memory", "search_for_pattern", "find_symbol", "find_declaration", "find_implementations", "find_referencing_symbols", "get_symbols_overview", "get_diagnostics_for_file"],
-  "codebase-memory": ["list_projects", "index_status", "search_graph", "trace_path", "detect_changes", "query_graph", "get_graph_schema", "get_code_snippet", "get_architecture", "search_code"]
-};
 const codebaseMemory = (catalog.servers || []).find((server) => server.name === "codebase-memory");
 
 if (!codebaseMemory) {
@@ -211,12 +216,20 @@ for (const server of catalog.servers || []) {
   if (["external-account", "database", "filesystem"].includes(server.category) && server.defaultEnabled !== false) {
     fail(`Sensitive MCP category must be disabled by default in catalog: ${server.name}`);
   }
+  if (server.enabledTools) {
+    const approvalNames = Object.keys(server.toolApprovals || {});
+    if (approvalNames.length !== server.enabledTools.length
+      || server.enabledTools.some((tool) => !approvalNames.includes(tool))) {
+      fail(`MCP catalog enabledTools/toolApprovals parity drift for ${server.name}`);
+    }
+  }
 }
 
 for (const configFile of configFiles) {
   const text = read(configFile);
   validateUniqueTomlAssignments(configFile, text);
   const blocks = parseMcpBlocks(text);
+  const toolApprovalBlocks = parseToolApprovalBlocks(text);
   const configNames = new Set(blocks.keys());
 
   for (const match of text.matchAll(/"-y",\s*"([^"]+)"/g)) {
@@ -257,9 +270,9 @@ for (const configFile of configFiles) {
     if (approval !== server.approval) {
       fail(`${configFile} approval drift for ${server.name}: expected ${server.approval}, found ${approval}`);
     }
-    if (expectedEnabledTools[server.name]) {
+    if (server.enabledTools) {
       const enabledTools = parseInlineStringArray(readTomlValue(block, "enabled_tools"));
-      const expected = expectedEnabledTools[server.name];
+      const expected = server.enabledTools;
       for (const expectedTool of expected) {
         if (!enabledTools.includes(expectedTool)) {
           fail(`${configFile} ${server.name} must allowlist ${expectedTool}.`);
@@ -267,6 +280,18 @@ for (const configFile of configFiles) {
       }
       if (enabledTools.length !== expected.length) {
         fail(`${configFile} ${server.name} enabled_tools must stay exact: ${expected.join(", ")}`);
+      }
+      const actualApprovals = toolApprovalBlocks.get(server.name) || new Map();
+      const expectedApprovals = server.toolApprovals || {};
+      for (const [tool, mode] of Object.entries(expectedApprovals)) {
+        if (actualApprovals.get(tool) !== mode) {
+          fail(`${configFile} ${server.name}.${tool} approval drift: expected ${mode}, found ${actualApprovals.get(tool) || "missing"}`);
+        }
+      }
+      for (const tool of actualApprovals.keys()) {
+        if (!Object.prototype.hasOwnProperty.call(expectedApprovals, tool)) {
+          fail(`${configFile} ${server.name}.${tool} has a dead approval block outside enabled_tools.`);
+        }
       }
     }
     if (server.url && !block.includes(`url = "${server.url}"`)) {

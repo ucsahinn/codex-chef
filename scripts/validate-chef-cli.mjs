@@ -731,12 +731,10 @@ runCliSmoke("skills", ["--skills", "--plain", "--no-log"], [
 ]);
 runCliSmoke("routing", ["--routing", "--plain", "--no-log"], [
   "Codex Chef enterprise routing board",
-  "Subagent visibility contract",
+  "Routing visibility contract",
   "Lifecycle hygiene",
-  "Agent plan",
-  "Skill selected",
-  "MCP selected",
-  "Surfaces used",
+  "Routing plan",
+  "Routing result",
   "Use /agent in Codex CLI"
 ]);
 runCliSmoke("diagnostics", ["--diagnostics", "--plain", "--no-log"], [
@@ -872,7 +870,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --status --repo-only --no-log",
     "Detailed CLI behavior lives in",
     "Installed skills do not execute by themselves",
-    "standing permission for bounded, reversible local specialist delegation"
+    "spawning is conditional"
   ],
   "README.tr.md": [
     "npm run chef",
@@ -885,7 +883,7 @@ for (const [file, snippets] of Object.entries({
     "npm run chef -- --status --repo-only --no-log",
     "Detaylı CLI davranışı",
     "Skill'ler kendiliğinden çalışmaz",
-    "kalıcı izin kaydeder"
+    "Ajan rolü otomatik seçilir ama spawn"
   ],
   "docs/verification.md": [
     "npm run validate:chef-cli",

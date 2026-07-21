@@ -43,6 +43,9 @@ jobs:
       - run: node --check plugins/codex-chef-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs
       - run: node --check scripts/analyze-token-surfaces.mjs
       - run: node --check scripts/validate-token-surfaces.mjs
+      - run: node --check scripts/validate-adaptive-runtime.mjs
+      - run: node --check scripts/lib/platform-command.mjs
+      - run: node --check scripts/verify-install-runtime.mjs
       - run: node --check scripts/scan-supply-chain-iocs.mjs
       - run: node --check scripts/validate-package-surface.mjs
       - run: node --check scripts/extract-release-notes.mjs

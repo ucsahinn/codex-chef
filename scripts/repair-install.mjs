@@ -16,6 +16,7 @@ const options = {
   json: false,
   noBackup: false,
   pruneManagedPluginExtras: false,
+  migrateLegacyProfilePins: false,
   redactPaths: false,
   platform: process.platform === "win32" ? "windows" : "unix",
   codexHome: process.env.CODEX_HOME || path.join(os.homedir(), ".codex"),
@@ -31,6 +32,7 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--json") options.json = true;
   else if (arg === "--no-backup") options.noBackup = true;
   else if (arg === "--prune-managed-plugin-extras") options.pruneManagedPluginExtras = true;
+  else if (arg === "--migrate-legacy-profile-pins") options.migrateLegacyProfilePins = true;
   else if (arg === "--redact-paths") options.redactPaths = true;
   else if (arg === "--platform") {
     options.platform = args[index + 1];
@@ -63,6 +65,7 @@ Options:
   --apply                         Write backup-backed repairs
   --no-backup                     Skip backups when --apply is used
   --prune-managed-plugin-extras   Delete extra files only inside the managed Codex Chef plugin directory
+  --migrate-legacy-profile-pins   Remove model/review_model pins from known legacy profile files after backup
   --platform <windows|unix>       Select config template; defaults to current OS
   --codex-home <path>             Installed Codex home to inspect
   --agents-home <path>            Installed Agents home to inspect
@@ -171,6 +174,35 @@ function recordAction(action) {
     target: action.target ? redact(action.target) : undefined,
     backup: action.backup ? redact(action.backup) : undefined
   });
+}
+
+function migrateLegacyProfilePins() {
+  const profiles = ["conservative.config.toml", "trusted-project.config.toml", "full-access.config.toml"];
+  const results = [];
+  if (!options.migrateLegacyProfilePins) return { requested: false, results };
+  for (const name of profiles) {
+    const target = path.join(options.codexHome, name);
+    if (!fs.existsSync(target)) continue;
+    const original = fs.readFileSync(target, "utf8");
+    const updated = original.replace(/^(?:model|review_model)\s*=\s*"[^"]+"\s*\r?\n/gm, "");
+    if (updated === original) {
+      results.push({ profile: name, status: "current" });
+      continue;
+    }
+    const action = {
+      kind: "migrate-legacy-profile-pins",
+      target,
+      status: options.apply ? "applied" : "planned",
+      reason: "remove legacy model and review_model pins while preserving profile behavior"
+    };
+    if (options.apply) {
+      action.backup = backupTarget(target);
+      fs.writeFileSync(target, updated, "utf8");
+    }
+    recordAction(action);
+    results.push({ profile: name, status: action.status });
+  }
+  return { requested: true, results };
 }
 
 function listFilesRecursive(directory) {
@@ -677,6 +709,7 @@ let managedFiles;
 let config;
 let marketplace;
 let skills;
+let legacyProfileMigration;
 
 try {
   preflight = runPreflightValidators();
@@ -685,6 +718,7 @@ try {
   }
   managedFiles = repairManagedFiles();
   config = runConfigMerge();
+  legacyProfileMigration = migrateLegacyProfilePins();
   marketplace = repairMarketplace();
   skills = inspectSkills();
   writeBackupManifest();
@@ -731,6 +765,7 @@ const report = {
   config,
   marketplace,
   skills,
+  legacyProfileMigration,
   actions,
   warnings,
   notes,

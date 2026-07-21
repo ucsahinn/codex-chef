@@ -34,7 +34,13 @@ Bu komut şunları çalıştırır:
   skill cleanup raporu ve explicit managed-plugin pruning davranisini kanitlar.
 - `scripts/validate-agent-config.mjs`: Windows ve Unix Codex template'leri icin
   uzman ajan catalog/config drift kontrolleri; role dosyalari icin otomatik
-  model/reasoning secimini de kontrol eder.
+  model/reasoning secimini, aktif kullanici profilini override etmeden kontrol
+  eder.
+- `scripts/validate-adaptive-runtime.mjs`: kosullu spawn politikasini, kisa
+  routing gorunurlugunu, `max_threads = 10` kapasitesini, normal bir-dort ajan
+  paralelligini, canonical skill alias'larini, kullaniciya ait config overlay'i,
+  token-audit katmanlarini, platform komut cozumlemesini ve sure sinirli runtime
+  probe sozlesmesini kontrol eder.
 - `scripts/validate-agent-research-corpus.mjs`: uzman ajan research corpus
   drift'i, authority-reference source marker'lari, source freshness cadence ve
   stale `dateChecked` kontrolleri ile agent basina expertise signal coverage.
@@ -74,6 +80,12 @@ gitleaks detect --redact --no-banner --no-git --verbose
 
 Repo `.gitleaks.toml` default Gitleaks kurallarını açık tutar; yalnızca ignored
 local scratch, dependency, build ve cache dizinlerini kapsam dışı bırakır.
+
+`npm run token:audit`; her oturumda yuklenen talimatlari, discoverability
+metadata'sini, cagrilan veya deferred skill/ajan icerigini, repo bakim
+boyutunu, tool schema/context'i, varsa olculen session telemetry'sini ve ajan
+basi maliyeti ayri raporlar. Repo byte/token tahminleri tanilama amacli context
+agirligidir; saglayici faturasi veya olculmus kullanim degildir.
 
 Installable skill'ler değiştiğinde network-backed resolver kontrolünü de çalıştır:
 
@@ -276,6 +288,12 @@ kullandıysan ver. Verifier managed dosyalarda source drift olup olmadığını
 kontrol eder, Codex CLI kontrollerini `CODEX_HOME` açıkça kurulu hedefe
 ayarlanmış şekilde çalıştırır, ambient sandbox/offline home drift'ini warning
 olarak raporlar ve yalnızca kurulu hedefin kendisi doğrulanamazsa fail eder.
+
+Her live probe kisa timeout ve ilerleme ciktisi kullanir. Network veya live
+runtime kontrolu kullanilamiyorsa `--offline`; managed dosyalar ile Codex CLI
+kontrol edilirken MCP probe baslatilmasin isteniyorsa `--no-mcp-probe` kullan.
+Bu modlar yalniz adlandirilan probe yuzeyini atlar; source-drift dogrulamasini
+gevsetmez.
 
 ## Remote Doğrulama
 
