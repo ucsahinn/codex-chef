@@ -91,3 +91,4 @@ gh run list --workflow validate --branch main --limit 1
 
 Bu paket source-first. İleride zip veya installer üretirsen bunları source'a
 commit etmek yerine GitHub Releases üzerinden yayınla.
+<!-- Current release: v0.5.51 -->

@@ -309,3 +309,24 @@ conditional, and runtime-bounded; the routing contract does not create hidden
 hooks or silent execution. Destructive, credentialed,
 publishing, deployment, database, and broad filesystem actions remain
 approval-gated.
+
+## Manual External Deep Review
+
+The bundled `external-review-workflow` owns one narrow lifecycle: package a
+Git snapshot, prepare a local handoff, and verify a returned JSON report.
+
+```bash
+npm run chef -- review pack --target <repo>
+npm run chef -- review pack --target <repo> --out <outside-dir> --apply
+npm run chef -- review handoff --target <repo> --manifest <manifest> --apply
+npm run chef -- review verify --target <repo> --manifest <manifest> --report <json>
+npm run chef -- review status --target <repo> --manifest <manifest>
+```
+
+Preview is the default. Output must stay outside the target. Only tracked text
+files are considered; sensitive paths, binary or oversized files, symlinks,
+path escapes, and secret-like content are excluded or blocked. Every packaged
+file and bundle part is SHA-256 pinned. No command uploads data, invokes an
+external model, changes the active model/profile, or widens sandbox access.
+External findings must match the review ID and commit and still reproduce
+against live file hashes before they are treated as review evidence.

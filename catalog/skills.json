@@ -36,6 +36,12 @@
       "reason": "Bundled local plugin skill for token/context budgeting, source prioritization, compaction handoff, and verification planning."
     },
     {
+      "name": "external-review-workflow",
+      "category": "code-review",
+      "install": false,
+      "reason": "Bundled local plugin skill for secret-safe external review packaging, manual handoff, snapshot freshness checks, and structured finding verification without automatic upload."
+    },
+    {
       "name": "adaptive-agent-routing",
       "category": "context-engineering",
       "install": false,

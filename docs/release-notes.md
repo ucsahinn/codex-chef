@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## v0.5.51 - 2026-07-25
+
+This release adds a manual external deep-review workflow without granting an
+external model live repository access. `chef review pack` previews a
+tracked-text-only, secret-scanned, split bundle; `handoff` creates local review
+instructions; `verify` and `status` reject stale snapshots and mismatched
+reports.
+
+## Highlights
+
+- No automatic upload, external model call, MCP, fixed model, or widened
+  sandbox is introduced.
+- SHA-256 manifests bind every packaged file and bundle part to the reviewed
+  commit.
+- Sensitive paths, secret-like content, binaries, oversized files, symlinks,
+  and path escapes fail closed or remain excluded.
+- One bundled workflow skill and one routing profile avoid collisions with
+  existing routing, context, security, debugging, and release owners.
+
+## Verification
+
+- `npm run test:external-review`
+- `npm run validate:external-review`
+- `npm run check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.50 - 2026-07-21
 
 This patch turns the operator board into a complete interactive workflow. Menu

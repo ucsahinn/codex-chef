@@ -94,3 +94,4 @@ gh run list --workflow validate --branch main --limit 1
 
 This setup kit is source-first. If you later create zip archives or installers,
 publish those through GitHub Releases, not as regular source files.
+<!-- Current release: v0.5.51 -->

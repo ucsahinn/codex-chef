@@ -80,3 +80,4 @@ git -c http.sslBackend=openssl ls-remote origin refs/heads/main
 ```
 
 The local and remote hashes must match before publishing the release.
+<!-- Current release: v0.5.51 -->

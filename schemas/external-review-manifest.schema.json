@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ucsahinn/codex-chef/schemas/external-review-manifest.schema.json",
+  "title": "Codex Chef External Review Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "reviewId", "generatedAt", "targetName", "snapshot", "policy", "files", "excluded", "parts"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "reviewId": { "type": "string", "minLength": 12 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "targetName": { "type": "string", "minLength": 1 },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "branch", "dirty"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "branch": { "type": "string", "minLength": 1 },
+        "dirty": { "type": "boolean" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trackedTextOnly", "outputOutsideTarget", "externalUploadPerformed", "maxFileBytes", "maxPartBytes"],
+      "properties": {
+        "trackedTextOnly": { "const": true },
+        "outputOutsideTarget": { "const": true },
+        "externalUploadPerformed": { "const": false },
+        "maxFileBytes": { "type": "integer", "minimum": 1 },
+        "maxPartBytes": { "type": "integer", "minimum": 10000 }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/file" }
+    },
+    "excluded": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "reason"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "reason": { "enum": ["sensitive-path", "not-a-file", "file-too-large", "binary"] }
+        }
+      }
+    },
+    "parts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "bytes", "sha256"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^review-bundle-part-[0-9]{3}\\.txt$" },
+          "bytes": { "type": "integer", "minimum": 1 },
+          "sha256": { "$ref": "#/$defs/hash" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256", "part"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "sha256": { "$ref": "#/$defs/hash" },
+        "part": { "type": "string", "pattern": "^review-bundle-part-[0-9]{3}\\.txt$" }
+      }
+    }
+  }
+}

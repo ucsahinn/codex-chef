@@ -309,3 +309,25 @@ biriyle ve runtime izniyle sinirlidir;
 routing kontrati gizli hook veya sessiz executor olusturmaz. Destructive,
 credential, publish, deploy, database ve genis filesystem aksiyonlari onay
 kapisinda kalir.
+
+## Manuel Dis Derin Inceleme
+
+Bundled `external-review-workflow` tek ve dar bir akisin sahibidir: Git
+snapshot'ini paketler, yerel handoff metnini hazirlar ve dis modelden donen JSON
+raporunu canli repo ile dogrular.
+
+```bash
+npm run chef -- review pack --target <repo>
+npm run chef -- review pack --target <repo> --out <repo-disindaki-dizin> --apply
+npm run chef -- review handoff --target <repo> --manifest <manifest> --apply
+npm run chef -- review verify --target <repo> --manifest <manifest> --report <json>
+npm run chef -- review status --target <repo> --manifest <manifest>
+```
+
+Varsayilan davranis preview'dur. Cikti hedef repo disinda kalir. Yalnizca Git
+tarafindan izlenen metin dosyalari degerlendirilir; hassas yollar, binary veya
+asiri buyuk dosyalar, symlink'ler, path escape ve secret benzeri icerik
+dislanir ya da akisi durdurur. Her dosya ve bundle parcasi SHA-256 ile
+sabitlenir. Hicbir komut upload yapmaz, dis model cagirmaz, aktif model/profile
+secimini degistirmez veya sandbox yetkisini genisletmez. Dis bulgular ancak
+review ID, commit ve canli dosya hashleri uyustugunda inceleme kaniti sayilir.

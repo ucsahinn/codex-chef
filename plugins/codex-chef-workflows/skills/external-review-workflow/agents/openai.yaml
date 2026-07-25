@@ -1,0 +1,7 @@
+interface:
+  display_name: "External Review Workflow"
+  short_description: "Package and verify a manual external code review."
+  default_prompt: "Use $external-review-workflow to prepare a secret-safe snapshot, manual handoff, and freshness-verified external review report."
+
+policy:
+  allow_implicit_invocation: true

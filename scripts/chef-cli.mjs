@@ -13,6 +13,11 @@ const root = path.resolve(scriptDir, "..");
 const logRoot = path.join(root, "tmp", "chef-cli", "logs");
 const args = process.argv.slice(2);
 
+if (args[0] === "review") {
+  const { runExternalReviewCli } = await import("./external-review-cli.mjs");
+  process.exit(await runExternalReviewCli(args.slice(1)));
+}
+
 function normalizeLanguage(value) {
   const normalized = String(value || "").trim().toLowerCase();
   if (!normalized) return null;

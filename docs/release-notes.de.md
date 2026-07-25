@@ -1,5 +1,7 @@
 # Release Notes
 
+## v0.5.51 - 2026-07-25
+
 [Deutsch](release-notes.de.md) | [Español](release-notes.es.md) | [English](release-notes.md) | [Português (Brasil)](release-notes.pt-BR.md) | [Türkçe](release-notes.tr.md) | [Français](release-notes.fr.md)
 
 > Diese deutsche Anleitung ist Teil des sechssprachigen Dokumentationssatzes fuer `release-notes.md`. Sie behält dieselbe Sicherheitsgrenze bei: zuerst eine Vorschau ausführen, keine Secrets speichern und jede Setup-Aenderung lokal verifizieren.

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.5.51 - 2026-07-25
+
+- Added a preview-first `chef review pack|handoff|verify|status` workflow that creates tracked text review bundles outside the target repository, screens them for exposed credentials, pins them with SHA-256, and performs no automatic upload.
+- Added manifest and report schemas, stale-snapshot checks, structured finding validation, symlink/path-escape defenses, focused regression tests, and a zero-network validator.
+- Added one collision-free `external-review-workflow` bundled skill and one `external-deep-review` routing profile while preserving profile-owned model, reasoning, approval, sandbox, and MCP behavior.
+- Documented the manual external-review boundary in English and Turkish and explicitly rejected fleet execution, unsafe flags, hidden upload hooks, and duplicate pack/handoff/verifier skills.
+
 ## 0.5.50 - 2026-07-21
 
 - Reworked the full operator menu so write-capable selections preview, request action-scoped typed confirmation, and complete in the same session while direct CLI automation keeps the `--apply` boundary.

@@ -1,5 +1,7 @@
 # Notes De Release
 
+## v0.5.51 - 2026-07-25
+
 [Deutsch](release-notes.de.md) | [Español](release-notes.es.md) | [English](release-notes.md) | [Português (Brasil)](release-notes.pt-BR.md) | [Türkçe](release-notes.tr.md) | [Français](release-notes.fr.md)
 
 > Ce guide en français fait partie du jeu de documentation en six langues pour `release-notes.md`. Il garde la même frontière de sécurité: prévisualiser d'abord, ne pas stocker de secrets et vérifier localement chaque changement de setup.

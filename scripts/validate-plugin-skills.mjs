@@ -11,6 +11,7 @@ const expectedBundledSkills = new Set([
   "adaptive-agent-routing",
   "codex-chef-operator",
   "context-budget-planner",
+  "external-review-workflow",
   "offline-diagram-triplet"
 ]);
 

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ucsahinn/codex-chef/schemas/external-review-report.schema.json",
+  "title": "Codex Chef External Review Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "reviewId", "snapshotCommit", "summary", "findings"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "reviewId": { "type": "string", "minLength": 12 },
+    "snapshotCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "summary": { "type": "string", "minLength": 1 },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "severity", "title", "evidence", "file", "line", "recommendation", "confidence"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "severity": { "enum": ["critical", "high", "medium", "low", "info"] },
+          "title": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string", "minLength": 1 },
+          "file": { "type": "string", "minLength": 1 },
+          "line": { "type": "integer", "minimum": 1 },
+          "recommendation": { "type": "string", "minLength": 1 },
+          "confidence": { "enum": ["high", "medium", "low"] }
+        }
+      }
+    }
+  }
+}

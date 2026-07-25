@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+## v0.5.51 - 2026-07-25
+
+Bu surum, dis modele canli repo erisimi vermeden manuel derin inceleme akisi
+ekler. `chef review pack` yalnizca tracked metinleri iceren, secret taramali ve
+parcalanmis paketi on izler; `handoff` yerel inceleme talimati uretir; `verify`
+ve `status` eski snapshot'lari ve uyusmayan raporlari reddeder.
+
+## One Cikanlar
+
+- Otomatik upload, dis model cagrisi, MCP, sabit model veya genisletilmis
+  sandbox eklenmez.
+- SHA-256 manifesti her paket dosyasini ve bundle parcasini incelenen commit'e
+  baglar.
+- Hassas yollar, secret benzeri icerik, binary ve asiri buyuk dosyalar,
+  symlink'ler ve path escape kapali-guvenli davranisla engellenir veya dislanir.
+- Tek bundled workflow skill'i ve tek routing profili mevcut routing, context,
+  security, debugging ve release sahipleriyle cakismayi onler.
+
+## Dogrulama
+
+- `npm run test:external-review`
+- `npm run validate:external-review`
+- `npm run check`
+- `gitleaks detect --redact --no-banner --no-git --verbose`
+
 ## v0.5.50 - 2026-07-21
 
 Bu patch operatör panelini eksiksiz bir interaktif akışa dönüştürür. Menü
