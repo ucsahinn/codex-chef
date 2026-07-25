@@ -490,7 +490,7 @@ function runNpmSilentJsonSmoke(name, npmArgs, expectedPath = []) {
 }
 
 function runBackupsFixtureSmokes() {
-  const fixtureRoot = fs.mkdtempSync(path.join(root, "tmp", "chef-cli-backups-smoke-"));
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "chef-cli-backups-smoke-"));
   const codexHome = path.join(fixtureRoot, "codex-home");
   const agentsHome = path.join(fixtureRoot, "agents-home");
   const backupId = "codex-chef-20990101-000000";
