@@ -1,11 +1,10 @@
 # Workflow Surface Map
 
-This page maps ECC and GStack-style workflow names to the Codex-native surface
-this starter should use. The rule is intentionally conservative: do not turn
-every slash-like entry into a subagent. In Codex, reusable workflows usually
-belong in skills, delegated specialist work belongs in subagents, live external
-context belongs in MCP/connectors, and publish/deploy actions stay behind
-explicit approval gates.
+Workflow names from ECC, GStack, and similar projects do not map one-to-one to
+Codex. The useful question is where each behavior belongs. Reusable procedures
+usually become skills, bounded specialist work may go to subagents, live
+external context belongs in MCP/connectors, and publish or deploy actions stay
+behind explicit approval.
 
 Date checked: 2026-06-15
 

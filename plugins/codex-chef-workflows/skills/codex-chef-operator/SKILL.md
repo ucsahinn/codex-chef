@@ -39,12 +39,14 @@ reference.
    - `docs/mcp-catalog.tr.md`
    - `docs/codex-flags.md`
    - `docs/codex-flags.tr.md`
-   - `docs/completion-audit.md`
-   - `docs/completion-audit.tr.md`
+   - `docs/public-readiness.md`
+   - `docs/public-readiness.tr.md`
    - `docs/install.md`
    - `docs/install.tr.md`
    - `docs/security-model.md`
-   - every English doc in `docs/` should have a matching `.tr.md` pair
+   - every English operator doc in `docs/` should have a matching `.tr.md` pair
+   - the six root README entry points should route readers honestly to the
+     complete English and Turkish operator docs
    - bundled local skills should stay reference-backed, zero-network unless
      their own script or workflow explicitly says otherwise, and validated by
      repo checks

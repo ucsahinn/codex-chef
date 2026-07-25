@@ -1,30 +1,25 @@
 # Contributing
 
-Keep changes small, auditable, and security-first.
+Codex Chef changes global developer tooling, so small and reviewable beats clever and surprising. Explain the behavior you are changing, keep the diff focused, and include evidence that matches the risk.
 
-## Rules
+## Ground Rules
 
-- Do not commit secrets, auth files, memories, sessions, logs, or local caches.
-- Do not add broad approval rules that allow publishing, credential access, or
-  destructive file operations.
-- Keep MCP connectors that require authentication disabled by default.
-- Prefer environment variable placeholders over static credentials.
-- Update both `README.md` and `README.tr.md` when install behavior changes.
-- Run `npm run validate` before proposing small changes.
-- Run `npm run check` and `npm run validate:release` before release-facing,
-  installer, security, package-surface, or public documentation changes.
+- Never commit secrets, auth state, sessions, memories, logs, caches, private paths, or generated archives.
+- Keep authenticated and high-risk MCP connectors disabled by default.
+- Do not broaden approval rules for publishing, credential access, destructive file operations, or unrestricted shells.
+- Prefer environment placeholders over static credentials.
+- Keep English and Turkish operator docs aligned when behavior changes.
+- Preserve user-owned config, profiles, skills, MCPs, and unrelated plugin files during install or repair.
 
-## Commit Hygiene
+## Verification
 
-Before commit:
+For a focused documentation or metadata change:
 
 ```bash
-git status --short
-git diff --cached
 npm run validate
 ```
 
-Before release-facing work:
+For installer, security, package-surface, release, or broad public-doc changes:
 
 ```bash
 npm run check
@@ -33,5 +28,14 @@ git diff --check
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
-Stage explicit files. Avoid `git add .` unless every changed path has been
-reviewed.
+## Commit Hygiene
+
+Inspect every path before staging:
+
+```bash
+git status --short
+git diff
+git diff --cached
+```
+
+Stage explicit files. Do not use a broad add command while generated output, screenshots, logs, local agent state, or unrelated user work is present.

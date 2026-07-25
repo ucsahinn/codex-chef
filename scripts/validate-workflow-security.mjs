@@ -93,7 +93,6 @@ if (!fs.existsSync(validateWorkflow)) {
     "persist-credentials: false",
     "node --check scripts/validate-workflow-security.mjs",
     "node --check scripts/validate-doc-locales.mjs",
-    "node --check scripts/sync-doc-locales.mjs",
     "node --check scripts/validate-readme-locales.mjs",
     "node --check scripts/validate-content-safety.mjs",
     "node --check scripts/validate-agent-config.mjs",

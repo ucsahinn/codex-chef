@@ -1,16 +1,16 @@
-# GitHub Repository Ayarları
+# GitHub Repo Ayarları
 
-Kaynak ağaç doğrulandıktan ve kullanıcı GitHub settings değişikliklerini açıkça
-onayladıktan sonra bu checklist'i kullan. Bunlar repo metadata önerileridir;
-installer bunları otomatik uygulamamalıdır.
+Bu ayarlar projenin public ilk izlenimini belirler. Yalnız source tree doğrulandıktan ve account-level değişiklik açıkça onaylandıktan sonra manuel uygula.
 
-## Önerilen Açıklama
+Güncel yayınlanmış temel sürüm: **v0.5.53**.
+
+## Açıklama
 
 ```text
-Codex Chef: Windows-first Codex setup kit with agents, skills, MCP connectors, safe installers, validation gates, and multilingual docs.
+Cross-platform Codex setup kit with specialist agents, curated skills, conservative MCP defaults, preview-first installers, and release-grade validation.
 ```
 
-## Önerilen Topic'ler
+## Topic’ler
 
 ```text
 codex
@@ -22,61 +22,43 @@ mcp
 model-context-protocol
 agent-skills
 windows
+macos
+linux
 powershell
 developer-tools
 security
-starter-template
 setup
-automation
 ```
 
-## Website
+## Website Ve Social Preview
 
-Stabil bir proje sayfası yoksa boş bırak. Lokal dosya yolu, geçici preview URL
-veya private workspace URL kullanma.
+Stabil bir public proje sayfası yoksa website alanını boş bırak. Lokal path, geçici preview URL veya private workspace linki kullanma.
 
-## Social Preview
+GitHub social preview için `assets/social-preview.png` kullan. Düzenlenebilir kaynak olarak `assets/social-preview.svg` kalsın.
 
-GitHub social preview image olarak `assets/social-preview.png` kullan.
-`assets/social-preview.svg` editable source artwork olarak kalsin.
-
-## Özellikler
+## Repo Özellikleri
 
 - Issues: açık.
-- Discussions: opsiyonel; maintainer community sorularını cevaplayacaksa aç.
-- Wiki: docs bilinçli olarak oraya taşınmadıkça kapalı.
+- Discussions: maintainer’lar community sorularını gerçekten yanıtlayacaksa aç.
+- Wiki: bu repodaki version-controlled docs kanonik olduğu sürece kapalı.
 - Projects: opsiyonel.
-- Sponsorship/packages: bilinçli bakım yapılmayacaksa kapalı.
+- Packages ve sponsorships: aktif bakım yapılmayacaksa kapalı.
 
 ## Branch Ve Actions
 
 - Default branch: `main`.
-- Release iddiası yapmadan önce GitHub Actions validation başarılı olmalı.
-- Workflow permissions least-privilege kalmalı; bu repo'nun validation workflow'u
-  `contents: read` kullanır.
-- Release artifact'larını source klasörlerinden yayınlama. İleride archive veya
-  installer üretilirse GitHub Releases kullan.
+- Release iddiasından önce validation workflow tamamen geçmeli.
+- Workflow permission’ları read-only, action referansları full commit SHA ile pinned kalmalı.
+- Release yayını manuel kalmalı; validation workflow push, tag veya publish yapmamalı.
 
 ## Release Metadata
 
-v0.5.50 icin:
+v0.5.53 için:
 
 ```text
-Title: Codex Chef v0.5.50
-Tag: v0.5.50
+Title: Codex Chef v0.5.53
+Tag: v0.5.53
 Notes: tmp/release-notes-current.md
 ```
 
-Release oluşturmadan önce doğrula:
-
-```bash
-npm run check
-npm run verify:skills:online
-npm run release:notes
-gitleaks detect --redact --no-banner --no-git --verbose
-git rev-parse HEAD
-git -c http.sslBackend=openssl ls-remote origin refs/heads/main
-```
-
-Release yayınlanmadan önce local ve remote hash aynı olmalı.
-<!-- Current release: v0.5.52 -->
+Gelecekteki bir release öncesinde `npm run check`, `npm run verify:skills:online`, `npm run release:notes`, `gitleaks detect --redact --no-banner --no-git --verbose` ve [Yayın kontrol listesinde](publish.tr.md) anlatılan lokal/remote commit eşitliği kontrolünü çalıştır.

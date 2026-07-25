@@ -1,12 +1,12 @@
 # Senior Codex Best Practices
 
-Bu rehber, ilk kurulumdan sonra bu starter reposunun kalitesini korumak için
-standart işletim modelidir. Resmi Codex yüzey modelini, bu reponun lokal
-doğrulama gate'lerini ve bizim diğer prompt-engineering / best-practice
-repolarından gelen pratikleri birleştirir.
+İlk kurulumu yapmak kolaydır; altı ay sonra hâlâ anlaşılır bir sistem bırakmak
+ise ortak bir çalışma standardı ister. Buradaki kurallar resmi Codex yüzey
+modelini, reponun doğrulama kapılarını ve benzer agent-tooling projelerinden
+çıkan işe yarar dersleri bir araya getirir.
 
-Yeni skill, MCP, ajan, profil, hook, installer seçeneği veya public doküman
-eklerken burayı kullan.
+Yeni bir skill, MCP, ajan, profil, hook, installer seçeneği veya public doküman
+eklemeden önce buraya dön.
 
 ## Hızlı Başla
 

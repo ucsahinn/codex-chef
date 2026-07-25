@@ -1,9 +1,9 @@
 # Codex Capability Map
 
-This page explains how the starter turns Codex into a safer operating setup
-after installation. It is not another install guide. It maps each Codex surface
-to the job it should handle, the guardrail that keeps it safe, and the local
-checks that prove the starter still matches that model.
+Installation tells you where files go; this map tells you why each surface
+exists. It connects every Codex surface to the job it should own, the guardrail
+that contains it, and the local check that proves the setup still follows that
+design.
 
 Official references:
 

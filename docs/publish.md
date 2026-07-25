@@ -1,9 +1,10 @@
 # Publishing Checklist
 
-The repository is designed to be public, but publishing is a separate user
-decision.
+Publishing is the point where local confidence becomes a public claim. Keep it deliberate: verify first, review the exact diff, and only then create commits, tags, or releases with explicit approval.
 
-## Before Push Or Release
+Current published baseline: **v0.5.53**.
+
+## Before Commit Or Push
 
 ```bash
 npm run check
@@ -17,81 +18,55 @@ git diff --check
 git diff --cached --check
 ```
 
-If Gitleaks is installed:
+If Gitleaks is available:
 
 ```bash
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
-For a release, also confirm:
+Review the staged diff file by file. Do not stage ignored `.serena/`, `tmp/`, logs, caches, screenshots, archives, package tarballs, auth state, sessions, or memories.
 
-- `package.json` version matches the intended tag.
-- `CHANGELOG.md` has a dated version section.
-- [docs/release-notes.md](release-notes.md) matches the release.
-- `tmp/release-notes-current.md` contains only the current release section.
-- [docs/github-settings.md](github-settings.md) has the intended repository
-  description, topics, and release metadata.
-- `git diff --cached` contains only reviewed source/docs/config files.
-- ignored `.serena/`, `tmp/`, logs, caches, screenshots, and generated archives
-  are not staged.
+## Prepare Release Notes
 
-Generate the release-note artifact only after the read-only checks pass and a
-release is actually being prepared:
+`docs/release-notes.md` describes the release users should install now. `CHANGELOG.md` keeps the complete history. Generate the GitHub Release body from only the current section:
 
 ```bash
 npm run release:notes
 ```
 
-## Create A Repository
+The generated file is `tmp/release-notes-current.md`; it is local release input, not tracked source.
 
-Using GitHub CLI, after review and explicit approval:
+## Publish An Existing Repository
 
-```bash
-gh repo create codex-chef --public --source . --remote origin
-git push -u origin main
-```
-
-Manual remote setup:
+After explicit approval and a clean staged review:
 
 ```bash
-git remote add origin https://github.com/<owner>/codex-chef.git
-git push -u origin main
-```
-
-## Existing Repository Release Flow
-
-After explicit commit/push/release approval:
-
-```bash
-git add <reviewed files>
-git diff --cached
-npm run release:notes
-git commit -m "Release Codex Chef v0.5.50"
+git commit -m "Prepare Codex Chef public docs"
 git push origin main
-git tag v0.5.50
-git push origin v0.5.50
-gh release create v0.5.50 --title "Codex Chef v0.5.50" --notes-file tmp/release-notes-current.md
 ```
 
-After pushing, verify remote equality and CI:
+For a future version, replace `<version>` only after package metadata and both release-note files are aligned:
+
+```bash
+git tag -a v<version> -m "Codex Chef v<version>"
+git push origin v<version>
+gh release create v<version> --title "Codex Chef v<version>" --notes-file tmp/release-notes-current.md
+```
+
+## Verify The Public State
 
 ```bash
 git rev-parse HEAD
 git -c http.sslBackend=openssl ls-remote origin refs/heads/main
 gh run list --workflow validate --branch main --limit 1
+gh release view v<version>
 ```
 
-## Do Not Publish
+The local and remote commits must match, CI must be green, and the release tag must resolve to the intended commit.
 
-- real credentials
-- auth files
-- generated Codex memory/session state
-- user-specific `.codex` backups
-- local project paths
-- installers and release archives
+## Never Publish
 
-## Release Artifacts
-
-This setup kit is source-first. If you later create zip archives or installers,
-publish those through GitHub Releases, not as regular source files.
-<!-- Current release: v0.5.52 -->
+- credentials, auth files, cookies, private keys, or signing material
+- Codex sessions, memories, logs, browser profiles, or local databases
+- machine-specific paths or project trust state
+- generated installers, archives, build output, dependency folders, or scratch reports as regular source files

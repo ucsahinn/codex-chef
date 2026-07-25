@@ -1,9 +1,7 @@
 # Code Of Conduct
 
-Keep project discussion respectful, practical, and focused on improving the
-starter safely.
+Treat project discussions like collaborative engineering work: be direct, respectful, and specific about the problem you want to solve. Challenge an idea without attacking the person who proposed it.
 
-Do not post secrets, private logs, credentials, personal data, or private
-workspace content in public issues, pull requests, or discussions.
+Keep public threads safe. Never paste credentials, private logs, personal data, local workspace content, Codex sessions, or memory files into issues, pull requests, or discussions.
 
-Security-sensitive reports should follow [SECURITY.md](SECURITY.md).
+Report security-sensitive findings through the private route described in [SECURITY.md](SECURITY.md).

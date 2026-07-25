@@ -1,11 +1,11 @@
 # Senior Codex Best Practices
 
-This guide is the operating standard for keeping this starter useful after the
-first install. It combines the official Codex surface model, the repository's
-local validation gates, and lessons from adjacent prompt-engineering and
-best-practice repositories.
+The first install is the easy part. Keeping the setup understandable six months
+later takes a shared standard. The practices below connect the official Codex
+surface model with this repository's validation gates and the useful lessons
+learned from adjacent agent-tooling projects.
 
-Use it when you add a new skill, MCP, agent, profile, hook, installer option,
+Come here before adding a skill, MCP, agent, profile, hook, installer option,
 or public-facing document.
 
 ## Start Fast

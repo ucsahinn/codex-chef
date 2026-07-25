@@ -46,5 +46,5 @@ diagnostic log.
 
 - [Verification guide](../docs/verification.md)
 - [Expected output](../docs/expected-output.md)
-- [Local audit](../docs/local-audit.md)
+- [Public readiness](../docs/public-readiness.md)
 - [Security model](../docs/security-model.md)

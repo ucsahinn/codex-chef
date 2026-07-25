@@ -36,8 +36,8 @@ local agent state varken geniş add komutu kullanma.
 
 ## Public Metadata
 
-- Repo description ve topic'ler [SEO ve keşfedilebilirlik](../docs/seo.tr.md)
-  rehberiyle uyumlu olmali.
+- Repo açıklaması ve topic'ler [GitHub repo ayarları](../docs/github-settings.tr.md)
+  rehberiyle uyumlu olmalı.
 - GitHub social preview `assets/social-preview.png` kullanmali.
 - Release notes tam historical dosya yerine `npm run release:notes` ile
   üretilen current section'i kullanmalı.

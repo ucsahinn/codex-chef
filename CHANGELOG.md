@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.5.53 - 2026-07-26
+
+- Replace generated deep-documentation shells with six concise, human-written README entry points and complete English/Turkish operator guides.
+- Remove obsolete completion-audit, local-audit, and SEO documents while preserving useful guidance in the maintained docs, knowledge base, agent corpus, and changelog.
+- Rewrite the public README, governance, support, privacy, publishing, GitHub settings, and release-readiness surfaces in direct, natural language.
+- Align locale, security, package, token, workflow, doctor, and release validators with the smaller documentation contract without weakening safety gates.
+- Document token-budget diagnostics, the optional capability-preserving token-safe profile, and automatic agent model/reasoning inheritance.
+- Consolidate GitHub Releases to the current supported line while preserving every historical Git tag and commit.
+
 ## 0.5.52 - 2026-07-26
 
 - Make the install and validation contract explicitly cross-platform across Windows, macOS, Linux, and WSL, including macOS CI and Node.js 18 compatibility coverage.

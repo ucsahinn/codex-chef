@@ -36,7 +36,7 @@ logs, archives, screenshots, or local agent state are present.
 
 ## Public Metadata
 
-- Repository description and topics should match [SEO and discoverability](../docs/seo.md).
+- Repository description and topics should match [GitHub repository settings](../docs/github-settings.md).
 - GitHub social preview should use `assets/social-preview.png`.
 - Release notes should use the current section extracted by
   `npm run release:notes`, not the full historical release-notes file.

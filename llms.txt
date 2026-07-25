@@ -18,7 +18,7 @@ Primary human entry points:
 - [Knowledge base](kb/README.md)
 - [Workflow surface map](docs/workflow-surface-map.md)
 - [ECC compatibility](docs/ecc-compatibility.md)
-- [Completion audit](docs/completion-audit.md)
+- [Public readiness](docs/public-readiness.md)
 - [Release notes](docs/release-notes.md)
 
 ## What It Installs
@@ -45,9 +45,11 @@ explicit `-InstallGitGuards` or `--install-git-guards` flag.
 ## Core Capabilities
 
 - 21 specialist Codex subagent role definitions.
-- 3 bundled local plugin skills:
+- 5 bundled local plugin skills:
+  - `adaptive-agent-routing`
   - `codex-chef-operator`
   - `context-budget-planner`
+  - `external-review-workflow`
   - `offline-diagram-triplet`
 - 16 reviewed installable global skills in `catalog/skills.json` and
   `catalog/skills-lock.json`.

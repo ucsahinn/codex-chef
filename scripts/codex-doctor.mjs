@@ -9,7 +9,7 @@ const jsonOutput = args.has("--json");
 const redactPaths = args.has("--redact-paths");
 const includeGlobal = args.has("--include-global");
 
-const localeCodes = ["de", "es", "pt-BR", "tr", "fr"];
+const localeCodes = ["tr"];
 const agentConfigFiles = [
   "templates/codex/config.windows.toml",
   "templates/codex/config.unix.toml"
@@ -58,7 +58,7 @@ function parseMcpBlocks(text) {
 }
 
 function isLocalizedDoc(file) {
-  return /\.(?:de|es|pt-BR|tr|fr)\.md$/.test(file);
+  return /\.tr\.md$/.test(file);
 }
 
 function inspectAgents(failures) {

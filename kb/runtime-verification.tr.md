@@ -46,5 +46,5 @@ Repo-local diagnostic log yazılmasın istiyorsan inspection komutlarında
 
 - [Doğrulama rehberi](../docs/verification.tr.md)
 - [Beklenen çıktı](../docs/expected-output.tr.md)
-- [Lokal audit](../docs/local-audit.tr.md)
+- [Public hazırlık](../docs/public-readiness.tr.md)
 - [Security model](../docs/security-model.tr.md)

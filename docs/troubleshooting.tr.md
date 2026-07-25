@@ -1,7 +1,8 @@
 # Troubleshooting
 
-Setup veya doğrulama hata verdiğinde bu rehberi kullan. Installer veya auth
-isteyen connector çalıştırmadan önce tanı komutlarını read-only tut.
+Setup veya doğrulama hata verdiğinde daha geniş permission ile her şeyi yeniden
+çalıştırmak yerine önce hatanın hangi katmanda olduğunu bul. Installer veya auth
+isteyen connector'ı bilinçli seçene kadar tanı komutlarını read-only tut.
 
 ## Windows Installer
 

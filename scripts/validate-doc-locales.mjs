@@ -6,71 +6,49 @@ const root = path.resolve(process.cwd());
 const docsDir = path.join(root, "docs");
 const failures = [];
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
-const expectedReleaseHeading = `## v${packageJson.version} - `;
-
-const localeCodes = ["de", "es", "pt-BR", "tr", "fr"];
-const languageLabels = ["Deutsch", "Español", "English", "Português (Brasil)", "Türkçe", "Français"];
-const generatedLocaleCodes = ["de", "es", "pt-BR", "fr"];
-
-function isLocalizedDoc(file) {
-  return /\.(?:de|es|pt-BR|tr|fr)\.md$/.test(file);
-}
-
-function baseFor(file) {
-  return file.replace(/\.(?:de|es|pt-BR|tr|fr)\.md$/, ".md");
-}
+const currentReleaseHeading = `## v${packageJson.version} - `;
 
 if (!fs.existsSync(docsDir)) {
   failures.push("Missing docs directory.");
 } else {
-  const docFiles = fs.readdirSync(docsDir).filter((file) => file.endsWith(".md")).sort();
-  const docSet = new Set(docFiles);
-  const baseDocs = docFiles.filter((file) => !isLocalizedDoc(file));
+  const files = fs.readdirSync(docsDir).filter((file) => file.endsWith(".md")).sort();
+  const fileSet = new Set(files);
+  const englishDocs = files.filter((file) => !file.endsWith(".tr.md"));
+  const turkishDocs = files.filter((file) => file.endsWith(".tr.md"));
 
-  for (const file of baseDocs) {
+  for (const file of englishDocs) {
     const slug = file.replace(/\.md$/, "");
-    for (const code of localeCodes) {
-      const localized = `${slug}.${code}.md`;
-      if (!docSet.has(localized)) {
-        failures.push(`Missing localized doc for docs/${file}: docs/${localized}`);
-      }
-    }
+    const pair = `${slug}.tr.md`;
+    if (!fileSet.has(pair)) failures.push(`Missing Turkish pair for docs/${file}: docs/${pair}`);
   }
 
-  for (const file of docFiles.filter(isLocalizedDoc)) {
-    const base = baseFor(file);
-    if (!docSet.has(base)) {
-      failures.push(`Localized doc has no English source pair: docs/${file}`);
-    }
+  for (const file of turkishDocs) {
+    const pair = file.replace(/\.tr\.md$/, ".md");
+    if (!fileSet.has(pair)) failures.push(`Turkish doc has no English source pair: docs/${file}`);
   }
 
-  for (const file of docFiles.filter((entry) => /\.(?:de|es|pt-BR|fr)\.md$/.test(entry))) {
+  for (const file of files) {
+    if (/\.(?:de|es|fr|pt-BR)\.md$/.test(file)) {
+      failures.push(`Generated summary locale should not return to deep docs: docs/${file}`);
+    }
     const text = fs.readFileSync(path.join(docsDir, file), "utf8");
-    const slug = file.replace(/\.(?:de|es|pt-BR|fr)\.md$/, "");
-    for (const label of languageLabels) {
-      if (!text.includes(label)) {
-        failures.push(`Localized doc docs/${file} missing language switch label: ${label}`);
-      }
-    }
-    for (const code of generatedLocaleCodes) {
-      if (!text.includes(`${slug}.${code}.md`)) {
-        failures.push(`Localized doc docs/${file} missing peer link: ${slug}.${code}.md`);
-      }
-    }
-    for (const required of [`${slug}.md`, `${slug}.tr.md`, "npm run validate:doc-locales"]) {
-      if (!text.includes(required)) {
-        failures.push(`Localized doc docs/${file} missing required sync signal: ${required}`);
-      }
-    }
     if (/(?:TODO|TBD|translation needed|lorem ipsum)/i.test(text)) {
-      failures.push(`Localized doc docs/${file} contains placeholder localization text.`);
+      failures.push(`Doc contains placeholder text: docs/${file}`);
     }
   }
 
-  for (const file of docFiles.filter((entry) => /^release-notes\.(?:de|es|pt-BR|tr|fr)\.md$/.test(entry))) {
+  for (const file of ["release-notes.md", "release-notes.tr.md"]) {
     const text = fs.readFileSync(path.join(docsDir, file), "utf8");
-    if (!text.includes(expectedReleaseHeading)) {
-      failures.push(`Localized release notes docs/${file} missing current ${expectedReleaseHeading.trim()} section.`);
+    if (!text.includes(currentReleaseHeading)) {
+      failures.push(`docs/${file} missing current ${currentReleaseHeading.trim()} section.`);
+    }
+  }
+
+  for (const [indexFile, suffix] of [["README.md", ".md"], ["README.tr.md", ".tr.md"]]) {
+    const index = fs.readFileSync(path.join(docsDir, indexFile), "utf8");
+    const expected = suffix === ".md" ? englishDocs : turkishDocs;
+    for (const file of expected.filter((entry) => entry !== indexFile)) {
+      if (!index.includes(`(${file})`)) failures.push(`docs/${indexFile} does not link docs/${file}`);
     }
   }
 }
@@ -81,4 +59,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`Doc locale validation passed for ${localeCodes.length + 1} documentation languages.`);
+console.log("Doc locale validation passed for complete English and Turkish operator docs.");

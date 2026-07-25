@@ -1,157 +1,71 @@
 # Codex Chef
 
 <p align="center">
-  <img src="assets/banner.svg" alt="Banner de Codex Chef con agents, MCPs, skills, verificacion y documentacion multilingue" width="100%" />
+  <img src="assets/banner.svg" alt="Codex Chef" width="100%" />
 </p>
 
 <p align="center">
   <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
-  <a href="README.md"><img alt="Idiomas de documentacion" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
-  <img alt="Windows, macOS, Linux, and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-164e63" />
+  <a href="README.md"><img alt="Six README languages" src="https://img.shields.io/badge/readme-6%20languages-0f766e" /></a>
 </p>
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> <strong>Documentación:</strong>
-  <a href="README.de.md"><img src="https://flagcdn.com/w20/de.png" alt="Deutsch" width="20"></a> |
-  <a href="README.es.md"><img src="https://flagcdn.com/w20/es.png" alt="Español" width="20"></a> |
-  <a href="README.md"><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"></a> |
-  <a href="README.pt-BR.md"><img src="https://flagcdn.com/w20/br.png" alt="Português (Brasil)" width="20"></a> |
-  <a href="README.tr.md"><img src="https://flagcdn.com/w20/tr.png" alt="Türkçe" width="20"></a> |
-  <a href="README.fr.md"><img src="https://flagcdn.com/w20/fr.png" alt="Français" width="20"></a>
+  <a href="README.de.md">Deutsch</a> |
+  <a href="README.es.md">Español</a> |
+  <a href="README.md">English</a> |
+  <a href="README.pt-BR.md">Português (Brasil)</a> |
+  <a href="README.tr.md">Türkçe</a> |
+  <a href="README.fr.md">Français</a>
 </p>
 
-Codex Chef ofrece un punto de partida claro para Codex en Windows, macOS, Linux y WSL: defaults seguros, un equipo de agentes con nombre, skills curadas, MCPs preconfigurados, workflows locales de plugin y validación revisable antes de tocar tu máquina.
+Codex Chef prepara una base de trabajo clara para Codex en Windows, macOS,
+Linux y WSL: agentes especializados, skills revisadas, MCP prudentes,
+instalación con vista previa y comprobaciones que puedes ejecutar tú mismo.
 
-Este es un starter comunitario no oficial, no un producto de OpenAI. Los README y la documentación profunda existen en seis idiomas; esta página es la entrada en español.
+Es un proyecto comunitario no oficial, no un producto de OpenAI. El acceso a
+credenciales, bases de datos, publicación, despliegue y sistemas de archivos
+amplios sigue requiriendo aprobación explícita.
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> Qué queda listo después de instalar
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Empieza Con Seguridad
 
-Codex Chef no intenta ser un volcado de configuración. La idea es dejarte una
-base local de Codex que puedas entender, verificar y extender:
-
-| Área | Resultado |
-| --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Equipo de agentes | 21 roles con nombre, como Code Mapper, Docs Researcher, Google SEO Auditor, Security Auditor y Release Verifier; model/reasoning no queda fijado por agente y lo decide el perfil activo. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skills locales | `codex-chef-operator`, `offline-diagram-triplet` y `context-budget-planner` vienen dentro del plugin local. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" alt="" aria-hidden="true" width="20"> Skills opcionales | 16 skills globales public/first-party revisadas para mantenimiento, debugging, planificación de refactor, seguridad, testing, verificación de navegador, SEO, calidad web, docs, CI, MCP, context engineering, prompt architecture, skill authoring y un workflow amplio de frontend se pueden instalar con `-All`. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP por defecto | Los MCP locales y de investigación quedan listos; los conectores autenticados siguen desactivados hasta que los necesites. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Red de seguridad | Dry-run, backups, secret scan, validación y approval gates siguen dentro del flujo normal. |
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> Inicio Rapido
-
-| Objetivo | Link |
-| --- | --- |
-| Instalar de forma segura | [Quick Start](#-quick-start) |
-| Previsualizar sin escribir | [Dry Run](#-dry-run-first) |
-| Ver el plan completo | [Install Plan](#-install-plan) |
-| Entender capacidades de Codex | [Capability Map](docs/codex-capability-map.es.md) |
-| Revisar seguridad | [Modelo de seguridad](docs/security-model.es.md) |
-| Preparar publicacion | [Publishing](docs/publish.es.md) |
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Superficie De Instalacion
-
-Los installers gestionan:
-
-- `~/.codex/AGENTS.md`
-- `~/.codex/config.toml`
-- `~/.codex/*.config.toml`
-- `~/.codex/agents/*.toml`
-- `~/.codex/rules/default.rules`
-- `~/.codex/plugins/codex-chef-workflows`
-- `~/.agents/plugins/marketplace.json`
-
-`-All` instala las skills curadas de Codex, pero no cambia la configuración global de Git. Los Git guards globales quedan como opt-in separado con `-InstallGitGuards` o `--install-git-guards`.
-
-`token-safe.config.toml` se copia como perfil. `npm run token:audit` muestra las superficies principales de contexto y tokens sin desactivar skills, MCPs, agents, hooks ni memories.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> Lo Que No Hace
-
-- No guarda secretos, no copia memory state privado ni importa sessions existentes; Memory MCP es solo para contexto local sin secretos cuando lo usas deliberadamente.
-- No activa por defecto conectores de cuenta, base de datos, produccion o filesystem amplio.
-- No hace commit, push, release, deploy, package publish ni secret rotation.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50e.svg" alt="" aria-hidden="true" width="20"> Dry Run First
-
-PowerShell:
+Revisa primero el plan de instalación. Este paso todavía no escribe en tu
+configuración de Codex.
 
 ```powershell
+git clone https://github.com/ucsahinn/codex-chef.git
+cd codex-chef
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
-```
-
-Bash o WSL:
-
-```bash
-./scripts/install.sh --all --dry-run
-```
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install Plan
-
-```bash
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
-El plan viene de `manifests/install-plan.json` y describe cada operacion, politica de colision, backup, riesgo y flag requerido. ECC inspiro el patron de manifests, pero este repo sigue siendo Codex-only.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Quick Start
-
-PowerShell:
+Instala solo cuando la vista previa coincida con lo que esperas:
 
 ```powershell
-git clone https://github.com/ucsahinn/codex-chef.git
-cd codex-chef
-Set-ExecutionPolicy -Scope Process Bypass -Force
-.\scripts\install.ps1 -All -Interactive
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
 
-Bash o WSL:
-
 ```bash
-git clone https://github.com/ucsahinn/codex-chef.git
-cd codex-chef
 chmod +x scripts/install.sh
 ./scripts/install.sh --all --interactive
 ```
 
-Al final, el installer muestra un capability board con el equipo de agents,
-MCPs, skills locales del plugin y skills globales revisadas.
-
-Despues de instalar, reinicia Codex y ejecuta:
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Verificación Local
 
 ```bash
-codex doctor --summary
-npm run verify:install:runtime
-codex exec --strict-config "Summarize the active Codex setup."
+npm run check
+npm run token:audit
 ```
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Senales De Confianza
+`npm run token:audit` muestra qué superficies consumen más contexto. El perfil opcional `token-safe.config.toml` reduce los límites de salida sin desactivar funciones principales; la selección automática de `model/reasoning` de los agentes sigue el perfil activo del usuario.
 
-| Senal | Evidencia |
-| --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Public-safe | Sin secretos, auth files, sessions privadas ni estado especifico de maquina; Memory MCP solo para contexto local no secreto. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Validacion real | `npm run check` cubre repo, docs, install-plan, MCP drift, skills, token surfaces, supply-chain y security; `npm run token:audit` da el diagnostico de tokens. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCPs conservadores | Los conectores autenticados quedan desactivados por defecto. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa7a.svg" alt="" aria-hidden="true" width="20"> Doctor | `npm run codex:doctor` resume health repo-only sin escrituras globales. |
-| Indice para agents | `llms.txt` resume destinos de instalacion, docs, limites de seguridad y fuentes comparadas para coding agents. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d0.svg" alt="" aria-hidden="true" width="20"> Diagramas offline | `offline-diagram-triplet` emite Mermaid, Excalidraw editable, SVG, PNG y Markdown sin red. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4e3.svg" alt="" aria-hidden="true" width="20"> Triage public-safe | CODEOWNERS e issue templates enrutan bugs, features, preguntas y security reports sin datos privados. |
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Documentación
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Documentacion
-
-- [Install](docs/install.es.md)
-- [How to run the setup](docs/how-to.es.md)
-- [Verification](docs/verification.es.md)
-- [Codex capability map](docs/codex-capability-map.es.md)
-- [Workflow surface map](docs/workflow-surface-map.es.md)
-- [Security model](docs/security-model.es.md)
-- [Public readiness](docs/public-readiness.es.md)
-- [ECC compatibility](docs/ecc-compatibility.es.md)
-- [SEO y descubrimiento](docs/seo.es.md)
-- [Advisory sources](docs/advisory-sources.es.md)
+- [English operator docs](docs/README.md)
+- [Türkçe operatör dokümanları](docs/README.tr.md)
 - [Knowledge base](kb/README.md)
-- [Turkish knowledge base](kb/README.tr.md)
-- [Indice para agents](llms.txt)
+- [Türkçe bilgi bankası](kb/README.tr.md)
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Limite De Publicacion
-
-El repo queda public-ready despues de validacion, pero el installer solo hace setup local. Commit, push, tag, release, deploy y GitHub settings siguen siendo decisiones humanas explicitas.
+La documentación técnica completa se mantiene en inglés y turco. Esta página
+es una entrada breve escrita por personas, no un resumen automático presentado
+como traducción completa.

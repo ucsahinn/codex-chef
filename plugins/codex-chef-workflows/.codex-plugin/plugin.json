@@ -1,6 +1,6 @@
 {
   "name": "codex-chef-workflows",
-  "version": "0.5.52",
+  "version": "0.5.53",
   "description": "Codex Chef setup maintenance workflows.",
   "skills": "./skills/"
 }

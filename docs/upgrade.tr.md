@@ -1,7 +1,8 @@
 # Upgrade Rehberi
 
-Zaten çalışan bir Codex setup'ın varsa ve bu starter'ın yeni sürümüne geçmek
-istiyorsan bu rehberi kullan.
+Güncelleme, daha önce yaptığın tercihleri ezmeden Codex Chef'in yönetilen
+dosyalarını yenilemeli. Aşağıdaki akış gelen değişikliği önce gösterir, yedek
+alır, yalnız yönetilen yüzeyi uygular ve kurulu runtime'ı doğrular.
 
 ## Güvenli Upgrade Akışı
 

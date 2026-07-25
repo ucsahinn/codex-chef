@@ -1,9 +1,9 @@
 # Codex Kapasite Haritasi
 
-Bu sayfa starter'in kurulumdan sonra Codex'i nasil daha guvenli ve kullanisli
-bir calisma sistemine cevirdigini anlatir. Bu bir kurulum rehberi degildir. Her
-Codex yuzeyinin hangi isi yapmasi gerektigini, hangi guvenlik siniriyla
-tutuldugunu ve hangi lokal kontrollerle dogrulandigini gosterir.
+Kurulum rehberi dosyaların nereye gittiğini anlatır; bu harita ise her yüzeyin
+neden var olduğunu gösterir. Codex yüzeylerini sahiplenmeleri gereken işle,
+onları sınırlayan güvenlik kuralıyla ve tasarımın bozulmadığını kanıtlayan lokal
+kontrolle eşleştirir.
 
 Resmi kaynaklar:
 

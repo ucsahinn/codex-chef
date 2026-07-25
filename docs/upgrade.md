@@ -1,7 +1,8 @@
 # Upgrade Guide
 
-Use this guide when you already have a Codex setup and want to adopt a newer
-version of this starter.
+An upgrade should refresh Codex Chef's managed files without flattening the
+choices you already made. The flow below previews the incoming change, creates
+a backup, applies only the managed surface, and verifies the installed runtime.
 
 ## Safe Upgrade Flow
 

@@ -39,8 +39,6 @@ const requiredPublicFiles = [
   "docs/ecc-compatibility.tr.md",
   "docs/advisory-sources.md",
   "docs/advisory-sources.tr.md",
-  "docs/completion-audit.md",
-  "docs/completion-audit.tr.md",
   "assets/banner.svg",
   "assets/workflow-overview.svg",
   "catalog/agent-research-corpus.json",
@@ -62,7 +60,6 @@ const requiredPublicFiles = [
   "schemas/install-state-preview.schema.json",
   "scripts/plan-install.mjs",
   "scripts/chef-cli.mjs",
-  "scripts/sync-doc-locales.mjs",
   "scripts/validate-doc-locales.mjs",
   "scripts/validate-readme-locales.mjs",
   "scripts/validate-workflow-security.mjs",
@@ -152,8 +149,8 @@ const docsDir = path.join(root, "docs");
 if (fs.existsSync(docsDir)) {
   const docFiles = fs.readdirSync(docsDir).filter((file) => file.endsWith(".md"));
   const docSet = new Set(docFiles);
-  const docLocaleSuffixes = ["de", "es", "pt-BR", "tr", "fr"];
-  const localePattern = /\.(?:de|es|pt-BR|tr|fr)\.md$/;
+  const docLocaleSuffixes = ["tr"];
+  const localePattern = /\.tr\.md$/;
   for (const file of docFiles) {
     if (localePattern.test(file)) {
       const english = file.replace(localePattern, ".md");

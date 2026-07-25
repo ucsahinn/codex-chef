@@ -1,7 +1,9 @@
 # Troubleshooting
 
-Use this guide when setup or verification fails. Keep diagnostics read-only until
-you intentionally run an installer or authenticated connector.
+When setup or verification fails, start by locating the layer that failed
+instead of rerunning everything with broader permissions. Keep diagnostics
+read-only until you intentionally choose an installer or authenticated
+connector.
 
 ## Windows Installer
 

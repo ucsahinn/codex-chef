@@ -54,8 +54,8 @@ if (report) {
   if (report.skills?.lockEntries !== report.skills?.installableCount) {
     fail("codex doctor lockEntries must match installableCount.");
   }
-  if (report.docs?.languages !== 6) {
-    fail("codex doctor must report six documentation languages.");
+  if (report.docs?.languages !== 2) {
+    fail("codex doctor must report the complete English and Turkish operator-doc matrix.");
   }
   if ((report.docs?.missing || []).length > 0) {
     fail("codex doctor must not report missing localized docs.");

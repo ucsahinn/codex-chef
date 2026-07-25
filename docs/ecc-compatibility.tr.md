@@ -1,7 +1,8 @@
 # ECC Uyumluluk Ve Import Politikasi
 
-Bu repo ECC'den ogrenebilir ama ECC'ye donusmemelidir. Starter Codex-only,
-Windows-friendly, konservatif ve yazmadan once preview edilebilir kalir.
+ECC'deki iyi fikirleri almak, Codex Chef'i ECC'nin bir kopyasına çevirmek
+anlamına gelmez. Bu proje Codex-only, platform bağımsız, temkinli ve her gerçek
+write öncesinde ön izlenebilir kalır.
 
 Kontrol tarihi: 2026-06-14.
 

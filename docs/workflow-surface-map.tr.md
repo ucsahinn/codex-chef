@@ -1,10 +1,10 @@
 # Workflow Yuzey Haritasi
 
-Bu sayfa ECC ve GStack tarzindaki workflow adlarini Codex'te hangi yuzeye
-koymamiz gerektigini aciklar. Kural bilerek konservatif: slash-komut gibi
-gorunen her seyi subagent yapmiyoruz. Codex'te tekrar kullanilabilir workflow
-genelde skill olur, uzman delegasyonu subagent olur, canli dis baglam MCP veya
-connector olur, push/release/deploy ise acik onay kapisinda kalir.
+ECC, GStack ve benzeri projelerdeki workflow adları Codex'e birebir taşınmaz.
+Doğru soru, her davranışın hangi yüzeye ait olduğudur. Tekrar kullanılabilir
+prosedürler genellikle skill olur, sınırlı uzman işi subagent'a verilebilir,
+canlı dış bağlam MCP/connector'a gider; push, release ve deploy ise açık onay
+kapısında kalır.
 
 Kontrol tarihi: 2026-06-15
 

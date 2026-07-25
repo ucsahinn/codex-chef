@@ -130,7 +130,6 @@ for (const required of [
   "contents: read",
   "persist-credentials: false",
   "node --check scripts/validate-doc-locales.mjs",
-  "node --check scripts/sync-doc-locales.mjs",
   "node --check scripts/validate-readme-locales.mjs",
   "node --check scripts/validate-kb-locales.mjs",
   "node --check scripts/validate-workflow-security.mjs",

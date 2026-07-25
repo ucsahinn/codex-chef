@@ -23,6 +23,8 @@ const requiredFiles = [
   "package.json",
   "docs/how-to.md",
   "docs/how-to.tr.md",
+  "docs/README.md",
+  "docs/README.tr.md",
   "docs/troubleshooting.md",
   "docs/troubleshooting.tr.md",
   "docs/github-settings.md",
@@ -31,8 +33,6 @@ const requiredFiles = [
   "docs/upgrade.tr.md",
   "docs/release-notes.md",
   "docs/release-notes.tr.md",
-  "docs/seo.md",
-  "docs/seo.tr.md",
   "docs/expected-output.md",
   "docs/expected-output.tr.md",
   "docs/ecc-compatibility.md",
@@ -41,8 +41,6 @@ const requiredFiles = [
   "docs/advisory-sources.tr.md",
   "docs/best-practices.md",
   "docs/best-practices.tr.md",
-  "docs/completion-audit.md",
-  "docs/completion-audit.tr.md",
   "kb/README.md",
   "kb/README.tr.md",
   "kb/install-preview.md",
@@ -105,7 +103,6 @@ const requiredFiles = [
   "scripts/codex-routing-board.mjs",
   "scripts/codex-status.mjs",
   "scripts/repair-install.mjs",
-  "scripts/sync-doc-locales.mjs",
   "scripts/validate-doc-locales.mjs",
   "scripts/validate-readme-locales.mjs",
   "scripts/validate-kb-locales.mjs",
@@ -257,14 +254,20 @@ if (fs.existsSync(codeownersPath) && !fs.readFileSync(codeownersPath, "utf8").in
 }
 
 const files = walk(root);
-const mojibakePattern = new RegExp("[\\u00c3\\u00c4\\u00c5][^\\s/]|\\u00f0\\u0178|\\u00e2[\\u20ac\\u0153\\u201e\\u2122\\u0161\\u017e\\u0178]");
+const mojibakePattern = new RegExp(
+  "\\u00c3[\\u0080-\\u00bf]|" +
+  "\\u00c4[\\u00b0\\u00b1\\u0178\\u017e]|" +
+  "\\u00c5[\\u0178\\u017e]|" +
+  "\\u00f0\\u0178|" +
+  "\\u00e2[\\u20ac\\u0153\\u017e\\u2122\\u0161\\u201c\\u201d\\u2013\\u2014]"
+);
 
 const docsDir = path.join(root, "docs");
 if (fs.existsSync(docsDir)) {
   const docFiles = fs.readdirSync(docsDir).filter((file) => file.endsWith(".md"));
   const docSet = new Set(docFiles);
-  const docLocaleSuffixes = ["de", "es", "pt-BR", "tr", "fr"];
-  const localePattern = /\.(?:de|es|pt-BR|tr|fr)\.md$/;
+  const docLocaleSuffixes = ["tr"];
+  const localePattern = /\.tr\.md$/;
   for (const file of docFiles) {
     if (localePattern.test(file)) {
       const english = file.replace(localePattern, ".md");
@@ -448,8 +451,8 @@ for (const requiredPattern of [
   /Portugu/,
   /Fran/,
   /Türkçe/,
-  /docs-6%20languages/,
-  /six-language deep docs/i,
+  /readme-6%20languages/,
+  /English and Turkish deep docs/i,
   /Knowledge base/,
   /Bilgi bankas/,
   /assets\/banner\.svg/,

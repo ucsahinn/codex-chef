@@ -38,9 +38,15 @@ const dangerousCodePoints = new Map([
 ]);
 
 const mojibakePatterns = [
-  { label: "UTF-8 decoded as Windows-1252/Latin-1", pattern: /[\u00c3\u00c4\u00c5][^\s/]/ },
+  {
+    label: "UTF-8 decoded as Windows-1252/Latin-1",
+    pattern: /\u00c3[\u0080-\u00bf]|\u00c4[\u00b0\u00b1\u0178\u017e]|\u00c5[\u0178\u017e]/
+  },
   { label: "mojibake emoji lead", pattern: /\u00f0\u0178/ },
-  { label: "mojibake punctuation or symbol lead", pattern: /\u00e2[\u20ac\u0153\u201e\u2122\u0161\u017e\u0178]/ }
+  {
+    label: "mojibake punctuation or symbol lead",
+    pattern: /\u00e2[\u20ac\u0153\u017e\u2122\u0161\u201c\u201d\u2013\u2014]/
+  }
 ];
 
 const publicHandoffDocs = new Set([

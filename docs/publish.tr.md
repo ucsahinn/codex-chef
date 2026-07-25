@@ -1,8 +1,10 @@
-# Yayınlama Checklist'i
+# Yayın Kontrol Listesi
 
-Bu repo public push için tasarlandı, fakat publish ayrı bir kullanıcı kararıdır.
+Yayın, lokal güvenin public bir iddiaya dönüştüğü noktadır. Sıralamayı bozma: önce doğrula, exact diff’i incele, ardından açık onayla commit, tag veya release oluştur.
 
-## Push Veya Release Öncesi
+Güncel yayınlanmış temel sürüm: **v0.5.53**.
+
+## Commit Veya Push Öncesi
 
 ```bash
 npm run check
@@ -22,73 +24,49 @@ Gitleaks varsa:
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
-Release için ayrıca şunları doğrula:
+Stage edilen diff’i dosya dosya incele. Ignored `.serena/`, `tmp/`, log, cache, screenshot, archive, package tarball, auth state, session veya memory dosyalarını stage etme.
 
-- `package.json` version hedef tag ile aynı olmalı.
-- `CHANGELOG.md` içinde tarihli version bölümü olmalı.
-- [docs/release-notes.tr.md](release-notes.tr.md) release ile aynı olmalı.
-- [docs/github-settings.tr.md](github-settings.tr.md) hedef repo açıklaması,
-  topic'leri ve release metadata'sı ile aynı olmalı.
-- `git diff --cached` yalnızca review edilmiş source/docs/config dosyalarını
-  içermeli.
-- ignored `.serena/`, `tmp/`, log, cache, screenshot ve generated archive
-  dosyaları stage edilmemeli.
+## Release Notunu Hazırla
 
-## GitHub Repo Oluşturma
-
-GitHub CLI ile, açık onaydan sonra:
+`docs/release-notes.tr.md` kullanıcıların şimdi kurması gereken sürümü anlatır. Tam geçmiş `CHANGELOG.md` içinde kalır. GitHub Release metnini yalnız güncel bölümden üret:
 
 ```bash
-gh repo create codex-chef --public --source . --remote origin
-git push -u origin main
-```
-
-Manuel remote:
-
-```bash
-git remote add origin https://github.com/<owner>/codex-chef.git
-git push -u origin main
-```
-
-Release-note artifact'ini yalnizca read-only kontroller gectikten ve gercekten
-release hazirlanirken olustur.
-
-## Mevcut Repo Release Akışı
-
-Açık commit/push/release onayından sonra:
-
-```bash
-git add <review edilmiş dosyalar>
-git diff --cached
 npm run release:notes
-git commit -m "Release Codex Chef v0.5.50"
-git push origin main
-git tag v0.5.50
-git push origin v0.5.50
-gh release create v0.5.50 --title "Codex Chef v0.5.50" --notes-file tmp/release-notes-current.md
 ```
 
-Push sonrasında remote eşitliği ve CI durumunu doğrula:
+Oluşan `tmp/release-notes-current.md` lokal release girdisidir; tracked source değildir.
+
+## Mevcut Repoyu Yayınla
+
+Açık onay ve temiz staged review sonrasında:
+
+```bash
+git commit -m "Prepare Codex Chef public docs"
+git push origin main
+```
+
+Gelecekteki bir sürüm için `<version>` değerini ancak package metadata ve iki release-note dosyası hizalandıktan sonra değiştir:
+
+```bash
+git tag -a v<version> -m "Codex Chef v<version>"
+git push origin v<version>
+gh release create v<version> --title "Codex Chef v<version>" --notes-file tmp/release-notes-current.md
+```
+
+## Public Durumu Doğrula
 
 ```bash
 git rev-parse HEAD
 git -c http.sslBackend=openssl ls-remote origin refs/heads/main
 gh run list --workflow validate --branch main --limit 1
+gh release view v<version>
 ```
 
-## Public Etme
+Lokal ve remote commit aynı olmalı, CI tamamen yeşil olmalı ve release tag’i hedeflenen commit’e çözülmeli.
 
-Şunları public repo'ya koyma:
+## Asla Yayınlama
 
-- gerçek credential
-- auth dosyası
-- Codex memory/session state
-- kullanıcıya özel `.codex` backup'ları
-- lokal proje pathleri
-- installer ve release archive'ları
-
-## Release Artifact
-
-Bu paket source-first. İleride zip veya installer üretirsen bunları source'a
-commit etmek yerine GitHub Releases üzerinden yayınla.
-<!-- Current release: v0.5.52 -->
+- credential, auth dosyası, cookie, private key veya signing materyali
+- Codex session, memory, log, browser profile veya lokal database
+- makineye özel path veya project trust state
+- generated installer, archive, build output, dependency klasörü veya scratch raporu normal source dosyası olarak

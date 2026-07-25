@@ -1,8 +1,8 @@
 # Kurulum Rehberi
 
-Bu rehber starter paketini mevcut kullanıcının Codex home dizinine kurar.
-Varsayılan konum `~/.codex` dizinidir. `CODEX_HOME` tanımlıysa installer o
-dizini kullanır.
+Codex Chef mevcut kullanıcının Codex home dizinine kurulur. Varsayılan konum
+`~/.codex` dizinidir; `CODEX_HOME` tanımlıysa installer bunun yerine o path'i
+kullanır. İlk gerçek write sürpriz olmasın diye her zaman ön izlemeyle başla.
 
 ## Gereksinimler
 

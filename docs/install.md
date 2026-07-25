@@ -1,7 +1,8 @@
 # Installation Guide
 
-This guide installs the starter into the current user's Codex home. By default
-Codex uses `~/.codex`; if `CODEX_HOME` is set, the installer uses that path.
+Codex Chef installs into the current user's Codex home. That is `~/.codex` by
+default; when `CODEX_HOME` is set, the installer respects that path instead.
+Start with a preview so the first real write is never a surprise.
 
 ## Prerequisites
 

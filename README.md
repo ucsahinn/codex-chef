@@ -9,45 +9,42 @@
 <p align="center">
   <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
-  <a href="README.md"><img alt="Documentation languages" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
+  <a href="README.md"><img alt="Six README languages" src="https://img.shields.io/badge/readme-6%20languages-0f766e" /></a>
   <img alt="Windows, macOS, Linux, and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-164e63" />
 </p>
 
 <p align="center">
   <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> <strong>Docs:</strong>
-  <a href="README.de.md"><img src="https://flagcdn.com/w20/de.png" alt="Deutsch" width="20"></a> |
-  <a href="README.es.md"><img src="https://flagcdn.com/w20/es.png" alt="Español" width="20"></a> |
-  <a href="README.md"><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"></a> |
-  <a href="README.pt-BR.md"><img src="https://flagcdn.com/w20/br.png" alt="Português (Brasil)" width="20"></a> |
-  <a href="README.tr.md"><img src="https://flagcdn.com/w20/tr.png" alt="Türkçe" width="20"></a> |
-  <a href="README.fr.md"><img src="https://flagcdn.com/w20/fr.png" alt="Français" width="20"></a>
+  <a href="README.de.md">Deutsch</a> |
+  <a href="README.es.md">Español</a> |
+  <a href="README.md">English</a> |
+  <a href="README.pt-BR.md">Português (Brasil)</a> |
+  <a href="README.tr.md">Türkçe</a> |
+  <a href="README.fr.md">Français</a>
 </p>
 
 <!-- bilingual-welcome:start -->
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"> English welcome</h3>
-      <p><strong>Codex Chef is a cross-platform Codex setup kit for Windows, macOS, Linux, and WSL.</strong> It installs a reviewable baseline for agents, MCPs, skills, plugins, safety rules, and verification without turning on risky account or database access by default.</p>
-      <p><strong>Start here:</strong> run the safe preview, then use the interactive installer only after you see what will change.</p>
+      <h3>English</h3>
+      <p><strong>Codex Chef gives Codex a strong local operating setup without copying someone else’s machine.</strong> You get specialist agents, reviewed skills, conservative MCP defaults, preview-first installers, and checks you can run yourself.</p>
     </td>
     <td width="50%" valign="top">
-      <h3><img src="https://flagcdn.com/w20/tr.png" alt="Türkçe" width="20"> Türkçe karşılama</h3>
-      <p><strong>Codex Chef; Windows, macOS, Linux ve WSL için platform bağımsız bir Codex kurulum kitidir.</strong> Ajanlar, MCP'ler, skill'ler, plugin akışları, güvenlik kuralları ve doğrulamayı tek yerde toplar; riskli hesap/database bağlantılarını kendiliğinden açmaz.</p>
-      <p><strong>Buradan başla:</strong> önce safe preview çalıştır, sonra değişiklikleri gördükten sonra interactive install kullan.</p>
+      <h3>Türkçe</h3>
+      <p><strong>Codex Chef, başkasının makinesini kopyalamadan Codex’e güçlü bir lokal çalışma düzeni kazandırır.</strong> Uzman ajanlar, incelenmiş skill’ler, temkinli MCP varsayılanları, ön izleme öncelikli installer’lar ve kendi çalıştırabileceğin kontroller sunar.</p>
     </td>
   </tr>
 </table>
 <!-- bilingual-welcome:end -->
 
-This is an unofficial community starter, not an OpenAI product. It is mapped to current official Codex documentation and keeps destructive, credentialed, publishing, deployment, database, and broad filesystem actions approval-gated.
+Codex Chef is an unofficial community starter, not an OpenAI product. Its Codex guidance is based on official Codex documentation and is checked against the repository's current contracts. It supports Windows, macOS, Linux, and WSL, and keeps destructive, credentialed, database, publishing, deployment, and broad-filesystem actions behind explicit approval.
 
-The multilingual README entry points, six-language deep docs coverage, and bilingual knowledge base are part of the release surface. English and Turkish keep the most complete operator flow; Deutsch, Español, Português (Brasil), and Français provide concise local entry points and links into the same deep docs.
+There are six README entry points for orientation. English and Turkish deep docs contain the complete operator guidance; the other language pages are concise, human-written routes into those canonical guides.
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Copy-Paste Install
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Start With A Preview
 
-Before you paste, confirm the local prerequisites so setup failures point to the
-right layer:
+Check the local prerequisites first:
 
 ```powershell
 Get-Command git
@@ -57,11 +54,9 @@ Get-Command codex
 node -v
 ```
 
-Node.js 18 or newer is required. If one of these commands is missing, use
-[Troubleshooting](docs/troubleshooting.md) before treating the repository as
-broken.
+Node.js 18 or newer is required. If a command is missing, start with [Troubleshooting](docs/troubleshooting.md).
 
-Preview first:
+Clone and preview without changing your Codex home:
 
 ```powershell
 git clone https://github.com/ucsahinn/codex-chef.git
@@ -70,13 +65,13 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 node scripts/plan-install.mjs --all --json --redact-paths
 ```
 
-Install after reviewing the preview:
+Install only after the preview looks right:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
 ```
 
-Bash or WSL:
+macOS, Linux, or WSL:
 
 ```bash
 git clone https://github.com/ucsahinn/codex-chef.git
@@ -85,96 +80,52 @@ chmod +x scripts/install.sh
 ./scripts/install.sh --all --interactive
 ```
 
-Repair an existing Codex Chef setup without deleting user skills:
+The installer backs up managed targets before replacement. Normal install and repair do not prune user-owned skills, MCPs, profiles, or unrelated plugin files.
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair -WhatIf
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Repair
-```
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> Use The CLI Without Guessing
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> CLI Without The Noise
-
-Use `npm run chef` for the menu. Keep these commands handy:
+Run `npm run chef` for the numbered command center.
 
 | Need | Command |
 | --- | --- |
-| Fast local health check | `npm run chef -- --status --repo-only --no-log` |
+| Fast repository health | `npm run chef -- --status --repo-only --no-log` |
 | Full status board | `npm run codex:status` |
 | Install preview | `npm run chef -- --preview` |
-| Routing profile map | `npm run chef -- --routing --profile starter-health` |
-| Diagnostics hub | `npm run chef -- --diagnostics --no-log` |
-| Process audit only | `npm run chef -- --processes --no-log` |
-| Repair preview/apply | `npm run chef -- --repair` then `npm run chef -- --repair --apply` |
+| Routing map | `npm run chef -- --routing --profile starter-health` |
+| Diagnostics | `npm run chef -- --diagnostics --no-log` |
+| Process audit | `npm run chef -- --processes` |
+| Repair managed files | `npm run chef -- --repair`, then `npm run chef -- --repair --apply` |
+| Update preview | `npm run chef -- --update --plain --no-log` |
+| Update and verify | `npm run chef -- --update --apply` |
 
-Rules of thumb:
+Inspection commands stay read-only. Write-capable commands require `--apply` or an action-specific typed confirmation. Use `--no-log` when you do not want the CLI to create its normal redacted, repo-local diagnostic record.
 
-- `--status`, `--preview`, `--skills`, `--mcp`, `--routing`, `--diagnostics`, `--processes`, `--auth`, and `--logs` are inspection-first surfaces.
-- Write paths require `--apply` or typed confirmation. The menu labels the write boundary before doing anything risky.
-- Add `--no-log` when you want a strict no-log audit. Normal CLI logs are repo-local, ignored, and redacted.
-- Do not use `npx run`; use `npm run chef` or `npm --prefix <repo> run chef`.
+Detailed CLI behavior lives in [Installation](docs/install.md), [Expected
+output](docs/expected-output.md), and [Troubleshooting](docs/troubleshooting.md).
 
-Detailed CLI behavior lives in [Install](docs/install.md), [Expected output](docs/expected-output.md), and [Troubleshooting](docs/troubleshooting.md).
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> What Lands On Your Machine
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> What You Get
-
-Codex Chef installs a reviewed Codex baseline, not a hidden copy of someone else's machine.
-
-| Surface | What lands on your machine |
+| Surface | What you get |
 | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agent team | 21 Codex subagent role files under `~/.codex/agents/*.toml`, including readable `nickname_candidates`. They are role definitions, not always-on services. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Durable guidance | Global `~/.codex/AGENTS.md` with routing, verification, safety, and approval rules. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP defaults | 8 useful MCP entries enabled for docs, code navigation, browser evidence, reasoning, non-secret memory, and local codebase graph reads; mutating tools are prompt-gated or disabled, and 8 account/database/high-risk connectors stay disabled. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Plugin + skills | Local `codex-chef-workflows` plugin, four bundled skills, and sixteen reviewed optional global skills. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Safety gates | Dry runs, backups, validation, secret scanning, and approval gates before risky actions. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agents | 21 named specialist role files. They are available for bounded delegation, not always-running background services. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skills | Five bundled plugin workflows and sixteen reviewed optional global skills. Skills load when the task matches; they do not execute by themselves. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCPs | Eight useful defaults for official docs, current library docs, reasoning, browser evidence, semantic navigation, memory reads, and local codebase graph reads through `codebase-memory`. Eight account, database, production, and broad-filesystem connectors stay off. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Guidance | A durable `~/.codex/AGENTS.md`, routing profiles, approval rules, and token-safe profile choices that do not pin every agent to one model. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Safety | Dry runs, manifest-backed install plans, backup-first replacement, secret scanning, package-surface checks, and runtime verification. |
 
-Installed skills do not execute by themselves. They enter context when named by
-the user or when a task clearly matches their description. Agent roles are
-selected automatically, but spawning is conditional: use a subagent only for
-genuinely independent parallel work, to isolate noisy logs or research from the
-main thread, or when the user explicitly requests delegation. `max_threads =
-10` remains a capacity ceiling for multi-window use; ordinary routing targets
-one to four focused agents. Agent files do not pin a model or reasoning effort,
-so `token-safe.config.toml` and the user's active profile model/reasoning choices
-remain authoritative.
+Installed skills do not execute by themselves; Codex loads them when a request
+matches their description or the user names one. Agent role selection is
+automatic, but spawning is conditional: delegation is reserved for independent
+parallel work, noisy research isolation, or an explicit user request.
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Installed Agent Team
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> What It Deliberately Does Not Do
 
-These are the visible specialist names Codex Chef installs. They are role files for explicit, visible delegation; they are not always-on background services.
+- It does not store secrets, import browser sessions, copy private memories, or send telemetry to a maintainer service.
+- It does not enable GitHub, Figma, Linear, Notion, Sentry, Vercel, Supabase, or broad filesystem access by default.
+- It does not commit, push, tag, release, deploy, publish packages, rotate credentials, or change GitHub settings.
+- It does not delete user data to make validation pass.
 
-| Map and plan | Build and review | Verify and ship |
-| --- | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5fa.svg" alt="" aria-hidden="true" width="18"> **Code Mapper** (`code_mapper`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" alt="" aria-hidden="true" width="18"> **Design Reviewer** (`design_reviewer`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="18"> **QA Lead** (`qa_lead`) |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="18"> **Docs Researcher** (`docs_researcher`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f0.svg" alt="" aria-hidden="true" width="18"> **DevEx Auditor** (`devex_auditor`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="18"> **Performance Auditor** (`performance_auditor`) |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ed.svg" alt="" aria-hidden="true" width="18"> **Context Architect** (`context_architect`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f575.svg" alt="" aria-hidden="true" width="18"> **Root-Cause Debugger** (`root_cause_debugger`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50e.svg" alt="" aria-hidden="true" width="18"> **Google SEO Auditor** (`google_seo_auditor`) |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/270d.svg" alt="" aria-hidden="true" width="18"> **Prompt Architect** (`prompt_architect`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4dd.svg" alt="" aria-hidden="true" width="18"> **Docs Author** (`docs_author`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="18"> **Security Auditor** (`security_auditor`) |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="18"> **MCP Integrator** (`mcp_integrator`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4cb.svg" alt="" aria-hidden="true" width="18"> **Spec Author** (`spec_author`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="18"> **Test Verifier** (`test_verifier`) |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3af.svg" alt="" aria-hidden="true" width="18"> **Product Strategist** (`product_strategist`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50d.svg" alt="" aria-hidden="true" width="18"> **Code Reviewer** (`code_reviewer`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a2.svg" alt="" aria-hidden="true" width="18"> **Release Verifier** (`release_verifier`) |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3d7.svg" alt="" aria-hidden="true" width="18"> **Engineering Planner** (`engineering_planner`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ad.svg" alt="" aria-hidden="true" width="18"> **Frontend Verifier** (`frontend_verifier`) | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1fa7a.svg" alt="" aria-hidden="true" width="18"> **Codex Doctor** (`codex_doctor`) |
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skills Included
-
-| Set | Skills |
-| --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> Local plugin | `codex-chef-operator`, `offline-diagram-triplet`, `context-budget-planner`, `adaptive-agent-routing` |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9f0.svg" alt="" aria-hidden="true" width="20"> Reviewed global catalog | `dependency-upgrade`, `gh-fix-ci`, `systematic-debugging`, `request-refactor-plan`, `security-best-practices`, `frontend-skill`, `webapp-testing`, `web-quality-audit`, `seo`, `accessibility`, `test-driven-development`, `documentation-and-adrs`, `mcp-builder`, `ai-project-starter`, `prompt-architect`, `ai-skill-create` |
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP Defaults
-
-| Status | MCPs | Boundary |
-| --- | --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Default-enabled narrowed tools | OpenAI Docs · Context7 · Sequential Thinking · Playwright · Chrome DevTools · Serena · Memory · `codebase-memory` | Docs and reasoning run smoothly; browser evidence, semantic navigation, local memory reads, and local graph reads are allowlisted, while interaction, symbol edits, graph indexing, and writes stay prompt-gated or disabled. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f512.svg" alt="" aria-hidden="true" width="20"> Disabled until opt-in | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c1.svg" alt="" aria-hidden="true" width="18"> Filesystem · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f419.svg" alt="" aria-hidden="true" width="18"> GitHub · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a8.svg" alt="" aria-hidden="true" width="18"> Figma · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4cc.svg" alt="" aria-hidden="true" width="18"> Linear · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5d2.svg" alt="" aria-hidden="true" width="18"> Notion · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a8.svg" alt="" aria-hidden="true" width="18"> Sentry · ▲ Vercel · <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f5c4.svg" alt="" aria-hidden="true" width="18"> Supabase | These can expose private files, accounts, deployments, telemetry, or databases. |
-
-Run `npm run codex:status` after install to see MCP setup notes, effective controls, routing profiles, and installed-runtime drift without mutating global Codex state.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> What It Does Not Do
-
-- It does not store secrets, copy private memory state, or import existing sessions; Memory MCP is only for non-secret local context when you use it deliberately.
-- It does not enable authenticated account, database, production, or broad filesystem MCP connectors by default.
-- It does not commit, push, tag, release, publish packages, deploy, rotate secrets, or change GitHub settings.
-- It does not delete user data as a cleanup shortcut; repair and force flows are previewed and backup-backed.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ac.svg" alt="" aria-hidden="true" width="20"> Visual Overview
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ac.svg" alt="" aria-hidden="true" width="20"> See The Workflow
 
 <p align="center">
   <img src="assets/workflow-overview.svg" alt="Workflow overview showing install, route, research, implement, and verify steps" width="100%" />
@@ -182,83 +133,40 @@ Run `npm run codex:status` after install to see MCP setup notes, effective contr
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Trust Signals
 
-| Signal | Evidence |
-| --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ea.svg" alt="" aria-hidden="true" width="20"> Real validation | `npm run check` runs repo, docs, install-plan, installer smoke, agent drift, MCP drift, token-surface, skill-source, supply-chain, package-surface, release-readiness, and security checks. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> Multilingual surface | Six root READMEs plus six-language deep docs are validated. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d8.svg" alt="" aria-hidden="true" width="20"> Operator KB | `kb/` keeps short English and Turkish task articles for install preview, runtime verification, routing, and release hygiene. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> Conservative connectors | Account, database, production, and broad filesystem connectors stay disabled until a task explicitly needs them. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Install plan | `manifests/install-plan.json` and `schemas/install-plan.schema.json` define the managed write surface. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9ee.svg" alt="" aria-hidden="true" width="20"> Context budget | `npm run token:audit` separates always-loaded instructions, discoverability metadata, invoked/deferred surfaces, repository maintenance size, tool schema/context, measured session telemetry when available, and per-agent cost. It is a context estimate, not provider billing. |
-| Agent-readable index | `llms.txt` gives agents a compact map of install targets, docs, safety boundaries, and comparison sources. |
+- `npm run check` validates docs, installers, agents, MCPs, skills, routing, package contents, release metadata, supply-chain indicators, and security boundaries.
+- CI covers the Windows installer, Ubuntu with Node.js 18, and macOS with Node.js 24.
+- `manifests/install-plan.json` describes the managed write surface before an installer runs.
+- Authenticated and high-risk connectors remain opt-in.
+- The repository is `private: true` in npm metadata, so this source-first project cannot be published to npm by accident.
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4c1.svg" alt="" aria-hidden="true" width="20"> Repository Layout
-
-```text
-.github/                 CI workflow plus issue and PR templates
-assets/                  Public-safe README visuals
-catalog/                 Agent, skill, MCP, and routing metadata
-README*.md               Multilingual public entry points
-docs/                    Six-language setup and verification guides
-kb/                      English and Turkish task-focused knowledge base
-manifests/               No-write install plan metadata
-plugins/                 Bundled local Codex plugin and skills
-schemas/                 Lightweight validation schemas
-scripts/                 Install, doctor, status, CLI, and validation scripts
-templates/codex/         Files copied into ~/.codex
-templates/git/           Optional global Git hygiene files
-```
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9fe.svg" alt="" aria-hidden="true" width="20"> Verify Locally
+Verify locally:
 
 ```bash
 npm run check
+npm run token:audit
+npm run verify:skills:online
 git diff --check
 gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
-Optional online skill-source check:
-
-```bash
-npm run verify:skills:online
-```
+For long or repository-wide sessions, `npm run token:audit` shows which context surfaces carry the most weight. The optional `token-safe.config.toml` profile lowers verbosity and tool-output limits without disabling agents, skills, MCPs, memory, hooks, or apps. Agent roles do not pin a model; automatic `model/reasoning` selection follows the active user profile.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Documentation
 
-Use the README for orientation; use the docs for operator detail:
-
-- [Install](docs/install.md)
-- [How to run the setup](docs/how-to.md)
-- [Expected output](docs/expected-output.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Upgrade guide](docs/upgrade.md)
-- [Codex capability map](docs/codex-capability-map.md)
-- [Workflow surface map](docs/workflow-surface-map.md)
-- [Codex surfaces](docs/codex-surfaces.md)
-- [Codex flags](docs/codex-flags.md)
+- [Documentation map](docs/README.md)
+- [Türkçe dokümantasyon haritası](docs/README.tr.md)
+- [Installation](docs/install.md)
+- [Security model](docs/security-model.md)
 - [Skills and agents](docs/skills-and-agents.md)
 - [MCP catalog](docs/mcp-catalog.md)
-- [Security model](docs/security-model.md)
-- [Verification](docs/verification.md)
 - [Public readiness](docs/public-readiness.md)
-- [ECC compatibility](docs/ecc-compatibility.md)
-- [SEO and discoverability](docs/seo.md)
-- [Research notes](docs/research-notes.md)
 - [Advisory sources](docs/advisory-sources.md)
-- [Publishing](docs/publish.md)
 - [Knowledge base](kb/README.md)
-- [Turkish knowledge base](kb/README.tr.md)
+- [Türkçe bilgi bankası](kb/README.tr.md)
 - [Agent-readable index](llms.txt)
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Official Codex References
+## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f91d.svg" alt="" aria-hidden="true" width="20"> Contributing And Support
 
-- Codex manual: https://developers.openai.com/codex/codex-manual.md
-- Skills: https://developers.openai.com/codex/skills
-- Plugins: https://developers.openai.com/codex/plugins
-- MCP and connectors: https://developers.openai.com/api/docs/guides/tools-connectors-mcp
-- Windows: https://developers.openai.com/codex/windows
-- Config, permissions, rules, hooks, and `AGENTS.md` mapping: [Research notes](docs/research-notes.md)
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a change and [SUPPORT.md](SUPPORT.md) before sharing diagnostics. Security reports belong in the private route described by [SECURITY.md](SECURITY.md).
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Publishing Boundary
-
-This repo is built to be public-ready after validation, but the installer is local-only. Commit, push, tag, release, package publishing, deployments, and GitHub settings changes must be explicit human decisions after local verification.
+MIT licensed. Community maintained.
