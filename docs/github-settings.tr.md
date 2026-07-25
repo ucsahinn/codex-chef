@@ -79,4 +79,4 @@ git -c http.sslBackend=openssl ls-remote origin refs/heads/main
 ```
 
 Release yayınlanmadan önce local ve remote hash aynı olmalı.
-<!-- Current release: v0.5.51 -->
+<!-- Current release: v0.5.52 -->

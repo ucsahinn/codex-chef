@@ -651,7 +651,10 @@ function inspectCodexCliRuntime() {
         status: "skipped",
         exitCode: null,
         configuredCount: 0,
+        enabledCount: 0,
+        disabledCount: 0,
         configuredServers: [],
+        states: [],
         outputPreview: null
       },
       ambient: {
@@ -665,7 +668,10 @@ function inspectCodexCliRuntime() {
           status: "skipped",
           exitCode: null,
           configuredCount: 0,
+          enabledCount: 0,
+          disabledCount: 0,
           configuredServers: [],
+          states: [],
           outputPreview: null
         }
       },
@@ -683,15 +689,25 @@ function inspectCodexCliRuntime() {
       .map((server) => server.name || server.id)
       .filter(Boolean)
       .sort();
+    const mcpStates = mcpEntries
+      .map((server) => ({
+        name: server.name || server.id,
+        enabled: server.enabled !== false,
+        disabledReason: typeof server.disabled_reason === "string" ? server.disabled_reason : null,
+        authStatus: typeof server.auth_status === "string" ? server.auth_status : null
+      }))
+      .filter((server) => Boolean(server.name))
+      .sort((left, right) => left.name.localeCompare(right.name));
 
-    return { version, login, mcp, mcpNames };
+    return { version, login, mcp, mcpNames, mcpStates };
   }
 
   const targetEnv = { ...process.env, CODEX_HOME: options.codexHome };
   const targetProbe = inspectWithEnv(targetEnv, "target");
   const ambientProbe = inspectWithEnv(process.env, "ambient");
-  const { version, login, mcp, mcpNames } = targetProbe;
+  const { version, login, mcp, mcpNames, mcpStates } = targetProbe;
   const ambientMcpNames = ambientProbe.mcpNames;
+  const ambientMcpStates = ambientProbe.mcpStates;
   const ambientSameAsTarget = ambientProbe.login.status === login.status
     && ambientMcpNames.length === mcpNames.length
     && ambientMcpNames.every((name, index) => name === mcpNames[index]);
@@ -727,7 +743,10 @@ function inspectCodexCliRuntime() {
       status: mcp.status,
       exitCode: mcp.exitCode,
       configuredCount: mcpNames.length,
+      enabledCount: mcpStates.filter((server) => server.enabled).length,
+      disabledCount: mcpStates.filter((server) => !server.enabled).length,
       configuredServers: mcpNames,
+      states: mcpStates,
       outputPreview: mcp.outputPreview || null
     },
     ambient: {
@@ -751,7 +770,10 @@ function inspectCodexCliRuntime() {
         status: ambientProbe.mcp.status,
         exitCode: ambientProbe.mcp.exitCode,
         configuredCount: ambientMcpNames.length,
+        enabledCount: ambientMcpStates.filter((server) => server.enabled).length,
+        disabledCount: ambientMcpStates.filter((server) => !server.enabled).length,
         configuredServers: ambientMcpNames,
+        states: ambientMcpStates,
         outputPreview: ambientProbe.mcp.outputPreview || null
       }
     },
@@ -1151,7 +1173,7 @@ if (options.json) {
   console.log(`${localText("Target Codex home", "Hedef Codex home")}: ${codexCliRuntime.target.codexHome}`);
   const ambientMcpText = codexCliRuntime.ambient.mcp.inspected === false
     ? localText("MCP skipped", "MCP atlandi")
-    : `MCP ${codexCliRuntime.ambient.mcp.configuredCount}`;
+    : `MCP ${codexCliRuntime.ambient.mcp.configuredCount} (${codexCliRuntime.ambient.mcp.enabledCount} on/${codexCliRuntime.ambient.mcp.disabledCount} off)`;
   console.log(
     `${localText("Ambient Codex", "Ortam Codex")}: ${stateText(codexCliRuntime.ambient.relationshipToTarget)} (login ${stateText(codexCliRuntime.ambient.login.status)}, ${ambientMcpText}; CODEX_HOME env ${codexCliRuntime.ambient.codexHomeEnv || localText("unset", "atanmamis")})`
   );
@@ -1159,12 +1181,21 @@ if (options.json) {
   if (gitRepository.remediation) console.log(`${localText("Repo Git remediation", "Repo Git onerisi")}: ${translateStatusMessage(gitRepository.remediation)}`);
   const targetMcpText = codexCliRuntime.mcp.inspected === false
     ? localText("MCP probe skipped", "MCP probu atlandi")
-    : localText(`MCP configured ${codexCliRuntime.mcp.configuredCount}`, `MCP config ${codexCliRuntime.mcp.configuredCount}`);
+    : localText(
+        `MCP configured ${codexCliRuntime.mcp.configuredCount}, enabled ${codexCliRuntime.mcp.enabledCount}, disabled ${codexCliRuntime.mcp.disabledCount}, live not probed`,
+        `MCP yapılandırılmış ${codexCliRuntime.mcp.configuredCount}, açık ${codexCliRuntime.mcp.enabledCount}, kapalı ${codexCliRuntime.mcp.disabledCount}, canlı durum ölçülmedi`
+      );
   console.log(
     codexCliRuntime.mcp.inspected === false
       ? `Codex CLI: ${stateText(codexCliRuntime.status)} (strict config ${stateText(codexCliRuntime.version.status)}, login ${stateText(codexCliRuntime.login.status)}, ${targetMcpText})`
       : `Codex CLI: ${stateText(codexCliRuntime.status)} (strict config ${stateText(codexCliRuntime.version.status)}, login ${stateText(codexCliRuntime.login.status)}, MCP ${stateText(codexCliRuntime.mcp.status)}; ${targetMcpText})`
   );
+  for (const server of codexCliRuntime.mcp.states || []) {
+    const state = server.enabled ? "ON" : "OFF";
+    const auth = server.authStatus ? `, auth=${server.authStatus}` : "";
+    const reason = server.disabledReason ? `, reason=${server.disabledReason}` : "";
+    console.log(`  MCP ${server.name}: ${state} [CLI CONFIG; live=not-probed${auth}${reason}]`);
+  }
   console.log(
     `${localText("Logs", "Loglar")}: Chef ${logSummary.repoCliLogs.recent.length} ${localText("recent metadata record(s), content not inspected", "son metadata kaydi, icerik incelenmedi")}; ${logSummary.codexLogs.inspected === false ? localText("Codex skipped", "Codex atlandi") : `Codex ${logSummary.codexLogs.recent.length} ${localText("recent metadata record(s), content not inspected", "son metadata kaydi, icerik incelenmedi")}`}`
   );

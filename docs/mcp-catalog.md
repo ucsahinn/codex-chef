@@ -94,9 +94,13 @@ root before enabling:
 ```toml
 [mcp_servers.filesystem]
 enabled = true
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "C:\\Users\\you\\project"]
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "."]
 default_tools_approval_mode = "prompt"
 ```
+
+`.` means the Codex process working directory and avoids a machine-specific
+path. Replace it with a narrower absolute workspace before enabling when the
+task should not expose the whole current workspace.
 
 For Supabase, set the database URL outside the repo and keep approval prompted:
 

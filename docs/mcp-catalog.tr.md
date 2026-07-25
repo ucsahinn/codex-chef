@@ -93,9 +93,13 @@ Filesystem icin template path'i acmadan once en dar local root ile degistir:
 ```toml
 [mcp_servers.filesystem]
 enabled = true
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "C:\\Users\\you\\project"]
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "."]
 default_tools_approval_mode = "prompt"
 ```
+
+`.` Codex process'inin çalışma dizinini ifade eder ve makineye özel path
+gerektirmez. Görev bütün mevcut workspace'i görmemeliyse açmadan önce daha dar
+bir absolute workspace ile değiştir.
 
 Supabase icin database URL'ini repo disinda ayarla ve approval'i prompt tut:
 

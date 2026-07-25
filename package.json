@@ -1,8 +1,8 @@
 {
   "name": "codex-chef",
-  "version": "0.5.51",
+  "version": "0.5.52",
   "private": true,
-  "description": "Codex Chef: Windows-first Codex setup kit with agents, skills, MCPs, safe installers, and validation gates.",
+  "description": "Codex Chef: cross-platform Codex setup kit with agents, skills, MCPs, safe installers, and validation gates.",
   "files": [
     ".agents/",
     ".github/",

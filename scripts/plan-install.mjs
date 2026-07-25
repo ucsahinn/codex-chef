@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 const root = path.resolve(process.cwd());
@@ -18,9 +19,9 @@ function parseArgs(argv) {
     noBackup: false,
     redactPaths: false,
     platform: process.platform === "win32" ? "windows" : "unix",
-    codexHome: process.env.CODEX_HOME || path.join(process.env.HOME || process.env.USERPROFILE || "~", ".codex"),
-    agentsHome: process.env.AGENTS_HOME || path.join(process.env.HOME || process.env.USERPROFILE || "~", ".agents"),
-    home: process.env.HOME || process.env.USERPROFILE || "~"
+    codexHome: process.env.CODEX_HOME || path.join(os.homedir(), ".codex"),
+    agentsHome: process.env.AGENTS_HOME || path.join(os.homedir(), ".agents"),
+    home: os.homedir()
   };
 
   for (let index = 2; index < argv.length; index += 1) {

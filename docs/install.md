@@ -90,9 +90,9 @@ Without `--apply`, update mode does not change managed/global files; normal
 CLI logs are still repo-local unless `--no-log` is supplied. The default
 preview is concise; `npm run chef -- --update --verbose-plan` prints the full
 install dry-run evidence. Apply mode requires a clean worktree and runs
-`git pull --ff-only`. If the pull advances the repo, the CLI prints a fresh
-preview and stops; rerun `npm run chef -- --update --apply` after reviewing
-that updated preview. If the repo is already current, apply refreshes managed
+`git pull --ff-only`. If the pull advances the repo, the same approved CLI
+prints a fresh preview, continues local validation and managed refresh, then
+verifies installed-runtime parity. If the repo is already current, apply refreshes managed
 files through the backup-backed installer. Update does not install curated global skills
 or optional global Git guards; use `--install --apply` or `--skills --apply`
 when you want those explicit surfaces.
@@ -199,7 +199,7 @@ Useful switches:
 - `-PlainOutput`: use ASCII status markers instead of emoji, useful for older
   Windows consoles, CI logs, and terminals that render Unicode poorly.
 
-## Bash Or WSL Install
+## Bash Install (macOS, Linux, Or WSL)
 
 Preview without writing:
 
@@ -230,7 +230,7 @@ Useful flags:
 - `--no-backup`
 - `--dry-run`
 - `--plain-output`: use ASCII status markers.
-- `--interactive`: guided Bash/WSL setup with the same path, skills, force,
+- `--interactive`: guided macOS/Linux/WSL setup with the same path, skills, force,
   Git-guard, and continue prompts.
 
 Both installers finish with a capability board that lists the specialist

@@ -423,7 +423,11 @@ function displayValue(value, column = {}) {
 }
 
 function makeIcons() {
-  const source = supportsColor() ? RICH_ICONS : ASCII_ICONS;
+  // Emoji rendering is not reliable across Windows console code pages. Keep
+  // colour, but use deterministic ASCII operational markers in real sessions.
+  const source = process.env.CODEX_CHEF_TEST_MENU === "1" && supportsColor()
+    ? RICH_ICONS
+    : ASCII_ICONS;
   return Object.fromEntries(
     Object.entries(source).map(([name, icon]) => [name, colorize(icon, ICON_COLORS[name])])
   );
@@ -544,40 +548,52 @@ const MENU_ITEMS = [
 
 const MENU_GROUPS = [
   {
-    id: "check",
-    label: "Check",
-    labelTr: "Kontrol",
-    itemIds: ["status", "status:repo-only", "doctor"]
+    id: "system",
+    label: "System dashboard",
+    labelTr: "Sistem paneli",
+    description: "Runtime, repository, login, skills, MCP, and health evidence.",
+    descriptionTr: "Çalışma ortamı, repo, oturum, skill, MCP ve sağlık kanıtları.",
+    itemIds: ["status"]
   },
   {
-    id: "plan",
-    label: "Plan first",
-    labelTr: "Önce planla",
-    itemIds: ["preview", "update"]
+    id: "setup",
+    label: "Setup & update",
+    labelTr: "Kurulum ve güncelleme",
+    description: "Preview, update, install, refresh, and repair with explicit write gates.",
+    descriptionTr: "Açık yazma onaylarıyla ön izleme, güncelleme, kurulum, yenileme ve onarım.",
+    itemIds: ["preview", "update", "install", "reset", "repair"]
   },
   {
-    id: "apply-gated",
-    label: "Apply-gated setup",
-    labelTr: "Onaylı kurulum",
-    itemIds: ["install", "reset", "repair"]
+    id: "capabilities",
+    label: "Capabilities",
+    labelTr: "Yetenekler",
+    description: "Curated skills, MCP connectors, and routing ownership.",
+    descriptionTr: "Seçili skill'ler, MCP bağlayıcıları ve yönlendirme sahipliği.",
+    itemIds: ["skills", "mcp", "routing"]
   },
   {
-    id: "catalogs",
-    label: "Catalogs and routing",
-    labelTr: "Kataloglar ve yönlendirme",
-    itemIds: ["backups", "skills", "mcp", "routing"]
+    id: "recovery",
+    label: "Recovery & evidence",
+    labelTr: "Kurtarma ve kanıt",
+    description: "Backups, diagnostics, process evidence, and safe log metadata.",
+    descriptionTr: "Yedekler, tanılama, süreç kanıtı ve güvenli log bilgisi.",
+    itemIds: ["backups", "diagnostics", "processes", "logs"]
   },
   {
-    id: "evidence",
-    label: "Evidence and account notes",
-    labelTr: "Kanıt ve hesap notları",
-    itemIds: ["diagnostics", "processes", "auth", "logs"]
+    id: "repository",
+    label: "Repository checks",
+    labelTr: "Repo kontrolleri",
+    description: "Fast local repository health and the full validation suite.",
+    descriptionTr: "Hızlı yerel repo sağlığı ve tam doğrulama paketi.",
+    itemIds: ["status:repo-only", "doctor"]
   },
   {
-    id: "preferences",
-    label: "Preferences",
-    labelTr: "Tercihler",
-    itemIds: ["language", "exit"]
+    id: "account",
+    label: "Account & preferences",
+    labelTr: "Hesap ve tercihler",
+    description: "Public-safe authentication guidance and language preference.",
+    descriptionTr: "Public-safe kimlik rehberi ve dil tercihi.",
+    itemIds: ["auth", "language"]
   }
 ];
 
@@ -707,8 +723,10 @@ function menuItemColor(item) {
 }
 
 function menuIcon(item) {
-  const icons = supportsColor() ? MENU_RICH_ICONS : MENU_ASCII_ICONS;
-  return icons[item.id] || (supportsColor() ? "•" : "--");
+  const icons = process.env.CODEX_CHEF_TEST_MENU === "1" && supportsColor()
+    ? MENU_RICH_ICONS
+    : MENU_ASCII_ICONS;
+  return icons[item.id] || "--";
 }
 
 function tableBorder(widths) {
@@ -967,7 +985,11 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
     ""
   ].join("\n");
   if (logPath) fs.appendFileSync(logPath, header, "utf8");
-  if (!options.json) console.log(`${ICONS.run} ${commandForDisplay(command, commandArgs)}`);
+  const startedMs = Date.now();
+  if (!options.json) {
+    console.log(`${ICONS.run} [----------]   0% RUNNING  ${action}`);
+    console.log(`${ICONS.run} ${commandForDisplay(command, commandArgs)}`);
+  }
   if (extra.waitNote && !options.json) console.log(`${ICONS.info} ${extra.waitNote}`);
 
   const result = spawnSync(executable, argsForSpawn, {
@@ -992,17 +1014,20 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
   }
 
   if (result.error) {
+    if (!options.json) console.error(`${ICONS.warn} [!!!!!!!!!!] 100% FAILED   ${action} (${Date.now() - startedMs} ms)`);
     console.error(`${ICONS.warn} ${result.error.message}`);
-    return { ok: false, status: null, logPath, error: result.error.message };
+    return { ok: false, status: null, logPath, error: result.error.message, elapsedMs: Date.now() - startedMs };
   }
   if (result.status !== 0) {
+    if (!options.json) console.error(`${ICONS.warn} [!!!!!!!!!!] 100% FAILED   ${action} (${Date.now() - startedMs} ms)`);
     const logNote = logPath ? ` Log: ${toPosix(path.relative(root, logPath))}` : " Logging disabled by --no-log.";
     console.error(`${ICONS.warn} Command failed with exit ${result.status}.${logNote}`);
-    return { ok: false, status: result.status, logPath };
+    return { ok: false, status: result.status, logPath, elapsedMs: Date.now() - startedMs };
   }
+  if (!options.json) console.log(`${ICONS.ok} [##########] 100% DONE     ${action} (${Date.now() - startedMs} ms)`);
   if (logPath && !options.json) console.log(`${ICONS.ok} Log: ${toPosix(path.relative(root, logPath))}`);
   else if (!options.json) console.log(`${ICONS.ok} ${localText("Log disabled by --no-log", "Log --no-log ile kapali")}`);
-  return { ok: true, status: result.status, logPath };
+  return { ok: true, status: result.status, logPath, elapsedMs: Date.now() - startedMs };
 }
 
 function runNode(action, script, scriptArgs = [], extra = {}) {
@@ -1061,6 +1086,31 @@ function printHeader() {
 }
 
 function printMenu() {
+  printDivider("COMMAND CENTER");
+  console.log(styleHeading(localText("Codex Chef command center", "Codex Chef komuta merkezi")));
+  printOperatorStatusStrip();
+  console.log("");
+  MENU_GROUPS.forEach((group, index) => {
+    const label = options.lang === "tr" ? group.labelTr : group.label;
+    const description = options.lang === "tr" ? group.descriptionTr : group.description;
+    const writeCount = group.itemIds
+      .map((id) => MENU_ITEMS.find((item) => item.id === id))
+      .filter((item) => item && !/^No writes$/.test(item.writes))
+      .length;
+    const badge = writeCount > 0
+      ? localText(`${writeCount} approval-gated`, `${writeCount} onaylı işlem`)
+      : localText("read-only", "salt okunur");
+    console.log(`${styleHeading(String(index + 1).padStart(2, "0"))}  ${styleHeading(label)}  ${styleMuted(`[${badge}]`)}`);
+    console.log(`    ${description}`);
+  });
+  console.log("");
+  console.log(styleMuted(localText(
+    "Choose a workspace. Shortcuts: l = language, q = quit.",
+    "Bir çalışma alanı seçin. Kısayollar: l = dil, q = çıkış."
+  )));
+}
+
+function printLegacyMenu() {
   printDivider("OPERATOR BOARD");
   console.log(styleHeading(localText("Operator menu", "Operatör menüsü")));
   printOperatorStatusStrip();
@@ -1075,6 +1125,24 @@ function printMenu() {
   )));
 }
 
+function printHubMenu(group) {
+  const label = options.lang === "tr" ? group.labelTr : group.label;
+  const description = options.lang === "tr" ? group.descriptionTr : group.description;
+  printDivider(label.toUpperCase());
+  console.log(styleHeading(label));
+  console.log(description);
+  console.log("");
+  group.itemIds.forEach((id, index) => {
+    const item = MENU_ITEMS.find((candidate) => candidate.id === id);
+    if (!item) return;
+    console.log(`${styleHeading(String(index + 1).padStart(2, "0"))}  ${menuIcon(item)} ${styleHeading(menuLabel(item))}`);
+    console.log(`    ${menuDescription(item)}`);
+    console.log(`    ${styleMuted(localText("Impact", "Etki"))}: ${menuWrites(item)}`);
+  });
+  console.log("");
+  console.log(styleMuted(localText("b = back, l = language, q = quit", "b = geri, l = dil, q = çıkış")));
+}
+
 function printActionStart(item) {
   const label = menuLabel(item) || item.label || item.id;
   printSurfaceHeader(
@@ -1086,9 +1154,11 @@ function printActionStart(item) {
 
 function printActionEnd(item, result) {
   const label = menuLabel(item) || item.label || item.id;
-  const status = result?.ok === false && !result.skipped
-    ? localText("attention", "dikkat")
-    : localText("ready", "hazir");
+  const status = result?.skipped
+    ? localText("skipped", "atlandı")
+    : result?.ok === false
+      ? localText("attention", "dikkat")
+      : localText("ready", "hazır");
   printDivider(localText(`${label}: ${status}`, `${label}: ${status}`));
 }
 
@@ -1376,25 +1446,49 @@ async function runUpdate(interaction = {}) {
   if (beforeHead.value !== afterHead.value) {
     console.log(`${ICONS.update} ${localText(`Repository updated from ${beforeHead.value.slice(0, 7)} to ${afterHead.value.slice(0, 7)}.`, `Repo ${beforeHead.value.slice(0, 7)} -> ${afterHead.value.slice(0, 7)} güncellendi.`)}`);
     console.log(`${ICONS.info} ${localText(
-      isMenuInteraction(interaction)
-        ? "Running a fresh preview from the updated tree, then continuing validation and managed refresh in this session."
-        : "Running a fresh preview from the updated tree. Review it, then rerun npm run chef -- --update --apply to refresh managed files.",
-      isMenuInteraction(interaction)
-        ? "Güncel ağaçtan yeni ön izleme çalıştırılıyor; ardından doğrulama ve managed yenileme bu oturumda sürecek."
-        : "Güncel ağaçtan fresh preview basılıyor. İnceleyip managed dosyaları yenilemek için npm run chef -- --update --apply tekrar çalıştırın."
+      "Running a fresh preview from the updated tree, then continuing validation and managed refresh in this approved session.",
+      "Güncel ağaçtan yeni ön izleme çalıştırılıyor; ardından doğrulama ve managed yenileme bu onaylı oturumda sürecek."
     )}`);
     const preview = runPreview(true, false);
     if (!preview.ok) return preview;
-    if (!isMenuInteraction(interaction)) return { ok: true, skipped: true };
   } else {
     console.log(`${ICONS.ok} ${localText("Repository already up to date; applying the reviewed managed refresh.", "Repo zaten güncel; incelenmiş managed refresh uygulanıyor.")}`);
   }
   const validation = runUpdateValidation();
   if (!validation.ok) return validation;
+  let applied;
   if (process.platform === "win32") {
-    return runPowerShell("update-install", ".\\scripts\\install.ps1", ["-Force", "-PlainOutput"]);
+    applied = runPowerShell("update-install", ".\\scripts\\install.ps1", ["-Force", "-PlainOutput"]);
+  } else {
+    applied = runBash("update-install", "scripts/install.sh", ["--force", "--plain-output"]);
   }
-  return runBash("update-install", "scripts/install.sh", ["--force", "--plain-output"]);
+  return completeAppliedAction(applied, false);
+}
+
+function runPostApplyVerification(expectSkills = false) {
+  printSurfaceHeader(
+    localText("Runtime verification", "Çalışma ortamı doğrulaması"),
+    localText(
+      "Confirming that installed managed files match this repository. This is evidence, not an assumed success state.",
+      "Kurulu managed dosyaların bu repoyla eşleştiği doğrulanıyor. Bu varsayılan başarı değil, gerçek kanıttır."
+    ),
+    ICONS.run
+  );
+  return runNode("post-apply-verify", "scripts/verify-install-runtime.mjs", [
+    "--redact-paths",
+    ...(expectSkills ? ["--expect-skills"] : [])
+  ]);
+}
+
+function completeAppliedAction(applied, expectSkills = false) {
+  if (!applied.ok) return applied;
+  const verification = runPostApplyVerification(expectSkills);
+  return {
+    ...verification,
+    applied: true,
+    applyLogPath: applied.logPath,
+    verificationLogPath: verification.logPath
+  };
 }
 
 async function runInstall(interaction = {}) {
@@ -1404,10 +1498,13 @@ async function runInstall(interaction = {}) {
     interaction
   );
   if (!allowed) return { ok: false, skipped: true };
+  let applied;
   if (process.platform === "win32") {
-    return runPowerShell("install", ".\\scripts\\install.ps1", ["-All", "-Interactive", "-PlainOutput"]);
+    applied = runPowerShell("install", ".\\scripts\\install.ps1", ["-All", "-Interactive", "-PlainOutput"]);
+  } else {
+    applied = runBash("install", "scripts/install.sh", ["--all", "--interactive", "--plain-output"]);
   }
-  return runBash("install", "scripts/install.sh", ["--all", "--interactive", "--plain-output"]);
+  return completeAppliedAction(applied, true);
 }
 
 async function runReset(interaction = {}) {
@@ -1434,10 +1531,13 @@ async function runReset(interaction = {}) {
     interaction
   );
   if (!allowed) return { ok: false, skipped: true };
+  let applied;
   if (process.platform === "win32") {
-    return runPowerShell("reset-apply", ".\\scripts\\install.ps1", ["-All", "-Force", "-Interactive", "-PlainOutput"]);
+    applied = runPowerShell("reset-apply", ".\\scripts\\install.ps1", ["-All", "-Force", "-Interactive", "-PlainOutput"]);
+  } else {
+    applied = runBash("reset-apply", "scripts/install.sh", ["--all", "--force", "--interactive", "--plain-output"]);
   }
-  return runBash("reset-apply", "scripts/install.sh", ["--all", "--force", "--interactive", "--plain-output"]);
+  return completeAppliedAction(applied, true);
 }
 
 async function runRepair(interaction = {}) {
@@ -1464,7 +1564,10 @@ async function runRepair(interaction = {}) {
     interaction
   );
   if (!allowed) return { ok: false, skipped: true };
-  return runNode("repair-apply", "scripts/repair-install.mjs", ["--redact-paths", "--apply"]);
+  return completeAppliedAction(
+    runNode("repair-apply", "scripts/repair-install.mjs", ["--redact-paths", "--apply"]),
+    false
+  );
 }
 
 const BACKUP_MANIFEST_NAME = ".codex-chef-backup.json";
@@ -3092,20 +3195,38 @@ async function runMenu() {
     return readQuestion(rl, prompt);
   };
   const interaction = { question, fromMenu: true };
+  // Existing transcript smokes intentionally retain the historical flat menu.
+  // Real interactive sessions use the task-oriented command center below.
+  const legacyTranscriptMode = process.env.CODEX_CHEF_TEST_MENU === "1"
+    && process.env.CODEX_CHEF_TEST_MENU_V2 !== "1";
+  const navigationOnly = process.env.CODEX_CHEF_TEST_MENU_NAV_ONLY === "1";
   try {
     let shouldRenderMenu = true;
+    let activeGroup = null;
     while (true) {
       if (shouldRenderMenu) {
-        printMenu();
+        if (legacyTranscriptMode) printLegacyMenu();
+        else if (activeGroup) printHubMenu(activeGroup);
+        else printMenu();
         shouldRenderMenu = false;
       }
       const answer = await question(operatorPrompt());
       const normalizedAnswer = answer.trim().toLowerCase();
       if (!normalizedAnswer) {
-        console.log(`${ICONS.warn} ${localText(`Choose 1-${MENU_ITEMS.length}, l for language, or q to quit.`, `1-${MENU_ITEMS.length} arasında bir işlem seçin, dil için l, çıkış için q yazın.`)}`);
+        const upperBound = legacyTranscriptMode
+          ? MENU_ITEMS.length
+          : activeGroup
+            ? activeGroup.itemIds.length
+            : MENU_GROUPS.length;
+        console.log(`${ICONS.warn} ${localText(`Choose 1-${upperBound}, l for language, or q to quit.`, `1-${upperBound} arasında bir işlem seçin, dil için l, çıkış için q yazın.`)}`);
         continue;
       }
       if (["q", "quit", "exit"].includes(normalizedAnswer)) break;
+      if (!legacyTranscriptMode && ["b", "back", "geri"].includes(normalizedAnswer)) {
+        activeGroup = null;
+        shouldRenderMenu = true;
+        continue;
+      }
       if (["l", "lang", "language", "dil"].includes(normalizedAnswer)) {
         const languageItem = MENU_ITEMS.find((candidate) => candidate.id === "language");
         printActionStart(languageItem);
@@ -3116,21 +3237,43 @@ async function runMenu() {
         continue;
       }
       const index = Number(normalizedAnswer);
-      const item = MENU_ITEMS[index - 1];
+      if (!legacyTranscriptMode && !activeGroup) {
+        activeGroup = MENU_GROUPS[index - 1];
+        if (!activeGroup) {
+          console.log(`${ICONS.warn} ${localText(`Choose 1-${MENU_GROUPS.length}, l for language, or q to quit.`, `1-${MENU_GROUPS.length} arasında bir alan seçin, dil için l, çıkış için q yazın.`)}`);
+          continue;
+        }
+        shouldRenderMenu = true;
+        continue;
+      }
+      const item = legacyTranscriptMode
+        ? MENU_ITEMS[index - 1]
+        : MENU_ITEMS.find((candidate) => candidate.id === activeGroup.itemIds[index - 1]);
       if (!item) {
-        console.log(`${ICONS.warn} ${localText(`Choose 1-${MENU_ITEMS.length}, l for language, or q to quit.`, `1-${MENU_ITEMS.length} arasında bir işlem seçin, dil için l, çıkış için q yazın.`)}`);
+        const upperBound = legacyTranscriptMode ? MENU_ITEMS.length : activeGroup.itemIds.length;
+        console.log(`${ICONS.warn} ${localText(`Choose 1-${upperBound}, b for back, or q to quit.`, `1-${upperBound} arasında bir işlem seçin, geri için b, çıkış için q yazın.`)}`);
         continue;
       }
       if (item.id === "exit") break;
       printActionStart(item);
-      const result = await runAction(item.id, interaction);
+      const result = navigationOnly
+        ? (console.log(`[route] ${item.id}`), { ok: true, skipped: true })
+        : await runAction(item.id, interaction);
       printActionEnd(item, result);
-      if (item.id !== "language") await pauseBeforeMenu(question);
+      if (!navigationOnly && item.id !== "language") await pauseBeforeMenu(question);
       else console.log("");
       shouldRenderMenu = true;
     }
   } finally {
     if (rl) rl.close();
+  }
+  if (!legacyTranscriptMode) {
+    console.log("");
+    printBrandSignature();
+    console.log(styleMuted(localText(
+      "U.C.S. Codex Chef session closed.",
+      "U.C.S. Codex Chef oturumu kapatıldı."
+    )));
   }
 }
 

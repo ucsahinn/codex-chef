@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.5.52 - 2026-07-26
+
+- Make the install and validation contract explicitly cross-platform across Windows, macOS, Linux, and WSL, including macOS CI and Node.js 18 compatibility coverage.
+- Add a fail-closed portability validator for personal absolute paths, user identifiers, home resolution, platform command shims, and CI operating-system coverage.
+- Replace Desktop-specific filesystem MCP roots with the portable current-workspace root while keeping the connector disabled by default.
+
+- Redesign the interactive CLI as a six-hub command center with full descriptions, ASCII-safe operational indicators, and the exact U.C.S. signature at entry and exit.
+- Complete approved updates in one invocation: pull, fresh preview, validation, managed refresh, and installed-runtime verification.
+- Verify install, refresh, repair, and update writes against the installed runtime before reporting readiness.
+- Expose safe MCP configured/enabled/disabled evidence from `codex mcp list --json` while explicitly distinguishing it from unprobed live-session state.
+
 ## 0.5.51 - 2026-07-25
 
 - Added a preview-first `chef review pack|handoff|verify|status` workflow that creates tracked text review bundles outside the target repository, screens them for exposed credentials, pins them with SHA-256, and performs no automatic upload.

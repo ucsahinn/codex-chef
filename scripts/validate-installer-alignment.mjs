@@ -290,10 +290,118 @@ requireText(marketplaceHelper, "--write", "Marketplace upsert helper");
 requireText(marketplaceHelper, "stableJson", "Marketplace upsert helper");
 runMarketplaceHelperSmokes();
 
+function validatePortabilityContracts() {
+  const ignoredDirectories = new Set([
+    ".git",
+    ".next",
+    ".serena",
+    "build",
+    "coverage",
+    "dist",
+    "node_modules",
+    "temp",
+    "tmp"
+  ]);
+  const textExtensions = new Set([
+    ".json",
+    ".js",
+    ".md",
+    ".mjs",
+    ".ps1",
+    ".rules",
+    ".sh",
+    ".toml",
+    ".txt",
+    ".yaml",
+    ".yml"
+  ]);
+
+  function walkTextFiles(directory) {
+    const files = [];
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
+      const fullPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) files.push(...walkTextFiles(fullPath));
+      else if (entry.isFile() && (textExtensions.has(path.extname(entry.name)) || entry.name === "package.json")) {
+        files.push(fullPath);
+      }
+    }
+    return files;
+  }
+
+  const personalPathPatterns = [
+    /[A-Za-z]:[\\/]+Users[\\/]+[^\\/"'`\s]+/gi,
+    /\/Users\/[^/"'`\s]+/g,
+    /\/home\/[^/"'`\s]+/g
+  ];
+  const forbiddenLocalIdentifiers = new RegExp(`\\b(?:${["ula", "sc"].join("")}|${["mit", "nick"].join("")})\\b`, "gi");
+
+  for (const file of walkTextFiles(root)) {
+    const relativePath = path.relative(root, file).split(path.sep).join("/");
+    if (/^scripts\/(?:validate-|security-audit\.mjs$)/.test(relativePath)) continue;
+    const text = fs.readFileSync(file, "utf8");
+    for (const pattern of personalPathPatterns) {
+      pattern.lastIndex = 0;
+      for (const match of text.matchAll(pattern)) {
+        fail(`${relativePath} contains a machine/user-specific absolute path: ${match[0]}`);
+      }
+    }
+    forbiddenLocalIdentifiers.lastIndex = 0;
+    if (forbiddenLocalIdentifiers.test(text)) {
+      fail(`${relativePath} contains a local machine or user identifier.`);
+    }
+  }
+
+  const windowsConfig = fs.readFileSync(path.join(root, "templates", "codex", "config.windows.toml"), "utf8");
+  const unixConfig = fs.readFileSync(path.join(root, "templates", "codex", "config.unix.toml"), "utf8");
+  if (!/server-filesystem@[^\"]+",\s*"\."\]/.test(windowsConfig)) {
+    fail("Windows filesystem MCP must use the portable current-workspace root.");
+  }
+  if (!/server-filesystem@[^\"]+",\s*"\."\]/.test(unixConfig)) {
+    fail("Unix filesystem MCP must use the portable current-workspace root.");
+  }
+  if (/(?:%USERPROFILE%|\$HOME)[\\/]+Desktop/.test(`${windowsConfig}\n${unixConfig}`)) {
+    fail("MCP templates must not assume a user Desktop directory.");
+  }
+
+  const planner = fs.readFileSync(path.join(root, "scripts", "plan-install.mjs"), "utf8");
+  if (!planner.includes('import os from "node:os"') || !planner.includes("os.homedir()")) {
+    fail("Install planning must resolve fallback homes through os.homedir().");
+  }
+  if (planner.includes('|| "~"')) {
+    fail("Install planning must not emit a literal tilde fallback path.");
+  }
+
+  for (const token of ["CODEX_HOME", "AGENTS_HOME"]) {
+    if (!ps.includes(token)) fail(`PowerShell installer must honor ${token}.`);
+    if (!sh.includes(token)) fail(`Bash installer must honor ${token}.`);
+  }
+  if (!sh.startsWith("#!/usr/bin/env bash")) {
+    fail("Unix installer must use a portable env-based Bash shebang.");
+  }
+
+  const platformResolver = fs.readFileSync(path.join(root, "scripts", "lib", "platform-command.mjs"), "utf8");
+  for (const command of ["npm.cmd", "npx.cmd", "codex.cmd"]) {
+    if (!platformResolver.includes(command)) fail(`Windows command resolver is missing ${command}.`);
+  }
+
+  const workflow = fs.readFileSync(path.join(root, ".github", "workflows", "validate.yml"), "utf8");
+  for (const runner of ["ubuntu-latest", "windows-latest", "macos-latest"]) {
+    if (!workflow.includes(runner)) fail(`Validation workflow must cover ${runner}.`);
+  }
+  for (const nodeVersion of ["18", "24"]) {
+    if (!new RegExp(`(?:node-version|node):\\s*${nodeVersion}\\b`).test(workflow)) {
+      fail(`Validation workflow must cover supported Node.js ${nodeVersion}.`);
+    }
+  }
+}
+
+validatePortabilityContracts();
+
 if (failures.length > 0) {
   console.error("Installer alignment validation failed:");
   for (const failure of failures) console.error(`- ${failure}`);
   process.exit(1);
 }
 
-console.log("Installer alignment validation passed.");
+console.log("Installer alignment and portability validation passed.");

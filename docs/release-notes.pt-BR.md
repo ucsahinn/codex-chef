@@ -1,6 +1,6 @@
 # Notas De Release
 
-## v0.5.51 - 2026-07-25
+## v0.5.52 - 2026-07-26
 
 [Deutsch](release-notes.de.md) | [Español](release-notes.es.md) | [English](release-notes.md) | [Português (Brasil)](release-notes.pt-BR.md) | [Türkçe](release-notes.tr.md) | [Français](release-notes.fr.md)
 

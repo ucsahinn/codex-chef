@@ -89,8 +89,8 @@ npm run chef -- --update --apply
 `--apply` olmadan update modu managed/global dosyalari degistirmez; normal CLI
 loglari `--no-log` yoksa repo-local kalir. Varsayilan preview kisadir;
 `npm run chef -- --update --verbose-plan` tam install dry-run kanitini basar.
-Apply modunda clean worktree ister ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse CLI fresh preview basip durur; bu updated preview'i
-inceledikten sonra `npm run chef -- --update --apply` tekrar calistir. Repo zaten guncelse managed dosyalari backup alan installer uzerinden yeniler.
+Apply modunda clean worktree ister ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse aynı onaylı CLI fresh preview basar, managed refresh ve
+kurulu ortam doğrulamasıyla devam eder; ikinci çalıştırma gerekmez. Repo zaten guncelse managed dosyalari backup alan installer uzerinden yeniler.
 Update curated global skill veya opsiyonel global Git guard kurmaz; bunlar icin
 `--install --apply` veya `--skills --apply` yuzeylerini acikca kullan.
 
@@ -197,7 +197,7 @@ Kullanışlı parametreler:
 - `-PlainOutput`: eski Windows konsolları, CI logları veya Unicode'u kötü
   gösteren terminaller için emoji yerine ASCII status işaretleri kullanır.
 
-## Bash Veya WSL Kurulumu
+## Bash Kurulumu (macOS, Linux veya WSL)
 
 Yazmadan önce ön izle:
 
@@ -229,7 +229,7 @@ Kullanışlı flagler:
 - `--no-backup`
 - `--dry-run`
 - `--plain-output`: ASCII status işaretleri kullanır.
-- `--interactive`: Bash/WSL tarafında aynı path, skill, force, Git guard ve
+- `--interactive`: macOS/Linux/WSL tarafında aynı path, skill, force, Git guard ve
   devam onaylarını soran rehberli setup.
 
 İki installer da en sonda capability board basar: specialist agent'lar,

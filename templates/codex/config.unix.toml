@@ -337,10 +337,13 @@ approval_mode = "approve"
 [mcp_servers.codebase-memory.tools.search_code]
 approval_mode = "approve"
 
+# Disabled by default because it grants local filesystem tool access.
+# "." resolves to the Codex process working directory. Replace it with a
+# narrower absolute workspace only when a task explicitly needs one.
 [mcp_servers.filesystem]
 enabled = false
 command = "npx"
-args = ["-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "$HOME/Desktop"]
+args = ["-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "."]
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 60

@@ -146,7 +146,7 @@ function runMenuTranscriptSmoke() {
     timeout: 30000
   });
   if (language.ok) {
-    for (const snippet of ["Opening: Language", "Dil Türkçe olarak ayarlandı", "Dil: hazir", "Operatör menüsü"]) {
+    for (const snippet of ["Opening: Language", "Dil Türkçe olarak ayarlandı", "Dil: hazır", "Operatör menüsü"]) {
       if (!language.output.includes(snippet)) fail(`chef-cli menu language transcript missing output snippet: ${snippet}`);
     }
   }
@@ -356,6 +356,71 @@ function runMenuTranscriptSmoke() {
     }
     if (!/\x1b\[[0-9;]*m/.test(rich.output)) {
       fail("chef-cli rich menu transcript must include ANSI color when color is forced");
+    }
+  }
+}
+
+function runCommandCenterSmoke() {
+  const result = runCliSmokeRaw("command-center-v2", ["--plain", "--no-log"], {
+    input: "1\n1\nb\n2\n1\n2\n3\n4\n5\nb\n3\n1\n2\n3\nb\n4\n1\n2\n3\n4\nb\n5\n1\n2\nb\n6\n1\n2\nb\nq\n",
+    env: {
+      CODEX_CHEF_TEST_MENU: "1",
+      CODEX_CHEF_TEST_MENU_V2: "1",
+      CODEX_CHEF_TEST_MENU_NAV_ONLY: "1",
+      FORCE_COLOR: "0",
+      NO_COLOR: "1"
+    }
+  });
+  if (!result.ok) return;
+  for (const snippet of [
+    "Codex Chef command center",
+    "System dashboard",
+    "Setup & update",
+    "Capabilities",
+    "Recovery & evidence",
+    "Repository checks",
+    "Account & preferences",
+    "Runtime, repository, login, skills, MCP, and health evidence.",
+    "Impact",
+    "b = back",
+    "U.C.S. Codex Chef session closed."
+  ]) {
+    if (!result.output.includes(snippet)) {
+      fail(`chef-cli command center smoke must include ${JSON.stringify(snippet)}`);
+    }
+  }
+  const signature = "██╗   ██╗   ██████╗   ███████╗";
+  if (countOccurrences(result.output, signature) !== 2) {
+    fail("chef-cli command center must render the exact U.C.S. signature once at entry and once at exit");
+  }
+  if (result.output.includes("•") || /[\u{1F300}-\u{1FAFF}]/u.test(result.output)) {
+    fail("chef-cli command center must use ASCII-safe operational markers");
+  }
+  for (const actionId of [
+    "status",
+    "preview",
+    "update",
+    "install",
+    "reset",
+    "repair",
+    "skills",
+    "mcp",
+    "routing",
+    "backups",
+    "diagnostics",
+    "processes",
+    "logs",
+    "status:repo-only",
+    "doctor",
+    "auth",
+    "language"
+  ]) {
+    const routedCount = result.output
+      .split(/\r?\n/)
+      .filter((line) => line.trim() === `[route] ${actionId}`)
+      .length;
+    if (routedCount !== 1) {
+      fail(`chef-cli command center must route menu action exactly once: ${actionId}`);
     }
   }
 }
@@ -801,6 +866,7 @@ runCliSmoke("help-tr-env", ["--help", "--plain", "--no-log"], [
   forbidAnsi: true
 });
 runMenuTranscriptSmoke();
+runCommandCenterSmoke();
 runBackupsFixtureSmokes();
 runCliErrorSmoke("unknown-option", ["--bad-flag", "--plain", "--no-log"], [
   "Codex Chef CLI error: Unknown option --bad-flag",

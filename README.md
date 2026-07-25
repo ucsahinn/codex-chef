@@ -10,7 +10,7 @@
   <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Documentation languages" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
-  <img alt="Windows and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
+  <img alt="Windows, macOS, Linux, and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-164e63" />
 </p>
 
 <p align="center">
@@ -28,12 +28,12 @@
   <tr>
     <td width="50%" valign="top">
       <h3><img src="https://flagcdn.com/w20/gb.png" alt="English" width="20"> English welcome</h3>
-      <p><strong>Codex Chef is a Windows-first Codex setup kit.</strong> It installs a reviewable baseline for agents, MCPs, skills, plugins, safety rules, and verification without turning on risky account or database access by default.</p>
+      <p><strong>Codex Chef is a cross-platform Codex setup kit for Windows, macOS, Linux, and WSL.</strong> It installs a reviewable baseline for agents, MCPs, skills, plugins, safety rules, and verification without turning on risky account or database access by default.</p>
       <p><strong>Start here:</strong> run the safe preview, then use the interactive installer only after you see what will change.</p>
     </td>
     <td width="50%" valign="top">
       <h3><img src="https://flagcdn.com/w20/tr.png" alt="Türkçe" width="20"> Türkçe karşılama</h3>
-      <p><strong>Codex Chef, Windows odaklı bir Codex kurulum kitidir.</strong> Ajanlar, MCP'ler, skill'ler, plugin akışları, güvenlik kuralları ve doğrulamayı tek yerde toplar; riskli hesap/database bağlantılarını kendiliğinden açmaz.</p>
+      <p><strong>Codex Chef; Windows, macOS, Linux ve WSL için platform bağımsız bir Codex kurulum kitidir.</strong> Ajanlar, MCP'ler, skill'ler, plugin akışları, güvenlik kuralları ve doğrulamayı tek yerde toplar; riskli hesap/database bağlantılarını kendiliğinden açmaz.</p>
       <p><strong>Buradan başla:</strong> önce safe preview çalıştır, sonra değişiklikleri gördükten sonra interactive install kullan.</p>
     </td>
   </tr>

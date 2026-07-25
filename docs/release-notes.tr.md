@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## v0.5.52 - 2026-07-26
+
+Bu surum Codex Chef CLI'yi gorev odakli bir komuta merkezine donusturur ve
+Windows, macOS, Linux ile WSL kurulum/guncelleme davranisini sertlestirir.
+
+## One Cikanlar
+
+- Uzun duz menu yerine alti odakli operator alani gelir; dogrudan CLI
+  flag'lerinin uyumlulugu korunur.
+- Update tek onayli calistirmada pull, fresh preview, validation, managed
+  refresh ve kurulu ortam dogrulamasini tamamlar.
+- Install, refresh, repair ve update hazirlik bildirmeden once ortaya cikan
+  runtime'i dogrular.
+- Status, canli oldugu olculmeyen MCP'yi live diye gostermeden guvenli
+  enabled/disabled kaniti verir.
+- Kullaniciya ozel Desktop path'leri kaldirilir, home fallback
+  `os.homedir()` kullanir ve CI Windows, Node.js 18 Ubuntu ve macOS'u kapsar.
+
+## Dogrulama
+
+- `npm run check`
+- `npm run validate:chef-cli`
+- `npm run validate:installer`
+- `npm run validate:installer-smoke`
+- `gitleaks detect --source . --no-banner --redact`
+
 ## v0.5.51 - 2026-07-25
 
 Bu surum, dis modele canli repo erisimi vermeden manuel derin inceleme akisi

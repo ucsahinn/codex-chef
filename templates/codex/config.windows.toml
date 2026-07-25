@@ -342,11 +342,12 @@ approval_mode = "approve"
 approval_mode = "approve"
 
 # Disabled by default because it grants local filesystem tool access.
-# Replace the path with an intentional workspace before enabling.
+# "." resolves to the Codex process working directory. Replace it with a
+# narrower absolute workspace only when a task explicitly needs one.
 [mcp_servers.filesystem]
 enabled = false
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "%USERPROFILE%\\Desktop"]
+args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "."]
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 60

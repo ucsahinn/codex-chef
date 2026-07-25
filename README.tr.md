@@ -10,7 +10,7 @@
   <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Dokümantasyon dilleri" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
-  <img alt="Windows ve WSL hazır" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
+  <img alt="Windows, macOS, Linux ve WSL hazır" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-164e63" />
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
   <a href="README.fr.md"><img src="https://flagcdn.com/w20/fr.png" alt="Français" width="20"></a>
 </p>
 
-Codex Chef, Windows tarafında güçlü ama kontrollü bir Codex zemini isteyenler için hazırlanmış kurulum kitidir. Ajan rolleri, MCP varsayılanları, seçilmiş skill'ler, yerel plugin akışları, kalıcı talimatlar ve doğrulama kapıları tek yerde durur; riskli hesap, database, deploy veya geniş filesystem erişimleri kendiliğinden açılmaz.
+Codex Chef; Windows, macOS, Linux ve WSL üzerinde güçlü ama kontrollü bir Codex zemini isteyenler için hazırlanmış platform bağımsız kurulum kitidir. Ajan rolleri, MCP varsayılanları, seçilmiş skill'ler, yerel plugin akışları, kalıcı talimatlar ve doğrulama kapıları tek yerde durur; riskli hesap, database, deploy veya geniş filesystem erişimleri kendiliğinden açılmaz.
 
 Bu repo resmi olmayan bir community starter'dır; OpenAI ürünü değildir. Güncel resmi Codex dokümantasyonuyla eşlenir ve destructive, credential, publish, deploy, database ve geniş filesystem aksiyonlarını onay kapısında tutar.
 

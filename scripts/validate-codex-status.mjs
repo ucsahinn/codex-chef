@@ -326,6 +326,13 @@ if (fakeCodexResult.error) {
     if (!fakeReport.codexCliRuntime?.mcp?.configuredServers?.includes("fakeMcp")) {
       fail("codex status fake Codex validation must use CODEX_STATUS_CODEX_COMMAND.");
     }
+    const fakeMcpState = fakeReport.codexCliRuntime?.mcp?.states?.find((server) => server.name === "fakeMcp");
+    if (!fakeMcpState || typeof fakeMcpState.enabled !== "boolean") {
+      fail("codex status fake Codex validation must expose safe MCP enabled/disabled state.");
+    }
+    if ("transport" in fakeMcpState || "env" in fakeMcpState) {
+      fail("codex status MCP state must not expose transport or environment configuration.");
+    }
   } catch (error) {
     fail(`codex status fake Codex validation did not emit parseable JSON: ${error.message}`);
   }

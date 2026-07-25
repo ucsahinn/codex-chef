@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## v0.5.52 - 2026-07-26
+
+This release turns the Codex Chef CLI into a task-oriented command center and
+hardens install/update behavior across Windows, macOS, Linux, and WSL.
+
+## Highlights
+
+- Six focused operator hubs replace the long flat menu while every direct CLI
+  flag remains compatible.
+- Update now completes pull, fresh preview, validation, managed refresh, and
+  installed-runtime verification in one approved invocation.
+- Install, refresh, repair, and update verify the resulting runtime before
+  reporting readiness.
+- Status reports safe MCP enabled/disabled evidence without claiming an
+  unprobed server is live.
+- User-specific Desktop paths are removed, home fallback uses `os.homedir()`,
+  and CI covers Windows, Ubuntu with Node.js 18, and macOS.
+
+## Verification
+
+- `npm run check`
+- `npm run validate:chef-cli`
+- `npm run validate:installer`
+- `npm run validate:installer-smoke`
+- `gitleaks detect --source . --no-banner --redact`
+
 ## v0.5.51 - 2026-07-25
 
 This release adds a manual external deep-review workflow without granting an

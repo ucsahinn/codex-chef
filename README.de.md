@@ -8,7 +8,7 @@
   <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Dokumentationssprachen" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
-  <img alt="Windows and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
+  <img alt="Windows, macOS, Linux, and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-164e63" />
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
   <a href="README.fr.md"><img src="https://flagcdn.com/w20/fr.png" alt="Français" width="20"></a>
 </p>
 
-Codex Chef gibt deinem Windows-first Codex-Setup einen klaren Startpunkt: sichere Defaults, ein benanntes Agent-Team, kuratierte Skills, MCP-Vorgaben, lokale Plugin-Workflows und Validierung, die du vor echten Aenderungen pruefen kannst.
+Codex Chef gibt deinem plattformuebergreifenden Codex-Setup auf Windows, macOS, Linux und WSL einen klaren Startpunkt: sichere Defaults, ein benanntes Agent-Team, kuratierte Skills, MCP-Vorgaben, lokale Plugin-Workflows und Validierung, die du vor echten Aenderungen pruefen kannst.
 
 Dies ist ein inoffizieller Community-Starter, kein OpenAI-Produkt. README und tiefe Dokumentationsdateien sind in sechs Sprachen vorhanden; diese Seite ist der deutsche Einstieg.
 

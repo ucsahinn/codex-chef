@@ -8,7 +8,7 @@
   <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Idiomas da documentacao" src="https://img.shields.io/badge/docs-6%20languages-0f766e" /></a>
-  <img alt="Windows and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%2B%20WSL-164e63" />
+  <img alt="Windows, macOS, Linux, and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-164e63" />
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
   <a href="README.fr.md"><img src="https://flagcdn.com/w20/fr.png" alt="Français" width="20"></a>
 </p>
 
-Codex Chef dá ao seu setup de Codex no Windows um ponto de partida claro: defaults seguros, um time de agentes com nome, skills curadas, MCPs preconfigurados, workflows locais de plugin e validação que você consegue revisar antes de mudar a máquina.
+Codex Chef oferece um ponto de partida claro para Codex no Windows, macOS, Linux e WSL: defaults seguros, um time de agentes com nome, skills curadas, MCPs preconfigurados, workflows locais de plugin e validação que você consegue revisar antes de mudar a máquina.
 
 Este é um starter comunitário não oficial, não um produto da OpenAI. Os READMEs e a documentação profunda existem em seis idiomas; esta página é a entrada em português do Brasil.
 
