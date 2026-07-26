@@ -53,6 +53,7 @@ const options = {
   restore: false,
   deleteBackup: false,
   verbosePlan: false,
+  details: false,
   lang: languageFromArgs(args, languageFromEnvironment()),
   action: null,
   backupId: null,
@@ -162,6 +163,7 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--restore") options.restore = true;
   else if (arg === "--delete") options.deleteBackup = true;
   else if (arg === "--verbose-plan") options.verbosePlan = true;
+  else if (arg === "--details") options.details = true;
   else if (arg === "--backup") {
     const value = args[index + 1];
     if (!value || value.startsWith("--")) {
@@ -973,6 +975,7 @@ Seçenekler:
   --restore      --backup ID için geri yükleme preview'i; dosya kopyalamak için --apply ekle
   --delete       --backup ID için silme preview'i; arşivi silmek için --apply ekle
   --verbose-plan Preview ekranlarında tam install dry-run kanıtını basar
+  --details      Özet ekranlarda tam tablo ve kanıt ayrıntılarını gösterir
   --apply        Update, install, reset, repair veya seçili skill install için write action izni verir
   --help         Bu yardımı gösterir
 
@@ -1024,6 +1027,7 @@ Options:
   --restore      Preview restore for --backup ID; add --apply to copy files back
   --delete       Preview deletion for --backup ID; add --apply to remove the archive
   --verbose-plan Print the full install dry-run evidence for preview screens
+  --details      Show full tables and evidence on summary screens
   --apply        Allow write actions for update, install, reset, repair, or selected skill install
   --help         Show this help
 
@@ -1102,11 +1106,11 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
   ].join("\n");
   if (logPath) fs.appendFileSync(logPath, header, "utf8");
   const startedMs = Date.now();
-  if (!options.json) {
+  if (!options.json && !extra.quiet) {
     console.log(`${ICONS.run} [----------]   0% RUNNING  ${action}`);
     console.log(`${ICONS.run} ${commandForDisplay(command, commandArgs)}`);
   }
-  if (extra.waitNote && !options.json) console.log(`${ICONS.info} ${extra.waitNote}`);
+  if (extra.waitNote && !options.json && !extra.quiet) console.log(`${ICONS.info} ${extra.waitNote}`);
 
   const result = spawnSync(executable, argsForSpawn, {
     cwd: root,
@@ -1123,7 +1127,8 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
   });
 
   const output = redactSensitiveOutput([result.stdout, result.stderr].filter(Boolean).join("\n"));
-  if (output.trim()) process.stdout.write(output.endsWith("\n") ? output : `${output}\n`);
+  const failed = Boolean(result.error) || result.status !== 0;
+  if (output.trim() && (!extra.quiet || failed)) process.stdout.write(output.endsWith("\n") ? output : `${output}\n`);
   if (logPath) {
     fs.appendFileSync(logPath, output, "utf8");
     fs.appendFileSync(logPath, `\nexitCode=${result.status ?? "error"}\n`, "utf8");
@@ -1142,9 +1147,9 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
     console.error(`${ICONS.warn} Command failed with exit ${result.status}.${signalNote}${logNote}`);
     return { ok: false, status: result.status, signal: result.signal || null, logPath, output, elapsedMs: Date.now() - startedMs };
   }
-  if (!options.json) console.log(`${ICONS.ok} [##########] 100% DONE     ${action} (${Date.now() - startedMs} ms)`);
-  if (logPath && !options.json) console.log(`${ICONS.ok} Log: ${toPosix(path.relative(root, logPath))}`);
-  else if (!options.json) console.log(`${ICONS.ok} ${localText("Log disabled by --no-log", "Log --no-log ile kapali")}`);
+  if (!options.json && !extra.quiet) console.log(`${ICONS.ok} [##########] 100% DONE     ${action} (${Date.now() - startedMs} ms)`);
+  if (logPath && !options.json && !extra.quiet) console.log(`${ICONS.ok} Log: ${toPosix(path.relative(root, logPath))}`);
+  else if (!options.json && !extra.quiet) console.log(`${ICONS.ok} ${localText("Log disabled by --no-log", "Log --no-log ile kapali")}`);
   return { ok: true, status: result.status, signal: result.signal || null, logPath, output, elapsedMs: Date.now() - startedMs };
 }
 
@@ -1152,7 +1157,7 @@ function runNode(action, script, scriptArgs = [], extra = {}) {
   return runLoggedCommand(action, process.execPath, [script, ...scriptArgs], extra);
 }
 
-function runPowerShell(action, script, scriptArgs = []) {
+function runPowerShell(action, script, scriptArgs = [], extra = {}) {
   return runLoggedCommand(action, "powershell.exe", [
     "-NoProfile",
     "-ExecutionPolicy",
@@ -1160,11 +1165,11 @@ function runPowerShell(action, script, scriptArgs = []) {
     "-File",
     script,
     ...scriptArgs
-  ], { timeout: 300000 });
+  ], { timeout: 300000, ...extra });
 }
 
-function runBash(action, script, scriptArgs = []) {
-  return runLoggedCommand(action, "bash", [script, ...scriptArgs], { timeout: 300000 });
+function runBash(action, script, scriptArgs = [], extra = {}) {
+  return runLoggedCommand(action, "bash", [script, ...scriptArgs], { timeout: 300000, ...extra });
 }
 
 function isMenuInteraction(interaction = {}) {
@@ -1384,6 +1389,7 @@ function runPreview(force = false, includeSkills = true, compact = !options.verb
     "--redact-paths"
   ]);
   if (!plan.ok) return plan;
+  if (compact && !options.details && !options.verbosePlan) return plan;
   if (process.platform === "win32") {
     return runPowerShell("preview-installer", ".\\scripts\\install.ps1", [
       ...(includeSkills ? ["-All"] : []),
@@ -1408,10 +1414,11 @@ function runPackageScript(action, scriptName, extra = {}) {
   return runLoggedCommand(action, npmCommand(), ["run", scriptName], extra);
 }
 
-function runUpdateValidation() {
-  console.log(`${ICONS.info} ${localText("Checking the repo before managed files are refreshed.", "Yonetilen dosyalar yenilenmeden once repo kontrol ediliyor.")}`);
+function runUpdateValidation(extra = {}) {
+  if (!extra.quiet) console.log(`${ICONS.info} ${localText("Checking the repo before managed files are refreshed.", "Yonetilen dosyalar yenilenmeden once repo kontrol ediliyor.")}`);
   return runPackageScript("update-check", "check", {
     timeout: 300000,
+    quiet: extra.quiet,
     waitNote: localText(
       "Running the full repo check before global managed files are refreshed.",
       "Global managed dosyalar yenilenmeden once tam repo check calistiriliyor."
@@ -1432,22 +1439,31 @@ const MANAGED_REFRESH_TARGETS = [
 function printManagedRefreshSummary(interaction = {}) {
   console.log("");
   console.log(styleHeading(localText("Managed targets", "Yönetilen hedefler")));
-  for (const target of MANAGED_REFRESH_TARGETS) console.log(`- ${target}`);
+  if (options.details) {
+    for (const target of MANAGED_REFRESH_TARGETS) console.log(`- ${target}`);
+  } else {
+    console.log(`- ${localText(
+      `${MANAGED_REFRESH_TARGETS.length} managed target groups; backup first; user data is preserved.`,
+      `${MANAGED_REFRESH_TARGETS.length} managed hedef grubu; önce yedek alınır; kullanıcı verisi korunur.`
+    )}`);
+  }
   console.log(styleMuted(localText(
     "Apply backs up replaced managed files first; it does not delete, prune, or clean user data.",
     "Apply önce değişecek managed dosyaları yedekler; user data silmez, prune/clean yapmaz."
   )));
-  console.log(styleMuted(localText(
-    "Update excludes curated global skill installs and optional global Git guards; use --install or --skills for those explicit surfaces.",
-    "Update curated global skill kurulumlarını ve opsiyonel global Git guard'larını dışarıda tutar; bu yüzeyler için --install veya --skills kullanın."
-  )));
+  if (options.details) {
+    console.log(styleMuted(localText(
+      "Update excludes curated global skill installs and optional global Git guards; use --install or --skills for those explicit surfaces.",
+      "Update curated global skill kurulumlarını ve opsiyonel global Git guard'larını dışarıda tutar; bu yüzeyler için --install veya --skills kullanın."
+    )));
+  }
   console.log("");
   console.log(styleHeading(localText("Next safe step", "Sonraki güvenli adım")));
   if (isMenuInteraction(interaction)) {
     console.log(`- ${localText("Continue here after reviewing the plan; the menu will ask for typed APPLY confirmation.", "Planı inceledikten sonra burada devam edin; menü yazılı APPLY onayı isteyecek.")}`);
   } else {
     console.log(`- ${localText("Apply after review", "İncelemeden sonra uygula")}: npm run chef -- --update --apply`);
-    console.log(`- ${localText("Full evidence", "Tam kanıt")}: npm run chef -- --update --verbose-plan`);
+    console.log(`- ${localText("Full evidence", "Tam kanıt")}: npm run chef -- --update --details`);
   }
 }
 
@@ -1529,9 +1545,52 @@ function printUpdateContext() {
   console.log(`- ${localText("Commit", "Commit")}: ${head.ok && head.value ? head.value.slice(0, 12) : localText("not inspected", "kontrol edilmedi")}`);
   console.log(`- ${localText("Release notes", "Release notu")}: ${latestReleaseNoteTitle()}`);
   console.log(styleMuted(localText(
-    "Preview does not contact the remote. Apply uses git pull --ff-only first, then refreshes managed files only after backup and validation.",
-    "Preview remote'a bağlanmaz. Apply önce git pull --ff-only kullanır, sonra validation ve yedekten sonra sadece managed dosyaları yeniler."
+    "Preview does not contact the remote. Apply checks the available version first and changes nothing unless it is newer.",
+    "Ön izleme remote'a bağlanmaz. Apply önce uygun sürümü kontrol eder; daha yeni değilse hiçbir şeyi değiştirmez."
   )));
+}
+
+function compareReleaseVersions(left, right) {
+  const parse = (value) => {
+    const match = String(value || "").trim().match(/^v?(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);
+    return match ? match.slice(1).map(Number) : null;
+  };
+  const a = parse(left);
+  const b = parse(right);
+  if (!a || !b) return null;
+  for (let index = 0; index < 3; index += 1) {
+    if (a[index] !== b[index]) return a[index] < b[index] ? -1 : 1;
+  }
+  return 0;
+}
+
+function gitPackageVersion(ref) {
+  const result = spawnSync("git", ["show", `${ref}:package.json`], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true
+  });
+  if (result.error || result.status !== 0) {
+    return {
+      ok: false,
+      message: redactSensitiveOutput(result.error?.message || result.stderr || `git show exited ${result.status}`)
+    };
+  }
+  try {
+    return { ok: true, value: JSON.parse(result.stdout).version };
+  } catch (error) {
+    return { ok: false, message: `Invalid package.json at ${ref}: ${error.message}` };
+  }
+}
+
+function printProgress(percent, label, state = "run") {
+  if (options.json) return;
+  const bounded = Math.max(0, Math.min(100, Number(percent) || 0));
+  const filled = Math.round(bounded / 10);
+  const bar = `${"#".repeat(filled)}${"-".repeat(10 - filled)}`;
+  const icon = state === "done" ? ICONS.ok : state === "failed" ? ICONS.warn : ICONS.run;
+  console.log(`${icon} [${bar}] ${String(bounded).padStart(3)}% ${label}`);
 }
 
 async function runUpdate(interaction = {}) {
@@ -1560,8 +1619,10 @@ async function runUpdate(interaction = {}) {
     );
     printUpdateContext();
     printManagedRefreshSummary(interaction);
-    const currentPreview = runPreview(true, false);
-    if (!currentPreview.ok) return currentPreview;
+    if (options.details) {
+      const currentPreview = runPreview(true, false);
+      if (!currentPreview.ok) return currentPreview;
+    }
   }
   const dirty = inspectGitDirty();
   if (!dirty.ok) {
@@ -1588,20 +1649,52 @@ async function runUpdate(interaction = {}) {
     return { ok: false };
   }
   const beforeVersion = currentPackageVersion();
+  printProgress(10, localText("Checking available version", "Uygun sürüm kontrol ediliyor"));
+  const fetchArgs = process.platform === "win32"
+    ? ["-c", "http.sslBackend=openssl", "fetch", "--quiet", "origin", "main"]
+    : ["fetch", "--quiet", "origin", "main"];
+  const fetch = runLoggedCommand("update-fetch", "git", fetchArgs, { timeout: 300000, quiet: true });
+  if (!fetch.ok) {
+    printProgress(10, localText("Version check failed", "Sürüm kontrolü başarısız"), "failed");
+    return fetch;
+  }
+  const remoteVersion = gitPackageVersion("FETCH_HEAD");
+  if (!remoteVersion.ok) {
+    console.log(`${ICONS.warn} ${localText(`Cannot read available version: ${remoteVersion.message}`, `Uygun sürüm okunamadı: ${remoteVersion.message}`)}`);
+    return { ok: false };
+  }
+  const versionOrder = compareReleaseVersions(beforeVersion, remoteVersion.value);
+  console.log(`${styleLabel(localText("Local version", "Yerel sürüm"))}: ${beforeVersion}`);
+  console.log(`${styleLabel(localText("Available version", "Uygun sürüm"))}: ${remoteVersion.value}`);
+  if (versionOrder === null) {
+    console.log(`${ICONS.warn} ${localText("Versions could not be compared safely; update stopped.", "Sürümler güvenle karşılaştırılamadı; güncelleme durduruldu.")}`);
+    return { ok: false };
+  }
+  if (versionOrder === 0) {
+    printProgress(100, localText(`Already current: v${beforeVersion}. No files changed.`, `Zaten güncel: v${beforeVersion}. Hiçbir dosya değişmedi.`), "done");
+    return { ok: true, skipped: true, upToDate: true, localVersion: beforeVersion, availableVersion: remoteVersion.value };
+  }
+  if (versionOrder > 0) {
+    printProgress(100, localText("Local version is newer; update skipped.", "Yerel sürüm daha yeni; güncelleme atlandı."), "done");
+    return { ok: true, skipped: true, localVersion: beforeVersion, availableVersion: remoteVersion.value };
+  }
+  printProgress(20, localText(`New version found: v${remoteVersion.value}`, `Yeni sürüm bulundu: v${remoteVersion.value}`));
   const allowed = await confirmWriteAction(
     localText("Update", "Guncelleme"),
     localText(
-      "Update pulls latest Codex Chef changes with git pull --ff-only, then refreshes managed Codex files after a same-tree preview.",
-      "Güncelleme git pull --ff-only ile son Codex Chef değişikliklerini çeker, sonra aynı ağaç preview'inden sonra managed Codex dosyalarını yeniler."
+      `Update fast-forwards Codex Chef from v${beforeVersion} to v${remoteVersion.value}, validates it, then refreshes managed Codex files.`,
+      `Güncelleme Codex Chef'i v${beforeVersion} sürümünden v${remoteVersion.value} sürümüne fast-forward eder, doğrular ve managed Codex dosyalarını yeniler.`
     ),
     interaction
   );
   if (!allowed) return { ok: false, skipped: true };
-  const pull = runLoggedCommand("update-pull", "git", ["pull", "--ff-only"], {
+  printProgress(30, localText("Downloading source update", "Kaynak güncelleme indiriliyor"));
+  const pull = runLoggedCommand("update-merge", "git", ["merge", "--ff-only", "FETCH_HEAD"], {
     timeout: 300000,
-    waitNote: "Fetching and fast-forwarding the Codex Chef repository."
+    quiet: true
   });
   if (!pull.ok) return pull;
+  printProgress(40, localText("Source update complete", "Kaynak güncelleme tamamlandı"));
   const afterHead = gitHead();
   if (!afterHead.ok) {
     console.log(`${ICONS.warn} ${localText(`Cannot inspect updated Git HEAD: ${afterHead.message}`, `Guncel Git HEAD incelenemedi: ${afterHead.message}`)}`);
@@ -1613,42 +1706,53 @@ async function runUpdate(interaction = {}) {
       "Running a fresh preview from the updated tree, then continuing validation and managed refresh in this approved session.",
       "Güncel ağaçtan yeni ön izleme çalıştırılıyor; ardından doğrulama ve managed yenileme bu onaylı oturumda sürecek."
     )}`);
-    const preview = runPreview(true, false);
-    if (!preview.ok) return preview;
+    if (options.details) {
+      const preview = runPreview(true, false);
+      if (!preview.ok) return preview;
+    }
   } else {
     console.log(`${ICONS.ok} ${localText("Repository already up to date; applying the reviewed managed refresh.", "Repo zaten güncel; incelenmiş managed refresh uygulanıyor.")}`);
   }
   const afterVersion = currentPackageVersion();
-  const validation = runUpdateValidation();
+  printProgress(55, localText("Validating repository", "Repo doğrulanıyor"));
+  const validation = runUpdateValidation({ quiet: !options.details });
   if (!validation.ok) return validation;
+  printProgress(70, localText("Repository valid", "Repo doğrulandı"));
   let applied;
+  printProgress(80, localText("Refreshing managed files", "Managed dosyalar yenileniyor"));
   if (process.platform === "win32") {
-    applied = runPowerShell("update-install", ".\\scripts\\install.ps1", ["-Update", "-PlainOutput"]);
+    applied = runPowerShell("update-install", ".\\scripts\\install.ps1", ["-Update", "-PlainOutput"], { quiet: !options.details });
   } else {
-    applied = runBash("update-install", "scripts/install.sh", ["--update", "--plain-output"]);
+    applied = runBash("update-install", "scripts/install.sh", ["--update", "--plain-output"], { quiet: !options.details });
   }
-  return completeAppliedAction(applied, false, {
+  if (applied.ok) printProgress(90, localText("Verifying installed runtime", "Kurulu runtime doğrulanıyor"));
+  const completed = completeAppliedAction(applied, false, {
     kind: "update",
+    quiet: !options.details,
     beforeVersion,
     afterVersion,
     beforeHead: beforeHead.value,
     afterHead: afterHead.value
   });
+  printProgress(100, completed.ok ? localText("Update complete", "Güncelleme tamamlandı") : localText("Update failed", "Güncelleme başarısız"), completed.ok ? "done" : "failed");
+  return completed;
 }
 
-function runPostApplyVerification(expectSkills = false) {
-  printSurfaceHeader(
-    localText("Runtime verification", "Çalışma ortamı doğrulaması"),
-    localText(
-      "Confirming that installed managed files match this repository. This is evidence, not an assumed success state.",
-      "Kurulu managed dosyaların bu repoyla eşleştiği doğrulanıyor. Bu varsayılan başarı değil, gerçek kanıttır."
-    ),
-    ICONS.run
-  );
+function runPostApplyVerification(expectSkills = false, extra = {}) {
+  if (!extra.quiet) {
+    printSurfaceHeader(
+      localText("Runtime verification", "Çalışma ortamı doğrulaması"),
+      localText(
+        "Confirming that installed managed files match this repository. This is evidence, not an assumed success state.",
+        "Kurulu managed dosyaların bu repoyla eşleştiği doğrulanıyor. Bu varsayılan başarı değil, gerçek kanıttır."
+      ),
+      ICONS.run
+    );
+  }
   return runNode("post-apply-verify", "scripts/verify-install-runtime.mjs", [
     "--redact-paths",
     ...(expectSkills ? ["--expect-skills"] : [])
-  ]);
+  ], { quiet: extra.quiet });
 }
 
 function outputValue(output, label) {
@@ -1735,7 +1839,8 @@ function printOperationReceipt(result) {
 }
 
 function completeAppliedAction(applied, expectSkills = false, context = {}) {
-  const verification = applied.ok ? runPostApplyVerification(expectSkills) : null;
+  const quiet = context.quiet ?? !options.details;
+  const verification = applied.ok ? runPostApplyVerification(expectSkills, { quiet }) : null;
   const operation = buildOperationResult(applied, verification, context);
   const result = {
     ...(verification || applied),
@@ -2278,11 +2383,12 @@ function printBackupTable(backups, interaction = {}) {
       `Son geri yüklenebilir yedek: ${latestRestorable.id} (${latestRestorable.restorableCount} managed dosya).`
     )}`);
   }
-  const visibleBackups = options.plain ? backups.slice(0, 10) : backups;
-  if (options.plain && backups.length > visibleBackups.length) {
+  const visibleLimit = options.details ? (options.plain ? 10 : backups.length) : 5;
+  const visibleBackups = backups.slice(0, visibleLimit);
+  if (backups.length > visibleBackups.length) {
     console.log(`${ICONS.info} ${localText(
-      `Showing latest ${visibleBackups.length} of ${backups.length}; use --json for the full machine-readable list.`,
-      `${backups.length} yedeğin son ${visibleBackups.length} girdisi gösteriliyor; tam liste için --json kullan.`
+      `Showing latest ${visibleBackups.length} of ${backups.length}; use --details or --json for the full list.`,
+      `${backups.length} yedeğin son ${visibleBackups.length} girdisi gösteriliyor; tam liste için --details veya --json kullan.`
     )}`);
   }
   printRows(
@@ -2405,7 +2511,9 @@ async function runBackups(interaction = {}, requested = {}) {
         printBackupTable(backups, interaction);
       }
       if (isMenuInteraction(interaction) && backups.length > 0) {
-        const selectableBackups = options.plain ? backups.slice(0, 10) : backups;
+        const selectableBackups = options.details
+          ? (options.plain ? backups.slice(0, 10) : backups)
+          : backups.slice(0, 5);
         const selected = await askSelection(
           selectableBackups,
           localText("\nChoose a backup number, or press Enter to return: ", "\nBir yedek numarası seçin veya dönmek için Enter'a basın: "),
@@ -2639,6 +2747,17 @@ async function runSkills(interaction = {}) {
     localText(`${installable.length} curated installable skills with source checks and activation rules.`, `Kaynak kontrolü ve aktivasyon kuralları olan ${installable.length} curated skill.`),
     ICONS.docs
   );
+  if (!options.details) {
+    const counts = groupByCategory(installable)
+      .map(({ category, entries }) => `${category}: ${entries.length}`)
+      .join(" | ");
+    console.log(counts);
+    console.log(`${ICONS.info} ${localText("Skills activate only when named or clearly matched to the task.", "Skill'ler yalnız adı söylendiğinde veya görevle açıkça eşleştiğinde etkinleşir.")}`);
+    console.log(`${ICONS.info} ${localText(`${profileCount} routing profiles are available. Use --details for the full catalog.`, `${profileCount} routing profili var. Tam katalog için --details kullanın.`)}`);
+    const verification = runNode("skills", "scripts/verify-skill-sources.mjs", [], { quiet: true });
+    if (!verification.ok || (!process.stdin.isTTY && !interaction.question)) return verification;
+    return selectSkill(installable, interaction);
+  }
   printRows(
     groupByCategory(installable).map(({ category, entries }) => ({
       category,
@@ -2728,6 +2847,28 @@ async function runMcp(interaction = {}) {
     localText(`${servers.length} connectors: default-safe tooling first, account connectors disabled until needed.`, `${servers.length} bağlayıcı: önce varsayılan güvenli tooling, hesap bağlayıcıları gerekene kadar kapalı.`),
     ICONS.docs
   );
+  if (!options.details) {
+    const isReady = (server) => server.defaultEnabled ?? server.enabledByDefault;
+    const ready = servers.filter(isReady).map((server) => server.name);
+    const optIn = servers.filter((server) => !isReady(server)).map((server) => server.name);
+    console.log(`${styleLabel(localText("Ready", "Hazır"))}: ${ready.join(", ") || localText("none", "yok")}`);
+    console.log(`${styleLabel(localText("Opt-in", "İsteğe bağlı"))}: ${optIn.join(", ") || localText("none", "yok")}`);
+    console.log(styleMuted(localText("Account, database, production, and broad-filesystem connectors stay disabled until needed.", "Hesap, veritabanı, production ve geniş dosya sistemi bağlayıcıları gerekene kadar kapalı kalır.")));
+    console.log(`${ICONS.info} ${localText("Use --details for setup and safety notes.", "Kurulum ve güvenlik notları için --details kullanın.")}`);
+    if (process.stdin.isTTY || interaction.question) {
+      console.log("");
+      servers.forEach((server, index) => {
+        const readyByDefault = isReady(server);
+        printChoiceRow(index + 1, server.name, readyByDefault ? localText("ready", "hazır") : localText("opt-in", "isteğe bağlı"), readyByDefault ? "brightGreen" : "brightYellow", "●");
+      });
+      const selected = await askSelection(servers, localText(
+        "\nSelect a connector number for details, or press Enter to leave: ",
+        "\nAyrıntı için bağlayıcı numarası seçin veya çıkmak için Enter'a basın: "
+      ), interaction);
+      if (selected) explainMcpServer(selected);
+    }
+    return { ok: true };
+  }
   console.log(styleMuted(localText(
     "Evidence levels: documented=catalog, configured=template/installed config, verified=only after /mcp or codex mcp live check.",
     "Kanıt seviyeleri: doc=catalog, config=template/kurulu config, canlı=yalnız /mcp veya codex mcp live check başarılıysa."
@@ -2798,8 +2939,17 @@ async function runMcp(interaction = {}) {
 }
 
 function runRouting() {
+  const profileArgs = options.profile
+    ? ["--profile", options.profile]
+    : options.details
+      ? []
+      : ["--profile", "starter-health"];
+  if (!options.profile && !options.details && !options.json) {
+    const profileCount = (readJson("catalog/routing-profiles.json").profiles || []).length;
+    console.log(`${ICONS.info} ${localText(`${profileCount} routing profiles available; showing starter-health. Use --details for all.`, `${profileCount} routing profili var; starter-health gösteriliyor. Tümü için --details kullanın.`)}`);
+  }
   return runNode("routing", "scripts/codex-routing-board.mjs", [
-    ...(options.profile ? ["--profile", options.profile] : []),
+    ...profileArgs,
     ...(options.json ? ["--json"] : [])
   ], {
     waitNote: localText(
@@ -3351,6 +3501,13 @@ function runDiagnostics() {
   console.log("");
   console.log(styleHeading(localText("Next safe actions", "Sonraki güvenli adımlar")));
   for (const action of payload.nextActions.slice(0, 6)) console.log(`- ${translateCliMessage(action)}`);
+  if (!options.details) {
+    console.log(styleMuted(localText(
+      "Use --details for diagnostic commands, historical signals, and lifecycle notes.",
+      "Tanılama komutları, geçmiş sinyaller ve lifecycle notları için --details kullanın."
+    )));
+    return { ok: true };
+  }
   console.log("");
   console.log(styleHeading(localText("Diagnostic evidence commands", "Tanılama kanıt komutları")));
   printRows(
@@ -3403,7 +3560,7 @@ function runDiagnostics() {
 }
 
 function runLogs() {
-  const logs = recentCliLogs(12);
+  const logs = recentCliLogs(options.details ? 12 : 5);
   printSurfaceHeader(
     localText("Recent logs", "Son loglar"),
     localText("Metadata and signal counts only. Raw log contents stay local.", "Yalnız metadata ve sinyal sayıları. Raw log içeriği lokal kalır."),

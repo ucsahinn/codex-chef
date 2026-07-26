@@ -190,6 +190,7 @@ for (const script of [
 
 const matrix = [
   ["read-only PowerShell wrapper", ["powershell.exe", "-Command", "Get-Content", "-LiteralPath", "package.json"], "allow"],
+  ["read-only PowerShell wrapper single-token command", ["powershell.exe", "-Command", "Get-Content -LiteralPath package.json"], "allow"],
   ["git rev-parse", ["git", "rev-parse", "HEAD"], "allow"],
   ["git cat-file", ["git", "cat-file", "-t", "HEAD"], "allow"],
   ["npm pack dry-run", ["npm.cmd", "pack", "--dry-run", "--json", "--ignore-scripts"], "allow"],

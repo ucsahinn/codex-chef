@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.5.55 - 2026-07-26
+
+- Make every primary CLI surface summary-first while preserving full tables, setup notes, and diagnostic evidence behind the new `--details` option.
+- Add a compact update progress bar with explicit local and available versions, and stop without confirmation, validation, installation, or managed-file writes when the versions match.
+- Fetch the candidate release once and fast-forward from the inspected `FETCH_HEAD`, preventing a second network pull between version comparison and installation.
+- Keep successful child-command noise in local logs while still printing complete command output when a step fails.
+- Reduce preview, install, refresh, skills, MCP, routing, diagnostics, backup, and log screen density without removing JSON or detailed operator evidence.
+- Support both split-token and single-token Windows PowerShell command normalization for the exact read-only approval-harmony probe used by installer preflight.
+- Expand CLI and approval regression coverage for compact/default views, detailed views, version-aware updates, and cross-PC Codex CLI compatibility.
+
 ## 0.5.54 - 2026-07-26
 
 - Add Codex Chef Brain as a preview-first, project-scoped Markdown knowledge vault with schemas, templates, capture/retrieval CLI commands, backup and restore plans, Windows ACL evidence, documentation, and focused regression tests.

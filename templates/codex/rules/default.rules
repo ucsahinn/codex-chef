@@ -36,6 +36,7 @@ prefix_rule(pattern = ["ConvertTo-Json"], decision = "allow")
 
 # Common read-only PowerShell commands when Codex invokes PowerShell explicitly.
 prefix_rule(pattern = ["powershell.exe", "-Command", "Get-Content"], decision = "allow")
+prefix_rule(pattern = ["powershell.exe", "-Command", "Get-Content -LiteralPath package.json"], decision = "allow")
 prefix_rule(pattern = ["powershell.exe", "-Command", "Get-ChildItem"], decision = "allow")
 prefix_rule(pattern = ["powershell.exe", "-Command", "Select-String"], decision = "allow")
 prefix_rule(pattern = ["powershell.exe", "-Command", "Select-Object"], decision = "allow")

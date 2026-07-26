@@ -638,6 +638,7 @@ if (!exists(cliPath)) {
     "--lang",
     "--tr",
     "--verbose-plan",
+    "--details",
     "--summary",
     "--plain",
     "--no-log",
@@ -709,7 +710,9 @@ if (!exists(cliPath)) {
     "runPackageScript(\"update-check\", \"check\"",
     "gitHead",
     "Repository updated from",
-    "same-tree preview",
+    "compareReleaseVersions",
+    "gitPackageVersion",
+    "Already current",
     "selectSkill",
     "installSelectedSkill",
     "explainMcpServer",
@@ -761,10 +764,10 @@ if (!exists(cliPath)) {
   if (cli.includes('runBash("install", "scripts/install.sh", ["--all", "--interactive"')) {
     fail(`${cliPath} Full install must not open a second nested Bash confirmation flow after CLI APPLY`);
   }
-  if (!cli.includes('runPowerShell("update-install", ".\\\\scripts\\\\install.ps1", ["-Update", "-PlainOutput"])')) {
+  if (!cli.includes('runPowerShell("update-install", ".\\\\scripts\\\\install.ps1", ["-Update", "-PlainOutput"]')) {
     fail(`${cliPath} Windows update-install must use -Update so user-owned config survives managed refresh`);
   }
-  if (!cli.includes('runBash("update-install", "scripts/install.sh", ["--update", "--plain-output"])')) {
+  if (!cli.includes('runBash("update-install", "scripts/install.sh", ["--update", "--plain-output"]')) {
     fail(`${cliPath} Bash update-install must use --update so user-owned config survives managed refresh`);
   }
   if (cli.includes('runPowerShell("update-install", ".\\\\scripts\\\\install.ps1", ["-Force"')) {
@@ -855,6 +858,7 @@ runCliSmoke("help", ["--help", "--plain", "--no-log"], [
   "--lang tr",
   "--tr",
   "--verbose-plan",
+  "--details",
   "Allow write actions for update",
   "--reset [--apply]",
   "tmp/chef-cli/logs"
@@ -867,6 +871,7 @@ runCliSmoke("help-tr", ["--help", "--lang", "tr", "--plain", "--no-log"], [
   "--processes",
   "--lang tr",
   "--verbose-plan",
+  "--details",
   "tmp/chef-cli/logs"
 ], { forbidAnsi: true });
 runCliSmoke("help-tr-alias", ["--help", "--tr", "--plain", "--no-log"], [
@@ -911,7 +916,7 @@ runCliSmoke("forced-color", ["--help", "--no-log"], [
   },
   expectAnsi: true
 });
-runCliSmoke("mcp", ["--mcp", "--plain", "--no-log"], [
+runCliSmoke("mcp", ["--mcp", "--details", "--plain", "--no-log"], [
   "MCP connectors",
   "16 connectors",
   "Credential need",
@@ -919,7 +924,7 @@ runCliSmoke("mcp", ["--mcp", "--plain", "--no-log"], [
   "Timeouts and per-tool exposure live in templates/codex/config.windows.toml",
   "Authenticated account, database, production, broad filesystem, and graph-indexing MCP connectors stay disabled by default."
 ], { forbidAnsi: true });
-runCliSmoke("mcp-tr", ["--mcp", "--tr", "--plain", "--no-log"], [
+runCliSmoke("mcp-tr", ["--mcp", "--details", "--tr", "--plain", "--no-log"], [
   "MCP bağlayıcıları",
   "16 bağlayıcı",
   "Kimlik bilgisi veya ek girdi gerekmez.",
@@ -934,7 +939,7 @@ runCliSmoke("mcp-tr", ["--mcp", "--tr", "--plain", "--no-log"], [
     "Requires GitHub/Copilot account authorization"
   ]
 });
-runCliSmoke("mcp-forced-color", ["--mcp", "--no-log"], [
+runCliSmoke("mcp-forced-color", ["--mcp", "--details", "--no-log"], [
   "MCP connectors",
   "Authenticated account, database, production, broad filesystem, and graph-indexing MCP connectors stay disabled by default."
 ], {
@@ -944,7 +949,7 @@ runCliSmoke("mcp-forced-color", ["--mcp", "--no-log"], [
   },
   expectAnsi: true
 });
-runCliSmoke("skills", ["--skills", "--plain", "--no-log"], [
+runCliSmoke("skills", ["--skills", "--details", "--plain", "--no-log"], [
   "Skills catalog",
   "16 curated installable skills",
   "How skill activation works",
@@ -955,7 +960,7 @@ runCliSmoke("skills", ["--skills", "--plain", "--no-log"], [
   "Skill source verification passed",
   "Log disabled by --no-log"
 ]);
-runCliSmoke("routing", ["--routing", "--plain", "--no-log"], [
+runCliSmoke("routing", ["--routing", "--details", "--plain", "--no-log"], [
   "Codex Chef enterprise routing board",
   "Routing visibility contract",
   "Lifecycle hygiene",
@@ -963,7 +968,7 @@ runCliSmoke("routing", ["--routing", "--plain", "--no-log"], [
   "Routing result",
   "Use /agent in Codex CLI"
 ]);
-runCliSmoke("diagnostics", ["--diagnostics", "--plain", "--no-log"], [
+runCliSmoke("diagnostics", ["--diagnostics", "--details", "--plain", "--no-log"], [
   "Diagnostics hub",
   "Current health",
   "Next safe actions",
@@ -981,7 +986,7 @@ runCliSmoke("diagnostics", ["--diagnostics", "--plain", "--no-log"], [
   "Recent CLI logs",
   "Log root"
 ], { forbidAnsi: true });
-runCliSmoke("diagnostics-tr", ["--diagnostics", "--tr", "--plain", "--no-log"], [
+runCliSmoke("diagnostics-tr", ["--diagnostics", "--details", "--tr", "--plain", "--no-log"], [
   "Tanılama merkezi",
   "Canlı sağlık",
   "Sonraki güvenli adımlar",
@@ -1030,7 +1035,6 @@ runCliSmoke("update-preview", ["--update", "--plain", "--no-log"], [
   "Update preview",
   "No managed or global files changed",
   "npm run chef -- --update --apply",
-  "excludes curated global skill installs",
   "Managed targets",
   "Full evidence"
 ], {
@@ -1065,7 +1069,7 @@ runCliSmoke("status-repo-only", ["--status", "--repo-only", "--plain", "--no-log
   "Codex skipped",
   "Log disabled by --no-log"
 ], { timeout: 180000 });
-runCliSmoke("reset-preview", ["--reset", "--plain", "--no-log"], [
+runCliSmoke("reset-preview", ["--reset", "--details", "--plain", "--no-log"], [
   "Refresh preview",
   "--force",
   "completed: Codex Chef dry run",
