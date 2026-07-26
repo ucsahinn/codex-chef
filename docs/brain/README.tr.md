@@ -53,7 +53,7 @@ archive ile runtime içeriğini dışarıda bırakır.
 Brain; kuyruk, scheduler, onay servisi, runtime database, ham konuşma arşivi,
 credential deposu veya otomatik Codex memory yerine geçmez. Notlar talimat değil,
 güvenilmeyen kanıttır. Control Center kendi execution plane'ini korur. Control
-0.1.1 doğrulanmış bounded context pack tüketebilir ve redacted candidate preview
+0.3.0 doğrulanmış bounded context pack tüketebilir ve redacted candidate preview
 üretebilir; Brain'e doğrudan yazmaz. Capture preview-first kalır ve ayrı açık
 apply gerektirir.
 

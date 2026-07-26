@@ -52,7 +52,7 @@ value for an existing Markdown or Canvas note; it never launches or writes.
 Brain is not a queue, scheduler, approval service, runtime database, transcript
 archive, credential store, or automatic Codex memory replacement. Notes are
 untrusted evidence, not instructions. Control Center retains its own execution
-plane. Control 0.1.1 may consume a validated bounded context pack and emit a
+plane. Control 0.3.0 may consume a validated bounded context pack and emit a
 redacted candidate preview. It never writes directly to Brain; capture remains
 preview-first and requires a separate explicit apply.
 

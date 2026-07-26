@@ -130,3 +130,29 @@ test("CLI exposes a read-only Windows Brain permission audit", () => {
   assert.equal(statusReport.ok, process.platform === "win32" ? statusReport.securityStatus.ok : true);
   assert.deepEqual(snapshotVault(target), before);
 });
+
+test("Brain documentation names the supported CLI and Control 0.3.0 boundary", () => {
+  const documentation = [
+    "templates/brain/README.md",
+    "docs/brain/README.md",
+    "docs/brain/README.tr.md",
+    "plugins/codex-chef-workflows/skills/codex-chef-brain/SKILL.md",
+    "plugins/codex-chef-workflows/skills/codex-chef-brain/references/brain-protocol.md"
+  ];
+
+  for (const relativePath of documentation) {
+    const content = fs.readFileSync(path.join(root, relativePath), "utf8");
+    assert.doesNotMatch(content, /\bcodex-brain\b/i, `${relativePath} must not advertise an unshipped codex-brain executable.`);
+    assert.doesNotMatch(content, /Control 0\.1\.1/i, `${relativePath} must not advertise the superseded Control 0.1.1 contract.`);
+  }
+
+  for (const relativePath of documentation.slice(0, 4)) {
+    const content = fs.readFileSync(path.join(root, relativePath), "utf8");
+    assert.match(content, /npm\.cmd run brain -- status --target/i, `${relativePath} must direct users to the supported Brain status command.`);
+  }
+
+  for (const relativePath of documentation.slice(1)) {
+    const content = fs.readFileSync(path.join(root, relativePath), "utf8");
+    assert.match(content, /Control\s+0\.3\.0/i, `${relativePath} must identify the current Control boundary.`);
+  }
+});

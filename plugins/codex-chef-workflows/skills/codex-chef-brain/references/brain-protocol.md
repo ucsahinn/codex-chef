@@ -88,7 +88,7 @@ separate owner-only location or a future reviewed projection design.
 ## Control Center Boundary
 
 The two systems never share a database. Brain may return a read-only bounded
-context pack. Control 0.1.1 validates its schema, project, privacy, relative
+context pack. Control 0.3.0 validates its schema, project, privacy, relative
 paths, hashes, note count, and character budgets before wrapping excerpts as
 untrusted reference data. Canonical evidence stores only context digest and note
 references, never excerpts or the absolute vault path. A successful run may

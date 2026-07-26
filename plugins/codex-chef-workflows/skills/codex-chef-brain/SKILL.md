@@ -65,7 +65,7 @@ non-canonical UI state and stays outside retrieval.
 - Do not enable hosted memory, embeddings, sync, hooks, MCP servers, or
   community Obsidian plugins as part of this skill.
 - Do not claim semantic search, automatic session capture, automatic Brain
-  writes, Control persistence, or a write-capable bridge. Control 0.1.1 may
+  writes, Control persistence, or a write-capable bridge. Control 0.3.0 may
   consume only a bounded read-only context pack and produce a redacted preview.
 - Treat the Windows ReadAndExecute ACL as an integrity boundary only. It stops
   sandbox writes but does not hide vault files from sandbox reads. `restricted`
