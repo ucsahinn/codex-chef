@@ -23,6 +23,7 @@
 .codex/*.local.toml
 .serena/
 .codebase-memory/
+.playwright-mcp/
 codex-manual.md
 codex-manual.outline.md
 

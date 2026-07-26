@@ -51,14 +51,13 @@ Repoyu klonla ve Codex home’a yazmadan planı gör:
 ```powershell
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
-node scripts/plan-install.mjs --all --json --redact-paths
+npm run chef -- --install
 ```
 
 Ön izleme doğruysa kurulumu başlat:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
+npm run chef -- --install --apply
 ```
 
 macOS, Linux veya WSL:
@@ -66,11 +65,14 @@ macOS, Linux veya WSL:
 ```bash
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
-chmod +x scripts/install.sh
-./scripts/install.sh --all --interactive
+npm run chef -- --install
+npm run chef -- --install --apply
 ```
 
 Installer yönetilen hedefleri değiştirmeden önce yedek alır. Normal kurulum ve repair, kullanıcıya ait skill, MCP, profil veya ilgisiz plugin dosyalarını prune etmez.
+Renkli CLI önerilen public giriş yoludur. İleri düzey veya otomasyon amaçlı kullanımda
+Windows üzerinde `scripts\install.ps1`, Bash sistemlerinde `scripts/install.sh` doğrudan
+çağrılabilir; manifest tabanlı operasyon sözleşmesi `node scripts/plan-install.mjs --all --json --redact-paths` ile görülebilir.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> CLI’ı Tahmin Etmeden Kullan
 
@@ -99,7 +101,7 @@ giderme](docs/troubleshooting.tr.md) sayfalarında anlatılır.
 | Yüzey | Gelenler |
 | --- | --- |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Ajanlar | 21 isimlendirilmiş uzman rolü. Bunlar her zaman çalışan servisler değil, gerektiğinde sınırlı delegasyon için kullanılan rol dosyalarıdır. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skill’ler | Beş lokal plugin workflow’u ve on altı incelenmiş opsiyonel global skill. Skill’ler görev eşleştiğinde context’e girer, kendi kendine çalışmaz. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skill’ler | Proje kapsamlı Codex Chef Brain dahil altı lokal plugin workflow’u ve on altı incelenmiş opsiyonel global skill. Skill’ler görev eşleştiğinde context’e girer, kendi kendine çalışmaz. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP’ler | Resmi docs, güncel kütüphane docs’u, reasoning, browser kanıtı, semantic navigation, memory okuması ve `codebase-memory` ile lokal codebase graph okumaları için sekiz güvenli varsayılan. Hesap, database, production ve geniş filesystem connector’larından sekizi kapalı gelir. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Çalışma sözleşmesi | Kalıcı `~/.codex/AGENTS.md`, routing profilleri, approval kuralları ve her ajanı tek modele kilitlemeyen token-safe profil seçenekleri. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Güvenlik | Dry-run, manifest tabanlı kurulum planı, backup-first replacement, secret scan, package-surface kontrolü ve runtime doğrulaması. |

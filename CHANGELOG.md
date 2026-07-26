@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.5.54 - 2026-07-26
+
+- Add Codex Chef Brain as a preview-first, project-scoped Markdown knowledge vault with schemas, templates, capture/retrieval CLI commands, backup and restore plans, Windows ACL evidence, documentation, and focused regression tests.
+- Restore and refine the colorful U.C.S. operator CLI with clearer menu importance, operation impact, action receipts, post-update version/commit evidence, and a green third signature color.
+- Separate first install, safe existing-install reconciliation, managed update, force refresh, and drift repair into explicit behaviors across Windows and Bash installers.
+- Preserve user-owned `config.toml` settings during normal updates while synchronizing Codex Chef-managed tables and refreshing managed files after backup.
+- Make the colorful CLI the recommended public install path, remove nested installer confirmation after CLI `APPLY`, and retain direct installer/plan commands for reviewed automation.
+- Expand CLI and installer validation for update safety, nested-confirmation prevention, Brain packaging, locale parity, and portable public documentation.
+
 ## 0.5.53 - 2026-07-26
 
 - Replace generated deep-documentation shells with six concise, human-written README entry points and complete English/Turkish operator guides.

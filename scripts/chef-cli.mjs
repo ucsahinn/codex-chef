@@ -257,7 +257,15 @@ const COLOR_CODES = {
   yellow: "\x1b[33m",
   blue: "\x1b[34m",
   magenta: "\x1b[35m",
-  cyan: "\x1b[36m"
+  cyan: "\x1b[36m",
+  white: "\x1b[37m",
+  gray: "\x1b[90m",
+  brightRed: "\x1b[91m",
+  brightGreen: "\x1b[92m",
+  brightYellow: "\x1b[93m",
+  brightBlue: "\x1b[94m",
+  brightMagenta: "\x1b[95m",
+  brightCyan: "\x1b[96m"
 };
 
 const ANSI_PATTERN = /\x1b\[[0-9;]*m/g;
@@ -290,12 +298,18 @@ function colorize(value, color) {
   return `${code}${value}${COLOR_CODES.reset}`;
 }
 
+function paint(value, ...styles) {
+  if (!supportsColor()) return String(value);
+  const codes = styles.map((style) => COLOR_CODES[style]).filter(Boolean).join("");
+  return codes ? `${codes}${value}${COLOR_CODES.reset}` : String(value);
+}
+
 function styleAction(action) {
-  return colorize(action, "cyan");
+  return paint(action, "bold", "brightCyan");
 }
 
 function styleHeading(value) {
-  return colorize(value, "bold");
+  return paint(value, "bold", "brightCyan");
 }
 
 function styleLabel(value) {
@@ -303,7 +317,7 @@ function styleLabel(value) {
 }
 
 function styleMuted(value) {
-  return colorize(value, "dim");
+  return paint(value, "dim", "gray");
 }
 
 function stripAnsi(value) {
@@ -356,7 +370,10 @@ function printBrandSignature() {
     " ╚═════╝    ╚═════╝   ╚══════╝"
   ];
   console.log("");
-  for (const line of lines) console.log(colorize(line, "cyan"));
+  const palette = ["brightCyan", "cyan", "brightBlue", "blue", "brightGreen", "green"];
+  for (const [index, line] of lines.entries()) {
+    console.log(paint(line, "bold", palette[index % palette.length]));
+  }
   console.log("");
 }
 
@@ -423,17 +440,14 @@ function displayValue(value, column = {}) {
 }
 
 function makeIcons() {
-  // Emoji rendering is not reliable across Windows console code pages. Keep
-  // colour, but use deterministic ASCII operational markers in real sessions.
-  const source = process.env.CODEX_CHEF_TEST_MENU === "1" && supportsColor()
-    ? RICH_ICONS
-    : ASCII_ICONS;
+  const source = supportsColor() ? RICH_ICONS : ASCII_ICONS;
   return Object.fromEntries(
     Object.entries(source).map(([name, icon]) => [name, colorize(icon, ICON_COLORS[name])])
   );
 }
 
 const ICONS = makeIcons();
+let lastActionSummary = null;
 
 const MENU_ITEMS = [
   {
@@ -559,8 +573,8 @@ const MENU_GROUPS = [
     id: "setup",
     label: "Setup & update",
     labelTr: "Kurulum ve güncelleme",
-    description: "Preview, update, install, refresh, and repair with explicit write gates.",
-    descriptionTr: "Açık yazma onaylarıyla ön izleme, güncelleme, kurulum, yenileme ve onarım.",
+    description: "Preview first. Update an existing setup, install once, repair drift, and use force refresh only as recovery.",
+    descriptionTr: "Önce ön izle. Mevcut kurulumu güncelle, ilk kez kur, drift'i onar; zorunlu yenilemeyi yalnız kurtarma için kullan.",
     itemIds: ["preview", "update", "install", "reset", "repair"]
   },
   {
@@ -596,6 +610,71 @@ const MENU_GROUPS = [
     itemIds: ["auth", "language"]
   }
 ];
+
+const GROUP_VISUALS = [
+  { icon: "◉", color: "brightGreen" },
+  { icon: "◆", color: "brightMagenta" },
+  { icon: "✦", color: "brightCyan" },
+  { icon: "◇", color: "brightBlue" },
+  { icon: "✓", color: "brightGreen" },
+  { icon: "●", color: "brightYellow" }
+];
+
+function groupVisual(group) {
+  const index = Math.max(0, MENU_GROUPS.findIndex((candidate) => candidate.id === group.id));
+  return GROUP_VISUALS[index % GROUP_VISUALS.length];
+}
+
+function statusBadge(label, kind = "safe") {
+  const color = kind === "write"
+    ? "brightRed"
+    : kind === "guidance"
+      ? "brightYellow"
+      : "brightGreen";
+  return paint(`[ ${label} ]`, "bold", color);
+}
+
+function menuImportance(item) {
+  const levels = {
+    status: localText("ESSENTIAL", "TEMEL"),
+    "status:repo-only": localText("QUICK CHECK", "HIZLI KONTROL"),
+    doctor: localText("DEEP CHECK", "DERİN KONTROL"),
+    preview: localText("START HERE", "BURADAN BAŞLA"),
+    update: localText("RECOMMENDED", "ÖNERİLEN"),
+    install: localText("FIRST SETUP", "İLK KURULUM"),
+    reset: localText("ADVANCED", "İLERİ SEVİYE"),
+    repair: localText("DRIFT FIX", "DRIFT ONARIMI"),
+    backups: localText("RECOVERY", "KURTARMA"),
+    skills: localText("OPTIONAL", "İSTEĞE BAĞLI"),
+    mcp: localText("CAPABILITY", "YETENEK"),
+    routing: localText("GUIDANCE", "REHBER"),
+    diagnostics: localText("EVIDENCE", "KANIT"),
+    processes: localText("EVIDENCE", "KANIT"),
+    auth: localText("GUIDANCE", "REHBER"),
+    logs: localText("HISTORY", "GEÇMİŞ"),
+    language: localText("PREFERENCE", "TERCİH"),
+    exit: localText("SESSION", "OTURUM")
+  };
+  return levels[item.id] || localText("UTILITY", "ARAÇ");
+}
+
+function importanceBadge(item) {
+  const color = item.id === "reset"
+    ? "brightRed"
+    : ["update", "preview", "repair"].includes(item.id)
+      ? "brightMagenta"
+      : menuItemColor(item);
+  return paint(`[ ${menuImportance(item)} ]`, "bold", color);
+}
+
+function printChoiceRow(index, label, detail = "", color = "brightCyan", icon = "›") {
+  if (!supportsColor()) {
+    console.log(`${index}. ${label}${detail ? ` - ${detail}` : ""}`);
+    return;
+  }
+  console.log(`${paint(String(index).padStart(2, "0"), "bold", color)} ${paint(icon, "bold", color)} ${paint(label, "bold", "white")}`);
+  if (detail) console.log(`   ${paint("└─", color)} ${styleMuted(detail)}`);
+}
 
 const MENU_TEXT_TR = {
   status: {
@@ -717,20 +796,36 @@ function menuItemNumber(item) {
 }
 
 function menuItemColor(item) {
-  if (item.id === "exit") return "dim";
-  if (item.id === "language") return "magenta";
-  return "cyan";
+  const colors = {
+    status: "brightGreen",
+    "status:repo-only": "brightGreen",
+    doctor: "brightGreen",
+    preview: "brightBlue",
+    update: "brightMagenta",
+    install: "brightCyan",
+    reset: "brightYellow",
+    repair: "brightYellow",
+    backups: "brightBlue",
+    skills: "brightMagenta",
+    mcp: "brightCyan",
+    routing: "brightBlue",
+    diagnostics: "brightGreen",
+    processes: "brightCyan",
+    auth: "brightYellow",
+    logs: "brightBlue",
+    language: "brightMagenta",
+    exit: "gray"
+  };
+  return colors[item.id] || "brightCyan";
 }
 
 function menuIcon(item) {
-  const icons = process.env.CODEX_CHEF_TEST_MENU === "1" && supportsColor()
-    ? MENU_RICH_ICONS
-    : MENU_ASCII_ICONS;
+  const icons = supportsColor() ? MENU_RICH_ICONS : MENU_ASCII_ICONS;
   return icons[item.id] || "--";
 }
 
 function tableBorder(widths) {
-  return colorize(`+${widths.map((width) => "-".repeat(width + 2)).join("+")}+`, "dim");
+  return colorize(`+${widths.map((width) => "-".repeat(width + 2)).join("+")}+`, supportsColor() ? "blue" : "dim");
 }
 
 function tableRow(cells, widths, muted = false) {
@@ -739,8 +834,17 @@ function tableRow(cells, widths, muted = false) {
   return muted ? styleMuted(line) : line;
 }
 
-function printSurfaceHeader(title, subtitle = "", icon = ICONS.info) {
+function printSurfaceHeader(title, subtitle = "", icon = ICONS.info, accent = "brightCyan") {
   console.log("");
+  if (supportsColor()) {
+    const width = Math.max(28, Math.min(terminalWidth(), 92));
+    const titleText = ` ${stripAnsi(icon)}  ${title} `;
+    const remainder = Math.max(2, width - visualLength(titleText) - 2);
+    console.log(paint(`╭─${titleText}${"─".repeat(remainder)}╮`, "bold", accent));
+    if (subtitle) console.log(`${paint("│", accent)} ${paint(subtitle, "white")}`);
+    console.log(paint(`╰${"─".repeat(width - 2)}╯`, accent));
+    return;
+  }
   const rawTitle = String(title || "");
   const dividerTitle = isTr()
     ? rawTitle.toLocaleUpperCase("tr-TR").replace(/\bSKİLL\b/g, "SKILL")
@@ -751,11 +855,18 @@ function printSurfaceHeader(title, subtitle = "", icon = ICONS.info) {
 }
 
 function printSurfaceNote(label, value) {
-  console.log(`${styleLabel(label)}: ${value}`);
+  const marker = supportsColor() ? `${paint("◆", "brightBlue")} ` : "";
+  console.log(`${marker}${styleLabel(label)}: ${value}`);
 }
 
-function operatorPrompt() {
-  return `\n${styleLabel(localText(`Choose action 1-${MENU_ITEMS.length}`, `İşlem seç 1-${MENU_ITEMS.length}`))}${styleMuted(localText(" / l language / q quit:", " / l dil / q çıkış:"))} `;
+function operatorPrompt(upperBound = MENU_ITEMS.length, canGoBack = false) {
+  if (!supportsColor()) {
+    return `\n${styleLabel(localText(`Choose action 1-${upperBound}`, `İşlem seç 1-${upperBound}`))}${styleMuted(localText(" / l language / q quit:", " / l dil / q çıkış:"))} `;
+  }
+  const shortcuts = canGoBack
+    ? localText(" / b back / l language / q quit:", " / b geri / l dil / q çıkış:")
+    : localText(" / l language / q quit:", " / l dil / q çıkış:");
+  return `\n${paint("›", "bold", "brightMagenta")} ${styleLabel(localText(`Choose 1-${upperBound}`, `1-${upperBound} seç`))}${styleMuted(shortcuts)} `;
 }
 
 function printOperatorStatusStrip() {
@@ -765,6 +876,11 @@ function printOperatorStatusStrip() {
   console.log(`${styleLabel(localText("Mode", "Mod"))}: ${localText("Local operator", "Yerel operatör")} | ${styleLabel(localText("Version", "Versiyon"))}: ${currentPackageVersion()} | ${styleLabel("Git")}: ${gitBranch()}@${commit}`);
   console.log(`${styleLabel(localText("Safety", "Güvenlik"))}: ${localText("menu writes use typed confirmation; direct CLI writes require --apply", "menüde yazan işlemler yazılı onay; doğrudan CLI işlemleri --apply ister")}`);
   console.log(`${styleLabel(legendLabel)}: ${colorize("SAFE", "green")}=${localText("read-only", "yazmaz")} | ${colorize("APPLY-GATED", "red")}=${localText("backup/confirmation required", "yedek/onay gerekir")} | ${colorize("ACCOUNT-GUIDED", "yellow")}=${localText("guidance only", "yalnız rehberlik")}`);
+  if (lastActionSummary) {
+    const color = lastActionSummary.ok ? "brightGreen" : lastActionSummary.skipped ? "brightYellow" : "brightRed";
+    const duration = Number.isFinite(lastActionSummary.elapsedMs) ? ` | ${lastActionSummary.elapsedMs} ms` : "";
+    console.log(`${styleLabel(localText("Last action", "Son işlem"))}: ${paint(lastActionSummary.label, "bold", color)} | ${paint(lastActionSummary.status, color)}${styleMuted(duration)}`);
+  }
 }
 
 function printStackedMenu(width) {
@@ -846,7 +962,7 @@ Komut kısayolları:
 
 Seçenekler:
   --json          Desteklenen yerlerde JSON çıktı verir
-  --lang tr      Operatör metinlerini Türkçe yapar (en veya tr)
+  --lang tr       Operatör metinlerini Türkçe yapar (en veya tr)
   --tr           --lang tr kısa yolu
   --plain        İkon yerine ASCII etiketleri kullanır
   --no-log       Sıkı audit için repo-local CLI log dosyası oluşturmaz
@@ -897,7 +1013,7 @@ Operator screens:
 
 Options:
   --json          Emit JSON where supported
-  --lang tr      Localize operator-facing wrapper text (en or tr)
+  --lang tr       Localize operator-facing wrapper text (en or tr)
   --tr           Shortcut for --lang tr
   --plain        Use ASCII labels instead of icons
   --no-log       Do not create repo-local CLI log files for strict audits
@@ -1011,23 +1127,25 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
   if (logPath) {
     fs.appendFileSync(logPath, output, "utf8");
     fs.appendFileSync(logPath, `\nexitCode=${result.status ?? "error"}\n`, "utf8");
+    if (result.signal) fs.appendFileSync(logPath, `signal=${result.signal}\n`, "utf8");
   }
 
   if (result.error) {
     if (!options.json) console.error(`${ICONS.warn} [!!!!!!!!!!] 100% FAILED   ${action} (${Date.now() - startedMs} ms)`);
     console.error(`${ICONS.warn} ${result.error.message}`);
-    return { ok: false, status: null, logPath, error: result.error.message, elapsedMs: Date.now() - startedMs };
+    return { ok: false, status: null, signal: result.signal || null, logPath, error: result.error.message, output, elapsedMs: Date.now() - startedMs };
   }
   if (result.status !== 0) {
     if (!options.json) console.error(`${ICONS.warn} [!!!!!!!!!!] 100% FAILED   ${action} (${Date.now() - startedMs} ms)`);
     const logNote = logPath ? ` Log: ${toPosix(path.relative(root, logPath))}` : " Logging disabled by --no-log.";
-    console.error(`${ICONS.warn} Command failed with exit ${result.status}.${logNote}`);
-    return { ok: false, status: result.status, logPath, elapsedMs: Date.now() - startedMs };
+    const signalNote = result.signal ? ` Signal: ${result.signal}.` : "";
+    console.error(`${ICONS.warn} Command failed with exit ${result.status}.${signalNote}${logNote}`);
+    return { ok: false, status: result.status, signal: result.signal || null, logPath, output, elapsedMs: Date.now() - startedMs };
   }
   if (!options.json) console.log(`${ICONS.ok} [##########] 100% DONE     ${action} (${Date.now() - startedMs} ms)`);
   if (logPath && !options.json) console.log(`${ICONS.ok} Log: ${toPosix(path.relative(root, logPath))}`);
   else if (!options.json) console.log(`${ICONS.ok} ${localText("Log disabled by --no-log", "Log --no-log ile kapali")}`);
-  return { ok: true, status: result.status, logPath, elapsedMs: Date.now() - startedMs };
+  return { ok: true, status: result.status, signal: result.signal || null, logPath, output, elapsedMs: Date.now() - startedMs };
 }
 
 function runNode(action, script, scriptArgs = [], extra = {}) {
@@ -1073,7 +1191,12 @@ async function confirmWriteAction(action, detail, interaction = {}) {
 function printHeader() {
   printBrandSignature();
   printDivider("Codex Chef");
-  console.log(`${ICONS.chef} Codex Chef`);
+  if (supportsColor()) {
+    console.log(`${ICONS.chef} ${paint("CODEX CHEF", "bold", "brightCyan")}  ${paint("OPERATOR CONSOLE", "bold", "brightMagenta")}`);
+    console.log(`${paint("●", "brightGreen")} ${paint(localText("READY", "HAZIR"), "bold", "brightGreen")}  ${paint("•", "gray")}  ${styleMuted(`v${currentPackageVersion()}  ${gitBranch()}`)}`);
+  } else {
+    console.log(`${ICONS.chef} Codex Chef`);
+  }
   console.log(styleMuted(localText(
     "One operator board for status, setup, backups, skills, MCP connectors, diagnostics, auth notes, and logs.",
     "Durum, kurulum, yedekler, skill'ler, MCP bağlayıcıları, tanılama, kimlik notları ve loglar için tek operatör paneli."
@@ -1087,12 +1210,17 @@ function printHeader() {
 
 function printMenu() {
   printDivider("COMMAND CENTER");
-  console.log(styleHeading(localText("Codex Chef command center", "Codex Chef komuta merkezi")));
+  if (supportsColor()) {
+    console.log(`${paint("✦", "bold", "brightMagenta")} ${styleHeading(localText("Codex Chef command center", "Codex Chef komuta merkezi"))}`);
+  } else {
+    console.log(styleHeading(localText("Codex Chef command center", "Codex Chef komuta merkezi")));
+  }
   printOperatorStatusStrip();
   console.log("");
   MENU_GROUPS.forEach((group, index) => {
     const label = options.lang === "tr" ? group.labelTr : group.label;
     const description = options.lang === "tr" ? group.descriptionTr : group.description;
+    const visual = groupVisual(group);
     const writeCount = group.itemIds
       .map((id) => MENU_ITEMS.find((item) => item.id === id))
       .filter((item) => item && !/^No writes$/.test(item.writes))
@@ -1100,8 +1228,14 @@ function printMenu() {
     const badge = writeCount > 0
       ? localText(`${writeCount} approval-gated`, `${writeCount} onaylı işlem`)
       : localText("read-only", "salt okunur");
-    console.log(`${styleHeading(String(index + 1).padStart(2, "0"))}  ${styleHeading(label)}  ${styleMuted(`[${badge}]`)}`);
-    console.log(`    ${description}`);
+    if (supportsColor()) {
+      const badgeKind = writeCount > 0 ? "write" : "safe";
+      console.log(`${paint("╭─", visual.color)} ${paint(String(index + 1).padStart(2, "0"), "bold", visual.color)} ${paint(visual.icon, "bold", visual.color)}  ${paint(label, "bold", "white")}  ${statusBadge(badge, badgeKind)}`);
+      console.log(`${paint("╰─", visual.color)} ${styleMuted(description)}`);
+    } else {
+      console.log(`${styleHeading(String(index + 1).padStart(2, "0"))}  ${styleHeading(label)}  ${styleMuted(`[${badge}]`)}`);
+      console.log(`    ${description}`);
+    }
   });
   console.log("");
   console.log(styleMuted(localText(
@@ -1128,16 +1262,29 @@ function printLegacyMenu() {
 function printHubMenu(group) {
   const label = options.lang === "tr" ? group.labelTr : group.label;
   const description = options.lang === "tr" ? group.descriptionTr : group.description;
+  const visual = groupVisual(group);
   printDivider(label.toUpperCase());
-  console.log(styleHeading(label));
-  console.log(description);
+  if (supportsColor()) {
+    console.log(`${paint(visual.icon, "bold", visual.color)} ${paint(label, "bold", visual.color)}`);
+    console.log(styleMuted(description));
+  } else {
+    console.log(styleHeading(label));
+    console.log(description);
+  }
   console.log("");
   group.itemIds.forEach((id, index) => {
     const item = MENU_ITEMS.find((candidate) => candidate.id === id);
     if (!item) return;
-    console.log(`${styleHeading(String(index + 1).padStart(2, "0"))}  ${menuIcon(item)} ${styleHeading(menuLabel(item))}`);
-    console.log(`    ${menuDescription(item)}`);
-    console.log(`    ${styleMuted(localText("Impact", "Etki"))}: ${menuWrites(item)}`);
+    if (supportsColor()) {
+      const color = menuItemColor(item);
+      const boundary = writeBoundaryKind(menuWrites(item));
+      console.log(`${paint("╭─", color)} ${paint(String(index + 1).padStart(2, "0"), "bold", color)} ${colorize(menuIcon(item), color)}  ${paint(menuLabel(item), "bold", "white")}  ${importanceBadge(item)} ${statusBadge(menuWrites(item), boundary)}`);
+      console.log(`${paint("╰─", color)} ${styleMuted(menuDescription(item))}`);
+    } else {
+      console.log(`${styleHeading(String(index + 1).padStart(2, "0"))}  ${menuIcon(item)} ${styleHeading(menuLabel(item))}`);
+      console.log(`    ${menuDescription(item)}`);
+      console.log(`    ${styleMuted(localText("Importance", "Önem"))}: ${menuImportance(item)} | ${styleMuted(localText("Impact", "Etki"))}: ${menuWrites(item)}`);
+    }
   });
   console.log("");
   console.log(styleMuted(localText("b = back, l = language, q = quit", "b = geri, l = dil, q = çıkış")));
@@ -1148,7 +1295,8 @@ function printActionStart(item) {
   printSurfaceHeader(
     localText(`Opening: ${label}`, `Aciliyor: ${label}`),
     menuDescription(item),
-    ICONS.run
+    colorize(menuIcon(item), menuItemColor(item)),
+    menuItemColor(item)
   );
 }
 
@@ -1159,7 +1307,22 @@ function printActionEnd(item, result) {
     : result?.ok === false
       ? localText("attention", "dikkat")
       : localText("ready", "hazır");
-  printDivider(localText(`${label}: ${status}`, `${label}: ${status}`));
+  const color = result?.skipped ? "brightYellow" : result?.ok === false ? "brightRed" : "brightGreen";
+  const elapsedMs = result?.operation?.elapsedMs ?? result?.elapsedMs;
+  lastActionSummary = {
+    label,
+    status,
+    ok: result?.ok !== false && !result?.skipped,
+    skipped: Boolean(result?.skipped),
+    elapsedMs: Number.isFinite(elapsedMs) ? elapsedMs : null
+  };
+  if (supportsColor()) {
+    const icon = result?.skipped ? "○" : result?.ok === false ? "!" : "✓";
+    console.log("");
+    console.log(`${paint("╰─", color)} ${paint(icon, "bold", color)} ${paint(localText(`${label}: ${status}`, `${label}: ${status}`), "bold", color)}`);
+  } else {
+    printDivider(localText(`${label}: ${status}`, `${label}: ${status}`));
+  }
 }
 
 async function pauseBeforeMenu(question) {
@@ -1424,6 +1587,7 @@ async function runUpdate(interaction = {}) {
     console.log(`${ICONS.warn} ${localText(`Cannot inspect current Git HEAD: ${beforeHead.message}`, `Gecerli Git HEAD incelenemedi: ${beforeHead.message}`)}`);
     return { ok: false };
   }
+  const beforeVersion = currentPackageVersion();
   const allowed = await confirmWriteAction(
     localText("Update", "Guncelleme"),
     localText(
@@ -1454,15 +1618,22 @@ async function runUpdate(interaction = {}) {
   } else {
     console.log(`${ICONS.ok} ${localText("Repository already up to date; applying the reviewed managed refresh.", "Repo zaten güncel; incelenmiş managed refresh uygulanıyor.")}`);
   }
+  const afterVersion = currentPackageVersion();
   const validation = runUpdateValidation();
   if (!validation.ok) return validation;
   let applied;
   if (process.platform === "win32") {
-    applied = runPowerShell("update-install", ".\\scripts\\install.ps1", ["-Force", "-PlainOutput"]);
+    applied = runPowerShell("update-install", ".\\scripts\\install.ps1", ["-Update", "-PlainOutput"]);
   } else {
-    applied = runBash("update-install", "scripts/install.sh", ["--force", "--plain-output"]);
+    applied = runBash("update-install", "scripts/install.sh", ["--update", "--plain-output"]);
   }
-  return completeAppliedAction(applied, false);
+  return completeAppliedAction(applied, false, {
+    kind: "update",
+    beforeVersion,
+    afterVersion,
+    beforeHead: beforeHead.value,
+    afterHead: afterHead.value
+  });
 }
 
 function runPostApplyVerification(expectSkills = false) {
@@ -1480,18 +1651,115 @@ function runPostApplyVerification(expectSkills = false) {
   ]);
 }
 
-function completeAppliedAction(applied, expectSkills = false) {
-  if (!applied.ok) return applied;
-  const verification = runPostApplyVerification(expectSkills);
+function outputValue(output, label) {
+  const prefix = `${label}:`;
+  const line = String(output || "").split(/\r?\n/).find((entry) => entry.trim().startsWith(prefix));
+  return line ? line.trim().slice(prefix.length).trim() : null;
+}
+
+function operationLabel(kind) {
+  const labels = {
+    update: localText("Update Codex Chef", "Codex Chef'i güncelle"),
+    install: localText("Full install", "Tam kurulum"),
+    reset: localText("Force refresh", "Zorunlu yenileme"),
+    repair: localText("Repair setup", "Kurulumu onar")
+  };
+  return labels[kind] || localText("Managed operation", "Yönetilen işlem");
+}
+
+function buildOperationResult(applied, verification, context = {}) {
+  const evidenceOutput = verification?.output || "";
+  const applyOutput = applied?.output || "";
   return {
-    ...verification,
-    applied: true,
-    applyLogPath: applied.logPath,
-    verificationLogPath: verification.logPath
+    kind: context.kind || "managed",
+    label: operationLabel(context.kind),
+    beforeVersion: context.beforeVersion || null,
+    afterVersion: context.afterVersion || currentPackageVersion(),
+    beforeHead: context.beforeHead || null,
+    afterHead: context.afterHead || null,
+    sourceChanged: Boolean(context.beforeHead && context.afterHead && context.beforeHead !== context.afterHead),
+    backup: outputValue(applyOutput, "Backup"),
+    applyLogPath: applied?.logPath || null,
+    verificationLogPath: verification?.logPath || null,
+    applyElapsedMs: applied?.elapsedMs ?? null,
+    verificationElapsedMs: verification?.elapsedMs ?? null,
+    elapsedMs: (applied?.elapsedMs || 0) + (verification?.elapsedMs || 0),
+    evidence: {
+      status: outputValue(evidenceOutput, "Status"),
+      managedFiles: outputValue(evidenceOutput, "Managed files"),
+      agents: outputValue(evidenceOutput, "Agents"),
+      mcp: outputValue(evidenceOutput, "MCP config"),
+      skills: outputValue(evidenceOutput, "Skills")
+    }
   };
 }
 
+function printOperationReceipt(result) {
+  const operation = result.operation;
+  const ok = result.ok !== false;
+  printSurfaceHeader(
+    localText("Operation receipt", "İşlem makbuzu"),
+    localText("What changed, what was verified, and what to do next.", "Ne değişti, ne doğrulandı ve sırada ne yapılmalı."),
+    ok ? ICONS.ok : ICONS.warn,
+    ok ? "brightGreen" : "brightRed"
+  );
+  printSurfaceNote(localText("Operation", "İşlem"), operation.label);
+  printSurfaceNote(localText("Outcome", "Sonuç"), ok ? colorize(localText("verified", "doğrulandı"), "brightGreen") : colorize(localText("attention", "dikkat"), "brightRed"));
+  if (operation.beforeVersion || operation.afterVersion) {
+    printSurfaceNote(localText("Version", "Sürüm"), `${operation.beforeVersion || operation.afterVersion} ${options.plain ? "->" : "→"} ${operation.afterVersion}`);
+  }
+  if (operation.beforeHead && operation.afterHead) {
+    const sourceState = operation.sourceChanged
+      ? `${operation.beforeHead.slice(0, 7)} ${options.plain ? "->" : "→"} ${operation.afterHead.slice(0, 7)}`
+      : `${operation.afterHead.slice(0, 7)} (${localText("already current", "zaten güncel")})`;
+    printSurfaceNote(localText("Repository", "Repo"), sourceState);
+  }
+  if (operation.backup) printSurfaceNote(localText("Backup", "Yedek"), operation.backup);
+  for (const [label, value] of [
+    [localText("Runtime", "Çalışma ortamı"), operation.evidence.status],
+    [localText("Managed files", "Yönetilen dosyalar"), operation.evidence.managedFiles],
+    [localText("Agents", "Ajanlar"), operation.evidence.agents],
+    ["MCP", operation.evidence.mcp],
+    [localText("Skills", "Skill'ler"), operation.evidence.skills]
+  ]) {
+    if (value) printSurfaceNote(label, value);
+  }
+  printSurfaceNote(localText("Duration", "Süre"), `${operation.elapsedMs} ms`);
+  if (operation.applyLogPath) printSurfaceNote(localText("Apply log", "Uygulama logu"), toPosix(path.relative(root, operation.applyLogPath)));
+  if (operation.verificationLogPath) printSurfaceNote(localText("Verification log", "Doğrulama logu"), toPosix(path.relative(root, operation.verificationLogPath)));
+  console.log("");
+  console.log(`${paint(options.plain ? "->" : "→", "bold", ok ? "brightCyan" : "brightYellow")} ${styleHeading(localText("Next step", "Sonraki adım"))}`);
+  console.log(ok
+    ? localText("Restart Codex to load refreshed managed files, then use System status if you want a fresh live-session check.", "Yenilenen yönetilen dosyaları yüklemek için Codex'i yeniden başlat; ardından yeni bir canlı oturum kontrolü için Sistem durumu'nu kullan.")
+    : localText("Nothing is claimed ready. Inspect the failed command and its log before retrying or choosing Repair setup.", "Hiçbir şey hazır sayılmadı. Yeniden denemeden veya Kurulumu onar'ı seçmeden önce başarısız komutu ve logunu incele."));
+}
+
+function completeAppliedAction(applied, expectSkills = false, context = {}) {
+  const verification = applied.ok ? runPostApplyVerification(expectSkills) : null;
+  const operation = buildOperationResult(applied, verification, context);
+  const result = {
+    ...(verification || applied),
+    applied: Boolean(applied.ok),
+    applyLogPath: applied.logPath,
+    verificationLogPath: verification?.logPath || null,
+    operation
+  };
+  if (!options.json) printOperationReceipt(result);
+  return result;
+}
+
 async function runInstall(interaction = {}) {
+  if (!writeFlowRequested(interaction)) {
+    printSurfaceHeader(
+      localText("Install preview", "Kurulum ön izlemesi"),
+      localText(
+        "Full install preview. No managed files, global skills, or Git settings will be changed.",
+        "Tam kurulum ön izlemesi. Yönetilen dosyalar, global skill'ler veya Git ayarları değiştirilmeyecek."
+      ),
+      ICONS.info
+    );
+    return runPreview();
+  }
   const allowed = await confirmWriteAction(
     "Install",
     "Full install can write managed Codex files after backup and can install curated global skills.",
@@ -1500,11 +1768,15 @@ async function runInstall(interaction = {}) {
   if (!allowed) return { ok: false, skipped: true };
   let applied;
   if (process.platform === "win32") {
-    applied = runPowerShell("install", ".\\scripts\\install.ps1", ["-All", "-Interactive", "-PlainOutput"]);
+    applied = runPowerShell("install", ".\\scripts\\install.ps1", ["-All", "-PlainOutput"]);
   } else {
-    applied = runBash("install", "scripts/install.sh", ["--all", "--interactive", "--plain-output"]);
+    applied = runBash("install", "scripts/install.sh", ["--all", "--plain-output"]);
   }
-  return completeAppliedAction(applied, true);
+  return completeAppliedAction(applied, true, {
+    kind: "install",
+    beforeVersion: currentPackageVersion(),
+    afterVersion: currentPackageVersion()
+  });
 }
 
 async function runReset(interaction = {}) {
@@ -1537,7 +1809,11 @@ async function runReset(interaction = {}) {
   } else {
     applied = runBash("reset-apply", "scripts/install.sh", ["--all", "--force", "--interactive", "--plain-output"]);
   }
-  return completeAppliedAction(applied, true);
+  return completeAppliedAction(applied, true, {
+    kind: "reset",
+    beforeVersion: currentPackageVersion(),
+    afterVersion: currentPackageVersion()
+  });
 }
 
 async function runRepair(interaction = {}) {
@@ -1566,7 +1842,12 @@ async function runRepair(interaction = {}) {
   if (!allowed) return { ok: false, skipped: true };
   return completeAppliedAction(
     runNode("repair-apply", "scripts/repair-install.mjs", ["--redact-paths", "--apply"]),
-    false
+    false,
+    {
+      kind: "repair",
+      beforeVersion: currentPackageVersion(),
+      afterVersion: currentPackageVersion()
+    }
   );
 }
 
@@ -2132,10 +2413,10 @@ async function runBackups(interaction = {}, requested = {}) {
         );
         if (!selected) return { ok: true, skipped: true };
         console.log("");
-        console.log(styleHeading(localText("Backup action", "Yedek işlemi")));
-        console.log(`1. ${localText("Inspect", "İncele")} (${localText("read-only", "yazmaz")})`);
-        console.log(`2. ${localText("Restore", "Geri yükle")} (${localText("typed APPLY confirmation", "yazılı APPLY onayı")})`);
-        console.log(`3. ${localText("Delete archive", "Arşivi sil")} (${localText(`type DELETE ${selected.id}`, `DELETE ${selected.id} yaz`)})`);
+        console.log(`${paint("◆", "brightBlue")} ${styleHeading(localText("Backup action", "Yedek işlemi"))}`);
+        printChoiceRow(1, localText("Inspect", "İncele"), localText("read-only", "yazmaz"), "brightGreen", "◉");
+        printChoiceRow(2, localText("Restore", "Geri yükle"), localText("typed APPLY confirmation", "yazılı APPLY onayı"), "brightYellow", "↺");
+        printChoiceRow(3, localText("Delete archive", "Arşivi sil"), localText(`type DELETE ${selected.id}`, `DELETE ${selected.id} yaz`), "brightRed", "×");
         const action = await askInteractive(
           localText("Choose 1-3, or press Enter to return: ", "1-3 seçin veya dönmek için Enter'a basın: "),
           interaction
@@ -2327,7 +2608,7 @@ async function selectSkill(installable, interaction = {}) {
     ICONS.docs
   );
   installable.forEach((skill, index) => {
-    console.log(`${index + 1}. ${styleAction(skill.name)} - ${styleMuted(skill.source)}`);
+    printChoiceRow(index + 1, skill.name, skill.source, "brightMagenta", "✦");
   });
   const selected = await askSelection(
     installable,
@@ -2501,7 +2782,11 @@ async function runMcp(interaction = {}) {
   if (process.stdin.isTTY || interaction.question) {
     console.log("");
     servers.forEach((server, index) => {
-      console.log(`${index + 1}. ${styleAction(server.name)}`);
+      const color = server.enabledByDefault ? "brightGreen" : "brightYellow";
+      const state = server.enabledByDefault
+        ? localText("ready by default", "varsayılan hazır")
+        : localText("opt-in", "isteğe bağlı");
+      printChoiceRow(index + 1, server.name, state, color, "●");
     });
     const selected = await askSelection(servers, localText(
       "\nSelect a connector number for details, or press Enter to leave this screen unchanged: ",
@@ -3210,15 +3495,15 @@ async function runMenu() {
         else printMenu();
         shouldRenderMenu = false;
       }
-      const answer = await question(operatorPrompt());
+      const promptUpperBound = legacyTranscriptMode
+        ? MENU_ITEMS.length
+        : activeGroup
+          ? activeGroup.itemIds.length
+          : MENU_GROUPS.length;
+      const answer = await question(operatorPrompt(promptUpperBound, !legacyTranscriptMode && Boolean(activeGroup)));
       const normalizedAnswer = answer.trim().toLowerCase();
       if (!normalizedAnswer) {
-        const upperBound = legacyTranscriptMode
-          ? MENU_ITEMS.length
-          : activeGroup
-            ? activeGroup.itemIds.length
-            : MENU_GROUPS.length;
-        console.log(`${ICONS.warn} ${localText(`Choose 1-${upperBound}, l for language, or q to quit.`, `1-${upperBound} arasında bir işlem seçin, dil için l, çıkış için q yazın.`)}`);
+        console.log(`${ICONS.warn} ${localText(`Choose 1-${promptUpperBound}, l for language, or q to quit.`, `1-${promptUpperBound} arasında bir işlem seçin, dil için l, çıkış için q yazın.`)}`);
         continue;
       }
       if (["q", "quit", "exit"].includes(normalizedAnswer)) break;

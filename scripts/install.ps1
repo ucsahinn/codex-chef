@@ -4,6 +4,7 @@ param(
   [switch]$InstallSkills,
   [switch]$InstallGitGuards,
   [switch]$Force,
+  [switch]$Update,
   [switch]$Repair,
   [switch]$NoBackup,
   [switch]$Interactive,
@@ -198,6 +199,10 @@ if ($Interactive -and $All -and $InstallSkills) {
   }
 }
 
+if ($Update) {
+  $Force = $true
+}
+
 if ($Interactive -and (Test-AnyManagedTargetExists) -and -not $Force) {
   if (Read-YesNo -Prompt "Replace existing managed Codex Chef files after backup instead of preserving/merging?" -Default $false) {
     $Force = $true
@@ -306,25 +311,31 @@ function Install-CodexConfig {
     [Parameter(Mandatory=$true)][string]$Destination
   )
 
-  if ((Test-Path -LiteralPath $Destination) -and -not $Force) {
+  if ((Test-Path -LiteralPath $Destination) -and (-not $Force -or $Update)) {
     Ensure-Dir (Split-Path -Parent $Destination)
     Backup-Target $Destination
     $MergeScript = Join-Path $RepoRoot "scripts\merge-codex-config.mjs"
+    $MergeArgs = @($MergeScript, $Source, $Destination)
     $Action = "Merge missing Codex Chef config blocks from $Source"
+    if ($Update) {
+      $MergeArgs += "--sync-managed-tables"
+      $Action = "Synchronize managed Codex Chef config blocks from $Source"
+    }
     if ($WhatIfPreference) {
+      $DryRunArgs = @($MergeArgs) + "--dry-run"
       Invoke-Change -Target $Destination -Action $Action -ScriptBlock {
-        & node $MergeScript $Source $Destination --dry-run
+        & node @DryRunArgs
       } | Out-Null
       return
     }
     $changed = Invoke-Change -Target $Destination -Action $Action -ScriptBlock {
-      & node $MergeScript $Source $Destination
+      & node @MergeArgs
       if ($LASTEXITCODE -ne 0) {
         throw "Codex config merge failed with code $LASTEXITCODE"
       }
     }
     if ($changed) {
-      Write-Action -Status "merged config" -Message $Destination
+      Write-Action -Status $(if ($Update) { "updated config" } else { "merged config" }) -Message $Destination
     }
     return
   }
@@ -381,7 +392,9 @@ function Install-Directory {
 Write-Section "Codex Chef installer"
 Write-Note "Codex home: $CodexHome"
 Write-Note "Agents home: $AgentsHome"
-if ($Force) {
+if ($Update) {
+  Write-Note "Mode: update managed targets after backup; preserve user config and synchronize Codex Chef tables"
+} elseif ($Force) {
   Write-Note "Mode: replace managed targets after backup"
 } else {
   Write-Note "Mode: preserve existing files; merge missing config blocks"
@@ -400,7 +413,11 @@ if ($WhatIfPreference) {
   Write-Note "Dry run: no files, Git settings, or skills will be changed"
 }
 if ($Interactive) {
-  Write-Note "Existing config policy: backup + merge missing Codex Chef blocks unless Force is enabled"
+  if ($Update) {
+    Write-Note "Existing config policy: backup + synchronize managed Codex Chef tables while preserving user-owned settings"
+  } else {
+    Write-Note "Existing config policy: backup + merge missing Codex Chef blocks unless Force is enabled"
+  }
   Write-Note "Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled."
   if (-not (Read-YesNo -Prompt "Continue with this plan?" -Default $true)) {
     throw "Codex Chef install cancelled by user."

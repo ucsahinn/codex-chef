@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "codex-chef.brain.v1",
+  "ownership": "user-owned-local-markdown",
+  "distribution": "templates-only",
+  "defaultMutationMode": "preview",
+  "semanticMemory": false,
+  "automaticSessionCapture": false,
+  "controlCenterRuntimeState": false,
+  "optionalEditor": "Obsidian",
+  "requiredTopLevel": ["AGENTS.md", "README.md", "brain.config.json", "00-inbox", "10-command-center", "20-goals", "30-projects", "40-knowledge", "50-research", "60-decisions", "70-personal", "80-memory", "90-archive", "templates"]
+}

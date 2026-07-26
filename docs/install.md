@@ -94,7 +94,8 @@ install dry-run evidence. Apply mode requires a clean worktree and runs
 `git pull --ff-only`. If the pull advances the repo, the same approved CLI
 prints a fresh preview, continues local validation and managed refresh, then
 verifies installed-runtime parity. If the repo is already current, apply refreshes managed
-files through the backup-backed installer. Update does not install curated global skills
+files through the backup-backed update mode. Update replaces Codex Chef-owned files, synchronizes
+managed config tables, and preserves user-owned `config.toml` settings. It does not install curated global skills
 or optional global Git guards; use `--install --apply` or `--skills --apply`
 when you want those explicit surfaces.
 

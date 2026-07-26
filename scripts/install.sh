@@ -5,6 +5,7 @@ INSTALL_SKILLS=0
 INSTALL_GIT_GUARDS=0
 ALL=0
 FORCE=0
+UPDATE=0
 REPAIR=0
 NO_BACKUP=0
 DRY_RUN=0
@@ -18,6 +19,7 @@ for arg in "$@"; do
     --install-skills) INSTALL_SKILLS=1 ;;
     --install-git-guards) INSTALL_GIT_GUARDS=1 ;;
     --force) FORCE=1 ;;
+    --update) UPDATE=1 ;;
     --repair) REPAIR=1 ;;
     --no-backup) NO_BACKUP=1 ;;
     --dry-run) DRY_RUN=1 ;;
@@ -187,6 +189,10 @@ if [ "$INTERACTIVE" -eq 1 ] && [ "$ALL" -eq 1 ] && [ "$INSTALL_SKILLS" -eq 1 ]; 
   fi
 fi
 
+if [ "$UPDATE" -eq 1 ]; then
+  FORCE=1
+fi
+
 if [ "$INTERACTIVE" -eq 1 ] && [ "$FORCE" -ne 1 ] && any_managed_target_exists; then
   if yes_no "Replace existing managed Codex Chef files after backup instead of preserving/merging?" "no"; then
     FORCE=1
@@ -268,17 +274,26 @@ install_file() {
 install_codex_config() {
   local source="$1"
   local destination="$2"
-  if [ -e "$destination" ] && [ "$FORCE" -ne 1 ]; then
+  if [ -e "$destination" ] && { [ "$FORCE" -ne 1 ] || [ "$UPDATE" -eq 1 ]; }; then
     ensure_dir "$(dirname "$destination")"
     backup_target "$destination"
+    local merge_args=("$REPO_ROOT/scripts/merge-codex-config.mjs" "$source" "$destination")
+    local merge_action="merge missing Codex Chef config blocks from $source"
+    if [ "$UPDATE" -eq 1 ]; then
+      merge_args+=("--sync-managed-tables")
+      merge_action="synchronize managed Codex Chef config blocks from $source"
+    fi
     if [ "$DRY_RUN" -eq 1 ]; then
-      run_change "$destination" "merge missing Codex Chef config blocks from $source" true || true
-      node "$REPO_ROOT/scripts/merge-codex-config.mjs" "$source" "$destination" --dry-run
+      run_change "$destination" "$merge_action" true || true
+      node "${merge_args[@]}" --dry-run
       return
     fi
-    if run_change "$destination" "merge missing Codex Chef config blocks from $source" \
-      node "$REPO_ROOT/scripts/merge-codex-config.mjs" "$source" "$destination"; then
-      action "merged config" "$destination"
+    if run_change "$destination" "$merge_action" node "${merge_args[@]}"; then
+      if [ "$UPDATE" -eq 1 ]; then
+        action "updated config" "$destination"
+      else
+        action "merged config" "$destination"
+      fi
     fi
     return
   fi
@@ -325,7 +340,9 @@ install_directory() {
 section "Codex Chef installer"
 note "Codex home: $CODEX_HOME_DIR"
 note "Agents home: $AGENTS_HOME_DIR"
-if [ "$FORCE" -eq 1 ]; then
+if [ "$UPDATE" -eq 1 ]; then
+  note "Mode: update managed targets after backup; preserve user config and synchronize Codex Chef tables"
+elif [ "$FORCE" -eq 1 ]; then
   note "Mode: replace managed targets after backup"
 else
   note "Mode: preserve existing files; merge missing config blocks"
@@ -344,7 +361,11 @@ if [ "$DRY_RUN" -eq 1 ]; then
   note "Dry run: no files, Git settings, or skills will be changed"
 fi
 if [ "$INTERACTIVE" -eq 1 ]; then
-  note "Existing config policy: backup + merge missing Codex Chef blocks unless force is enabled"
+  if [ "$UPDATE" -eq 1 ]; then
+    note "Existing config policy: backup + synchronize managed Codex Chef tables while preserving user-owned settings"
+  else
+    note "Existing config policy: backup + merge missing Codex Chef blocks unless force is enabled"
+  fi
   note "Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled."
   if ! yes_no "Continue with this plan?" "yes"; then
     echo "Codex Chef install cancelled by user." >&2

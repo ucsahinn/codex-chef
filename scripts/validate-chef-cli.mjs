@@ -755,6 +755,24 @@ if (!exists(cliPath)) {
   if (/update-install",\s*"scripts\/install\.sh",\s*\[[^\]]*"--all"/s.test(cli)) {
     fail(`${cliPath} update-install must not use --all because update is scoped to managed files, not curated skills`);
   }
+  if (cli.includes('runPowerShell("install", ".\\\\scripts\\\\install.ps1", ["-All", "-Interactive"')) {
+    fail(`${cliPath} Full install must not open a second nested Windows confirmation flow after CLI APPLY`);
+  }
+  if (cli.includes('runBash("install", "scripts/install.sh", ["--all", "--interactive"')) {
+    fail(`${cliPath} Full install must not open a second nested Bash confirmation flow after CLI APPLY`);
+  }
+  if (!cli.includes('runPowerShell("update-install", ".\\\\scripts\\\\install.ps1", ["-Update", "-PlainOutput"])')) {
+    fail(`${cliPath} Windows update-install must use -Update so user-owned config survives managed refresh`);
+  }
+  if (!cli.includes('runBash("update-install", "scripts/install.sh", ["--update", "--plain-output"])')) {
+    fail(`${cliPath} Bash update-install must use --update so user-owned config survives managed refresh`);
+  }
+  if (cli.includes('runPowerShell("update-install", ".\\\\scripts\\\\install.ps1", ["-Force"')) {
+    fail(`${cliPath} Windows update-install must not use broad -Force config replacement`);
+  }
+  if (cli.includes('runBash("update-install", "scripts/install.sh", ["--force"')) {
+    fail(`${cliPath} Bash update-install must not use broad --force config replacement`);
+  }
   if (cli.includes("AGENTS_HOME/plugins/codex-chef-workflows")) {
     fail(`${cliPath} must describe the Codex Chef plugin target under CODEX_HOME, not AGENTS_HOME`);
   }

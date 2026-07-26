@@ -9,6 +9,7 @@ const pluginManifestRel = "plugins/codex-chef-workflows/.codex-plugin/plugin.jso
 const pluginManifestPath = path.join(root, pluginManifestRel);
 const expectedBundledSkills = new Set([
   "adaptive-agent-routing",
+  "codex-chef-brain",
   "codex-chef-operator",
   "context-budget-planner",
   "external-review-workflow",

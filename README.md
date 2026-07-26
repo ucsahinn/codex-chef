@@ -61,14 +61,13 @@ Clone and preview without changing your Codex home:
 ```powershell
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -WhatIf
-node scripts/plan-install.mjs --all --json --redact-paths
+npm run chef -- --install
 ```
 
 Install only after the preview looks right:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -All -Interactive
+npm run chef -- --install --apply
 ```
 
 macOS, Linux, or WSL:
@@ -76,11 +75,14 @@ macOS, Linux, or WSL:
 ```bash
 git clone https://github.com/ucsahinn/codex-chef.git
 cd codex-chef
-chmod +x scripts/install.sh
-./scripts/install.sh --all --interactive
+npm run chef -- --install
+npm run chef -- --install --apply
 ```
 
 The installer backs up managed targets before replacement. Normal install and repair do not prune user-owned skills, MCPs, profiles, or unrelated plugin files.
+The colorful CLI is the recommended public entry point. Advanced/manual automation can call
+`scripts\install.ps1` on Windows or `scripts/install.sh` on Bash systems; the manifest-backed
+operation contract is available through `node scripts/plan-install.mjs --all --json --redact-paths`.
 
 ## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> Use The CLI Without Guessing
 
@@ -108,7 +110,7 @@ output](docs/expected-output.md), and [Troubleshooting](docs/troubleshooting.md)
 | Surface | What you get |
 | --- | --- |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agents | 21 named specialist role files. They are available for bounded delegation, not always-running background services. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skills | Five bundled plugin workflows and sixteen reviewed optional global skills. Skills load when the task matches; they do not execute by themselves. |
+| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skills | Six bundled plugin workflows, including the project-scoped Codex Chef Brain, and sixteen reviewed optional global skills. Skills load when the task matches; they do not execute by themselves. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCPs | Eight useful defaults for official docs, current library docs, reasoning, browser evidence, semantic navigation, memory reads, and local codebase graph reads through `codebase-memory`. Eight account, database, production, and broad-filesystem connectors stay off. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Guidance | A durable `~/.codex/AGENTS.md`, routing profiles, approval rules, and token-safe profile choices that do not pin every agent to one model. |
 | <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Safety | Dry runs, manifest-backed install plans, backup-first replacement, secret scanning, package-surface checks, and runtime verification. |

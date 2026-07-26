@@ -48,6 +48,12 @@
       "reason": "Bundled local plugin skill for conditional delegation, canonical skill ownership, profile-inherited agent model selection, and compact routing visibility."
     },
     {
+      "name": "codex-chef-brain",
+      "category": "context-engineering",
+      "install": false,
+      "reason": "Bundled local plugin skill for preview-first capture, project-scoped retrieval, backup, and restore of a user-owned Markdown Brain vault."
+    },
+    {
       "name": "investigate",
       "category": "debugging",
       "install": false,

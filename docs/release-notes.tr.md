@@ -1,31 +1,37 @@
 # Sürüm Notları
 
-Bu sayfa, kullanıcıların şu anda kurması gereken sürümü anlatır. Eski mühendislik geçmişi [CHANGELOG.md](../CHANGELOG.md) içinde korunur; böylece public sürüm rehberi büyüyen bir arşive dönüşmeden güncel kalır.
+Bu sayfa kullanıcıların şimdi kurması gereken sürümü anlatır. Eski mühendislik geçmişi [CHANGELOG.md](../CHANGELOG.md) içinde korunur; böylece public sürüm rehberi büyüyen bir arşive dönüşmeden güncel kalır.
 
-## v0.5.53 - 2026-07-26
+## v0.5.54 - 2026-07-26
 
-Codex Chef artık projeyi değerli kılan workflow’ları, güvenlik sınırlarını ve teknik geçmişi kaybetmeden daha küçük ve daha anlaşılır bir public yüzeye sahip.
+Codex Chef 0.5.54, proje kapsamlı Brain kasasını ekler ve kullanıcıya ait yapılandırma sınırlarını zayıflatmadan renkli CLI, kurulum, güncelleme, yenileme ve onarım deneyimini tamamlar.
 
 ### Neler Değişti?
 
-- İngilizce, Türkçe, Almanca, İspanyolca, Fransızca ve Brezilya Portekizcesi için altı kısa, insan eliyle yazılmış README giriş noktası var.
-- Tam operatör dokümantasyonu İngilizce ve Türkçe tutuluyor; üretilmiş çeviri kabukları artık tam rehbermiş gibi yayımlanmıyor.
-- Eski completion-audit, local-audit ve SEO dokümanları kaldırıldı; faydalı bilgiler güncel dokümanlarda, bilgi tabanında, ajan corpus’unda ve changelog’da korunuyor.
-- Public README, yönetim, gizlilik, destek, yayın, GitHub ayarları ve hazırlık rehberleri doğrudan ve doğal bir dille yeniden yazıldı.
-- Dil, güvenlik, paket, token, workflow, doctor ve release validator’ları daha küçük dokümantasyon sözleşmesini güvenlik kapılarını zayıflatmadan uyguluyor.
-- Token bütçesi denetimi, temel yetenekleri koruyan isteğe bağlı `token-safe.config.toml` profili ve otomatik ajan `model/reasoning` mirası public giriş noktalarında açıklanıyor.
-- GitHub Releases desteklenen sürüm çizgisinde toplandı; geçmişteki tüm Git tag’leri ve commit’ler korundu.
+- Preview-first capture, proje kapsamlı retrieval, Markdown vault depolaması, schema, template, backup ve restore planları, Windows ACL kanıtı, dokümantasyon ve regresyon testleriyle Codex Chef Brain eklendi.
+- Renkli U.C.S. operatör arayüzü daha net menü önemi, işlem etkisi, operasyon makbuzu, sürüm/commit kanıtı ve yeşil üçüncü imza rengiyle tamamlandı.
+- İlk kurulum, mevcut kurulumu güvenli uzlaştırma, managed update, force refresh ve drift repair davranışları platformlar arasında açıkça ayrıldı.
+- Normal update artık backup sonrasında Codex Chef'e ait dosyaları yenilerken kullanıcıya ait `config.toml` ayarlarını koruyor ve yalnız managed tabloları senkronluyor.
+- Full install için önerilen public yol renkli CLI oldu; CLI içindeki `APPLY` onayından sonra ikinci bir nested confirmation açılmıyor.
+- Installer, CLI, Brain, locale, portability, package ve release doğrulamaları genişletildi.
 
-### Güncelleme
+### Kurulum Veya Güncelleme
 
-Ön izleme öncelikli akışı kullan:
+İlk kurulum:
+
+```bash
+npm run chef -- --install
+npm run chef -- --install --apply
+```
+
+Mevcut kurulum:
 
 ```bash
 npm run chef -- --update --plain --no-log
 npm run chef -- --update --apply
 ```
 
-Ardından Codex’i yeniden başlat ve kurulu runtime’ı doğrula:
+Ardından Codex'i yeniden başlat ve kurulu runtime'ı doğrula:
 
 ```bash
 npm run verify:install:runtime
@@ -36,4 +42,4 @@ npm run codex:status
 
 - Node.js 18 veya üzeri
 - Windows PowerShell, macOS, Linux ve WSL
-- Kullanıcıya ait mevcut skill, MCP, profil tercihleri ve ilgisiz plugin dosyaları normal akışta prune edilmez
+- Kullanıcıya ait mevcut skill, MCP, profil tercihi, özel config tablosu ve ilgisiz plugin dosyaları normal prune davranışının dışında kalır

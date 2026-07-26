@@ -91,7 +91,9 @@ loglari `--no-log` yoksa repo-local kalir. Varsayilan preview kisadir;
 `npm run chef -- --update --verbose-plan` tam install dry-run kanitini basar.
 Apply modunda clean worktree ister ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse aynı onaylı CLI fresh preview basar, managed refresh ve
 kurulu ortam doğrulamasıyla devam eder; ikinci çalıştırma gerekmez. Repo zaten guncelse managed dosyalari backup alan installer uzerinden yeniler.
-Update curated global skill veya opsiyonel global Git guard kurmaz; bunlar icin
+Update Codex Chef'e ait dosyalari backup sonrasinda yeniler, managed config tablolarini
+senkronlar ve kullaniciya ait `config.toml` ayarlarini korur. curated global skill veya
+opsiyonel global Git guard kurmaz; bunlar icin
 `--install --apply` veya `--skills --apply` yuzeylerini acikca kullan.
 
 Codex Chef backup archive'larini ayni CLI ile incele veya geri yukle:
