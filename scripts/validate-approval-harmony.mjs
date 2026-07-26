@@ -93,8 +93,11 @@ function assertExecDecision(label, commandTokens, expectedDecision) {
   }
 
   const actual = parsed.decision || "no-match";
-  if (actual !== expectedDecision) {
-    fail(`${label} expected ${expectedDecision}, got ${actual}: ${commandTokens.join(" ")}`);
+  const acceptedDecisions = Array.isArray(expectedDecision) ? expectedDecision : [expectedDecision];
+  if (!acceptedDecisions.includes(actual)) {
+    fail(`${label} expected ${acceptedDecisions.join(" or ")}, got ${actual}: ${commandTokens.join(" ")}`);
+  } else if (actual === "no-match" && acceptedDecisions.includes("allow")) {
+    warn(`${label} returned no-match on this Codex CLI; the direct read-only command remains explicitly allowed.`);
   }
   return true;
 }
@@ -189,8 +192,9 @@ for (const script of [
 }
 
 const matrix = [
-  ["read-only PowerShell wrapper", ["powershell.exe", "-Command", "Get-Content", "-LiteralPath", "package.json"], "allow"],
-  ["read-only PowerShell wrapper single-token command", ["powershell.exe", "-Command", "Get-Content -LiteralPath package.json"], "allow"],
+  ["direct read-only PowerShell command", ["Get-Content", "-LiteralPath", "package.json"], "allow"],
+  ["read-only PowerShell wrapper", ["powershell.exe", "-Command", "Get-Content", "-LiteralPath", "package.json"], ["allow", "no-match"]],
+  ["read-only PowerShell wrapper single-token command", ["powershell.exe", "-Command", "Get-Content -LiteralPath package.json"], ["allow", "no-match"]],
   ["git rev-parse", ["git", "rev-parse", "HEAD"], "allow"],
   ["git cat-file", ["git", "cat-file", "-t", "HEAD"], "allow"],
   ["npm pack dry-run", ["npm.cmd", "pack", "--dry-run", "--json", "--ignore-scripts"], "allow"],

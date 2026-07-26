@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.5.56 - 2026-07-26
+
+- Keep installer approval preflight compatible with older Codex CLI builds that return `no-match` for read-only PowerShell wrapper commands even when the equivalent direct command is explicitly allowed.
+- Continue to require direct `Get-Content` to resolve to `allow` and destructive PowerShell wrappers to resolve to `prompt`, so compatibility does not broaden the write surface.
+- Report unsupported read-only wrapper matching as a visible warning instead of blocking an otherwise safe first or existing installation.
+
 ## 0.5.55 - 2026-07-26
 
 - Make every primary CLI surface summary-first while preserving full tables, setup notes, and diagnostic evidence behind the new `--details` option.

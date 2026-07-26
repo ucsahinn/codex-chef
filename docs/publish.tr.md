@@ -2,7 +2,7 @@
 
 Yayın, lokal güvenin public bir iddiaya dönüştüğü noktadır. Sıralamayı bozma: önce doğrula, exact diff’i incele, ardından açık onayla commit, tag veya release oluştur.
 
-Güncel yayınlanmış temel sürüm: **v0.5.55**.
+Güncel yayınlanmış temel sürüm: **v0.5.56**.
 
 ## Commit Veya Push Öncesi
 
