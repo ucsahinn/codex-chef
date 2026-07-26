@@ -110,6 +110,23 @@ function countOccurrences(value, needle) {
   return String(value || "").split(needle).length - 1;
 }
 
+function createCuratedSkillFixture(rootPath, { invalid = [] } = {}) {
+  const skills = JSON.parse(read("catalog/skills.json")).skills
+    .filter((skill) => skill.install === true);
+  const skillsRoot = path.join(rootPath, ".codex", "skills");
+  for (const skill of skills) {
+    const skillRoot = path.join(skillsRoot, skill.name);
+    fs.mkdirSync(skillRoot, { recursive: true });
+    if (!invalid.includes(skill.name)) {
+      fs.writeFileSync(path.join(skillRoot, "SKILL.md"), `# ${skill.name}\n`, "utf8");
+    }
+  }
+  return {
+    CODEX_HOME: path.join(rootPath, ".codex"),
+    AGENTS_HOME: path.join(rootPath, ".agents")
+  };
+}
+
 function runMenuTranscriptSmoke() {
   const baseEnv = {
     CODEX_CHEF_TEST_MENU: "1",
@@ -215,31 +232,42 @@ function runMenuTranscriptSmoke() {
     }
   }
 
+  const installedSkillsRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-menu-skills-ready-"));
+  const installedSkillsEnv = createCuratedSkillFixture(installedSkillsRoot);
   const skillSelection = runCliSmokeRaw("menu-skills-selection-transcript", ["--plain", "--no-log"], {
-    env: baseEnv,
-    input: "10\n\n\nq\n",
+    env: {
+      ...baseEnv,
+      ...installedSkillsEnv
+    },
+    input: "10\n\nq\n",
     timeout: 30000
   });
   if (skillSelection.ok) {
     for (const snippet of [
-      "Opening: Skills catalog",
-      "Choose a skill to install",
-      "Select a skill number, or press Enter to leave everything unchanged:",
-      "No skill selected; nothing changed.",
+      "Opening: Skill status & catalog",
+      "Installed (ready)",
+      "All curated skills are installed and ready.",
       "Press Enter to return to the operator board."
     ]) {
       if (!skillSelection.output.includes(snippet)) {
         fail(`chef-cli menu skills transcript missing output snippet: ${snippet}`);
       }
     }
+    if (skillSelection.output.includes("Choose a skill to install")) {
+      fail("chef-cli menu skills transcript must not offer installation when every curated skill is ready.");
+    }
     if (/unsettled top-level await|AbortError|ABORT_ERR/i.test(skillSelection.output)) {
       fail("chef-cli menu skills transcript must not leak readline lifecycle warnings");
     }
   }
 
-
+  const missingSkillsRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-menu-skills-missing-"));
   const skillInstallCancel = runCliSmokeRaw("menu-skills-typed-apply-transcript", ["--plain", "--no-log"], {
-    env: baseEnv,
+    env: {
+      ...baseEnv,
+      CODEX_HOME: path.join(missingSkillsRoot, ".codex"),
+      AGENTS_HOME: path.join(missingSkillsRoot, ".agents")
+    },
     input: "10\n1\n\n\nq\n",
     timeout: 30000
   });
@@ -381,6 +409,7 @@ function runCommandCenterSmoke() {
     "Repository checks",
     "Account & preferences",
     "Runtime, repository, login, skills, MCP, and health evidence.",
+    "1 approval-gated / 1 account-guided",
     "Impact",
     "b = back",
     "U.C.S. Codex Chef session closed."
@@ -421,6 +450,49 @@ function runCommandCenterSmoke() {
       .length;
     if (routedCount !== 1) {
       fail(`chef-cli command center must route menu action exactly once: ${actionId}`);
+    }
+  }
+
+  const commandCenterRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-command-center-actions-"));
+  const readySkillsEnv = createCuratedSkillFixture(commandCenterRoot);
+  const readySkills = runCliSmokeRaw("command-center-v2-ready-skills", ["--plain", "--no-log"], {
+    input: "3\n1\n\nb\nq\n",
+    env: {
+      CODEX_CHEF_TEST_MENU: "1",
+      CODEX_CHEF_TEST_MENU_V2: "1",
+      FORCE_COLOR: "0",
+      NO_COLOR: "1",
+      ...readySkillsEnv
+    },
+    timeout: 30000
+  });
+  if (readySkills.ok) {
+    if (!readySkills.output.includes("All curated skills are installed and ready.")) {
+      fail("chef-cli command center must show an all-ready skill state without an install chooser.");
+    }
+    if (readySkills.output.includes("Choose a skill to install")) {
+      fail("chef-cli command center must not offer skill installation when all curated skills are ready.");
+    }
+  }
+
+  const freshInstallRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-command-center-install-"));
+  const installPreview = runCliSmokeRaw("command-center-v2-install-preview", ["--plain", "--no-log"], {
+    input: "2\n3\n\n\nb\nq\n",
+    env: {
+      CODEX_CHEF_TEST_MENU: "1",
+      CODEX_CHEF_TEST_MENU_V2: "1",
+      FORCE_COLOR: "0",
+      NO_COLOR: "1",
+      CODEX_HOME: path.join(freshInstallRoot, ".codex"),
+      AGENTS_HOME: path.join(freshInstallRoot, ".agents")
+    },
+    timeout: 120000
+  });
+  if (installPreview.ok) {
+    for (const snippet of ["Installation state", "Fresh setup", "Install preview", "Type APPLY to continue"]) {
+      if (!installPreview.output.includes(snippet)) {
+        fail(`chef-cli command center install must inspect state and preview before confirmation: ${snippet}`);
+      }
     }
   }
 }
@@ -764,6 +836,12 @@ if (!exists(cliPath)) {
   if (cli.includes('runBash("install", "scripts/install.sh", ["--all", "--interactive"')) {
     fail(`${cliPath} Full install must not open a second nested Bash confirmation flow after CLI APPLY`);
   }
+  if (cli.includes('runPowerShell("reset-apply", ".\\\\scripts\\\\install.ps1", ["-All", "-Force", "-Interactive"')) {
+    fail(`${cliPath} Refresh setup must not open a second nested Windows confirmation flow after CLI APPLY`);
+  }
+  if (cli.includes('runBash("reset-apply", "scripts/install.sh", ["--all", "--force", "--interactive"')) {
+    fail(`${cliPath} Refresh setup must not open a second nested Bash confirmation flow after CLI APPLY`);
+  }
   if (!cli.includes('runPowerShell("update-install", ".\\\\scripts\\\\install.ps1", ["-Update", "-PlainOutput"]')) {
     fail(`${cliPath} Windows update-install must use -Update so user-owned config survives managed refresh`);
   }
@@ -798,7 +876,7 @@ if (!exists(cliPath)) {
     "Refresh setup",
     "Repair setup",
     "Backups",
-    "Skills catalog",
+    "Skill status & catalog",
     "MCP connectors",
     "Routing guide",
     "Diagnostics hub",
@@ -949,8 +1027,90 @@ runCliSmoke("mcp-forced-color", ["--mcp", "--details", "--no-log"], [
   },
   expectAnsi: true
 });
+const skillStatusRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-skills-status-"));
+try {
+  runCliSmoke("skills-status-empty", ["--skills", "--details", "--plain", "--no-log"], [
+    "Installation status",
+    "0 of 16 curated skills ready",
+    "16 missing",
+    "0 invalid"
+  ], {
+    env: {
+      CODEX_HOME: path.join(skillStatusRoot, ".codex"),
+      AGENTS_HOME: path.join(skillStatusRoot, ".agents")
+    }
+  });
+} finally {
+  fs.rmSync(skillStatusRoot, { recursive: true, force: true });
+}
+
+const invalidSkillStatusRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-skills-invalid-"));
+try {
+  const invalidEnv = createCuratedSkillFixture(invalidSkillStatusRoot, {
+    invalid: ["dependency-upgrade"]
+  });
+  fs.rmSync(path.join(invalidEnv.CODEX_HOME, "skills", "systematic-debugging"), { recursive: true, force: true });
+  runCliSmoke("skills-status-invalid", ["--skills", "--details", "--plain", "--no-log"], [
+    "14 of 16 curated skills ready",
+    "1 missing",
+    "1 invalid",
+    "Invalid installation"
+  ], {
+    env: invalidEnv
+  });
+} finally {
+  fs.rmSync(invalidSkillStatusRoot, { recursive: true, force: true });
+}
+
+const mcpStatusRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-mcp-status-"));
+try {
+  const mcpCodexHome = path.join(mcpStatusRoot, ".codex");
+  fs.mkdirSync(mcpCodexHome, { recursive: true });
+  fs.writeFileSync(path.join(mcpCodexHome, "config.toml"), [
+    "[mcp_servers.context7]",
+    "enabled = true",
+    "",
+    "[mcp_servers.github]",
+    "enabled = false",
+    "",
+    "[mcp_servers.custom-local]",
+    "command = \"node\"",
+    ""
+  ].join("\n"), "utf8");
+  runCliSmoke("mcp-installed-status", ["--mcp", "--details", "--plain", "--no-log"], [
+    "Configured and enabled: 1",
+    "Configured but disabled: 1",
+    "Cataloged but not configured: 14",
+    "User-added: 1",
+    "custom-local",
+    "User-added (enabled)",
+    "Live status was not probed"
+  ], {
+    env: {
+      CODEX_HOME: mcpCodexHome,
+      AGENTS_HOME: path.join(mcpStatusRoot, ".agents")
+    }
+  });
+} finally {
+  fs.rmSync(mcpStatusRoot, { recursive: true, force: true });
+}
+
+const skillsWorkspaceMenu = runCliSmokeRaw("menu-skills-workspace", ["--plain", "--no-log"], {
+  env: {
+    CODEX_CHEF_TEST_MENU: "1",
+    CODEX_CHEF_TEST_MENU_V2: "1",
+    FORCE_COLOR: "0",
+    NO_COLOR: "1"
+  },
+  input: "3\nb\nq\n",
+  timeout: 30000
+});
+if (skillsWorkspaceMenu.ok && !skillsWorkspaceMenu.output.includes("Skill status & catalog")) {
+  fail("chef-cli skills workspace must advertise installed/missing status alongside the catalog.");
+}
+
 runCliSmoke("skills", ["--skills", "--details", "--plain", "--no-log"], [
-  "Skills catalog",
+  "Skill status & catalog",
   "16 curated installable skills",
   "How skill activation works",
   "Installed skills do not run by themselves",
@@ -1059,6 +1219,26 @@ runCliSmoke("update-preview-verbose", ["--update", "--verbose-plan", "--plain", 
 runCliJsonSmoke("status-repo-only-json", ["--status", "--repo-only", "--json", "--no-log"]);
 runCliJsonSmoke("status-repo-only-json-tr", ["--status", "--repo-only", "--json", "--lang", "tr", "--no-log"]);
 runCliSmoke("status-repo-only", ["--status", "--repo-only", "--plain", "--no-log"], [
+  "Codex Chef status",
+  "Overall:",
+  "Repo Git:",
+  "Codex CLI: skipped",
+  "MCP probe skipped",
+  "MCP: skipped",
+  "Installed runtime: skipped by this mode",
+  "Skills: skipped",
+  "Next action:",
+  "Details: npm run chef -- --status --details",
+  "Log disabled by --no-log"
+], {
+  timeout: 180000,
+  forbiddenSnippets: [
+    "MCP quick view:",
+    "managed hooks=not inspected",
+    "Target Codex home:"
+  ]
+});
+runCliSmoke("status-repo-only-details", ["--status", "--repo-only", "--details", "--plain", "--no-log"], [
   "Codex Chef status",
   "Codex CLI: skipped",
   "MCP probe skipped",
@@ -1172,7 +1352,7 @@ for (const [file, snippets] of Object.entries({
     "completed agent threads",
     "Serena/MCP process-audit",
     "/agent",
-    "Installed skills do not execute by themselves",
+    "Installed and ready skills do not execute by themselves",
     "live activation is",
     "GitHub CLI or Git Credential Manager",
     "organization policy"
@@ -1206,8 +1386,8 @@ for (const [file, snippets] of Object.entries({
     "Tamamlanan agent thread",
     "Serena/MCP surec",
     "/agent",
-    "Kurulu skill'ler kendiliginden calismaz",
-    "canli aktivasyon",
+    "Kurulu ve hazır skill'ler kendiliğinden çalışmaz",
+    "canlı aktivasyon",
     "GitHub CLI veya Git Credential Manager",
     "kendi kurum politikaniza"
   ],

@@ -46,9 +46,10 @@ Bu komut şunları çalıştırır:
   stale `dateChecked` kontrolleri ile agent basina expertise signal coverage.
 - `scripts/validate-mcp-config.mjs`: Windows ve Unix Codex template'leri icin
   MCP catalog/config drift kontrolleri.
-- `scripts/validate-chef-cli.mjs`: tek menulu Codex Chef CLI sozlesmesi,
-  guvenli komut routing'i, write-boundary etiketleri, log konumu, README
-  kullanim ornekleri ve public-safe GitHub auth boundary rehberi.
+- `scripts/validate-chef-cli.mjs`: gruplu Codex Chef komuta merkezi sözleşmesi,
+  doğru yazma/hesap rehberi rozetleri, duruma göre kurulum ön izlemesi, curated
+  skill hazır/eksik/geçersiz fixture'ları, kurulu MCP config envanteri, log
+  konumu, README kullanım örnekleri ve public-safe GitHub auth sınırı rehberi.
 - `scripts/validate-token-surfaces.mjs`: token audit script'i, `token-safe`
   profil, AGENTS token disiplini, context-budget skill referansi, README komut
   dokumani ve pinlenmeyen agent model/reasoning sozlesmesi.
@@ -168,6 +169,7 @@ Codex Chef CLI smoke:
 ```bash
 npm run validate:chef-cli
 npm run chef -- --status
+npm run chef -- --status --details
 npm run chef -- --status --repo-only
 npm run chef -- --status --repo-only --no-log
 npm run chef -- --preview
@@ -191,10 +193,11 @@ refresh icin lokal validation sonrasinda,
 `npm run chef -- --reset --apply` backup'li managed refresh icin,
 `npm run chef -- --repair --apply` backup'li repair icin,
 `npm run chef -- --install --apply` full managed install icin kullanilir.
-Interactive terminalde `npm run chef -- --skills` numarayla tek reviewed skill
-sectirir; `npm run chef -- --mcp` numarayla connector sectirip setup/auth/
-source/rollback ve transport/endpoint-package notlarini gosterir ama
-connector'i acmaz.
+Etkileşimli terminalde `npm run chef -- --skills` her curated skill'i hazır,
+eksik veya geçersiz olarak gösterir ve yalnız işlem gereken kayıtlardan birini
+seçtirir. `npm run chef -- --mcp` kurulu config durumlarını gösterir, kullanıcının
+eklediği bağlayıcıları korur ve hiçbir şeyi açmadan transport, endpoint/package,
+setup/auth/source/rollback notlarının incelenmesini sağlar.
 
 `npm run chef -- --diagnostics --no-log` read-only triage menusudur. Repo-only
 status snapshot'ini calistirir; canli saglik, attention nedenleri, sonraki
@@ -259,12 +262,20 @@ bir skill'i veya bundled local skill adini iceren no-write bir Codex turn'u
 baslat; asistanin aksiyondan once `Skill selected` yazdigini ve hedef
 `SKILL.md` dosyasini okudugunu dogrula.
 
-Repo sagligi, kurulu runtime drift'i, Codex doctor check'leri, skills
-context-budget baskisi, routing kontrolleri ve MCP setup gereksinimlerini tek
-son kullanici gorunumunde gormek icin:
+Repo sağlığı, kurulu runtime drift'i, curated skill'ler, yapılandırılmış MCP'ler,
+Codex CLI/oturum, doctor kontrolleri, dikkat maddeleri ve sonraki adımı kısa bir
+son kullanıcı görünümünde görmek için:
 
 ```bash
 npm run codex:status
+```
+
+Hedef/ortam runtime karşılaştırması, MCP kayıtlarının tamamı, yönlendirme
+kontrolleri, context bütçesi, kurulum notları ve log bilgileri için `--details`
+ekleyin:
+
+```bash
+npm run chef -- --status --details
 ```
 
 Kurulu runtime check'lerini, global skill-root envanterini, Codex log

@@ -10,7 +10,7 @@ Discovery output stays no-write and human-readable:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.56
+Package: codex-chef@0.5.57
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -203,16 +203,18 @@ JSON output uses `schemaVersion: codex-chef.repair.v1`. `-Repair -WhatIf` and
 ```text
 Codex Chef status
 Overall: attention
-Use: npm run chef (or npm run chef -- --status --repo-only --no-log for no repo-local log)
-Numbered menu: yes; write actions require --apply or typed confirmation.
-
-Effective controls: multi_agent=true, max_depth=1, approval=on-request, sandbox=workspace-write, network=restricted, hooks=true, managed hooks=advisory_only, apps default=false/destructive=false/open_world=false
-Context budget: reasoning=medium, summary=auto, verbosity=medium, compact=not inspected, tool_output=not inspected
-Token-safe profile: available=yes, active=no, target=low/none/low/64000/6000. For repo-wide or long-running work, run Codex with --profile token-safe or merge token-safe.config.toml; this lowers verbosity, default reasoning, compaction, and tool-output ceilings without disabling skills, agents, MCPs, memory, hooks, or apps.
-
-MCP setup:
-MCP setup note: codebase-memory [local-state] - Requires Node/npx first-run package download; keeps local repository graph state on this machine. Indexing, destructive graph, and admin tools stay prompt-gated or disabled.
+Repo Git: attention - git status --short reports changed lines.
+MCP: 16/16 cataloged configured, 0 missing, 1 user-added; 9 enabled/8 disabled; live not probed
+Codex CLI: ok (strict config ok, login ok, MCP ok)
+Installed runtime: attention/current (...)
+Skills: 42 total installed across global roots (16 Codex Chef curated, 0 missing, 26 other/user-installed)
+Codex doctor checks: attention (...)
+Next action: Review attention items; they do not necessarily mean Codex Chef install is broken.
+Details: npm run chef -- --status --details
 ```
+
+Use `--details` for target/ambient runtime comparison, individual MCP entries,
+routing controls, context-budget evidence, setup notes, and log metadata.
 
 ## Bash Dry Run
 

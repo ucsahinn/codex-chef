@@ -127,6 +127,12 @@ Normal merge/repair preserves model/profile choice, approval and sandbox
 settings, project trust, custom MCPs, and unrelated marketplace entries.
 Chef-managed agent/MCP safety tables remain validated, while wholesale
 replacement requires the explicit force path and a backup.
+The interactive command center inspects this state before a full install. It
+does not silently reinstall an already current setup or present managed drift as
+a clean first install; current setups become a no-op, while drift is directed to
+the explicit backup-backed repair boundary. The same status inspection treats
+user-added skills and MCP connectors as preserved inventory, not deletion
+targets.
 `scripts/validate-install-plan.mjs` also keeps destinations inside reviewed
 Codex, Agents, and optional Git-guard targets so adjacent harness homes such as
 `.claude`, `.cursor`, `.opencode`, `.zed`, and `.vscode` cannot drift into the

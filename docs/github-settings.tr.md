@@ -2,7 +2,7 @@
 
 Bu ayarlar projenin public ilk izlenimini belirler. Yalnız source tree doğrulandıktan ve account-level değişiklik açıkça onaylandıktan sonra manuel uygula.
 
-Güncel yayınlanmış temel sürüm: **v0.5.56**.
+Güncel yayınlanmış temel sürüm: **v0.5.57**.
 
 ## Açıklama
 
@@ -53,11 +53,11 @@ GitHub social preview için `assets/social-preview.png` kullan. Düzenlenebilir 
 
 ## Release Metadata
 
-v0.5.56 için:
+v0.5.57 için:
 
 ```text
-Title: Codex Chef v0.5.56
-Tag: v0.5.56
+Title: Codex Chef v0.5.57
+Tag: v0.5.57
 Notes: tmp/release-notes-current.md
 ```
 

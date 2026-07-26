@@ -44,9 +44,11 @@ This runs:
   stale `dateChecked` checks, and per-agent expertise signal coverage.
 - `scripts/validate-mcp-config.mjs`: MCP catalog/config drift checks across
   Windows and Unix Codex templates.
-- `scripts/validate-chef-cli.mjs`: one-menu Codex Chef CLI contract, safe
-  command routing, write-boundary labels, log location, README usage snippets,
-  and public-safe GitHub auth boundary guidance.
+- `scripts/validate-chef-cli.mjs`: grouped Codex Chef command-center contract,
+  accurate write/account-guidance badges, state-aware install preview, curated
+  skill ready/missing/invalid fixtures, installed MCP config inventory, log
+  location, README usage snippets, and public-safe GitHub auth boundary
+  guidance.
 - `scripts/validate-token-surfaces.mjs`: token audit script, `token-safe`
   profile, AGENTS token discipline, context-budget skill reference, README
   command docs, and unpinned agent model/reasoning contract.
@@ -166,6 +168,7 @@ Codex Chef CLI smoke:
 ```bash
 npm run validate:chef-cli
 npm run chef -- --status
+npm run chef -- --status --details
 npm run chef -- --status --repo-only
 npm run chef -- --status --repo-only --no-log
 npm run chef -- --preview
@@ -189,10 +192,11 @@ when the repo is already current after local validation,
 `npm run chef -- --reset --apply` for backup-backed managed refresh,
 `npm run chef -- --repair --apply` for backup-backed repair, and
 `npm run chef -- --install --apply` for a full managed install. In an
-interactive terminal, `npm run chef -- --skills` lets the user select one
-reviewed skill by number, and `npm run chef -- --mcp` lets the user select one
-connector by number for transport, endpoint/package, setup/auth/source/rollback
-notes without enabling it.
+interactive terminal, `npm run chef -- --skills` reports every curated skill as
+ready, missing, or invalid and lets the user select only an actionable entry.
+`npm run chef -- --mcp` reports installed config states, preserves user-added
+connectors, and lets the user inspect transport, endpoint/package,
+setup/auth/source/rollback notes without enabling anything.
 
 `npm run chef -- --diagnostics --no-log` is the read-only triage menu. It runs a
 repo-only status snapshot, shows current health, attention reasons, next safe
@@ -255,12 +259,19 @@ names a skill such as `$security-best-practices` or a bundled local skill, then
 confirm the assistant prints `Skill selected` and reads the target `SKILL.md`
 before acting.
 
-For a single end-user view of repo health, installed runtime drift, Codex
-doctor checks, skills context-budget pressure, routing controls, and MCP setup
-requirements, run:
+For a compact end-user view of repo health, installed runtime drift, curated
+skills, configured MCPs, Codex CLI/login, doctor checks, attention items, and
+the next action, run:
 
 ```bash
 npm run codex:status
+```
+
+Add `--details` for target/ambient runtime comparison, per-MCP entries, routing
+controls, context-budget evidence, setup notes, and log metadata:
+
+```bash
+npm run chef -- --status --details
 ```
 
 For a fast repository-only audit that avoids installed-runtime checks, global

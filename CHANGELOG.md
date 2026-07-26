@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.5.57 - 2026-07-26
+
+- Make the command center installation-aware: fresh and incomplete setups preview before typed approval, current setups exit without reinstalling, managed drift routes to backup-backed repair, and invalid skill directories route to focused skill recovery.
+- Report curated skills from real `SKILL.md` evidence as ready, missing, or invalid; offer only actionable entries for installation and preserve other user-installed skills.
+- Read installed MCP configuration separately from catalog defaults, showing configured enabled/disabled, cataloged but missing, and user-added connectors without claiming a live probe.
+- Keep the default status board compact while retaining target/ambient runtime, per-MCP, routing, context-budget, setup-note, and log evidence behind `--details`.
+- Correct command-center approval/account-guidance badges and remove the nested installer confirmation from backup-backed force refresh.
+- Add canonical Brain control workspace canvases, bilingual operator guidance, project/goal/memory surfaces, and Obsidian configuration while preserving existing user vault files.
+- Expand temporary-home, transcript, status, installer, documentation, locale, package-surface, and release regression coverage for first install, existing install, idempotence, drift, invalid skills, custom MCPs, and Turkish output.
+
 ## 0.5.56 - 2026-07-26
 
 - Keep installer approval preflight compatible with older Codex CLI builds that return `no-match` for read-only PowerShell wrapper commands even when the equivalent direct command is explicitly allowed.

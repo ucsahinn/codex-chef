@@ -420,8 +420,13 @@ if (textResult.error) {
 } else if (textResult.status !== 0) {
   fail(`codex status text validation exited ${textResult.status}: ${(textResult.stderr || textResult.stdout).trim()}`);
 } else {
-  for (const required of ["Codex Chef status", "Use:", "Numbered menu:", "Target Codex home:", "Ambient Codex:", "Repo Git:", "Logs:", "Repo starter:", "Installed runtime:", "Skills context:", "Enterprise routing:", "Effective controls:", "Context budget:", "Token-safe profile: available=", "active=", "target=low/none/low/64000/6000", "MCP setup:", "MCP setup note: serena", "MCP setup note: codebase-memory", "MCP setup note: supabase"]) {
+  for (const required of ["Codex Chef status", "Overall:", "Repo Git:", "Installed runtime:", "Skills:", "MCP:", "Codex CLI:", "Codex doctor checks:", "Next action:"]) {
     if (!textResult.stdout.includes(required)) fail(`codex status text output missing: ${required}`);
+  }
+  for (const hiddenByDefault of ["Target Codex home:", "Ambient Codex:", "Enterprise routing:", "Effective controls:", "Context budget:", "Token-safe profile:", "MCP setup note:"]) {
+    if (textResult.stdout.includes(hiddenByDefault)) {
+      fail(`codex status compact text output must reserve this surface for --details: ${hiddenByDefault}`);
+    }
   }
   if (!textResult.stdout.includes("[status] running repo:doctor")) {
     fail("codex status text output should label the repository doctor as repo:doctor.");
@@ -431,14 +436,41 @@ if (textResult.error) {
   }
 }
 
+const detailedTextResult = run(["--details", "--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks"]);
+if (detailedTextResult.error) {
+  fail(`codex status detailed text validation could not run: ${detailedTextResult.error.message}`);
+} else if (detailedTextResult.status !== 0) {
+  fail(`codex status detailed text validation exited ${detailedTextResult.status}: ${(detailedTextResult.stderr || detailedTextResult.stdout).trim()}`);
+} else {
+  for (const required of ["Use:", "Numbered menu:", "Target Codex home:", "Ambient Codex:", "Logs:", "Repo starter:", "Skills context:", "Enterprise routing:", "Effective controls:", "Context budget:", "Token-safe profile: available=", "active=", "target=low/none/low/64000/6000", "MCP setup:", "MCP setup note: serena", "MCP setup note: codebase-memory", "MCP setup note: supabase"]) {
+    if (!detailedTextResult.stdout.includes(required)) fail(`codex status detailed text output missing: ${required}`);
+  }
+}
+
 const turkishTextResult = run(["--tr", "--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks"]);
 if (turkishTextResult.error) {
   fail(`codex status Turkish text validation could not run: ${turkishTextResult.error.message}`);
 } else if (turkishTextResult.status !== 0) {
   fail(`codex status Turkish text validation exited ${turkishTextResult.status}: ${(turkishTextResult.stderr || turkishTextResult.stdout).trim()}`);
 } else {
-  for (const required of ["Context butcesi:", "Token-safe profil:", "MCP kurulum notu: codebase-memory", "Ilk calismada Node/npx paket indirmesi gerekir"]) {
+  for (const required of ["Codex Chef durumu", "Genel:", "Kurulu ortam:", "Skill'ler:", "MCP:", "Codex doctor kontrolleri:", "Sonraki adım:"]) {
     if (!turkishTextResult.stdout.includes(required)) fail(`codex status Turkish text output missing: ${required}`);
+  }
+  for (const asciiWording of ["Kullanim", "Numarali menu", "calisiyor", "zaman siniri", "atlandi", "kaydi", "yonetilen dosyalar"]) {
+    if (turkishTextResult.stdout.includes(asciiWording)) {
+      fail(`codex status Turkish text output must use natural Turkish spelling instead of: ${asciiWording}`);
+    }
+  }
+}
+
+const turkishDetailedTextResult = run(["--details", "--tr", "--redact-paths", "--skip-runtime", "--skip-codex-doctor-checks"]);
+if (turkishDetailedTextResult.error) {
+  fail(`codex status Turkish detailed text validation could not run: ${turkishDetailedTextResult.error.message}`);
+} else if (turkishDetailedTextResult.status !== 0) {
+  fail(`codex status Turkish detailed text validation exited ${turkishDetailedTextResult.status}: ${(turkishDetailedTextResult.stderr || turkishDetailedTextResult.stdout).trim()}`);
+} else {
+  for (const required of ["Kullanım:", "Numaralı menü:", "Context bütçesi:", "Token-safe profil:", "MCP kurulum notu: codebase-memory", "İlk çalışmada Node/npx paket indirmesi gerekir"]) {
+    if (!turkishDetailedTextResult.stdout.includes(required)) fail(`codex status Turkish detailed text output missing: ${required}`);
   }
   if (turkishTextResult.stdout.includes("Requires Node/npx first-run package download")) {
     fail("codex status Turkish text output must translate the codebase-memory setup hint.");

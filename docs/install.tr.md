@@ -125,6 +125,7 @@ bolumu kullan.
 ```powershell
 npm run chef
 npm run chef -- --status
+npm run chef -- --status --details
 npm run chef -- --status --repo-only
 npm run chef -- --preview
 npm run chef -- --preview --verbose-plan
@@ -147,6 +148,30 @@ npm run chef -- --help --lang tr
 npm run chef -- --status --repo-only --no-log
 ```
 
+Komuta merkezi mevcut durumu dikkate alır. Etkileşimli tam kurulumdan önce
+yönetilen dosyaları ve curated skill durumunu okur, ardından kısa bir ön izleme
+gösterir. Sıfırdan veya eksik bir kurulum yazılı `APPLY` onayıyla devam eder;
+zaten eksiksiz olan kurulum başarılı biçimde sonlanır ve yeniden kurulmaz;
+yönetilen dosyalarda drift varsa akış bunu yeni kurulum gibi göstermeyip yedekli
+onarım yoluna yönlendirir. Doğrudan komutlar, belgelenmiş `--apply` bayrağı
+verilmediği sürece yalnız ön izleme yapar.
+
+`Skill durumu ve katalog` ekranı yalnız aynı adlı klasöre değil, gerçek bir
+`SKILL.md` dosyasına bakar. Her curated skill hazır, eksik veya geçersiz olarak
+gösterilir. Kurulum için yalnız eksik veya geçersiz kayıtlar seçilebilir; tümü
+hazırsa kurulum seçimi açılmaz. Kullanıcının ayrıca kurduğu diğer skill'ler
+sayılır ve korunur.
+
+`MCP bağlayıcıları` ekranı kurulu `CODEX_HOME/config.toml` dosyasını okuyarak
+bağlayıcıları yapılandırılmış ve açık, yapılandırılmış ama kapalı, katalogda olup
+yapılandırılmamış ve kullanıcı tarafından eklenmiş olarak ayırır. Bunlar config
+durumlarıdır, canlı sağlık iddiası değildir; Codex `/mcp`, `codex mcp` veya
+başka güvenli bir kontrol başarılı olana kadar canlı durum ölçülmemiş sayılır.
+
+Varsayılan durum panosu kısadır. MCP listesinin tamamı, yönlendirme kontrolleri,
+context bütçesi, kurulum notları, hedef/ortam Codex karşılaştırması ve log
+bilgileri için `--details` ekleyin.
+
 `--routing` task-shape haritasini, beklenen skill ve MCP yuzeylerini ve operator
 raporlama sozlesmesini gosterir. Tamamlanan agent thread'lerini incelemek ve kapatmak
 icin `/agent`; current Codex session tarafindan baslatilan terminal
@@ -154,10 +179,10 @@ isleri icin `/ps` ve `/stop` kullan. `--diagnostics` Serena/MCP surec audit
 komutunu ve diger read-only kanit komutlarini gosterir, ama surec durdurmaz ve
 global dosya degistirmez.
 
-Kurulu skill'ler kendiliginden calismaz. Kullanici skill adini yazdiginda veya
-is skill aciklamasina net uydugunda Codex context'ine girer; canli aktivasyon
-asistanin `Skill selected` yazmasi ve aksiyondan once ilgili `SKILL.md`
-dosyasini okumasiyla kanitlanir.
+Kurulu ve hazır skill'ler kendiliğinden çalışmaz. Kullanıcı skill adını
+yazdığında veya iş skill açıklamasına açıkça uyduğunda Codex context'ine girer;
+canlı aktivasyon, asistanın `Skill selected` yazması ve işlemden önce ilgili
+`SKILL.md` dosyasını okumasıyla kanıtlanır.
 
 GitHub release, push veya workflow check'leri lokal GitHub authentication bayat
 oldugu icin fail ederse GitHub CLI veya Git Credential Manager'i kendi kurum politikaniza

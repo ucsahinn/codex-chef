@@ -382,6 +382,12 @@ function printBrandSignature() {
 function writeBoundaryKind(boundary) {
   const normalized = stripAnsi(String(boundary || "")).toLowerCase();
   if (
+    normalized.includes("guidance") ||
+    normalized.includes("rehberi")
+  ) {
+    return "guidance";
+  }
+  if (
     normalized === "none" ||
     normalized === "read-only" ||
     normalized === "yazmaz" ||
@@ -394,9 +400,7 @@ function writeBoundaryKind(boundary) {
   }
   if (
     normalized.includes("optional") ||
-    normalized.includes("guidance") ||
-    normalized.includes("opsiyonel") ||
-    normalized.includes("rehberi")
+    normalized.includes("opsiyonel")
   ) {
     return "guidance";
   }
@@ -508,9 +512,9 @@ const MENU_ITEMS = [
   },
   {
     id: "skills",
-    label: "Skills catalog",
+    label: "Skill status & catalog",
     writes: "Install: typed confirmation",
-    description: "Review curated skills, choose one, and confirm installation in the same session."
+    description: "See installed/missing curated skills, then choose one to install with confirmation."
   },
   {
     id: "mcp",
@@ -725,8 +729,8 @@ const MENU_TEXT_TR = {
     writes: "Geri yükleme/silme: yazılı onay"
   },
   skills: {
-    label: "Skill kataloğu",
-    description: "Skill'leri inceler; seçilen skill kurulumunu aynı oturumda onayla tamamlar.",
+    label: "Skill durumu ve katalog",
+    description: "Kurulu/eksik curated skill'leri görür; seçileni aynı oturumda onayla kurar.",
     writes: "Kurulum: yazılı onay"
   },
   mcp: {
@@ -1010,7 +1014,7 @@ Reference actions:
 
 Operator screens:
   System status, Repo health, Full checkup, Install preview, Update Codex Chef,
-  Full install, Refresh setup, Repair setup, Backups, Skills catalog,
+  Full install, Refresh setup, Repair setup, Backups, Skill status & catalog,
   MCP connectors, Routing guide, Diagnostics hub, Process audit,
   Auth notes, Recent logs
 
@@ -1149,7 +1153,7 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
   }
   if (!options.json && !extra.quiet) console.log(`${ICONS.ok} [##########] 100% DONE     ${action} (${Date.now() - startedMs} ms)`);
   if (logPath && !options.json && !extra.quiet) console.log(`${ICONS.ok} Log: ${toPosix(path.relative(root, logPath))}`);
-  else if (!options.json && !extra.quiet) console.log(`${ICONS.ok} ${localText("Log disabled by --no-log", "Log --no-log ile kapali")}`);
+  else if (!options.json && !extra.quiet) console.log(`${ICONS.ok} ${localText("Log disabled by --no-log", "Log --no-log ile kapalı")}`);
   return { ok: true, status: result.status, signal: result.signal || null, logPath, output, elapsedMs: Date.now() - startedMs };
 }
 
@@ -1187,7 +1191,7 @@ async function confirmWriteAction(action, detail, interaction = {}) {
     return false;
   }
   const answer = await askInteractive(
-    `${ICONS.warn} ${detail} ${localText("Type APPLY to continue, or press Enter to cancel:", "Devam etmek icin APPLY yazin; vazgecmek icin Enter'a basin:")} `,
+    `${ICONS.warn} ${detail} ${localText("Type APPLY to continue, or press Enter to cancel:", "Devam etmek için APPLY yazın; vazgeçmek için Enter'a basın:")} `,
     interaction
   );
   return answer.trim() === "APPLY";
@@ -1226,15 +1230,25 @@ function printMenu() {
     const label = options.lang === "tr" ? group.labelTr : group.label;
     const description = options.lang === "tr" ? group.descriptionTr : group.description;
     const visual = groupVisual(group);
-    const writeCount = group.itemIds
+    const boundaryCounts = group.itemIds
       .map((id) => MENU_ITEMS.find((item) => item.id === id))
-      .filter((item) => item && !/^No writes$/.test(item.writes))
-      .length;
-    const badge = writeCount > 0
-      ? localText(`${writeCount} approval-gated`, `${writeCount} onaylı işlem`)
+      .filter(Boolean)
+      .reduce((counts, item) => {
+        counts[writeBoundaryKind(item.writes)] += 1;
+        return counts;
+      }, { safe: 0, guidance: 0, write: 0 });
+    const badgeParts = [];
+    if (boundaryCounts.write > 0) {
+      badgeParts.push(localText(`${boundaryCounts.write} approval-gated`, `${boundaryCounts.write} onaylı işlem`));
+    }
+    if (boundaryCounts.guidance > 0) {
+      badgeParts.push(localText(`${boundaryCounts.guidance} account-guided`, `${boundaryCounts.guidance} hesap rehberi`));
+    }
+    const badge = badgeParts.length > 0
+      ? badgeParts.join(" / ")
       : localText("read-only", "salt okunur");
     if (supportsColor()) {
-      const badgeKind = writeCount > 0 ? "write" : "safe";
+      const badgeKind = boundaryCounts.write > 0 ? "write" : boundaryCounts.guidance > 0 ? "guidance" : "safe";
       console.log(`${paint("╭─", visual.color)} ${paint(String(index + 1).padStart(2, "0"), "bold", visual.color)} ${paint(visual.icon, "bold", visual.color)}  ${paint(label, "bold", "white")}  ${statusBadge(badge, badgeKind)}`);
       console.log(`${paint("╰─", visual.color)} ${styleMuted(description)}`);
     } else {
@@ -1348,16 +1362,17 @@ function runStatus(overrides = {}) {
     "--lang",
     options.lang,
     ...(repoOnly ? ["--skip-runtime", "--skip-codex-doctor-checks", "--skip-codex-cli"] : []),
+    ...(options.details ? ["--details"] : []),
     ...(options.json ? ["--json"] : [])
   ], {
     waitNote: repoOnly
       ? localText(
           "Collecting local repo checks only; installed runtime, global skill roots, Codex logs, and Codex CLI probes are skipped.",
-          "Yalnizca lokal repo kontrolleri toplaniyor; kurulu runtime, global skill kokleri, Codex loglari ve Codex CLI problari atlandi."
+          "Yalnızca yerel repo kontrolleri toplanıyor; kurulu ortam, global skill kökleri, Codex logları ve Codex CLI kontrolleri atlandı."
         )
       : localText(
           "Collecting Codex runtime, MCP, Git, and log metadata checks; this can take 30-60 seconds.",
-          "Codex runtime, MCP, Git ve log metadata kontrolleri toplaniyor; 30-60 saniye surebilir."
+          "Codex çalışma ortamı, MCP, Git ve log bilgisi kontrolleri toplanıyor; 30-60 saniye sürebilir."
         )
   });
 }
@@ -1421,7 +1436,7 @@ function runUpdateValidation(extra = {}) {
     quiet: extra.quiet,
     waitNote: localText(
       "Running the full repo check before global managed files are refreshed.",
-      "Global managed dosyalar yenilenmeden once tam repo check calistiriliyor."
+      "Global yönetilen dosyalar yenilenmeden önce tam repo kontrolü çalıştırılıyor."
     )
   });
 }
@@ -1631,7 +1646,7 @@ async function runUpdate(interaction = {}) {
     return { ok: false };
   }
   if (dirty.dirty) {
-    console.log(`${ICONS.warn} ${localText("Update apply requires a clean worktree so local edits are not overwritten.", "Update apply lokal editlerin ustune yazmamak icin temiz worktree ister.")}`);
+    console.log(`${ICONS.warn} ${localText("Update apply requires a clean worktree so local edits are not overwritten.", "Update apply, yerel değişikliklerin üzerine yazmamak için temiz worktree ister.")}`);
     process.stdout.write(dirty.output.endsWith("\n") ? dirty.output : `${dirty.output}\n`);
     console.log(`${ICONS.info} ${localText(
       isMenuInteraction(interaction)
@@ -1854,6 +1869,38 @@ function completeAppliedAction(applied, expectSkills = false, context = {}) {
 }
 
 async function runInstall(interaction = {}) {
+  const installation = inspectInstallState();
+  if (!installation.ok) return installation;
+  printInstallState(installation);
+
+  if (installation.kind === "current") {
+    console.log(`${ICONS.ok} ${localText(
+      "The complete Codex Chef setup is already current; nothing needs to be installed.",
+      "Codex Chef kurulumu zaten eksiksiz ve güncel; kurulacak bir şey yok."
+    )}`);
+    return { ok: true, skipped: true };
+  }
+
+  if (installation.kind === "repair") {
+    console.log(`${ICONS.warn} ${localText(
+      "This is an existing setup with managed drift. Use Repair setup so drift is backed up and repaired explicitly.",
+      "Bu, yönetilen dosyalarında drift olan mevcut bir kurulum. Farkların yedeklenip açıkça onarılması için Kurulumu onar akışını kullanın."
+    )}`);
+    console.log(styleMuted(localText(
+      "Run npm run chef -- --repair to preview it, or choose Repair setup from this menu.",
+      "Ön izlemek için npm run chef -- --repair çalıştırın veya bu menüden Kurulumu onar seçeneğini açın."
+    )));
+    return { ok: true, skipped: true };
+  }
+
+  if (installation.kind === "skill_attention") {
+    console.log(`${ICONS.warn} ${localText(
+      "One or more curated skill directories are invalid. Open Skill status & catalog to inspect and reinstall only those entries.",
+      "Bir veya daha fazla curated skill dizini geçersiz. Yalnız bu kayıtları inceleyip yeniden kurmak için Skill durumu ve katalog ekranını açın."
+    )}`);
+    return { ok: true, skipped: true };
+  }
+
   if (!writeFlowRequested(interaction)) {
     printSurfaceHeader(
       localText("Install preview", "Kurulum ön izlemesi"),
@@ -1864,6 +1911,18 @@ async function runInstall(interaction = {}) {
       ICONS.info
     );
     return runPreview();
+  }
+  if (isMenuInteraction(interaction)) {
+    printSurfaceHeader(
+      localText("Install preview", "Kurulum ön izlemesi"),
+      localText(
+        "Reviewing the first-install plan before confirmation.",
+        "İlk kurulum planı onaydan önce inceleniyor."
+      ),
+      ICONS.info
+    );
+    const preview = runPreview();
+    if (!preview.ok) return preview;
   }
   const allowed = await confirmWriteAction(
     "Install",
@@ -1910,9 +1969,9 @@ async function runReset(interaction = {}) {
   if (!allowed) return { ok: false, skipped: true };
   let applied;
   if (process.platform === "win32") {
-    applied = runPowerShell("reset-apply", ".\\scripts\\install.ps1", ["-All", "-Force", "-Interactive", "-PlainOutput"]);
+    applied = runPowerShell("reset-apply", ".\\scripts\\install.ps1", ["-All", "-Force", "-PlainOutput"]);
   } else {
-    applied = runBash("reset-apply", "scripts/install.sh", ["--all", "--force", "--interactive", "--plain-output"]);
+    applied = runBash("reset-apply", "scripts/install.sh", ["--all", "--force", "--plain-output"]);
   }
   return completeAppliedAction(applied, true, {
     kind: "reset",
@@ -2501,7 +2560,7 @@ async function runBackups(interaction = {}, requested = {}) {
     const deleteBackup = requested.deleteBackup ?? options.deleteBackup;
     if (!backupId) {
       if (restore || deleteBackup) {
-        console.error(`${ICONS.warn} ${localText("--restore and --delete require --backup ID.", "--restore ve --delete icin --backup ID gerekir.")}`);
+        console.error(`${ICONS.warn} ${localText("--restore and --delete require --backup ID.", "--restore ve --delete için --backup ID gerekir.")}`);
         return { ok: false };
       }
       const backups = listBackupArchives();
@@ -2614,7 +2673,7 @@ async function runBackups(interaction = {}, requested = {}) {
     );
     printBackupInspect(archivePath, plan, interaction);
     if (plan.issues.length > 0) {
-      console.error(`${ICONS.warn} ${localText("Restore blocked because the archive has unsafe entries.", "Arsiv guvensiz girdiler icerdigi icin geri yukleme bloklandi.")}`);
+      console.error(`${ICONS.warn} ${localText("Restore blocked because the archive has unsafe entries.", "Arşiv güvenli olmayan girdiler içerdiği için geri yükleme engellendi.")}`);
       return { ok: false };
     }
     if (!writeFlowRequested(interaction)) {
@@ -2640,7 +2699,7 @@ async function runBackups(interaction = {}, requested = {}) {
     } else {
       console.log(`${ICONS.info} ${localText(
         "Rollback backup: none needed because no current targets existed.",
-        "Rollback yedegi: mevcut hedef olmadigi icin gerekmedi."
+        "Rollback yedeği: mevcut hedef olmadığı için gerekmedi."
       )}`);
     }
     console.log(`${ICONS.info} ${localText("Restart Codex, then run npm run chef -- --status --repo-only --no-log.", "Codex'i yeniden başlatın, sonra npm run chef -- --status --repo-only --no-log çalıştırın.")}`);
@@ -2702,7 +2761,131 @@ function summarizeNames(entries, limit = 3) {
   return `${visible}${hidden}`;
 }
 
-async function selectSkill(installable, interaction = {}) {
+function inspectInstallState() {
+  const result = runNode("install-state", "scripts/repair-install.mjs", [
+    "--json",
+    "--redact-paths"
+  ], { quiet: true });
+  if (!result.ok) return result;
+  let report;
+  try {
+    report = JSON.parse(result.output);
+  } catch (error) {
+    console.error(`${ICONS.warn} ${localText(
+      `Could not read the installation state: ${error.message}`,
+      `Kurulum durumu okunamadı: ${error.message}`
+    )}`);
+    return { ok: false, error: error.message };
+  }
+  const managed = report.managedFiles || {};
+  const skills = report.skills || {};
+  const skillCatalog = readJson("catalog/skills.json");
+  const curatedSkillState = inspectCuratedSkillStatus(
+    (skillCatalog.skills || []).filter((skill) => skill.install === true)
+  );
+  const current = Number(managed.current || 0);
+  const expected = Number(managed.expected || 0);
+  const planned = Number(managed.planned || 0);
+  const missingSkills = curatedSkillState.missing;
+  const invalidSkills = curatedSkillState.invalid;
+  const kind = planned === 0 && missingSkills === 0 && invalidSkills === 0
+    ? "current"
+    : current === 0
+      ? "fresh"
+      : planned > 0
+        ? "repair"
+        : invalidSkills > 0
+          ? "skill_attention"
+        : "incomplete";
+  return {
+    ok: true,
+    kind,
+    managed: { current, expected, planned },
+    skills: {
+      installed: Number(skills.installed || 0),
+      expected: Number(skills.expected || 0),
+      missing: missingSkills,
+      invalid: invalidSkills,
+      extra: Number(skills.extraCount || 0)
+    }
+  };
+}
+
+function printInstallState(installation) {
+  const labels = {
+    current: localText("Current setup", "Güncel kurulum"),
+    fresh: localText("Fresh setup", "Sıfırdan kurulum"),
+    repair: localText("Existing setup needs repair", "Mevcut kurulum onarım istiyor"),
+    skill_attention: localText("Skill installation needs attention", "Skill kurulumu dikkat istiyor"),
+    incomplete: localText("Incomplete setup", "Eksik kurulum")
+  };
+  console.log("");
+  console.log(styleHeading(localText("Installation state", "Kurulum durumu")));
+  console.log(`${styleLabel(labels[installation.kind])}: ${localText(
+    `${installation.managed.current}/${installation.managed.expected} managed files current; ${installation.managed.planned} planned change(s); ${installation.skills.missing} curated skill(s) missing; ${installation.skills.invalid} invalid.`,
+    `${installation.managed.current}/${installation.managed.expected} yönetilen dosya güncel; ${installation.managed.planned} planlı değişiklik; ${installation.skills.missing} curated skill eksik; ${installation.skills.invalid} geçersiz.`
+  )}`);
+}
+
+function inspectCuratedSkillStatus(installable) {
+  const roots = [
+    path.join(codexHome(), "skills"),
+    path.join(agentsHome(), "skills")
+  ];
+  const discoveredNames = new Set();
+  for (const root of roots) {
+    if (!fs.existsSync(root)) continue;
+    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+      if (entry.isDirectory() && !entry.name.startsWith(".")) discoveredNames.add(entry.name);
+    }
+  }
+  const states = new Map();
+  const readyNames = new Set();
+  const invalidNames = new Set();
+  const missingNames = new Set();
+  for (const skill of installable) {
+    const hasDirectory = roots.some((root) => fs.existsSync(path.join(root, skill.name)));
+    const hasSkillFile = roots.some((root) => fs.existsSync(path.join(root, skill.name, "SKILL.md")));
+    const state = hasSkillFile ? "ready" : hasDirectory ? "invalid" : "missing";
+    states.set(skill.name, state);
+    if (state === "ready") readyNames.add(skill.name);
+    else if (state === "invalid") invalidNames.add(skill.name);
+    else missingNames.add(skill.name);
+  }
+  const curatedNames = new Set(installable.map((skill) => skill.name));
+  const otherNames = [...discoveredNames].filter((name) => !curatedNames.has(name)).sort();
+  return {
+    states,
+    readyNames,
+    invalidNames,
+    missingNames,
+    otherNames,
+    installedNames: readyNames,
+    installed: readyNames.size,
+    ready: readyNames.size,
+    invalid: invalidNames.size,
+    missing: missingNames.size,
+    roots
+  };
+}
+
+function skillStateText(state) {
+  if (state === "ready") return localText("Installed (ready)", "Kurulu (hazır)");
+  if (state === "invalid") return localText("Invalid installation", "Geçersiz kurulum");
+  return localText("Missing", "Eksik");
+}
+
+function printCuratedSkillStates(installable, installation) {
+  console.log("");
+  console.log(styleHeading(localText("Curated skill status", "Curated skill durumu")));
+  installable.forEach((skill, index) => {
+    const state = installation.states.get(skill.name);
+    const color = state === "ready" ? "brightGreen" : state === "invalid" ? "brightYellow" : "brightMagenta";
+    printChoiceRow(index + 1, skill.name, skillStateText(state), color, "✦");
+  });
+}
+
+async function selectSkill(installable, installation, interaction = {}) {
   printSurfaceHeader(
     localText("Choose a skill to install", "Kurulacak skill'i seç"),
     localText(
@@ -2716,7 +2899,8 @@ async function selectSkill(installable, interaction = {}) {
     ICONS.docs
   );
   installable.forEach((skill, index) => {
-    printChoiceRow(index + 1, skill.name, skill.source, "brightMagenta", "✦");
+    const status = skillStateText(installation.states.get(skill.name));
+    printChoiceRow(index + 1, skill.name, `${skill.source} | ${status}`, "brightMagenta", "✦");
   });
   const selected = await askSelection(
     installable,
@@ -2742,12 +2926,27 @@ async function runSkills(interaction = {}) {
   const routing = readJson("catalog/routing-profiles.json");
   const installable = (catalog.skills || []).filter((skill) => skill.install === true);
   const profileCount = (routing.profiles || []).length;
+  const installation = inspectCuratedSkillStatus(installable);
   printSurfaceHeader(
-    localText("Skills catalog", "Skill kataloğu"),
+    localText("Skill status & catalog", "Skill durumu ve katalog"),
     localText(`${installable.length} curated installable skills with source checks and activation rules.`, `Kaynak kontrolü ve aktivasyon kuralları olan ${installable.length} curated skill.`),
     ICONS.docs
   );
+  console.log(styleHeading(localText("Installation status", "Kurulum durumu")));
+  console.log(`${ICONS.info} ${localText(
+    `${installation.ready} of ${installable.length} curated skills ready; ${installation.missing} missing; ${installation.invalid} invalid.`,
+    `${installable.length} curated skill'in ${installation.ready} tanesi hazır; ${installation.missing} tanesi eksik; ${installation.invalid} tanesi geçersiz.`
+  )}`);
+  console.log(`${ICONS.info} ${localText(
+    `${installation.otherNames.length} other/user-installed skill(s) are preserved.`,
+    `${installation.otherNames.length} diğer/kullanıcı kurulu skill korunuyor.`
+  )}`);
+  console.log(styleMuted(localText(
+    "Installed means ready for task-based activation; skills do not run continuously in the background.",
+    "Kurulu, görevle eşleştiğinde kullanıma hazır demektir; skill'ler arka planda sürekli çalışmaz."
+  )));
   if (!options.details) {
+    printCuratedSkillStates(installable, installation);
     const counts = groupByCategory(installable)
       .map(({ category, entries }) => `${category}: ${entries.length}`)
       .join(" | ");
@@ -2756,7 +2955,15 @@ async function runSkills(interaction = {}) {
     console.log(`${ICONS.info} ${localText(`${profileCount} routing profiles are available. Use --details for the full catalog.`, `${profileCount} routing profili var. Tam katalog için --details kullanın.`)}`);
     const verification = runNode("skills", "scripts/verify-skill-sources.mjs", [], { quiet: true });
     if (!verification.ok || (!process.stdin.isTTY && !interaction.question)) return verification;
-    return selectSkill(installable, interaction);
+    if (installation.missing === 0 && installation.invalid === 0) {
+      console.log(`${ICONS.ok} ${localText(
+        "All curated skills are installed and ready.",
+        "Tüm curated skill'ler kurulu ve hazır."
+      )}`);
+      return { ok: true };
+    }
+    const actionable = installable.filter((skill) => installation.states.get(skill.name) !== "ready");
+    return selectSkill(actionable, installation, interaction);
   }
   printRows(
     groupByCategory(installable).map(({ category, entries }) => ({
@@ -2785,6 +2992,27 @@ async function runSkills(interaction = {}) {
           { key: "checked", label: "Last checked" }
         ]
   );
+  printRows(
+    installable.map((skill) => ({
+      skill: skill.name,
+      category: skill.category,
+      status: skillStateText(installation.states.get(skill.name)),
+      activation: localText("Task matched", "Görev eşleşince")
+    })),
+    isTr()
+      ? [
+          { key: "skill", label: "Skill" },
+          { key: "category", label: "Akış" },
+          { key: "status", label: "Durum" },
+          { key: "activation", label: "Aktivasyon" }
+        ]
+      : [
+          { key: "skill", label: "Skill" },
+          { key: "category", label: "Workflow" },
+          { key: "status", label: "Status" },
+          { key: "activation", label: "Activation" }
+        ]
+  );
   console.log("");
   console.log(styleHeading(localText("How skill activation works", "Skill aktivasyonu nasıl çalışır")));
   console.log(`- ${localText("Installed skills do not run by themselves or grant hidden permissions.", "Kurulu skill'ler kendiliğinden çalışmaz ve gizli yetki vermez.")}`);
@@ -2794,7 +3022,15 @@ async function runSkills(interaction = {}) {
   console.log(`${ICONS.info} ${localText("Offline verification runs by default. Online resolution: npm run verify:skills:online -- --timeout-ms=90000", "Varsayılan doğrulama offline çalışır. Online çözümleme: npm run verify:skills:online -- --timeout-ms=90000")}`);
   const verification = runNode("skills", "scripts/verify-skill-sources.mjs");
   if (!verification.ok || (!process.stdin.isTTY && !interaction.question)) return verification;
-  return selectSkill(installable, interaction);
+  if (installation.missing === 0 && installation.invalid === 0) {
+    console.log(`${ICONS.ok} ${localText(
+      "All curated skills are installed and ready.",
+      "Tüm curated skill'ler kurulu ve hazır."
+    )}`);
+    return { ok: true };
+  }
+  const actionable = installable.filter((skill) => installation.states.get(skill.name) !== "ready");
+  return selectSkill(actionable, installation, interaction);
 }
 
 function explainMcpServer(server) {
@@ -2804,31 +3040,42 @@ function explainMcpServer(server) {
     ICONS.docs
   );
   const rows = [
-    { field: localText("Catalog status", "Katalog durumu"), value: displayValue(server.defaultEnabled ? "ready_by_default" : "disabled_by_default") },
-    { field: localText("Transport", "Tasima"), value: server.transport },
-    { field: localText("Target", "Hedef"), value: mcpTarget(server) },
-    { field: localText("Auth boundary", "Auth siniri"), value: displayValue(server.auth) },
-    { field: localText("Approval mode", "Onay modu"), value: server.approval },
-    { field: localText("Risk", "Risk"), value: server.risk },
-    { field: localText("Setup", "Kurulum"), value: `${server.setupKind} - ${translateSetupHint(server.setupHint)}` },
-    { field: localText("Why it exists", "Neden var"), value: server.defaultReason },
-    { field: localText("Source", "Kaynak"), value: server.sourceUrl },
     {
-      field: localText("Config reference", "Config referansi"),
-      value: localText("See templates/codex/config.windows.toml and templates/codex/config.unix.toml for timeouts and per-tool exposure.", "Timeout ve tool bazli yetkiler icin templates/codex/config.windows.toml ve templates/codex/config.unix.toml dosyalarina bakin.")
+      field: localText("Catalog status", "Katalog durumu"),
+      value: server.sourceKind === "user"
+        ? localText("User-added; not in the curated catalog", "Kullanıcı ekledi; curated katalogda yok")
+        : displayValue(server.defaultEnabled ? "ready_by_default" : "disabled_by_default")
+    },
+    { field: localText("Installed config", "Kurulu config"), value: mcpInstalledStateText(server) },
+    { field: localText("Transport", "Taşıma"), value: server.transport || localText("Defined in user config", "Kullanıcı config dosyasında tanımlı") },
+    { field: localText("Target", "Hedef"), value: mcpTarget(server) },
+    { field: localText("Auth boundary", "Auth sınırı"), value: displayValue(server.auth) },
+    { field: localText("Approval mode", "Onay modu"), value: server.approval || localText("Read from user config at runtime", "Çalışırken kullanıcı config dosyasından okunur") },
+    { field: localText("Risk", "Risk"), value: server.risk || localText("Not cataloged", "Katalogda yok") },
+    {
+      field: localText("Setup", "Kurulum"),
+      value: server.setupKind
+        ? `${server.setupKind} - ${translateSetupHint(server.setupHint)}`
+        : localText("User-managed configuration", "Kullanıcının yönettiği yapılandırma")
+    },
+    { field: localText("Why it exists", "Neden var"), value: server.defaultReason || localText("User-added connector", "Kullanıcının eklediği bağlayıcı") },
+    { field: localText("Source", "Kaynak"), value: server.sourceUrl || localText("Not present in the curated catalog", "Curated katalogda bulunmuyor") },
+    {
+      field: localText("Config reference", "Config referansı"),
+      value: localText("See templates/codex/config.windows.toml and templates/codex/config.unix.toml for timeouts and per-tool exposure.", "Timeout ve tool bazlı yetkiler için templates/codex/config.windows.toml ve templates/codex/config.unix.toml dosyalarına bakın.")
     },
     {
       field: localText("Live verification", "Canlı doğrulama"),
-      value: localText("Not live-checked until /mcp, codex mcp, or a safe read-only probe succeeds.", "/mcp, codex mcp veya guvenli read-only probe basarili olana kadar canli kontrol yok.")
+      value: localText("Not live-checked until /mcp, codex mcp, or a safe read-only probe succeeds.", "/mcp, codex mcp veya güvenli read-only kontrol başarılı olana kadar canlı durum ölçülmez.")
     },
     {
       field: localText("Rollback", "Geri alma"),
-      value: localText("Set this connector's enabled flag to false and restart Codex.", "Bu connector icin enabled flag'ini false yapin ve Codex'i yeniden baslatin.")
+      value: localText("Set this connector's enabled flag to false and restart Codex.", "Bu connector için enabled flag'ini false yapın ve Codex'i yeniden başlatın.")
     }
   ];
   printRows(rows, [
     { key: "field", label: localText("Field", "Alan") },
-    { key: "value", label: localText("Value", "Deger") }
+    { key: "value", label: localText("Value", "Değer") }
   ]);
 }
 
@@ -2836,32 +3083,117 @@ function mcpTarget(server) {
   if (server.url) return server.url;
   if (server.package) return server.package;
   if (server.command) return server.sourceRef ? `${server.command} @ ${server.sourceRef}` : server.command;
+  if (server.sourceKind === "user") return localText("Defined in user config; target not printed", "Kullanıcı config dosyasında tanımlı; hedef yazdırılmadı");
   return "configured in template";
+}
+
+function parseInstalledMcpConfig() {
+  const configPath = path.join(codexHome(), "config.toml");
+  const configured = new Map();
+  if (!fs.existsSync(configPath)) return { configPath, configured };
+  let current = null;
+  for (const rawLine of fs.readFileSync(configPath, "utf8").split(/\r?\n/)) {
+    const section = rawLine.match(/^\s*\[mcp_servers\.(?:"([^"]+)"|'([^']+)'|([A-Za-z0-9_-]+))\]\s*(?:#.*)?$/);
+    if (section) {
+      current = section[1] || section[2] || section[3];
+      configured.set(current, { name: current, enabled: true });
+      continue;
+    }
+    if (/^\s*\[/.test(rawLine)) {
+      current = null;
+      continue;
+    }
+    if (!current) continue;
+    const enabled = rawLine.match(/^\s*enabled\s*=\s*(true|false)\s*(?:#.*)?$/i);
+    if (enabled) configured.get(current).enabled = enabled[1].toLowerCase() === "true";
+  }
+  return { configPath, configured };
+}
+
+function inspectMcpInstallation(servers) {
+  const { configPath, configured } = parseInstalledMcpConfig();
+  const catalogNames = new Set(servers.map((server) => server.name));
+  const catalogStates = servers.map((server) => {
+    const installed = configured.get(server.name);
+    return {
+      ...server,
+      sourceKind: "catalog",
+      configured: Boolean(installed),
+      enabled: installed?.enabled ?? null,
+      installedState: !installed ? "not_configured" : installed.enabled ? "enabled" : "disabled"
+    };
+  });
+  const userAdded = [...configured.values()]
+    .filter((server) => !catalogNames.has(server.name))
+    .sort((left, right) => left.name.localeCompare(right.name))
+    .map((server) => ({
+      ...server,
+      sourceKind: "user",
+      configured: true,
+      installedState: server.enabled ? "user_enabled" : "user_disabled"
+    }));
+  return {
+    configPath,
+    configured,
+    catalogStates,
+    userAdded,
+    enabled: catalogStates.filter((server) => server.installedState === "enabled").length,
+    disabled: catalogStates.filter((server) => server.installedState === "disabled").length,
+    notConfigured: catalogStates.filter((server) => server.installedState === "not_configured").length
+  };
+}
+
+function mcpInstalledStateText(server) {
+  const labels = {
+    enabled: localText("Configured (enabled)", "Yapılandırılmış (açık)"),
+    disabled: localText("Configured (disabled)", "Yapılandırılmış (kapalı)"),
+    not_configured: localText("Cataloged (not configured)", "Katalogda (yapılandırılmamış)"),
+    user_enabled: localText("User-added (enabled)", "Kullanıcı ekledi (açık)"),
+    user_disabled: localText("User-added (disabled)", "Kullanıcı ekledi (kapalı)")
+  };
+  return labels[server.installedState] || localText("Unknown", "Bilinmiyor");
+}
+
+function printMcpInstallationSummary(installation) {
+  console.log(`${styleLabel(localText("Configured and enabled", "Yapılandırılmış ve açık"))}: ${installation.enabled}`);
+  console.log(`${styleLabel(localText("Configured but disabled", "Yapılandırılmış ama kapalı"))}: ${installation.disabled}`);
+  console.log(`${styleLabel(localText("Cataloged but not configured", "Katalogda ama yapılandırılmamış"))}: ${installation.notConfigured}`);
+  console.log(`${styleLabel(localText("User-added", "Kullanıcı ekledi"))}: ${installation.userAdded.length}`);
+  console.log(styleMuted(localText(
+    "Live status was not probed; these states come from the installed config only.",
+    "Canlı durum ölçülmedi; bu durumlar yalnız kurulu config dosyasından okunur."
+  )));
 }
 
 async function runMcp(interaction = {}) {
   const catalog = readJson("catalog/mcp-servers.json");
   const servers = catalog.servers || [];
+  const installation = inspectMcpInstallation(servers);
+  const displayServers = [...installation.catalogStates, ...installation.userAdded];
   printSurfaceHeader(
     localText("MCP connectors", "MCP bağlayıcıları"),
-    localText(`${servers.length} connectors: default-safe tooling first, account connectors disabled until needed.`, `${servers.length} bağlayıcı: önce varsayılan güvenli tooling, hesap bağlayıcıları gerekene kadar kapalı.`),
+    localText(
+      `${servers.length} connectors in the curated catalog; ${installation.userAdded.length} user-added. Default-safe tooling first; account connectors stay disabled until needed.`,
+      `Curated katalogda ${servers.length} bağlayıcı; kullanıcı tarafından eklenen ${installation.userAdded.length}. Önce varsayılan güvenli tooling; hesap bağlayıcıları gerekene kadar kapalı kalır.`
+    ),
     ICONS.docs
   );
+  printMcpInstallationSummary(installation);
   if (!options.details) {
     const isReady = (server) => server.defaultEnabled ?? server.enabledByDefault;
     const ready = servers.filter(isReady).map((server) => server.name);
     const optIn = servers.filter((server) => !isReady(server)).map((server) => server.name);
-    console.log(`${styleLabel(localText("Ready", "Hazır"))}: ${ready.join(", ") || localText("none", "yok")}`);
-    console.log(`${styleLabel(localText("Opt-in", "İsteğe bağlı"))}: ${optIn.join(", ") || localText("none", "yok")}`);
+    console.log(`${styleLabel(localText("Catalog default-enabled", "Katalogda varsayılan açık"))}: ${ready.join(", ") || localText("none", "yok")}`);
+    console.log(`${styleLabel(localText("Catalog opt-in", "Katalogda isteğe bağlı"))}: ${optIn.join(", ") || localText("none", "yok")}`);
     console.log(styleMuted(localText("Account, database, production, and broad-filesystem connectors stay disabled until needed.", "Hesap, veritabanı, production ve geniş dosya sistemi bağlayıcıları gerekene kadar kapalı kalır.")));
     console.log(`${ICONS.info} ${localText("Use --details for setup and safety notes.", "Kurulum ve güvenlik notları için --details kullanın.")}`);
     if (process.stdin.isTTY || interaction.question) {
       console.log("");
-      servers.forEach((server, index) => {
-        const readyByDefault = isReady(server);
-        printChoiceRow(index + 1, server.name, readyByDefault ? localText("ready", "hazır") : localText("opt-in", "isteğe bağlı"), readyByDefault ? "brightGreen" : "brightYellow", "●");
+      displayServers.forEach((server, index) => {
+        const color = ["enabled", "user_enabled"].includes(server.installedState) ? "brightGreen" : "brightYellow";
+        printChoiceRow(index + 1, server.name, mcpInstalledStateText(server), color, "●");
       });
-      const selected = await askSelection(servers, localText(
+      const selected = await askSelection(displayServers, localText(
         "\nSelect a connector number for details, or press Enter to leave: ",
         "\nAyrıntı için bağlayıcı numarası seçin veya çıkmak için Enter'a basın: "
       ), interaction);
@@ -2873,6 +3205,27 @@ async function runMcp(interaction = {}) {
     "Evidence levels: documented=catalog, configured=template/installed config, verified=only after /mcp or codex mcp live check.",
     "Kanıt seviyeleri: doc=catalog, config=template/kurulu config, canlı=yalnız /mcp veya codex mcp live check başarılıysa."
   )));
+  printRows(
+    displayServers.map((server) => ({
+      connector: server.name,
+      source: server.sourceKind === "catalog" ? localText("Curated catalog", "Curated katalog") : localText("User-added", "Kullanıcı ekledi"),
+      status: mcpInstalledStateText(server),
+      live: localText("Not probed", "Ölçülmedi")
+    })),
+    isTr()
+      ? [
+          { key: "connector", label: "Bağlayıcı" },
+          { key: "source", label: "Kaynak" },
+          { key: "status", label: "Kurulu durum" },
+          { key: "live", label: "Canlı durum" }
+        ]
+      : [
+          { key: "connector", label: "Connector" },
+          { key: "source", label: "Source" },
+          { key: "status", label: "Installed state" },
+          { key: "live", label: "Live status" }
+        ]
+  );
   printRows(
     groupByCategory(servers).map(({ category, entries }) => ({
       category,
@@ -2922,14 +3275,12 @@ async function runMcp(interaction = {}) {
   )));
   if (process.stdin.isTTY || interaction.question) {
     console.log("");
-    servers.forEach((server, index) => {
-      const color = server.enabledByDefault ? "brightGreen" : "brightYellow";
-      const state = server.enabledByDefault
-        ? localText("ready by default", "varsayılan hazır")
-        : localText("opt-in", "isteğe bağlı");
+    displayServers.forEach((server, index) => {
+      const color = ["enabled", "user_enabled"].includes(server.installedState) ? "brightGreen" : "brightYellow";
+      const state = mcpInstalledStateText(server);
       printChoiceRow(index + 1, server.name, state, color, "●");
     });
-    const selected = await askSelection(servers, localText(
+    const selected = await askSelection(displayServers, localText(
       "\nSelect a connector number for details, or press Enter to leave this screen unchanged: ",
       "\nAyrıntı için bağlayıcı numarası seçin veya ekranı değiştirmeden bırakmak için Enter'a basın: "
     ), interaction);

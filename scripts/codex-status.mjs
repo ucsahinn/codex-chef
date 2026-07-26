@@ -13,6 +13,7 @@ const RUNTIME_VERIFY_TIMEOUT_MS = 300000;
 
 const options = {
   json: false,
+  details: false,
   redactPaths: false,
   expectSkills: false,
   expectGitGuards: false,
@@ -30,6 +31,7 @@ const options = {
 for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
   if (arg === "--json") options.json = true;
+  else if (arg === "--details") options.details = true;
   else if (arg === "--tr") options.lang = "tr";
   else if (arg === "--lang") {
     const value = args[index + 1];
@@ -77,6 +79,7 @@ Read-only end-user status board for Codex Chef.
 
 Options:
   --json                       Emit machine-readable JSON
+  --details                    Show the full diagnostic and setup evidence
   --output <path>              Write the JSON report inside this repository
   --force-output               Allow --output to replace an existing report
   --expect-skills              Fail runtime status if curated global skills are missing
@@ -109,11 +112,11 @@ if (progressEnabled) {
   console.log(options.skipRuntime && options.skipCodexDoctorChecks && options.skipCodexCli
     ? localText(
         "Collecting local repository checks; installed runtime, global skill-root inventory, Codex log metadata, and live Codex CLI probes are skipped.",
-        "Lokal repo kontrolleri toplaniyor; kurulu ortam, global skill envanteri, Codex log metadata'si ve canli Codex CLI problari atlandi."
+        "Yerel repo kontrolleri toplanıyor; kurulu ortam, global skill envanteri, Codex log bilgisi ve canlı Codex CLI kontrolleri atlandı."
       )
     : localText(
         "Collecting repo, runtime, Codex CLI, MCP, Git, and log metadata checks; this can take 30-60 seconds.",
-        "Repo, kurulu ortam, Codex CLI, MCP, Git ve log metadata kontrolleri toplaniyor; 30-60 saniye surebilir."
+        "Repo, kurulu ortam, Codex CLI, MCP, Git ve log bilgisi kontrolleri toplanıyor; 30-60 saniye sürebilir."
       ));
 }
 
@@ -121,8 +124,8 @@ function progress(message) {
   if (!progressEnabled) return;
   const translated = isTr()
     ? String(message)
-        .replace(/^running /, "calisiyor: ")
-        .replace(/\(timeout (\d+)s\)/, "(zaman siniri $1s)")
+        .replace(/^running /, "çalışıyor: ")
+        .replace(/\(timeout (\d+)s\)/, "(zaman sınırı $1s)")
     : message;
   console.log(`[${localText("status", "durum")}] ${translated}`);
 }
@@ -163,13 +166,13 @@ function humanStatusValue(value, context = "") {
   const normalized = text.trim().toLowerCase();
   const replacements = {
     none: context === "skillMode"
-      ? localText("profile-specific; some profiles do not need skills", "profile gore degisir; bazi profiller skill istemez")
+      ? localText("profile-specific; some profiles do not need skills", "profile göre değişir; bazı profiller skill istemez")
       : localText("not applicable", "uygulanmaz"),
     "not_checked_here": localText("not checked in this status run", "bu durum turunda kontrol edilmedi"),
-    "not_inferred_from_catalog": localText("not inferred from catalog", "catalogdan varsayilmadi"),
-    skipped: localText("skipped by this mode", "bu modda atlandi"),
-    true: localText("enabled", "acik"),
-    false: localText("disabled", "kapali")
+    "not_inferred_from_catalog": localText("not inferred from catalog", "katalogdan varsayılmadı"),
+    skipped: localText("skipped by this mode", "bu modda atlandı"),
+    true: localText("enabled", "açık"),
+    false: localText("disabled", "kapalı")
   };
   return replacements[normalized] || text;
 }
@@ -185,13 +188,13 @@ function stateText(value) {
     ok: localText("ok", "tamam"),
     attention: localText("attention", "dikkat"),
     fail: localText("fail", "hata"),
-    warning: localText("warning", "uyari"),
-    skipped: localText("skipped", "atlandi"),
-    same: localText("same", "ayni"),
-    different: localText("different", "farkli"),
+    warning: localText("warning", "uyarı"),
+    skipped: localText("skipped", "atlandı"),
+    same: localText("same", "aynı"),
+    different: localText("different", "farklı"),
     installed: localText("installed", "kurulu"),
-    not_installed: localText("not installed", "kurulu degil"),
-    current: localText("current", "guncel")
+    not_installed: localText("not installed", "kurulu değil"),
+    current: localText("current", "güncel")
   };
   return replacements[normalized] || String(value ?? localText("not inspected", "kontrol edilmedi"));
 }
@@ -201,13 +204,13 @@ function translateStatusMessage(message) {
   if (!isTr()) return text;
   text = text
     .replace("git status --short is clean.", "git status --short temiz.")
-    .replace(/git status --short reports (\d+) changed line\(s\)\./, "git status --short $1 degisen satir bildiriyor.")
-    .replace("one or more required provider endpoints are unreachable over HTTP", "bir veya daha fazla gerekli provider endpoint'i HTTP uzerinden erisilemiyor")
-    .replace("MCP configuration has optional issues", "MCP config icinde opsiyonel uyarilar var")
-    .replace("update configuration is locally consistent", "update yapilandirmasi lokal olarak tutarli")
-    .replace("Ambient Codex runtime home differs from installed target; verifying with explicit CODEX_HOME=", "Ortam Codex runtime home kurulu hedeften farkli; explicit CODEX_HOME ile dogrulaniyor: ")
-    .replace("Skipped installed/global skill roots because installed-runtime and live Codex CLI probes are disabled.", "Kurulu ortam ve canli Codex CLI problari kapali oldugu icin kurulu/global skill kokleri atlandi.")
-    .replace("For repo-wide or long-running work, run Codex with --profile token-safe or merge token-safe.config.toml; this lowers verbosity, default reasoning, compaction, and tool-output ceilings without disabling skills, agents, MCPs, memory, hooks, or apps.", "Repo-wide veya uzun islerde Codex'i --profile token-safe ile calistir ya da token-safe.config.toml ayarlarini merge et; bu, skill, agent, MCP, memory, hook veya app kapatmadan verbosity, default reasoning, compaction ve tool-output limitlerini dusurur.");
+    .replace(/git status --short reports (\d+) changed line\(s\)\./, "git status --short $1 değişen satır bildiriyor.")
+    .replace("one or more required provider endpoints are unreachable over HTTP", "bir veya daha fazla gerekli provider endpoint'ine HTTP üzerinden erişilemiyor")
+    .replace("MCP configuration has optional issues", "MCP config içinde isteğe bağlı uyarılar var")
+    .replace("update configuration is locally consistent", "update yapılandırması yerel olarak tutarlı")
+    .replace("Ambient Codex runtime home differs from installed target; verifying with explicit CODEX_HOME=", "Ortam Codex runtime home kurulu hedeften farklı; açık CODEX_HOME ile doğrulanıyor: ")
+    .replace("Skipped installed/global skill roots because installed-runtime and live Codex CLI probes are disabled.", "Kurulu ortam ve canlı Codex CLI kontrolleri kapalı olduğu için kurulu/global skill kökleri atlandı.")
+    .replace("For repo-wide or long-running work, run Codex with --profile token-safe or merge token-safe.config.toml; this lowers verbosity, default reasoning, compaction, and tool-output ceilings without disabling skills, agents, MCPs, memory, hooks, or apps.", "Repo genelindeki veya uzun işlerde Codex'i --profile token-safe ile çalıştırın ya da token-safe.config.toml ayarlarını birleştirin; bu işlem skill, agent, MCP, memory, hook veya app kapatmadan verbosity, varsayılan reasoning, compaction ve tool-output sınırlarını düşürür.");
   return text;
 }
 
@@ -216,20 +219,40 @@ function translateSetupHint(message) {
   if (!isTr()) return text;
   return text
     .replace("No credential or extra input is required.", "Kimlik bilgisi veya ek girdi gerekmez.")
-    .replace("Requires npm/npx network access on first startup; no credential is required.", "Ilk calismada npm/npx ag erisimi gerekir; kimlik bilgisi gerekmez.")
-    .replace("Requires npm/npx network access and local browser control; no credential is required.", "npm/npx ag erisimi ve lokal browser kontrolu gerekir; kimlik bilgisi gerekmez.")
-    .replace("Requires npm/npx network access and starts an isolated Chrome/DevTools bridge; no credential is required.", "npm/npx ag erisimi gerekir ve izole Chrome/DevTools koprusu baslatir; kimlik bilgisi gerekmez.")
-    .replace("Requires uvx and the pinned Serena git source; disable if uvx is unavailable.", "uvx ve pinlenmis Serena git kaynagi gerekir; uvx yoksa kapatin.")
-    .replace("No credential is required; use only for non-secret local memory.", "Kimlik bilgisi gerekmez; yalniz gizli olmayan lokal memory icin kullanin.")
-    .replace("Requires Node/npx first-run package download; keeps local repository graph state on this machine. Indexing, destructive graph, and admin tools stay prompt-gated or disabled.", "Ilk calismada Node/npx paket indirmesi gerekir; lokal repo graph state'i bu makinede kalir. Indexing, destructive graph ve admin tool'lari prompt-gated veya disabled kalir.")
-    .replace("Choose a deliberate local root path in config args before enabling.", "Acmadan once config argumanlarinda bilincli bir lokal kok path secin.")
-    .replace("Requires GitHub/Copilot account authorization; keep disabled until private GitHub context is needed.", "GitHub/Copilot hesap yetkilendirmesi gerekir; private GitHub context gerekene kadar kapali tutun.")
+    .replace("Requires npm/npx network access on first startup; no credential is required.", "İlk çalışmada npm/npx ağ erişimi gerekir; kimlik bilgisi gerekmez.")
+    .replace("Requires npm/npx network access and local browser control; no credential is required.", "npm/npx ağ erişimi ve yerel tarayıcı kontrolü gerekir; kimlik bilgisi gerekmez.")
+    .replace("Requires npm/npx network access and starts an isolated Chrome/DevTools bridge; no credential is required.", "npm/npx ağ erişimi gerekir ve izole Chrome/DevTools köprüsü başlatır; kimlik bilgisi gerekmez.")
+    .replace("Requires uvx and the pinned Serena git source; disable if uvx is unavailable.", "uvx ve sabitlenmiş Serena git kaynağı gerekir; uvx yoksa kapatın.")
+    .replace("No credential is required; use only for non-secret local memory.", "Kimlik bilgisi gerekmez; yalnız gizli olmayan yerel memory için kullanın.")
+    .replace("Requires Node/npx first-run package download; keeps local repository graph state on this machine. Indexing, destructive graph, and admin tools stay prompt-gated or disabled.", "İlk çalışmada Node/npx paket indirmesi gerekir; yerel repo graph durumu bu makinede kalır. Indexing, destructive graph ve admin tool'ları prompt-gated veya disabled kalır.")
+    .replace("Choose a deliberate local root path in config args before enabling.", "Açmadan önce config argümanlarında bilinçli bir yerel kök path seçin.")
+    .replace("Requires GitHub/Copilot account authorization; keep disabled until private GitHub context is needed.", "GitHub/Copilot hesap yetkilendirmesi gerekir; private GitHub context gerekene kadar kapalı tutun.")
     .replace("Requires Figma account or workspace authorization.", "Figma hesap veya workspace yetkilendirmesi gerekir.")
     .replace("Requires Linear workspace authorization.", "Linear workspace yetkilendirmesi gerekir.")
     .replace("Requires Notion workspace authorization.", "Notion workspace yetkilendirmesi gerekir.")
-    .replace("Requires Sentry organization authorization and may expose production error data.", "Sentry organizasyon yetkilendirmesi gerekir ve production hata verisini aciga cikarabilir.")
-    .replace("Requires Vercel account/team authorization and may expose project or deployment data.", "Vercel hesap/takim yetkilendirmesi gerekir ve proje/deploy verisini aciga cikarabilir.")
-    .replace("Set SUPABASE_DB_URL in the shell environment, then add a task-specific local launcher only after explicit database approval; never commit the value.", "Shell ortaminda SUPABASE_DB_URL ayarlayin; task-specific lokal launcher'i yalnizca acik database onayindan sonra ekleyin ve degeri asla commit etmeyin.");
+    .replace("Requires Sentry organization authorization and may expose production error data.", "Sentry organizasyon yetkilendirmesi gerekir ve production hata verisini açığa çıkarabilir.")
+    .replace("Requires Vercel account/team authorization and may expose project or deployment data.", "Vercel hesap/takım yetkilendirmesi gerekir ve proje/deploy verisini açığa çıkarabilir.")
+    .replace("Set SUPABASE_DB_URL in the shell environment, then add a task-specific local launcher only after explicit database approval; never commit the value.", "Shell ortamında SUPABASE_DB_URL ayarlayın; task-specific yerel launcher'ı yalnız açık veritabanı onayından sonra ekleyin ve değeri asla commit etmeyin.");
+}
+
+function translateNextAction(message) {
+  if (!isTr()) return message;
+  const translations = new Map([
+    [
+      "Run npm run chef -- --preview --no-log to inspect the install plan, then run npm run chef -- --install --apply when ready.",
+      "Kurulum planını görmek için npm run chef -- --preview --no-log çalıştırın; hazır olduğunuzda npm run chef -- --install --apply ile kurulumu başlatın."
+    ],
+    [
+      "Run npm run repair:install -- --apply to repair managed runtime drift, then rerun npm run codex:status.",
+      "Yönetilen kurulum drift'ini onarmak için npm run repair:install -- --apply çalıştırın; ardından npm run codex:status komutunu yeniden çalıştırın."
+    ],
+    [
+      "Review attention items; they do not necessarily mean Codex Chef install is broken.",
+      "Dikkat maddelerini inceleyin; bunlar Codex Chef kurulumunun bozuk olduğu anlamına gelmeyebilir."
+    ],
+    ["No action needed.", "İşlem gerekmiyor."]
+  ]);
+  return translations.get(message) || translateStatusMessage(message);
 }
 
 function run(command, commandArgs, extra = {}) {
@@ -1168,93 +1191,120 @@ if (options.json) {
 } else {
   if (!progressEnabled) console.log(localText("Codex Chef status", "Codex Chef durumu"));
   console.log(`${localText("Overall", "Genel")}: ${stateText(report.status)}`);
-  console.log(`${localText("Use", "Kullanim")}: ${cliQuickStart.interactiveMenu} (${localText("or", "veya")} ${cliQuickStart.auditMode} ${localText("for no repo-local log", "repo-local log istemiyorsan")})`);
-  console.log(`${localText("Numbered menu", "Numarali menu")}: ${cliQuickStart.numberedActions ? localText("yes", "evet") : localText("no", "hayir")}; ${localText("write actions require --apply or typed confirmation", "yazan islemler --apply veya yazili onay ister")}.`);
-  console.log(`${localText("Target Codex home", "Hedef Codex home")}: ${codexCliRuntime.target.codexHome}`);
-  const ambientMcpText = codexCliRuntime.ambient.mcp.inspected === false
-    ? localText("MCP skipped", "MCP atlandi")
-    : `MCP ${codexCliRuntime.ambient.mcp.configuredCount} (${codexCliRuntime.ambient.mcp.enabledCount} on/${codexCliRuntime.ambient.mcp.disabledCount} off)`;
-  console.log(
-    `${localText("Ambient Codex", "Ortam Codex")}: ${stateText(codexCliRuntime.ambient.relationshipToTarget)} (login ${stateText(codexCliRuntime.ambient.login.status)}, ${ambientMcpText}; CODEX_HOME env ${codexCliRuntime.ambient.codexHomeEnv || localText("unset", "atanmamis")})`
-  );
+  if (options.details) {
+    console.log(`${localText("Use", "Kullanım")}: ${cliQuickStart.interactiveMenu} (${localText("or", "veya")} ${cliQuickStart.auditMode} ${localText("for no repo-local log", "repo-local log istemiyorsanız")})`);
+    console.log(`${localText("Numbered menu", "Numaralı menü")}: ${cliQuickStart.numberedActions ? localText("yes", "evet") : localText("no", "hayır")}; ${localText("write actions require --apply or typed confirmation", "yazan işlemler --apply veya yazılı onay ister")}.`);
+    console.log(`${localText("Target Codex home", "Hedef Codex home")}: ${codexCliRuntime.target.codexHome}`);
+    const ambientMcpText = codexCliRuntime.ambient.mcp.inspected === false
+      ? localText("MCP skipped", "MCP atlandı")
+      : `MCP ${codexCliRuntime.ambient.mcp.configuredCount} (${codexCliRuntime.ambient.mcp.enabledCount} ${localText("on", "açık")}/${codexCliRuntime.ambient.mcp.disabledCount} ${localText("off", "kapalı")})`;
+    console.log(
+      `${localText("Ambient Codex", "Ortam Codex")}: ${stateText(codexCliRuntime.ambient.relationshipToTarget)} (login ${stateText(codexCliRuntime.ambient.login.status)}, ${ambientMcpText}; CODEX_HOME env ${codexCliRuntime.ambient.codexHomeEnv || localText("unset", "atanmamış")})`
+    );
+  }
   console.log(`${localText("Repo Git", "Repo Git")}: ${stateText(gitRepository.status)} - ${translateStatusMessage(gitRepository.summary)}`);
-  if (gitRepository.remediation) console.log(`${localText("Repo Git remediation", "Repo Git onerisi")}: ${translateStatusMessage(gitRepository.remediation)}`);
+  if (gitRepository.remediation) console.log(`${localText("Repo Git remediation", "Repo Git önerisi")}: ${translateStatusMessage(gitRepository.remediation)}`);
   const targetMcpText = codexCliRuntime.mcp.inspected === false
-    ? localText("MCP probe skipped", "MCP probu atlandi")
+    ? localText("MCP probe skipped", "MCP kontrolü atlandı")
     : localText(
         `MCP configured ${codexCliRuntime.mcp.configuredCount}, enabled ${codexCliRuntime.mcp.enabledCount}, disabled ${codexCliRuntime.mcp.disabledCount}, live not probed`,
         `MCP yapılandırılmış ${codexCliRuntime.mcp.configuredCount}, açık ${codexCliRuntime.mcp.enabledCount}, kapalı ${codexCliRuntime.mcp.disabledCount}, canlı durum ölçülmedi`
       );
+  if (codexCliRuntime.mcp.inspected === false) {
+    console.log(`${localText("MCP", "MCP")}: ${stateText("skipped")}`);
+  } else {
+    const catalogNames = new Set(mcpSetupBoard.servers.map((server) => server.name));
+    const configuredStates = codexCliRuntime.mcp.states || [];
+    const expectedPresent = configuredStates.filter((server) => catalogNames.has(server.name)).length;
+    const userAdded = configuredStates.filter((server) => !catalogNames.has(server.name)).length;
+    const expectedMissing = Math.max(0, mcpSetupBoard.serverCount - expectedPresent);
+    console.log(`${localText("MCP", "MCP")}: ${localText(
+      `${expectedPresent}/${mcpSetupBoard.serverCount} cataloged configured, ${expectedMissing} missing, ${userAdded} user-added; ${codexCliRuntime.mcp.enabledCount} enabled/${codexCliRuntime.mcp.disabledCount} disabled; live not probed`,
+      `${expectedPresent}/${mcpSetupBoard.serverCount} katalog bağlayıcısı yapılandırılmış, ${expectedMissing} eksik, ${userAdded} kullanıcı ekledi; ${codexCliRuntime.mcp.enabledCount} açık/${codexCliRuntime.mcp.disabledCount} kapalı; canlı durum ölçülmedi`
+    )}`);
+  }
   console.log(
     codexCliRuntime.mcp.inspected === false
       ? `Codex CLI: ${stateText(codexCliRuntime.status)} (strict config ${stateText(codexCliRuntime.version.status)}, login ${stateText(codexCliRuntime.login.status)}, ${targetMcpText})`
       : `Codex CLI: ${stateText(codexCliRuntime.status)} (strict config ${stateText(codexCliRuntime.version.status)}, login ${stateText(codexCliRuntime.login.status)}, MCP ${stateText(codexCliRuntime.mcp.status)}; ${targetMcpText})`
   );
-  for (const server of codexCliRuntime.mcp.states || []) {
-    const state = server.enabled ? "ON" : "OFF";
-    const auth = server.authStatus ? `, auth=${server.authStatus}` : "";
-    const reason = server.disabledReason ? `, reason=${server.disabledReason}` : "";
-    console.log(`  MCP ${server.name}: ${state} [CLI CONFIG; live=not-probed${auth}${reason}]`);
-  }
-  console.log(
-    `${localText("Logs", "Loglar")}: Chef ${logSummary.repoCliLogs.recent.length} ${localText("recent metadata record(s), content not inspected", "son metadata kaydi, icerik incelenmedi")}; ${logSummary.codexLogs.inspected === false ? localText("Codex skipped", "Codex atlandi") : `Codex ${logSummary.codexLogs.recent.length} ${localText("recent metadata record(s), content not inspected", "son metadata kaydi, icerik incelenmedi")}`}`
-  );
-  if (repoDoctor.report) {
+  if (options.details) {
+    for (const server of codexCliRuntime.mcp.states || []) {
+      const state = server.enabled ? "ON" : "OFF";
+      const auth = server.authStatus ? `, auth=${server.authStatus}` : "";
+      const reason = server.disabledReason ? `, reason=${server.disabledReason}` : "";
+      console.log(`  MCP ${server.name}: ${state} [CLI CONFIG; live=not-probed${auth}${reason}]`);
+    }
     console.log(
-      `${localText("Repo starter", "Repo starter")}: ${stateText(repoDoctor.status)} (${repoDoctor.report.agents?.count || 0} agents, ${repoDoctor.report.mcp?.count || 0} MCP, ${repoDoctor.report.docs?.baseGuides || 0} docs x ${repoDoctor.report.docs?.languages || 0})`
+      `${localText("Logs", "Loglar")}: Chef ${logSummary.repoCliLogs.recent.length} ${localText("recent metadata record(s), content not inspected", "son metadata kaydı, içerik incelenmedi")}; ${logSummary.codexLogs.inspected === false ? localText("Codex skipped", "Codex atlandı") : `Codex ${logSummary.codexLogs.recent.length} ${localText("recent metadata record(s), content not inspected", "son metadata kaydı, içerik incelenmedi")}`}`
     );
-  } else {
-    console.log(`${localText("Repo starter", "Repo starter")}: ${stateText(repoDoctor.status)}`);
+    if (repoDoctor.report) {
+      console.log(
+        `${localText("Repo starter", "Repo starter")}: ${stateText(repoDoctor.status)} (${repoDoctor.report.agents?.count || 0} agents, ${repoDoctor.report.mcp?.count || 0} MCP, ${repoDoctor.report.docs?.baseGuides || 0} docs x ${repoDoctor.report.docs?.languages || 0})`
+      );
+    } else {
+      console.log(`${localText("Repo starter", "Repo starter")}: ${stateText(repoDoctor.status)}`);
+    }
   }
   if (runtime.report) {
     const installed = runtime.report.installed || {};
     const managed = runtime.report.managedFiles || {};
+    const expectedMcp = Number(installed.mcp?.expected || 0);
+    const missingMcp = Array.isArray(installed.mcp?.missing) ? installed.mcp.missing.length : 0;
+    const expectedMcpPresent = Math.max(0, expectedMcp - missingMcp);
+    const userAddedMcp = Math.max(0, Number(installed.mcp?.installed || 0) - expectedMcpPresent);
+    const mcpRuntimeText = localText(
+      `${expectedMcpPresent}/${expectedMcp} expected present${userAddedMcp > 0 ? ` + ${userAddedMcp} user-added` : ""}`,
+      `${expectedMcpPresent}/${expectedMcp} beklenen hazır${userAddedMcp > 0 ? ` + ${userAddedMcp} kullanıcı ekledi` : ""}`
+    );
     console.log(
-      `${localText("Installed runtime", "Kurulu ortam")}: ${stateText(runtime.status)}/${stateText(runtimeInstallState)} (agents ${installed.agents?.installed || 0}/${installed.agents?.expected || 0}, MCP ${installed.mcp?.installed || 0}/${installed.mcp?.expected || 0}, ${localText("managed files", "yonetilen dosyalar")} ${managed.matched || 0}/${managed.expected || 0})`
+      `${localText("Installed runtime", "Kurulu ortam")}: ${stateText(runtime.status)}/${stateText(runtimeInstallState)} (agents ${installed.agents?.installed || 0}/${installed.agents?.expected || 0}, MCP ${mcpRuntimeText}, ${localText("managed files", "yönetilen dosyalar")} ${managed.matched || 0}/${managed.expected || 0})`
     );
     if (runtime.report.skills?.inspected) {
       console.log(
-        `Skills: ${runtime.report.skills.installed} ${localText("installed", "kurulu")}, ${runtime.report.skills.missing.length} ${localText("missing from curated set", "curated set icinde eksik")}`
+        `${localText("Skills", "Skill'ler")}: ${runtime.report.skills.installed} ${localText("installed", "kurulu")}, ${runtime.report.skills.missing.length} ${localText("missing from curated set", "curated set içinde eksik")}`
       );
     }
   } else {
     const runtimeText = runtime.status === "skipped"
-      ? localText("skipped by this mode", "bu modda atlandi")
+      ? localText("skipped by this mode", "bu modda atlandı")
       : `${runtime.status}/${runtimeInstallState}`;
     console.log(`${localText("Installed runtime", "Kurulu ortam")}: ${runtimeText}`);
   }
   if (!runtime.report?.skills?.inspected && skillInventory.inspected) {
-    console.log(`Skills: ${skillInventory.installed} ${localText("total installed across global roots", "global koklerde toplam kurulu")} (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} ${localText("missing", "eksik")}, ${skillInventory.extraCount} ${localText("other/user-installed", "diger/kullanici kurulu")})`);
+    console.log(`${localText("Skills", "Skill'ler")}: ${skillInventory.installed} ${localText("total installed across global roots", "global köklerde toplam kurulu")} (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} ${localText("missing", "eksik")}, ${skillInventory.extraCount} ${localText("other/user-installed", "diğer/kullanıcı kurulu")})`);
   } else if (!runtime.report?.skills?.inspected && skillInventory.inspected === false) {
-    console.log(`Skills: ${localText("skipped", "atlandi")} (${translateStatusMessage(skillInventory.note)})`);
+    console.log(`${localText("Skills", "Skill'ler")}: ${localText("skipped", "atlandı")} (${translateStatusMessage(skillInventory.note)})`);
   }
-  const skillsInstalledText = skillsContext.installed === null || skillsContext.installed === undefined
-    ? localText("installed not inspected", "kurulu skill sayisi kontrol edilmedi")
-    : `${skillsContext.installed} ${localText("installed", "kurulu")}`;
-  console.log(`${localText("Skills context", "Skill context")}: ${stateText(skillsContext.status)} (${skillsInstalledText}; curated baseline ${skillsContext.curatedExpected})`);
-  console.log(
-    `${localText("Enterprise routing", "Enterprise yonlendirme")}: ${routingBoard.profileCount} profiles (agents ${routingBoard.requiredSurfaces.agents.length}, skills ${routingBoard.requiredSurfaces.skills.length}, MCP ${routingBoard.requiredSurfaces.mcp.length}, flags/checks ${routingBoard.requiredSurfaces.flags.length})`
-  );
-  console.log(
-    `${localText("Routing modes", "Yonlendirme modlari")}: delegation=${humanList(routingBoard.requiredSurfaces.delegationModes, "delegationMode")}, skills=${humanList(routingBoard.requiredSurfaces.skillModes, "skillMode")}, MCP=${humanList(routingBoard.requiredSurfaces.mcpModes, "mcpMode")}`
-  );
-  console.log(
-    `${localText("MCP quick view", "MCP hizli gorunum")}: ${localText("ready", "hazir")}=${mcpSetupBoard.enabledByDefault.join(", ") || localText("not configured", "yapilandirilmadi")}, opt-in=${mcpSetupBoard.disabledByDefault.join(", ") || localText("not configured", "yapilandirilmadi")}`
-  );
-  console.log(
-    `${localText("Effective controls", "Etkin kontroller")}: multi_agent=${humanStatusValue(effectiveControls.features.multiAgent)}, max_depth=${humanStatusValue(effectiveControls.agents.maxDepth)}, approval=${humanStatusValue(effectiveControls.approvalPolicy)}, sandbox=${humanStatusValue(effectiveControls.sandboxMode)}, network=${humanStatusValue(effectiveControls.workspaceNetwork)}, hooks=${humanStatusValue(effectiveControls.features.hooks)}, managed hooks=${humanStatusValue(effectiveControls.managedHooks)}, apps default=${humanStatusValue(effectiveControls.appsDefault.enabled)}/destructive=${humanStatusValue(effectiveControls.appsDefault.destructiveEnabled)}/open_world=${humanStatusValue(effectiveControls.appsDefault.openWorldEnabled)}`
-  );
-  console.log(
-    `${localText("Context budget", "Context butcesi")}: reasoning=${humanStatusValue(effectiveControls.contextBudget.reasoningEffort)}, summary=${humanStatusValue(effectiveControls.contextBudget.reasoningSummary)}, verbosity=${humanStatusValue(effectiveControls.contextBudget.verbosity)}, compact=${humanStatusValue(effectiveControls.contextBudget.autoCompactTokenLimit)}, tool_output=${humanStatusValue(effectiveControls.contextBudget.toolOutputTokenLimit)}`
-  );
-  const tokenSafeTarget = effectiveControls.contextBudget.tokenSafeTarget || {};
-  const tokenSafeTargetText = `${tokenSafeTarget.reasoningEffort}/${tokenSafeTarget.reasoningSummary}/${tokenSafeTarget.verbosity}/${tokenSafeTarget.autoCompactTokenLimit}/${tokenSafeTarget.toolOutputTokenLimit}`;
-  console.log(`${localText("Token-safe profile", "Token-safe profil")}: available=${effectiveControls.contextBudget.tokenSafeProfileAvailable ? "yes" : "no"}, active=${effectiveControls.contextBudget.tokenSafeProfileActive ? "yes" : "no"}, target=${tokenSafeTargetText}. ${translateStatusMessage(effectiveControls.contextBudget.longRunningRecommendation)}`);
-  console.log(
-    `MCP setup: ${mcpSetupBoard.serverCount} servers (${mcpSetupBoard.enabledByDefault.length} ${localText("enabled", "acik")}, ${mcpSetupBoard.disabledByDefault.length} ${localText("disabled", "kapali")}, ${mcpSetupBoard.setupRequiredCount} ${localText("with setup notes", "kurulum notlu")})`
-  );
-  for (const server of mcpSetupBoard.servers.filter((item) => item.setupKind !== "none" && (item.setupKind !== "local-state" || item.name === "codebase-memory"))) {
-    console.log(`${localText("MCP setup note", "MCP kurulum notu")}: ${server.name} [${server.setupKind}] - ${translateSetupHint(server.setupHint)}`);
+  if (options.details) {
+    const skillsInstalledText = skillsContext.installed === null || skillsContext.installed === undefined
+      ? localText("installed not inspected", "kurulu skill sayısı kontrol edilmedi")
+      : `${skillsContext.installed} ${localText("installed", "kurulu")}`;
+    console.log(`${localText("Skills context", "Skill context")}: ${stateText(skillsContext.status)} (${skillsInstalledText}; curated baseline ${skillsContext.curatedExpected})`);
+    console.log(
+      `${localText("Enterprise routing", "Enterprise yönlendirme")}: ${routingBoard.profileCount} profiles (agents ${routingBoard.requiredSurfaces.agents.length}, skills ${routingBoard.requiredSurfaces.skills.length}, MCP ${routingBoard.requiredSurfaces.mcp.length}, flags/checks ${routingBoard.requiredSurfaces.flags.length})`
+    );
+    console.log(
+      `${localText("Routing modes", "Yönlendirme modları")}: delegation=${humanList(routingBoard.requiredSurfaces.delegationModes, "delegationMode")}, skills=${humanList(routingBoard.requiredSurfaces.skillModes, "skillMode")}, MCP=${humanList(routingBoard.requiredSurfaces.mcpModes, "mcpMode")}`
+    );
+    console.log(
+      `${localText("MCP quick view", "MCP hızlı görünüm")}: ${localText("ready", "hazır")}=${mcpSetupBoard.enabledByDefault.join(", ") || localText("not configured", "yapılandırılmadı")}, opt-in=${mcpSetupBoard.disabledByDefault.join(", ") || localText("not configured", "yapılandırılmadı")}`
+    );
+    console.log(
+      `${localText("Effective controls", "Etkin kontroller")}: multi_agent=${humanStatusValue(effectiveControls.features.multiAgent)}, max_depth=${humanStatusValue(effectiveControls.agents.maxDepth)}, approval=${humanStatusValue(effectiveControls.approvalPolicy)}, sandbox=${humanStatusValue(effectiveControls.sandboxMode)}, network=${humanStatusValue(effectiveControls.workspaceNetwork)}, hooks=${humanStatusValue(effectiveControls.features.hooks)}, managed hooks=${humanStatusValue(effectiveControls.managedHooks)}, apps default=${humanStatusValue(effectiveControls.appsDefault.enabled)}/destructive=${humanStatusValue(effectiveControls.appsDefault.destructiveEnabled)}/open_world=${humanStatusValue(effectiveControls.appsDefault.openWorldEnabled)}`
+    );
+    console.log(
+      `${localText("Context budget", "Context bütçesi")}: reasoning=${humanStatusValue(effectiveControls.contextBudget.reasoningEffort)}, summary=${humanStatusValue(effectiveControls.contextBudget.reasoningSummary)}, verbosity=${humanStatusValue(effectiveControls.contextBudget.verbosity)}, compact=${humanStatusValue(effectiveControls.contextBudget.autoCompactTokenLimit)}, tool_output=${humanStatusValue(effectiveControls.contextBudget.toolOutputTokenLimit)}`
+    );
+    const tokenSafeTarget = effectiveControls.contextBudget.tokenSafeTarget || {};
+    const tokenSafeTargetText = `${tokenSafeTarget.reasoningEffort}/${tokenSafeTarget.reasoningSummary}/${tokenSafeTarget.verbosity}/${tokenSafeTarget.autoCompactTokenLimit}/${tokenSafeTarget.toolOutputTokenLimit}`;
+    console.log(`${localText("Token-safe profile", "Token-safe profil")}: available=${effectiveControls.contextBudget.tokenSafeProfileAvailable ? "yes" : "no"}, active=${effectiveControls.contextBudget.tokenSafeProfileActive ? "yes" : "no"}, target=${tokenSafeTargetText}. ${translateStatusMessage(effectiveControls.contextBudget.longRunningRecommendation)}`);
+    console.log(
+      `${localText("MCP setup", "MCP kurulumu")}: ${mcpSetupBoard.serverCount} ${localText("servers", "sunucu")} (${mcpSetupBoard.enabledByDefault.length} ${localText("enabled", "açık")}, ${mcpSetupBoard.disabledByDefault.length} ${localText("disabled", "kapalı")}, ${mcpSetupBoard.setupRequiredCount} ${localText("with setup notes", "kurulum notlu")})`
+    );
+    for (const server of mcpSetupBoard.servers.filter((item) => item.setupKind !== "none" && (item.setupKind !== "local-state" || item.name === "codebase-memory"))) {
+      console.log(`${localText("MCP setup note", "MCP kurulum notu")}: ${server.name} [${server.setupKind}] - ${translateSetupHint(server.setupHint)}`);
+    }
   }
   if (codexDoctor.inspected) {
     console.log(
@@ -1263,12 +1313,18 @@ if (options.json) {
   } else {
     console.log(`${localText("Codex doctor checks", "Codex doctor kontrolleri")}: ${stateText(codexDoctor.status)}`);
   }
-  for (const warning of warnings) console.log(`${localText("Warning", "Uyari")}: ${translateStatusMessage(warning)}`);
+  for (const warning of warnings) console.log(`${localText("Warning", "Uyarı")}: ${translateStatusMessage(warning)}`);
   if (skillsContext.status === "attention") console.log(`${localText("Attention", "Dikkat")}: ${translateStatusMessage(skillsContext.impact)}`);
   for (const check of codexDoctor.failedChecks || []) console.log(`${localText("Attention", "Dikkat")}: ${check.id} - ${translateStatusMessage(check.summary)}`);
   for (const check of codexDoctor.blockingWarningChecks || codexDoctor.warningChecks || []) console.log(`${localText("Attention", "Dikkat")}: ${check.id} - ${translateStatusMessage(check.summary)}`);
-  for (const check of codexDoctor.nonBlockingWarningChecks || []) console.log(`${localText("Warning", "Uyari")}: ${check.id} - ${translateStatusMessage(check.summary)}`);
+  for (const check of codexDoctor.nonBlockingWarningChecks || []) console.log(`${localText("Warning", "Uyarı")}: ${check.id} - ${translateStatusMessage(check.summary)}`);
   for (const failure of failures) console.error(`${localText("Failure", "Hata")}: ${translateStatusMessage(failure)}`);
+  for (const [index, action] of report.nextActions.entries()) {
+    console.log(`${index === 0 ? localText("Next action", "Sonraki adım") : "  "}: ${translateNextAction(action)}`);
+  }
+  if (!options.details) {
+    console.log(`${localText("Details", "Ayrıntılar")}: npm run chef -- --status --details`);
+  }
   if (options.output) console.log(`${localText("Report", "Rapor")}: ${redact(path.resolve(root, options.output))}`);
 }
 

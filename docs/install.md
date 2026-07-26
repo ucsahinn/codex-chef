@@ -128,6 +128,7 @@ the full operator reference.
 ```powershell
 npm run chef
 npm run chef -- --status
+npm run chef -- --status --details
 npm run chef -- --status --repo-only
 npm run chef -- --preview
 npm run chef -- --preview --verbose-plan
@@ -150,6 +151,30 @@ npm run chef -- --help --lang tr
 npm run chef -- --status --repo-only --no-log
 ```
 
+The command center is state-aware. Before an interactive full install, it reads
+the existing managed-file and curated-skill state and prints a compact preview.
+A fresh or incomplete setup can continue to typed `APPLY`; an already complete
+setup exits successfully without reinstalling; managed drift is directed to the
+backup-backed repair flow instead of being presented as a clean first install.
+Direct commands remain preview-first unless their documented `--apply` flag is
+present.
+
+`Skill status & catalog` checks for a real `SKILL.md`, not just a same-named
+directory. Every curated skill is shown as ready, missing, or invalid. Only
+missing or invalid entries are offered for installation, and an all-ready setup
+does not show an install chooser. Other user-installed skills are counted and
+preserved.
+
+`MCP connectors` reads the installed `CODEX_HOME/config.toml` and separates
+configured-and-enabled, configured-but-disabled, cataloged-but-not-configured,
+and user-added connectors. These are configuration states, not live-health
+claims; live status remains unprobed until Codex `/mcp`, `codex mcp`, or another
+safe probe succeeds.
+
+The default status board is compact. Add `--details` to restore the per-MCP
+inventory, routing controls, context budget, setup notes, target/ambient Codex
+comparison, and log metadata.
+
 `--routing` shows the task-shape map, expected skills and MCPs, and the
 operator reporting contract. Use `/agent` to inspect and close completed agent threads;
 use `/ps` and `/stop` for live terminal work started by the current
@@ -157,10 +182,10 @@ Codex session. `--diagnostics` includes the Serena/MCP process-audit command
 and other read-only evidence commands, but it does not stop processes or mutate
 global files.
 
-Installed skills do not execute by themselves. A skill enters Codex context
-when the user names it or the task clearly matches its description; live activation is
-proven when the assistant prints `Skill selected` and reads the
-skill's `SKILL.md` before acting.
+Installed and ready skills do not execute by themselves. A skill enters Codex
+context when the user names it or the task clearly matches its description;
+live activation is proven when the assistant prints `Skill selected` and reads
+the skill's `SKILL.md` before acting.
 
 If GitHub release, push, or workflow checks fail because local GitHub
 authentication is stale, refresh GitHub CLI or Git Credential Manager according

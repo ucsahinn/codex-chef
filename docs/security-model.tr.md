@@ -135,6 +135,12 @@ Normal merge/repair model/profil secimini, approval ve sandbox ayarlarini,
 project trust kayitlarini, ozel MCP'leri ve ilgisiz marketplace kayitlarini
 korur. Chef-managed agent/MCP guvenlik tablolari dogrulanmaya devam eder;
 toplu replacement acik force yolu ve backup gerektirir.
+Etkileşimli komuta merkezi tam kurulumdan önce bu durumu inceler. Zaten güncel
+bir kurulumu sessizce yeniden kurmaz ve yönetilen drift'i temiz bir ilk kurulum
+gibi göstermez; güncel kurulum işlem yapmadan sonlanır, drift ise açık ve yedekli
+onarım sınırına yönlendirilir. Aynı durum incelemesi, kullanıcının eklediği
+skill'leri ve MCP bağlayıcılarını silinecek hedefler olarak değil, korunacak
+envanter olarak ele alır.
 `scripts/validate-install-plan.mjs` hedefleri yalniz review edilmis Codex,
 Agents ve opsiyonel Git-guard alanlarinda tutar; `.claude`, `.cursor`,
 `.opencode`, `.zed` ve `.vscode` gibi komsu harness home path'leri install

@@ -2,7 +2,7 @@
 
 These settings shape the project’s public first impression. Apply them manually only after the source tree is verified and the account-level change is explicitly approved.
 
-Current published baseline: **v0.5.56**.
+Current published baseline: **v0.5.57**.
 
 ## Description
 
@@ -53,11 +53,11 @@ Use `assets/social-preview.png` for GitHub’s social preview. Keep `assets/soci
 
 ## Release Metadata
 
-For v0.5.56:
+For v0.5.57:
 
 ```text
-Title: Codex Chef v0.5.56
-Tag: v0.5.56
+Title: Codex Chef v0.5.57
+Tag: v0.5.57
 Notes: tmp/release-notes-current.md
 ```
 

@@ -11,7 +11,7 @@ Discovery ciktisi no-write ve okunabilir kalir:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.56
+Package: codex-chef@0.5.57
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -201,18 +201,20 @@ olusturur.
 ## Status Panosu
 
 ```text
-Codex Chef status
-Overall: attention
-Kullanim: npm run chef (veya npm run chef -- --status --repo-only --no-log repo-local log istemiyorsan)
-Numarali menu: evet; yazan islemler --apply veya yazili onay ister.
-
-Etkin kontroller: multi_agent=true, max_depth=1, approval=on-request, sandbox=workspace-write, network=restricted, hooks=true, managed hooks=advisory_only, apps default=false/destructive=false/open_world=false
-Context butcesi: reasoning=medium, summary=auto, verbosity=medium, compact=not inspected, tool_output=not inspected
-Token-safe profil: available=yes, active=no, target=low/none/low/64000/6000. Repo-wide veya uzun islerde Codex'i --profile token-safe ile calistir ya da token-safe.config.toml ayarlarini merge et; bu, skill, agent, MCP, memory, hook veya app kapatmadan verbosity, default reasoning, compaction ve tool-output limitlerini dusurur.
-
-MCP setup:
-MCP kurulum notu: codebase-memory [local-state] - Ilk calismada Node/npx paket indirmesi gerekir; lokal repo graph state'i bu makinede kalir. Indexing, destructive graph ve admin tool'lari prompt-gated veya disabled kalir.
+Codex Chef durumu
+Genel: dikkat
+Repo Git: dikkat - git status --short değişen satırlar bildiriyor.
+MCP: 16/16 katalog bağlayıcısı yapılandırılmış, 0 eksik, 1 kullanıcı ekledi; 9 açık/8 kapalı; canlı durum ölçülmedi
+Codex CLI: tamam (strict config tamam, login tamam, MCP tamam)
+Kurulu ortam: dikkat/güncel (...)
+Skill'ler: global köklerde toplam 42 kurulu (16 Codex Chef curated, 0 eksik, 26 diğer/kullanıcı kurulu)
+Codex doctor kontrolleri: dikkat (...)
+Sonraki adım: Dikkat maddelerini inceleyin; bunlar Codex Chef kurulumunun bozuk olduğu anlamına gelmeyebilir.
+Ayrıntılar: npm run chef -- --status --details
 ```
+
+Hedef/ortam karşılaştırması, MCP kayıtlarının tamamı, yönlendirme kontrolleri,
+context bütçesi, kurulum notları ve log bilgileri için `--details` kullanın.
 
 ## Bash Dry Run
 
