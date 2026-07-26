@@ -7,4 +7,10 @@ tags: [brain, decisions]
 
 # Decision Index
 
-Link approved decision records from `60-decisions`. Do not treat this index as a replacement for repository ADRs.
+## Türkçe
+
+`60-decisions` içindeki onaylı karar kayıtlarına bağlantı ver. Bu dizini depo ADR'lerinin yerine geçecek bir kaynak olarak kullanma.
+
+## English
+
+Link approved decision records from `60-decisions`. Do not use this index as a replacement for repository ADRs.

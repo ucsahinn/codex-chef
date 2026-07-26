@@ -33,7 +33,11 @@ export const BRAIN_REQUIRED_FILES = Object.freeze([
   "80-memory/decisions.md",
   "80-memory/session-index.md",
   "90-archive/README.md",
-  "templates/note.md"
+  "templates/note.md",
+  "10-command-center/system-map.canvas",
+  "10-command-center/control-brain-flow.canvas",
+  "10-command-center/portfolio-map.canvas",
+  ".obsidian/core-plugins.json"
 ]);
 
 function normalize(filePath) {

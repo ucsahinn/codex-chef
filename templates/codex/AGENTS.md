@@ -101,3 +101,9 @@
 - The installed `$adaptive-agent-routing` skill contains the deferred routing ID catalog, specialist ownership map, skill compatibility aliases, MCP guidance, UI standards, and expanded operating notes.
 - Catalogs and validators are canonical for machine-readable agent, skill, MCP, approval, and routing parity.
 - Detailed guidance is loaded only when selected; this compact contract remains the always-loaded safety and completion baseline.
+
+## Codex Chef Control Routing
+
+- Use `$codex-control-router` for explicit delayed, background, recurring, restart-resilient, monitored, or Control-managed work.
+- Keep immediate ordinary work in the current Codex session.
+- A Control MCP proposal is not execution authority. Model use, result-text disclosure, and recurring schedules require the exact Control UI decision; Brain write and workspace write remain disabled.

@@ -10,6 +10,40 @@ import { pathToFileURL } from "node:url";
 const root = path.resolve(import.meta.dirname, "../..");
 const modulePath = path.join(root, "scripts/lib/brain-foundation.mjs");
 const templateRoot = path.join(root, "templates/brain");
+const manifestPath = path.join(root, "manifests/brain-vault.json");
+
+const canonicalTwenty = [
+  ".codex-chef-brain.json",
+  ".gitignore",
+  "AGENTS.md",
+  "README.md",
+  "brain.config.json",
+  "00-inbox/README.md",
+  "10-command-center/dashboard.md",
+  "20-goals/README.md",
+  "30-projects/README.md",
+  "40-knowledge/README.md",
+  "50-research/README.md",
+  "60-decisions/README.md",
+  "70-personal/README.md",
+  "80-memory/profile.md",
+  "80-memory/current-context.md",
+  "80-memory/active-threads.md",
+  "80-memory/decisions.md",
+  "80-memory/session-index.md",
+  "90-archive/README.md",
+  "templates/note.md"
+];
+const controlCanvasFiles = [
+  "10-command-center/system-map.canvas",
+  "10-command-center/control-brain-flow.canvas",
+  "10-command-center/portfolio-map.canvas"
+];
+const requiredFiles = [...canonicalTwenty, ...controlCanvasFiles, ".obsidian/core-plugins.json"];
+
+function readTemplate(relativePath) {
+  return fs.readFileSync(path.join(templateRoot, ...relativePath.split("/")), "utf8");
+}
 
 async function loadFoundation() {
   assert.equal(
@@ -19,6 +53,87 @@ async function loadFoundation() {
   );
   return import(pathToFileURL(modulePath).href);
 }
+
+test("required-file contract keeps the canonical twenty and adds the Control Canvas surface", async () => {
+  const { BRAIN_REQUIRED_FILES } = await loadFoundation();
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+
+  assert.deepEqual(BRAIN_REQUIRED_FILES, requiredFiles);
+  assert.deepEqual(manifest.requiredFiles, requiredFiles);
+  for (const relativePath of requiredFiles) {
+    assert.equal(fs.existsSync(path.join(templateRoot, ...relativePath.split("/"))), true, relativePath);
+  }
+
+  const plugins = JSON.parse(readTemplate(".obsidian/core-plugins.json"));
+  assert.equal(plugins.canvas, true);
+  for (const relativePath of controlCanvasFiles) {
+    const canvas = JSON.parse(readTemplate(relativePath));
+    assert.ok(Array.isArray(canvas.nodes) && canvas.nodes.length > 0, `${relativePath} nodes`);
+    assert.ok(Array.isArray(canvas.edges), `${relativePath} edges`);
+  }
+});
+
+test("canonical Brain copy is anonymous and every human-facing template is bilingual TR/EN", () => {
+  const markdownFiles = canonicalTwenty.filter((relativePath) => relativePath.endsWith(".md"));
+  for (const relativePath of markdownFiles) {
+    const text = readTemplate(relativePath);
+    assert.match(text, /(?:^|\n)## Türkçe(?:\r?\n|$)/, `${relativePath} Turkish section`);
+    assert.match(text, /(?:^|\n)## English(?:\r?\n|$)/, `${relativePath} English section`);
+  }
+
+  const humanFacing = [
+    ...markdownFiles.map((relativePath) => readTemplate(relativePath)),
+    ...controlCanvasFiles.map((relativePath) => readTemplate(relativePath))
+  ].join("\n");
+  assert.doesNotMatch(humanFacing, /(?:[A-Za-z]:\\Users\\|\/Users\/|\/home\/)[^\s"'`]+/i);
+  const privateIdentifiers = [
+    ["ula", "sc"].join(""),
+    ["uc", "sahinn"].join(""),
+    ["Vault", "Pilot"].join(""),
+    ["Pass", "Man"].join(""),
+    ["My", "Vuln"].join(""),
+    ["Vault", "ek"].join("")
+  ];
+  assert.doesNotMatch(humanFacing, new RegExp(`\\b(?:${privateIdentifiers.join("|")})\\b`, "i"));
+  assert.doesNotMatch(humanFacing, /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i);
+
+  for (const relativePath of controlCanvasFiles) {
+    const canvas = JSON.parse(readTemplate(relativePath));
+    const textNodes = canvas.nodes.filter((node) => node.type === "text");
+    assert.ok(textNodes.length > 0, `${relativePath} text nodes`);
+    for (const node of textNodes) {
+      assert.match(node.text, /\bTR:/, `${relativePath} Turkish Canvas text`);
+      assert.match(node.text, /\bEN:/, `${relativePath} English Canvas text`);
+    }
+  }
+});
+
+test("apply preserves conflicting Control Canvas and Obsidian plugin files", async () => {
+  const { applyBrainPlan, buildBrainPlan } = await loadFoundation();
+  const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-brain-canvas-conflict-"));
+  const target = path.join(sandbox, "CodexChefBrain");
+  const preserved = new Map([
+    ["10-command-center/system-map.canvas", '{"user":"owned canvas"}\n'],
+    [".obsidian/core-plugins.json", '{"canvas":false,"userOwned":true}\n']
+  ]);
+
+  for (const [relativePath, content] of preserved) {
+    const absolute = path.join(target, ...relativePath.split("/"));
+    fs.mkdirSync(path.dirname(absolute), { recursive: true });
+    fs.writeFileSync(absolute, content, "utf8");
+  }
+
+  const plan = buildBrainPlan({ templateRoot, target });
+  assert.deepEqual(plan.conflicts.map((entry) => entry.relativePath).sort(), [...preserved.keys()].sort());
+
+  const result = applyBrainPlan(plan);
+  assert.equal(result.overwritten.length, 0);
+  for (const [relativePath, content] of preserved) {
+    assert.equal(fs.readFileSync(path.join(target, ...relativePath.split("/")), "utf8"), content);
+  }
+  assert.ok(result.created.includes("10-command-center/control-brain-flow.canvas"));
+  assert.ok(result.created.includes("10-command-center/portfolio-map.canvas"));
+});
 
 test("preview plans a complete vault without writing the target", async () => {
   const { buildBrainPlan } = await loadFoundation();
@@ -68,7 +183,7 @@ test("validation ignores Obsidian session state and validates canonical note fro
   const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-brain-note-validation-"));
   const target = path.join(sandbox, "CodexChefBrain");
   applyBrainPlan(buildBrainPlan({ templateRoot, target }));
-  fs.mkdirSync(path.join(target, ".obsidian"));
+  fs.mkdirSync(path.join(target, ".obsidian"), { recursive: true });
   fs.writeFileSync(path.join(target, ".obsidian", "workspace.json"), '{"session":"OPENAI_API_KEY=not-canonical"}', "utf8");
   assert.equal(validateBrainVault(target).ok, true);
 

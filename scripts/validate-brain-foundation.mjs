@@ -2,30 +2,12 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { BRAIN_REQUIRED_FILES } from "./lib/brain-foundation.mjs";
 
 const root = path.resolve(process.cwd());
 const failures = [];
 const requiredFiles = [
-  "templates/brain/.codex-chef-brain.json",
-  "templates/brain/.gitignore",
-  "templates/brain/AGENTS.md",
-  "templates/brain/README.md",
-  "templates/brain/brain.config.json",
-  "templates/brain/00-inbox/README.md",
-  "templates/brain/10-command-center/dashboard.md",
-  "templates/brain/20-goals/README.md",
-  "templates/brain/30-projects/README.md",
-  "templates/brain/40-knowledge/README.md",
-  "templates/brain/50-research/README.md",
-  "templates/brain/60-decisions/README.md",
-  "templates/brain/70-personal/README.md",
-  "templates/brain/80-memory/profile.md",
-  "templates/brain/80-memory/current-context.md",
-  "templates/brain/80-memory/active-threads.md",
-  "templates/brain/80-memory/decisions.md",
-  "templates/brain/80-memory/session-index.md",
-  "templates/brain/90-archive/README.md",
-  "templates/brain/templates/note.md",
+  ...BRAIN_REQUIRED_FILES.map((relativePath) => `templates/brain/${relativePath}`),
   "schemas/brain-config.schema.json",
   "schemas/brain-candidate.schema.json",
   "schemas/brain-context-pack.schema.json",
@@ -43,6 +25,18 @@ const requiredFiles = [
   "docs/brain/README.tr.md",
   "docs/decisions/002-brain-content-and-windows-acl-status.md"
 ];
+
+const manifestPath = path.join(root, "manifests/brain-vault.json");
+if (fs.existsSync(manifestPath)) {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    if (JSON.stringify(manifest.requiredFiles) !== JSON.stringify(BRAIN_REQUIRED_FILES)) {
+      failures.push("Brain manifest requiredFiles must match BRAIN_REQUIRED_FILES exactly");
+    }
+  } catch {
+    // The general JSON validation below reports the parse error.
+  }
+}
 
 for (const relativePath of requiredFiles) {
   if (!fs.existsSync(path.join(root, relativePath))) failures.push(`Missing ${relativePath}`);

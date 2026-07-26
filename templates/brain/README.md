@@ -1,12 +1,17 @@
 # Codex Chef Brain
 
-Codex Chef Brain is a user-owned local Markdown vault for curated project knowledge, decisions, research, goals, and continuity. Obsidian is optional: every file remains readable and editable without it.
+## Türkçe
 
-Start at `10-command-center/dashboard.md`. Use `00-inbox` for unprocessed captures, project-specific context under `30-projects`, formal decisions under `60-decisions`, and compact continuity notes under `80-memory`.
+Codex Chef Brain; gözden geçirilmiş proje bilgisi, kararlar, araştırma, hedefler ve süreklilik için kullanıcıya ait yerel bir Markdown kasasıdır. Obsidian isteğe bağlıdır; her dosya onsuz da okunabilir ve düzenlenebilir.
 
-The vault must not contain credentials, raw environment dumps, runtime databases, or unbounded transcripts. Permanent writes require preview and user review.
+`10-command-center/dashboard.md` ile başla. İşlenmemiş kayıtları `00-inbox`, projeye özgü bağlamı `30-projects`, resmî kararları `60-decisions`, kısa süreklilik notlarını `80-memory` altında tut. `10-command-center` içindeki Canvas dosyaları yalnız görsel gezinme sunar; Control çalışma zamanı durumunu saklamaz.
 
-On Windows, run `codex-brain status --json` after setup and permission changes.
-A safe result requires both content and ACL security status to pass. The
-CodexSandboxUsers read-only policy protects integrity but does not hide vault
-files from Codex; keep confidential material in a separate owner-only location.
+Kasada kimlik bilgisi, ham ortam dökümü, çalışma zamanı veritabanı veya sınırsız sohbet kaydı tutma. Kalıcı yazmalar önizleme ve kullanıcı incelemesi gerektirir. Windows kurulumundan ve izin değişikliklerinden sonra içerik ile ACL durumunu doğrulamak için `codex-brain status --json` çalıştır.
+
+## English
+
+Codex Chef Brain is a user-owned local Markdown vault for reviewed project knowledge, decisions, research, goals, and continuity. Obsidian is optional; every file remains readable and editable without it.
+
+Start at `10-command-center/dashboard.md`. Keep unprocessed captures in `00-inbox`, project context in `30-projects`, formal decisions in `60-decisions`, and compact continuity notes in `80-memory`. Canvas files in `10-command-center` provide visual navigation only; they do not store Control runtime state.
+
+Do not store credentials, raw environment dumps, runtime databases, or unbounded transcripts. Durable writes require preview and user review. On Windows, run `codex-brain status --json` after setup and permission changes to verify content and ACL status.
