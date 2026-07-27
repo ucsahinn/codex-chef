@@ -22,8 +22,10 @@ Codex Chef’in ayrıntılı operatör dokümantasyonu İngilizce ve Türkçe tu
 - [Codex kapasite haritası](codex-capability-map.tr.md)
 - [Codex yüzeyleri](codex-surfaces.tr.md)
 - [CLI flag ve komutları](codex-flags.tr.md)
-- [Skill ve ajanlar](skills-and-agents.tr.md)
+- [Uzman agent'lar](agents.tr.md)
+- [Skill kataloğu](skills.tr.md)
 - [MCP kataloğu](mcp-catalog.tr.md)
+- [Skill, plugin ve agent uyumluluk haritası](skills-and-agents.tr.md)
 - [Workflow yüzey haritası](workflow-surface-map.tr.md)
 - [Windows notları](windows.tr.md)
 

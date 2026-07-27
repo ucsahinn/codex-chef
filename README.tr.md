@@ -1,52 +1,97 @@
 # Codex Chef
 
 <p align="center">
-  <img src="assets/icon.svg" alt="Codex Chef ikonu" width="120" />
-  <br />
-  <img src="assets/banner.svg" alt="Ajanları, MCP’leri, skill’leri, doğrulamayı ve çok dilli dokümantasyonu gösteren Codex Chef banner’ı" width="100%" />
+  <img src="assets/banner.svg" alt="Agent, skill, MCP, onay ve doğrulama katmanlarını bir araya getiren Codex Chef" width="100%" />
 </p>
 
 <p align="center">
-  <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
+  <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Doğrulama workflow'u" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT lisansı" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Altı README dili" src="https://img.shields.io/badge/readme-6%20languages-0f766e" /></a>
-  <img alt="Windows, macOS, Linux ve WSL hazır" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-164e63" />
+  <img alt="Windows, macOS, Linux ve WSL" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-164e63" />
 </p>
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> <strong>Dokümanlar:</strong>
-  <a href="README.de.md">Deutsch</a> |
-  <a href="README.es.md">Español</a> |
-  <a href="README.md">English</a> |
-  <a href="README.pt-BR.md">Português (Brasil)</a> |
-  <a href="README.tr.md">Türkçe</a> |
-  <a href="README.fr.md">Français</a>
+  <strong>Dil:</strong>
+  <a href="README.tr.md">Türkçe</a> ·
+  <a href="README.md">English</a> ·
+  <a href="README.de.md">Deutsch</a> ·
+  <a href="README.es.md">Español</a> ·
+  <a href="README.fr.md">Français</a> ·
+  <a href="README.pt-BR.md">Português (Brasil)</a>
 </p>
 
-Codex Chef, başkasının bilgisayarını kopyalamadan Codex’e güçlü ve denetlenebilir bir lokal çalışma düzeni kazandırır. Uzman ajanlar, incelenmiş skill’ler, temkinli MCP varsayılanları, ön izleme öncelikli installer’lar ve kendi çalıştırabileceğin doğrulama kapıları tek yerde gelir.
+Codex'i çalıştırmaya başlamak kolay. Onu bir hafta sonra da düzenli, faydalı ve
+güvenli kalan bir çalışma ortamına dönüştürmek ise gereğinden fazla uğraştırıyor.
 
-Codex Chef resmi OpenAI ürünü değildir; topluluk tarafından geliştirilen,
-platform bağımsız bir Codex kurulum kitidir. Windows, macOS, Linux ve WSL
-desteklenir. Destructive işlem, credential erişimi, database bağlantısı,
-publish, deploy ve geniş filesystem erişimi açık onay olmadan çalışmaz.
+Ben **Codex Chef**'i bu yüzden geliştirdim. Kendi kullanımımda sürekli aynı
+sorulara dönüyordum: Bu işi hangi agent üstlenmeli, hangi skill yol göstermeli,
+hangi MCP güvenli, nerede onay istenmeli ve ortaya çıkan sonucu gerçekten nasıl
+doğrulayacağım?
 
-Public giriş için altı README vardır. Ayrıntılı teknik dokümantasyon İngilizce ve Türkçe tutulur; diğer diller insan tarafından yazılmış kısa girişlerdir ve kanonik rehberlere yönlendirir.
+Codex Chef, [OpenAI Codex](https://developers.openai.com/codex) için hazırladığım
+resmi olmayan, açık kaynak bir kurulum ve çalışma kiti. Başkasının özel
+bilgisayarını, credential'larını, session'larını veya lokal memory'sini
+kopyalamadan sağlam bir başlangıç düzeni kurar.
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Önce Ne Değişeceğini Gör
+> **Ana odağı Codex.** Buradaki fikirler başka terminal agent'larına
+> uyarlanabilir; fakat repo doğrudan Claude veya her istemciyle hazır uyumluluk
+> iddia etmez.
 
-İlk olarak gereksinimleri kontrol et:
+## 👋 Aradığın Yerden Başla
 
-```powershell
-Get-Command git
-Get-Command node
-Get-Command npx
-Get-Command codex
-node -v
-```
+| İncele | Ne bulacaksın? |
+| --- | --- |
+| [🤖 21 agent'ın tamamını gör](docs/agents.tr.md) | Her uzman rolün ne yaptığını, ne zaman seçildiğini ve delegasyonun ne zaman gerçekten faydalı olduğunu. |
+| [🧩 Skill kataloğunu aç](docs/skills.tr.md) | Altı bundled workflow'u, full install ile gelen on altı incelenmiş skill'i ve varsayılan yolu kalabalıklaştırmayan opsiyonları. |
+| [🔌 MCP kataloğuna bak](docs/mcp-catalog.tr.md) | Varsayılan açık sekiz MCP'yi, gerektiğinde açılan sekiz connector'ı, gereksinimleri ve erişim sınırlarını. |
+| [🛡️ Güvenlik modelini oku](docs/security-model.tr.md) | Ön izleme, yedekleme, onay kapıları, secret sınırları ve Codex Chef'in bilerek kendi başına yapmadığı işlemleri. |
 
-Node.js 18 veya üzeri gerekir. Bir komut eksikse repoyu bozuk sanmadan önce [Sorun giderme](docs/troubleshooting.tr.md) sayfasına bak.
+## 🍳 Codex Chef Neler Ekliyor?
 
-Repoyu klonla ve Codex home’a yazmadan planı gör:
+### Agent'lar: yalnızca gerektiğinde doğru uzman
+
+Starter; `code_mapper`, `root_cause_debugger`, `security_auditor`,
+`docs_author` ve `test_verifier` gibi uzman roller içeriyor. Bunlar arka planda
+sürekli çalışan servisler değil. Bir rolün görevle eşleşmesi yol gösterir;
+Codex ancak iş güvenli biçimde bölünebiliyorsa veya sen açıkça istersen subagent
+başlatır.
+
+[Tüm agent'ları ve gerçek rol dosyalarını gör →](docs/agents.tr.md)
+
+### Skill'ler: aynı işi her seferinde düzgün yapabilmek için
+
+Skill, Codex'e belirli bir işi hangi adımlarla yapacağını anlatır. Codex önce
+kısa açıklamayı görür; tam talimatı yalnızca görev eşleştiğinde yükler. Codex
+Chef altı lokal plugin workflow'u sunar ve full install profilinde on altı
+incelenmiş skill'e yer verir.
+
+[Hangisi bundled, hangisi kurulur, hangisi opsiyonel gör →](docs/skills.tr.md)
+
+### MCP'ler: canlı araç ve context, fakat sınırları görünür
+
+MCP; Codex'i dokümantasyona, browser'a, semantic code navigation'a, memory'ye
+ve lokal codebase graph okumalarına bağlar. `openaiDeveloperDocs`, `context7`,
+`playwright`, `chrome-devtools`, `serena`, `memory`,
+`sequential-thinking` ve `codebase-memory` kullanışlı varsayılanlar olarak
+yapılandırılır. Hesap, database, production ve geniş filesystem connector'ları
+sen bilerek açana kadar kapalı kalır.
+
+[Tüm MCP'leri, önkoşulları ve erişim sınırlarını gör →](docs/mcp-catalog.tr.md)
+
+## 🧭 Parçalar Birlikte Nasıl Çalışıyor?
+
+<p align="center">
+  <img src="assets/workflow-overview.tr.svg" alt="Bir görev routing ile agent, skill veya MCP'ye yönelir; gerektiğinde onay ister ve doğrulamayla tamamlanır" width="100%" />
+</p>
+
+Sen işi anlatırsın. Routing en dar ve faydalı yüzeyi seçer. Riskli işlemler
+onay için durur. Doğrulama, gerçekte ne olduğunu kontrol eder.
+
+## 🚀 Önce Gör, Sonra Kur
+
+Git, Node.js 18 veya üzeri, npm/npx ve Codex gerekir. Bunlardan biri eksikse
+tahmin yürütmek yerine [kurulum rehberine](docs/install.tr.md) bakabilirsin.
 
 ```powershell
 git clone https://github.com/ucsahinn/codex-chef.git
@@ -54,112 +99,75 @@ cd codex-chef
 npm run chef -- --install
 ```
 
-Ön izleme doğruysa kurulumu başlat:
+İlk komut yalnızca ön izleme yapar. Codex home'a yazmadan önce Codex Chef'in
+hangi dosyaları yöneteceğini gösterir.
+
+Ön izleme doğruysa:
 
 ```powershell
 npm run chef -- --install --apply
 ```
 
-macOS, Linux veya WSL:
+Aynı komutlar macOS, Linux ve WSL üzerinde de çalışır. Installer, yönettiği
+hedefleri değiştirmeden önce yedek alır; sana ait skill, MCP, profil veya ilgisiz
+plugin dosyalarını temizlemez.
 
-```bash
-git clone https://github.com/ucsahinn/codex-chef.git
-cd codex-chef
-npm run chef -- --install
-npm run chef -- --install --apply
-```
-
-Installer yönetilen hedefleri değiştirmeden önce yedek alır. Normal kurulum ve repair, kullanıcıya ait skill, MCP, profil veya ilgisiz plugin dosyalarını prune etmez.
-Renkli CLI önerilen public giriş yoludur. İleri düzey veya otomasyon amaçlı kullanımda
-Windows üzerinde `scripts\install.ps1`, Bash sistemlerinde `scripts/install.sh` doğrudan
-çağrılabilir; manifest tabanlı operasyon sözleşmesi `node scripts/plan-install.mjs --all --json --redact-paths` ile görülebilir.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> CLI’ı Tahmin Etmeden Kullan
-
-Numaralı komuta merkezi için `npm run chef` çalıştır.
+### Hatırlaman gereken üç komut
 
 | İhtiyaç | Komut |
 | --- | --- |
-| Hızlı repo sağlığı | `npm run chef -- --status --repo-only --no-log` |
-| Tam durum panosu | `npm run codex:status` |
-| Kurulum ön izlemesi | `npm run chef -- --preview` |
-| Routing haritası | `npm run chef -- --routing --profile starter-health` |
-| Diagnostik merkezi | `npm run chef -- --diagnostics --no-log` |
-| Process denetimi | `npm run chef -- --processes` |
-| Yönetilen dosyaları onar | `npm run chef -- --repair`, ardından `npm run chef -- --repair --apply` |
-| Güncelleme ön izlemesi | `npm run chef -- --update --plain --no-log` |
-| Güncelle ve doğrula | `npm run chef -- --update --apply` |
+| Kurulumu ön izle | `npm run chef -- --install` |
+| Repo sağlığını kontrol et | `npm run chef -- --status --repo-only --no-log` |
+| Routing sözleşmesini gör | `npm run chef -- --routing --profile starter-health` |
 
-İnceleme komutları read-only kalır. Yazabilen komutlar `--apply` veya işleme özel typed confirmation ister. Repo-local ve redacted CLI logu istemiyorsan `--no-log` ekle.
+Repair, diagnostics, update, process kontrolü, beklenen çıktılar ve doğrudan
+installer komutları [operatör dokümantasyonunda](docs/README.tr.md) duruyor.
 
-Detaylı CLI davranışı [Kurulum](docs/install.tr.md), [Beklenen
-çıktı](docs/expected-output.tr.md) ve [Sorun
-giderme](docs/troubleshooting.tr.md) sayfalarında anlatılır.
+## 🛡️ Güvenli Varsayılanlar, Gizli Erişim Değil
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> Makineye Neler Kurulur?
+- Silme, credential erişimi, database işlemleri, publish, release, deploy ve
+  geniş filesystem erişimi açık onay sınırında kalır.
+- GitHub, Figma, Linear, Notion, Sentry, Vercel ve Supabase gibi authenticated
+  connector'lar katalogda yer alıyor diye kendiliğinden açılmaz.
+- Codex Chef browser session import etmez, private memory kopyalamaz, secret
+  saklamaz, maintainer telemetry'si göndermez ve çalışmanı sessizce commit edip
+  pushlamaz.
 
-| Yüzey | Gelenler |
-| --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Ajanlar | 21 isimlendirilmiş uzman rolü. Bunlar her zaman çalışan servisler değil, gerektiğinde sınırlı delegasyon için kullanılan rol dosyalarıdır. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skill’ler | Proje kapsamlı Codex Chef Brain dahil altı lokal plugin workflow’u ve on altı incelenmiş opsiyonel global skill. Skill’ler görev eşleştiğinde context’e girer, kendi kendine çalışmaz. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCP’ler | Resmi docs, güncel kütüphane docs’u, reasoning, browser kanıtı, semantic navigation, memory okuması ve `codebase-memory` ile lokal codebase graph okumaları için sekiz güvenli varsayılan. Hesap, database, production ve geniş filesystem connector’larından sekizi kapalı gelir. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Çalışma sözleşmesi | Kalıcı `~/.codex/AGENTS.md`, routing profilleri, approval kuralları ve her ajanı tek modele kilitlemeyen token-safe profil seçenekleri. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Güvenlik | Dry-run, manifest tabanlı kurulum planı, backup-first replacement, secret scan, package-surface kontrolü ve runtime doğrulaması. |
-
-Skill'ler kendiliğinden çalışmaz; istek açıklamayla eşleştiğinde veya kullanıcı
-skill'i adıyla çağırdığında context'e girer. Ajan rolü otomatik seçilir ama spawn
-yalnız bağımsız paralel iş, gürültülü araştırmayı ayırma veya açık kullanıcı
-isteği olduğunda yapılır.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> Bilerek Yapmadığı Şeyler
-
-- Secret saklamaz, browser session import etmez, private memory kopyalamaz ve maintainer servisine telemetry göndermez.
-- GitHub, Figma, Linear, Notion, Sentry, Vercel, Supabase veya geniş filesystem erişimini varsayılan olarak açmaz.
-- Commit, push, tag, release, deploy, package publish, credential rotation veya GitHub settings değişikliği yapmaz.
-- Validation geçsin diye kullanıcı verisi silmez.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ac.svg" alt="" aria-hidden="true" width="20"> Akışı Gör
-
-<p align="center">
-  <img src="assets/workflow-overview.svg" alt="Kurulum, routing, araştırma, uygulama ve doğrulama adımlarını gösteren workflow" width="100%" />
-</p>
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Güven Sinyalleri
-
-- `npm run check`; docs, installer, ajan, MCP, skill, routing, package içeriği, release metadata, supply-chain göstergeleri ve security sınırlarını doğrular.
-- CI; Windows installer, Ubuntu/Node 18 ve macOS/Node 24 yollarını kapsar.
-- `manifests/install-plan.json`, installer çalışmadan önce yönetilen write yüzeyini gösterir.
-- Authenticated ve yüksek riskli connector’lar opt-in kalır.
-- `package.json` içindeki `private: true`, source-first projenin yanlışlıkla npm’e publish edilmesini engeller.
-
-Lokal doğrulama:
+Repoyu kendin doğrulamak istersen:
 
 ```bash
 npm run check
-npm run token:audit
-npm run verify:skills:online
-git diff --check
-gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
-Uzun veya repo genelindeki çalışmalarda `npm run token:audit`, bağlam yükünün hangi yüzeylerden geldiğini gösterir. İsteğe bağlı `token-safe.config.toml` profili; ajanları, skill’leri, MCP’leri, memory’yi, hook’ları veya app’leri kapatmadan ayrıntı ve araç çıktısı sınırlarını düşürür. Ajan rolleri sabit model kullanmaz; otomatik `model/reasoning` seçimi etkin kullanıcı profilini izler.
+Bu kontrol docs, installer, agent, skill, MCP, routing, package içeriği,
+supply-chain göstergeleri ve güvenlik sınırlarını birlikte denetler.
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Dokümantasyon
+## 📚 Aradığını Dosyalar Arasında Kaybolmadan Bul
 
 - [Türkçe dokümantasyon haritası](docs/README.tr.md)
-- [English documentation map](docs/README.md)
-- [Kurulum](docs/install.tr.md)
-- [Güvenlik modeli](docs/security-model.tr.md)
-- [Skill ve ajanlar](docs/skills-and-agents.tr.md)
+- [Kurulum ve güvenli ön izleme](docs/install.tr.md)
+- [Agent'lar](docs/agents.tr.md)
+- [Skill ve plugin'ler](docs/skills.tr.md)
 - [MCP kataloğu](docs/mcp-catalog.tr.md)
-- [Public hazırlık](docs/public-readiness.tr.md)
-- [Advisory kaynakları](docs/advisory-sources.tr.md)
 - [Bilgi bankası](kb/README.tr.md)
-- [English knowledge base](kb/README.md)
-- [Ajanlar için kısa indeks](llms.txt)
+- [Sorun giderme](docs/troubleshooting.tr.md)
+- [Katkı](CONTRIBUTING.md), [destek](SUPPORT.md) ve
+  [private güvenlik bildirimi](SECURITY.md)
+- [Agent'lar için kısa indeks](llms.txt)
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f91d.svg" alt="" aria-hidden="true" width="20"> Katkı Ve Destek
+Ayrıntılı operatör rehberleri İngilizce ve Türkçe tutulur. Diğer dört README,
+okuyucuyu bu iki kanonik dokümana götüren kısa ve insan tarafından yazılmış
+girişlerdir.
 
-Değişiklik açmadan önce [CONTRIBUTING.md](CONTRIBUTING.md), diagnostik paylaşmadan önce [SUPPORT.md](SUPPORT.md) dosyasını oku. Güvenlik raporları [SECURITY.md](SECURITY.md) içindeki private kanala gitmeli.
+## 🤝 Geri Bildirim Gerçekten Değerli
 
-MIT lisanslıdır. Topluluk tarafından geliştirilir.
+Codex Chef gerçek kullanım sırasında yaşadığım sorunlardan çıktı ve hâlâ
+geliştirmeye devam ediyorum. Bir bölüm net değilse, katalogda yanlış gördüğün
+bir şey varsa veya ilk kurulumda tereddüt ettiğin bir nokta olursa issue açıp
+yazabilirsin.
+
+Proje işine yararsa GitHub'da bırakacağın bir yıldız daha fazla kişinin
+bulmasına yardımcı olur. ⭐
+
+MIT lisanslıdır. Topluluk tarafından geliştirilir. Resmi bir OpenAI ürünü
+değildir.

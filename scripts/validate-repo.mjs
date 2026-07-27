@@ -25,6 +25,12 @@ const requiredFiles = [
   "docs/how-to.tr.md",
   "docs/README.md",
   "docs/README.tr.md",
+  "docs/agents.md",
+  "docs/agents.tr.md",
+  "docs/skills.md",
+  "docs/skills.tr.md",
+  "docs/mcp-catalog.md",
+  "docs/mcp-catalog.tr.md",
   "docs/troubleshooting.md",
   "docs/troubleshooting.tr.md",
   "docs/github-settings.md",
@@ -68,6 +74,7 @@ const requiredFiles = [
   "assets/social-preview.svg",
   "assets/social-preview.png",
   "assets/workflow-overview.svg",
+  "assets/workflow-overview.tr.svg",
   ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/docs_improvement.yml",
@@ -452,15 +459,15 @@ for (const requiredPattern of [
   /Fran/,
   /Türkçe/,
   /readme-6%20languages/,
-  /English and Turkish deep docs/i,
+  /English and Turkish/i,
   /Knowledge base/,
   /Bilgi bankas/,
   /assets\/banner\.svg/,
   /assets\/workflow-overview\.svg/,
-  /Trust Signals/,
-  /Güven Sinyalleri/,
-  /Advisory sources/,
-  /Advisory kaynakları/
+  /assets\/workflow-overview\.tr\.svg/,
+  /docs\/agents(?:\.tr)?\.md/,
+  /docs\/skills(?:\.tr)?\.md/,
+  /docs\/mcp-catalog(?:\.tr)?\.md/
 ]) {
   if (!requiredPattern.test(readmeText)) {
     failures.push(`README.md missing required storefront signal: ${requiredPattern}`);
@@ -534,7 +541,23 @@ if (fs.existsSync(pluginManifest)) {
 const skillCatalog = path.join(root, "catalog/skills.json");
 if (fs.existsSync(skillCatalog)) {
   const catalog = JSON.parse(fs.readFileSync(skillCatalog, "utf8"));
-  for (const skill of catalog.skills || []) {
+  const skills = catalog.skills || [];
+  if (skills.length !== 53) {
+    failures.push(`Public skill catalog contract expects 53 entries; found ${skills.length}.`);
+  }
+  if (skills.filter((skill) => skill.install === true).length !== 16) {
+    failures.push("Public skill catalog contract expects 16 full-install skills.");
+  }
+  for (const doc of ["docs/skills.md", "docs/skills.tr.md"]) {
+    if (!fs.existsSync(path.join(root, doc))) continue;
+    const text = fs.readFileSync(path.join(root, doc), "utf8");
+    for (const skill of skills) {
+      if (!text.includes(`\`${skill.name}\``)) {
+        failures.push(`${doc} must name cataloged skill: ${skill.name}`);
+      }
+    }
+  }
+  for (const skill of skills) {
     if (skill.install === true) {
       if (!skill.package || !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(skill.package)) {
         failures.push(`Installable skill must declare package as owner/repo: ${skill.name}`);
@@ -554,15 +577,84 @@ if (fs.existsSync(skillCatalog)) {
   }
 }
 
+const agentCatalog = path.join(root, "catalog/agents.json");
+if (fs.existsSync(agentCatalog)) {
+  const catalog = JSON.parse(fs.readFileSync(agentCatalog, "utf8"));
+  const agents = catalog.agents || [];
+  if (agents.length !== 21) {
+    failures.push(`Public agent catalog contract expects 21 entries; found ${agents.length}.`);
+  }
+  for (const doc of ["docs/agents.md", "docs/agents.tr.md"]) {
+    if (!fs.existsSync(path.join(root, doc))) continue;
+    const text = fs.readFileSync(path.join(root, doc), "utf8");
+    for (const agent of agents) {
+      if (!text.includes(`\`${agent.name}\``)) {
+        failures.push(`${doc} must name cataloged agent: ${agent.name}`);
+      }
+    }
+  }
+}
+
 const mcpCatalog = path.join(root, "catalog/mcp-servers.json");
 if (fs.existsSync(mcpCatalog)) {
   const catalog = JSON.parse(fs.readFileSync(mcpCatalog, "utf8"));
-  for (const server of catalog.servers || []) {
+  const servers = catalog.servers || [];
+  if (servers.length !== 16) {
+    failures.push(`Public MCP catalog contract expects 16 entries; found ${servers.length}.`);
+  }
+  if (servers.filter((server) => server.defaultEnabled === true).length !== 8) {
+    failures.push("Public MCP catalog contract expects 8 default-enabled servers.");
+  }
+  for (const doc of ["docs/mcp-catalog.md", "docs/mcp-catalog.tr.md"]) {
+    if (!fs.existsSync(path.join(root, doc))) continue;
+    const text = fs.readFileSync(path.join(root, doc), "utf8");
+    for (const server of servers) {
+      if (!text.includes(`\`${server.name}\``)) {
+        failures.push(`${doc} must name cataloged MCP server: ${server.name}`);
+      }
+    }
+  }
+  for (const server of servers) {
     for (const key of ["sourceUrl", "risk", "defaultReason"]) {
       if (!server[key]) {
         failures.push(`MCP server ${server.name} must declare ${key}`);
       }
     }
+  }
+}
+
+const bundledSkillsDir = path.join(root, "plugins/codex-chef-workflows/skills");
+if (fs.existsSync(bundledSkillsDir)) {
+  const bundledSkills = fs.readdirSync(bundledSkillsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(bundledSkillsDir, entry.name, "SKILL.md")))
+    .map((entry) => entry.name)
+    .sort();
+  if (bundledSkills.length !== 6) {
+    failures.push(`Public bundled workflow contract expects 6 skills; found ${bundledSkills.length}.`);
+  }
+  for (const doc of ["docs/skills.md", "docs/skills.tr.md"]) {
+    if (!fs.existsSync(path.join(root, doc))) continue;
+    const text = fs.readFileSync(path.join(root, doc), "utf8");
+    for (const skill of bundledSkills) {
+      if (!text.includes(`\`${skill}\``)) {
+        failures.push(`${doc} must name bundled workflow: ${skill}`);
+      }
+    }
+  }
+}
+
+for (const publicFile of [
+  "README.md",
+  "README.tr.md",
+  "llms.txt",
+  "assets/banner.svg",
+  "assets/social-preview.svg",
+  "assets/workflow-overview.svg",
+  "assets/workflow-overview.tr.svg"
+]) {
+  if (!fs.existsSync(path.join(root, publicFile))) continue;
+  if (/Windows-first/i.test(fs.readFileSync(path.join(root, publicFile), "utf8"))) {
+    failures.push(`${publicFile} must not describe the cross-platform starter as Windows-first.`);
   }
 }
 

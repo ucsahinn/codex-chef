@@ -101,34 +101,11 @@ if (exists("plugins/codex-chef-workflows/skills/context-budget-planner/reference
 }
 
 for (const rel of [
-  "README.md",
-  "README.tr.md",
-  "README.de.md",
-  "README.es.md",
-  "README.fr.md",
-  "README.pt-BR.md",
   "docs/verification.md",
   "docs/verification.tr.md"
 ]) {
   if (exists(rel) && !read(rel).includes("npm run token:audit")) {
     fail(`${rel} must document npm run token:audit.`);
-  }
-}
-
-for (const rel of [
-  "README.md",
-  "README.tr.md",
-  "README.de.md",
-  "README.es.md",
-  "README.fr.md",
-  "README.pt-BR.md"
-]) {
-  const text = exists(rel) ? read(rel) : "";
-  if (!text.includes("token-safe.config.toml")) {
-    fail(`${rel} must document token-safe.config.toml.`);
-  }
-  if (!text.includes("model/reasoning")) {
-    fail(`${rel} must document automatic agent model/reasoning selection.`);
   }
 }
 

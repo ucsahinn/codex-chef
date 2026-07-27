@@ -15,13 +15,7 @@ const locales = [
 const sharedSignals = [
   "assets/banner.svg",
   "readme-6%20languages",
-  "scripts\\install.ps1",
-  "scripts/install.sh",
-  "scripts/plan-install.mjs",
-  "npm run check",
-  "docs/README.md",
-  "docs/README.tr.md",
-  "kb/README.md"
+  "npm run check"
 ];
 
 function read(file) {
@@ -48,23 +42,46 @@ for (const { file } of locales) {
   if (/(?:TODO|TBD|translation needed|lorem ipsum)/i.test(text)) failures.push(`${file} contains placeholder text.`);
 }
 
-for (const file of ["README.md", "README.tr.md"]) {
+const canonicalReadmes = [
+  {
+    file: "README.md",
+    signals: [
+      "docs/agents.md",
+      "docs/skills.md",
+      "docs/mcp-catalog.md",
+      "docs/README.md",
+      "kb/README.md",
+      "assets/workflow-overview.svg"
+    ]
+  },
+  {
+    file: "README.tr.md",
+    signals: [
+      "docs/agents.tr.md",
+      "docs/skills.tr.md",
+      "docs/mcp-catalog.tr.md",
+      "docs/README.tr.md",
+      "kb/README.tr.md",
+      "assets/workflow-overview.tr.svg"
+    ]
+  }
+];
+
+for (const { file, signals } of canonicalReadmes) {
   const text = read(file);
   for (const required of [
-    "Get-Command git",
-    "Get-Command node",
-    "Get-Command npx",
-    "Get-Command codex",
-    "node -v",
+    ...signals,
+    "npm run chef -- --install",
+    "npm run chef -- --install --apply",
     "codebase-memory"
   ]) {
-    if (!text.includes(required)) failures.push(`${file} missing first-run or local graph signal: ${required}`);
+    if (!text.includes(required)) failures.push(`${file} missing canonical public entry signal: ${required}`);
   }
 }
 
 const english = read("README.md");
-if (!english.includes("six README entry points")) failures.push("README.md must describe six README entry points.");
-if (!english.includes("English and Turkish deep docs")) failures.push("README.md must describe canonical English and Turkish deep docs.");
+if (!english.includes('href="README.tr.md"')) failures.push("README.md must keep the Turkish public entry point visible.");
+if (!english.includes("English and Turkish")) failures.push("README.md must describe canonical English and Turkish documentation.");
 
 if (failures.length > 0) {
   console.error("README locale validation failed:");

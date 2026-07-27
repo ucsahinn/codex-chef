@@ -32,5 +32,6 @@ updated.
 
 ## Related Docs
 
-- [Skills and agents](../docs/skills-and-agents.md)
+- [Skill catalog](../docs/skills.md)
+- [Agent catalog](../docs/agents.md)
 - [Advisory sources](../docs/advisory-sources.md)

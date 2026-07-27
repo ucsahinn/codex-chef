@@ -8,6 +8,7 @@ makaleyi kullan.
 - `assets/icon.svg`
 - `assets/banner.svg`
 - `assets/workflow-overview.svg`
+- `assets/workflow-overview.tr.svg`
 - `assets/social-preview.svg`
 - `assets/social-preview.png`
 

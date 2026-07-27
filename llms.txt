@@ -1,6 +1,6 @@
 # Codex Chef
 
-Codex Chef is an unofficial, Windows-first Codex setup kit. It packages
+Codex Chef is an unofficial, cross-platform Codex setup kit. It packages
 reviewed global Codex guidance, conservative config templates, specialist
 subagents, curated skills, MCP defaults, a local plugin, dry-run installers, and
 validation gates.
@@ -14,7 +14,9 @@ Primary human entry points:
 - [Install guide](docs/install.md)
 - [Verification guide](docs/verification.md)
 - [Security model](docs/security-model.md)
-- [Skills and agents](docs/skills-and-agents.md)
+- [Agent catalog](docs/agents.md)
+- [Skill catalog](docs/skills.md)
+- [MCP catalog](docs/mcp-catalog.md)
 - [Knowledge base](kb/README.md)
 - [Workflow surface map](docs/workflow-surface-map.md)
 - [ECC compatibility](docs/ecc-compatibility.md)
@@ -45,8 +47,9 @@ explicit `-InstallGitGuards` or `--install-git-guards` flag.
 ## Core Capabilities
 
 - 21 specialist Codex subagent role definitions.
-- 5 bundled local plugin skills:
+- 6 bundled local plugin skills:
   - `adaptive-agent-routing`
+  - `codex-chef-brain`
   - `codex-chef-operator`
   - `context-budget-planner`
   - `external-review-workflow`

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="430" viewBox="0 0 1120 430" role="img" aria-labelledby="title desc">
-  <title id="title">How Codex Chef routes a task</title>
-  <desc id="desc">A five-step flow from the user's task to routing, selected agents skills or MCP tools, approval when needed, and final verification.</desc>
+  <title id="title">Codex Chef bir görevi nasıl yönlendirir?</title>
+  <desc id="desc">Kullanıcının görevinden routing'e, seçilen agent skill veya MCP aracına, gerektiğinde onaya ve son doğrulamaya uzanan beş adımlı akış.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#f8fafc"/>
@@ -33,8 +33,8 @@
   <rect x="28" y="28" width="1064" height="374" rx="22" fill="#ffffff" stroke="#cbd5e1"/>
 
   <g font-family="Segoe UI, Arial, sans-serif">
-    <text x="58" y="78" font-size="30" font-weight="800" fill="#0f172a">From task to proof</text>
-    <text x="58" y="108" font-size="17" fill="#475569">Codex Chef chooses the useful surface, keeps risky steps visible, and finishes with evidence.</text>
+    <text x="58" y="78" font-size="30" font-weight="800" fill="#0f172a">Görevden kanıta</text>
+    <text x="58" y="108" font-size="17" fill="#475569">Codex Chef işe yarayan yüzeyi seçer, riskli adımları görünür tutar ve kanıtla bitirir.</text>
 
     <g fill="none" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow)">
       <path class="route" d="M224 240 H250"/>
@@ -47,9 +47,9 @@
       <rect width="172" height="160" rx="18" fill="#ecfeff" stroke="#0e7490"/>
       <circle cx="32" cy="34" r="16" fill="#cffafe"/>
       <path d="M24 34 H40 M32 26 V42" stroke="#0e7490" stroke-width="2.5" stroke-linecap="round"/>
-      <text x="22" y="82" font-size="19" font-weight="800" fill="#0f172a">Your task</text>
-      <text x="22" y="110" font-size="14" fill="#475569">One clear request</text>
-      <text x="22" y="133" font-size="14" fill="#475569">in the current repo</text>
+      <text x="22" y="82" font-size="19" font-weight="800" fill="#0f172a">Görevin</text>
+      <text x="22" y="110" font-size="14" fill="#475569">Mevcut repo için</text>
+      <text x="22" y="133" font-size="14" fill="#475569">tek ve net istek</text>
     </g>
 
     <g class="card d2" transform="translate(250 160)" filter="url(#shadow)">
@@ -59,23 +59,23 @@
       <circle cx="54" cy="45" r="7" fill="none" stroke="#15803d" stroke-width="2.5"/>
       <path d="M38 34 C44 34 45 26 47 26 M38 34 C44 34 45 44 47 44" fill="none" stroke="#15803d" stroke-width="2.5"/>
       <text x="20" y="82" font-size="19" font-weight="800" fill="#0f172a">Routing</text>
-      <text x="20" y="110" font-size="14" fill="#475569">What will actually</text>
-      <text x="20" y="133" font-size="14" fill="#475569">help this task?</text>
+      <text x="20" y="110" font-size="14" fill="#475569">Bu işe gerçekten</text>
+      <text x="20" y="133" font-size="14" fill="#475569">ne katkı sağlar?</text>
     </g>
 
     <g class="card d3" transform="translate(436 142)" filter="url(#shadow)">
       <rect width="224" height="196" rx="20" fill="#f8fafc" stroke="#64748b"/>
-      <text x="20" y="38" font-size="18" font-weight="800" fill="#0f172a">Use what fits</text>
+      <text x="20" y="38" font-size="18" font-weight="800" fill="#0f172a">Uygun olanı kullan</text>
       <g font-size="15" font-weight="700">
         <rect x="20" y="58" width="184" height="34" rx="10" fill="#ccfbf1"/>
         <text x="36" y="80" fill="#115e59">Agent</text>
-        <text x="94" y="80" font-weight="400" fill="#475569">focused role</text>
+        <text x="94" y="80" font-weight="400" fill="#475569">uzman rol</text>
         <rect x="20" y="102" width="184" height="34" rx="10" fill="#e0f2fe"/>
         <text x="36" y="124" fill="#155e75">Skill</text>
-        <text x="86" y="124" font-weight="400" fill="#475569">reusable workflow</text>
+        <text x="86" y="124" font-weight="400" fill="#475569">tekrar kullanılan akış</text>
         <rect x="20" y="146" width="184" height="34" rx="10" fill="#eef2ff"/>
         <text x="36" y="168" fill="#4338ca">MCP</text>
-        <text x="84" y="168" font-weight="400" fill="#475569">tool or live context</text>
+        <text x="84" y="168" font-weight="400" fill="#475569">araç veya canlı bağlam</text>
       </g>
     </g>
 
@@ -83,20 +83,20 @@
       <rect width="166" height="160" rx="18" fill="#fff7ed" stroke="#c2410c"/>
       <path d="M32 22 L50 29 V43 C50 56 41 64 32 68 C23 64 14 56 14 43 V29 Z" fill="#ffedd5" stroke="#c2410c" stroke-width="2.4"/>
       <path d="M24 43 L30 49 L41 36" fill="none" stroke="#c2410c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="20" y="86" font-size="18" font-weight="800" fill="#0f172a">Approval</text>
-      <text x="20" y="112" font-size="14" fill="#475569">Only when a risky</text>
-      <text x="20" y="135" font-size="14" fill="#475569">step really needs it</text>
+      <text x="20" y="86" font-size="18" font-weight="800" fill="#0f172a">Onay</text>
+      <text x="20" y="112" font-size="14" fill="#475569">Yalnızca riskli adım</text>
+      <text x="20" y="135" font-size="14" fill="#475569">gerçekten gerektirirse</text>
     </g>
 
     <g class="card d5" transform="translate(878 160)" filter="url(#shadow)">
       <rect width="188" height="160" rx="18" fill="#f0fdf4" stroke="#15803d"/>
       <circle class="pulse" cx="34" cy="36" r="17" fill="#dcfce7" opacity=".75"/>
       <path d="M24 36 L31 43 L45 28" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="20" y="86" font-size="19" font-weight="800" fill="#0f172a">Verification</text>
-      <text x="20" y="112" font-size="14" fill="#475569">Tests, browser, build,</text>
-      <text x="20" y="135" font-size="14" fill="#475569">or the right proof</text>
+      <text x="20" y="86" font-size="19" font-weight="800" fill="#0f172a">Doğrulama</text>
+      <text x="20" y="112" font-size="14" fill="#475569">Test, browser, build</text>
+      <text x="20" y="135" font-size="14" fill="#475569">veya doğru kanıt</text>
     </g>
 
-    <text x="58" y="376" font-size="14" fill="#64748b">Nothing is spawned, connected, or approved just because its name matches.</text>
+    <text x="58" y="376" font-size="14" fill="#64748b">Hiçbir şey yalnızca adı eşleşti diye açılmaz, bağlanmaz veya onaylanmaz.</text>
   </g>
 </svg>

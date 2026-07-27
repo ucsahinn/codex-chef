@@ -1,84 +1,59 @@
 # MCP Catalog
 
-This starter keeps high-signal MCP servers documented and mostly safe by
-default. See `catalog/mcp-servers.json` for machine-readable metadata.
-`npm run check` validates that this catalog stays aligned with both Windows and
-Unix Codex config templates.
-The catalog also records `setupKind` and `setupHint`; installers and
-`npm run codex:status` print those notes so required local tooling, OAuth,
-filesystem-path, or environment-variable inputs are visible before enabling a
-connector.
+[English](mcp-catalog.md) | [Türkçe](mcp-catalog.tr.md)
 
-Status evidence is intentionally split:
+MCP servers give Codex extra tools or live context: current documentation,
+browser evidence, semantic code navigation, private account data, or database
+access. That makes them useful, but it also means each server needs a clear
+boundary.
 
-- `cataloged`: present in `catalog/mcp-servers.json`.
-- `installed config`: present in the installed or template Codex config.
-- `live codex mcp list`: verified by `codex mcp list --json`.
-- `/mcp session visible`: visible in the current Codex session.
+Codex Chef knows about 16 MCP servers. Eight read-heavy helpers are enabled in
+the starter config. Eight account, database, or broad-filesystem connectors
+stay off until you deliberately need them.
 
-Do not treat a cataloged connector as live until the live command or `/mcp`
-confirms it.
+> **Configured is not the same as live.** A server can exist in the template
+> and still need a launcher, first-run package download, browser, authorization,
+> or Codex restart. Check `codex mcp list` or `/mcp` before relying on it.
 
-Default-enabled means Codex Chef writes the server config and expects the
-launcher to be present; it is not proof that the current machine already has a
-live MCP session. Node/npx-backed defaults need Node and first-run network
-access for pinned packages. Serena additionally needs `uvx`; if `uvx` is not
-available on a fresh machine, disable Serena or treat its status note as a setup
-prerequisite rather than a repo failure.
+[Official Codex MCP guide](https://developers.openai.com/codex/mcp) ·
+[MCP specification](https://modelcontextprotocol.io/specification) ·
+[Machine-readable catalog](../catalog/mcp-servers.json)
 
-Official Codex MCP reference:
+## Ready In The Starter Config
 
-https://developers.openai.com/codex/mcp
-
-Official MCP specification reference:
-
-https://modelcontextprotocol.io/specification
-
-MCP servers can expose tools, resources, and prompts. Treat each server as a
-capability boundary: documentation and reasoning helpers can use approved
-read-heavy defaults. Browser, semantic-code, and local codebase-graph servers
-must be narrowed with `enabled_tools` so only evidence, navigation, and read
-tools run smoothly; browser interaction, symbol edits, graph indexing,
-filesystem, database, account, production, billing, deployment, secret-bearing,
-or other mutating tools need prompt defaults, disabled state, or narrower tool
-exposure.
-
-All npm-based MCP package specs are exact-version pinned in both
-`catalog/mcp-servers.json` and `templates/codex/config.*.toml`. Floating
-`@latest` specs and unversioned `npx -y` MCP packages are rejected by
-`npm run check`. Git-based MCP launchers, such as Serena through `uvx --from`,
-must include a full commit SHA and matching catalog `sourceRef`.
-
-## Enabled By Default
-
-| Server | Purpose | Startup prerequisite |
+| MCP | What I use it for | What it needs |
 | --- | --- | --- |
-| `openaiDeveloperDocs` | Official OpenAI developer docs | Streamable HTTP; no local launcher |
-| `context7` | Current library/framework docs | Node/npx first-run package download |
-| `sequential-thinking` | Structured decomposition | Node/npx first-run package download |
-| `playwright` | Browser automation and UI verification | Node/npx plus local browser control |
-| `chrome-devtools` | Chrome inspection and Lighthouse-style checks | Node/npx plus isolated Chrome/DevTools bridge |
-| `serena` | Semantic code navigation | `uvx` plus pinned git source ref; disable if unavailable |
-| `memory` | Local MCP memory graph | Node/npx; avoid storing secrets |
-| `codebase-memory` | Graph-backed code intelligence, architecture queries, and diff impact analysis | Node/npx first-run package download; keeps local graph state out of source. |
+| [`openaiDeveloperDocs`](https://developers.openai.com/mcp) | Current OpenAI developer documentation | Nothing extra |
+| [`context7`](https://github.com/upstash/context7) | Current library and framework docs | Node/npx and first-run network access |
+| [`sequential-thinking`](https://github.com/modelcontextprotocol/servers) | Breaking a complex task into clear steps | Node/npx and first-run network access |
+| [`playwright`](https://github.com/microsoft/playwright-mcp) | Browser snapshots, screenshots, console and network evidence | Node/npx and local browser control |
+| [`chrome-devtools`](https://github.com/ChromeDevTools/chrome-devtools-mcp) | Chrome inspection and UI diagnostics | Node/npx and an isolated Chrome bridge |
+| [`serena`](https://github.com/oraios/serena) | Symbol-aware code navigation in unfamiliar repositories | `uvx` and the pinned Serena source |
+| [`memory`](https://github.com/modelcontextprotocol/servers) | Small, non-secret local memory graph | Node/npx; never store secrets |
+| [`codebase-memory`](https://github.com/DeusData/codebase-memory-mcp) | Architecture, graph search, paths, and change impact | Node/npx; indexing and admin tools stay gated |
 
-## Disabled Until Needed
+Browser navigation, memory writes, indexing, symbol edits, and similar actions
+are not silently approved just because the server is enabled. The templates
+allowlist reviewed read tools and keep the wider actions prompted or disabled.
 
-| Server | Purpose | Setup required before enabling |
+If `uvx` is missing, Serena will not start. That is a local prerequisite, not a
+reason to weaken the rest of the setup; install the prerequisite separately or
+disable Serena until you need it.
+
+## Off Until You Need Them
+
+| MCP | What it can open | Why it starts off |
 | --- | --- | --- |
-| `filesystem` | Local filesystem access | Choose a deliberate local root path in config args. |
-| `github` | GitHub issues, PRs, repositories | GitHub/Copilot OAuth account authorization. |
-| `figma` | Figma design access | Figma account or workspace authorization. |
-| `linear` | Linear issue/project access | Linear workspace authorization. |
-| `notion` | Notion docs and databases | Notion workspace authorization. |
-| `sentry` | Production error data | Sentry organization authorization. |
-| `vercel` | Deploy/project management | Vercel account or team authorization. |
-| `supabase` | Database inspection | Set `SUPABASE_DB_URL` outside the repo before enabling. |
+| [`filesystem`](https://github.com/modelcontextprotocol/servers) | A local directory tree | The allowed root must be chosen deliberately |
+| [`github`](https://docs.github.com/en/copilot) | Repository, issue, and PR context | Requires GitHub/Copilot authorization |
+| [`figma`](https://help.figma.com) | Private design files and workspace context | Requires Figma authorization |
+| [`linear`](https://linear.app/docs) | Private issues and projects | Requires Linear workspace authorization |
+| [`notion`](https://developers.notion.com) | Private docs and databases | Requires Notion workspace authorization |
+| [`sentry`](https://docs.sentry.io) | Production error and telemetry data | Requires Sentry organization authorization |
+| [`vercel`](https://vercel.com/docs) | Project and deployment data | Requires Vercel account or team authorization |
+| [`supabase`](https://github.com/modelcontextprotocol/servers) | A database connection | Needs a task-specific database URL and explicit approval |
 
-## Opt-In Connector Recipes
-
-For OAuth account connectors, first confirm the task needs private account
-context, then change only that connector:
+Enable only the connector the task actually needs. For example:
 
 ```toml
 [mcp_servers.github]
@@ -86,10 +61,8 @@ enabled = true
 default_tools_approval_mode = "approve"
 ```
 
-Rollback is `enabled = false` followed by a Codex restart.
-
-For filesystem, replace the template path with the narrowest intended local
-root before enabling:
+For filesystem access, replace the path with the narrowest workspace you mean
+to expose:
 
 ```toml
 [mcp_servers.filesystem]
@@ -98,59 +71,27 @@ args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", 
 default_tools_approval_mode = "prompt"
 ```
 
-`.` means the Codex process working directory and avoids a machine-specific
-path. Replace it with a narrower absolute workspace before enabling when the
-task should not expose the whole current workspace.
+`.` means the Codex process working directory. An explicit, narrower absolute
+path is safer when the task should not see the whole current workspace.
 
-For Supabase, set the database URL outside the repo and keep approval prompted:
+Supabase credentials belong in the shell environment, never in this repository
+or a committed launcher:
 
 ```powershell
 $env:SUPABASE_DB_URL = "<set outside the repo; do not commit>"
 ```
 
-Then enable only for the task that needs database inspection. Disable it again
-afterward unless it is a deliberate durable workflow.
+## The Boundary I Keep
 
-For Codebase Memory, Codex Chef enables read-heavy graph-backed code
-intelligence by default, allowlists graph read/query tools, and keeps indexing
-plus destructive/admin tools prompt-gated or disabled:
+- Documentation and read-only reasoning helpers can be convenient defaults.
+- Browser interaction, memory writes, code edits, and graph indexing remain
+  prompted or narrowly allowlisted.
+- Authenticated accounts, databases, production systems, and broad filesystem
+  access stay disabled until the task needs them and the user approves.
+- Credentials come from environment variables or the connector's own OAuth
+  flow, never from committed config.
+- After a config change, restart Codex and confirm the server with `/mcp` or
+  `codex mcp list`.
 
-```toml
-[mcp_servers.codebase-memory]
-enabled = true
-default_tools_approval_mode = "prompt"
-enabled_tools = ["list_projects", "index_status", "search_graph", "trace_path", "detect_changes", "query_graph", "get_graph_schema", "get_code_snippet", "get_architecture", "search_code"]
-disabled_tools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"]
-```
-
-Rollback is `enabled = false` followed by a Codex restart. Keep
-`.codebase-memory/` ignored unless a graph artifact is deliberately reviewed as
-source material for a private team workflow.
-
-## Rule
-
-Documentation MCPs can be convenient defaults. Authenticated MCPs should remain
-disabled until the task needs them and the user has approved the account scope.
-When a task matches an enabled MCP server, use that server instead of guessing
-from stale memory. If the matching server is disabled or unavailable, state the
-reason and continue with the safest fallback.
-
-Use the `mcp_integrator` specialist before changing connector state. It should
-name the server, auth boundary, approval mode, tool allowlist or denylist,
-startup/tool timeout, verification command, and rollback note before any config
-change is made.
-
-## Config Flags To Prefer
-
-| Config field | Use |
-| --- | --- |
-| `enabled` | Disable authenticated, database, production, broad filesystem, or broad/destructive graph-indexing servers until needed. |
-| `default_tools_approval_mode` | Use `approve` for reviewed documentation and reasoning helpers. Use `prompt` when the server also exposes browser interaction, symbol edits, indexing, request/response detail, memory writes, account, filesystem, database, production, deploy, publish, or mutating tools. |
-| `enabled_tools` / `disabled_tools` | Narrow a server to the specific tools a workflow needs; this is required when a useful default-enabled server also exposes mutating tools. |
-| `startup_timeout_sec` | Give stdio servers enough startup time without hanging Codex forever. |
-| `tool_timeout_sec` | Bound slow browser, code-intelligence, docs, or external-account calls. |
-| `bearer_token_env_var`, `env_vars`, `env_http_headers` | Pull credentials from environment variables instead of committed files. |
-| `mcp_oauth_callback_port`, `mcp_oauth_callback_url` | Use only when an OAuth provider needs a fixed callback. |
-
-After changing MCP config, restart Codex and verify active servers with `/mcp`
-or `codex mcp` before relying on the tools.
+For the bigger picture, see the [agent catalog](agents.md), [skill
+catalog](skills.md), and [workflow surface map](workflow-surface-map.md).

@@ -30,5 +30,6 @@ veya katalog bilinçli güncellenene kadar bu hataları release blocker kabul et
 
 ## İlgili Dokümanlar
 
-- [Skills ve ajanlar](../docs/skills-and-agents.tr.md)
+- [Skill kataloğu](../docs/skills.tr.md)
+- [Agent kataloğu](../docs/agents.tr.md)
 - [Advisory kaynakları](../docs/advisory-sources.tr.md)

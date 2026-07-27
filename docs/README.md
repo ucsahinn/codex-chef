@@ -22,8 +22,10 @@ Codex Chef keeps complete operator documentation in English and Turkish. The Ger
 - [Codex capability map](codex-capability-map.md)
 - [Codex surfaces](codex-surfaces.md)
 - [CLI flags and commands](codex-flags.md)
-- [Skills and agents](skills-and-agents.md)
+- [Specialist agents](agents.md)
+- [Skill catalog](skills.md)
 - [MCP catalog](mcp-catalog.md)
+- [Skills, plugins, and agents compatibility map](skills-and-agents.md)
 - [Workflow surface map](workflow-surface-map.md)
 - [Windows notes](windows.md)
 

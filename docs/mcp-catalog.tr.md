@@ -1,84 +1,60 @@
-# MCP Katalogu
+# MCP Kataloğu
 
-Makine tarafindan okunabilir liste icin `catalog/mcp-servers.json` dosyasina
-bak. `npm run check`, bu katalog ile Windows/Unix Codex config template'lerinin
-ayni hizada kaldigini dogrular.
+[English](mcp-catalog.md) | [Türkçe](mcp-catalog.tr.md)
 
-Katalog `setupKind` ve `setupHint` alanlarini da tutar. Installer,
-`npm run codex:status` ve `npm run chef -- --mcp`, lokal tooling, OAuth,
-filesystem path veya environment variable isteyen MCP'leri bu notlarla
-gosterir.
+MCP'ler Codex'e ek araç veya canlı bağlam verir: güncel dokümantasyon, browser
+kanıtı, semantic code navigation, özel hesap verileri ya da veritabanı erişimi
+gibi. Bu yüzden çok kullanışlılar ama her birinin sınırı açık olmalı.
 
-Status kaniti bilincli olarak ayrilir:
+Codex Chef toplam 16 MCP tanıyor. Okuma ağırlıklı sekiz yardımcı starter
+config'inde açık gelir. Hesap, veritabanı veya geniş dosya sistemi erişimi
+isteyen diğer sekiz connector ise gerçekten ihtiyacın olana kadar kapalı kalır.
 
-- `cataloged`: `catalog/mcp-servers.json` icinde var.
-- `installed config`: kurulu veya template Codex config icinde var.
-- `live codex mcp list`: `codex mcp list --json` ile dogrulandi.
-- `/mcp session visible`: aktif Codex oturumunda `/mcp` ile gorunur.
+> **Config'de görünmesi çalıştığı anlamına gelmez.** Bir MCP template'te yer
+> aldığı hâlde launcher, ilk açılışta paket indirme, browser, hesap onayı veya
+> Codex restart'ı bekliyor olabilir. Kullanmadan önce `codex mcp list` ya da
+> `/mcp` ile kontrol et.
 
-Bir connector'u sadece catalog'da var diye live kabul etme; live komut veya
-`/mcp` bunu dogrulamalidir.
+[Resmî Codex MCP rehberi](https://developers.openai.com/codex/mcp) ·
+[MCP spesifikasyonu](https://modelcontextprotocol.io/specification) ·
+[Makine tarafından okunan katalog](../catalog/mcp-servers.json)
 
-Varsayilan acik olmak, Codex Chef'in server config'ini yazdigi ve launcher'in
-makinede olmasini bekledigi anlamina gelir; mevcut makinede live MCP session
-oldugunun kaniti degildir. Node/npx tabanli default'lar pinned package'lar icin
-Node ve ilk calismada network ister. Serena ayrica `uvx` ister; fresh machine'de
-`uvx` yoksa Serena'yi disable et veya status notunu repo hatasi degil setup
-onkosulu olarak ele al.
+## Starter Config'inde Hazır Gelenler
 
-Resmi kaynak:
-
-https://developers.openai.com/codex/mcp
-
-Resmi MCP specification:
-
-https://modelcontextprotocol.io/specification
-
-MCP server'lar tool, resource ve prompt sunabilir. Her server'i bir capability
-boundary olarak dusun: dokumantasyon ve reasoning helper'lari approved
-read-heavy default kullanabilir. Browser, semantic-code ve lokal codebase-graph
-server'lari `enabled_tools` ile daraltilmalidir; sadece evidence, navigation ve
-read tool'lar akici calisir. Browser interaction, symbol edit, graph indexing,
-filesystem, database, hesap, production, billing, deploy, secret-bearing veya
-diger mutating tool'lar prompt default, disabled state veya daha dar tool
-exposure ister.
-
-Npm tabanli tum MCP package spec'leri hem `catalog/mcp-servers.json` hem de
-`templates/codex/config.*.toml` icinde exact version ile pinlenir. Floating
-`@latest` spec'leri ve unversioned `npx -y` MCP package'lari `npm run check`
-tarafindan reddedilir. Serena gibi `uvx --from` kullanan git-based MCP
-launcher'lar full commit SHA ve matching catalog `sourceRef` icermelidir.
-
-## Varsayilan Acik
-
-| Server | Amac | Startup onkosulu |
+| MCP | Ne için kullanıyorum? | Neye ihtiyaç duyuyor? |
 | --- | --- | --- |
-| `openaiDeveloperDocs` | Resmi OpenAI developer docs | Streamable HTTP; lokal launcher yok |
-| `context7` | Guncel library/framework dokumanlari | Node/npx first-run package download |
-| `sequential-thinking` | Yapilandirilmis dusunme/decomposition | Node/npx first-run package download |
-| `playwright` | Browser otomasyonu ve UI dogrulama | Node/npx ve lokal browser kontrolu |
-| `chrome-devtools` | Chrome inspection ve audit | Node/npx ve isolated Chrome/DevTools bridge |
-| `serena` | Semantic code navigation | `uvx` ve pinned git source ref; yoksa disable et |
-| `memory` | Lokal memory graph | Node/npx; secret yazma |
-| `codebase-memory` | Graph destekli code intelligence, mimari sorgulari ve diff impact analysis | Node/npx first-run package download; lokal graph state source disinda kalir. |
+| [`openaiDeveloperDocs`](https://developers.openai.com/mcp) | Güncel OpenAI geliştirici dokümantasyonu | Ek bir şeye ihtiyaç duymaz |
+| [`context7`](https://github.com/upstash/context7) | Güncel kütüphane ve framework dokümantasyonu | Node/npx ve ilk açılışta internet |
+| [`sequential-thinking`](https://github.com/modelcontextprotocol/servers) | Karmaşık işi anlaşılır adımlara ayırmak | Node/npx ve ilk açılışta internet |
+| [`playwright`](https://github.com/microsoft/playwright-mcp) | Browser snapshot, screenshot, console ve network kanıtı | Node/npx ve yerel browser kontrolü |
+| [`chrome-devtools`](https://github.com/ChromeDevTools/chrome-devtools-mcp) | Chrome incelemesi ve UI teşhisi | Node/npx ve izole Chrome köprüsü |
+| [`serena`](https://github.com/oraios/serena) | Bilmediğin repoda sembol seviyesinde kod gezintisi | `uvx` ve sabitlenmiş Serena kaynağı |
+| [`memory`](https://github.com/modelcontextprotocol/servers) | Küçük ve gizli olmayan yerel hafıza grafiği | Node/npx; secret saklama |
+| [`codebase-memory`](https://github.com/DeusData/codebase-memory-mcp) | Mimari, graph search, akış ve değişiklik etkisi | Node/npx; index ve admin araçları kontrollü kalır |
 
-## Gerektiginde Ac
+Bir MCP'nin açık olması browser etkileşimi, memory write, indexleme veya sembol
+düzenleme gibi bütün araçlarının sessizce onaylandığı anlamına gelmez.
+Template'ler incelenmiş okuma araçlarını sınırlar; daha geniş işlemleri onaya
+bırakır veya kapalı tutar.
 
-| Server | Amac | Acmadan once gereken setup |
+Makinede `uvx` yoksa Serena açılmaz. Bu yerel bir ön koşuldur; kurulumun geri
+kalanını gevşetmek yerine ihtiyacın olduğunda ön koşulu ayrıca kurabilir ya da
+Serena'yı o zamana kadar kapatabilirsin.
+
+## İhtiyacın Olana Kadar Kapalı Kalanlar
+
+| MCP | Neye erişebilir? | Neden kapalı başlıyor? |
 | --- | --- | --- |
-| `filesystem` | Lokal filesystem erisimi | Config args icinde bilincli ve dar bir root path sec. |
-| `github` | GitHub issue/PR/repo | GitHub/Copilot OAuth hesap yetkilendirmesi. |
-| `figma` | Figma design context | Figma hesap veya workspace yetkilendirmesi. |
-| `linear` | Linear issue/project | Linear workspace yetkilendirmesi. |
-| `notion` | Notion docs/database | Notion workspace yetkilendirmesi. |
-| `sentry` | Production error data | Sentry organization yetkilendirmesi. |
-| `vercel` | Deploy/project yonetimi | Vercel account veya team yetkilendirmesi. |
-| `supabase` | Database erisimi | Acmadan once `SUPABASE_DB_URL` degerini repo disinda ayarla. |
+| [`filesystem`](https://github.com/modelcontextprotocol/servers) | Yerel bir klasör ağacı | İzin verilen kökü bilinçli seçmek gerekir |
+| [`github`](https://docs.github.com/en/copilot) | Repo, issue ve PR bağlamı | GitHub/Copilot hesap onayı gerekir |
+| [`figma`](https://help.figma.com) | Özel tasarım dosyaları ve workspace bağlamı | Figma hesap onayı gerekir |
+| [`linear`](https://linear.app/docs) | Özel issue ve projeler | Linear workspace onayı gerekir |
+| [`notion`](https://developers.notion.com) | Özel doküman ve veritabanları | Notion workspace onayı gerekir |
+| [`sentry`](https://docs.sentry.io) | Production hata ve telemetri verileri | Sentry organizasyon onayı gerekir |
+| [`vercel`](https://vercel.com/docs) | Proje ve deployment verileri | Vercel hesap veya takım onayı gerekir |
+| [`supabase`](https://github.com/modelcontextprotocol/servers) | Bir veritabanı bağlantısı | Göreve özel bağlantı adresi ve açık onay gerekir |
 
-## Opt-In Connector Tarifleri
-
-OAuth isteyen account connector'lari icin once gorevin private account context'e
-ihtiyaci oldugunu dogrula, sonra sadece gereken connector'u ac:
+Sadece işin gerçekten istediği connector'ı aç. Örneğin:
 
 ```toml
 [mcp_servers.github]
@@ -86,9 +62,7 @@ enabled = true
 default_tools_approval_mode = "approve"
 ```
 
-Rollback icin `enabled = false` yap ve Codex'i yeniden baslat.
-
-Filesystem icin template path'i acmadan once en dar local root ile degistir:
+Filesystem için erişilecek yeri mümkün olan en dar workspace olarak belirle:
 
 ```toml
 [mcp_servers.filesystem]
@@ -97,57 +71,29 @@ args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", 
 default_tools_approval_mode = "prompt"
 ```
 
-`.` Codex process'inin çalışma dizinini ifade eder ve makineye özel path
-gerektirmez. Görev bütün mevcut workspace'i görmemeliyse açmadan önce daha dar
-bir absolute workspace ile değiştir.
+Buradaki `.` Codex işleminin çalışma klasörüdür. Görev bütün workspace'i
+görmemeliyse daha dar ve açık bir absolute path kullanmak daha güvenlidir.
 
-Supabase icin database URL'ini repo disinda ayarla ve approval'i prompt tut:
+Supabase credential'ı bu repoya veya commit edilen bir launcher'a değil, shell
+ortamına aittir:
 
 ```powershell
-$env:SUPABASE_DB_URL = "<repo disinda ayarla; commit etme>"
+$env:SUPABASE_DB_URL = "<repo dışında ayarla; commit etme>"
 ```
 
-Sonra sadece database inspection gereken task icin ac. Kalici workflow olarak
-bilerek secmedikce is bitince tekrar disabled hale getir.
+## Koruduğum Sınır
 
-Codebase Memory icin Codex Chef read-heavy graph-backed code intelligence'i
-varsayilan acar, graph read/query tool'larini allowlist eder, indexing ve
-destructive/admin tool'lari prompt-gated veya disabled tutar:
+- Dokümantasyon ve salt-okunur reasoning yardımcıları kullanışlı varsayılanlar
+  olabilir.
+- Browser etkileşimi, memory write, kod düzenleme ve graph indexleme onaylı ya
+  da dar allowlist'li kalır.
+- Hesap, veritabanı, production ve geniş dosya sistemi erişimi; görev gerçekten
+  isteyip kullanıcı onay verene kadar kapalıdır.
+- Credential'lar commit edilen config'e değil, environment variable'a veya
+  connector'ın kendi OAuth akışına gider.
+- Config değişince Codex'i yeniden başlatıp `/mcp` veya `codex mcp list` ile
+  sonucu kontrol et.
 
-```toml
-[mcp_servers.codebase-memory]
-enabled = true
-default_tools_approval_mode = "prompt"
-enabled_tools = ["list_projects", "index_status", "search_graph", "trace_path", "detect_changes", "query_graph", "get_graph_schema", "get_code_snippet", "get_architecture", "search_code"]
-disabled_tools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"]
-```
-
-Rollback icin `enabled = false` yap ve Codex'i yeniden baslat.
-`.codebase-memory/` ignored kalmali; graph artifact ancak private team workflow
-icin bilerek review edilirse source material olarak ele alinabilir.
-
-Kural: Dokumantasyon MCP'leri iyi varsayilandir. Auth isteyen MCP'ler gorev
-gerektirmeden ve kullanici onayi olmadan acilmamalidir. Gorev enabled bir MCP
-server ile eslesiyorsa stale memory veya tahmin yerine o server kullanilir.
-Eslesen server disabled veya unavailable ise nedeni soylenir ve en guvenli
-fallback ile devam edilir.
-
-Connector state degismeden once `mcp_integrator` uzmani kullanilmalidir. Bu
-uzman server adini, auth sinirini, approval mode'u, tool allowlist veya
-denylist'ini, startup/tool timeout'unu, dogrulama komutunu ve rollback notunu
-config degismeden once netlestirmelidir.
-
-## Tercih Edilecek Config Flagleri
-
-| Config alani | Kullanim |
-| --- | --- |
-| `enabled` | Auth, database, production, genis filesystem veya broad/destructive graph-indexing server'larini gerekene kadar kapali tutar. |
-| `default_tools_approval_mode` | Incelenmis dokumantasyon ve reasoning helper'lari icin `approve`; browser interaction, symbol edit, indexing, request/response detail, memory write, account, filesystem, database, production, deploy, publish veya mutating tool sunan server'larda `prompt`. |
-| `enabled_tools` / `disabled_tools` | Server'i workflow icin gereken spesifik tool'larla sinirlar; faydali default-enabled bir server mutating tool da sunuyorsa bu sinirlama zorunludur. |
-| `startup_timeout_sec` | Stdio server'a baslama suresi verir ama Codex'i sonsuza kadar bekletmez. |
-| `tool_timeout_sec` | Yavas browser, code-intelligence, docs veya external-account cagrisini sinirlar. |
-| `bearer_token_env_var`, `env_vars`, `env_http_headers` | Credential'i commit edilen dosya yerine environment variable'dan okur. |
-| `mcp_oauth_callback_port`, `mcp_oauth_callback_url` | OAuth provider sabit callback istiyorsa kullanilir. |
-
-MCP config degisince Codex'i yeniden baslat ve tool'lara guvenmeden once `/mcp`
-veya `codex mcp` ile aktif server'lari dogrula.
+Büyük resmi görmek için [agent kataloğuna](agents.tr.md), [skill
+kataloğuna](skills.tr.md) ve [workflow yüzey
+haritasına](workflow-surface-map.tr.md) geçebilirsin.

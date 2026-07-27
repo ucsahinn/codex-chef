@@ -39,6 +39,7 @@ operations, and broad filesystem access stay prompt-gated or disabled.
 ## Related Docs
 
 - [Codex capability map](../docs/codex-capability-map.md)
-- [Skills and agents](../docs/skills-and-agents.md)
+- [Agent catalog](../docs/agents.md)
+- [Skill catalog](../docs/skills.md)
 - [MCP catalog](../docs/mcp-catalog.md)
 - [Workflow surface map](../docs/workflow-surface-map.md)

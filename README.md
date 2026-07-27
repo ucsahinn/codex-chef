@@ -1,62 +1,95 @@
 # Codex Chef
 
 <p align="center">
-  <img src="assets/icon.svg" alt="Codex Chef icon" width="120" />
-  <br />
-  <img src="assets/banner.svg" alt="Codex Chef banner showing agents, MCPs, skills, verification, and multilingual docs" width="100%" />
+  <img src="assets/banner.svg" alt="Codex Chef: a safer, clearer setup for Codex with agents, skills, MCPs, approvals, and verification" width="100%" />
 </p>
 
 <p align="center">
-  <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validate workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
+  <a href="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml"><img alt="Validation workflow" src="https://github.com/ucsahinn/codex-chef/actions/workflows/validate.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/ucsahinn/codex-chef?color=0f766e" /></a>
   <a href="README.md"><img alt="Six README languages" src="https://img.shields.io/badge/readme-6%20languages-0f766e" /></a>
-  <img alt="Windows, macOS, Linux, and WSL ready" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-164e63" />
+  <img alt="Windows, macOS, Linux, and WSL" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-164e63" />
 </p>
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f310.svg" alt="" aria-hidden="true" width="20"> <strong>Docs:</strong>
-  <a href="README.de.md">Deutsch</a> |
-  <a href="README.es.md">Español</a> |
-  <a href="README.md">English</a> |
-  <a href="README.pt-BR.md">Português (Brasil)</a> |
-  <a href="README.tr.md">Türkçe</a> |
-  <a href="README.fr.md">Français</a>
+  <strong>Read in:</strong>
+  <a href="README.md">English</a> ·
+  <a href="README.tr.md">Türkçe</a> ·
+  <a href="README.de.md">Deutsch</a> ·
+  <a href="README.es.md">Español</a> ·
+  <a href="README.fr.md">Français</a> ·
+  <a href="README.pt-BR.md">Português (Brasil)</a>
 </p>
 
-<!-- bilingual-welcome:start -->
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>English</h3>
-      <p><strong>Codex Chef gives Codex a strong local operating setup without copying someone else’s machine.</strong> You get specialist agents, reviewed skills, conservative MCP defaults, preview-first installers, and checks you can run yourself.</p>
-    </td>
-    <td width="50%" valign="top">
-      <h3>Türkçe</h3>
-      <p><strong>Codex Chef, başkasının makinesini kopyalamadan Codex’e güçlü bir lokal çalışma düzeni kazandırır.</strong> Uzman ajanlar, incelenmiş skill’ler, temkinli MCP varsayılanları, ön izleme öncelikli installer’lar ve kendi çalıştırabileceğin kontroller sunar.</p>
-    </td>
-  </tr>
-</table>
-<!-- bilingual-welcome:end -->
+Getting Codex running is the easy part. Turning it into a setup that stays
+clear, useful, and safe after the first week takes much more work.
 
-Codex Chef is an unofficial community starter, not an OpenAI product. Its Codex guidance is based on official Codex documentation and is checked against the repository's current contracts. It supports Windows, macOS, Linux, and WSL, and keeps destructive, credentialed, database, publishing, deployment, and broad-filesystem actions behind explicit approval.
+I built **Codex Chef** because I kept solving the same setup problems: which
+agent should handle a task, which skill should guide it, which MCP is safe to
+use, what needs approval, and how to prove the result instead of trusting a
+confident answer.
 
-There are six README entry points for orientation. English and Turkish deep docs contain the complete operator guidance; the other language pages are concise, human-written routes into those canonical guides.
+Codex Chef is an unofficial community starter built around
+[official Codex documentation](https://developers.openai.com/codex). It gives
+you a reviewed, open-source starting point without copying somebody else's
+private machine, credentials, sessions, or local memory.
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="" aria-hidden="true" width="20"> Start With A Preview
+> **Built for Codex.** The ideas are portable to other terminal agents, but
+> this repository does not claim drop-in Claude or multi-client compatibility.
 
-Check the local prerequisites first:
+## 👋 Start With What You Need
 
-```powershell
-Get-Command git
-Get-Command node
-Get-Command npx
-Get-Command codex
-node -v
-```
+| Explore | What you will find |
+| --- | --- |
+| [🤖 See all 21 agents](docs/agents.md) | The specialist roles, what each one owns, and when delegation is actually useful. |
+| [🧩 Browse the skill catalog](docs/skills.md) | Six bundled workflows, sixteen reviewed full-install skills, and the optional references that stay out of the default path. |
+| [🔌 Open the MCP catalog](docs/mcp-catalog.md) | The eight useful defaults, the eight opt-in connectors, their requirements, and their access boundaries. |
+| [🛡️ Read the security model](docs/security-model.md) | Preview-first changes, backups, approval gates, secret handling, and the actions Codex Chef deliberately leaves to you. |
 
-Node.js 18 or newer is required. If a command is missing, start with [Troubleshooting](docs/troubleshooting.md).
+## 🍳 What Codex Chef Adds
 
-Clone and preview without changing your Codex home:
+### Agents: the right specialist, only when it helps
+
+The starter includes roles such as `code_mapper`, `root_cause_debugger`,
+`security_auditor`, `docs_author`, and `test_verifier`. They are not permanent
+background services. A matching role is guidance; Codex spawns a subagent only
+when the work can be split safely or you ask for delegation.
+
+[Meet every agent and see its real role file →](docs/agents.md)
+
+### Skills: a reliable way to repeat a workflow
+
+Skills teach Codex how to handle a focused job. Codex sees a short description
+first and loads the full instructions only when the task matches. Codex Chef
+ships six local plugin workflows and offers sixteen reviewed skills through the
+full install profile.
+
+[See what is bundled, installed, and optional →](docs/skills.md)
+
+### MCPs: tools and live context with visible boundaries
+
+MCP connects Codex to documentation, browsers, semantic code navigation,
+memory, and codebase graph reads. `openaiDeveloperDocs`, `context7`,
+`playwright`, `chrome-devtools`, `serena`, `memory`,
+`sequential-thinking`, and `codebase-memory` are configured as useful defaults.
+Account, database, production, and broad-filesystem connectors stay off until
+you deliberately enable them.
+
+[See every MCP, prerequisite, and access boundary →](docs/mcp-catalog.md)
+
+## 🧭 How The Pieces Fit Together
+
+<p align="center">
+  <img src="assets/workflow-overview.svg" alt="A task moves through routing to an agent, skill, or MCP, asks for approval when needed, and ends with verification" width="100%" />
+</p>
+
+You describe the task. Routing chooses the narrowest useful surface. Risky
+actions pause for approval. Verification checks what actually happened.
+
+## 🚀 Preview First, Install Second
+
+You need Git, Node.js 18 or newer, npm/npx, and Codex. If one is missing, use
+the [installation guide](docs/install.md) instead of guessing.
 
 ```powershell
 git clone https://github.com/ucsahinn/codex-chef.git
@@ -64,111 +97,70 @@ cd codex-chef
 npm run chef -- --install
 ```
 
-Install only after the preview looks right:
+The first command is a preview. It shows what Codex Chef would manage without
+writing to your Codex home.
+
+When the preview looks right:
 
 ```powershell
 npm run chef -- --install --apply
 ```
 
-macOS, Linux, or WSL:
+The same commands work on macOS, Linux, and WSL. The installer backs up managed
+targets before replacement and does not prune user-owned skills, MCPs, profiles,
+or unrelated plugin files.
 
-```bash
-git clone https://github.com/ucsahinn/codex-chef.git
-cd codex-chef
-npm run chef -- --install
-npm run chef -- --install --apply
-```
-
-The installer backs up managed targets before replacement. Normal install and repair do not prune user-owned skills, MCPs, profiles, or unrelated plugin files.
-The colorful CLI is the recommended public entry point. Advanced/manual automation can call
-`scripts\install.ps1` on Windows or `scripts/install.sh` on Bash systems; the manifest-backed
-operation contract is available through `node scripts/plan-install.mjs --all --json --redact-paths`.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a1.svg" alt="" aria-hidden="true" width="20"> Use The CLI Without Guessing
-
-Run `npm run chef` for the numbered command center.
+### Three commands worth remembering
 
 | Need | Command |
 | --- | --- |
-| Fast repository health | `npm run chef -- --status --repo-only --no-log` |
-| Full status board | `npm run codex:status` |
-| Install preview | `npm run chef -- --preview` |
-| Routing map | `npm run chef -- --routing --profile starter-health` |
-| Diagnostics | `npm run chef -- --diagnostics --no-log` |
-| Process audit | `npm run chef -- --processes` |
-| Repair managed files | `npm run chef -- --repair`, then `npm run chef -- --repair --apply` |
-| Update preview | `npm run chef -- --update --plain --no-log` |
-| Update and verify | `npm run chef -- --update --apply` |
+| Preview the install | `npm run chef -- --install` |
+| Check repo health | `npm run chef -- --status --repo-only --no-log` |
+| See the routing contract | `npm run chef -- --routing --profile starter-health` |
 
-Inspection commands stay read-only. Write-capable commands require `--apply` or an action-specific typed confirmation. Use `--no-log` when you do not want the CLI to create its normal redacted, repo-local diagnostic record.
+Repair, diagnostics, updates, process checks, expected output, and direct
+installer commands live in the [operator documentation](docs/README.md).
 
-Detailed CLI behavior lives in [Installation](docs/install.md), [Expected
-output](docs/expected-output.md), and [Troubleshooting](docs/troubleshooting.md).
+## 🛡️ Safe Defaults, Not Hidden Access
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f373.svg" alt="" aria-hidden="true" width="20"> What Lands On Your Machine
+- Destructive actions, credential access, database work, publishing, releases,
+  deployments, and broad filesystem access stay behind explicit approval.
+- Authenticated connectors such as GitHub, Figma, Linear, Notion, Sentry,
+  Vercel, and Supabase are not enabled just because they exist in the catalog.
+- Codex Chef does not import browser sessions, copy private memory, store
+  secrets, send maintainer telemetry, or silently commit and push your work.
 
-| Surface | What you get |
-| --- | --- |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" alt="" aria-hidden="true" width="20"> Agents | 21 named specialist role files. They are available for bounded delegation, not always-running background services. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e9.svg" alt="" aria-hidden="true" width="20"> Skills | Six bundled plugin workflows, including the project-scoped Codex Chef Brain, and sixteen reviewed optional global skills. Skills load when the task matches; they do not execute by themselves. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f50c.svg" alt="" aria-hidden="true" width="20"> MCPs | Eight useful defaults for official docs, current library docs, reasoning, browser evidence, semantic navigation, memory reads, and local codebase graph reads through `codebase-memory`. Eight account, database, production, and broad-filesystem connectors stay off. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9e0.svg" alt="" aria-hidden="true" width="20"> Guidance | A durable `~/.codex/AGENTS.md`, routing profiles, approval rules, and token-safe profile choices that do not pin every agent to one model. |
-| <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6e1.svg" alt="" aria-hidden="true" width="20"> Safety | Dry runs, manifest-backed install plans, backup-first replacement, secret scanning, package-surface checks, and runtime verification. |
-
-Installed skills do not execute by themselves; Codex loads them when a request
-matches their description or the user names one. Agent role selection is
-automatic, but spawning is conditional: delegation is reserved for independent
-parallel work, noisy research isolation, or an explicit user request.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6ab.svg" alt="" aria-hidden="true" width="20"> What It Deliberately Does Not Do
-
-- It does not store secrets, import browser sessions, copy private memories, or send telemetry to a maintainer service.
-- It does not enable GitHub, Figma, Linear, Notion, Sentry, Vercel, Supabase, or broad filesystem access by default.
-- It does not commit, push, tag, release, deploy, publish packages, rotate credentials, or change GitHub settings.
-- It does not delete user data to make validation pass.
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3ac.svg" alt="" aria-hidden="true" width="20"> See The Workflow
-
-<p align="center">
-  <img src="assets/workflow-overview.svg" alt="Workflow overview showing install, route, research, implement, and verify steps" width="100%" />
-</p>
-
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2705.svg" alt="" aria-hidden="true" width="20"> Trust Signals
-
-- `npm run check` validates docs, installers, agents, MCPs, skills, routing, package contents, release metadata, supply-chain indicators, and security boundaries.
-- CI covers the Windows installer, Ubuntu with Node.js 18, and macOS with Node.js 24.
-- `manifests/install-plan.json` describes the managed write surface before an installer runs.
-- Authenticated and high-risk connectors remain opt-in.
-- The repository is `private: true` in npm metadata, so this source-first project cannot be published to npm by accident.
-
-Verify locally:
+Want to verify the repository yourself?
 
 ```bash
 npm run check
-npm run token:audit
-npm run verify:skills:online
-git diff --check
-gitleaks detect --redact --no-banner --no-git --verbose
 ```
 
-For long or repository-wide sessions, `npm run token:audit` shows which context surfaces carry the most weight. The optional `token-safe.config.toml` profile lowers verbosity and tool-output limits without disabling agents, skills, MCPs, memory, hooks, or apps. Agent roles do not pin a model; automatic `model/reasoning` selection follows the active user profile.
+The check covers docs, installers, agents, skills, MCPs, routing, package
+contents, supply-chain indicators, and security boundaries.
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4da.svg" alt="" aria-hidden="true" width="20"> Documentation
+## 📚 Go Deeper Without Digging Around
 
 - [Documentation map](docs/README.md)
-- [Türkçe dokümantasyon haritası](docs/README.tr.md)
-- [Installation](docs/install.md)
-- [Security model](docs/security-model.md)
-- [Skills and agents](docs/skills-and-agents.md)
+- [Installation and safe preview](docs/install.md)
+- [Agents](docs/agents.md)
+- [Skills and plugins](docs/skills.md)
 - [MCP catalog](docs/mcp-catalog.md)
-- [Public readiness](docs/public-readiness.md)
-- [Advisory sources](docs/advisory-sources.md)
 - [Knowledge base](kb/README.md)
-- [Türkçe bilgi bankası](kb/README.tr.md)
-- [Agent-readable index](llms.txt)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Contributing](CONTRIBUTING.md), [support](SUPPORT.md), and
+  [private security reporting](SECURITY.md)
+- [Short index for agents](llms.txt)
 
-## <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f91d.svg" alt="" aria-hidden="true" width="20"> Contributing And Support
+English and Turkish deep docs contain the complete operator guidance. The other
+four README entry points are concise, human-written routes into those guides.
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a change and [SUPPORT.md](SUPPORT.md) before sharing diagnostics. Security reports belong in the private route described by [SECURITY.md](SECURITY.md).
+## 🤝 Feedback Is Welcome
 
-MIT licensed. Community maintained.
+Codex Chef grew out of real setup friction, and I am still improving it. If a
+section is unclear, a catalog entry feels wrong, or the first run makes you
+hesitate, please open an issue and tell me where.
+
+If the project saves you time, a GitHub star helps more people find it. ⭐
+
+MIT licensed. Community maintained. Not an OpenAI product.

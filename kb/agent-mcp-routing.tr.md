@@ -40,6 +40,7 @@ kalır.
 ## İlgili Dokümanlar
 
 - [Codex capability map](../docs/codex-capability-map.tr.md)
-- [Skills ve ajanlar](../docs/skills-and-agents.tr.md)
+- [Agent kataloğu](../docs/agents.tr.md)
+- [Skill kataloğu](../docs/skills.tr.md)
 - [MCP kataloğu](../docs/mcp-catalog.tr.md)
 - [Workflow surface map](../docs/workflow-surface-map.tr.md)

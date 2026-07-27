@@ -1272,28 +1272,24 @@ for (const [file, snippets] of Object.entries({
   "README.md": [
     "npm run chef",
     "npm run chef -- --status --repo-only",
-    "npm run chef -- --preview",
-    "npm run chef -- --repair --apply",
+    "npm run chef -- --install",
+    "npm run chef -- --install --apply",
     "npm run chef -- --routing",
-    "npm run chef -- --diagnostics",
-    "npm run chef -- --processes",
     "npm run chef -- --status --repo-only --no-log",
-    "Detailed CLI behavior lives in",
-    "Installed skills do not execute by themselves",
-    "spawning is conditional"
+    "operator documentation",
+    "Skills teach Codex how to handle a focused job",
+    "Codex spawns a subagent only"
   ],
   "README.tr.md": [
     "npm run chef",
     "npm run chef -- --status --repo-only",
-    "npm run chef -- --preview",
-    "npm run chef -- --repair --apply",
+    "npm run chef -- --install",
+    "npm run chef -- --install --apply",
     "npm run chef -- --routing",
-    "npm run chef -- --diagnostics",
-    "npm run chef -- --processes",
     "npm run chef -- --status --repo-only --no-log",
-    "Detaylı CLI davranışı",
-    "Skill'ler kendiliğinden çalışmaz",
-    "Ajan rolü otomatik seçilir ama spawn"
+    "operatör dokümantasyonunda",
+    "Skill, Codex'e belirli bir işi hangi adımlarla yapacağını anlatır",
+    "Codex ancak iş güvenli biçimde bölünebiliyorsa"
   ],
   "docs/verification.md": [
     "npm run validate:chef-cli",

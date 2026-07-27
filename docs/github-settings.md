@@ -7,7 +7,7 @@ Current published baseline: **v0.5.57**.
 ## Description
 
 ```text
-Cross-platform Codex setup kit with specialist agents, curated skills, conservative MCP defaults, preview-first installers, and release-grade validation.
+A cross-platform Codex setup kit with specialist agents, curated skills, safe MCP defaults, preview-first installation, and clear verification.
 ```
 
 ## Topics
