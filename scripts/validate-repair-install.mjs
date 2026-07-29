@@ -33,6 +33,10 @@ function runRepair(args, codexHome, agentsHome, cwd = root) {
   ], {
     cwd,
     encoding: "utf8",
+    env: {
+      ...process.env,
+      CODEX_CHEF_CODEX_COMMAND: "codex-chef-missing-fixture-command"
+    },
     stdio: ["ignore", "pipe", "pipe"],
     timeout: 120000,
     windowsHide: true

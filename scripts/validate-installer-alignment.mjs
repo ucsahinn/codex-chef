@@ -14,6 +14,8 @@ const sh = fs.readFileSync(path.join(root, "scripts", "install.sh"), "utf8");
 const pinnedSkillHelper = fs.readFileSync(path.join(root, "scripts", "install-pinned-skill.mjs"), "utf8");
 const pinnedSkillActivation = fs.readFileSync(path.join(root, "scripts", "lib", "pinned-skill-activation.mjs"), "utf8");
 const marketplaceHelper = fs.readFileSync(path.join(root, "scripts", "upsert-marketplace-entry.mjs"), "utf8");
+const pluginRefreshHelper = fs.readFileSync(path.join(root, "scripts", "refresh-installed-plugin.mjs"), "utf8");
+const repairHelper = fs.readFileSync(path.join(root, "scripts", "repair-install.mjs"), "utf8");
 
 function fail(message) {
   failures.push(message);
@@ -224,6 +226,8 @@ requireText(ps, "marketplace.json", "PowerShell installer");
 requireText(ps, "upsert-marketplace-entry.mjs", "PowerShell installer");
 requireText(ps, "Upsert Codex Chef plugin marketplace entry", "PowerShell installer");
 requireText(ps, "Cannot update plugin marketplace because it is invalid or unreadable", "PowerShell installer");
+requireText(ps, "refresh-installed-plugin.mjs", "PowerShell installer");
+requireText(ps, "Refresh installed Codex Chef plugin cache", "PowerShell installer");
 requireText(ps, "successful dry run or install", "PowerShell installer");
 requireRegex(ps, /exit\s+0\s*$/m, "PowerShell installer");
 requireText(ps, "templates\\git\\.gitignore_global", "PowerShell installer");
@@ -300,6 +304,8 @@ requireText(sh, "marketplace.json", "Bash installer");
 requireText(sh, "upsert-marketplace-entry.mjs", "Bash installer");
 requireText(sh, "Would upsert Codex Chef plugin marketplace entry", "Bash installer");
 requireText(sh, "Cannot update plugin marketplace because it is invalid or unreadable", "Bash installer");
+requireText(sh, "refresh-installed-plugin.mjs", "Bash installer");
+requireText(sh, "Refresh installed Codex Chef plugin cache", "Bash installer");
 requireText(sh, "Backup failed; refusing to replace managed target without a backup", "Bash installer");
 requireText(sh, "Failed to replace existing managed directory", "Bash installer");
 requireText(sh, "templates/git/.gitignore_global", "Bash installer");
@@ -405,6 +411,11 @@ requireText(marketplaceHelper, "sourceMarketplacePath", "Marketplace upsert help
 requireText(marketplaceHelper, "--check", "Marketplace upsert helper");
 requireText(marketplaceHelper, "--write", "Marketplace upsert helper");
 requireText(marketplaceHelper, "stableJson", "Marketplace upsert helper");
+requireText(pluginRefreshHelper, '["plugin", "list", "--json"]', "Installed plugin refresh helper");
+requireText(pluginRefreshHelper, '["plugin", "add", PLUGIN_ID, "--json"]', "Installed plugin refresh helper");
+requireText(pluginRefreshHelper, 'status: "not-installed"', "Installed plugin refresh helper");
+requireText(repairHelper, 'import { PLUGIN_ID, refreshInstalledPlugin } from "./refresh-installed-plugin.mjs"', "Repair helper");
+requireText(repairHelper, "pluginRefresh = refreshInstalledPlugin", "Repair helper");
 runMarketplaceHelperSmokes();
 
 function validatePortabilityContracts() {

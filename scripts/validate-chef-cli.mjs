@@ -99,15 +99,30 @@ function runCliSmoke(name, cliArgs, expectedSnippets, extra = {}) {
 
 function runCliSmokeRaw(name, cliArgs, extra = {}) {
   const expectedStatus = extra.expectedStatus ?? 0;
+  const requestedEnv = extra.env || {};
+  const childEnv = {
+    ...process.env,
+    ...requestedEnv
+  };
+  const forceColor = String(childEnv.FORCE_COLOR || "").toLowerCase();
+  if (
+    forceColor !== "" &&
+    forceColor !== "0" &&
+    forceColor !== "false" &&
+    Object.hasOwn(requestedEnv, "NO_COLOR")
+  ) {
+    fail(`chef-cli smoke ${name} must not export NO_COLOR while FORCE_COLOR is enabled`);
+    return { ok: false, output: "", stdout: "", stderr: "" };
+  }
+  if (forceColor !== "" && forceColor !== "0" && forceColor !== "false") {
+    delete childEnv.NO_COLOR;
+  }
   const result = spawnSync(process.execPath, [path.join(root, "scripts/chef-cli.mjs"), ...cliArgs], {
     cwd: extra.cwd || root,
     encoding: "utf8",
     input: extra.input,
     stdio: [extra.input === undefined ? "ignore" : "pipe", "pipe", "pipe"],
-    env: {
-      ...process.env,
-      ...(extra.env || {})
-    },
+    env: childEnv,
     windowsHide: true,
     timeout: extra.timeout || 180000
   });
@@ -428,8 +443,7 @@ function runMenuTranscriptSmoke() {
   const rich = runCliSmokeRaw("menu-rich-transcript", ["--no-log"], {
     env: {
       CODEX_CHEF_TEST_MENU: "1",
-      FORCE_COLOR: "1",
-      NO_COLOR: ""
+      FORCE_COLOR: "1"
     },
     input: "q\n",
     timeout: 30000
@@ -1356,8 +1370,7 @@ runCliSmoke("forced-color", ["--help", "--no-log"], [
   "Codex Chef CLI"
 ], {
   env: {
-    FORCE_COLOR: "1",
-    NO_COLOR: ""
+    FORCE_COLOR: "1"
   },
   expectAnsi: true
 });
@@ -1389,8 +1402,7 @@ runCliSmoke("mcp-forced-color", ["--mcp", "--details", "--no-log"], [
   "Authenticated account, database, production, broad filesystem, and graph-indexing MCP connectors stay disabled by default."
 ], {
   env: {
-    FORCE_COLOR: "1",
-    NO_COLOR: ""
+    FORCE_COLOR: "1"
   },
   expectAnsi: true
 });
@@ -1645,8 +1657,7 @@ runCliSmoke("routing-rich-narrow", ["--routing", "--details", "--no-log"], [
 ], {
   env: {
     COLUMNS: "72",
-    FORCE_COLOR: "1",
-    NO_COLOR: ""
+    FORCE_COLOR: "1"
   },
   maxVisualWidth: 72,
   expectAnsi: true

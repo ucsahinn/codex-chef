@@ -24,6 +24,7 @@
 .serena/
 .codebase-memory/
 .playwright-mcp/
+.playwright-cli/
 codex-manual.md
 codex-manual.outline.md
 

@@ -223,6 +223,14 @@ direct-skill ownership, and every existing path component are preflighted
 before installers write any managed file. Linked or junctioned descendants
 that escape the configured homes fail closed.
 
+After that explicit first plugin install, installer, repair, and update applies
+inspect the installed plugin version through the targeted `CODEX_HOME`. They
+run `codex plugin add codex-chef-workflows@codex-chef --json` only when the
+plugin is already installed and its versioned cache is stale, then read the
+installed version again before reporting success. A missing or uninstalled
+plugin remains uninstalled, and a failed refresh fails closed instead of
+claiming runtime parity.
+
 ## Repair Mode
 
 `scripts/repair-install.mjs` is the repair/reconcile path for users who already
@@ -231,7 +239,8 @@ managed drift, missing config blocks, marketplace drift, extra managed plugin
 files, non-curated skills, and duplicate skill names. With `--apply`, it backs
 up and repairs only Codex Chef-managed files, merges missing config blocks, and
 updates the Codex Chef marketplace entry while preserving unrelated marketplace
-plugins.
+plugins. It also reports or refreshes stale versioned cache state only for an
+already-installed Codex Chef plugin.
 
 Repair mode does not delete user skills. Extra global skills and duplicate
 skill names are cleanup candidates because they can pressure Codex's initial
@@ -252,7 +261,9 @@ from the updated tree and stops. If the repository is already current, it runs
 local validation before the managed refresh, then refreshes scoped managed
 Codex Chef files through the backup-backed installer. That refresh may backup
 and replace scoped managed targets, including the managed Codex Chef plugin
-directory. It does not publish, perform unscoped cleanup, install curated
+directory, and refreshes an already-installed stale plugin cache in place. It
+does not install the plugin for users who have not opted in or publish. It does
+not perform unscoped cleanup, install curated
 global skills, install optional global Git guards, delete user skills, rotate
 credentials, or enable account/database/broad-filesystem connectors.
 

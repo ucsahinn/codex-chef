@@ -220,7 +220,7 @@ test("release note extraction consumes options instead of falling back silently"
   for (const args of [
     ["--check", "--tga", "v0.0.0"],
     ["--check", "--tag"],
-    ["--check", "--tag", "v0.5.57", "--tag", "v0.0.0"]
+    ["--check", "--tag", "v0.5.58", "--tag", "v0.0.0"]
   ]) {
     const result = run("scripts/extract-release-notes.mjs", args);
     assert.equal(result.status, 2);
@@ -230,7 +230,7 @@ test("release note extraction consumes options instead of falling back silently"
   const equalsResult = run("scripts/extract-release-notes.mjs", ["--check", "--tag=v0.0.0"]);
   assert.equal(equalsResult.status, 1);
   assert.match(equalsResult.stderr, /does not contain a section for v0\.0\.0/);
-  assert.doesNotMatch(equalsResult.stdout, /v0\.5\.57/);
+  assert.doesNotMatch(equalsResult.stdout, /v0\.5\.58/);
   assertNoStack(equalsResult);
 });
 
@@ -243,7 +243,7 @@ test("release note output refuses a linked in-repository ancestor", () => {
     const relativeOut = path.relative(root, path.join(link, "notes.md"));
     const result = run("scripts/extract-release-notes.mjs", [
       "--tag",
-      "v0.5.57",
+      "v0.5.58",
       "--out",
       relativeOut
     ]);

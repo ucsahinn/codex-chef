@@ -87,7 +87,7 @@ test("release readiness Git-state branches are deterministic", async (context) =
     withFixture((fixture) => {
       const result = runFixture(fixture);
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stdout, /Release readiness validation passed for v0\.5\.57\./);
+      assert.match(result.stdout, /Release readiness validation passed for v0\.5\.58\./);
     });
   });
 
@@ -171,20 +171,20 @@ test("release readiness Git-state branches are deterministic", async (context) =
       assert.equal(result.status, 1);
       assert.match(result.stderr, /Could not inspect git status/);
       assert.match(result.stderr, /Could not inspect tracked files/);
-      assert.match(result.stderr, /Could not inspect existing tag v0\.5\.57/);
+      assert.match(result.stderr, /Could not inspect existing tag v0\.5\.58/);
     }, { initializeGit: false });
   });
 
   await context.test("existing expected tag is strict-fail and allow-dirty warning", () => {
     withFixture((fixture) => {
-      runGit(fixture, ["tag", "v0.5.57"]);
+      runGit(fixture, ["tag", "v0.5.58"]);
       const strict = runFixture(fixture);
       assert.equal(strict.status, 1);
-      assert.match(strict.stderr, /Tag v0\.5\.57 already exists locally/);
+      assert.match(strict.stderr, /Tag v0\.5\.58 already exists locally/);
 
       const diagnostic = runFixture(fixture, ["--allow-dirty"]);
       assert.equal(diagnostic.status, 0, diagnostic.stderr);
-      assert.match(diagnostic.stderr, /Warning: Tag v0\.5\.57 already exists locally/);
+      assert.match(diagnostic.stderr, /Warning: Tag v0\.5\.58 already exists locally/);
     });
   });
 

@@ -77,7 +77,10 @@ applies backup-backed reconciliation for Codex Chef-managed guidance, rules,
 agent/profile files, the bundled plugin, all nine managed direct local
 workflows, missing config blocks, and the local plugin marketplace entry. It
 preserves unrelated marketplace plugins and never deletes user skills; extra
-or duplicate global skills are reported as cleanup candidates.
+or duplicate global skills are reported as cleanup candidates. If the
+namespaced Codex Chef plugin is already installed, preview reports a stale
+versioned plugin cache and apply refreshes it in place. Repair never installs
+the plugin for a user who has not already installed it.
 
 Update an existing checkout and managed setup through the guided CLI:
 
@@ -97,7 +100,9 @@ verifies installed-runtime parity. If the repo is already current, apply refresh
 files through the backup-backed update mode. Update replaces Codex Chef-owned files, synchronizes
 managed config tables, and preserves user-owned `config.toml` settings. It does not install curated global skills
 or optional global Git guards; use `--install --apply` or `--skills --apply`
-when you want those explicit surfaces.
+when you want those explicit surfaces. An already-installed namespaced Codex
+Chef plugin is refreshed and version-verified after its managed source is
+synchronized; update leaves an uninstalled plugin uninstalled.
 
 Inspect or restore Codex Chef backup archives through the same CLI:
 
@@ -239,7 +244,9 @@ Useful switches:
   does not install or enable the plugin. To use
   `$codex-chef-workflows:<skill-name>`, run `codex plugin add
   codex-chef-workflows@codex-chef --json` (or use `/plugins`) and start a new
-  Codex session.
+  Codex session. After that explicit first install, later installer, update,
+  and repair applies refresh a stale versioned plugin cache in place and verify
+  the active version. They do not install the plugin before that opt-in.
 - The personal marketplace reads its plugin mirror from
   `AGENTS_HOME/plugins/sources/codex-chef-workflows` through a path relative to
   the marketplace root. A custom `AGENTS_HOME` is an installer destination,

@@ -643,6 +643,16 @@ else
   fi
 fi
 
+PLUGIN_REFRESH_HELPER="$REPO_ROOT/scripts/refresh-installed-plugin.mjs"
+PLUGIN_REFRESH_ARGS=("$PLUGIN_REFRESH_HELPER" "--codex-home" "$CODEX_HOME_DIR")
+if [ "$DRY_RUN" -ne 1 ]; then
+  PLUGIN_REFRESH_ARGS+=("--apply")
+fi
+if ! node "${PLUGIN_REFRESH_ARGS[@]}"; then
+  echo "Refresh installed Codex Chef plugin cache failed." >&2
+  exit 1
+fi
+
 if [ "$INSTALL_GIT_GUARDS" -eq 1 ]; then
   section "Optional Git guards"
   GITIGNORE_TARGET="$HOME/.gitignore_global"

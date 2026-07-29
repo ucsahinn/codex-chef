@@ -2,20 +2,21 @@
 
 This page follows the release users should install now. Older engineering history remains available in [CHANGELOG.md](../CHANGELOG.md), so the public release guide stays useful instead of becoming an ever-growing archive.
 
-## v0.5.57 - 2026-07-26
+## v0.5.58 - 2026-07-29
 
-Codex Chef 0.5.57 makes installation, skill, MCP, and status screens reflect the setup actually present on the machine. It also adds the canonical Brain control workspace for project, goal, knowledge, decision, and memory coordination.
+Codex Chef 0.5.58 adds security-bounded Fetch, SEO, and Evidence Research workflows, strengthens managed skill installation and CLI error contracts, and restores a clean Ubuntu/Node.js 18 portability gate without weakening Windows or macOS behavior.
 
 ### What Changed
 
-- Detects fresh, incomplete, current, drifted, and invalid-skill installation states before an interactive full install.
-- Previews fresh installs before typed `APPLY`, exits cleanly when the complete setup is already current, and routes managed drift to backup-backed repair.
-- Verifies curated skills through a real `SKILL.md` and labels each one ready, missing, or invalid; user-installed skills remain preserved.
-- Separates installed MCP config from catalog defaults and reports enabled, disabled, not-configured, and user-added connectors without claiming a live health probe.
-- Keeps the normal status board concise; `--details` restores per-MCP, routing, context-budget, setup-note, target/ambient, and log evidence.
-- Corrects approval/account-guidance counts and removes the second nested confirmation from force refresh after Chef already received typed approval.
-- Adds the canonical bilingual Brain workspace, Obsidian control canvases, dashboard, and structured project, goal, knowledge, decision, personal, memory, and archive surfaces.
-- Extends Windows/Bash temporary-home, idempotence, CLI transcript, Turkish, documentation, package, security, and release regression coverage.
+- Adds the explicit-only `$fetch` workflow for authorized, browser-evidenced website reconstruction with public-passive defaults, inert authentication, prompt-injection and SSRF boundaries, lawful asset handling, zero-egress local output, and deterministic report validation.
+- Replaces the upstream SEO reference with a Chef-owned `$seo` workflow that separates local, rendered, deployed, field, and account evidence while validating claim-safe technical, content, international, and local SEO reports.
+- Adds `$evidence-research` for scoped search, screening, source appraisal, claim-level traceability, disagreement and uncertainty synthesis, reproducibility, and ethics-aware decision packages.
+- Installs Fetch, SEO, and Evidence Research from the canonical plugin source as managed direct skills with fail-closed collision checks, explicit per-skill adoption, backup-backed replacement, rollback verification, and runtime parity checks.
+- Refreshes an already-installed Codex Chef plugin's stale versioned cache during installer, update, and repair applies, verifies the active version, and leaves never-installed plugins untouched.
+- Hardens commit-pinned skill installation with exact native-tree hashing, provenance-aware managed upgrades, foreign-target preservation, mandatory backups, and functional full-history fetch support.
+- Adds a shared sanitized plain/JSON error contract and truthful result receipts across Chef, status, routing, doctor, Brain, external-review, release-note, and pinned-skill CLIs.
+- Tightens token-budget diagnostics, external-review containment, credential-path screening, MCP/runtime catalog alignment, approval boundaries, installer checks, and supply-chain verification.
+- Removes contradictory `NO_COLOR` inheritance from forced-color smoke tests so Node.js 18 no longer emits a warning that breaks the Ubuntu 72-column portability gate.
 
 ### Install Or Upgrade
 

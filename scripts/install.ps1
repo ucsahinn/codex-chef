@@ -658,6 +658,16 @@ if ($marketplaceCheckExit -eq 2) {
   throw "Cannot update plugin marketplace because it is invalid or unreadable: $MarketplacePath"
 }
 
+$PluginRefreshHelper = Join-Path $RepoRoot "scripts\refresh-installed-plugin.mjs"
+$PluginRefreshArgs = @($PluginRefreshHelper, "--codex-home", $CodexHome)
+if (-not $WhatIfPreference) {
+  $PluginRefreshArgs += "--apply"
+}
+& node @PluginRefreshArgs
+if ($LASTEXITCODE -ne 0) {
+  throw "Refresh installed Codex Chef plugin cache failed with code $LASTEXITCODE."
+}
+
 if ($InstallGitGuards) {
   Write-Section "Optional Git guards"
   $GitIgnoreSource = Join-Path $RepoRoot "templates\git\.gitignore_global"

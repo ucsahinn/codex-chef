@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.58 - 2026-07-29
+
 - Add the explicit-only `fetch` bundled skill for authorized, browser-evidenced website reconstruction with public-passive defaults, inert authentication, prompt-injection and SSRF boundaries, lawful asset handling, zero-egress local output, fidelity reporting, and deterministic report validation.
 - Replace the upstream SEO reference with a Chef-owned `$seo` workflow that separates local, rendered, deployed, field, and account evidence; corrects retired or restricted Google Search features; implements technical/content/international/local guidance; and validates claim-safe audit reports.
 - Add the Chef-owned `$evidence-research` workflow for scoped search, screening, appraisal, claim-level traceability, disagreement and uncertainty synthesis, reproducibility, and ethics-aware decision packages.
@@ -9,6 +11,8 @@
 - Add a shared, sanitized plain/JSON error contract and truthful result receipts across the Chef, status, routing, doctor, Brain, external-review, release-note, and pinned-skill CLIs; expand Continuity and runtime health evidence without exposing local secrets.
 - Harden commit-pinned skill installation with native exact-tree hashing, provenance-aware managed upgrades, foreign-target preservation, explicit per-skill adoption, mandatory replacement backups, rollback verification, and functional full-history fetch support.
 - Correct layered token-budget diagnostics, tighten external-review snapshot and credential-path containment, align MCP/runtime catalogs and approval boundaries, and expand release, installer, CLI, security, and cross-platform verification coverage.
+- Keep forced-color CLI validation hermetic across Node.js versions by removing contradictory `NO_COLOR` inheritance, preventing Node.js 18 warnings from breaking the Ubuntu portability gate.
+- Refresh an already-installed Codex Chef plugin's stale versioned cache during installer, update, and repair applies, verify the active version afterward, and leave never-installed plugins untouched.
 
 ## 0.5.57 - 2026-07-26
 

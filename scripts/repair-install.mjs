@@ -18,6 +18,7 @@ import {
   installCliErrorBoundary,
   requireCliValue
 } from "./lib/cli-error-contract.mjs";
+import { PLUGIN_ID, refreshInstalledPlugin } from "./refresh-installed-plugin.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
@@ -851,6 +852,7 @@ function writeBackupManifest() {
 let managedFiles;
 let config;
 let marketplace;
+let pluginRefresh;
 let skills;
 let legacyProfileMigration;
 
@@ -913,6 +915,23 @@ try {
   config = runConfigMerge();
   legacyProfileMigration = migrateLegacyProfilePins();
   marketplace = repairMarketplace();
+  pluginRefresh = refreshInstalledPlugin({
+    apply: options.apply,
+    codexHome: options.codexHome,
+    expectedVersion: readJson("plugins/codex-chef-workflows/.codex-plugin/plugin.json").version,
+    platform: options.platform
+  });
+  if (pluginRefresh.status === "planned" || pluginRefresh.status === "refreshed") {
+    recordAction({
+      id: "installed-plugin-cache",
+      kind: "refresh-installed-plugin-cache",
+      target: PLUGIN_ID,
+      status: pluginRefresh.status === "refreshed" ? "applied" : "planned",
+      reason: `installed Codex Chef plugin cache is ${pluginRefresh.currentVersion || pluginRefresh.previousVersion || "unknown"}; expected ${pluginRefresh.expectedVersion}`
+    });
+  } else if (pluginRefresh.warning) {
+    notes.push(pluginRefresh.warning);
+  }
   skills = inspectSkills();
   writeBackupManifest();
 } catch (error) {
@@ -957,6 +976,7 @@ const report = {
   managedFiles,
   config,
   marketplace,
+  pluginRefresh,
   skills,
   legacyProfileMigration,
   actions,
@@ -991,6 +1011,9 @@ if (options.json) {
   }
   if (marketplace) {
     console.log(`Marketplace: ${marketplace.status}`);
+  }
+  if (pluginRefresh) {
+    console.log(`Plugin cache: ${pluginRefresh.status}`);
   }
   if (skills) {
     console.log(`Skills: ${skills.installed} unique installed (${skills.expected} curated expected, ${skills.missing.length} missing, ${skills.extraCount} non-curated, ${skills.duplicateCount} duplicate names)`);

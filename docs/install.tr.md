@@ -77,6 +77,9 @@ dokuz yönetilen direct lokal workflow, eksik config bloklari ve local plugin
 marketplace kaydi icin once no-write plan verir, sonra istenirse backup alarak
 onarir. Baska marketplace plugin'lerini korur ve user skill'lerini silmez;
 fazla veya duplicate global skill'leri cleanup adayi olarak raporlar.
+Namespaced Codex Chef plugin'i zaten kuruluysa preview eski versioned plugin
+cache'ini raporlar, apply ise cache'i yerinde yeniler. Repair, plugin'i daha
+once kurmamis bir kullanici icin kendiliginden kurmaz.
 
 Mevcut checkout ve managed setup'i guided CLI ile guncelle:
 
@@ -94,7 +97,9 @@ kurulu ortam doğrulamasıyla devam eder; ikinci çalıştırma gerekmez. Repo z
 Update Codex Chef'e ait dosyalari backup sonrasinda yeniler, managed config tablolarini
 senkronlar ve kullaniciya ait `config.toml` ayarlarini korur. curated global skill veya
 opsiyonel global Git guard kurmaz; bunlar icin
-`--install --apply` veya `--skills --apply` yuzeylerini acikca kullan.
+`--install --apply` veya `--skills --apply` yuzeylerini acikca kullan. Daha
+once kurulmus namespaced Codex Chef plugin'i managed kaynak senkronundan sonra
+yenilenir ve aktif surumu dogrulanir; kurulu olmayan plugin kurulu olmadan kalir.
 
 Codex Chef backup archive'larini ayni CLI ile incele veya geri yukle:
 
@@ -238,7 +243,9 @@ Kullanışlı parametreler:
   keşfedilebilir yapar; kurmaz veya etkinleştirmez.
   `$codex-chef-workflows:<skill-adı>` çağrıları için `codex plugin add
   codex-chef-workflows@codex-chef --json` komutunu (veya `/plugins` yüzeyini)
-  kullanıp yeni bir Codex oturumu başlat.
+  kullanıp yeni bir Codex oturumu başlat. Bu açık ilk kurulumdan sonra
+  installer, update ve repair apply akışları eski versioned plugin cache'ini
+  yerinde yeniler ve aktif sürümü doğrular; ilk opt-in öncesinde plugin kurmaz.
 - Kişisel marketplace plugin aynasını
   `AGENTS_HOME/plugins/sources/codex-chef-workflows` altından marketplace
   root'una göre relative bir path ile okur. Custom `AGENTS_HOME` bir installer
