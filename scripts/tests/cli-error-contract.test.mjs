@@ -138,6 +138,24 @@ test("shared error sanitizer redacts paths, secret shapes, and terminal controls
   }
 });
 
+test("shared error sanitizer redacts explicit local roots outside HOME", () => {
+  const agentsRoot = path.join(path.parse(root).root, "sentinel-agents-home");
+  const leakedPath = path.join(agentsRoot, "skills", "codex-chef-brain", "linked-child");
+  const message = sanitizeCliError(
+    new Error(`managed direct skill tree must not contain links: ${leakedPath}`),
+    {
+      root,
+      pathRedactions: [{ target: agentsRoot, replacement: "${AGENTS_HOME}" }]
+    }
+  );
+
+  assert.equal(message.includes(agentsRoot), false);
+  assert.equal(
+    message,
+    `managed direct skill tree must not contain links: ${path.join("${AGENTS_HOME}", "skills", "codex-chef-brain", "linked-child")}`
+  );
+});
+
 test("plain errors wrap long unbroken arguments to the terminal width", () => {
   const result = run("scripts/codex-doctor.mjs", [`--${"x".repeat(160)}`], {
     env: { COLUMNS: "40" }

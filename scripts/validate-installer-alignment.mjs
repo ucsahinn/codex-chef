@@ -373,7 +373,7 @@ for (const required of ["foreign", "--adopt-existing"]) {
 for (const required of ["--json", "preserved user-owned skill", "already current"]) {
   requireText(ps, required, "PowerShell curated skill status contract");
 }
-for (const required of ["--json", "Preserved user-owned skill", "Skill already current"]) {
+for (const required of ["--json", "preserved user-owned skill", "skill already current"]) {
   requireText(sh, required, "Bash curated skill status contract");
 }
 

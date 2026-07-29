@@ -3809,7 +3809,12 @@ function inspectGlobalSkill(name) {
 
 function inspectBrainContinuity() {
   const source = path.join(root, "plugins", "codex-chef-workflows", "skills", "codex-chef-brain");
-  const target = path.join(agentsHome(), "skills", "codex-chef-brain");
+  const installedAgentsHome = agentsHome();
+  const target = path.join(installedAgentsHome, "skills", "codex-chef-brain");
+  const skillErrorOptions = {
+    root,
+    pathRedactions: [{ target: installedAgentsHome, replacement: "${AGENTS_HOME}" }]
+  };
   let skill = { ready: false, state: "missing" };
   try {
     const state = inspectDirectSkillTarget(source, target);
@@ -3817,10 +3822,10 @@ function inspectBrainContinuity() {
       ready: state.status === "managed",
       state: state.status === "managed"
         ? "ready"
-        : sanitizeCliError(state.reason || state.status, { root })
+        : sanitizeCliError(state.reason || state.status, skillErrorOptions)
     };
   } catch (error) {
-    skill = { ready: false, state: sanitizeCliError(error, { root }) };
+    skill = { ready: false, state: sanitizeCliError(error, skillErrorOptions) };
   }
 
   const configuredTarget = String(process.env.CODEX_CHEF_BRAIN_HOME || "").trim();

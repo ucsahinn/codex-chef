@@ -32,9 +32,13 @@ function replacePath(value, target, replacement) {
     .replace(new RegExp(escapeRegExp(resolved.replaceAll("\\", "/")), flags), replacement);
 }
 
-export function redactCliPaths(value, { root = process.cwd() } = {}) {
+export function redactCliPaths(value, { root = process.cwd(), pathRedactions = [] } = {}) {
   let redacted = String(value ?? "");
   redacted = replacePath(redacted, root, "${REPO}");
+  for (const entry of pathRedactions) {
+    if (!entry?.target || !entry?.replacement) continue;
+    redacted = replacePath(redacted, entry.target, entry.replacement);
+  }
   redacted = replacePath(redacted, os.homedir(), "${HOME}");
   return redacted;
 }
@@ -68,14 +72,14 @@ function stripTerminalControls(value) {
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u202A-\u202E\u2066-\u2069]/g, "");
 }
 
-export function sanitizeCliError(error, { root = process.cwd() } = {}) {
+export function sanitizeCliError(error, { root = process.cwd(), pathRedactions = [] } = {}) {
   let message = "Unknown error";
   try {
     message = String(error?.message || error || "Unknown error");
   } catch {
     message = "Unable to inspect the original error safely.";
   }
-  message = redactCliPaths(message, { root });
+  message = redactCliPaths(message, { root, pathRedactions });
   message = stripTerminalControls(redactSecrets(message)).replace(/\s+/g, " ").trim();
   if (message.length > 1000) return `${message.slice(0, 997)}...`;
   return message;

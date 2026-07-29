@@ -732,11 +732,11 @@ for (const skill of catalog.skills.filter((item) => item.install)) {
     process.exit(1);
   }
   const statusByOutcome = {
-    "installed": "Installed skill",
-    "upgraded": "Upgraded managed skill",
-    "already-current": "Skill already current",
-    "skipped-user-owned": "Preserved user-owned skill",
-    "adopted": "Adopted skill"
+    "installed": "installed skill",
+    "upgraded": "upgraded managed skill",
+    "already-current": "skill already current",
+    "skipped-user-owned": "preserved user-owned skill",
+    "adopted": "adopted skill"
   };
   const status = statusByOutcome[receipt.outcome];
   if (!status) {
