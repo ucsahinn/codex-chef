@@ -311,26 +311,33 @@ Resmi kaynak: https://developers.openai.com/codex/rules
 
 ## Hooks
 
-Hooks lifecycle check için faydalıdır ama primary security boundary değildir.
-Non-managed hook'lar çalışmadan önce kullanıcı tarafından review ve trust
-edilmelidir.
+Hooks lifecycle kontrolü için faydalıdır ama primary security boundary değildir.
+Codex, plugin hook'u çalışmadan önce tam kaynak hash'iyle incelenmesini ve
+güvenilir olarak işaretlenmesini ister.
 
-Bu starter ECC-style lifecycle hook runtime'larini, otomatik `SessionStart`
-context injection'i veya `hookSpecificOutput.additionalContext` desenlerini
-import etmez. Bu yuzeyler templates veya plugins altinda acik review olmadan
-gorunurse `scripts/security-audit.mjs` fail eder.
-Hook runtime'lari root hook klasorleri, nested `hooks/` path'leri,
+Lokal plugin süreç hijyeni için dar kapsamlı tek bir `SessionEnd` hook'u
+tanımlar. Prompt veya transcript metni okumaz ve context eklemez. Normal oturum
+sonunda yalnız tam Codex sahibinin lokal MCP alt süreçlerini yakalar, detached
+taramada 45 saniye bekler ve sahip zinciri gittikten sonra yalnız PID ile
+oluşturulma zamanı hâlâ eşleşen yakalanmış süreçleri durdurur. Subagent lifecycle
+olayları `SessionEnd` hook'unu çağırmaz. Eksik süreç metadata bilgisi, canlı
+sahip, yeni süreç ağacı veya PID yeniden kullanımı güvenli biçimde işlemi
+durdurur.
+
+Starter; otomatik `SessionStart` context injection'ını,
+`hookSpecificOutput.additionalContext` desenlerini, ilgisiz hook runtime'larını,
+plugin-bundled MCP/app yüzeylerini ve `Write` capability'sini reddetmeye devam
+eder. `scripts/security-audit.mjs` yalnız tam process-hygiene hook path ve
+komutunu allowlist'e alır; root hook klasörleri, başka nested `hooks/` path'leri,
 `scripts/hooks`, `.cursor/hooks`, `.kiro/hooks`, `.opencode` hook plugin'leri,
-templates veya plugin bundle'lari uzerinden gelirse de acik review olmadan
-reddedilir.
-
-Plugin manifest'leri de varsayilan olarak dar tutulur. Repo validation,
-plugin-bundled `hooks`, `mcpServers`, `apps` ve `Write` capability'lerini
-reddeder. Yalniz skill iceren Codex Chef marketplace kaydi, guncel semanin
-zorunlu `ON_INSTALL` degerini kullanir; authenticated MCP paketlemez veya
-servis credential'i istemez.
+template veya plugin bundle'ları açık review olmadan yeni hook eklerse fail
+eder. Hook dosya silmez, credential okumaz ve ilgisiz Node/Python süreçlerini
+temizlik adayı saymaz.
 
 Resmi kaynak: https://developers.openai.com/codex/hooks
+
+Operasyon sözleşmesi:
+[çoklu oturum süreç hijyeni](process-hygiene.tr.md).
 
 ## Git Hijyeni
 

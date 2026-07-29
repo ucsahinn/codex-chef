@@ -43,7 +43,7 @@ private machine, credentials, sessions, or local memory.
 | --- | --- |
 | [🤖 See all 21 agents](docs/agents.md) | The specialist roles, what each one owns, and when delegation is actually useful. |
 | [🧩 Browse the skill catalog](docs/skills.md) | Nine bundled workflows, fifteen reviewed full-install skills, and the optional references that stay out of the default path. |
-| [🔌 Open the MCP catalog](docs/mcp-catalog.md) | The eight useful defaults, the eight opt-in connectors, their requirements, and their access boundaries. |
+| [🔌 Open the MCP catalog](docs/mcp-catalog.md) | The balanced three-server default, optional local capabilities, eight gated connectors, and their process/access boundaries. |
 | [🛡️ Read the security model](docs/security-model.md) | Preview-first changes, backups, approval gates, secret handling, and the actions Codex Chef deliberately leaves to you. |
 
 ## 🍳 What Codex Chef Adds
@@ -73,11 +73,14 @@ marketplace plugin is installed and a new Codex session is started.
 ### MCPs: tools and live context with visible boundaries
 
 MCP connects Codex to documentation, browsers, semantic code navigation,
-memory, and codebase graph reads. `openaiDeveloperDocs`, `context7`,
-`playwright`, `chrome-devtools`, `serena`, `memory`,
-`sequential-thinking`, and `codebase-memory` are configured as useful defaults.
-Account, database, production, and broad-filesystem connectors stay off until
-you deliberately enable them.
+memory, and codebase graph reads. The balanced base enables the remote
+`openaiDeveloperDocs` server plus local `context7` and `serena`; the other five
+local stdio servers (`sequential-thinking`, `playwright`, `chrome-devtools`,
+`memory`, and `codebase-memory`) stay configured but off so every concurrent
+Codex window does not eagerly duplicate their Node/Python helper trees. Use the `full`
+profile for one capability-heavy primary session and `multi-session` for
+low-process secondary sessions. Account, database, production, and
+broad-filesystem connectors remain off until you deliberately enable them.
 
 [See every MCP, prerequisite, and access boundary →](docs/mcp-catalog.md)
 
@@ -121,7 +124,7 @@ or unrelated plugin files.
 | Preview the install | `npm run chef -- --install` |
 | Check repo health | `npm run chef -- --status --repo-only --no-log` |
 | See the routing contract | `npm run chef -- --routing --profile starter-health` |
-| Check Control and Brain visibility | `npm run chef -- --continuity --details` |
+| Audit Codex/MCP process ownership | `npm run chef -- --processes --no-log` |
 
 Repair, diagnostics, updates, process checks, expected output, and direct
 installer commands live in the [operator documentation](docs/README.md).

@@ -176,9 +176,38 @@ if (!codebaseMemory) {
 } else {
   if (codebaseMemory.category !== "code-intelligence") fail("codebase-memory catalog category must stay code-intelligence.");
   if (codebaseMemory.setupKind !== "local-state") fail("codebase-memory catalog setupKind must stay local-state.");
-  if (codebaseMemory.defaultEnabled !== true) fail("codebase-memory must stay enabled by default for local read-heavy repo intelligence.");
+  if (codebaseMemory.defaultEnabled !== false) fail("codebase-memory must stay available but disabled in the balanced default to avoid duplicate code-intelligence processes.");
   if (codebaseMemory.approval !== "prompt") fail("codebase-memory default approval must stay prompt so indexing is not silently approved.");
   if (codebaseMemory.risk !== "medium") fail("codebase-memory catalog risk must stay medium while destructive/admin tools are disabled.");
+}
+
+const localProcessMcpNames = (catalog.servers || [])
+  .filter((server) => server.transport === "stdio" && server.name !== "filesystem")
+  .map((server) => server.name);
+const balancedEnabledNames = (catalog.servers || [])
+  .filter((server) => server.transport === "stdio" && server.defaultEnabled === true)
+  .map((server) => server.name)
+  .sort();
+if (JSON.stringify(balancedEnabledNames) !== JSON.stringify(["context7", "serena"])) {
+  fail(`Balanced default must enable only context7 and serena local MCPs, found: ${balancedEnabledNames.join(", ") || "none"}`);
+}
+
+for (const [profileFile, expectedEnabled] of [
+  ["templates/codex/profiles/full.config.toml", true],
+  ["templates/codex/profiles/multi-session.config.toml", false]
+]) {
+  const profileBlocks = parseMcpBlocks(read(profileFile));
+  for (const name of localProcessMcpNames) {
+    const block = profileBlocks.get(name);
+    if (!block) {
+      fail(`${profileFile} is missing [mcp_servers.${name}]`);
+      continue;
+    }
+    const enabled = readTomlValue(block, "enabled");
+    if (enabled !== String(expectedEnabled)) {
+      fail(`${profileFile} must set ${name} enabled=${expectedEnabled}`);
+    }
+  }
 }
 
 if (!supabase) {

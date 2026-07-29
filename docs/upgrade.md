@@ -96,6 +96,8 @@ Review these files before upgrading:
 - `templates/codex/AGENTS.md`
 - `templates/codex/config.windows.toml`
 - `templates/codex/config.unix.toml`
+- `templates/codex/profiles/full.config.toml`
+- `templates/codex/profiles/multi-session.config.toml`
 - `templates/codex/profiles/token-safe.config.toml`
 - `templates/codex/rules/default.rules`
 - `catalog/skills.json`
@@ -112,6 +114,7 @@ Run:
 ```bash
 codex doctor --summary
 npm run token:audit
+npm run chef -- --processes --no-log
 npm run verify:install:runtime -- --expect-skills
 codex exec --strict-config "Summarize the active Codex setup."
 ```
@@ -142,6 +145,9 @@ Inside Codex, check:
 /plugins
 /hooks
 ```
+
+If `/hooks` reports a new or changed process-hygiene source hash, inspect it
+before trusting it. Upgrade and repair do not bypass Codex hook trust.
 
 ## Rollback
 

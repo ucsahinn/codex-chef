@@ -235,10 +235,16 @@ if (result.error) {
     "scripts/validate-kb-locales.mjs",
     "scripts/validate-readme-locales.mjs",
     "scripts/validate-workflow-security.mjs",
+    "scripts/codex-process-hygiene.mjs",
+    "scripts/tests/process-hygiene.test.mjs",
     "manifests/install-plan.json",
     "catalog/mcp-servers.json",
+    "plugins/codex-chef-workflows/hooks/process-hygiene.json",
+    "plugins/codex-chef-workflows/scripts/codex-process-hygiene.mjs",
     "templates/codex/profiles/ci.config.toml",
     "templates/codex/profiles/development.config.toml",
+    "templates/codex/profiles/full.config.toml",
+    "templates/codex/profiles/multi-session.config.toml",
     "templates/codex/profiles/review.config.toml",
     "templates/codex/profiles/token-safe.config.toml"
   ]) {

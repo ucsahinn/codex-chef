@@ -96,12 +96,16 @@ Enabled by default:
 
 - OpenAI Docs MCP for official OpenAI documentation.
 - Context7 for current library and framework docs.
+- Serena for semantic code navigation.
+
+Configured but disabled in the balanced base:
+
 - Sequential Thinking for structured decomposition.
 - Playwright and Chrome DevTools for browser verification.
-- Serena for semantic code navigation.
 - Memory for local non-secret recall.
+- Codebase Memory for graph-backed repository intelligence.
 
-Disabled until needed:
+Account or broad-access connectors disabled until needed:
 
 - GitHub
 - Figma
@@ -126,10 +130,17 @@ The installer copies profile configs into `~/.codex`:
 - `token-safe.config.toml`: lower verbosity, lower default reasoning,
   compaction, and tool-output limits for broad or long-running work without
   disabling skills, agents, MCPs, memory, hooks, or apps.
+- `full.config.toml`: enables every bundled local stdio MCP for one primary
+  capability-heavy session.
+- `multi-session.config.toml`: disables local stdio MCPs for secondary
+  concurrent sessions without disabling agents, skills, remote OpenAI docs,
+  built-in memories, hooks, or apps.
 
 Use profiles when a task needs a different safety posture without rewriting the
 main config. Specialist role files leave per-agent model/reasoning unpinned, so
 the active profile and Codex runtime can choose the right balance for the task.
+For the ownership-aware audit and exact stale cleanup boundary, see
+[multi-session process hygiene](process-hygiene.md).
 
 ## Common Prompts
 

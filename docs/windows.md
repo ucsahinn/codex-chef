@@ -49,12 +49,20 @@ npm.cmd run token:audit
 npm.cmd run verify:install:runtime -- --no-mcp-probe
 npx.cmd --version
 codex.cmd --version
+npm.cmd run chef -- --processes --no-log
 ```
 
 Codex Chef's programmatic command resolver selects `npm.cmd`, `npx.cmd`, and
 `codex.cmd` on Windows and the un-suffixed commands on Unix. This avoids the
 PowerShell script-policy and executable-resolution differences that can make a
 command work interactively but fail in an agent or child process.
+
+Windows MCP launchers often appear as layered `cmd.exe`, `node.exe`, `uvx.exe`,
+and `python.exe` trees. Do not use executable-name cleanup. The process audit
+reads `Win32_Process` parent/child and creation-time metadata; if that metadata
+is unavailable it fails closed and produces no cleanup candidates. Use
+`codex --profile multi-session` for secondary concurrent windows and see
+[multi-session process hygiene](process-hygiene.md).
 
 For additional temporary read access inside a session:
 

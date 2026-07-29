@@ -23,8 +23,8 @@ Official references:
 | `config.toml` | Models, sandbox, approvals, MCP, features, profiles | Conservative workspace-write sandbox and on-request approvals | `npm run validate:mcp` |
 | Rules | Narrow command approval defaults | Verification commands only; destructive/publish actions stay gated | `npm run validate:content` |
 | Skills | Reusable workflows with progressive disclosure | Commit-pinned curated installs plus nine local plugin skills, including authorized reconstruction, evidence-backed SEO, and traceable deep research | `npm run verify:skills` |
-| Plugins | Shareable packages for skills and future bundled surfaces | One local plugin, no default hooks/MCP/apps | `npm run validate` |
-| MCP/connectors | Live docs, browser, code navigation, external systems | Docs/code/browser helpers enabled; authenticated connectors disabled | `npm run validate:mcp` |
+| Plugins | Shareable packages for skills and reviewed lifecycle surfaces | One local plugin with nine skills and one exact, trust-gated SessionEnd process hook; no bundled MCP/apps | `npm run validate` |
+| MCP/connectors | Live docs, browser, code navigation, external systems | Three balanced defaults; optional local stdio helpers and authenticated connectors disabled | `npm run validate:mcp` |
 | Subagents | Delegated evidence-heavy specialist work | Twenty-one reviewed specialist agents with sandboxed role files | `npm run validate:agents` |
 | Doctor/status | No-write health and drift summary | Repo-only by default; optional global existence checks | `npm run codex:doctor` |
 
@@ -189,8 +189,8 @@ This repo follows that split:
 - The local plugin exposes nine workflows, including the enterprise operator,
   zero-network offline diagram triplet, explicit-only Fetch, evidence-backed
   `$seo`, traceable `$evidence-research`, and context budget planning.
-- Plugin hooks, MCP servers, and apps remain absent from the default manifest
-  until separately reviewed.
+- One exact `SessionEnd` process-hygiene hook is separately reviewed and
+  trust-gated. Other plugin hooks, MCP servers, and apps remain absent.
 
 Run the local diagram renderer directly when you need `/diagram`-style output:
 
@@ -209,10 +209,15 @@ and documents them:
 - Cross-harness global config sync.
 - Broad skill marketplace imports.
 - Enabled-by-default authenticated connectors.
-- Plugin-bundled lifecycle hooks.
+- Unreviewed or context-injecting plugin lifecycle hooks.
 - Automatic memory/session injection.
 - Hidden research-corpus injection into every turn.
-- Destructive cleanup, push, release, publish, or deploy automation.
+- Broad or evidence-free cleanup, push, release, publish, or deploy automation.
+
+The one cleanup exception is fail-closed and ownership-scoped: its SessionEnd
+sweep can stop only exact local MCP descendants captured from the ended Codex
+owner after a 45-second grace period. See
+[multi-session process hygiene](process-hygiene.md).
 
 ## Verification
 

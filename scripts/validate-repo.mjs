@@ -99,6 +99,8 @@ const requiredFiles = [
   "templates/codex/config.windows.toml",
   "templates/codex/config.unix.toml",
   "templates/codex/AGENTS.md",
+  "templates/codex/profiles/full.config.toml",
+  "templates/codex/profiles/multi-session.config.toml",
   "templates/codex/profiles/token-safe.config.toml",
   "templates/codex/rules/default.rules",
   "scripts/install.ps1",
@@ -530,10 +532,14 @@ if (fs.existsSync(marketplacePath)) {
 const pluginManifest = path.join(root, "plugins/codex-chef-workflows/.codex-plugin/plugin.json");
 if (fs.existsSync(pluginManifest)) {
   const plugin = JSON.parse(fs.readFileSync(pluginManifest, "utf8"));
-  for (const forbiddenKey of ["hooks", "mcpServers", "apps"]) {
+  for (const forbiddenKey of ["mcpServers", "apps"]) {
     if (Object.prototype.hasOwnProperty.call(plugin, forbiddenKey)) {
-      failures.push(`Plugin manifest must not declare ${forbiddenKey}; authenticated or lifecycle surfaces stay disabled by default.`);
+      failures.push(`Plugin manifest must not declare ${forbiddenKey}; authenticated surfaces stay disabled by default.`);
     }
+  }
+  const expectedHooks = ["./hooks/process-hygiene.json"];
+  if (JSON.stringify(plugin.hooks || []) !== JSON.stringify(expectedHooks)) {
+    failures.push(`Plugin manifest hooks must be exactly: ${expectedHooks.join(", ")}`);
   }
   const capabilities = plugin?.interface?.capabilities;
   if (Array.isArray(capabilities) && capabilities.some((capability) => String(capability).toLowerCase() === "write")) {
@@ -640,8 +646,13 @@ if (fs.existsSync(mcpCatalog)) {
   if (servers.length !== 16) {
     failures.push(`Public MCP catalog contract expects 16 entries; found ${servers.length}.`);
   }
-  if (servers.filter((server) => server.defaultEnabled === true).length !== 8) {
-    failures.push("Public MCP catalog contract expects 8 default-enabled servers.");
+  const defaultEnabledServers = servers
+    .filter((server) => server.defaultEnabled === true)
+    .map((server) => server.name)
+    .sort();
+  const expectedDefaultEnabledServers = ["context7", "openaiDeveloperDocs", "serena"];
+  if (JSON.stringify(defaultEnabledServers) !== JSON.stringify(expectedDefaultEnabledServers)) {
+    failures.push(`Public MCP catalog default-enabled servers must be exactly: ${expectedDefaultEnabledServers.join(", ")}`);
   }
   for (const doc of ["docs/mcp-catalog.md", "docs/mcp-catalog.tr.md"]) {
     if (!fs.existsSync(path.join(root, doc))) continue;

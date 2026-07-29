@@ -121,6 +121,20 @@ If a server starts but shows no tools:
 4. Re-run `/mcp`.
 5. Disable the connector again when the task is done.
 
+## Too Many Node/Python/MCP Processes
+
+Do not kill by executable name. First run:
+
+```powershell
+npm run chef -- --processes --no-log
+```
+
+If active MCP instances scale with open Codex windows, use the balanced base,
+reserve `codex --profile full` for one primary session, and start secondary
+windows with `codex --profile multi-session`. Only old unowned candidates can
+appear in the explicit cleanup preview. See
+[multi-session process hygiene](process-hygiene.md).
+
 ## Windows Sandbox
 
 Current Codex Windows modes include native elevated sandbox, native unelevated

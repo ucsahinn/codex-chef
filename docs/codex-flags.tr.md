@@ -25,6 +25,28 @@ https://developers.openai.com/codex/cli/reference
 | `--dangerously-bypass-approvals-and-sandbox` | Normal lokal geliştirme için kullanma. |
 | `--dangerously-bypass-hook-trust` | Sadece hook source dışarıda ayrıca doğrulanıyorsa. |
 
+Codex Chef iki MCP maliyet profili kurar:
+
+```bash
+codex --profile full
+codex --profile multi-session
+```
+
+`full`, tek ana oturumda bütün bundled lokal stdio MCP'leri açar.
+`multi-session`, ikincil eşzamanlı oturumlarda lokal stdio MCP'leri kapatır;
+agent, skill, uzak OpenAI docs, built-in memory, hook ve app yüzeylerini korur.
+
+Sahiplik farkındalıklı Codex Chef süreç komutları:
+
+```bash
+npm run chef -- --processes --no-log
+npm run chef -- --processes --cleanup-stale --no-log
+npm run chef -- --processes --cleanup-stale --apply --no-log
+```
+
+İlk iki komut yazmasızdır. Son komut ayrıca onaylı tam hedefli temizlik yoludur;
+ayrıntı için [çoklu oturum süreç hijyenine](process-hygiene.tr.md) bak.
+
 ## Güvenli Başlangıçlar
 
 İnteraktif çalışma:

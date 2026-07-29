@@ -2,7 +2,7 @@
 
 These settings shape the project’s public first impression. Apply them manually only after the source tree is verified and the account-level change is explicitly approved.
 
-Current published baseline: **v0.5.58**.
+Current published baseline: **v0.5.59**.
 
 Live read-back after the approved account writes on 2026-07-29: secret scanning,
 push protection, vulnerability alerts, Dependabot security updates, and private
@@ -72,11 +72,11 @@ validated locally but is not yet uploaded to the account-level setting.
 
 ## Release Metadata
 
-For v0.5.58:
+For v0.5.59:
 
 ```text
-Title: Codex Chef v0.5.58
-Tag: v0.5.58
+Title: Codex Chef v0.5.59
+Tag: v0.5.59
 Notes: tmp/release-notes-current.md
 ```
 

@@ -1,6 +1,9 @@
 {
   "name": "codex-chef-workflows",
-  "version": "0.5.58",
+  "version": "0.5.59",
   "description": "Security-first Codex Chef workflows for setup maintenance, planning, review, reconstruction, and verification.",
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "hooks": [
+    "./hooks/process-hygiene.json"
+  ]
 }

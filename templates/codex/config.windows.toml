@@ -129,6 +129,8 @@ network_access = false
 sandbox = "elevated"
 sandbox_private_desktop = true
 
+# Balanced multi-session MCP baseline. Use --profile full for one primary
+# capability-heavy session and --profile multi-session for secondary windows.
 [mcp_servers.openaiDeveloperDocs]
 enabled = true
 url = "https://developers.openai.com/mcp"
@@ -146,7 +148,7 @@ startup_timeout_sec = 20
 tool_timeout_sec = 120
 
 [mcp_servers.sequential-thinking]
-enabled = true
+enabled = false
 command = "cmd.exe"
 args = ["/d", "/s", "/c", "npx.cmd", "-y", "@modelcontextprotocol/server-sequential-thinking@2025.12.18"]
 env = { NoDefaultCurrentDirectoryInExePath = "1" }
@@ -155,7 +157,7 @@ startup_timeout_sec = 20
 tool_timeout_sec = 120
 
 [mcp_servers.playwright]
-enabled = true
+enabled = false
 command = "cmd.exe"
 args = ["/d", "/s", "/c", "npx.cmd", "-y", "@playwright/mcp@0.0.76", "--isolated", "--block-service-workers"]
 env = { NoDefaultCurrentDirectoryInExePath = "1" }
@@ -196,7 +198,7 @@ approval_mode = "prompt"
 approval_mode = "prompt"
 
 [mcp_servers.chrome-devtools]
-enabled = true
+enabled = false
 command = "cmd.exe"
 args = ["/d", "/s", "/c", "npx.cmd", "-y", "chrome-devtools-mcp@1.2.0", "--isolated", "--no-usage-statistics", "--redactNetworkHeaders", "--viewport", "1366x900"]
 env = { NoDefaultCurrentDirectoryInExePath = "1" }
@@ -287,7 +289,7 @@ approval_mode = "approve"
 approval_mode = "approve"
 
 [mcp_servers.memory]
-enabled = true
+enabled = false
 command = "cmd.exe"
 args = ["/d", "/s", "/c", "npx.cmd", "-y", "@modelcontextprotocol/server-memory@2026.1.26"]
 env = { NoDefaultCurrentDirectoryInExePath = "1" }
@@ -307,7 +309,7 @@ approval_mode = "approve"
 # Optional graph-backed code intelligence for broad repo mapping and impact analysis.
 # Enable only when a task needs local repository indexing.
 [mcp_servers.codebase-memory]
-enabled = true
+enabled = false
 command = "cmd.exe"
 args = ["/d", "/s", "/c", "npx.cmd", "-y", "codebase-memory-mcp@0.8.1"]
 env = { NoDefaultCurrentDirectoryInExePath = "1" }

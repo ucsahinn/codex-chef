@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.5.59 - 2026-07-29
+
+- Add capability-preserving multi-session MCP profiles: the balanced base keeps remote OpenAI docs plus Context7 and Serena enabled, `full` restores every bundled local stdio MCP for one primary session, and `multi-session` parks local MCP launchers in secondary windows without disabling agents, skills, built-in memories, hooks, or apps.
+- Replace flat Node/Python counts with a schema-v2 ownership audit that separates active Codex sessions, logical MCP instances, helper trees, grace-period trees, old unowned candidates, and unrelated runtimes.
+- Add preview-first, exact stale-MCP cleanup with a second PID, creation-time, MCP-signature, and active-owner recheck immediately before termination; incomplete process metadata and PID reuse fail closed.
+- Add one trust-gated plugin `SessionEnd` hook that captures only the ending Codex owner's MCP descendants, waits 45 seconds, and stops exact survivors only after the owner chain is gone.
+- Document the Windows and multi-session operating model in English and Turkish, record the design in ADR-003, and expand installer, CLI, MCP, security, package-surface, and process-hygiene regression coverage.
+
 ## 0.5.58 - 2026-07-29
 
 - Add the explicit-only `fetch` bundled skill for authorized, browser-evidenced website reconstruction with public-passive defaults, inert authentication, prompt-injection and SSRF boundaries, lawful asset handling, zero-egress local output, fidelity reporting, and deterministic report validation.

@@ -58,6 +58,14 @@
 - Treat MCP servers as capability boundaries; tool allowlists and approval blocks must stay in parity.
 - Never store tokens in instructions, skills, docs, rules, shell history, or committed config.
 
+## Multi-Session Process Hygiene
+
+- Use the balanced base for ordinary work, `--profile full` for one primary session that needs every bundled local stdio MCP, and `--profile multi-session` for secondary concurrent sessions.
+- Disabling a local MCP in a profile parks its launcher without removing its definition; agents, skills, remote OpenAI docs, built-in memories, hooks, and apps stay available.
+- Audit Codex/MCP ownership before cleanup. Active Codex descendants, recent unowned trees, PID-reused processes, and unrelated Node/Python runtimes must never be cleanup candidates.
+- Manual stale cleanup requires the exact preview/apply path `npm run chef -- --processes --cleanup-stale [--apply]`. Do not broaden it to name-based process killing.
+- The reviewed session-end process hook is fail-closed and owner-scoped. Do not bypass hook trust, add startup context injection, or turn it into broad lifecycle automation.
+
 ## Token Budget Discipline
 
 - Start with catalogs, manifests, package scripts, summaries, `rg --files`, and focused searches; open full files only when selected.

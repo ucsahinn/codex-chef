@@ -43,7 +43,8 @@ The summary keeps normal previews short; the JSON and full human plan list
 managed targets, optional global Git changes, curated skill commands, collision
 policy, backup behavior, and risk level.
 The profile copy operation includes `development.config.toml`,
-`review.config.toml`, `ci.config.toml`, and `token-safe.config.toml`.
+`review.config.toml`, `ci.config.toml`, `token-safe.config.toml`,
+`full.config.toml`, and `multi-session.config.toml`.
 
 Default-enabled MCPs still have launcher prerequisites. Node/npx-backed MCPs
 start after Node can download their pinned packages. Serena is default-enabled
@@ -161,6 +162,7 @@ npm run chef -- --routing
 npm run chef -- --continuity
 npm run chef -- --diagnostics
 npm run chef -- --processes
+npm run chef -- --processes --cleanup-stale
 npm run chef -- --auth
 npm run chef -- --logs
 npm run chef -- --help --lang tr
@@ -174,6 +176,13 @@ setup exits successfully without reinstalling; managed drift is directed to the
 backup-backed repair flow instead of being presented as a clean first install.
 Direct commands remain preview-first unless their documented `--apply` flag is
 present.
+
+The bundled plugin also installs one reviewed `SessionEnd` process-hygiene
+hook. Start a new Codex session after install or refresh, open `/hooks`, inspect
+the exact source/hash, and trust it only when it matches this repository. Hook
+trust is intentionally not bypassed by the installer. See
+[multi-session process hygiene](process-hygiene.md) for profiles, audit fields,
+the 45-second grace period, and the separately gated cleanup command.
 
 `Skill status & catalog` separates commit-pinned upstream skills, bundled/direct
 Codex Chef skills, other user-installed skills, and the total visible global

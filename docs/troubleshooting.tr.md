@@ -120,6 +120,20 @@ Bir server açılıyor ama tool göstermiyorsa:
 4. `/mcp` komutunu tekrar çalıştır.
 5. İş bitince connector'ı yeniden disabled yap.
 
+## Çok Fazla Node/Python/MCP Süreci
+
+Executable adına göre süreç öldürme. Önce çalıştır:
+
+```powershell
+npm run chef -- --processes --no-log
+```
+
+Aktif MCP instance sayısı açık Codex pencereleriyle birlikte büyüyorsa dengeli
+ana config'i kullan, `codex --profile full` profilini tek ana oturuma ayır ve
+ikincil pencereleri `codex --profile multi-session` ile başlat. Açık temizlik
+ön izlemesinde yalnız eski ve sahipsiz adaylar görünebilir. Ayrıntı için
+[çoklu oturum süreç hijyenine](process-hygiene.tr.md) bak.
+
 ## Windows Sandbox
 
 Güncel Codex Windows modları native elevated sandbox, native unelevated sandbox

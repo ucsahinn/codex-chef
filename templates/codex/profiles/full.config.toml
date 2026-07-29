@@ -1,0 +1,24 @@
+# Full local MCP profile.
+# Use for one primary session that needs every bundled local MCP capability.
+# The normal balanced config keeps overlapping local servers available but off.
+
+[mcp_servers.context7]
+enabled = true
+
+[mcp_servers.sequential-thinking]
+enabled = true
+
+[mcp_servers.playwright]
+enabled = true
+
+[mcp_servers.chrome-devtools]
+enabled = true
+
+[mcp_servers.serena]
+enabled = true
+
+[mcp_servers.memory]
+enabled = true
+
+[mcp_servers.codebase-memory]
+enabled = true

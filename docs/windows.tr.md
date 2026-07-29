@@ -49,12 +49,20 @@ npm.cmd run token:audit
 npm.cmd run verify:install:runtime -- --no-mcp-probe
 npx.cmd --version
 codex.cmd --version
+npm.cmd run chef -- --processes --no-log
 ```
 
 Codex Chef'in programatik command resolver'i Windows'ta `npm.cmd`, `npx.cmd`
 ve `codex.cmd`; Unix'te uzantisiz komutlari secer. Boylece interaktif shell'de
 calisip ajan veya child process'te PowerShell script-policy ya da executable
 resolution farki nedeniyle bozulan komutlar onlenir.
+
+Windows MCP launcher'ları çoğu zaman katmanlı `cmd.exe`, `node.exe`, `uvx.exe`
+ve `python.exe` ağaçları olarak görünür. Executable adına göre temizlik yapma.
+Süreç denetimi `Win32_Process` parent/child ve oluşturulma zamanı metadata
+bilgisini okur; bu bilgi yoksa fail-closed kalır ve temizlik adayı üretmez.
+İkincil eşzamanlı pencerelerde `codex --profile multi-session` kullan ve
+[çoklu oturum süreç hijyenine](process-hygiene.tr.md) bak.
 
 Bir oturum içinde geçici ek okuma izni gerekiyorsa:
 

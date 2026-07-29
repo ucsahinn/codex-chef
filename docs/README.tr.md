@@ -15,6 +15,7 @@ Codex Chef’in ayrıntılı operatör dokümantasyonu İngilizce ve Türkçe tu
 | Proje notlarını lokal yakalamak veya geri çağırmak | [Markdown Brain workflow'u](brain/README.tr.md) |
 | Terminal çıktısını karşılaştırmak | [Beklenen çıktı](expected-output.tr.md) |
 | Hatalı bir komutu teşhis etmek | [Sorun giderme](troubleshooting.tr.md) |
+| Eşzamanlı Codex/MCP süreçlerini sınırlı tutmak | [Çoklu oturum süreç hijyeni](process-hygiene.tr.md) |
 | Lokal tercihleri kaybetmeden güncellemek | [Güncelleme rehberi](upgrade.tr.md) |
 | Repoyu veya kurulu runtime’ı kanıtlamak | [Doğrulama](verification.tr.md) |
 
@@ -26,6 +27,7 @@ Codex Chef’in ayrıntılı operatör dokümantasyonu İngilizce ve Türkçe tu
 - [Uzman agent'lar](agents.tr.md)
 - [Skill kataloğu](skills.tr.md)
 - [MCP kataloğu](mcp-catalog.tr.md)
+- [Çoklu oturum süreç hijyeni](process-hygiene.tr.md)
 - [Skill, plugin ve agent uyumluluk haritası](skills-and-agents.tr.md)
 - [Workflow yüzey haritası](workflow-surface-map.tr.md)
 - [Windows notları](windows.tr.md)

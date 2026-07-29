@@ -1,0 +1,26 @@
+# Low-process profile for secondary concurrent Codex sessions.
+# Local stdio MCP definitions remain in the base config. A normal primary
+# session restores the balanced context7/Serena pair; --profile full restores
+# all bundled local servers. Agents, skills, remote MCPs, built-in memories,
+# hooks, and apps are not disabled here.
+
+[mcp_servers.context7]
+enabled = false
+
+[mcp_servers.sequential-thinking]
+enabled = false
+
+[mcp_servers.playwright]
+enabled = false
+
+[mcp_servers.chrome-devtools]
+enabled = false
+
+[mcp_servers.serena]
+enabled = false
+
+[mcp_servers.memory]
+enabled = false
+
+[mcp_servers.codebase-memory]
+enabled = false

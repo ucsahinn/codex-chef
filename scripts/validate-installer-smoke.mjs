@@ -180,6 +180,8 @@ function assertInstalledBaseline(codexHome, agentsHome, label) {
   const expectedProfiles = [
     "ci.config.toml",
     "development.config.toml",
+    "full.config.toml",
+    "multi-session.config.toml",
     "review.config.toml",
     "token-safe.config.toml"
   ];

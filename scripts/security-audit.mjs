@@ -117,6 +117,7 @@ function isPinnedPackageSpec(spec) {
 
 function isHookSurfacePath(rel) {
   if (rel === "templates/git/pre-commit") return false;
+  if (rel === "plugins/codex-chef-workflows/hooks/process-hygiene.json") return false;
   return /(?:^|\/)hooks(?:\/|$)/i.test(rel)
     || /(?:^|\/)hooks\.json$/i.test(rel)
     || /^scripts\/hooks\//i.test(rel)
@@ -200,6 +201,10 @@ const forbiddenStatePatterns = [
 for (const file of files) {
   const rel = posix(path.relative(root, file));
   const text = fs.readFileSync(file, "utf8");
+  const reviewedProcessHygieneSurface = [
+    "plugins/codex-chef-workflows/hooks/process-hygiene.json",
+    "plugins/codex-chef-workflows/scripts/codex-process-hygiene.mjs"
+  ].includes(rel);
 
   if (isHookSurfacePath(rel)) {
     failures.push(`Codex lifecycle hook runtime must not be introduced without explicit review: ${rel}`);
@@ -210,6 +215,13 @@ for (const file of files) {
       const plugin = JSON.parse(text);
       for (const forbiddenKey of ["hooks", "mcpServers", "apps"]) {
         if (Object.prototype.hasOwnProperty.call(plugin, forbiddenKey)) {
+          if (
+            rel === "plugins/codex-chef-workflows/.codex-plugin/plugin.json"
+            && forbiddenKey === "hooks"
+            && JSON.stringify(plugin.hooks) === JSON.stringify(["./hooks/process-hygiene.json"])
+          ) {
+            continue;
+          }
           failures.push(`Plugin manifest must not declare ${forbiddenKey} by default: ${rel}`);
         }
       }
@@ -231,10 +243,44 @@ for (const file of files) {
       /(?:^|[\\/])instincts[\\/]/i,
       /\blearned skills?\b/i
     ];
-    for (const pattern of hookInjectionPatterns) {
+    for (const [index, pattern] of hookInjectionPatterns.entries()) {
       if (pattern.test(text)) {
+        if (reviewedProcessHygieneSurface && index === 0) continue;
         failures.push(`Automatic hook/session context injection pattern found in ${rel}: ${pattern}`);
       }
+    }
+  }
+
+  if (rel === "plugins/codex-chef-workflows/hooks/process-hygiene.json") {
+    try {
+      const hookConfig = JSON.parse(text);
+      const events = Object.keys(hookConfig.hooks || {});
+      const group = hookConfig.hooks?.SessionEnd?.[0];
+      const handler = group?.hooks?.[0];
+      if (JSON.stringify(events) !== JSON.stringify(["SessionEnd"])) {
+        failures.push("Process hygiene hook must declare only SessionEnd.");
+      }
+      if (!Array.isArray(hookConfig.hooks?.SessionEnd)
+        || hookConfig.hooks.SessionEnd.length !== 1
+        || group?.matcher !== "other") {
+        failures.push("Process hygiene hook must keep one matcher=other SessionEnd group.");
+      }
+      if (!Array.isArray(group?.hooks)
+        || group.hooks.length !== 1
+        || handler?.type !== "command"
+        || handler.timeout !== 3) {
+        failures.push("Process hygiene hook must keep one bounded command handler with the SessionEnd maximum timeout=3.");
+      }
+      for (const field of ["command", "commandWindows"]) {
+        const command = String(handler?.[field] || "");
+        if (!/PLUGIN_ROOT/.test(command)
+          || !/scripts[\\/]codex-process-hygiene\.mjs/.test(command)
+          || !/--session-end/.test(command)) {
+          failures.push(`Process hygiene hook ${field} must target the plugin-owned SessionEnd script.`);
+        }
+      }
+    } catch (error) {
+      failures.push(`Process hygiene hook must be parseable JSON: ${error.message}`);
     }
   }
 

@@ -98,12 +98,16 @@ Varsayılan açık gelenler:
 
 - Resmi OpenAI dokümanları için OpenAI Docs MCP.
 - Güncel kütüphane ve framework dokümanları için Context7.
+- Semantik kod gezintisi için Serena.
+
+Dengeli ana config'de tanımlı ama kapalı gelenler:
+
 - Parçalama ve düşünce akışı için Sequential Thinking.
 - Tarayıcı doğrulaması için Playwright ve Chrome DevTools.
-- Semantik kod gezintisi için Serena.
 - Gizli veri yazmamak şartıyla yerel Memory.
+- Graph destekli repo zekâsı için Codebase Memory.
 
-İhtiyaç olana kadar kapalı gelenler:
+Hesap veya geniş erişim isteyen ve ihtiyaç olana kadar kapalı gelenler:
 
 - GitHub
 - Figma
@@ -128,10 +132,17 @@ Installer profilleri `~/.codex` içine kopyalar:
 - `token-safe.config.toml`: broad veya uzun işlerde skill, agent, MCP, memory,
   hook veya app kapatmadan daha düşük verbosity, daha düşük default reasoning,
   compaction ve tool-output limitleri kullanır.
+- `full.config.toml`: yetenek ağırlıklı tek ana oturumda bütün bundled lokal
+  stdio MCP'leri açar.
+- `multi-session.config.toml`: ikincil eşzamanlı oturumlarda lokal stdio
+  MCP'leri kapatır; agent, skill, uzak OpenAI docs, built-in memory, hook ve
+  app yüzeylerini korur.
 
 Ana config'i bozmak yerine farklı güvenlik duruşu gerektiğinde profil kullan.
 Uzman role dosyaları agent bazlı model/reasoning pinlemez; aktif profil ve
 Codex runtime task'a uygun dengeyi seçebilir.
+Sahiplik farkındalıklı denetim ve tam hedefli eski süreç temizliği için
+[çoklu oturum süreç hijyeni](process-hygiene.tr.md) sayfasına bak.
 
 ## Kullanışlı Promptlar
 

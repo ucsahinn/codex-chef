@@ -109,14 +109,14 @@
     {
       "id": "codex-plugin",
       "kind": "copy-directory",
-      "summary": "Install the local workflow plugin bundle.",
+      "summary": "Install the local workflow plugin bundle and its reviewed SessionEnd process-hygiene hook.",
       "source": "plugins/codex-chef-workflows",
       "destination": "${CODEX_HOME}/plugins/codex-chef-workflows",
       "platforms": ["windows", "unix"],
       "collision": "sync-managed-files-preserve-extras-backup-before-sync",
       "backup": true,
       "risk": "medium",
-      "conflictPolicy": "Managed plugin files are refreshed after backup while extra files are preserved by default; destructive pruning requires an explicit repair flag."
+      "conflictPolicy": "Managed plugin files are refreshed after backup while extra files are preserved by default; destructive pruning requires an explicit repair flag, and Codex hook trust remains a separate exact-source user review."
     },
     {
       "id": "codex-chef-operator-direct-skill",

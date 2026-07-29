@@ -10,7 +10,7 @@ Discovery output stays no-write and human-readable:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.58
+Package: codex-chef@0.5.59
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -92,10 +92,10 @@ What if: Performing the operation ...
 [*] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (8):
-    sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
-    github, figma, ...
+  - MCP ready by default (3):
+    openaiDeveloperDocs, context7, serena
+  - MCP opt-in / disabled by default (13):
+    sequential-thinking, playwright, chrome-devtools, memory, codebase-memory, github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Requires npm/npx network access on first startup; no credential is required., ...
   - Local plugin skills (9):
@@ -148,10 +148,10 @@ Continue with this plan? [Y/n]:
 [chef] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (8):
-    sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
-    github, figma, ...
+  - MCP ready by default (3):
+    openaiDeveloperDocs, context7, serena
+  - MCP opt-in / disabled by default (13):
+    sequential-thinking, playwright, chrome-devtools, memory, codebase-memory, github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Requires npm/npx network access on first startup; no credential is required., ...
   - Local plugin skills (9):
@@ -206,7 +206,7 @@ current managed-file inventory vary by machine and release.
 Codex Chef status
 Overall: attention
 Repo Git: attention - git status --short reports changed lines.
-MCP: 16/16 cataloged configured, 0 missing, <user-added> user-added; 8 catalog defaults enabled/8 disabled; live not probed
+MCP: 16/16 cataloged configured, 0 missing, <user-added> user-added; 3 catalog defaults enabled/13 disabled; live not probed
 Codex CLI: ok (strict config ok, login ok, MCP ok)
 Installed runtime: attention/current (...)
 Skills: <installed> total across global roots (<managed> Codex Chef managed, <missing> missing, <other> other/user-installed)
@@ -233,10 +233,10 @@ Would install file from ...
 [*] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (8):
-    sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
-    github, figma, ...
+  - MCP ready by default (3):
+    openaiDeveloperDocs, context7, serena
+  - MCP opt-in / disabled by default (13):
+    sequential-thinking, playwright, chrome-devtools, memory, codebase-memory, github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Requires npm/npx network access on first startup; no credential is required., ...
   - Local plugin skills (9):
@@ -265,10 +265,10 @@ Would install file from ...
 [*] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (8):
-    sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
-    github, figma, ...
+  - MCP ready by default (3):
+    openaiDeveloperDocs, context7, serena
+  - MCP opt-in / disabled by default (13):
+    sequential-thinking, playwright, chrome-devtools, memory, codebase-memory, github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Requires npm/npx network access on first startup; no credential is required., ...
   - Local plugin skills (9):

@@ -37,7 +37,7 @@
       "name": "sequential-thinking",
       "category": "reasoning",
       "transport": "stdio",
-      "defaultEnabled": true,
+      "defaultEnabled": false,
       "package": "@modelcontextprotocol/server-sequential-thinking@2025.12.18",
       "auth": "none",
       "setupKind": "tooling",
@@ -45,14 +45,14 @@
       "approval": "approve",
       "risk": "low",
       "sourceUrl": "https://github.com/modelcontextprotocol/servers",
-      "defaultReason": "No-auth reasoning helper with no project mutation.",
+      "defaultReason": "Configured but disabled in the balanced base to avoid duplicating an overlapping local stdio helper in every concurrent session; the full profile re-enables it.",
       "notes": "Structured decomposition helper."
     },
     {
       "name": "playwright",
       "category": "browser",
       "transport": "stdio",
-      "defaultEnabled": true,
+      "defaultEnabled": false,
       "package": "@playwright/mcp@0.0.76",
       "auth": "none",
       "setupKind": "tooling",
@@ -62,14 +62,14 @@
       "toolApprovals": {"browser_snapshot":"approve", "browser_take_screenshot":"approve", "browser_console_messages":"approve", "browser_network_requests":"prompt", "browser_wait_for":"approve", "browser_resize":"approve", "browser_navigate":"prompt", "browser_navigate_back":"prompt", "browser_close":"prompt", "browser_tabs":"prompt"},
       "risk": "medium",
       "sourceUrl": "https://github.com/microsoft/playwright-mcp",
-      "defaultReason": "Useful for UI evidence; an isolated non-persistent profile is used, and interaction plus request-detail tools stay prompt-gated or disabled.",
+      "defaultReason": "Configured but disabled in the balanced base to avoid per-session browser-helper trees; the full profile re-enables its isolated, prompt-gated UI evidence surface.",
       "notes": "Browser automation and UI verification with isolated state and service workers blocked by default."
     },
     {
       "name": "chrome-devtools",
       "category": "browser",
       "transport": "stdio",
-      "defaultEnabled": true,
+      "defaultEnabled": false,
       "package": "chrome-devtools-mcp@1.2.0",
       "auth": "none",
       "setupKind": "tooling",
@@ -79,7 +79,7 @@
       "toolApprovals": {"list_pages":"approve", "select_page":"approve", "take_snapshot":"approve", "take_screenshot":"approve", "list_console_messages":"approve", "get_console_message":"approve", "list_network_requests":"prompt", "wait_for":"approve", "resize_page":"approve", "navigate_page":"prompt", "navigate_page_history":"prompt", "close_page":"prompt"},
       "risk": "medium",
       "sourceUrl": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
-      "defaultReason": "Browser inspection with isolated mode and redacted headers; only read/navigation evidence tools are allowlisted.",
+      "defaultReason": "Configured but disabled in the balanced base to avoid a second per-session browser bridge; the full profile re-enables its isolated, redacted inspection surface.",
       "notes": "Chrome inspection with isolated mode and redacted network headers."
     },
     {
@@ -104,7 +104,7 @@
       "name": "memory",
       "category": "local-state",
       "transport": "stdio",
-      "defaultEnabled": true,
+      "defaultEnabled": false,
       "package": "@modelcontextprotocol/server-memory@2026.1.26",
       "auth": "none",
       "setupKind": "local-state",
@@ -112,14 +112,14 @@
       "approval": "prompt",
       "risk": "medium",
       "sourceUrl": "https://github.com/modelcontextprotocol/servers",
-      "defaultReason": "Local memory can be useful but must not store secrets.",
+      "defaultReason": "Configured but disabled in the balanced base to avoid an eager per-session local memory process; the full profile re-enables it for non-secret recall.",
       "notes": "Local memory graph. Do not store secrets."
     },
     {
       "name": "codebase-memory",
       "category": "code-intelligence",
       "transport": "stdio",
-      "defaultEnabled": true,
+      "defaultEnabled": false,
       "package": "codebase-memory-mcp@0.8.1",
       "auth": "none",
       "setupKind": "local-state",
@@ -130,7 +130,7 @@
       "toolApprovals": {"list_projects":"approve", "index_status":"approve", "search_graph":"approve", "trace_path":"approve", "detect_changes":"approve", "query_graph":"approve", "get_graph_schema":"approve", "get_code_snippet":"approve", "get_architecture":"approve", "search_code":"approve"},
       "risk": "medium",
       "sourceUrl": "https://github.com/DeusData/codebase-memory-mcp",
-      "defaultReason": "Local codebase graph reads are allowlisted, while indexing and destructive/admin tools are disabled or prompt-gated.",
+      "defaultReason": "Configured but disabled in the balanced base to avoid eager per-session graph runtime cost; the full profile re-enables allowlisted reads while indexing and destructive/admin tools stay disabled or prompt-gated.",
       "notes": "Local codebase knowledge graph. Keep generated graph artifacts out of source unless deliberately reviewed."
     },
     {

@@ -317,23 +317,31 @@ Official reference: https://developers.openai.com/codex/rules
 ## Hooks
 
 Hooks are useful for lifecycle checks, but they are not a primary security
-boundary. Non-managed hooks should be reviewed and trusted by the user before
-they run.
+boundary. Codex requires plugin hooks to be reviewed and trusted by exact source
+hash before they run.
 
-This starter does not import ECC-style lifecycle hook runtimes, automatic
-`SessionStart` context injection, or `hookSpecificOutput.additionalContext`
-patterns. `scripts/security-audit.mjs` fails if hook runtimes appear through
-root hook folders, nested `hooks/` paths, `scripts/hooks`, `.cursor/hooks`,
-`.kiro/hooks`, `.opencode` hook plugins, templates, or plugin bundles without
-an explicit reviewed change.
+The local plugin declares one narrowly reviewed `SessionEnd` hook for process
+hygiene. It reads no prompt or transcript text and injects no context. On normal
+session end it captures only local MCP descendants of the exact Codex owner,
+waits 45 seconds in a detached sweep, and stops only captured processes whose
+PID and creation time still match after the owner chain is gone. Subagent
+lifecycle events do not invoke `SessionEnd`. Missing process metadata,
+live owners, recent trees, or PID reuse all fail closed.
 
-Plugin manifests are also kept narrow by default. Repo validation rejects
-plugin-bundled `hooks`, `mcpServers`, `apps`, and `Write` capabilities. The
-skills-only Codex Chef marketplace entry uses the current required
-`ON_INSTALL` policy value; it does not bundle an authenticated MCP or request
-service credentials.
+The starter still rejects automatic `SessionStart` context injection,
+`hookSpecificOutput.additionalContext`, unrelated hook runtimes, plugin-bundled
+MCP/apps, and `Write` capabilities. `scripts/security-audit.mjs` allowlists the
+exact process-hygiene hook path and command, then fails if hook runtimes appear
+through root hook folders, other nested `hooks/` paths, `scripts/hooks`,
+`.cursor/hooks`, `.kiro/hooks`, `.opencode` hook plugins, templates, or plugin
+bundles without an explicit reviewed change. The hook never deletes files,
+reads credentials, or treats unrelated Node/Python processes as cleanup
+candidates.
 
 Official reference: https://developers.openai.com/codex/hooks
+
+Operational contract:
+[multi-session process hygiene](process-hygiene.md).
 
 ## Git Hygiene
 

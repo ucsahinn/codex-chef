@@ -26,6 +26,18 @@ https://developers.openai.com/codex/cli/reference
 | `--dangerously-bypass-approvals-and-sandbox` | Do not use for normal local development. Use only inside a hardened throwaway environment. |
 | `--dangerously-bypass-hook-trust` | Only for automation that already vets hook sources. |
 
+Codex Chef installs two MCP-cost profiles:
+
+```bash
+codex --profile full
+codex --profile multi-session
+```
+
+`full` enables every bundled local stdio MCP for one primary session.
+`multi-session` disables local stdio MCPs for secondary concurrent sessions
+while preserving agents, skills, remote OpenAI docs, built-in memories, hooks,
+and apps.
+
 ## Common Commands
 
 | Command | Use |
@@ -41,6 +53,17 @@ https://developers.openai.com/codex/cli/reference
 | `codex completion power-shell` | Generate PowerShell completions. |
 | `codex debug models` | Inspect the model catalog Codex sees. |
 | `codex execpolicy check` | Test rules against a command. |
+
+Codex Chef's ownership-aware process commands are:
+
+```bash
+npm run chef -- --processes --no-log
+npm run chef -- --processes --cleanup-stale --no-log
+npm run chef -- --processes --cleanup-stale --apply --no-log
+```
+
+The first two are read-only. The last command is the separately gated exact
+cleanup path; see [multi-session process hygiene](process-hygiene.md).
 
 ## MCP Config Fields
 

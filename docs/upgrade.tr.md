@@ -91,6 +91,8 @@ Upgrade öncesi şu dosyaları incele:
 - `templates/codex/AGENTS.md`
 - `templates/codex/config.windows.toml`
 - `templates/codex/config.unix.toml`
+- `templates/codex/profiles/full.config.toml`
+- `templates/codex/profiles/multi-session.config.toml`
 - `templates/codex/profiles/token-safe.config.toml`
 - `templates/codex/rules/default.rules`
 - `catalog/skills.json`
@@ -107,6 +109,7 @@ Upgrade öncesi şu dosyaları incele:
 ```bash
 codex doctor --summary
 npm run token:audit
+npm run chef -- --processes --no-log
 npm run verify:install:runtime -- --expect-skills
 codex exec --strict-config "Summarize the active Codex setup."
 ```
@@ -138,6 +141,9 @@ Codex içinde kontrol et:
 /plugins
 /hooks
 ```
+
+`/hooks` yeni veya değişmiş process-hygiene kaynak hash'i gösterirse güvenmeden
+önce incele. Upgrade ve repair, Codex hook trust kontrolünü bypass etmez.
 
 ## Rollback
 

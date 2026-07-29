@@ -11,7 +11,7 @@ Discovery ciktisi no-write ve okunabilir kalir:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.58
+Package: codex-chef@0.5.59
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -91,10 +91,10 @@ What if: Performing the operation ...
 [*] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (8):
-    sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
-    github, figma, ...
+  - MCP ready by default (3):
+    openaiDeveloperDocs, context7, serena
+  - MCP opt-in / disabled by default (13):
+    sequential-thinking, playwright, chrome-devtools, memory, codebase-memory, github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
   - Local plugin skills (9):
@@ -147,10 +147,10 @@ Continue with this plan? [Y/n]:
 [chef] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (8):
-    sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
-    github, figma, ...
+  - MCP ready by default (3):
+    openaiDeveloperDocs, context7, serena
+  - MCP opt-in / disabled by default (13):
+    sequential-thinking, playwright, chrome-devtools, memory, codebase-memory, github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
   - Local plugin skills (9):
@@ -206,7 +206,7 @@ managed-file envanteri makineye ve sürüme göre değişir.
 Codex Chef durumu
 Genel: dikkat
 Repo Git: dikkat - git status --short değişen satırlar bildiriyor.
-MCP: 16/16 katalog bağlayıcısı yapılandırılmış, 0 eksik, <user-added> kullanıcı kaydı; katalog varsayılanlarında 8 açık/8 kapalı; canlı durum ölçülmedi
+MCP: 16/16 katalog bağlayıcısı yapılandırılmış, 0 eksik, <user-added> kullanıcı kaydı; katalog varsayılanlarında 3 açık/13 kapalı; canlı durum ölçülmedi
 Codex CLI: tamam (strict config tamam, login tamam, MCP tamam)
 Kurulu ortam: dikkat/güncel (...)
 Skill'ler: global köklerde toplam <installed> (<managed> Codex Chef managed, <missing> eksik, <other> diğer/kullanıcı kurulu)
@@ -233,10 +233,10 @@ Would install file from ...
 [*] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (8):
-    sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
-    github, figma, ...
+  - MCP ready by default (3):
+    openaiDeveloperDocs, context7, serena
+  - MCP opt-in / disabled by default (13):
+    sequential-thinking, playwright, chrome-devtools, memory, codebase-memory, github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
   - Local plugin skills (9):
@@ -265,10 +265,10 @@ Would install file from ...
 [*] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (8):
-    sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (8):
-    github, figma, ...
+  - MCP ready by default (3):
+    openaiDeveloperDocs, context7, serena
+  - MCP opt-in / disabled by default (13):
+    sequential-thinking, playwright, chrome-devtools, memory, codebase-memory, github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
   - Local plugin skills (9):

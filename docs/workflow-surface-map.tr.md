@@ -80,9 +80,9 @@ Karar gerekcesi: [ADR-001](decisions/001-adaptive-routing-and-user-owned-config-
 | Buyuk skills ve agents katalogu | Validasyonlu `catalog/skills.json` ve `catalog/agents.json`. | Genis cross-harness kataloglari komple import etmez. |
 | Manifest-driven install | `manifests/install-plan.json` ve `scripts/plan-install.mjs`. | Plan preview'da gorunmeyen global write yok. |
 | Doctor/status komutlari | `npm run codex:doctor` ve JSON cikti. | Diagnostic sirasinda user secret okumaz veya global Codex state yazmaz. |
-| Plugin dagitimi | Local `codex-chef-workflows` plugin. | Default acik plugin hook, genis MCP veya external auth yok. |
+| Plugin dagitimi | Tam hedefli, trust-gated tek SessionEnd süreç hook'u olan lokal `codex-chef-workflows` plugin'i. | Context ekleyen hook, genis MCP veya external auth yok. |
 | Legacy command uyumlulugu | Slash-like adlari Codex yuzeylerine map eden dokuman. | 80+ command shim veya deprecated prompt wrapper yok. |
-| Security/runtime hardening | Gitleaks, workflow hardening, MCP least privilege, install backup. | Auto-cleanup, auto-publish, token scraping veya genis command allow rule yok. |
+| Security/runtime hardening | Gitleaks, workflow hardening, MCP least privilege, install backup ve bekleme sonrası sahiplik kapsamlı stale-MCP temizliği. | Genis cleanup, auto-publish, token scraping veya genis command allow rule yok. |
 
 ## Kanita Dayali Disarida Birakilanlar
 

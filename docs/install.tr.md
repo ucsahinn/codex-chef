@@ -42,7 +42,8 @@ Summary normal preview'i kisa tutar; JSON ve full human plan managed
 target'lari, opsiyonel global Git degisikliklerini, curated skill komutlarini,
 collision policy'yi, backup davranisini ve risk seviyesini listeler.
 Profile copy operation `development.config.toml`, `review.config.toml`,
-`ci.config.toml` ve `token-safe.config.toml` dosyalarini kapsar.
+`ci.config.toml`, `token-safe.config.toml`, `full.config.toml` ve
+`multi-session.config.toml` dosyalarini kapsar.
 
 Varsayilan acik MCP'lerin de launcher onkosullari vardir. Node/npx tabanli
 MCP'ler, Node pinned package'lari indirebildiginde baslar. Serena semantic code
@@ -158,6 +159,7 @@ npm run chef -- --routing
 npm run chef -- --continuity
 npm run chef -- --diagnostics
 npm run chef -- --processes
+npm run chef -- --processes --cleanup-stale
 npm run chef -- --auth
 npm run chef -- --logs
 npm run chef -- --help --lang tr
@@ -171,6 +173,13 @@ zaten eksiksiz olan kurulum başarılı biçimde sonlanır ve yeniden kurulmaz;
 yönetilen dosyalarda drift varsa akış bunu yeni kurulum gibi göstermeyip yedekli
 onarım yoluna yönlendirir. Doğrudan komutlar, belgelenmiş `--apply` bayrağı
 verilmediği sürece yalnız ön izleme yapar.
+
+Bundled plugin ayrıca incelenmiş tek bir `SessionEnd` süreç hijyeni hook'u
+kurar. Kurulum veya yenilemeden sonra yeni Codex oturumu aç, `/hooks` ekranında
+tam kaynak/hash bilgisini incele ve yalnız bu repoyla eşleşiyorsa güven.
+Installer hook trust kontrolünü bilerek bypass etmez. Profiller, denetim
+alanları, 45 saniyelik bekleme ve ayrıca onaylı temizlik komutu için
+[çoklu oturum süreç hijyeni](process-hygiene.tr.md) sayfasına bak.
 
 `Skill durumu ve katalog` ekranı commit-pinned upstream skill'leri,
 bundled/direct Codex Chef skill'lerini, kullanıcı tarafından eklenen diğer

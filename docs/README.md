@@ -15,6 +15,7 @@ Codex Chef keeps complete operator documentation in English and Turkish. The Ger
 | Capture or retrieve project notes locally | [Markdown Brain workflow](brain/README.md) |
 | Compare expected terminal output | [Expected output](expected-output.md) |
 | Diagnose a failed command | [Troubleshooting](troubleshooting.md) |
+| Keep concurrent Codex/MCP processes bounded | [Multi-session process hygiene](process-hygiene.md) |
 | Upgrade without losing local choices | [Upgrade guide](upgrade.md) |
 | Prove the repository or installed runtime | [Verification](verification.md) |
 
@@ -26,6 +27,7 @@ Codex Chef keeps complete operator documentation in English and Turkish. The Ger
 - [Specialist agents](agents.md)
 - [Skill catalog](skills.md)
 - [MCP catalog](mcp-catalog.md)
+- [Multi-session process hygiene](process-hygiene.md)
 - [Skills, plugins, and agents compatibility map](skills-and-agents.md)
 - [Workflow surface map](workflow-surface-map.md)
 - [Windows notes](windows.md)

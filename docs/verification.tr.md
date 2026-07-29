@@ -188,6 +188,7 @@ npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
 npm run chef -- --diagnostics
 npm run chef -- --processes
+npm run chef -- --processes --cleanup-stale
 ```
 
 `npm run chef` numarali operator menusunu acar. Yukaridaki noninteractive
@@ -210,10 +211,14 @@ status snapshot'ini calistirir; canli saglik, attention nedenleri, sonraki
 guvenli adimlar, backup/log ozetleri ve status, doctor, routing, update
 preview, repair preview, backup, log, runtime parity, Serena/MCP surec denetimi
 icin tanilama kanit komutlarini gosterir. `npm run chef -- --processes
---no-log` bu surec sayimini hicbir seyi durdurmadan direkt calistirir. Log kok
-dizinini ve son CLI log metadata'sini basar, log icerigi basmaz ve surec durdurmaz. npm uzerinden
-parse edilebilir JSON icin `npm run --silent chef -- --diagnostics --json
---no-log` kullan.
+--no-log`, schema-v2 parent/child denetimini hiçbir şeyi durdurmadan çalıştırır.
+Aktif Codex sahiplerini, mantıksal lokal MCP instance'larını, yardımcı süreç
+ağaçlarını, bekleme süresindekileri, eski sahipsiz adayları ve ilgisiz
+Node/Python runtime'larını ayırır. Yazmasız tam hedefli temizlik ön izlemesi için
+`--cleanup-stale` ekle; yalnız `--cleanup-stale --apply` adayları durdurabilir.
+npm üzerinden parse edilebilir JSON için `npm run --silent chef --
+--processes --json --no-log` kullan. Tam semantik ve SessionEnd trust adımı
+[çoklu oturum süreç hijyeninde](process-hygiene.tr.md) açıklanır.
 
 `npm run chef -- --backups` backup archive metadata'sini global/user state'e
 dokunmadan listeler. `npm run chef -- --backups --backup <id>` bir backup

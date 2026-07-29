@@ -18,6 +18,10 @@ import {
   redactCliPaths,
   sanitizeCliError
 } from "./lib/cli-error-contract.mjs";
+import {
+  buildProcessAudit,
+  terminateCleanupPlan
+} from "./codex-process-hygiene.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
@@ -65,6 +69,7 @@ const options = {
   deleteBackup: false,
   verbosePlan: false,
   details: false,
+  cleanupStale: false,
   lang: languageFromArgs(args, languageFromEnvironment()),
   action: null,
   backupId: null,
@@ -183,6 +188,7 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--delete") options.deleteBackup = true;
   else if (arg === "--verbose-plan") options.verbosePlan = true;
   else if (arg === "--details") options.details = true;
+  else if (arg === "--cleanup-stale") options.cleanupStale = true;
   else if (arg === "--backup") {
     const value = args[index + 1];
     if (!value || value.startsWith("-")) {
@@ -224,6 +230,18 @@ if (options.profile && options.action !== "routing") {
   cliError(
     "--profile can only be used with --routing.",
     "--profile yalnızca --routing ile kullanılabilir."
+  );
+}
+if (options.cleanupStale && options.action !== "processes") {
+  cliError(
+    "--cleanup-stale can only be used with --processes.",
+    "--cleanup-stale yalnızca --processes ile kullanılabilir."
+  );
+}
+if (options.apply && options.action === "processes" && !options.cleanupStale) {
+  cliError(
+    "--processes --apply also requires --cleanup-stale.",
+    "--processes --apply ayrıca --cleanup-stale ister."
   );
 }
 
@@ -622,8 +640,8 @@ const MENU_ITEMS = [
   {
     id: "processes",
     label: "Process audit",
-    writes: "No writes",
-    description: "Count Serena, MCP, browser, Python, and Node processes without stopping them."
+    writes: "Read-only unless stale cleanup is explicitly applied",
+    description: "Trace Codex-owned local MCP trees, separate unrelated runtimes, and preview exact stale cleanup."
   },
   {
     id: "auth",
@@ -842,8 +860,8 @@ const MENU_TEXT_TR = {
   },
   processes: {
     label: "Süreç denetimi",
-    description: "Serena, MCP, tarayıcı, tünel, Python ve Node süreçlerini durdurmadan sayar.",
-    writes: "Yazmaz"
+    description: "Codex'e ait yerel MCP ağaçlarını izler, ilgisiz runtime'ları ayırır ve tam hedefli eski süreç temizliğini önizler.",
+    writes: "Açık stale cleanup uygulanmadıkça yazmaz"
   },
   auth: {
     label: "Kimlik notlari",
@@ -1092,7 +1110,8 @@ Kullanım:
 
 Komut kısayolları:
   Yazmasız ekranlar: --status, --doctor, --preview, --skills, --mcp, --routing, --continuity/--control-brain, --diagnostics, --processes, --auth, --logs
-  Onaylı yazan işlemler: --update [--apply], --reset [--apply], --repair [--apply], --install [--apply]
+  Onaylı yazan işlemler: --update [--apply], --reset [--apply], --repair [--apply], --install [--apply], --processes --cleanup-stale --apply
+  Süreç temizliği: --processes --cleanup-stale [--apply]; --apply olmadan yalnız önizleme
   Yedekler: --backups [--backup ID] [--restore|--delete --apply]
   Yönlendirme profili: --routing --profile starter-health
   Ayrıntılı preview kanıtı: --preview --verbose-plan
@@ -1112,7 +1131,8 @@ Seçenekler:
   --delete       --backup ID için silme preview'i; arşivi silmek için --apply ekle
   --verbose-plan Preview ekranlarında tam install dry-run kanıtını basar
   --details      Özet ekranlarda tam tablo ve kanıt ayrıntılarını gösterir
-  --apply        Update, install, reset, repair veya seçili skill install için write action izni verir
+  --cleanup-stale Süresi dolmuş, aktif Codex sahibi olmayan yerel MCP ağaçlarını önizler
+  --apply        Update, install, reset, repair, seçili skill install veya açık stale-process temizliği için write action izni verir
   --help         Bu yardımı gösterir
 
 Ekranlar:
@@ -1139,7 +1159,8 @@ Usage:
 
 Reference actions:
   Read-only: --status, --doctor, --preview, --skills, --mcp, --routing, --continuity/--control-brain, --diagnostics, --processes, --auth, --logs
-  Write gated: --update [--apply], --reset [--apply], --repair [--apply], --install [--apply]
+  Write gated: --update [--apply], --reset [--apply], --repair [--apply], --install [--apply], --processes --cleanup-stale --apply
+  Process cleanup: --processes --cleanup-stale [--apply]; preview-only without --apply
   Backups: --backups [--backup ID] [--restore|--delete --apply]
   Routing: --routing --profile starter-health
   Verbose preview: --preview --verbose-plan
@@ -1165,7 +1186,8 @@ Options:
   --delete       Preview deletion for --backup ID; add --apply to remove the archive
   --verbose-plan Print the full install dry-run evidence for preview screens
   --details      Show full tables and evidence on summary screens
-  --apply        Allow write actions for update, install, reset, repair, or selected skill install
+  --cleanup-stale Preview expired local MCP trees that have no active Codex owner
+  --apply        Allow write actions for update, install, reset, repair, selected skill install, or explicit stale-process cleanup
   --help         Show this help
 
 Details:
@@ -4260,7 +4282,7 @@ function translateCliMessage(message) {
     .replace("Fast repo health without installed runtime probes.", "Kurulu ortam probu olmadan hızlı repo sağlığı.")
     .replace("Repo doctor plus install/runtime expectations.", "Repo doctor ve kurulum/kurulu ortam beklentileri.")
     .replace("Source/runtime managed file, agent, MCP, and skill parity.", "Kaynak/kurulu ortam yönetilen dosya, agent, MCP ve skill eşliği.")
-    .replace("Read-only count before asking for any process stop.", "Herhangi bir süreç durdurma onayı istemeden önce yazmasız sayım.")
+    .replace("Owner-aware process audit; cleanup stays preview-only until --cleanup-stale --apply.", "Sahiplik farkındalıklı süreç denetimi; temizlik --cleanup-stale --apply verilene kadar yalnız önizlemedir.")
     .replace("Recent repo-local CLI log metadata; file contents are not printed.", "Son repo-local CLI log metadata'si; dosya içeriği basılmaz.")
     .replace("Backup archive inventory and restore/delete preview entry points.", "Yedek arşiv envanteri ve restore/delete preview girişleri.")
     .replace("Shows drift repair actions before any backup-backed write.", "Yedekli write öncesi drift onarım adımlarını gösterir.")
@@ -4394,185 +4416,91 @@ function diagnosticCommandRows() {
     {
       area: localText("Serena/MCP process audit", "Serena/MCP süreç denetimi"),
       command: "npm run chef -- --processes --no-log",
-      writes: localText("Read-only", "Yazmaz"),
-      reason: localText("Read-only count before asking for any process stop.", "Herhangi bir süreç durdurma onayı istemeden önce read-only sayım.")
+      writes: localText("Read-only; exact cleanup is separately gated", "Yazmaz; tam hedefli temizlik ayrıca onaylıdır"),
+      reason: localText(
+        "Owner-aware process audit; cleanup stays preview-only until --cleanup-stale --apply.",
+        "Sahiplik farkındalıklı süreç denetimi; temizlik --cleanup-stale --apply verilene kadar yalnız önizlemedir."
+      )
     }
   ];
 }
 
-const PROCESS_AUDIT_GROUPS = {
-  codex: new Set(["codex", "codex-command-runner", "codex-command-runner-0.141.0"]),
-  mcp: new Set(["serena", "uvx", "python", "python3", "node"]),
-  browser: new Set(["chrome", "chromium", "msedge"]),
-  tunnel: new Set(["cloudflared", "ngrok", "ssh", "tailscale", "wstunnel", "lt", "localtunnel"])
-};
-
-const PROCESS_AUDIT_NAMES = new Set(Object.values(PROCESS_AUDIT_GROUPS).flatMap((group) => [...group]));
-
-function parseCsvLine(line) {
-  const values = [];
-  let current = "";
-  let inQuote = false;
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    const next = line[index + 1];
-    if (char === "\"" && inQuote && next === "\"") {
-      current += "\"";
-      index += 1;
-    } else if (char === "\"") {
-      inQuote = !inQuote;
-    } else if (char === "," && !inQuote) {
-      values.push(current);
-      current = "";
-    } else {
-      current += char;
-    }
-  }
-  values.push(current);
-  return values;
-}
-
-function normalizeProcessName(value) {
-  return String(value || "")
-    .trim()
-    .replace(/^.*[\\/]/, "")
-    .replace(/\.exe$/i, "")
-    .toLowerCase();
-}
-
-function processCommandNames() {
-  const attempts = process.platform === "win32"
-    ? [
-        {
-          command: "tasklist.exe",
-          args: ["/fo", "csv", "/nh"],
-          parse: (stdout) => String(stdout || "")
-            .split(/\r?\n/)
-            .filter((line) => line.trim())
-            .map((line) => parseCsvLine(line)[0])
-        },
-        {
-          command: "powershell.exe",
-          args: ["-NoProfile", "-Command", "Get-Process | Select-Object -ExpandProperty ProcessName"],
-          parse: (stdout) => String(stdout || "").split(/\r?\n/).filter((line) => line.trim())
-        }
-      ]
-    : [
-        {
-          command: "ps",
-          args: ["-axo", "comm="],
-          parse: (stdout) => String(stdout || "").split(/\r?\n/).filter((line) => line.trim())
-        }
-      ];
-  const errors = [];
-  for (const attempt of attempts) {
-    const result = spawnSync(attempt.command, attempt.args, {
-    cwd: root,
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true,
-    timeout: 30000
-    });
-    const display = commandForDisplay(attempt.command, attempt.args);
-    if (result.error || result.status !== 0) {
-      errors.push(`${display}: ${result.error?.message || String(result.stderr || result.stdout || `exit ${result.status}`).trim()}`);
-      continue;
-    }
-    const names = attempt.parse(result.stdout);
+function processAuditPayload() {
+  const payload = buildProcessAudit();
+  if (options.cleanupStale && options.apply && payload.detailAvailable) {
     return {
-      ok: true,
-      command: display,
-      names: names.map(normalizeProcessName).filter(Boolean)
+      ...payload,
+      cleanupResults: terminateCleanupPlan(payload.cleanupCandidates)
     };
   }
-  return {
-    ok: false,
-    command: attempts.map((attempt) => commandForDisplay(attempt.command, attempt.args)).join(" | "),
-    error: errors.join("; ")
-  };
-}
-
-function processAuditPayload() {
-  const collected = processCommandNames();
-  const counts = new Map();
-  const groupCounts = Object.fromEntries(Object.keys(PROCESS_AUDIT_GROUPS).map((group) => [group, 0]));
-  if (collected.ok) {
-    for (const name of collected.names) {
-      if (!PROCESS_AUDIT_NAMES.has(name)) continue;
-      counts.set(name, (counts.get(name) || 0) + 1);
-      for (const [group, names] of Object.entries(PROCESS_AUDIT_GROUPS)) {
-        if (names.has(name)) groupCounts[group] += 1;
-      }
-    }
-  }
-  const matches = Array.from(counts.entries())
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([name, count]) => ({ name, count }));
-  return {
-    schemaVersion: 1,
-    generatedAt: new Date().toISOString(),
-    platform: process.platform,
-    command: collected.command,
-    status: collected.ok ? "ok" : "attention",
-    matches,
-    groupCounts,
-    tunnelStatus: groupCounts.tunnel > 0 ? "open" : "closed",
-    total: matches.reduce((sum, entry) => sum + entry.count, 0),
-    error: collected.ok ? null : redactSensitiveOutput(collected.error || ""),
-    safety: isTr()
-      ? [
-          "Yazmasız süreç sayımı.",
-          "Hiçbir süreç durdurulmaz veya kill edilmez.",
-          "Tünel süreçleri yalnız açık/kapalı kanıtı olarak raporlanır.",
-          "Kalıcı MCP, browser, tünel, Serena, Python veya Node süreçlerini durdurmadan önce onay isteyin."
-        ]
-      : [
-          "Read-only process count.",
-          "No process is stopped or killed.",
-          "Tunnel processes are reported as open/closed evidence only.",
-          "Ask before stopping persistent MCP, browser, tunnel, Serena, Python, or Node processes."
-        ]
-  };
+  return payload;
 }
 
 function runProcesses() {
   const payload = processAuditPayload();
   if (options.json) {
     console.log(JSON.stringify(payload, null, 2));
-    return { ok: true };
+    return { ok: !payload.cleanupResults?.some((item) => !item.ok) };
   }
 
   printSurfaceHeader(
     localText("Process audit", "Süreç denetimi"),
-    localText("Read-only count. No process is stopped, killed, or cleaned from this screen.", "Yazmasız sayım. Bu ekranda hiçbir süreç durdurulmaz, kill edilmez veya temizlenmez."),
+    options.cleanupStale && options.apply
+      ? localText(
+          "Approved stale-MCP cleanup. Active Codex trees and unrelated runtimes stay protected.",
+          "Onaylı eski MCP temizliği. Aktif Codex ağaçları ve ilgisiz runtime'lar korunur."
+        )
+      : localText(
+          "Parent/child audit. No process is stopped unless --cleanup-stale --apply is explicit.",
+          "Parent/child denetimi. --cleanup-stale --apply açıkça verilmedikçe hiçbir süreç durdurulmaz."
+        ),
     ICONS.docs
   );
-  printSurfaceNote(localText("Command", "Komut"), payload.command);
+  printSurfaceNote(localText("Evidence source", "Kanıt kaynağı"), payload.source);
   if (payload.error) {
-    console.log(`${ICONS.warn} ${localText("Process audit could not run:", "Süreç denetimi çalışamadı:")} ${payload.error}`);
-    return { ok: true };
+    console.log(`${ICONS.warn} ${localText(
+      "Detailed process audit could not run:",
+      "Ayrıntılı süreç denetimi çalışamadı:"
+    )} ${payload.error}`);
   }
-  console.log(`${styleLabel(localText("Total matching processes", "Eşleşen toplam süreç"))}: ${payload.total}`);
-  console.log(`${styleLabel(localText("Tunnel processes", "Tünel süreçleri"))}: ${payload.groupCounts.tunnel} (${localText(payload.tunnelStatus === "open" ? "open" : "closed", payload.tunnelStatus === "open" ? "açık" : "kapalı")})`);
-  console.log(`${styleLabel(localText("MCP/runtime processes", "MCP/runtime süreçleri"))}: ${payload.groupCounts.mcp}`);
-  console.log(`${styleLabel(localText("Browser processes", "Browser süreçleri"))}: ${payload.groupCounts.browser}`);
+  console.log(`${styleLabel(localText("Codex sessions", "Codex oturumları"))}: ${payload.codexSessions}`);
+  console.log(`${styleLabel(localText("Local MCP instances", "Yerel MCP instance'ları"))}: ${payload.localMcpInstances} (${payload.activeMcpInstances} ${localText("active", "aktif")}, ${payload.orphanCandidates} ${localText("orphan candidates", "yetim adayı")}, ${payload.graceInstances} ${localText("in grace", "bekleme süresinde")})`);
+  console.log(`${styleLabel(localText("MCP helper processes", "MCP yardımcı süreçleri"))}: ${payload.mcpHelperProcesses} (${payload.mcpWorkingSetMb} MB)`);
+  console.log(`${styleLabel(localText("Unrelated runtimes", "İlgisiz runtime'lar"))}: node=${payload.unrelatedRuntimes.node}, python=${payload.unrelatedRuntimes.python}, serena=${payload.unrelatedRuntimes.serena}, uvx=${payload.unrelatedRuntimes.uvx}`);
   printRows(
-    payload.matches,
+    payload.servers,
     isTr()
       ? [
-          { key: "name", label: "Süreç" },
-          { key: "count", label: "Adet" }
+          { key: "server", label: "MCP" },
+          { key: "instances", label: "Instance" },
+          { key: "active", label: "Aktif" },
+          { key: "orphanCandidates", label: "Yetim" },
+          { key: "processes", label: "Süreç" }
         ]
       : [
-          { key: "name", label: "Process" },
-          { key: "count", label: "Count" }
+          { key: "server", label: "MCP" },
+          { key: "instances", label: "Instances" },
+          { key: "active", label: "Active" },
+          { key: "orphanCandidates", label: "Orphan" },
+          { key: "processes", label: "Processes" }
         ],
-    localText("No Codex, MCP, browser, tunnel, Python, or Node processes matched.", "Codex, MCP, browser, tünel, Python veya Node süreci eşleşmedi.")
+    localText("No local MCP instances were identified.", "Yerel MCP instance'ı belirlenmedi.")
   );
+  if (Array.isArray(payload.cleanupResults)) {
+    const stopped = payload.cleanupResults.filter((item) => item.stopped).length;
+    const skipped = payload.cleanupResults.filter((item) => item.ok && !item.stopped).length;
+    const failed = payload.cleanupResults.filter((item) => !item.ok).length;
+    console.log(`${styleLabel(localText("Cleanup result", "Temizlik sonucu"))}: ${stopped} ${localText("stopped", "durduruldu")}, ${skipped} ${localText("skipped after recheck", "yeniden kontrolde atlandı")}, ${failed} ${localText("failed", "başarısız")}`);
+  } else if (payload.orphanCandidates > 0) {
+    console.log(`${ICONS.info} ${localText(
+      "Preview cleanup with --cleanup-stale; execute only with --cleanup-stale --apply.",
+      "Temizliği --cleanup-stale ile önizleyin; yalnız --cleanup-stale --apply ile uygulayın."
+    )}`);
+  }
   console.log("");
   console.log(styleHeading(localText("Safety notes", "Güvenlik notları")));
   for (const item of payload.safety) console.log(`- ${item}`);
-  return { ok: true };
+  return { ok: !payload.cleanupResults?.some((item) => !item.ok) };
 }
 
 function runDiagnostics() {
@@ -4700,7 +4628,8 @@ function runDiagnostics() {
   console.log(styleHeading(localText("Lifecycle cleanup notes", "Lifecycle temizlik notları")));
   console.log(`- ${localText("Use /agent to inspect and close completed agent threads.", "Tamamlanan agent thread'lerini incelemek ve kapatmak için /agent kullan.")}`);
   console.log(`- ${localText("Use /ps and /stop for live Codex tasks before starting another long operation.", "Yeni uzun işleme başlamadan önce live Codex task'ları için /ps ve /stop kullan.")}`);
-  console.log(`- ${localText("If Serena, browser, or MCP processes persist, audit first and ask before stopping them.", "Serena, browser veya MCP süreçleri kalırsa önce denetle ve durdurmadan önce onay iste.")}`);
+  console.log(`- ${localText("The reviewed SessionEnd hook waits 45 seconds and stops only exact captured MCP descendants after their Codex owner is gone.", "İncelenmiş SessionEnd hook'u 45 saniye bekler ve yalnız Codex sahibi gittikten sonra tam yakalanmış MCP alt süreçlerini durdurur.")}`);
+  console.log(`- ${localText("For manual cleanup, audit first; preview with --processes --cleanup-stale and apply only after reviewing exact candidates.", "Manuel temizlikte önce denetle; --processes --cleanup-stale ile ön izle ve yalnız tam adayları inceledikten sonra uygula.")}`);
   console.log(`- ${localText("Do not paste raw logs publicly; redaction covers common tokens but local logs can still contain machine context.", "Raw logları public paylaşma; redaction yaygın tokenları kapsar ama lokal loglar makine bağlamı içerebilir.")}`);
   return { ok: true };
 }

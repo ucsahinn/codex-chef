@@ -44,7 +44,7 @@ kopyalamadan sağlam bir başlangıç düzeni kurar.
 | --- | --- |
 | [🤖 21 agent'ın tamamını gör](docs/agents.tr.md) | Her uzman rolün ne yaptığını, ne zaman seçildiğini ve delegasyonun ne zaman gerçekten faydalı olduğunu. |
 | [🧩 Skill kataloğunu aç](docs/skills.tr.md) | Dokuz bundled workflow'u, full install ile gelen on beş incelenmiş skill'i ve varsayılan yolu kalabalıklaştırmayan opsiyonları. |
-| [🔌 MCP kataloğuna bak](docs/mcp-catalog.tr.md) | Varsayılan açık sekiz MCP'yi, gerektiğinde açılan sekiz connector'ı, gereksinimleri ve erişim sınırlarını. |
+| [🔌 MCP kataloğuna bak](docs/mcp-catalog.tr.md) | Dengeli üç sunuculu varsayılanı, opsiyonel lokal yetenekleri, sekiz kontrollü connector'ı ve süreç/erişim sınırlarını. |
 | [🛡️ Güvenlik modelini oku](docs/security-model.tr.md) | Ön izleme, yedekleme, onay kapıları, secret sınırları ve Codex Chef'in bilerek kendi başına yapmadığı işlemleri. |
 
 ## 🍳 Codex Chef Neler Ekliyor?
@@ -76,11 +76,15 @@ kullanılabilir.
 ### MCP'ler: canlı araç ve context, fakat sınırları görünür
 
 MCP; Codex'i dokümantasyona, browser'a, semantic code navigation'a, memory'ye
-ve lokal codebase graph okumalarına bağlar. `openaiDeveloperDocs`, `context7`,
-`playwright`, `chrome-devtools`, `serena`, `memory`,
-`sequential-thinking` ve `codebase-memory` kullanışlı varsayılanlar olarak
-yapılandırılır. Hesap, database, production ve geniş filesystem connector'ları
-sen bilerek açana kadar kapalı kalır.
+ve lokal codebase graph okumalarına bağlar. Dengeli ana config uzak
+`openaiDeveloperDocs` ile lokal `context7` ve `serena` sunucularını açar; diğer
+beş lokal stdio sunucusu (`sequential-thinking`, `playwright`,
+`chrome-devtools`, `memory` ve `codebase-memory`) tanımlı ama kapalı kalır.
+Böylece her eşzamanlı Codex penceresi aynı Node/Python yardımcı ağaçlarını
+baştan kurmaz. Yetenek ağırlıklı
+tek ana oturumda `full`, düşük süreç maliyetli ikincil oturumlarda
+`multi-session` profilini kullanabilirsin. Hesap, database, production ve geniş
+filesystem connector'ları sen bilerek açana kadar kapalı kalır.
 
 [Tüm MCP'leri, önkoşulları ve erişim sınırlarını gör →](docs/mcp-catalog.tr.md)
 
@@ -124,7 +128,7 @@ plugin dosyalarını temizlemez.
 | Kurulumu ön izle | `npm run chef -- --install` |
 | Repo sağlığını kontrol et | `npm run chef -- --status --repo-only --no-log` |
 | Routing sözleşmesini gör | `npm run chef -- --routing --profile starter-health` |
-| Control ve Brain görünürlüğünü kontrol et | `npm run chef -- --continuity --details` |
+| Codex/MCP süreç sahipliğini denetle | `npm run chef -- --processes --no-log` |
 
 Repair, diagnostics, update, process kontrolü, beklenen çıktılar ve doğrudan
 installer komutları [operatör dokümantasyonunda](docs/README.tr.md) duruyor.

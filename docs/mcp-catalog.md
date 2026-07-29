@@ -7,9 +7,12 @@ browser evidence, semantic code navigation, private account data, or database
 access. That makes them useful, but it also means each server needs a clear
 boundary.
 
-Codex Chef knows about 16 MCP servers. Eight read-heavy helpers are enabled in
-the starter config. Eight account, database, or broad-filesystem connectors
-stay off until you deliberately need them.
+Codex Chef knows about 16 MCP servers. The balanced starter enables three:
+remote `openaiDeveloperDocs` plus local `context7` and `serena`. Five additional
+local stdio helpers remain defined but disabled, preserving capability without
+eagerly starting their Node/Python trees in every concurrent session. Eight
+account, database, or broad-filesystem connectors stay off until you
+deliberately need them.
 
 > **Configured is not the same as live.** A server can exist in the template
 > and still need a launcher, first-run package download, browser, authorization,
@@ -20,18 +23,25 @@ stay off until you deliberately need them.
 [MCP specification](https://modelcontextprotocol.io/specification) ·
 [Machine-readable catalog](../catalog/mcp-servers.json)
 
-## Ready In The Starter Config
+## Balanced Local Defaults
 
-| MCP | What I use it for | What it needs |
-| --- | --- | --- |
-| [`openaiDeveloperDocs`](https://developers.openai.com/mcp) | Current OpenAI developer documentation | Nothing extra |
-| [`context7`](https://github.com/upstash/context7) | Current library and framework docs | Node/npx and first-run network access |
-| [`sequential-thinking`](https://github.com/modelcontextprotocol/servers) | Breaking a complex task into clear steps | Node/npx and first-run network access |
-| [`playwright`](https://github.com/microsoft/playwright-mcp) | Browser snapshots, screenshots, console and prompt-gated network evidence in an isolated, non-persistent profile | Node/npx and local browser control |
-| [`chrome-devtools`](https://github.com/ChromeDevTools/chrome-devtools-mcp) | Chrome inspection and UI diagnostics | Node/npx and an isolated Chrome bridge |
-| [`serena`](https://github.com/oraios/serena) | Symbol-aware code navigation in unfamiliar repositories | `uvx` and the pinned Serena source |
-| [`memory`](https://github.com/modelcontextprotocol/servers) | Small, non-secret local memory graph | Node/npx; never store secrets |
-| [`codebase-memory`](https://github.com/DeusData/codebase-memory-mcp) | Architecture, graph search, paths, and change impact | Node/npx; indexing and admin tools stay gated |
+| MCP | Base | What I use it for | What it needs |
+| --- | --- | --- | --- |
+| [`openaiDeveloperDocs`](https://developers.openai.com/mcp) | On | Current OpenAI developer documentation | Nothing extra |
+| [`context7`](https://github.com/upstash/context7) | On | Current library and framework docs | Node/npx and first-run network access |
+| [`serena`](https://github.com/oraios/serena) | On | Symbol-aware code navigation in unfamiliar repositories | `uvx` and the pinned Serena source |
+| [`sequential-thinking`](https://github.com/modelcontextprotocol/servers) | Off | Breaking a complex task into clear steps | Node/npx and first-run network access |
+| [`playwright`](https://github.com/microsoft/playwright-mcp) | Off | Browser snapshots, screenshots, console and prompt-gated network evidence in an isolated, non-persistent profile | Node/npx and local browser control |
+| [`chrome-devtools`](https://github.com/ChromeDevTools/chrome-devtools-mcp) | Off | Chrome inspection and UI diagnostics | Node/npx and an isolated Chrome bridge |
+| [`memory`](https://github.com/modelcontextprotocol/servers) | Off | Small, non-secret local memory graph | Node/npx; never store secrets |
+| [`codebase-memory`](https://github.com/DeusData/codebase-memory-mcp) | Off | Architecture, graph search, paths, and change impact | Node/npx; indexing and admin tools stay gated |
+
+Use `codex --profile full` for one primary session that needs every bundled
+local MCP. Start secondary concurrent windows with
+`codex --profile multi-session`; that profile disables all seven local stdio
+servers while leaving agents, skills, remote OpenAI docs, built-in memories,
+hooks, and apps available. Profiles layer over the base config, so disabling a
+server does not delete its definition.
 
 Browser navigation, memory writes, indexing, symbol edits, and similar actions
 are not silently approved just because the server is enabled. The templates
@@ -92,7 +102,8 @@ the repository.
 
 ## The Boundary I Keep
 
-- Documentation and read-only reasoning helpers can be convenient defaults.
+- Remote documentation plus one library-doc and one semantic-code helper form
+  the balanced default; overlapping local helpers stay one profile away.
 - Browser interaction, memory writes, code edits, and graph indexing remain
   prompted or narrowly allowlisted.
 - Authenticated accounts, databases, production systems, and broad filesystem

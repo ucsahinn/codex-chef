@@ -1094,6 +1094,7 @@ if (!exists(cliPath)) {
     "--diagnostics",
     "--diagnose",
     "--processes",
+    "--cleanup-stale",
     "--auth",
     "--logs",
     "--apply",
@@ -1296,6 +1297,7 @@ runCliSmoke("help", ["--help", "--plain", "--no-log"], [
   "--backups [--backup ID] [--restore|--delete --apply]",
   "--diagnostics",
   "--processes",
+  "--cleanup-stale",
   "--lang tr",
   "--tr",
   "--verbose-plan",
@@ -1310,6 +1312,7 @@ runCliSmoke("help-tr", ["--help", "--lang", "tr", "--plain", "--no-log"], [
   "Seçenekler:",
   "--diagnostics",
   "--processes",
+  "--cleanup-stale",
   "--lang tr",
   "--verbose-plan",
   "--details",
@@ -1702,19 +1705,19 @@ runCliJsonSmoke("diagnostics-json", ["--diagnostics", "--json", "--no-log"]);
 runNpmSilentJsonSmoke("diagnostics-npm-silent-json", ["chef", "--", "--diagnostics", "--json", "--no-log"], ["status", "overall"]);
 runCliSmoke("processes", ["--processes", "--plain", "--no-log"], [
   "Process audit",
-  "Read-only count",
-  "Total matching processes",
-  "Tunnel processes",
-  "MCP/runtime processes",
-  "No process is stopped"
+  "Parent/child audit",
+  "Codex sessions",
+  "Local MCP instances",
+  "MCP helper processes",
+  "Unrelated runtimes"
 ], { forbidAnsi: true });
 runCliSmoke("processes-tr", ["--processes", "--tr", "--plain", "--no-log"], [
   "Süreç denetimi",
-  "Yazmasız sayım",
-  "Eşleşen toplam süreç",
-  "Tünel süreçleri",
-  "MCP/runtime süreçleri",
-  "Hiçbir süreç durdurulmaz"
+  "Parent/child denetimi",
+  "Codex oturumları",
+  "Yerel MCP instance",
+  "MCP yardımcı süreçleri",
+  "İlgisiz runtime"
 ], { forbidAnsi: true });
 runCliJsonSmoke("processes-json", ["--processes", "--json", "--no-log"]);
 runNpmSilentJsonSmoke("status-npm-silent-json", ["chef", "--", "--status", "--repo-only", "--json", "--no-log"], ["cliQuickStart", "readOnlyCommands"]);

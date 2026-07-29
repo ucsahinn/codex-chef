@@ -187,6 +187,7 @@ npm run chef -- --reset
 npm run chef -- --routing --profile starter-health
 npm run chef -- --diagnostics
 npm run chef -- --processes
+npm run chef -- --processes --cleanup-stale
 ```
 
 `npm run chef` opens the numbered operator menu. The noninteractive smoke
@@ -208,10 +209,15 @@ setup/auth/source/rollback notes without enabling anything.
 repo-only status snapshot, shows current health, attention reasons, next safe
 actions, backup/log summaries, and the diagnostic evidence commands for status,
 doctor, routing, update preview, repair preview, backups, logs, runtime parity,
-and Serena/MCP process audits. `npm run chef -- --processes --no-log` runs that
-process count directly without stopping anything. It prints the log root and recent CLI log
-metadata without printing log contents or stopping processes. For parseable JSON
-through npm, use `npm run --silent chef -- --diagnostics --json --no-log`.
+and Serena/MCP process audits. `npm run chef -- --processes --no-log` runs the
+schema-v2 parent/child audit without stopping anything. It separates active
+Codex owners, logical local MCP instances, helper-process trees, grace-period
+trees, old unowned candidates, and unrelated Node/Python runtimes. Add
+`--cleanup-stale` for a no-write exact cleanup preview; only
+`--cleanup-stale --apply` can stop candidates. For parseable JSON through npm,
+use `npm run --silent chef -- --processes --json --no-log`. Full semantics and
+the SessionEnd trust step are in
+[multi-session process hygiene](process-hygiene.md).
 
 `npm run chef -- --backups` lists backup archive metadata without touching
 global/user state. `npm run chef -- --backups --backup <id>` inspects a backup

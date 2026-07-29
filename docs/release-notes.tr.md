@@ -2,21 +2,33 @@
 
 Bu sayfa kullanıcıların şimdi kurması gereken sürümü anlatır. Eski mühendislik geçmişi [CHANGELOG.md](../CHANGELOG.md) içinde korunur; böylece public sürüm rehberi büyüyen bir arşive dönüşmeden güncel kalır.
 
-## v0.5.58 - 2026-07-29
+## v0.5.59 - 2026-07-29
 
-Codex Chef 0.5.58; güvenlik sınırları net Fetch, SEO ve Evidence Research workflow'larını ekler, managed skill kurulumunu ve CLI hata sözleşmelerini güçlendirir, Windows ile macOS davranışını bozmadan Ubuntu/Node.js 18 taşınabilirlik kapısını yeniden yeşile taşır.
+Codex Chef 0.5.59, yetenekleri kaldırmadan gereksiz lokal MCP başlangıçlarını
+azaltır; böylece beş veya altı eşzamanlı Codex oturumu daha kontrollü çalışır.
+Ayrıca stale MCP ağaçları için sahiplik farkındalıklı denetim ve fail-closed
+temizlik yolu ekler.
 
 ### Neler Değişti?
 
-- Yalnız açıkça çağrılan `$fetch` workflow'uyla yetkili bir referans siteyi gerçek browser kanıtından yeniden kurar; public-passive varsayımlar, pasif authentication, prompt-injection ve SSRF sınırları, yasal asset kullanımı, sıfır-egress lokal çıktı ve deterministik rapor doğrulaması uygular.
-- Upstream SEO referansının yerine lokal, rendered, deployed, field ve account kanıtlarını ayıran; teknik, içerik, uluslararası ve lokal SEO raporlarını iddia güvenliği açısından doğrulayan Chef-owned `$seo` workflow'unu getirir.
-- Kapsamlı arama, eleme, kaynak değerlendirme, claim seviyesinde izlenebilirlik, görüş ayrılığı ve belirsizlik sentezi, tekrarlanabilirlik ve etik karar paketleri için `$evidence-research` ekler.
-- Fetch, SEO ve Evidence Research'ü canonical plugin kaynağından managed direct skill olarak kurar; çakışmada fail-closed davranış, skill bazında açık sahiplenme, yedekli değiştirme, rollback doğrulaması ve runtime parity kontrolü uygular.
-- Daha önce kurulmuş Codex Chef plugin'inin eski versioned cache'ini installer, update ve repair apply akışlarında yerinde yeniler, aktif sürümü doğrular ve hiç kurulmamış plugin'i kurmadan bırakır.
-- Commit-pinned skill kurulumunu exact native-tree hash'i, provenance-aware managed upgrade, yabancı hedefi koruma, zorunlu yedek ve çalışan full-history fetch desteğiyle güçlendirir.
-- Chef, status, routing, doctor, Brain, external-review, release-note ve pinned-skill CLI'ları boyunca sanitize edilmiş ortak plain/JSON hata sözleşmesi ve gerçeğe uygun sonuç makbuzları ekler.
-- Token bütçesi tanılarını, external-review containment'ını, credential-path taramasını, MCP/runtime katalog uyumunu, onay sınırlarını, installer kontrollerini ve supply-chain doğrulamasını sıkılaştırır.
-- Forced-color smoke testlerinden çelişkili `NO_COLOR` aktarımını kaldırır; böylece Node.js 18 uyarısı Ubuntu'daki 72 sütun taşınabilirlik kontrolünü artık bozmaz.
+- Dengeli ana config'i üç tamamlayıcı MCP'ye indirir:
+  `openaiDeveloperDocs`, `context7` ve `serena`. Örtüşen beş lokal stdio
+  yardımcısı tanımlı ama kapalı kalır.
+- Yetenek ağırlıklı tek ana oturum için `full.config.toml`, düşük süreçli ikincil
+  oturumlar için `multi-session.config.toml` ekler. Agent, skill, uzak OpenAI
+  docs, built-in memory, hook ve app yüzeyleri kullanılabilir kalır.
+- Düz Node/Python sayımı yerine aktif Codex sahibini, mantıksal MCP
+  instance'ını, yardımcı ağacı, bekleme süresini, eski sahipsiz adayı ve ilgisiz
+  runtime'ı ayıran schema-v2 denetim getirir.
+- Ön izleme öncelikli stale cleanup ekler. Durdurmadan hemen önce tam PID,
+  oluşturulma zamanı, MCP imzası ve aktif Codex sahibi bulunmadığını yeniden
+  doğrular; eksik metadata ve PID yeniden kullanımı fail-closed kalır.
+- Trust-gated tek bir plugin `SessionEnd` hook'u ekler. Yalnız biten Codex
+  sahibinin MCP alt süreçlerini yakalar, 45 saniye bekler ve sahip zinciri
+  kaybolduktan sonra tam eşleşen süreçleri durdurur.
+- Yeni sınır için odaklı regresyon testleri, security allowlist'leri,
+  installer/package kontrolleri, ADR-003 ve eksiksiz İngilizce/Türkçe operatör
+  rehberi ekler.
 
 ### Kurulum Veya Güncelleme
 
@@ -39,14 +51,23 @@ Kurulumdan önce ve sonra durumu dikkate alan ekranları kullan:
 ```bash
 npm run chef -- --skills
 npm run chef -- --mcp
+npm run chef -- --processes --no-log
 npm run chef -- --status --details
 ```
 
-Ardından Codex'i yeniden başlat ve kurulu runtime'ı doğrula:
+Ardından Codex'i yeniden başlat, `/hooks` ekranında tam process-hygiene
+kaynağını inceleyip güven ve kurulu runtime'ı doğrula:
 
 ```bash
 npm run verify:install:runtime
 npm run codex:status
+```
+
+Eşzamanlı çalışmada tek normal veya `full` ana oturum bırak; ikincil pencereleri
+şöyle başlat:
+
+```bash
+codex --profile multi-session
 ```
 
 ### Uyumluluk

@@ -23,8 +23,8 @@ Resmi kaynaklar:
 | `config.toml` | Model, sandbox, approval, MCP, feature ve profile ayarlari | Workspace-write sandbox ve on-request approval | `npm run validate:mcp` |
 | Rules | Dar komut approval varsayilanlari | Sadece dogrulama komutlari; destructive/publish aksiyonlari gated | `npm run validate:content` |
 | Skills | Progressive disclosure ile yeniden kullanilabilir workflow'lar | Commit-pinned curated kurulumlar ve yetkili reconstruction, kanıta dayalı SEO, izlenebilir deep research dahil dokuz yerel plugin skill'i | `npm run verify:skills` |
-| Plugins | Paylasilabilir skill ve gelecekte bundled yuzey paketi | Tek local plugin, default hook/MCP/app yok | `npm run validate` |
-| MCP/connectors | Canli docs, browser, code navigation ve dis sistemler | Docs/code/browser yardimcilari acik; auth isteyenler kapali | `npm run validate:mcp` |
+| Plugins | Paylasilabilir skill ve incelenmis lifecycle yuzeyi | Dokuz skill ve tam hedefli, trust-gated tek SessionEnd süreç hook'u olan lokal plugin; bundled MCP/app yok | `npm run validate` |
+| MCP/connectors | Canli docs, browser, code navigation ve dis sistemler | Dengeli üç varsayılan; opsiyonel lokal stdio yardımcıları ve auth isteyen connector'lar kapalı | `npm run validate:mcp` |
 | Subagents | Evidence-heavy uzman delegasyonu | Sandbox'li role dosyalariyla 21 incelenmis uzman ajan | `npm run validate:agents` |
 | Doctor/status | No-write saglik ve drift ozeti | Default repo-only; opsiyonel global varlik kontrolu | `npm run codex:doctor` |
 
@@ -187,7 +187,9 @@ Bu repo bu ayrimi korur:
 - Local plugin dokuz workflow sunar; enterprise operator, zero-network offline
   diagram triplet, explicit-only Fetch, kanıta dayalı `$seo`, izlenebilir
   `$evidence-research` ve context budget planner bunların içindedir.
-- Plugin hook, MCP server ve app yuzeyleri ayri review olmadan manifest'e girmez.
+- Tam hedefli tek `SessionEnd` süreç hijyeni hook'u ayrıca incelenir ve
+  trust-gated kalır. Başka plugin hook, MCP server ve app yüzeyleri manifest'te
+  yer almaz.
 
 `/diagram` benzeri cikti gerektiğinde local renderer'i dogrudan calistir:
 
@@ -205,10 +207,15 @@ Bu starter gelecekte ayri review ve dokumantasyon olmadan sunlari import etmez:
 - Cross-harness global config sync.
 - Genis skill marketplace import'lari.
 - Varsayilan acik authenticated connector'lar.
-- Plugin-bundled lifecycle hook'lar.
+- İncelenmemiş veya context ekleyen plugin lifecycle hook'ları.
 - Otomatik memory/session injection.
 - Her turn'e gizli research corpus injection.
-- Destructive cleanup, push, release, publish veya deploy otomasyonu.
+- Geniş veya kanıtsız cleanup, push, release, publish veya deploy otomasyonu.
+
+Tek cleanup istisnası fail-closed ve sahiplik kapsamlıdır: SessionEnd taraması
+yalnız biten Codex sahibinden yakalanmış tam lokal MCP alt süreçlerini 45
+saniyelik beklemeden sonra durdurabilir. Ayrıntı için
+[çoklu oturum süreç hijyenine](process-hygiene.tr.md) bak.
 
 ## Dogrulama
 
