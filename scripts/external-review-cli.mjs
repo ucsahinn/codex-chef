@@ -5,16 +5,27 @@ import path from "node:path";
 import process from "node:process";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import {
+  CliUsageError,
+  emitCliError,
+  requireCliValue
+} from "./lib/cli-error-contract.mjs";
 
 const MANIFEST_NAME = "external-review-manifest.json";
 const DEFAULT_PART_BYTES = 500_000;
 const MAX_FILE_BYTES = 1_000_000;
 const SECRET_PATTERNS = [
-  ["private key", /-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/],
+  ["private key", /-----BEGIN (?:(?:ENCRYPTED |RSA |EC |OPENSSH |DSA )?PRIVATE KEY|PGP PRIVATE KEY BLOCK)-----/],
   ["OpenAI API key", /\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}\b/],
   ["GitHub token", /\bgh(?:p|o|u|s|r)_[A-Za-z0-9]{30,}\b/],
+  ["GitHub fine-grained token", /\bgithub_pat_[A-Za-z0-9_]{20,}\b/],
+  ["npm token", /\bnpm_[A-Za-z0-9]{20,}\b/],
   ["AWS access key", /\bAKIA[0-9A-Z]{16}\b/],
-  ["Slack token", /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/]
+  ["AWS secret access key", /\bAWS_SECRET_ACCESS_KEY\s*[:=]\s*["']?[A-Za-z0-9/+=]{20,}/i],
+  ["Docker registry auth", /"auth"\s*:\s*"[A-Za-z0-9+/=]{12,}"/i],
+  ["Slack token", /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/],
+  ["JWT", /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/],
+  ["connection string", /\b(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|rediss|amqp|amqps|mssql):\/\/[^\s"'`]+/i]
 ];
 
 function fail(message, code = "EXTERNAL_REVIEW_ERROR") {
@@ -47,6 +58,96 @@ function isInside(parent, candidate) {
   return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
+function lstatOrNull(targetPath) {
+  try {
+    return fs.lstatSync(targetPath);
+  } catch (error) {
+    if (error?.code === "ENOENT") return null;
+    throw error;
+  }
+}
+
+function canonicalizeWithMissingTail(targetPath) {
+  let current = path.resolve(targetPath);
+  const missing = [];
+  while (!lstatOrNull(current)) {
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    missing.unshift(path.basename(current));
+    current = parent;
+  }
+  return path.resolve(fs.realpathSync.native(current), ...missing);
+}
+
+function assertNoLinkedOutputAncestor(outputPath) {
+  const resolved = path.resolve(outputPath);
+  const parsed = path.parse(resolved);
+  const segments = resolved.slice(parsed.root.length).split(path.sep).filter(Boolean);
+  let current = parsed.root;
+  for (const segment of segments) {
+    current = path.join(current, segment);
+    const stat = lstatOrNull(current);
+    if (!stat) break;
+    if (stat.isSymbolicLink()) {
+      fail(`Review output must not traverse a linked path component: ${current}`, "UNSAFE_OUTPUT_PATH");
+    }
+    if (current !== resolved && !stat.isDirectory()) {
+      fail(`Review output has a non-directory ancestor: ${current}`, "UNSAFE_OUTPUT_PATH");
+    }
+  }
+}
+
+function assertOutputOutsideTarget(target, outputPath) {
+  const resolvedTarget = fs.realpathSync.native(path.resolve(target));
+  const resolvedOut = path.resolve(outputPath);
+  if (isInside(resolvedTarget, resolvedOut)) {
+    fail("Review output must be outside the target repository.", "UNSAFE_OUTPUT_PATH");
+  }
+  assertNoLinkedOutputAncestor(resolvedOut);
+  const canonicalOut = canonicalizeWithMissingTail(resolvedOut);
+  if (isInside(resolvedTarget, canonicalOut)) {
+    fail("Review output resolves inside the target repository.", "UNSAFE_OUTPUT_PATH");
+  }
+  return resolvedOut;
+}
+
+function assertSafeSourcePath(target, sourcePath, relativePath) {
+  const resolvedTarget = path.resolve(target);
+  const canonicalTarget = fs.realpathSync.native(resolvedTarget);
+  const resolvedSource = path.resolve(sourcePath);
+  if (!isInside(resolvedTarget, resolvedSource)) {
+    fail(`Tracked path escapes target: ${relativePath}`, "UNSAFE_SOURCE_PATH");
+  }
+
+  const relative = path.relative(resolvedTarget, resolvedSource);
+  const segments = relative.split(path.sep).filter(Boolean);
+  let current = resolvedTarget;
+  let finalStat = null;
+  for (const [index, segment] of segments.entries()) {
+    current = path.join(current, segment);
+    const stat = lstatOrNull(current);
+    if (!stat) {
+      fail(`Tracked source is missing: ${relativePath}`, "MISSING_SOURCE_PATH");
+    }
+    if (stat.isSymbolicLink()) {
+      fail(`Tracked source traverses a linked path component: ${relativePath}`, "UNSAFE_SOURCE_PATH");
+    }
+    if (index < segments.length - 1 && !stat.isDirectory()) {
+      fail(`Tracked source has a non-directory ancestor: ${relativePath}`, "UNSAFE_SOURCE_PATH");
+    }
+    finalStat = stat;
+  }
+
+  if (!finalStat) {
+    fail(`Tracked source is not a file path: ${relativePath}`, "UNSAFE_SOURCE_PATH");
+  }
+  const canonicalSource = fs.realpathSync.native(resolvedSource);
+  if (!isInside(canonicalTarget, canonicalSource)) {
+    fail(`Tracked source resolves outside target: ${relativePath}`, "UNSAFE_SOURCE_PATH");
+  }
+  return finalStat;
+}
+
 function resolveTarget(target) {
   if (!target) fail("--target is required.");
   const resolved = fs.realpathSync(path.resolve(target));
@@ -63,7 +164,26 @@ function isSensitivePath(relativePath) {
   const normalized = relativePath.toLowerCase();
   const parts = normalized.split("/");
   const base = parts.at(-1);
-  if (parts.some((part) => [".git", ".codex", ".agents", ".serena", ".ssh", ".aws", ".gnupg"].includes(part))) return true;
+  if (
+    parts.some((part) => [
+      ".git",
+      ".codex",
+      ".agents",
+      ".serena",
+      ".ssh",
+      ".aws",
+      ".gnupg",
+      ".docker",
+      ".kube",
+      ".azure"
+    ].includes(part))
+  ) return true;
+  if (
+    normalized === ".config/gcloud"
+    || normalized.startsWith(".config/gcloud/")
+    || normalized.includes("/.config/gcloud/")
+  ) return true;
+  if ([".npmrc", ".pypirc", ".netrc", ".git-credentials"].includes(base)) return true;
   if (/^\.env(?:\.|$)/.test(base) && !/\.(?:example|sample|template)$/.test(base)) return true;
   if (/(?:^|[-_.])(?:credential|credentials|secret|secrets|cookie|cookies|session|sessions|auth-state)(?:[-_.]|$)/.test(base)) return true;
   return /\.(?:pem|key|p12|pfx|jks|keystore|sqlite|sqlite3|db|log|har)$/i.test(base);
@@ -74,10 +194,41 @@ function looksBinary(buffer) {
   return sample.includes(0);
 }
 
+function isCredentialPlaceholderOrReference(value) {
+  const normalized = String(value || "").trim();
+  return /^(?:(?:your|example|sample|placeholder|replace|change[-_]?me|not[-_]|sentinel|redacted)(?:[-_ ][A-Za-z0-9.]+)*|x{8,}|0{12,}|\$\{[A-Za-z0-9_]+\}|\{\{[^{}]+\}\}|<[^<>]+>)$/i.test(normalized)
+    || /^(?:process\.env\.[A-Za-z0-9_]+|deno\.env\.get\(["'][A-Za-z0-9_]+["']\)|bun\.env\.[A-Za-z0-9_]+|import\.meta\.env\.[A-Za-z0-9_]+|os\.(?:environ(?:\.get\(["'][A-Za-z0-9_]+["']\)|\[['"][A-Za-z0-9_]+['"]\]?)|getenv\(["'][A-Za-z0-9_]+["']\))|std::env::var\(["'][A-Za-z0-9_]+["']\)|environment\.getenvironmentvariable\(["'][A-Za-z0-9_]+["']\)|system\.getenv\(["'][A-Za-z0-9_]+["']\)|env\[['"][A-Za-z0-9_]+['"]\]?|\$env:[A-Za-z0-9_]+|%[A-Za-z0-9_]+%);?$/i.test(normalized);
+}
+
 export function scanSecrets(text) {
   const findings = [];
   for (const [name, pattern] of SECRET_PATTERNS) {
     if (pattern.test(text)) findings.push(name);
+  }
+  const hardcodedFallback = /(?<![-A-Za-z0-9_"'])(["']?)\b(api[_-]?key|client[_-]?secret|consumer[_-]?secret|secret|secret[_-]?key|signing[_-]?key|aws[_-]?secret[_-]?access[_-]?key|access[_-]?token|refresh[_-]?token|auth[_-]?token|_authToken|token|password|passwd|credential|private[_-]?key)\b\1\s*[:=]\s*[^\r\n]*?(?:\|\||\?\?|\bor\b)\s*(?:(["'])([^"'\r\n]{12,})\3|([^\s;,\r\n]{12,}))/gi;
+  if (hardcodedFallback.test(text)) findings.push("generic credential assignment");
+  const genericAssignments = /(?<![-A-Za-z0-9_"'])(["']?)\b(api[_-]?key|client[_-]?secret|consumer[_-]?secret|secret|secret[_-]?key|signing[_-]?key|aws[_-]?secret[_-]?access[_-]?key|access[_-]?token|refresh[_-]?token|auth[_-]?token|_authToken|token|password|passwd|credential|private[_-]?key)\b\1\s*[:=]\s*(?:(["'])([^"'\r\n]{12,})\3|([^\s,;}\]]{12,}))/gi;
+  for (const match of text.matchAll(genericAssignments)) {
+    const value = String(match[4] || match[5] || "").trim();
+    if (isCredentialPlaceholderOrReference(value)) continue;
+    if (!findings.includes("generic credential assignment")) {
+      findings.push("generic credential assignment");
+    }
+    break;
+  }
+  const lineAssignments = /^\s*(["']?)\b(api[_-]?key|client[_-]?secret|consumer[_-]?secret|secret|secret[_-]?key|signing[_-]?key|aws[_-]?secret[_-]?access[_-]?key|access[_-]?token|refresh[_-]?token|auth[_-]?token|_authToken|token|password|passwd|credential|private[_-]?key)\b\1\s*[:=]\s*(.+?)\s*$/gim;
+  for (const match of text.matchAll(lineAssignments)) {
+    const value = String(match[3] || "").trim().replace(/^(["'])([\s\S]*)\1$/, "$2");
+    if (value.length < 12) continue;
+    if (isCredentialPlaceholderOrReference(value)) continue;
+    if (!findings.includes("generic credential assignment")) {
+      findings.push("generic credential assignment");
+    }
+    break;
+  }
+  const yamlBlockAssignment = /^\s*(["']?)\b(api[_-]?key|client[_-]?secret|consumer[_-]?secret|secret|secret[_-]?key|signing[_-]?key|aws[_-]?secret[_-]?access[_-]?key|access[_-]?token|refresh[_-]?token|auth[_-]?token|_authToken|token|password|passwd|credential|private[_-]?key)\b\1\s*:\s*[|>][+-]?\s*(?:#.*)?$/gim;
+  if (yamlBlockAssignment.test(text) && !findings.includes("generic credential assignment")) {
+    findings.push("generic credential assignment");
   }
   return findings;
 }
@@ -114,10 +265,10 @@ export function buildPackPlan({ target, out, maxPartBytes = DEFAULT_PART_BYTES }
   const dirty = runGit(resolvedTarget, ["status", "--porcelain"]).trim().length > 0;
   const generatedAt = new Date().toISOString();
   const reviewId = `${generatedAt.replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z")}-${commit.slice(0, 8)}`;
-  const resolvedOut = path.resolve(out || defaultOutput(resolvedTarget, reviewId));
-  if (isInside(resolvedTarget, resolvedOut)) {
-    fail("Review output must be outside the target repository.");
-  }
+  const resolvedOut = assertOutputOutsideTarget(
+    resolvedTarget,
+    out || defaultOutput(resolvedTarget, reviewId)
+  );
 
   const included = [];
   const excluded = [];
@@ -128,9 +279,7 @@ export function buildPackPlan({ target, out, maxPartBytes = DEFAULT_PART_BYTES }
       continue;
     }
     const absolute = path.resolve(resolvedTarget, relativeRaw);
-    if (!isInside(resolvedTarget, absolute)) fail(`Tracked path escapes target: ${relative}`);
-    const stat = fs.lstatSync(absolute);
-    if (stat.isSymbolicLink()) fail(`Symlinks are not allowed in review packages: ${relative}`);
+    const stat = assertSafeSourcePath(resolvedTarget, absolute, relative);
     if (!stat.isFile()) {
       excluded.push({ path: relative, reason: "not-a-file" });
       continue;
@@ -202,8 +351,13 @@ export function buildPackPlan({ target, out, maxPartBytes = DEFAULT_PART_BYTES }
 
 export function applyPack(plan) {
   if (fs.existsSync(plan.out)) fail(`Output already exists; refusing to overwrite: ${plan.out}`);
+  assertOutputOutsideTarget(plan.target, plan.out);
   fs.mkdirSync(plan.out, { recursive: true });
+  assertOutputOutsideTarget(plan.target, plan.out);
   for (const part of plan.parts) {
+    if (path.basename(part.name) !== part.name) {
+      fail(`Unsafe review part name: ${part.name}`, "UNSAFE_OUTPUT_PATH");
+    }
     fs.writeFileSync(path.join(plan.out, part.name), part.content, { encoding: "utf8", flag: "wx" });
   }
   fs.writeFileSync(path.join(plan.out, MANIFEST_NAME), `${JSON.stringify(plan.manifest, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
@@ -213,8 +367,18 @@ export function applyPack(plan) {
 function readManifest(manifestPath) {
   if (!manifestPath) fail("--manifest is required.");
   const resolved = path.resolve(manifestPath);
+  const stat = lstatOrNull(resolved);
+  if (!stat || !stat.isFile() || stat.isSymbolicLink()) {
+    fail("External review manifest must be a regular non-linked file.", "UNSAFE_MANIFEST");
+  }
   const manifest = JSON.parse(fs.readFileSync(resolved, "utf8"));
-  if (manifest.schemaVersion !== "1.0.0" || !Array.isArray(manifest.files) || !Array.isArray(manifest.parts)) {
+  if (
+    manifest.schemaVersion !== "1.0.0"
+    || !Array.isArray(manifest.files)
+    || manifest.files.length === 0
+    || !Array.isArray(manifest.parts)
+    || manifest.parts.length === 0
+  ) {
     fail("Unsupported or invalid external review manifest.");
   }
   return { resolved, manifest };
@@ -224,20 +388,83 @@ export function checkFreshness(target, manifest) {
   const resolvedTarget = resolveTarget(target);
   const results = manifest.files.map((file) => {
     const absolute = path.resolve(resolvedTarget, file.path);
-    if (!isInside(resolvedTarget, absolute) || !fs.existsSync(absolute)) {
-      return { path: file.path, status: "missing" };
+    let stat;
+    try {
+      stat = assertSafeSourcePath(resolvedTarget, absolute, file.path);
+    } catch (error) {
+      return {
+        path: file.path,
+        status: error?.code === "MISSING_SOURCE_PATH" ? "missing" : "unsafe"
+      };
     }
-    const stat = fs.lstatSync(absolute);
-    if (!stat.isFile() || stat.isSymbolicLink()) return { path: file.path, status: "unsafe" };
+    if (!stat.isFile()) return { path: file.path, status: "unsafe" };
     const actual = sha256(fs.readFileSync(absolute));
     return { path: file.path, status: actual === file.sha256 ? "fresh" : "changed", actualSha256: actual };
   });
   const head = runGit(resolvedTarget, ["rev-parse", "HEAD"]).trim();
+  const expectedTracked = [...(manifest.files || []), ...(manifest.excluded || [])]
+    .map((entry) => toPosix(entry.path))
+    .sort();
+  const currentTracked = trackedFiles(resolvedTarget).map(toPosix);
+  const expectedTrackedSet = new Set(expectedTracked);
+  const currentTrackedSet = new Set(currentTracked);
+  const addedTracked = currentTracked.filter((file) => !expectedTrackedSet.has(file));
+  const missingTracked = expectedTracked.filter((file) => !currentTrackedSet.has(file));
+  const sourceSetFresh = addedTracked.length === 0
+    && missingTracked.length === 0
+    && currentTracked.length === expectedTracked.length;
   return {
-    fresh: results.every((entry) => entry.status === "fresh") && head === manifest.snapshot.commit,
+    fresh: results.every((entry) => entry.status === "fresh")
+      && head === manifest.snapshot.commit
+      && sourceSetFresh,
     expectedCommit: manifest.snapshot.commit,
     currentCommit: head,
+    sourceSet: {
+      fresh: sourceSetFresh,
+      expectedCount: expectedTracked.length,
+      currentCount: currentTracked.length,
+      added: addedTracked,
+      missing: missingTracked
+    },
     files: results
+  };
+}
+
+export function checkBundleIntegrity(manifestPath, manifest) {
+  const manifestFile = path.resolve(manifestPath);
+  const bundleRoot = path.dirname(manifestFile);
+  const parts = [];
+  for (const part of manifest.parts || []) {
+    const partName = String(part.name || "");
+    const partPath = path.resolve(bundleRoot, partName);
+    if (!partName || path.basename(partName) !== partName || !isInside(bundleRoot, partPath)) {
+      parts.push({ name: partName, status: "unsafe-name" });
+      continue;
+    }
+    const stat = lstatOrNull(partPath);
+    if (!stat) {
+      parts.push({ name: partName, status: "missing" });
+      continue;
+    }
+    if (!stat.isFile() || stat.isSymbolicLink()) {
+      parts.push({ name: partName, status: "unsafe" });
+      continue;
+    }
+    const content = fs.readFileSync(partPath);
+    const actualSha256 = sha256(content);
+    const actualBytes = content.length;
+    parts.push({
+      name: partName,
+      status: actualSha256 === part.sha256 && actualBytes === part.bytes ? "fresh" : "changed",
+      actualSha256,
+      actualBytes
+    });
+  }
+  return {
+    ok: parts.length > 0
+      && parts.length === (manifest.parts || []).length
+      && parts.every((entry) => entry.status === "fresh"),
+    parts
   };
 }
 
@@ -266,6 +493,23 @@ Every finding must cite a packaged file and a positive line number. Prefer repro
 
 function validateReport(report, manifest) {
   const failures = [];
+  const reportKeys = new Set(["schemaVersion", "reviewId", "snapshotCommit", "summary", "findings"]);
+  const findingKeys = new Set([
+    "id",
+    "severity",
+    "title",
+    "evidence",
+    "file",
+    "line",
+    "recommendation",
+    "confidence"
+  ]);
+  if (!report || typeof report !== "object" || Array.isArray(report)) {
+    return ["report must be an object"];
+  }
+  for (const key of Object.keys(report)) {
+    if (!reportKeys.has(key)) failures.push(`Unknown report property: ${key}`);
+  }
   if (report.schemaVersion !== "1.0.0") failures.push("schemaVersion must be 1.0.0");
   if (report.reviewId !== manifest.reviewId) failures.push("reviewId does not match manifest");
   if (report.snapshotCommit !== manifest.snapshot.commit) failures.push("snapshotCommit does not match manifest");
@@ -274,7 +518,14 @@ function validateReport(report, manifest) {
   const paths = new Set(manifest.files.map((file) => file.path));
   const severities = new Set(["critical", "high", "medium", "low", "info"]);
   const confidences = new Set(["high", "medium", "low"]);
-  for (const [index, finding] of (report.findings || []).entries()) {
+  for (const [index, finding] of (Array.isArray(report.findings) ? report.findings : []).entries()) {
+    if (!finding || typeof finding !== "object" || Array.isArray(finding)) {
+      failures.push(`findings[${index}] must be an object`);
+      continue;
+    }
+    for (const key of Object.keys(finding)) {
+      if (!findingKeys.has(key)) failures.push(`Unknown findings[${index}] property: ${key}`);
+    }
     for (const key of ["id", "title", "evidence", "file", "recommendation"]) {
       if (typeof finding[key] !== "string" || finding[key].trim().length === 0) failures.push(`findings[${index}].${key} is required`);
     }
@@ -293,12 +544,11 @@ function parseOptions(args) {
     if (arg === "--apply") options.apply = true;
     else if (arg === "--json") options.json = true;
     else if (["--target", "--out", "--manifest", "--report", "--max-part-bytes"].includes(arg)) {
-      const value = args[index + 1];
-      if (!value || value.startsWith("--")) fail(`${arg} requires a value.`);
+      const value = requireCliValue(args, index, arg);
       options[arg.slice(2).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = value;
       index += 1;
     } else {
-      fail(`Unknown review option: ${arg}`);
+      throw new CliUsageError(`Unknown review option: ${arg}`);
     }
   }
   if (options.maxPartBytes !== undefined) options.maxPartBytes = Number(options.maxPartBytes);
@@ -344,10 +594,16 @@ export async function runExternalReviewCli(argv = process.argv.slice(2)) {
     }
     if (command === "handoff") {
       const { resolved, manifest } = readManifest(options.manifest);
-      const freshness = checkFreshness(options.target, manifest);
+      const resolvedTarget = resolveTarget(options.target);
+      const freshness = checkFreshness(resolvedTarget, manifest);
       if (!freshness.fresh) fail("Snapshot is stale; create a new pack before handoff.", "STALE_SNAPSHOT");
       const content = handoffText(manifest);
       const output = path.join(path.dirname(resolved), "external-review-handoff.md");
+      assertOutputOutsideTarget(resolvedTarget, output);
+      const bundleIntegrity = checkBundleIntegrity(resolved, manifest);
+      if (!bundleIntegrity.ok) {
+        fail("Review bundle integrity check failed; create a new pack before handoff.", "STALE_BUNDLE");
+      }
       if (!options.apply) {
         print({ mode: "preview", output, reviewId: manifest.reviewId, externalUploadPerformed: false });
         return 0;
@@ -357,30 +613,38 @@ export async function runExternalReviewCli(argv = process.argv.slice(2)) {
       return 0;
     }
     if (command === "status") {
-      const { manifest } = readManifest(options.manifest);
+      const { resolved, manifest } = readManifest(options.manifest);
       const freshness = checkFreshness(options.target, manifest);
-      print(freshness);
-      return freshness.fresh ? 0 : 1;
+      const bundleIntegrity = checkBundleIntegrity(resolved, manifest);
+      print({ ...freshness, bundleIntegrity });
+      return freshness.fresh && bundleIntegrity.ok ? 0 : 1;
     }
     if (command === "verify") {
-      if (!options.report) fail("--report is required.");
-      const { manifest } = readManifest(options.manifest);
+      if (!options.report) throw new CliUsageError("--report is required.");
+      const { resolved, manifest } = readManifest(options.manifest);
       const freshness = checkFreshness(options.target, manifest);
+      const bundleIntegrity = checkBundleIntegrity(resolved, manifest);
       const report = JSON.parse(fs.readFileSync(path.resolve(options.report), "utf8"));
       const failures = validateReport(report, manifest);
       const result = {
-        verified: freshness.fresh && failures.length === 0,
+        verified: freshness.fresh && bundleIntegrity.ok && failures.length === 0,
         freshness,
+        bundleIntegrity,
         reportFailures: failures,
         findingCount: Array.isArray(report.findings) ? report.findings.length : 0
       };
       print(result);
       return result.verified ? 0 : 1;
     }
-    fail(`Unknown review command: ${command}`);
+    throw new CliUsageError(`Unknown review command: ${command}`);
   } catch (error) {
-    console.error(`Codex Chef external review error [${error.code || "ERROR"}]: ${error.message}`);
-    return 2;
+    return emitCliError({
+      tool: "external-review",
+      error,
+      argv,
+      root: process.cwd(),
+      prefix: `Codex Chef external review error [${error.code || "ERROR"}]`
+    });
   }
 }
 

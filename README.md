@@ -42,7 +42,7 @@ private machine, credentials, sessions, or local memory.
 | Explore | What you will find |
 | --- | --- |
 | [🤖 See all 21 agents](docs/agents.md) | The specialist roles, what each one owns, and when delegation is actually useful. |
-| [🧩 Browse the skill catalog](docs/skills.md) | Six bundled workflows, sixteen reviewed full-install skills, and the optional references that stay out of the default path. |
+| [🧩 Browse the skill catalog](docs/skills.md) | Nine bundled workflows, fifteen reviewed full-install skills, and the optional references that stay out of the default path. |
 | [🔌 Open the MCP catalog](docs/mcp-catalog.md) | The eight useful defaults, the eight opt-in connectors, their requirements, and their access boundaries. |
 | [🛡️ Read the security model](docs/security-model.md) | Preview-first changes, backups, approval gates, secret handling, and the actions Codex Chef deliberately leaves to you. |
 
@@ -61,8 +61,12 @@ when the work can be split safely or you ask for delegation.
 
 Skills teach Codex how to handle a focused job. Codex sees a short description
 first and loads the full instructions only when the task matches. Codex Chef
-ships six local plugin workflows and offers sixteen reviewed skills through the
-full install profile.
+ships nine local plugin workflows and offers fifteen reviewed skills through the
+full install profile. Every local workflow is synchronized as a managed direct
+skill, so calls such as `$adaptive-agent-routing`, `$context-budget-planner`,
+`$fetch`, `$seo`, and `$evidence-research` work without a separate plugin
+installation. The equivalent plugin namespace becomes available only after the
+marketplace plugin is installed and a new Codex session is started.
 
 [See what is bundled, installed, and optional →](docs/skills.md)
 
@@ -110,13 +114,14 @@ The same commands work on macOS, Linux, and WSL. The installer backs up managed
 targets before replacement and does not prune user-owned skills, MCPs, profiles,
 or unrelated plugin files.
 
-### Three commands worth remembering
+### Four commands worth remembering
 
 | Need | Command |
 | --- | --- |
 | Preview the install | `npm run chef -- --install` |
 | Check repo health | `npm run chef -- --status --repo-only --no-log` |
 | See the routing contract | `npm run chef -- --routing --profile starter-health` |
+| Check Control and Brain visibility | `npm run chef -- --continuity --details` |
 
 Repair, diagnostics, updates, process checks, expected output, and direct
 installer commands live in the [operator documentation](docs/README.md).
@@ -145,6 +150,7 @@ contents, supply-chain indicators, and security boundaries.
 - [Installation and safe preview](docs/install.md)
 - [Agents](docs/agents.md)
 - [Skills and plugins](docs/skills.md)
+- [Local Markdown Brain workflow](docs/brain/README.md)
 - [MCP catalog](docs/mcp-catalog.md)
 - [Knowledge base](kb/README.md)
 - [Troubleshooting](docs/troubleshooting.md)

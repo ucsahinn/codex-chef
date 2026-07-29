@@ -74,10 +74,47 @@ function assertRootAssignment(text, key, expectedValue, label) {
   }
 }
 
+function assertManagedFileAccounting(report, label) {
+  const managed = report?.managedFiles;
+  if (!managed) {
+    fail(`${label} must include managed file accounting.`);
+    return;
+  }
+  const observed = Number(managed.current || 0)
+    + Number(managed.planned || 0)
+    + Number(managed.applied || 0);
+  if (observed !== managed.expected) {
+    fail(`${label} managed file accounting drifted: expected ${managed.expected}, observed ${observed}.`);
+  }
+}
+
 const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-"));
 const codexHome = path.join(fixtureRoot, ".codex");
 const agentsHome = path.join(fixtureRoot, ".agents");
 const pluginTarget = path.join(codexHome, "plugins", "codex-chef-workflows");
+const marketplacePluginTarget = path.join(agentsHome, "plugins", "sources", "codex-chef-workflows");
+const directSkills = JSON.parse(read("catalog/skills.json")).skills.filter((skill) => skill.directInstall === true);
+const directSupportFiles = {
+  fetch: [
+    "agents/openai.yaml",
+    "assets/fetch-report.template.json",
+    "references/safety-boundaries.md",
+    "scripts/validate-fetch-report.mjs"
+  ],
+  seo: [
+    "agents/openai.yaml",
+    "assets/seo-audit-report.template.json",
+    "references/sources.md",
+    "scripts/validate-seo-report.mjs"
+  ],
+  "evidence-research": [
+    "agents/openai.yaml",
+    "assets/research-report.template.json",
+    "references/sources.md",
+    "scripts/validate-research-report.mjs"
+  ]
+};
+const expectedPluginSource = "./.agents/plugins/sources/codex-chef-workflows";
 
 write(path.join(codexHome, "AGENTS.md"), "# stale guidance\n");
 write(
@@ -112,6 +149,21 @@ write(
   "{\n  \"name\": \"codex-chef-workflows\",\n  \"version\": \"0.0.0\"\n}\n"
 );
 write(path.join(pluginTarget, "extra.txt"), "extra managed plugin file\n");
+write(path.join(marketplacePluginTarget, "marketplace-extra.txt"), "extra marketplace mirror file\n");
+for (const skill of directSkills) {
+  const directTarget = path.join(agentsHome, "skills", skill.name);
+  write(path.join(directTarget, "SKILL.md"), `---\nname: ${skill.name}\n---\n\nstale direct skill\n`);
+  write(
+    path.join(directTarget, ".codex-chef-managed.json"),
+    JSON.stringify({
+      schemaVersion: "codex-chef.managed-direct-skill.v1",
+      manager: "codex-chef",
+      component: "direct-skill",
+      name: skill.name,
+      source: `plugins/codex-chef-workflows/skills/${skill.name}`
+    }, null, 2) + "\n"
+  );
+}
 write(
   path.join(agentsHome, "plugins", "marketplace.json"),
   JSON.stringify({
@@ -120,12 +172,12 @@ write(
       {
         name: "other-plugin",
         source: { source: "local", path: "C:/other/plugin" },
-        policy: { installation: "AVAILABLE", authentication: "NONE" }
+        policy: { installation: "AVAILABLE", authentication: "ON_USE" }
       },
       {
         name: "codex-chef-workflows",
         source: { source: "local", path: "C:/stale/codex-chef-workflows" },
-        policy: { installation: "AVAILABLE", authentication: "NONE" }
+        policy: { installation: "AVAILABLE", authentication: "ON_INSTALL" }
       }
     ]
   }, null, 2) + "\n",
@@ -137,11 +189,14 @@ ensureDir(path.join(agentsHome, "skills", "random-extra-skill"));
 
 const plan = parseResult(runRepair([], codexHome, agentsHome), "repair plan");
 if (plan) {
+  assertManagedFileAccounting(plan, "repair plan");
   if (plan.schemaVersion !== "codex-chef.repair.v1") fail("repair plan schemaVersion drifted.");
   if (plan.mode !== "plan") fail(`repair plan mode drifted: ${plan.mode}`);
   if (plan.status !== "attention") fail(`repair plan should need attention, got ${plan.status}.`);
   if (!Array.isArray(plan.actions) || plan.actions.length === 0) fail("repair plan must include planned actions.");
-  if (!plan.managedFiles?.extraPluginFiles?.length) fail("repair plan must report extra managed plugin files.");
+  if ((plan.managedFiles?.extraPluginFiles?.length || 0) < 2) {
+    fail("repair plan must report extra files from both managed plugin mirrors.");
+  }
   if (!plan.config?.removedDeprecatedFields?.includes("apps._default.default_tools_enabled")) {
     fail("repair plan must report deprecated managed config fields.");
   }
@@ -187,6 +242,7 @@ if (!fs.readFileSync(path.join(codexHome, "rules", "default.rules"), "utf8").inc
 
 const applied = parseResult(runRepair(["--apply"], codexHome, agentsHome), "repair apply");
 if (applied) {
+  assertManagedFileAccounting(applied, "repair apply");
   if (applied.mode !== "apply") fail(`repair apply mode drifted: ${applied.mode}`);
   if (!["attention", "repaired"].includes(applied.status)) {
     fail(`repair apply should succeed with attention or repaired, got ${applied.status}.`);
@@ -243,16 +299,43 @@ if (
 if (!fs.existsSync(path.join(pluginTarget, "extra.txt"))) {
   fail("repair apply must not delete extra plugin files without the explicit prune flag.");
 }
+if (!fs.existsSync(path.join(marketplacePluginTarget, "marketplace-extra.txt"))) {
+  fail("repair apply must not delete marketplace mirror extras without the explicit prune flag.");
+}
+for (const skill of directSkills) {
+  const directTarget = path.join(agentsHome, "skills", skill.name);
+  if (
+    fs.readFileSync(path.join(directTarget, "SKILL.md"), "utf8")
+    !== read(`plugins/codex-chef-workflows/skills/${skill.name}/SKILL.md`)
+  ) {
+    fail(`repair apply must restore the direct $${skill.name} skill from its canonical plugin source.`);
+  }
+  const marker = readJson(path.join(directTarget, ".codex-chef-managed.json"));
+  if (
+    marker.name !== skill.name
+    || marker.source !== `plugins/codex-chef-workflows/skills/${skill.name}`
+  ) {
+    fail(`repair apply must write the correct direct $${skill.name} ownership marker.`);
+  }
+  for (const relativePath of directSupportFiles[skill.name] || []) {
+    if (
+      fs.readFileSync(path.join(directTarget, relativePath), "utf8")
+      !== read(`plugins/codex-chef-workflows/skills/${skill.name}/${relativePath}`)
+    ) {
+      fail(`repair apply must install the direct $${skill.name} support file ${relativePath}.`);
+    }
+  }
+}
 
 const repairedMarketplace = readJson(path.join(agentsHome, "plugins", "marketplace.json"));
 if (!repairedMarketplace.plugins.some((plugin) => plugin.name === "other-plugin")) {
   fail("repair apply must preserve unrelated marketplace plugins.");
 }
 const chefPlugin = repairedMarketplace.plugins.find((plugin) => plugin.name === "codex-chef-workflows");
-if (!chefPlugin || chefPlugin.source?.path !== pluginTarget) {
-  fail("repair apply must update the Codex Chef marketplace entry to the managed plugin target.");
+if (!chefPlugin || chefPlugin.source?.path !== expectedPluginSource) {
+  fail("repair apply must write the portable marketplace-root-relative managed plugin path.");
 }
-if (chefPlugin?.interface?.shortDescription !== "Security-first Codex setup maintenance workflow.") {
+if (chefPlugin?.interface?.shortDescription !== "Security-first Codex planning, maintenance, and verification workflows.") {
   fail("repair apply must preserve Codex Chef marketplace interface metadata.");
 }
 
@@ -276,11 +359,11 @@ if (!/\[apps\._default\][\s\S]*?\ndefault_tools_approval_mode\s*=\s*"prompt"/.te
   fail("repair apply must backfill apps._default.default_tools_approval_mode = prompt.");
 }
 assertRootAssignment(repairedConfig, "approvals_reviewer", '"auto_review"', "repair apply config");
-if (/%SUPABASE_DB_URL%|\$SUPABASE_DB_URL/.test(repairedConfig)) {
-  fail("repair apply must sync managed Supabase config and remove direct SUPABASE_DB_URL launcher args.");
+if (/SUPABASE_DB_URL|@modelcontextprotocol\/server-postgres/.test(repairedConfig)) {
+  fail("repair apply must remove the deprecated Postgres launcher and connection-string credential path.");
 }
-if (!/\[mcp_servers\.supabase\][\s\S]*?env_vars\s*=\s*\["SUPABASE_DB_URL"\]/.test(repairedConfig)) {
-  fail("repair apply must preserve Supabase credential boundary through env_vars.");
+if (!/\[mcp_servers\.supabase\][\s\S]*?url\s*=\s*"https:\/\/mcp\.supabase\.com\/mcp\?read_only=true&features=database,docs"/.test(repairedConfig)) {
+  fail("repair apply must install the official hosted, read-only Supabase OAuth boundary.");
 }
 
 const missingConfigRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-missing-config-"));
@@ -434,11 +517,11 @@ if (managedTableDriftApplied) {
   if (!/\[mcp_servers\.user-local\][\s\S]*?command\s*=\s*"node"/.test(driftConfig)) {
     fail("repair managed table drift must preserve user-defined MCP tables.");
   }
-  if (/%SUPABASE_DB_URL%|\$SUPABASE_DB_URL/.test(driftConfig)) {
-    fail("repair managed table drift must remove stale Supabase launcher args.");
+  if (/SUPABASE_DB_URL|@modelcontextprotocol\/server-postgres/.test(driftConfig)) {
+    fail("repair managed table drift must remove the deprecated Postgres launcher and credential path.");
   }
-  if (!/\[mcp_servers\.supabase\][\s\S]*?env_vars\s*=\s*\["SUPABASE_DB_URL"\]/.test(driftConfig)) {
-    fail("repair managed table drift must sync Supabase env_vars boundary.");
+  if (!/\[mcp_servers\.supabase\][\s\S]*?url\s*=\s*"https:\/\/mcp\.supabase\.com\/mcp\?read_only=true&features=database,docs"/.test(driftConfig)) {
+    fail("repair managed table drift must sync the hosted read-only Supabase OAuth boundary.");
   }
 }
 
@@ -446,6 +529,9 @@ const pruned = parseResult(runRepair(["--apply", "--prune-managed-plugin-extras"
 if (pruned) {
   if (fs.existsSync(path.join(pluginTarget, "extra.txt"))) {
     fail("repair prune must delete explicit extra managed plugin files.");
+  }
+  if (fs.existsSync(path.join(marketplacePluginTarget, "marketplace-extra.txt"))) {
+    fail("repair prune must delete explicit extras from the managed marketplace plugin mirror.");
   }
 }
 
@@ -471,6 +557,170 @@ if (noteOnlyApplied) {
     if (!noteOnlyPlan.notes?.some((note) => /non-curated/.test(note))) {
       fail("repair note-only plan must report non-curated user skills as notes.");
     }
+  }
+}
+
+const repairAdoptionScenarios = [
+  { name: "fetch", display: "Fetch", flagArgs: ["--adopt-fetch-skill"] },
+  { name: "seo", display: "SEO", flagArgs: ["--adopt-seo-skill"] },
+  {
+    name: "evidence-research",
+    display: "Evidence Research",
+    flagArgs: ["--adopt-evidence-research-skill"]
+  },
+  {
+    name: "context-budget-planner",
+    display: "Context Budget Planner",
+    flagArgs: ["--adopt-direct-skill", "context-budget-planner"]
+  }
+];
+for (const scenario of repairAdoptionScenarios) {
+  const foreignRoot = fs.mkdtempSync(path.join(os.tmpdir(), `codex-chef-repair-foreign-${scenario.name}-`));
+  const foreignCodexHome = path.join(foreignRoot, ".codex");
+  const foreignAgentsHome = path.join(foreignRoot, ".agents");
+  const foreignSkillRoot = path.join(foreignAgentsHome, "skills", scenario.name);
+  const foreignSkillText = `---\nname: ${scenario.name}\n---\n\nUser-owned unrelated ${scenario.display} workflow.\n`;
+  const foreignSentinel = "preserve this user-owned file\n";
+  write(path.join(foreignSkillRoot, "SKILL.md"), foreignSkillText);
+  write(path.join(foreignSkillRoot, "user-owned.txt"), foreignSentinel);
+  const foreignApply = runRepair(["--apply"], foreignCodexHome, foreignAgentsHome);
+  if (foreignApply.error) {
+    fail(`repair foreign ${scenario.display} collision could not run: ${foreignApply.error.message}`);
+  } else if (foreignApply.status === 0) {
+    fail(`repair apply must fail closed when the direct ${scenario.display} target is user-owned.`);
+  }
+  if (
+    fs.existsSync(foreignCodexHome)
+    || fs.existsSync(path.join(foreignAgentsHome, "plugins", "marketplace.json"))
+  ) {
+    fail(`repair foreign ${scenario.display} collision must perform zero managed writes before failing.`);
+  }
+  if (
+    fs.readFileSync(path.join(foreignSkillRoot, "SKILL.md"), "utf8") !== foreignSkillText
+    || fs.readFileSync(path.join(foreignSkillRoot, "user-owned.txt"), "utf8") !== foreignSentinel
+  ) {
+    fail(`repair foreign ${scenario.display} collision must preserve every user-owned file byte-for-byte.`);
+  }
+
+  const adopted = parseResult(
+    runRepair(["--apply", ...scenario.flagArgs], foreignCodexHome, foreignAgentsHome),
+    `repair explicit ${scenario.display} adoption`
+  );
+  if (adopted) {
+    if (
+      fs.readFileSync(path.join(foreignSkillRoot, "SKILL.md"), "utf8")
+      !== read(`plugins/codex-chef-workflows/skills/${scenario.name}/SKILL.md`)
+    ) {
+      fail(`repair explicit ${scenario.display} adoption must install the canonical managed source.`);
+    }
+    if (fs.readFileSync(path.join(foreignSkillRoot, "user-owned.txt"), "utf8") !== foreignSentinel) {
+      fail(`repair explicit ${scenario.display} adoption must preserve unrelated user-owned files.`);
+    }
+  }
+}
+
+const linkedRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-linked-fetch-"));
+const linkedCodexHome = path.join(linkedRoot, ".codex");
+const linkedAgentsHome = path.join(linkedRoot, ".agents");
+const linkedFetchRoot = path.join(linkedAgentsHome, "skills", "fetch");
+const linkedExternalRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-linked-external-"));
+const foreignSkill = "---\nname: fetch\n---\n\nUser-owned unrelated Fetch workflow.\n";
+ensureDir(path.dirname(linkedFetchRoot));
+write(path.join(linkedExternalRoot, "SKILL.md"), foreignSkill);
+fs.symlinkSync(linkedExternalRoot, linkedFetchRoot, process.platform === "win32" ? "junction" : "dir");
+const linkedApply = runRepair(
+  ["--apply", "--adopt-fetch-skill"],
+  linkedCodexHome,
+  linkedAgentsHome
+);
+if (linkedApply.error) {
+  fail(`repair linked Fetch collision could not run: ${linkedApply.error.message}`);
+} else if (linkedApply.status === 0) {
+  fail("repair must reject a linked Fetch root even with explicit adoption.");
+}
+if (
+  fs.existsSync(linkedCodexHome)
+  || fs.existsSync(path.join(linkedAgentsHome, "plugins", "marketplace.json"))
+) {
+  fail("repair linked Fetch collision must perform zero managed writes.");
+}
+if (fs.readFileSync(path.join(linkedExternalRoot, "SKILL.md"), "utf8") !== foreignSkill) {
+  fail("repair linked Fetch collision must not write through the linked target.");
+}
+
+const danglingRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-dangling-fetch-"));
+const danglingCodexHome = path.join(danglingRoot, ".codex");
+const danglingAgentsHome = path.join(danglingRoot, ".agents");
+const danglingFetchRoot = path.join(danglingAgentsHome, "skills", "fetch");
+const danglingExternalRoot = path.join(danglingRoot, "missing-external-fetch");
+ensureDir(path.dirname(danglingFetchRoot));
+fs.symlinkSync(danglingExternalRoot, danglingFetchRoot, process.platform === "win32" ? "junction" : "dir");
+for (const repairArgs of [["--apply"], ["--apply", "--adopt-fetch-skill"]]) {
+  const danglingApply = runRepair(repairArgs, danglingCodexHome, danglingAgentsHome);
+  if (danglingApply.error) {
+    fail(`repair dangling Fetch collision could not run: ${danglingApply.error.message}`);
+  } else if (danglingApply.status === 0) {
+    fail("repair must reject a dangling Fetch root with or without explicit adoption.");
+  }
+  if (
+    fs.existsSync(danglingCodexHome)
+    || fs.existsSync(path.join(danglingAgentsHome, "plugins", "marketplace.json"))
+  ) {
+    fail("repair dangling Fetch collision must perform zero managed writes.");
+  }
+  if (fs.existsSync(danglingExternalRoot) || !fs.lstatSync(danglingFetchRoot).isSymbolicLink()) {
+    fail("repair dangling Fetch collision must preserve the dangling link without creating its target.");
+  }
+}
+
+for (const scenario of [
+  { name: "codex-plugin-parent", home: "codex", linkedSegment: "plugins" },
+  { name: "agents-plugin-parent", home: "agents", linkedSegment: "plugins" }
+]) {
+  const linkedAncestorRoot = fs.mkdtempSync(path.join(os.tmpdir(), `codex-chef-repair-${scenario.name}-`));
+  const linkedAncestorCodexHome = path.join(linkedAncestorRoot, ".codex");
+  const linkedAncestorAgentsHome = path.join(linkedAncestorRoot, ".agents");
+  const selectedHome = scenario.home === "codex" ? linkedAncestorCodexHome : linkedAncestorAgentsHome;
+  const externalRoot = fs.mkdtempSync(path.join(os.tmpdir(), `codex-chef-repair-${scenario.name}-external-`));
+  ensureDir(selectedHome);
+  fs.symlinkSync(externalRoot, path.join(selectedHome, scenario.linkedSegment), process.platform === "win32" ? "junction" : "dir");
+
+  const linkedAncestorApply = runRepair(["--apply"], linkedAncestorCodexHome, linkedAncestorAgentsHome);
+  if (linkedAncestorApply.error) {
+    fail(`repair ${scenario.name} safety check could not run: ${linkedAncestorApply.error.message}`);
+  } else if (linkedAncestorApply.status === 0) {
+    fail(`repair must reject the linked ${scenario.home} managed-path ancestor.`);
+  }
+  if (fs.readdirSync(externalRoot).length > 0) {
+    fail(`repair must not write through the linked ${scenario.home} managed-path ancestor.`);
+  }
+  const untouchedHome = scenario.home === "codex" ? linkedAncestorAgentsHome : linkedAncestorCodexHome;
+  if (fs.existsSync(untouchedHome)) {
+    fail(`repair linked ${scenario.home} ancestor preflight must fail before writing the other managed home.`);
+  }
+}
+
+for (const home of ["codex", "agents"]) {
+  const linkedHomeRoot = fs.mkdtempSync(path.join(os.tmpdir(), `codex-chef-repair-${home}-home-link-`));
+  const linkedHomeCodex = path.join(linkedHomeRoot, ".codex");
+  const linkedHomeAgents = path.join(linkedHomeRoot, ".agents");
+  const selectedHome = home === "codex" ? linkedHomeCodex : linkedHomeAgents;
+  const untouchedHome = home === "codex" ? linkedHomeAgents : linkedHomeCodex;
+  const externalRoot = fs.mkdtempSync(path.join(os.tmpdir(), `codex-chef-repair-${home}-home-external-`));
+  write(path.join(externalRoot, "sentinel.txt"), "unchanged\n");
+  fs.symlinkSync(externalRoot, selectedHome, process.platform === "win32" ? "junction" : "dir");
+
+  const linkedHomeApply = runRepair(["--apply"], linkedHomeCodex, linkedHomeAgents);
+  if (linkedHomeApply.error) {
+    fail(`repair ${home} home-link safety check could not run: ${linkedHomeApply.error.message}`);
+  } else if (linkedHomeApply.status === 0) {
+    fail(`repair must reject a linked ${home.toUpperCase()}_HOME root.`);
+  }
+  if (fs.readdirSync(externalRoot).sort().join(",") !== "sentinel.txt") {
+    fail(`repair must not write through a linked ${home.toUpperCase()}_HOME root.`);
+  }
+  if (fs.existsSync(untouchedHome)) {
+    fail(`repair linked ${home.toUpperCase()}_HOME preflight must fail before writing the other managed home.`);
   }
 }
 

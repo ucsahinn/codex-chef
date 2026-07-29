@@ -16,6 +16,11 @@ import {
   validateBrainVault
 } from "./lib/brain-foundation.mjs";
 import { inspectWindowsBrainPermissions } from "./lib/brain-permissions-windows.mjs";
+import {
+  CliUsageError,
+  emitCliError,
+  requireCliValue
+} from "./lib/cli-error-contract.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const templateRoot = path.join(root, "templates", "brain");
@@ -28,7 +33,7 @@ function parseArgs(argv) {
     action = argv[0];
     index = 1;
   }
-  if (!ACTIONS.has(action)) throw new Error(`Unknown Brain action: ${action}`);
+  if (!ACTIONS.has(action)) throw new CliUsageError(`Unknown Brain action: ${action}`);
   const options = {
     action,
     mode: "preview",
@@ -48,8 +53,7 @@ function parseArgs(argv) {
     else if (arg === "--json") options.json = true;
     else if (arg === "--help" || arg === "-h") options.help = true;
     else if (["--target", "--vault", "--input", "--project", "--query", "--note", "--id", "--backup"].includes(arg)) {
-      const value = argv[index + 1];
-      if (!value) throw new Error(`${arg} requires a value.`);
+      const value = requireCliValue(argv, index, arg);
       if (arg === "--target" || arg === "--vault") options.target = path.resolve(value);
       else if (arg === "--input") options.input = path.resolve(value);
       else if (arg === "--project") options.projectId = value;
@@ -58,7 +62,7 @@ function parseArgs(argv) {
       else options.backupId = value;
       index += 1;
     } else {
-      throw new Error(`Unknown argument: ${arg}`);
+      throw new CliUsageError(`Unknown argument: ${arg}`);
     }
   }
   return options;
@@ -171,6 +175,11 @@ function execute(options) {
 try {
   execute(parseArgs(process.argv.slice(2)));
 } catch (error) {
-  console.error(`Codex Chef Brain error: ${error.message}`);
-  process.exitCode = 1;
+  process.exitCode = emitCliError({
+    tool: "brain",
+    error,
+    argv: process.argv.slice(2),
+    root,
+    prefix: "Codex Chef Brain error"
+  });
 }

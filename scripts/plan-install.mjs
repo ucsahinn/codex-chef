@@ -2,6 +2,11 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import {
+  CliUsageError,
+  emitCliError,
+  requireCliValue
+} from "./lib/cli-error-contract.mjs";
 
 const root = path.resolve(process.cwd());
 const manifestPath = path.join(root, "manifests", "install-plan.json");
@@ -37,27 +42,27 @@ function parseArgs(argv) {
     else if (arg === "--no-backup") parsed.noBackup = true;
     else if (arg === "--redact-paths") parsed.redactPaths = true;
     else if (arg === "--platform") {
-      parsed.platform = argv[index + 1];
+      parsed.platform = requireCliValue(argv, index, "--platform");
       index += 1;
     } else if (arg === "--codex-home") {
-      parsed.codexHome = argv[index + 1];
+      parsed.codexHome = requireCliValue(argv, index, "--codex-home");
       index += 1;
     } else if (arg === "--agents-home") {
-      parsed.agentsHome = argv[index + 1];
+      parsed.agentsHome = requireCliValue(argv, index, "--agents-home");
       index += 1;
     } else if (arg === "--home") {
-      parsed.home = argv[index + 1];
+      parsed.home = requireCliValue(argv, index, "--home");
       index += 1;
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
       process.exit(0);
     } else {
-      throw new Error(`Unknown argument: ${arg}`);
+      throw new CliUsageError(`Unknown argument: ${arg}`);
     }
   }
 
   if (!["windows", "unix"].includes(parsed.platform)) {
-    throw new Error("--platform must be windows or unix");
+    throw new CliUsageError("--platform must be windows or unix");
   }
 
   if (parsed.all) {
@@ -220,10 +225,10 @@ function skillOperations(operation, options) {
       id: `${operation.id}:${skill.name}`,
       componentId: operation.id,
       kind: "skill-install",
-      summary: `Install curated skill ${skill.name}`,
+      summary: `Install commit-pinned curated skill ${skill.name}`,
       command: skill.fullDepth
-        ? `npx skills add ${skill.package} --skill ${skill.skill} --full-depth --agent codex --yes --global`
-        : `npx skills add ${skill.package} --skill ${skill.skill} --agent codex --yes --global`,
+        ? `node scripts/install-pinned-skill.mjs --package ${skill.package} --commit ${skill.commit} --skill ${skill.skill} --cli-version ${catalog.skillsCliVersion} --full-depth`
+        : `node scripts/install-pinned-skill.mjs --package ${skill.package} --commit ${skill.commit} --skill ${skill.skill} --cli-version ${catalog.skillsCliVersion}`,
       source: skill.source,
       sourceUrl: skill.sourceUrl,
       risk: operation.risk,
@@ -447,6 +452,11 @@ try {
     printPlan(plan);
   }
 } catch (error) {
-  console.error(`Install planning failed: ${error.message}`);
-  process.exit(1);
+  process.exitCode = emitCliError({
+    tool: "plan-install",
+    error,
+    argv: process.argv.slice(2),
+    root,
+    prefix: "Install planning failed"
+  });
 }

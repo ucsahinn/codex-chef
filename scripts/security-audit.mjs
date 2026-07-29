@@ -66,6 +66,7 @@ const requiredPublicFiles = [
   "schemas/install-plan.schema.json",
   "schemas/install-state-preview.schema.json",
   "scripts/plan-install.mjs",
+  "scripts/manage-direct-skill-target.mjs",
   "scripts/chef-cli.mjs",
   "scripts/validate-doc-locales.mjs",
   "scripts/validate-readme-locales.mjs",
@@ -182,7 +183,7 @@ const secretPatterns = [
   { name: "GitHub fine-grained token", pattern: /\bgithub_pat_[A-Za-z0-9_]{20,}\b/ },
   { name: "Slack token", pattern: /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/ },
   { name: "AWS access key", pattern: /\bAKIA[0-9A-Z]{16}\b/ },
-  { name: "Private key marker", pattern: /-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/ },
+  { name: "Private key marker", pattern: /-----BEGIN (?:(?:ENCRYPTED |RSA |EC |OPENSSH |DSA )?PRIVATE KEY|PGP PRIVATE KEY BLOCK)-----/ },
   { name: "Long secret assignment", pattern: /\b(?:api[_-]?key|secret|token|password|private[_-]?key)\s*[:=]\s*["'][^"']{16,}["']/i }
 ];
 
@@ -252,8 +253,8 @@ for (const file of files) {
 if (exists(".agents/plugins/marketplace.json")) {
   const marketplace = JSON.parse(read(".agents/plugins/marketplace.json"));
   for (const plugin of marketplace.plugins || []) {
-    if (plugin?.policy?.authentication !== "NONE") {
-      failures.push(`Marketplace plugin ${plugin.name} must keep authentication NONE by default`);
+    if (plugin?.policy?.authentication !== "ON_INSTALL") {
+      failures.push(`Marketplace plugin ${plugin.name} must use current Codex authentication policy ON_INSTALL`);
     }
   }
 }
@@ -369,12 +370,24 @@ if (/prefix_rule\(pattern\s*=\s*\["npx\.cmd",\s*"skills"\],\s*decision\s*=\s*"al
 
 for (const configFile of ["templates/codex/config.windows.toml", "templates/codex/config.unix.toml"]) {
   const configText = read(configFile);
+  const playwrightBlock = configText.match(/\[mcp_servers\.playwright\]([\s\S]*?)(?=\r?\n\[|$)/)?.[1] || "";
+  for (const flag of ["--isolated", "--block-service-workers"]) {
+    if (!playwrightBlock.includes(`"${flag}"`)) {
+      failures.push(`${configFile} must launch Playwright with ${flag} to avoid persistent browser state`);
+    }
+  }
   for (const [server, tool] of [
-    ["playwright", "browser_network_request"],
-    ["chrome-devtools", "get_network_request"]
+    ["playwright", "browser_network_requests"],
+    ["chrome-devtools", "list_network_requests"]
   ]) {
-    const pattern = new RegExp(`\\[mcp_servers\\.${server.replace("-", "\\-")}\\.tools\\.${tool}\\]\\s+approval_mode\\s*=\\s*"approve"`, "m");
-    if (pattern.test(configText)) {
+    const blockPattern = new RegExp(
+      `\\[mcp_servers\\.${server.replace("-", "\\-")}\\.tools\\.${tool}\\]([\\s\\S]*?)(?=\\r?\\n\\[|$)`,
+      ""
+    );
+    const block = configText.match(blockPattern)?.[1] || "";
+    if (!block) {
+      failures.push(`${configFile} must define the current ${server}.${tool} approval block`);
+    } else if (!/approval_mode\s*=\s*"prompt"/.test(block)) {
       failures.push(`${configFile} must keep ${server}.${tool} prompt-gated because request details can include sensitive data`);
     }
   }
@@ -385,8 +398,18 @@ for (const operation of installPlan.operations || []) {
   if (operation.risk === "high" && !operation.requiresFlag) {
     failures.push(`High-risk install plan operation must require an explicit flag: ${operation.id}`);
   }
-  if (operation.kind === "skill-install" && operation.collision !== "skip-if-already-installed") {
-    failures.push(`Skill install operation must skip existing skills: ${operation.id}`);
+  if (
+    operation.kind === "skill-install"
+    && (
+      operation.collision !== "preserve-foreign-update-owned-mandatory-backup-explicit-adoption-required"
+      || operation.backup !== true
+      || !/foreign|unmarked/i.test(operation.conflictPolicy || "")
+      || !/--adopt-existing/.test(operation.conflictPolicy || "")
+    )
+  ) {
+    failures.push(
+      `Skill install operation must preserve foreign targets, backup managed upgrades, and require explicit per-skill adoption: ${operation.id}`
+    );
   }
 }
 

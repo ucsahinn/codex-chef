@@ -12,6 +12,7 @@ Codex Chef keeps complete operator documentation in English and Turkish. The Ger
 | --- | --- |
 | Preview or install safely | [Installation guide](install.md) |
 | Understand the day-to-day workflow | [How to run the setup](how-to.md) |
+| Capture or retrieve project notes locally | [Markdown Brain workflow](brain/README.md) |
 | Compare expected terminal output | [Expected output](expected-output.md) |
 | Diagnose a failed command | [Troubleshooting](troubleshooting.md) |
 | Upgrade without losing local choices | [Upgrade guide](upgrade.md) |

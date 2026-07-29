@@ -4,6 +4,15 @@ Bu ayarlar projenin public ilk izlenimini belirler. Yalnız source tree doğrula
 
 Güncel yayınlanmış temel sürüm: **v0.5.57**.
 
+2026-07-29 tarihli onaylı hesap yazmalarından sonraki canlı read-back: secret
+scanning, push protection, vulnerability alerts, Dependabot security updates ve
+private vulnerability reporting açık; Wiki kapalı; topic seti aşağıdaki listeyle
+eşleşiyor; `main` dört validation check'ini zorunlu tutarken force-push ve branch
+silme kapalı. Onaylı maintainer push'ları mümkün kılmak için repo yöneticileri
+kuraldan muaf. Custom social preview tek bekleyen hedeftir: GitHub upload'u
+authenticated web session üzerinden sunuyor, mevcut isolated browser session'ı
+anonim ve public GraphQL alanı hâlâ GitHub'ın ürettiği görseli döndürüyor.
+
 ## Açıklama
 
 ```text
@@ -34,11 +43,16 @@ setup
 
 Stabil bir public proje sayfası yoksa website alanını boş bırak. Lokal path, geçici preview URL veya private workspace linki kullanma.
 
-GitHub social preview için `assets/social-preview.png` kullan. Düzenlenebilir kaynak olarak `assets/social-preview.svg` kalsın.
+GitHub social preview için `assets/social-preview.png` kullan. Düzenlenebilir
+kaynak olarak `assets/social-preview.svg` kalsın. PNG lokal olarak hazırlandı ve
+doğrulandı fakat account-level ayara henüz yüklenmedi.
 
 ## Repo Özellikleri
 
-- Issues: açık.
+- Issues: açık kalsın.
+- Vulnerability alerts ve Dependabot security updates: açık.
+- Private vulnerability reporting: açık; böylece `SECURITY.md` içindeki özel
+  bildirim yolu doğrudan kullanılabilir.
 - Discussions: maintainer’lar community sorularını gerçekten yanıtlayacaksa aç.
 - Wiki: bu repodaki version-controlled docs kanonik olduğu sürece kapalı.
 - Projects: opsiyonel.
@@ -47,7 +61,12 @@ GitHub social preview için `assets/social-preview.png` kullan. Düzenlenebilir 
 ## Branch Ve Actions
 
 - Default branch: `main`.
-- Release iddiasından önce validation workflow tamamen geçmeli.
+- `main` protection; `validate`, `windows-installer`,
+  `portability (ubuntu-latest, Node 18)` ve
+  `portability (macos-latest, Node 24)` check'lerini strict branch freshness ile
+  zorunlu tutuyor.
+- Force-push ve branch silme kapalı; açıkça onaylanmış maintainer push'ı mümkün
+  kalsın diye repo yöneticileri kuraldan muaf.
 - Workflow permission’ları read-only, action referansları full commit SHA ile pinned kalmalı.
 - Release yayını manuel kalmalı; validation workflow push, tag veya publish yapmamalı.
 

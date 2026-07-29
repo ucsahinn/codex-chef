@@ -12,6 +12,7 @@ Agent roles inherit the active profile. Omitted model and reasoning fields are i
 
 - `repo-map-before-change`: `code_mapper`, then `engineering_planner` when architecture planning adds value; Serena or codebase memory for bounded reads.
 - `current-docs-research`: `docs_researcher` with official OpenAI docs or official project docs/Context7.
+- `evidence-backed-research`: `$evidence-research` in the main thread with optional `docs_researcher` or `product_strategist` review, source ledger, and explicit uncertainty.
 - `context-surface-decision`: `context_architect` and, for reusable prompts, `prompt_architect`.
 - `bug-root-cause`: `root_cause_debugger`; add `test_verifier` when reproduction or verification can run independently.
 - `bounded-feature`: main-thread implementation with `engineering_planner`, `test_verifier`, or `code_reviewer` only when separable.

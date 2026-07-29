@@ -40,6 +40,9 @@ The default managed Codex targets are:
 - `~/.codex/rules/default.rules`
 - `~/.codex/plugins/codex-chef-workflows`
 - `~/.agents/plugins/marketplace.json`
+- `~/.agents/skills/fetch`
+- `~/.agents/skills/seo`
+- `~/.agents/skills/evidence-research`
 
 Optional global Git guards are not part of the silent default. They require the
 explicit `-InstallGitGuards` or `--install-git-guards` flag.
@@ -47,14 +50,17 @@ explicit `-InstallGitGuards` or `--install-git-guards` flag.
 ## Core Capabilities
 
 - 21 specialist Codex subagent role definitions.
-- 6 bundled local plugin skills:
+- 9 bundled local plugin skills:
   - `adaptive-agent-routing`
   - `codex-chef-brain`
   - `codex-chef-operator`
   - `context-budget-planner`
+  - `evidence-research`
   - `external-review-workflow`
+  - `fetch`
   - `offline-diagram-triplet`
-- 16 reviewed installable global skills in `catalog/skills.json` and
+  - `seo`
+- 15 reviewed installable global skills in `catalog/skills.json` and
   `catalog/skills-lock.json`.
 - Conservative MCP defaults in `catalog/mcp-servers.json` and
   `templates/codex/config.*.toml`.

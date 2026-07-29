@@ -72,11 +72,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -R
 ```
 
 Repair modu, zaten Codex setup'i olan makineler icindir. Codex Chef'in
-yonettigi global guidance, rule, agent/profile dosyalari, bundled plugin, eksik
-config bloklari ve local plugin marketplace kaydi icin once no-write plan
-verir, sonra istenirse backup alarak onarir. Baska marketplace plugin'lerini
-korur ve user skill'lerini silmez; fazla veya duplicate global skill'leri
-cleanup adayi olarak raporlar.
+yonettigi global guidance, rule, agent/profile dosyalari, bundled plugin,
+dokuz yönetilen direct lokal workflow, eksik config bloklari ve local plugin
+marketplace kaydi icin once no-write plan verir, sonra istenirse backup alarak
+onarir. Baska marketplace plugin'lerini korur ve user skill'lerini silmez;
+fazla veya duplicate global skill'leri cleanup adayi olarak raporlar.
 
 Mevcut checkout ve managed setup'i guided CLI ile guncelle:
 
@@ -109,13 +109,23 @@ npm run chef -- --backups --backup <id> --delete --apply
 ```
 
 List ve inspect komutlari metadata-only calisir: backup archive konumunu,
-manifest durumunu, restorable dosya sayisini, size ve hash bilgilerini gosterir
-ama file content basmaz. Restore, `--apply` verilmedikce preview'dir. Apply
-path'i selected archive'dan bilinen Codex Chef managed dosyalarini geri
-kopyalamadan once mevcut target'lar icin yeni rollback backup olusturur. Delete
-de preview-first calisir: `--delete` resolved archive path'ini gosterir ama
-silmez; `--delete --apply` yalniz canonical backup root altindaki secili Codex
-Chef backup archive'ini kaldirir.
+manifest durumunu, dogrulanmis restorable dosya sayisini, size ve hash
+bilgilerini gosterir ama file content basmaz. Manifest, tum dosya seti, hash'ler
+ve target allowlist gecmeden bir archive restorable diye etiketlenmez. Restore,
+`--apply` verilmedikce preview'dir. Apply path'i exact source byte'larini okuyup
+dogrular, mevcut target'lar icin yeni rollback backup olusturur ve bilinen Codex
+Chef managed dosyalarini rollback korumali bir transaction olarak geri yazar.
+Commit-pinned skill replacement backup'lari namespaced manifest kullanir ve
+replacement'tan dosya birakmadan onceki skill tree'sini birebir geri yukler.
+Restore,
+valid `codex-chef.backup.v1` manifest tum archive dosyalarini path, size ve
+SHA-256 ile birebir dogrulamadikca fail-closed kalir; missing, extra, degistirilmis
+ve auth, hook, session, memory veya cache state gibi unsupported control-plane
+dosyalari reddedilir. `--json` ayni davranisi izler; write isteklerinde
+`applyRequested`, `applied` ve `outcome` alanlari acikca yazilir ve preview
+uygulanmis gibi raporlanmaz. Delete de preview-first calisir: `--delete`
+resolved archive path'ini gosterir ama silmez; `--delete --apply` yalniz
+canonical backup root altindaki secili Codex Chef backup archive'ini kaldirir.
 
 ## Codex Chef CLI Referansi
 
@@ -140,6 +150,7 @@ npm run chef -- --install --apply
 npm run chef -- --skills
 npm run chef -- --mcp
 npm run chef -- --routing
+npm run chef -- --continuity
 npm run chef -- --diagnostics
 npm run chef -- --processes
 npm run chef -- --auth
@@ -156,17 +167,21 @@ yönetilen dosyalarda drift varsa akış bunu yeni kurulum gibi göstermeyip yed
 onarım yoluna yönlendirir. Doğrudan komutlar, belgelenmiş `--apply` bayrağı
 verilmediği sürece yalnız ön izleme yapar.
 
-`Skill durumu ve katalog` ekranı yalnız aynı adlı klasöre değil, gerçek bir
-`SKILL.md` dosyasına bakar. Her curated skill hazır, eksik veya geçersiz olarak
-gösterilir. Kurulum için yalnız eksik veya geçersiz kayıtlar seçilebilir; tümü
-hazırsa kurulum seçimi açılmaz. Kullanıcının ayrıca kurduğu diğer skill'ler
-sayılır ve korunur.
+`Skill durumu ve katalog` ekranı commit-pinned upstream skill'leri,
+bundled/direct Codex Chef skill'lerini, kullanıcı tarafından eklenen diğer
+skill'leri ve global köklerde görünen toplamı ayrı gösterir. Aynı adlı klasör
+yeterli değildir: upstream kayıtların kaynak provenance bilgisi, bundled
+kayıtların ise geçerli yönetilen sahipliği olmalıdır. Yalnız eksik veya
+geçersiz upstream kayıtlar tek tek kurulabilir; bundled/direct drift onarım
+akışına yönlendirilir. Kullanıcı skill'leri sayılır ve korunur.
 
 `MCP bağlayıcıları` ekranı kurulu `CODEX_HOME/config.toml` dosyasını okuyarak
 bağlayıcıları yapılandırılmış ve açık, yapılandırılmış ama kapalı, katalogda olup
 yapılandırılmamış ve kullanıcı tarafından eklenmiş olarak ayırır. Bunlar config
-durumlarıdır, canlı sağlık iddiası değildir; Codex `/mcp`, `codex mcp` veya
-başka güvenli bir kontrol başarılı olana kadar canlı durum ölçülmemiş sayılır.
+durumlarıdır, canlı sağlık iddiası değildir. `codex mcp list --json` yalnız
+config discovery'yi kanıtlar; yeniden başlatılmış Codex oturumunda `/mcp` veya
+gerçek bir initialization probe başarılı olana kadar canlı durum ölçülmemiş
+sayılır.
 
 Varsayılan durum panosu kısadır. MCP listesinin tamamı, yönlendirme kontrolleri,
 context bütçesi, kurulum notları, hedef/ortam Codex karşılaştırması ve log
@@ -178,6 +193,22 @@ icin `/agent`; current Codex session tarafindan baslatilan terminal
 isleri icin `/ps` ve `/stop` kullan. `--diagnostics` Serena/MCP surec audit
 komutunu ve diger read-only kanit komutlarini gosterir, ama surec durdurmaz ve
 global dosya degistirmez.
+
+`--continuity`, Control veya Brain üzerinde değişiklik yapmadan ikisini de
+görünür kılar. `codex-control-router` skill'ini, kurulu `codex_control` MCP
+yapılandırmasını, bundled Brain skill'ini ve yalnız açıkça yapılandırılmış
+`CODEX_CHEF_BRAIN_HOME` vault'unu raporlar. Anlık işler mevcut oturumda kalır;
+Control yalnız açıkça gecikmeli, arka plan, tekrarlı, yeniden başlatmaya
+dayanıklı, izlenen veya Control yönetimli isteklerde etkinleşir. Brain otomatik
+capture kapalı kalır ve tüm Brain yazmaları önce ön izleme, sonra açık apply
+gerektirir.
+
+CLI alt süreci kurulu Control yapılandırmasını doğrulayabilir, ancak mevcut
+Codex oturumunun MCP araçlarını çağıramaz. Canlı proje sağlığını aktif Codex
+oturumundan Control MCP ile (veya owner terminalinden
+`codex-control status --json` ile) doğrulayın. Bir Control projesindeki
+`brainMapped: true` durumu, yerel `CODEX_CHEF_BRAIN_HOME` vault'undan ayrıdır;
+birini yapılandırmak diğerini sessizce yapılandırmaz veya ona yazmaz.
 
 Kurulu ve hazır skill'ler kendiliğinden çalışmaz. Kullanıcı skill adını
 yazdığında veya iş skill açıklamasına açıkça uyduğunda Codex context'ine girer;
@@ -195,11 +226,46 @@ Kullanışlı parametreler:
 - `-All`: Codex template'lerini, yerel Codex Chef plugin'ini, uzman ajanları,
   profilleri, kuralları ve doğrulanmış public/first-party skill'leri kurar.
   Global Git config'i değiştirmez.
+- Her varsayılan yönetilen kurulum, dokuz lokal workflow'un canonical
+  kaynaklarını `AGENTS_HOME/skills/<ad>` hedeflerine senkronize eder. Böylece
+  `$adaptive-agent-routing`, `$context-budget-planner`, `$fetch <url>`, `$seo
+  <hedef>` ve `$evidence-research <soru>` gibi çağrılar plugin kurulmadan
+  doğrudan kullanılabilir. Fetch implicit invocation'ı kapalı tutar; SEO ile
+  Evidence Research yalnız açıkça eşleşen isteklerde implicit seçilebilir.
+  Exact direct hedefte kullanıcıya ait farklı bir skill varsa installer hiçbir
+  managed dosya yazmadan durur.
+- Kişisel marketplace kaydı `codex-chef-workflows` plugin'ini yalnızca
+  keşfedilebilir yapar; kurmaz veya etkinleştirmez.
+  `$codex-chef-workflows:<skill-adı>` çağrıları için `codex plugin add
+  codex-chef-workflows@codex-chef --json` komutunu (veya `/plugins` yüzeyini)
+  kullanıp yeni bir Codex oturumu başlat.
+- Kişisel marketplace plugin aynasını
+  `AGENTS_HOME/plugins/sources/codex-chef-workflows` altından marketplace
+  root'una göre relative bir path ile okur. Custom `AGENTS_HOME` bir installer
+  hedefidir; aktif Codex host'unun bu marketplace'i keşfettiğinin kanıtı
+  değildir. Default dışı root'u `codex plugin marketplace add <root>` ile
+  kaydet ve `codex plugin marketplace list --json` ile doğrula.
+- `-AdoptFetchSkill`: yalnızca foreign-collision preflight'ından sonra
+  `AGENTS_HOME/skills/fetch` exact hedefini açıkça sahiplenir. Bash karşılığı
+  `--adopt-fetch-skill` olur. Normal install ve repair bu yetkiyi varsaymaz.
+- `-AdoptSeoSkill`: yalnızca incelenmiş foreign collision sonrasında
+  `AGENTS_HOME/skills/seo` hedefini sahiplenir. Bash karşılığı
+  `--adopt-seo-skill` olur.
+- `-AdoptEvidenceResearchSkill`: yalnızca
+  `AGENTS_HOME/skills/evidence-research` hedefini sahiplenir. Bash karşılığı
+  `--adopt-evidence-research-skill` olur.
+- `-AdoptDirectSkill <ad>`: katalogdaki başka bir foreign direct skill hedefini
+  açıkça sahiplenir. Bash karşılığı `--adopt-direct-skill=<ad>` olur.
 - `-InstallSkills`: `catalog/skills.json` içinde `install: true` olan,
-  `owner/repo` formatında doğrulanmış `package` ve eşleşen `skill` adı taşıyan
-  kayıtları kurar. Installer `npx.cmd skills add <package> --skill <skill>
-  --agent codex --yes --global` çağırır ve kullanıcı npm cache env'i
-  tanımlamadıysa ignored `tmp/npm-cache` altında repo-local npm cache kullanır.
+  `owner/repo` formatında doğrulanmış `package`, tam commit SHA ve eşleşen
+  `skill` adı taşıyan kayıtları kurar. Installer exact commit'i fetch eder,
+  seçilen skill'i doğrular, native copy'yi stage edip hash'ler ve atomik olarak
+  etkinleştirir. Fetch edilen repo kodunu veya registry kaynaklı bir installer'ı
+  çalıştırmaz. Eşleşen geçerli Codex Chef provenance marker'ı backup alan
+  managed upgrade'e izin verir. Unmarked, foreign veya lokal olarak drift etmiş
+  aynı adlı hedef korunur ve atlandı olarak raporlanır. `--adopt-existing`
+  geniş installer flag'i değildir; yalnızca o exact hedef incelendikten sonra
+  ekrana basılan `install-pinned-skill.mjs` komutu bu flag ile tekrar çalıştırılır.
 - `-InstallGitGuards`: global Git ignore, global pre-commit hook kurar ve
   `core.excludesfile` ile `core.hooksPath` ayarlar. Bunu ayrı tutuyoruz çünkü
   mevcut kullanıcıdaki bütün Git repolarını etkiler.
@@ -213,7 +279,9 @@ Kullanışlı parametreler:
 - `-Repair`: ortak repair motoruyla mevcut setup'i onarir. `-WhatIf` ile
   no-write repair plani basar. `-WhatIf` olmadan managed drift'i backup alip
   duzeltir. User skill'lerini silmez.
-- `-NoBackup`: yedeklemeyi kapatır. Tavsiye edilmez.
+- `-NoBackup`: opsiyonel managed-file yedeklerini kapatır. Tavsiye edilmez.
+  Pinned-skill upgrade veya açık pinned-skill adoption için zorunlu güvenlik
+  yedeğini asla kapatmaz.
 - `-WhatIf`: gerçek setup'a dokunmadan dosya, Git ve skill operasyonlarını ön
   izler.
 - `-Interactive`: özel Codex/Agents home değerlerini ve opsiyonel global Git
@@ -245,6 +313,11 @@ Kullanışlı flagler:
 
 - `--all`: global Git config'i değiştirmeyen önerilen tam Codex Chef kurulumu.
 - `--install-skills`
+- `--adopt-fetch-skill`, `--adopt-seo-skill` ve
+  `--adopt-evidence-research-skill`: yalnız adı verilen foreign direct hedefi
+  inceleme sonrasında sahiplenir; normal install ve repair fail-closed kalır.
+- `--adopt-direct-skill=<ad>`: katalogdaki başka bir foreign direct hedefi
+  inceleme sonrasında sahiplenir.
 - `--install-git-guards`: global Git ignore ve hook ayarlarına ayrıca opt-in.
 - `--force`: backup aldıktan sonra managed hedefleri değiştirir; vermezsen
   mevcut `config.toml` merge edilir ve diğer mevcut managed dosyalar atlanır.
@@ -263,8 +336,8 @@ Kullanışlı flagler:
 varsayılan hazır MCP server'ları, disabled/opt-in MCP connector'ları, bundled
 plugin skill'leri, reviewed global skill'ler, enterprise routing profile'lari
 ve MCP setup notlari. Bu notlar local tooling, OAuth authorization, filesystem
-path secimi, broad/destructive graph-indexing ve `SUPABASE_DB_URL` gibi
-gereksinimleri connector'a ihtiyac duymadan once gosterir. Account, database,
+path secimi, broad/destructive graph-indexing ve Supabase proje/read-only
+gereksinimlerini connector'a ihtiyac duymadan once gosterir. Account, database,
 production, genis filesystem ve broad/destructive graph-indexing connector'lari
 sen acikca enable edene kadar kapali kalir. Lokal codebase graph okumalari
 yalniz destructive/admin graph tool'lari kapaliyken acik olur.
@@ -300,11 +373,15 @@ Installer şu managed target'ları replace etmeden önce yedekler:
 - `config.toml`
 - `rules/default.rules`
 - `agents/*.toml`
+- `CODEX_HOME` içindeki managed profile dosyaları
 - kişisel plugin marketplace dosyası
-- bundled local plugin dizini
+- iki managed plugin aynası
+- bütün managed direct-skill dizinleri ve ownership marker'ları
 
 Dizin replacement sadece yönetilen Codex veya Agents home altında yapılır.
-Installer unmanaged directory target'larını reddeder.
+Installer herhangi bir write öncesinde bu root'ların altındaki symlink veya
+junction component'lerini reddeder; managed gibi görünen bir path başka dizine
+kaçamaz.
 
 ## Kurulum Sonrası Kontrol
 

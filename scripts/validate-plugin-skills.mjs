@@ -12,8 +12,11 @@ const expectedBundledSkills = new Set([
   "codex-chef-brain",
   "codex-chef-operator",
   "context-budget-planner",
+  "evidence-research",
   "external-review-workflow",
-  "offline-diagram-triplet"
+  "fetch",
+  "offline-diagram-triplet",
+  "seo"
 ]);
 
 function posix(filePath) {
@@ -42,7 +45,19 @@ function parseFrontmatter(text, rel) {
       failures.push(`${rel} frontmatter contains an unsupported line: ${line}`);
       continue;
     }
-    data[match[1]] = match[2].replace(/^["']|["']$/g, "");
+    const rawValue = match[2].trim();
+    const isDoubleQuoted = rawValue.startsWith("\"") && rawValue.endsWith("\"");
+    const isSingleQuoted = rawValue.startsWith("'") && rawValue.endsWith("'");
+    if (rawValue.includes(": ") && !isDoubleQuoted && !isSingleQuoted) {
+      failures.push(`${rel} frontmatter ${match[1]} must quote YAML values containing ': '.`);
+    }
+    if (
+      (rawValue.startsWith("\"") && !rawValue.endsWith("\""))
+      || (rawValue.startsWith("'") && !rawValue.endsWith("'"))
+    ) {
+      failures.push(`${rel} frontmatter ${match[1]} has an unterminated quoted value.`);
+    }
+    data[match[1]] = rawValue.replace(/^["']|["']$/g, "");
   }
   const keys = Object.keys(data).sort();
   if (keys.join(",") !== "description,name") {

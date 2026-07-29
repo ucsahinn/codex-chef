@@ -48,8 +48,11 @@ if (report) {
   if ((report.mcp?.count || 0) < 14) {
     fail("codex doctor must cover the MCP catalog.");
   }
-  if ((report.skills?.installableCount || 0) < 16) {
+  if ((report.skills?.installableCount || 0) < 15) {
     fail("codex doctor must cover installable curated skills.");
+  }
+  if ((report.skills?.directInstallCount || 0) < 3) {
+    fail("codex doctor must cover managed direct skills.");
   }
   if (report.skills?.lockEntries !== report.skills?.installableCount) {
     fail("codex doctor lockEntries must match installableCount.");

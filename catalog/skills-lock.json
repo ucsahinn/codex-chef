@@ -1,140 +1,149 @@
 {
   "version": "0.1.0",
   "generatedFrom": "catalog/skills.json",
-  "dateChecked": "2026-06-20",
+  "dateChecked": "2026-07-29",
   "status": "offline-validated",
-  "lockSemantics": "source-allowlist",
-  "immutability": "Skills CLI installation uses owner/repo plus skill name; this lock verifies reviewed package/skill/source metadata but does not pin upstream commits.",
+  "lockSemantics": "commit-pinned",
+  "skillsCliVersion": "1.5.20",
+  "skillsCliIntegrity": "sha512-lPl5KzMfTW+qwHFwc8t6R+wAqmdmSHw1+HWbGdJ/FZYbWLdB34bAZNFWiencM5DVoRaKAgXArmfTWMlNAbl9Gg==",
+  "immutability": "Every entry pins a full upstream commit SHA. Installation verifies the fetched HEAD and selected skill, stages and hashes a native copy, and does not execute the recorded Skills CLI package.",
   "onlineVerificationCommand": "npm run verify:skills:online",
   "entries": [
     {
       "name": "dependency-upgrade",
       "package": "wshobson/agents",
+      "commit": "c4b82b0ad771190355eb8e204b1329732a18449a",
       "skill": "dependency-upgrade",
       "source": "wshobson/agents@dependency-upgrade",
       "sourceUrl": "https://github.com/wshobson/agents",
-      "installCommand": "npx skills add wshobson/agents --skill dependency-upgrade --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package wshobson/agents --commit c4b82b0ad771190355eb8e204b1329732a18449a --skill dependency-upgrade --cli-version 1.5.20"
     },
     {
       "name": "gh-fix-ci",
       "package": "openai/skills",
+      "commit": "49f948faa9258a0c61caceaf225e179651397431",
       "skill": "gh-fix-ci",
       "source": "openai/skills@gh-fix-ci",
       "sourceUrl": "https://github.com/openai/skills",
-      "installCommand": "npx skills add openai/skills --skill gh-fix-ci --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package openai/skills --commit 49f948faa9258a0c61caceaf225e179651397431 --skill gh-fix-ci --cli-version 1.5.20"
     },
     {
       "name": "security-best-practices",
       "package": "openai/skills",
+      "commit": "49f948faa9258a0c61caceaf225e179651397431",
       "skill": "security-best-practices",
       "source": "openai/skills@security-best-practices",
       "sourceUrl": "https://github.com/openai/skills",
-      "installCommand": "npx skills add openai/skills --skill security-best-practices --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package openai/skills --commit 49f948faa9258a0c61caceaf225e179651397431 --skill security-best-practices --cli-version 1.5.20"
     },
     {
       "name": "systematic-debugging",
       "package": "obra/superpowers",
+      "commit": "44c9b2d6e889982ac18c27d05a19fefe335194e1",
       "skill": "systematic-debugging",
       "source": "obra/superpowers@systematic-debugging",
       "sourceUrl": "https://github.com/obra/superpowers",
-      "installCommand": "npx skills add obra/superpowers --skill systematic-debugging --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package obra/superpowers --commit 44c9b2d6e889982ac18c27d05a19fefe335194e1 --skill systematic-debugging --cli-version 1.5.20"
     },
     {
       "name": "request-refactor-plan",
       "package": "mattpocock/skills",
+      "commit": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
       "skill": "request-refactor-plan",
       "source": "mattpocock/skills@request-refactor-plan",
       "sourceUrl": "https://github.com/mattpocock/skills",
-      "installCommand": "npx skills add mattpocock/skills --skill request-refactor-plan --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package mattpocock/skills --commit 2ab958093e83e0ec752e6c1c5932da465bf23e0c --skill request-refactor-plan --cli-version 1.5.20"
     },
     {
       "name": "frontend-skill",
       "package": "nexu-io/open-design",
+      "commit": "f52fda29a8a6fc65c501a45bb165b6f5208194a1",
       "skill": "frontend-skill",
       "source": "nexu-io/open-design@frontend-skill",
       "sourceUrl": "https://github.com/nexu-io/open-design",
-      "installCommand": "npx skills add nexu-io/open-design --skill frontend-skill --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package nexu-io/open-design --commit f52fda29a8a6fc65c501a45bb165b6f5208194a1 --skill frontend-skill --cli-version 1.5.20"
     },
     {
       "name": "webapp-testing",
       "package": "anthropics/skills",
+      "commit": "b29e7cf65e5cb78a5ac33d582270551bc74a14eb",
       "skill": "webapp-testing",
       "source": "anthropics/skills@webapp-testing",
       "sourceUrl": "https://github.com/anthropics/skills",
-      "installCommand": "npx skills add anthropics/skills --skill webapp-testing --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package anthropics/skills --commit b29e7cf65e5cb78a5ac33d582270551bc74a14eb --skill webapp-testing --cli-version 1.5.20"
     },
     {
       "name": "web-quality-audit",
       "package": "addyosmani/web-quality-skills",
+      "commit": "95d6e255afe1596b557d7a8498517884438f5b3a",
       "skill": "web-quality-audit",
       "source": "addyosmani/web-quality-skills@web-quality-audit",
       "sourceUrl": "https://github.com/addyosmani/web-quality-skills",
-      "installCommand": "npx skills add addyosmani/web-quality-skills --skill web-quality-audit --agent codex --yes --global"
-    },
-    {
-      "name": "seo",
-      "package": "addyosmani/web-quality-skills",
-      "skill": "seo",
-      "source": "addyosmani/web-quality-skills@seo",
-      "sourceUrl": "https://github.com/addyosmani/web-quality-skills",
-      "installCommand": "npx skills add addyosmani/web-quality-skills --skill seo --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package addyosmani/web-quality-skills --commit 95d6e255afe1596b557d7a8498517884438f5b3a --skill web-quality-audit --cli-version 1.5.20"
     },
     {
       "name": "accessibility",
       "package": "addyosmani/web-quality-skills",
+      "commit": "95d6e255afe1596b557d7a8498517884438f5b3a",
       "skill": "accessibility",
       "source": "addyosmani/web-quality-skills@accessibility",
       "sourceUrl": "https://github.com/addyosmani/web-quality-skills",
-      "installCommand": "npx skills add addyosmani/web-quality-skills --skill accessibility --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package addyosmani/web-quality-skills --commit 95d6e255afe1596b557d7a8498517884438f5b3a --skill accessibility --cli-version 1.5.20"
     },
     {
       "name": "test-driven-development",
       "package": "obra/superpowers",
+      "commit": "44c9b2d6e889982ac18c27d05a19fefe335194e1",
       "skill": "test-driven-development",
       "source": "obra/superpowers@test-driven-development",
       "sourceUrl": "https://github.com/obra/superpowers",
-      "installCommand": "npx skills add obra/superpowers --skill test-driven-development --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package obra/superpowers --commit 44c9b2d6e889982ac18c27d05a19fefe335194e1 --skill test-driven-development --cli-version 1.5.20"
     },
     {
       "name": "documentation-and-adrs",
       "package": "addyosmani/agent-skills",
+      "commit": "7829ffd90d973b6325f5f12f1b1226dcace74443",
       "skill": "documentation-and-adrs",
       "source": "addyosmani/agent-skills@documentation-and-adrs",
       "sourceUrl": "https://github.com/addyosmani/agent-skills",
-      "installCommand": "npx skills add addyosmani/agent-skills --skill documentation-and-adrs --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package addyosmani/agent-skills --commit 7829ffd90d973b6325f5f12f1b1226dcace74443 --skill documentation-and-adrs --cli-version 1.5.20"
     },
     {
       "name": "mcp-builder",
       "package": "anthropics/skills",
+      "commit": "b29e7cf65e5cb78a5ac33d582270551bc74a14eb",
       "skill": "mcp-builder",
       "source": "anthropics/skills@mcp-builder",
       "sourceUrl": "https://github.com/anthropics/skills",
-      "installCommand": "npx skills add anthropics/skills --skill mcp-builder --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package anthropics/skills --commit b29e7cf65e5cb78a5ac33d582270551bc74a14eb --skill mcp-builder --cli-version 1.5.20"
     },
     {
       "name": "ai-project-starter",
       "package": "ucsahinn/ai-project-starter",
+      "commit": "9da8cdced620a89d4c4540cbbe562359eeb99c33",
       "skill": "ai-project-starter",
       "source": "ucsahinn/ai-project-starter@ai-project-starter",
       "sourceUrl": "https://github.com/ucsahinn/ai-project-starter",
-      "installCommand": "npx skills add ucsahinn/ai-project-starter --skill ai-project-starter --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package ucsahinn/ai-project-starter --commit 9da8cdced620a89d4c4540cbbe562359eeb99c33 --skill ai-project-starter --cli-version 1.5.20"
     },
     {
       "name": "prompt-architect",
       "package": "ucsahinn/prompt-architect",
+      "commit": "6d62cb0cfe44580e3422cdd9900f8be57ad8cd0f",
       "skill": "prompt-architect",
       "source": "ucsahinn/prompt-architect@prompt-architect",
       "sourceUrl": "https://github.com/ucsahinn/prompt-architect",
-      "installCommand": "npx skills add ucsahinn/prompt-architect --skill prompt-architect --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package ucsahinn/prompt-architect --commit 6d62cb0cfe44580e3422cdd9900f8be57ad8cd0f --skill prompt-architect --cli-version 1.5.20"
     },
     {
       "name": "ai-skill-create",
       "package": "ucsahinn/ai-skill-create",
+      "commit": "78144e434a5216799b0d0932579c7d9d84781d39",
       "skill": "ai-skill-create",
       "source": "ucsahinn/ai-skill-create@ai-skill-create",
       "sourceUrl": "https://github.com/ucsahinn/ai-skill-create",
       "fullDepth": true,
-      "installCommand": "npx skills add ucsahinn/ai-skill-create --skill ai-skill-create --full-depth --agent codex --yes --global"
+      "installCommand": "node scripts/install-pinned-skill.mjs --package ucsahinn/ai-skill-create --commit 78144e434a5216799b0d0932579c7d9d84781d39 --skill ai-skill-create --cli-version 1.5.20 --full-depth"
     }
   ]
 }

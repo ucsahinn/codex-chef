@@ -16,8 +16,8 @@ Platform: windows
 
 Profile | Operations | High risk | Optional flags
 --- | ---: | ---: | ---
-all | 8 | 1 | InstallSkills
-default | 7 | 0 | none
+all | 18 | 1 | InstallSkills
+default | 17 | 0 | none
 ```
 
 ```text
@@ -52,7 +52,7 @@ node scripts/plan-install.mjs --all --json --redact-paths
 
 ```text
 Codex Chef enterprise routing board
-Profiles: 13
+Profiles: 14
 Policy: task-shape routing names matching specialists, selects matching skills when applicable, and may spawn bounded local subagents when the current runtime permits delegation; risky actions remain approval-gated.
 
 Subagent visibility contract:
@@ -77,7 +77,7 @@ npm run chef -- --routing --profile starter-health --plain --no-log
   - Codex home: ...
   - Agents home: ...
   - Mode: preserve existing files; merge missing config blocks
-  - Skills: install reviewed catalog entries with --agent codex
+  - Skills: install reviewed commit-pinned entries by verified native copy
   - Git guards: disabled by default
   - Dry run: no files, Git settings, or skills will be changed
 [*] Managed Codex files
@@ -91,17 +91,17 @@ What if: Performing the operation ...
 [*] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (7):
+  - MCP ready by default (8):
     sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (9):
+  - MCP opt-in / disabled by default (8):
     github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
-  - Local plugin skills (3):
-    codex-chef-operator, context-budget-planner, ...
-  - Reviewed global skills (16):
+  - Local plugin skills (9):
+    adaptive-agent-routing, codex-chef-brain, codex-chef-operator, context-budget-planner, evidence-research, external-review-workflow, fetch, offline-diagram-triplet, seo
+  - Reviewed global skills (15):
     dependency-upgrade, gh-fix-ci, ...
-  - Enterprise routing profiles (12):
+  - Enterprise routing profiles (14):
     repo-map-before-change, current-docs-research, ...
   - Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.
 
@@ -117,7 +117,7 @@ What if: Performing the operation ...
   - No tokens, secrets, cookies, sessions, or credentials are requested.
 Codex home [...]:
 Agents home [...]:
-Install or reconcile the 16 reviewed global Codex skills now? [Y/n]:
+Install or reconcile the 15 reviewed global Codex skills now? [Y/n]:
 Replace existing managed Codex Chef files after backup instead of preserving/merging? [y/N]:
 Install optional global Git guards for this Windows user? [y/N]:
 
@@ -125,7 +125,7 @@ Install optional global Git guards for this Windows user? [y/N]:
   - Codex home: ...
   - Agents home: ...
   - Mode: preserve existing files; merge missing config blocks
-  - Skills: install reviewed catalog entries with --agent codex
+  - Skills: install reviewed commit-pinned entries by verified native copy
   - Git guards: disabled by default
   - Dry run: no files, Git settings, or skills will be changed
   - Existing config policy: backup + merge missing Codex Chef blocks unless Force is enabled
@@ -147,17 +147,17 @@ Continue with this plan? [Y/n]:
 [chef] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (7):
+  - MCP ready by default (8):
     sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (9):
+  - MCP opt-in / disabled by default (8):
     github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
-  - Local plugin skills (3):
-    codex-chef-operator, context-budget-planner, ...
-  - Reviewed global skills (16):
+  - Local plugin skills (9):
+    adaptive-agent-routing, codex-chef-brain, codex-chef-operator, context-budget-planner, evidence-research, external-review-workflow, fetch, offline-diagram-triplet, seo
+  - Reviewed global skills (15):
     dependency-upgrade, gh-fix-ci, ...
-  - Enterprise routing profiles (12):
+  - Enterprise routing profiles (14):
     repo-map-before-change, current-docs-research, ...
   - Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.
 
@@ -184,19 +184,21 @@ Mode: plan
 Overall: attention
 Codex home: ...
 Agents home: ...
-Managed files: 36/37 current, 1 planned, 0 applied
+Managed files: <current>/<expected> current, <planned> planned, <applied> applied
 Config: current
 Marketplace: planned
-Skills: 94 unique installed (16 curated expected, 0 missing, 78 non-curated, 3 duplicate names)
+Skills: <installed> unique installed (<managed-expected> managed expected, <missing> missing, <other> non-curated, <duplicates> duplicate names)
 Action: planned copy-file .../.codex/rules/default.rules
 Action: planned update-marketplace-entry .../.agents/plugins/marketplace.json
-Warning: 78 non-curated global skill(s) are installed; repair reports them but does not delete user skills.
+Warning: <other> non-curated global skill(s) are installed; repair reports them but does not delete user skills.
 ```
 
 JSON ciktisi `schemaVersion: codex-chef.repair.v1` kullanir. `-Repair -WhatIf`
 ve `npm run repair:install -- --json` no-write kalir. `-Repair` ve
 `npm run repair:install -- --apply` managed drift'i duzeltmeden once backup
 olusturur.
+Bu örnekteki sayılar placeholder'dır; kurulu kullanıcı skill'leri ve güncel
+managed-file envanteri makineye ve sürüme göre değişir.
 
 ## Status Panosu
 
@@ -204,10 +206,10 @@ olusturur.
 Codex Chef durumu
 Genel: dikkat
 Repo Git: dikkat - git status --short değişen satırlar bildiriyor.
-MCP: 16/16 katalog bağlayıcısı yapılandırılmış, 0 eksik, 1 kullanıcı ekledi; 9 açık/8 kapalı; canlı durum ölçülmedi
+MCP: 16/16 katalog bağlayıcısı yapılandırılmış, 0 eksik, <user-added> kullanıcı kaydı; katalog varsayılanlarında 8 açık/8 kapalı; canlı durum ölçülmedi
 Codex CLI: tamam (strict config tamam, login tamam, MCP tamam)
 Kurulu ortam: dikkat/güncel (...)
-Skill'ler: global köklerde toplam 42 kurulu (16 Codex Chef curated, 0 eksik, 26 diğer/kullanıcı kurulu)
+Skill'ler: global köklerde toplam <installed> (<managed> Codex Chef managed, <missing> eksik, <other> diğer/kullanıcı kurulu)
 Codex doctor kontrolleri: dikkat (...)
 Sonraki adım: Dikkat maddelerini inceleyin; bunlar Codex Chef kurulumunun bozuk olduğu anlamına gelmeyebilir.
 Ayrıntılar: npm run chef -- --status --details
@@ -231,17 +233,17 @@ Would install file from ...
 [*] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (7):
+  - MCP ready by default (8):
     sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (9):
+  - MCP opt-in / disabled by default (8):
     github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
-  - Local plugin skills (3):
-    codex-chef-operator, context-budget-planner, ...
-  - Reviewed global skills (16):
+  - Local plugin skills (9):
+    adaptive-agent-routing, codex-chef-brain, codex-chef-operator, context-budget-planner, evidence-research, external-review-workflow, fetch, offline-diagram-triplet, seo
+  - Reviewed global skills (15):
     dependency-upgrade, gh-fix-ci, ...
-  - Enterprise routing profiles (12):
+  - Enterprise routing profiles (14):
     repo-map-before-change, current-docs-research, ...
   - Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.
 
@@ -263,17 +265,17 @@ Would install file from ...
 [*] Capability board
   - Agents ready (21):
     code_mapper, docs_researcher, ...
-  - MCP ready by default (7):
+  - MCP ready by default (8):
     sequential-thinking, context7, ...
-  - MCP opt-in / disabled by default (9):
+  - MCP opt-in / disabled by default (8):
     github, figma, ...
   - MCP setup notes (14):
     context7 [tooling]: Ilk acilista npm/npx network erisimi gerekir; credential gerekmez., ...
-  - Local plugin skills (3):
-    codex-chef-operator, context-budget-planner, ...
-  - Reviewed global skills (16):
+  - Local plugin skills (9):
+    adaptive-agent-routing, codex-chef-brain, codex-chef-operator, context-budget-planner, evidence-research, external-review-workflow, fetch, offline-diagram-triplet, seo
+  - Reviewed global skills (15):
     dependency-upgrade, gh-fix-ci, ...
-  - Enterprise routing profiles (12):
+  - Enterprise routing profiles (14):
     repo-map-before-change, current-docs-research, ...
   - Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled.
 
@@ -294,9 +296,20 @@ Would install file from ...
 Başarılı skill kurulumları kısa status satırları basar:
 
 ```text
-Skill already installed: ...
-Installed skill: ...
+Pinned skill already current: ...
+Installed pinned skill ... by native copy from ...@...
+Skipped existing user-owned skill ...; rerun this exact command with --adopt-existing only after reviewing that target.
 ```
 
-Raw Skills CLI çıktısı yalnızca install hatasında gösterilir. Böylece başarılı
-Windows setup'ı gürültülü olmaz ama hata olduğunda debug yapılabilir.
+Top-level installer'lar helper sonucunu doğru statüye çevirir; korunan hedefi
+kurulmuş gibi göstermez:
+
+```text
+  - skill already current: ...
+  - installed skill: ...
+  - upgraded managed skill: ...
+  - preserved user-owned skill: ...
+```
+
+Hatalar fetch, staging, hash, activation veya rollback aşamasını belirtir.
+Kurulum registry kaynaklı bir Skills CLI çalıştırmaz.

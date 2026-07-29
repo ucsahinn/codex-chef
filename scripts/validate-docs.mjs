@@ -6,6 +6,9 @@ const root = path.resolve(process.cwd());
 const failures = [];
 const ignoredDirs = new Set([".git", ".serena", "node_modules", "dist", "build", "coverage", ".next", "tmp", "temp"]);
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+const installPlan = JSON.parse(fs.readFileSync(path.join(root, "manifests", "install-plan.json"), "utf8"));
+const routingProfiles = JSON.parse(fs.readFileSync(path.join(root, "catalog", "routing-profiles.json"), "utf8"));
+const mcpCatalog = JSON.parse(fs.readFileSync(path.join(root, "catalog", "mcp-servers.json"), "utf8"));
 const routingPolicyLine =
   "Policy: task-shape routing names matching specialists, selects matching skills when applicable, and may spawn bounded local subagents when the current runtime permits delegation; risky actions remain approval-gated.";
 
@@ -114,6 +117,19 @@ function validateDocText(file) {
         "Account, database, production, broad filesystem, and broad/destructive graph-indexing connectors stay disabled until explicitly enabled."
       ]) {
         if (!text.includes(requiredExpectedOutput)) failures.push(`${rel} missing current expected-output snippet: ${requiredExpectedOutput}`);
+      }
+      const enabledMcpCount = mcpCatalog.servers.filter((server) => server.defaultEnabled === true).length;
+      const disabledMcpCount = mcpCatalog.servers.length - enabledMcpCount;
+      for (const derivedSnippet of [
+        `all | ${installPlan.profiles.all.length} |`,
+        `default | ${installPlan.profiles.default.length} |`,
+        `Profiles: ${routingProfiles.profiles.length}`,
+        `MCP ready by default (${enabledMcpCount})`,
+        `MCP opt-in / disabled by default (${disabledMcpCount})`
+      ]) {
+        if (!text.includes(derivedSnippet)) {
+          failures.push(`${rel} has stale derived expected-output; missing ${derivedSnippet}`);
+        }
       }
     }
     if (text.includes("Authenticated/account MCP connectors remain disabled by default")) {

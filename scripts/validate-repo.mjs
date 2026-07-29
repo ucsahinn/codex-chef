@@ -118,6 +118,7 @@ const requiredFiles = [
   "scripts/validate-install-state-preview.mjs",
   "scripts/validate-installer-alignment.mjs",
   "scripts/validate-installer-smoke.mjs",
+  "scripts/manage-direct-skill-target.mjs",
   "scripts/validate-agent-config.mjs",
   "scripts/validate-agent-research-corpus.mjs",
   "scripts/validate-mcp-config.mjs",
@@ -127,6 +128,11 @@ const requiredFiles = [
   "scripts/validate-routing-profiles.mjs",
   "scripts/validate-repair-install.mjs",
   "scripts/validate-diagram-triplet.mjs",
+  "scripts/validate-fetch-skill.mjs",
+  "scripts/validate-growth-skills.mjs",
+  "scripts/tests/growth-skills.test.mjs",
+  "scripts/tests/cli-error-contract.test.mjs",
+  "scripts/tests/release-readiness.test.mjs",
   "scripts/validate-plugin-skills.mjs",
   "scripts/validate-chef-cli.mjs",
   "scripts/validate-external-review.mjs",
@@ -147,6 +153,26 @@ const requiredFiles = [
   "plugins/codex-chef-workflows/skills/offline-diagram-triplet/references/diagram-contract.md",
   "plugins/codex-chef-workflows/skills/offline-diagram-triplet/agents/openai.yaml",
   "plugins/codex-chef-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs",
+  "plugins/codex-chef-workflows/skills/fetch/SKILL.md",
+  "plugins/codex-chef-workflows/skills/fetch/agents/openai.yaml",
+  "plugins/codex-chef-workflows/skills/fetch/assets/fetch-report.template.json",
+  "plugins/codex-chef-workflows/skills/fetch/references/capture-protocol.md",
+  "plugins/codex-chef-workflows/skills/fetch/references/forward-tests.md",
+  "plugins/codex-chef-workflows/skills/fetch/references/implementation-protocol.md",
+  "plugins/codex-chef-workflows/skills/fetch/references/safety-boundaries.md",
+  "plugins/codex-chef-workflows/skills/fetch/references/sources.md",
+  "plugins/codex-chef-workflows/skills/fetch/references/verification-rubric.md",
+  "plugins/codex-chef-workflows/skills/fetch/scripts/validate-fetch-report.mjs",
+  "plugins/codex-chef-workflows/skills/seo/SKILL.md",
+  "plugins/codex-chef-workflows/skills/seo/agents/openai.yaml",
+  "plugins/codex-chef-workflows/skills/seo/assets/seo-audit-report.template.json",
+  "plugins/codex-chef-workflows/skills/seo/references/sources.md",
+  "plugins/codex-chef-workflows/skills/seo/scripts/validate-seo-report.mjs",
+  "plugins/codex-chef-workflows/skills/evidence-research/SKILL.md",
+  "plugins/codex-chef-workflows/skills/evidence-research/agents/openai.yaml",
+  "plugins/codex-chef-workflows/skills/evidence-research/assets/research-report.template.json",
+  "plugins/codex-chef-workflows/skills/evidence-research/references/sources.md",
+  "plugins/codex-chef-workflows/skills/evidence-research/scripts/validate-research-report.mjs",
   "plugins/codex-chef-workflows/skills/context-budget-planner/SKILL.md",
   "plugins/codex-chef-workflows/skills/context-budget-planner/references/context-strategy.md",
   "plugins/codex-chef-workflows/skills/context-budget-planner/agents/openai.yaml",
@@ -495,8 +521,8 @@ if (fs.existsSync(marketplacePath)) {
     if (!plugin?.interface?.displayName || !plugin?.interface?.shortDescription) {
       failures.push(`Marketplace plugin ${plugin.name} must include displayName and shortDescription metadata`);
     }
-    if (plugin?.policy?.authentication !== "NONE") {
-      failures.push(`Marketplace plugin ${plugin.name} must keep authentication NONE by default`);
+    if (plugin?.policy?.authentication !== "ON_INSTALL") {
+      failures.push(`Marketplace plugin ${plugin.name} must use current Codex authentication policy ON_INSTALL`);
     }
   }
 }
@@ -542,11 +568,20 @@ const skillCatalog = path.join(root, "catalog/skills.json");
 if (fs.existsSync(skillCatalog)) {
   const catalog = JSON.parse(fs.readFileSync(skillCatalog, "utf8"));
   const skills = catalog.skills || [];
-  if (skills.length !== 53) {
-    failures.push(`Public skill catalog contract expects 53 entries; found ${skills.length}.`);
+  if (catalog.lockSemantics !== "commit-pinned") {
+    failures.push("Public skill catalog must use commit-pinned lock semantics.");
   }
-  if (skills.filter((skill) => skill.install === true).length !== 16) {
-    failures.push("Public skill catalog contract expects 16 full-install skills.");
+  if (!/^\d+\.\d+\.\d+$/.test(catalog.skillsCliVersion || "")) {
+    failures.push("Public skill catalog must pin an exact Skills CLI version.");
+  }
+  if (!String(catalog.skillsCliIntegrity || "").startsWith("sha512-")) {
+    failures.push("Public skill catalog must pin the Skills CLI registry integrity.");
+  }
+  if (skills.length !== 55) {
+    failures.push(`Public skill catalog contract expects 55 entries; found ${skills.length}.`);
+  }
+  if (skills.filter((skill) => skill.install === true).length !== 15) {
+    failures.push("Public skill catalog contract expects 15 full-install skills.");
   }
   for (const doc of ["docs/skills.md", "docs/skills.tr.md"]) {
     if (!fs.existsSync(path.join(root, doc))) continue;
@@ -564,6 +599,9 @@ if (fs.existsSync(skillCatalog)) {
       }
       if (!skill.skill || /\s/.test(skill.skill)) {
         failures.push(`Installable skill must declare a single skill name: ${skill.name}`);
+      }
+      if (!/^[a-f0-9]{40}$/.test(skill.commit || "")) {
+        failures.push(`Installable skill must declare a full commit SHA: ${skill.name}`);
       }
       if (skill.source !== `${skill.package}@${skill.skill}`) {
         failures.push(`Installable skill source must equal package@skill for ${skill.name}`);
@@ -629,8 +667,8 @@ if (fs.existsSync(bundledSkillsDir)) {
     .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(bundledSkillsDir, entry.name, "SKILL.md")))
     .map((entry) => entry.name)
     .sort();
-  if (bundledSkills.length !== 6) {
-    failures.push(`Public bundled workflow contract expects 6 skills; found ${bundledSkills.length}.`);
+  if (bundledSkills.length !== 9) {
+    failures.push(`Public bundled workflow contract expects 9 skills; found ${bundledSkills.length}.`);
   }
   for (const doc of ["docs/skills.md", "docs/skills.tr.md"]) {
     if (!fs.existsSync(path.join(root, doc))) continue;

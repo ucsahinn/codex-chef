@@ -7,6 +7,17 @@ import process from "node:process";
 import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
+import {
+  inspectPinnedSkillTarget,
+  inspectSkillTree
+} from "./lib/skill-provenance.mjs";
+import { inspectDirectSkillTarget, markerFileName } from "./manage-direct-skill-target.mjs";
+import {
+  CliUsageError,
+  emitCliError,
+  redactCliPaths,
+  sanitizeCliError
+} from "./lib/cli-error-contract.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
@@ -36,7 +47,7 @@ function languageFromArgs(argv, fallback) {
     if (arg === "--tr") return "tr";
     if (arg === "--lang") {
       const value = argv[index + 1];
-      const parsed = value && !value.startsWith("--") ? normalizeLanguage(value) : null;
+      const parsed = value && !value.startsWith("-") ? normalizeLanguage(value) : null;
       if (parsed) return parsed;
     }
   }
@@ -70,8 +81,13 @@ function localText(en, tr) {
 
 function cliError(en, tr = en) {
   const prefix = isTr() ? "Codex Chef CLI hatasi" : "Codex Chef CLI error";
-  console.error(`${prefix}: ${localText(en, tr)}`);
-  process.exit(2);
+  process.exit(emitCliError({
+    tool: "chef",
+    error: new CliUsageError(localText(en, tr)),
+    argv: args,
+    root,
+    prefix
+  }));
 }
 
 class UserInterrupt extends Error {
@@ -132,12 +148,15 @@ const ACTION_FLAGS = new Map([
   ["--skills", "skills"],
   ["--mcp", "mcp"],
   ["--routing", "routing"],
+  ["--continuity", "continuity"],
+  ["--control-brain", "continuity"],
   ["--diagnostics", "diagnostics"],
   ["--diagnose", "diagnostics"],
   ["--processes", "processes"],
   ["--auth", "auth"],
   ["--logs", "logs"]
 ]);
+const requestedActionFlags = [];
 
 for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
@@ -145,7 +164,7 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--json") options.json = true;
   else if (arg === "--lang") {
     const value = args[index + 1];
-    if (!value || value.startsWith("--")) {
+    if (!value || value.startsWith("-")) {
       cliError("--lang requires a language code (en or tr). Run npm run chef -- --help for supported commands.", "--lang dil kodu ister (en veya tr). Desteklenen komutlar için npm run chef -- --help çalıştırın.");
     }
     const parsed = normalizeLanguage(value);
@@ -166,20 +185,46 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--details") options.details = true;
   else if (arg === "--backup") {
     const value = args[index + 1];
-    if (!value || value.startsWith("--")) {
+    if (!value || value.startsWith("-")) {
       cliError("--backup requires a backup id. Run npm run chef -- --backups to list available backups.", "--backup bir yedek id'si ister. Uygun yedekleri listelemek için npm run chef -- --backups çalıştırın.");
     }
     options.backupId = value;
     index += 1;
   }
   else if (arg === "--profile") {
-    options.profile = args[index + 1] || null;
+    const value = args[index + 1];
+    if (!value || value.startsWith("-")) {
+      cliError("--profile requires a routing profile id. Run npm run chef -- --routing to list profiles.", "--profile bir routing profile id'si ister. Profilleri listelemek için npm run chef -- --routing çalıştırın.");
+    }
+    options.profile = value;
     index += 1;
   }
-  else if (ACTION_FLAGS.has(arg)) options.action = ACTION_FLAGS.get(arg);
+  else if (ACTION_FLAGS.has(arg)) {
+    requestedActionFlags.push(arg);
+    options.action = ACTION_FLAGS.get(arg);
+  }
   else {
     cliError(`Unknown option ${arg}. Run npm run chef -- --help for supported commands.`, `Bilinmeyen seçenek ${arg}. Desteklenen komutlar için npm run chef -- --help çalıştırın.`);
   }
+}
+
+if (requestedActionFlags.length > 1) {
+  cliError(
+    `Choose exactly one action. Received: ${requestedActionFlags.join(", ")}.`,
+    `Tam olarak bir işlem seçin. Alınan seçenekler: ${requestedActionFlags.join(", ")}.`
+  );
+}
+if (options.repoOnly && options.action && options.action !== "status") {
+  cliError(
+    "--repo-only can only be used with --status.",
+    "--repo-only yalnızca --status ile kullanılabilir."
+  );
+}
+if (options.profile && options.action !== "routing") {
+  cliError(
+    "--profile can only be used with --routing.",
+    "--profile yalnızca --routing ile kullanılabilir."
+  );
 }
 
 const ASCII_ICONS = {
@@ -219,6 +264,7 @@ const MENU_ASCII_ICONS = {
   skills: "SK",
   mcp: "MC",
   routing: "RT",
+  continuity: "CB",
   diagnostics: "DG",
   processes: "PS",
   auth: "AU",
@@ -240,6 +286,7 @@ const MENU_RICH_ICONS = {
   skills: "🧠",
   mcp: "🔌",
   routing: "🧭",
+  continuity: "🧩",
   diagnostics: "🔎",
   processes: "⚙️",
   auth: "🔐",
@@ -346,7 +393,45 @@ function truncateVisual(value, width) {
 
 function terminalWidth() {
   const width = Number(process.stdout.columns || process.env.COLUMNS || 96);
-  return Math.max(72, Math.min(120, Number.isFinite(width) ? width : 96));
+  return Math.max(40, Math.min(120, Number.isFinite(width) ? width : 96));
+}
+
+function wrapVisual(value, width) {
+  const text = stripAnsi(String(value ?? "")).trim();
+  const limit = Math.max(12, Number(width) || terminalWidth());
+  if (!text) return [""];
+  const lines = [];
+  let current = "";
+  for (const word of text.split(/\s+/)) {
+    if (word.length > limit) {
+      if (current) {
+        lines.push(current);
+        current = "";
+      }
+      for (let offset = 0; offset < word.length; offset += limit) {
+        const chunk = word.slice(offset, offset + limit);
+        if (chunk.length === limit) lines.push(chunk);
+        else current = chunk;
+      }
+    } else if (!current) {
+      current = word;
+    } else if (current.length + 1 + word.length <= limit) {
+      current += ` ${word}`;
+    } else {
+      lines.push(current);
+      current = word;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+function printWrapped(value, { indent = "", styler = (line) => line, width = terminalWidth() } = {}) {
+  const contentWidth = Math.max(12, width - visualLength(indent));
+  const continuationIndent = " ".repeat(visualLength(indent));
+  for (const [index, line] of wrapVisual(value, contentWidth).entries()) {
+    console.log(`${index === 0 ? indent : continuationIndent}${styler(line)}`);
+  }
 }
 
 function divider(title = "") {
@@ -514,7 +599,7 @@ const MENU_ITEMS = [
     id: "skills",
     label: "Skill status & catalog",
     writes: "Install: typed confirmation",
-    description: "See installed/missing curated skills, then choose one to install with confirmation."
+    description: "See all Chef-managed, upstream, bundled, and user skills; install a selected upstream skill with confirmation."
   },
   {
     id: "mcp",
@@ -553,6 +638,12 @@ const MENU_ITEMS = [
     description: "List recent Chef log metadata without printing raw log contents."
   },
   {
+    id: "continuity",
+    label: "Control & Brain",
+    writes: "No writes",
+    description: "Show when Control routing activates, whether its MCP is configured, and whether Brain has an explicit vault target."
+  },
+  {
     id: "language",
     label: "Language",
     writes: "No writes",
@@ -589,7 +680,7 @@ const MENU_GROUPS = [
     labelTr: "Yetenekler",
     description: "Curated skills, MCP connectors, and routing ownership.",
     descriptionTr: "Seçili skill'ler, MCP bağlayıcıları ve yönlendirme sahipliği.",
-    itemIds: ["skills", "mcp", "routing"]
+    itemIds: ["skills", "mcp", "routing", "continuity"]
   },
   {
     id: "recovery",
@@ -658,6 +749,7 @@ function menuImportance(item) {
     processes: localText("EVIDENCE", "KANIT"),
     auth: localText("GUIDANCE", "REHBER"),
     logs: localText("HISTORY", "GEÇMİŞ"),
+    continuity: localText("CONTINUITY", "SÜREKLİLİK"),
     language: localText("PREFERENCE", "TERCİH"),
     exit: localText("SESSION", "OTURUM")
   };
@@ -730,7 +822,7 @@ const MENU_TEXT_TR = {
   },
   skills: {
     label: "Skill durumu ve katalog",
-    description: "Kurulu/eksik curated skill'leri görür; seçileni aynı oturumda onayla kurar.",
+    description: "Chef yönetimli, upstream, bundled ve kullanıcı skill'lerini gösterir; seçilen upstream skill'i onayla kurar.",
     writes: "Kurulum: yazılı onay"
   },
   mcp: {
@@ -761,6 +853,11 @@ const MENU_TEXT_TR = {
   logs: {
     label: "Son loglar",
     description: "Ham log içeriğini basmadan son Chef log bilgisini listeler.",
+    writes: "Yazmaz"
+  },
+  continuity: {
+    label: "Control ve Brain",
+    description: "Control yönlendirmesinin ne zaman açıldığını, MCP yapılandırmasını ve Brain için açık vault hedefi olup olmadığını gösterir.",
     writes: "Yazmaz"
   },
   language: {
@@ -815,6 +912,7 @@ function menuItemColor(item) {
     skills: "brightMagenta",
     mcp: "brightCyan",
     routing: "brightBlue",
+    continuity: "brightMagenta",
     diagnostics: "brightGreen",
     processes: "brightCyan",
     auth: "brightYellow",
@@ -844,10 +942,17 @@ function printSurfaceHeader(title, subtitle = "", icon = ICONS.info, accent = "b
   console.log("");
   if (supportsColor()) {
     const width = Math.max(28, Math.min(terminalWidth(), 92));
-    const titleText = ` ${stripAnsi(icon)}  ${title} `;
-    const remainder = Math.max(2, width - visualLength(titleText) - 2);
+    const titleText = truncateVisual(
+      ` ${stripAnsi(icon)}  ${stripAnsi(title)} `,
+      Math.max(4, width - 5)
+    );
+    const remainder = Math.max(2, width - visualLength(titleText) - 3);
     console.log(paint(`╭─${titleText}${"─".repeat(remainder)}╮`, "bold", accent));
-    if (subtitle) console.log(`${paint("│", accent)} ${paint(subtitle, "white")}`);
+    if (subtitle) {
+      for (const line of wrapVisual(subtitle, width - 2)) {
+        console.log(`${paint("│", accent)} ${paint(line, "white")}`);
+      }
+    }
     console.log(paint(`╰${"─".repeat(width - 2)}╯`, accent));
     return;
   }
@@ -857,12 +962,14 @@ function printSurfaceHeader(title, subtitle = "", icon = ICONS.info, accent = "b
     : rawTitle.toUpperCase();
   printDivider(dividerTitle);
   console.log(`${icon} ${styleHeading(title)}`);
-  if (subtitle) console.log(styleMuted(subtitle));
+  if (subtitle) printWrapped(subtitle, { styler: styleMuted });
 }
 
 function printSurfaceNote(label, value) {
   const marker = supportsColor() ? `${paint("◆", "brightBlue")} ` : "";
-  console.log(`${marker}${styleLabel(label)}: ${value}`);
+  printWrapped(`${stripAnsi(marker)}${label}: ${stripAnsi(value)}`, {
+    styler: styleMuted
+  });
 }
 
 function operatorPrompt(upperBound = MENU_ITEMS.length, canGoBack = false) {
@@ -879,13 +986,15 @@ function printOperatorStatusStrip() {
   const head = gitHead();
   const commit = head.ok && head.value ? head.value.slice(0, 7) : localText("unknown", "bilinmiyor");
   const legendLabel = isTr() ? "Lejant" : MENU_LEGEND_SOURCE_MARKER.split(":")[0];
-  console.log(`${styleLabel(localText("Mode", "Mod"))}: ${localText("Local operator", "Yerel operatör")} | ${styleLabel(localText("Version", "Versiyon"))}: ${currentPackageVersion()} | ${styleLabel("Git")}: ${gitBranch()}@${commit}`);
-  console.log(`${styleLabel(localText("Safety", "Güvenlik"))}: ${localText("menu writes use typed confirmation; direct CLI writes require --apply", "menüde yazan işlemler yazılı onay; doğrudan CLI işlemleri --apply ister")}`);
-  console.log(`${styleLabel(legendLabel)}: ${colorize("SAFE", "green")}=${localText("read-only", "yazmaz")} | ${colorize("APPLY-GATED", "red")}=${localText("backup/confirmation required", "yedek/onay gerekir")} | ${colorize("ACCOUNT-GUIDED", "yellow")}=${localText("guidance only", "yalnız rehberlik")}`);
+  printWrapped(`${localText("Mode", "Mod")}: ${localText("Local operator", "Yerel operatör")} | ${localText("Version", "Versiyon")}: ${currentPackageVersion()} | Git: ${gitBranch()}@${commit}`);
+  printWrapped(`${localText("Safety", "Güvenlik")}: ${localText("menu writes use typed confirmation; direct CLI writes require --apply", "menüde yazan işlemler yazılı onay; doğrudan CLI işlemleri --apply ister")}`);
+  printWrapped(`${legendLabel}: SAFE=${localText("read-only", "yazmaz")} | APPLY-GATED=${localText("backup/confirmation required", "yedek/onay gerekir")} | ACCOUNT-GUIDED=${localText("guidance only", "yalnız rehberlik")}`);
   if (lastActionSummary) {
     const color = lastActionSummary.ok ? "brightGreen" : lastActionSummary.skipped ? "brightYellow" : "brightRed";
     const duration = Number.isFinite(lastActionSummary.elapsedMs) ? ` | ${lastActionSummary.elapsedMs} ms` : "";
-    console.log(`${styleLabel(localText("Last action", "Son işlem"))}: ${paint(lastActionSummary.label, "bold", color)} | ${paint(lastActionSummary.status, color)}${styleMuted(duration)}`);
+    printWrapped(`${localText("Last action", "Son işlem")}: ${lastActionSummary.label} | ${lastActionSummary.status}${duration}`, {
+      styler: (line) => paint(line, color)
+    });
   }
 }
 
@@ -900,7 +1009,7 @@ function printStackedMenu(width) {
       const label = colorize(menuLabel(item), menuItemColor(item));
       console.log(`${padVisual(number, 4)} ${icon} ${label}`);
       console.log(`${indent}${styleLabel(localText("Impact", "Etki"))}: ${styleWriteBoundary(menuWrites(item))}`);
-      console.log(`${indent}${styleMuted(truncateVisual(menuDescription(item), Math.max(24, width - indent.length)))}`);
+      printWrapped(menuDescription(item), { indent, styler: styleMuted, width });
     }
   }
 }
@@ -917,7 +1026,7 @@ function printTableMenu(width) {
     40
   );
   const minPurposeWidth = 20;
-  const tableOverhead = 15;
+  const tableOverhead = 16;
   const fixedWithoutWrites = iconWidth + numberWidth + labelWidth + tableOverhead;
   const writesWidth = Math.max(
     localText("Impact", "Etki").length,
@@ -949,9 +1058,31 @@ function printTableMenu(width) {
   }
 }
 
+function printHelpText(value) {
+  const width = terminalWidth();
+  for (const rawLine of String(value).split(/\r?\n/)) {
+    if (visualLength(rawLine) <= width) {
+      console.log(rawLine);
+      continue;
+    }
+    const optionLine = /^(\s{2}--\S+(?:\s+\S+)?)(\s{2,})(.+)$/.exec(rawLine);
+    if (optionLine) {
+      const prefix = `${optionLine[1]}${optionLine[2]}`;
+      const continuation = " ".repeat(visualLength(prefix));
+      const wrapped = wrapVisual(optionLine[3], width - visualLength(prefix));
+      wrapped.forEach((line, index) => console.log(`${index === 0 ? prefix : continuation}${line}`));
+      continue;
+    }
+    const indent = rawLine.match(/^\s*/)?.[0] || "";
+    for (const line of wrapVisual(rawLine.trim(), width - visualLength(indent))) {
+      console.log(`${indent}${line}`);
+    }
+  }
+}
+
 function printHelp() {
   if (isTr()) {
-    console.log(`${colorize("Codex Chef CLI", "cyan")}
+    printHelpText(`${colorize("Codex Chef CLI", "cyan")}
 
 Kullanım:
   npm run chef
@@ -960,7 +1091,7 @@ Kullanım:
   npm run chef -- --diagnostics
 
 Komut kısayolları:
-  Yazmasız ekranlar: --status, --doctor, --preview, --skills, --mcp, --routing, --diagnostics, --processes, --auth, --logs
+  Yazmasız ekranlar: --status, --doctor, --preview, --skills, --mcp, --routing, --continuity/--control-brain, --diagnostics, --processes, --auth, --logs
   Onaylı yazan işlemler: --update [--apply], --reset [--apply], --repair [--apply], --install [--apply]
   Yedekler: --backups [--backup ID] [--restore|--delete --apply]
   Yönlendirme profili: --routing --profile starter-health
@@ -975,6 +1106,7 @@ Seçenekler:
   --repo-only    Status için kurulu runtime, global skill kökleri, Codex logları ve Codex CLI problarını atlar
   --profile ID   --routing ile tek routing profilini gösterir
   --diagnose     --diagnostics kısa yolu
+  --control-brain --continuity kısa yolu
   --backup ID    Belirli Codex Chef yedek arşivini inceler veya geri yükler
   --restore      --backup ID için geri yükleme preview'i; dosya kopyalamak için --apply ekle
   --delete       --backup ID için silme preview'i; arşivi silmek için --apply ekle
@@ -986,7 +1118,7 @@ Seçenekler:
 Ekranlar:
   Sistem durumu, Repo sağlığı, Tam kontrol, Kurulum ön izlemesi, Codex Chef'i güncelle,
   Tam kurulum, Kurulumu yenile, Kurulumu onar, Yedekler, Skill kataloğu,
-  MCP bağlayıcıları, Yönlendirme rehberi, Tanılama merkezi, Süreç denetimi,
+  MCP bağlayıcıları, Yönlendirme rehberi, Control ve Brain, Tanılama merkezi, Süreç denetimi,
   Kimlik notları, Son loglar
 
 Detay:
@@ -997,7 +1129,7 @@ Loglar:
 `);
     return;
   }
-  console.log(`${colorize("Codex Chef CLI", "cyan")}
+  printHelpText(`${colorize("Codex Chef CLI", "cyan")}
 
 Usage:
   npm run chef
@@ -1006,7 +1138,7 @@ Usage:
   npm run chef -- --diagnostics
 
 Reference actions:
-  Read-only: --status, --doctor, --preview, --skills, --mcp, --routing, --diagnostics, --processes, --auth, --logs
+  Read-only: --status, --doctor, --preview, --skills, --mcp, --routing, --continuity/--control-brain, --diagnostics, --processes, --auth, --logs
   Write gated: --update [--apply], --reset [--apply], --repair [--apply], --install [--apply]
   Backups: --backups [--backup ID] [--restore|--delete --apply]
   Routing: --routing --profile starter-health
@@ -1015,7 +1147,7 @@ Reference actions:
 Operator screens:
   System status, Repo health, Full checkup, Install preview, Update Codex Chef,
   Full install, Refresh setup, Repair setup, Backups, Skill status & catalog,
-  MCP connectors, Routing guide, Diagnostics hub, Process audit,
+  MCP connectors, Routing guide, Control & Brain, Diagnostics hub, Process audit,
   Auth notes, Recent logs
 
 Options:
@@ -1027,6 +1159,7 @@ Options:
   --repo-only    Skip installed runtime, global skill roots, Codex logs, and Codex CLI probes for status
   --profile ID   Show one routing profile when used with --routing
   --diagnose     Alias for --diagnostics
+  --control-brain Alias for --continuity
   --backup ID    Inspect or restore a specific Codex Chef backup archive
   --restore      Preview restore for --backup ID; add --apply to copy files back
   --delete       Preview deletion for --backup ID; add --apply to remove the archive
@@ -1070,12 +1203,7 @@ function commandForDisplay(command, commandArgs) {
 }
 
 function redactLocalPaths(output) {
-  const home = os.homedir();
-  return String(output)
-    .replaceAll(root, "${REPO}")
-    .replaceAll(root.replaceAll("\\", "/"), "${REPO}")
-    .replaceAll(home, "${HOME}")
-    .replaceAll(home.replaceAll("\\", "/"), "${HOME}");
+  return redactCliPaths(output, { root });
 }
 
 function redactSensitiveOutput(output) {
@@ -1114,7 +1242,9 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
     console.log(`${ICONS.run} [----------]   0% RUNNING  ${action}`);
     console.log(`${ICONS.run} ${commandForDisplay(command, commandArgs)}`);
   }
-  if (extra.waitNote && !options.json && !extra.quiet) console.log(`${ICONS.info} ${extra.waitNote}`);
+  if (extra.waitNote && !options.json && !extra.quiet) {
+    printWrapped(extra.waitNote, { indent: `${ICONS.info} ` });
+  }
 
   const result = spawnSync(executable, argsForSpawn, {
     cwd: root,
@@ -1132,7 +1262,9 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
 
   const output = redactSensitiveOutput([result.stdout, result.stderr].filter(Boolean).join("\n"));
   const failed = Boolean(result.error) || result.status !== 0;
-  if (output.trim() && (!extra.quiet || failed)) process.stdout.write(output.endsWith("\n") ? output : `${output}\n`);
+  if (output.trim() && !extra.captureOnly && (!extra.quiet || failed)) {
+    process.stdout.write(output.endsWith("\n") ? output : `${output}\n`);
+  }
   if (logPath) {
     fs.appendFileSync(logPath, output, "utf8");
     fs.appendFileSync(logPath, `\nexitCode=${result.status ?? "error"}\n`, "utf8");
@@ -1141,14 +1273,16 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
 
   if (result.error) {
     if (!options.json) console.error(`${ICONS.warn} [!!!!!!!!!!] 100% FAILED   ${action} (${Date.now() - startedMs} ms)`);
-    console.error(`${ICONS.warn} ${result.error.message}`);
+    if (!extra.captureOnly) console.error(`${ICONS.warn} ${result.error.message}`);
     return { ok: false, status: null, signal: result.signal || null, logPath, error: result.error.message, output, elapsedMs: Date.now() - startedMs };
   }
   if (result.status !== 0) {
     if (!options.json) console.error(`${ICONS.warn} [!!!!!!!!!!] 100% FAILED   ${action} (${Date.now() - startedMs} ms)`);
     const logNote = logPath ? ` Log: ${toPosix(path.relative(root, logPath))}` : " Logging disabled by --no-log.";
     const signalNote = result.signal ? ` Signal: ${result.signal}.` : "";
-    console.error(`${ICONS.warn} Command failed with exit ${result.status}.${signalNote}${logNote}`);
+    if (!extra.captureOnly) {
+      console.error(`${ICONS.warn} Command failed with exit ${result.status}.${signalNote}${logNote}`);
+    }
     return { ok: false, status: result.status, signal: result.signal || null, logPath, output, elapsedMs: Date.now() - startedMs };
   }
   if (!options.json && !extra.quiet) console.log(`${ICONS.ok} [##########] 100% DONE     ${action} (${Date.now() - startedMs} ms)`);
@@ -1206,14 +1340,14 @@ function printHeader() {
   } else {
     console.log(`${ICONS.chef} Codex Chef`);
   }
-  console.log(styleMuted(localText(
+  printWrapped(localText(
     "One operator board for status, setup, backups, skills, MCP connectors, diagnostics, auth notes, and logs.",
     "Durum, kurulum, yedekler, skill'ler, MCP bağlayıcıları, tanılama, kimlik notları ve loglar için tek operatör paneli."
-  )));
-  console.log(styleMuted(localText(
+  ), { styler: styleMuted });
+  printWrapped(localText(
     `Language: English | Safety: menu writes ask for APPLY; direct CLI writes require --apply.`,
     `Dil: Türkçe | Güvenlik: menü işlemleri APPLY onayı; doğrudan CLI işlemleri --apply ister.`
-  )));
+  ), { styler: styleMuted });
   console.log("");
 }
 
@@ -1249,18 +1383,20 @@ function printMenu() {
       : localText("read-only", "salt okunur");
     if (supportsColor()) {
       const badgeKind = boundaryCounts.write > 0 ? "write" : boundaryCounts.guidance > 0 ? "guidance" : "safe";
-      console.log(`${paint("╭─", visual.color)} ${paint(String(index + 1).padStart(2, "0"), "bold", visual.color)} ${paint(visual.icon, "bold", visual.color)}  ${paint(label, "bold", "white")}  ${statusBadge(badge, badgeKind)}`);
-      console.log(`${paint("╰─", visual.color)} ${styleMuted(description)}`);
+      console.log(`${paint("╭─", visual.color)} ${paint(String(index + 1).padStart(2, "0"), "bold", visual.color)} ${paint(visual.icon, "bold", visual.color)}  ${paint(label, "bold", "white")}`);
+      printWrapped(stripAnsi(statusBadge(badge, badgeKind)), { indent: "    ", styler: styleMuted });
+      printWrapped(description, { indent: "    ", styler: styleMuted });
     } else {
-      console.log(`${styleHeading(String(index + 1).padStart(2, "0"))}  ${styleHeading(label)}  ${styleMuted(`[${badge}]`)}`);
-      console.log(`    ${description}`);
+      console.log(`${styleHeading(String(index + 1).padStart(2, "0"))}  ${styleHeading(label)}`);
+      printWrapped(`[${badge}]`, { indent: "    ", styler: styleMuted });
+      printWrapped(description, { indent: "    " });
     }
   });
   console.log("");
-  console.log(styleMuted(localText(
+  printWrapped(localText(
     "Choose a workspace. Shortcuts: l = language, q = quit.",
     "Bir çalışma alanı seçin. Kısayollar: l = dil, q = çıkış."
-  )));
+  ), { styler: styleMuted });
 }
 
 function printLegacyMenu() {
@@ -1272,10 +1408,10 @@ function printLegacyMenu() {
   if (width < 110) printStackedMenu(width);
   else printTableMenu(width);
   console.log("");
-  console.log(styleMuted(localText(
+  printWrapped(localText(
     "Shortcuts: l = language, q = quit. Empty input repeats this prompt without repainting the menu.",
     "Kısayollar: l = dil, q = çıkış. Boş giriş menüyü yeniden basmadan promptu tekrarlar."
-  )));
+  ), { styler: styleMuted });
 }
 
 function printHubMenu(group) {
@@ -1285,10 +1421,10 @@ function printHubMenu(group) {
   printDivider(label.toUpperCase());
   if (supportsColor()) {
     console.log(`${paint(visual.icon, "bold", visual.color)} ${paint(label, "bold", visual.color)}`);
-    console.log(styleMuted(description));
+    printWrapped(description, { styler: styleMuted });
   } else {
     console.log(styleHeading(label));
-    console.log(description);
+    printWrapped(description);
   }
   console.log("");
   group.itemIds.forEach((id, index) => {
@@ -1297,16 +1433,25 @@ function printHubMenu(group) {
     if (supportsColor()) {
       const color = menuItemColor(item);
       const boundary = writeBoundaryKind(menuWrites(item));
-      console.log(`${paint("╭─", color)} ${paint(String(index + 1).padStart(2, "0"), "bold", color)} ${colorize(menuIcon(item), color)}  ${paint(menuLabel(item), "bold", "white")}  ${importanceBadge(item)} ${statusBadge(menuWrites(item), boundary)}`);
-      console.log(`${paint("╰─", color)} ${styleMuted(menuDescription(item))}`);
+      console.log(`${paint("╭─", color)} ${paint(String(index + 1).padStart(2, "0"), "bold", color)} ${colorize(menuIcon(item), color)}  ${paint(menuLabel(item), "bold", "white")}`);
+      printWrapped(`${stripAnsi(importanceBadge(item))} ${stripAnsi(statusBadge(menuWrites(item), boundary))}`, {
+        indent: "    ",
+        styler: styleMuted
+      });
+      printWrapped(menuDescription(item), { indent: "    ", styler: styleMuted });
     } else {
       console.log(`${styleHeading(String(index + 1).padStart(2, "0"))}  ${menuIcon(item)} ${styleHeading(menuLabel(item))}`);
-      console.log(`    ${menuDescription(item)}`);
-      console.log(`    ${styleMuted(localText("Importance", "Önem"))}: ${menuImportance(item)} | ${styleMuted(localText("Impact", "Etki"))}: ${menuWrites(item)}`);
+      printWrapped(menuDescription(item), { indent: "    " });
+      printWrapped(`${localText("Importance", "Önem")}: ${menuImportance(item)} | ${localText("Impact", "Etki")}: ${menuWrites(item)}`, {
+        indent: "    ",
+        styler: styleMuted
+      });
     }
   });
   console.log("");
-  console.log(styleMuted(localText("b = back, l = language, q = quit", "b = geri, l = dil, q = çıkış")));
+  printWrapped(localText("b = back, l = language, q = quit", "b = geri, l = dil, q = çıkış"), {
+    styler: styleMuted
+  });
 }
 
 function printActionStart(item) {
@@ -1378,9 +1523,75 @@ function runStatus(overrides = {}) {
 }
 
 function runDoctor() {
+  if (options.json) {
+    const repoDoctor = runNode("doctor", "scripts/codex-doctor.mjs", [
+      "--redact-paths",
+      "--json"
+    ], {
+      quiet: true,
+      captureOnly: true,
+      waitNote: "Running repo doctor checks."
+    });
+    const runtime = runNode("runtime", "scripts/verify-install-runtime.mjs", [
+      "--redact-paths",
+      "--expect-skills",
+      "--expect-git-guards",
+      "--require-live-runtime",
+      "--json"
+    ], {
+      quiet: true,
+      captureOnly: true,
+      waitNote: "Verifying installed Codex Chef runtime; this can take 30-60 seconds."
+    });
+
+    const parseReport = (result) => {
+      try {
+        return JSON.parse(result.output || "{}");
+      } catch {
+        return null;
+      }
+    };
+    const repoReport = parseReport(repoDoctor);
+    const runtimeReport = parseReport(runtime);
+    const failed = !repoDoctor.ok
+      || !runtime.ok
+      || repoReport?.status === "fail"
+      || runtimeReport?.status === "fail";
+    const attention = !failed && (
+      repoReport?.status === "attention"
+      || runtimeReport?.status === "attention"
+    );
+    const report = {
+      schemaVersion: "codex-chef.doctor-bundle.v1",
+      generatedAt: new Date().toISOString(),
+      status: failed ? "fail" : attention ? "attention" : "ok",
+      repoDoctor: {
+        ok: repoDoctor.ok,
+        exitCode: repoDoctor.status,
+        elapsedMs: repoDoctor.elapsedMs,
+        report: repoReport,
+        parseError: repoReport ? null : "Child command did not emit parseable JSON."
+      },
+      runtime: {
+        ok: runtime.ok,
+        exitCode: runtime.status,
+        elapsedMs: runtime.elapsedMs,
+        report: runtimeReport,
+        parseError: runtimeReport ? null : "Child command did not emit parseable JSON."
+      }
+    };
+    console.log(JSON.stringify(report, null, 2));
+    return {
+      ok: !failed,
+      status: failed ? 1 : 0,
+      logPath: runtime.logPath || repoDoctor.logPath,
+      output: JSON.stringify(report),
+      elapsedMs: repoDoctor.elapsedMs + runtime.elapsedMs
+    };
+  }
+
   const first = runNode("doctor", "scripts/codex-doctor.mjs", [
     "--redact-paths",
-    ...(options.json ? ["--json"] : [])
   ], {
     waitNote: "Running repo doctor checks."
   });
@@ -1389,7 +1600,7 @@ function runDoctor() {
     "--redact-paths",
     "--expect-skills",
     "--expect-git-guards",
-    ...(options.json ? ["--json"] : [])
+    "--require-live-runtime"
   ], {
     waitNote: "Verifying installed Codex Chef runtime; this can take 30-60 seconds."
   });
@@ -2141,30 +2352,132 @@ function listArchiveFiles(archivePath, includeHashes = false) {
   return { files, issues };
 }
 
-function mapBackupRelativeToTarget(relative) {
+function listCanonicalTreeFiles(sourceRoot) {
+  const files = [];
+  const pending = [sourceRoot];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const absolute = path.join(current, entry.name);
+      const stat = fs.lstatSync(absolute);
+      if (stat.isSymbolicLink()) {
+        throw new Error(`Canonical managed restore source contains a link: ${redactLocalPaths(absolute)}`);
+      }
+      if (stat.isDirectory()) pending.push(absolute);
+      else if (stat.isFile()) files.push(toPosix(path.relative(sourceRoot, absolute)));
+    }
+  }
+  return files.sort();
+}
+
+function managedRestoreAllowlist() {
+  const mappings = new Map();
+  const add = (archiveRelative, target) => {
+    mappings.set(archiveRelative.replaceAll("\\", "/"), target);
+  };
+  const addCodex = (relative) => {
+    add(relative, path.join(codexHome(), ...relative.split("/")));
+    add(`codex/${relative}`, path.join(codexHome(), ...relative.split("/")));
+  };
+
+  for (const relative of ["AGENTS.md", "config.toml", "rules/default.rules"]) addCodex(relative);
+  for (const file of fs.readdirSync(path.join(root, "templates", "codex", "agents"))) {
+    if (file.endsWith(".toml")) addCodex(`agents/${file}`);
+  }
+  for (const file of fs.readdirSync(path.join(root, "templates", "codex", "profiles"))) {
+    if (file.endsWith(".config.toml")) addCodex(file);
+  }
+
+  const pluginSource = path.join(root, "plugins", "codex-chef-workflows");
+  for (const file of listCanonicalTreeFiles(pluginSource)) {
+    addCodex(`plugins/codex-chef-workflows/${file}`);
+    add(
+      `agents/plugins/sources/codex-chef-workflows/${file}`,
+      path.join(agentsHome(), "plugins", "sources", "codex-chef-workflows", ...file.split("/"))
+    );
+  }
+
+  const directSkills = readJson("catalog/skills.json").skills.filter((skill) => skill.directInstall === true);
+  for (const skill of directSkills) {
+    const source = path.join(pluginSource, "skills", skill.name);
+    for (const file of [...listCanonicalTreeFiles(source), markerFileName]) {
+      const target = path.join(agentsHome(), "skills", skill.name, ...file.split("/"));
+      add(`agents/skills/${skill.name}/${file}`, target);
+      add(`${skill.name}/${file}`, target);
+    }
+  }
+
+  add("marketplace.json", path.join(agentsHome(), "plugins", "marketplace.json"));
+  add("agents/plugins/marketplace.json", path.join(agentsHome(), "plugins", "marketplace.json"));
+  return mappings;
+}
+
+function pinnedSkillIds() {
+  return new Set(
+    readJson("catalog/skills.json").skills
+      .filter((skill) => skill.install === true && skill.directInstall !== true)
+      .map((skill) => skill.name)
+  );
+}
+
+function mapBackupRelativeToTarget(relative, pinnedSkill = null) {
   const normalized = relative.replaceAll("\\", "/");
-  const ch = codexHome();
-  const ah = agentsHome();
-  if (normalized.startsWith("codex/")) {
-    return path.join(ch, ...normalized.slice("codex/".length).split("/"));
+  const exact = managedRestoreAllowlist().get(normalized);
+  if (exact) return exact;
+  if (!pinnedSkill || !pinnedSkillIds().has(pinnedSkill)) return null;
+  const prefix = `agents/skills/${pinnedSkill}/`;
+  if (!normalized.startsWith(prefix)) return null;
+  const skillRelative = normalized.slice(prefix.length);
+  if (!validateArchiveRelativePath(skillRelative)) return null;
+  const target = path.join(agentsHome(), "skills", pinnedSkill, ...skillRelative.split("/"));
+  return isInside(target, path.join(agentsHome(), "skills", pinnedSkill)) ? target : null;
+}
+
+function validateBackupManifest(manifest, files) {
+  const issues = [];
+  if (!manifest) return ["Backup manifest is required for restore."];
+  if (manifest.invalid) return [`Backup manifest is invalid JSON: ${manifest.error}`];
+  if (manifest.schemaVersion !== "codex-chef.backup.v1" || !Array.isArray(manifest.entries)) {
+    return ["Backup manifest must use codex-chef.backup.v1 with an entries array."];
   }
-  if (normalized.startsWith("agents/plugins/")) {
-    return path.join(ah, ...normalized.slice("agents/".length).split("/"));
+  if (Array.isArray(manifest.issues) && manifest.issues.length > 0) {
+    issues.push("Backup manifest records unresolved archive issues.");
   }
-  if (normalized === "marketplace.json") {
-    return path.join(ah, "plugins", "marketplace.json");
+
+  const manifestEntries = new Map();
+  for (const entry of manifest.entries) {
+    const relative = String(entry?.backupRelativePath || "").replaceAll("\\", "/");
+    if (
+      !validateArchiveRelativePath(relative)
+      || !Number.isInteger(entry?.size)
+      || entry.size < 0
+      || !/^[a-f0-9]{64}$/.test(entry?.sha256 || "")
+    ) {
+      issues.push(`Backup manifest has an invalid entry: ${relative || "<missing>"}`);
+      continue;
+    }
+    if (manifestEntries.has(relative)) {
+      issues.push(`Backup manifest repeats an entry: ${relative}`);
+      continue;
+    }
+    manifestEntries.set(relative, entry);
   }
-  if (
-    normalized === "AGENTS.md" ||
-    normalized === "config.toml" ||
-    normalized.startsWith("rules/") ||
-    normalized.startsWith("agents/") ||
-    normalized.startsWith("plugins/codex-chef-workflows/") ||
-    /^[A-Za-z0-9._-]+\.config\.toml$/.test(normalized)
-  ) {
-    return path.join(ch, ...normalized.split("/"));
+
+  const archiveEntries = new Set(files.map((file) => file.relative));
+  for (const file of files) {
+    const entry = manifestEntries.get(file.relative);
+    if (!entry) {
+      issues.push(`Backup file is not recorded in the manifest: ${file.relative}`);
+      continue;
+    }
+    if (entry.size !== file.size || entry.sha256 !== file.sha256) {
+      issues.push(`Backup file does not match its manifest hash or size: ${file.relative}`);
+    }
   }
-  return null;
+  for (const relative of manifestEntries.keys()) {
+    if (!archiveEntries.has(relative)) issues.push(`Backup manifest entry is missing from the archive: ${relative}`);
+  }
+  return issues;
 }
 
 function assertNoSymlinkParents(targetPath) {
@@ -2205,12 +2518,20 @@ function assertManagedRestoreTarget(targetPath) {
 
 function restoreBackupPlan(archivePath) {
   const { files, issues } = listArchiveFiles(archivePath, true);
+  const manifest = readBackupManifest(archivePath);
+  issues.push(...validateBackupManifest(manifest, files));
+  const pinnedSkill = manifest?.operation === "pinned-skill-replacement"
+    ? String(manifest.skill || "")
+    : null;
+  if (pinnedSkill && !pinnedSkillIds().has(pinnedSkill)) {
+    issues.push(`Backup manifest names an unknown pinned skill: ${pinnedSkill || "<missing>"}`);
+  }
   const unsupported = [];
   const planned = [];
   const seenTargets = new Set();
 
   for (const file of files) {
-    const target = mapBackupRelativeToTarget(file.relative);
+    const target = mapBackupRelativeToTarget(file.relative, pinnedSkill);
     if (!target) {
       unsupported.push(file.relative);
       continue;
@@ -2228,35 +2549,80 @@ function restoreBackupPlan(archivePath) {
     });
   }
 
-  return { files: planned, unsupported, issues };
+  const replaceRoot = pinnedSkill && pinnedSkillIds().has(pinnedSkill)
+    ? {
+      skill: pinnedSkill,
+      archiveRelativeRoot: `agents/skills/${pinnedSkill}`,
+      targetRoot: path.join(agentsHome(), "skills", pinnedSkill)
+    }
+    : null;
+  if (replaceRoot && files.some((file) => !file.relative.startsWith(`${replaceRoot.archiveRelativeRoot}/`))) {
+    issues.push(`Pinned skill backup contains files outside ${replaceRoot.archiveRelativeRoot}.`);
+  }
+  return {
+    files: planned,
+    unsupported,
+    issues,
+    manifestVerified: issues.length === 0,
+    replaceRoot
+  };
 }
 
 function createRollbackBackup(plan, restoredFrom = "") {
   const restoreId = `codex-chef-restore-${compactTimestamp()}-${process.pid}`;
   const rollbackPath = path.join(backupRootPath(), restoreId);
   const entries = [];
-  for (const item of plan.files) {
-    if (!fs.existsSync(item.target)) continue;
-    assertManagedRestoreTarget(item.target);
-    const targetStat = fs.lstatSync(item.target);
-    if (targetStat.isSymbolicLink()) {
-      throw new Error(`Refusing to back up symlink restore target: ${redactLocalPaths(item.target)}`);
+  if (plan.replaceRoot && fs.existsSync(plan.replaceRoot.targetRoot)) {
+    assertManagedRestoreTarget(plan.replaceRoot.targetRoot);
+    const targetStat = fs.lstatSync(plan.replaceRoot.targetRoot);
+    if (targetStat.isSymbolicLink() || !targetStat.isDirectory()) {
+      throw new Error(`Refusing to back up unsafe pinned skill target: ${redactLocalPaths(plan.replaceRoot.targetRoot)}`);
     }
-    const relative = isInside(item.target, codexHome())
-      ? path.join("codex", path.relative(codexHome(), item.target))
-      : path.join("agents", path.relative(agentsHome(), item.target));
-    const destination = path.join(rollbackPath, relative);
+    const destination = path.join(rollbackPath, plan.replaceRoot.archiveRelativeRoot);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.cpSync(item.target, destination, { recursive: true, force: true });
-    entries.push({
-      source: redactLocalPaths(item.target),
-      backupRelativePath: toPosix(relative),
-      size: targetStat.size
+    fs.cpSync(plan.replaceRoot.targetRoot, destination, {
+      recursive: true,
+      force: false,
+      errorOnExist: true,
+      dereference: false
     });
+    const scanned = listArchiveFiles(rollbackPath, true);
+    if (scanned.issues.length > 0) throw new Error(scanned.issues.join(" "));
+    for (const file of scanned.files) {
+      entries.push({
+        source: redactLocalPaths(path.join(plan.replaceRoot.targetRoot, path.relative(destination, file.path))),
+        backupRelativePath: file.relative,
+        size: file.size,
+        sha256: file.sha256
+      });
+    }
+  } else {
+    for (const item of plan.files) {
+      if (!fs.existsSync(item.target)) continue;
+      assertManagedRestoreTarget(item.target);
+      const targetStat = fs.lstatSync(item.target);
+      if (targetStat.isSymbolicLink() || !targetStat.isFile()) {
+        throw new Error(`Refusing to back up unsafe restore target: ${redactLocalPaths(item.target)}`);
+      }
+      const relative = isInside(item.target, codexHome())
+        ? path.join("codex", path.relative(codexHome(), item.target))
+        : path.join("agents", path.relative(agentsHome(), item.target));
+      const destination = path.join(rollbackPath, relative);
+      fs.mkdirSync(path.dirname(destination), { recursive: true });
+      fs.copyFileSync(item.target, destination);
+      const destinationStat = fs.statSync(destination);
+      entries.push({
+        source: redactLocalPaths(item.target),
+        backupRelativePath: toPosix(relative),
+        size: destinationStat.size,
+        sha256: hashFile(destination)
+      });
+    }
   }
   if (entries.length > 0) {
     writeBackupManifest(rollbackPath, {
-      operation: "restore-rollback",
+      operation: plan.replaceRoot ? "pinned-skill-replacement" : "restore-rollback",
+      ...(plan.replaceRoot ? { skill: plan.replaceRoot.skill } : {}),
       restoredFrom: path.basename(restoredFrom),
       entries
     });
@@ -2282,20 +2648,105 @@ function restoreBackupArchive(archivePath, plan) {
   if (plan.files.length === 0) {
     throw new Error("Selected backup archive has no restorable managed Codex Chef files.");
   }
+  const verified = [];
   for (const item of plan.files) {
     const sourceStat = fs.lstatSync(item.path);
     if (sourceStat.isSymbolicLink()) {
       throw new Error(`Refusing to restore symlink from backup archive: ${item.relative}`);
     }
     assertInside(safeRealpath(item.path), safeRealpath(archivePath), "restore source");
+    const data = fs.readFileSync(item.path);
+    const digest = crypto.createHash("sha256").update(data).digest("hex");
+    if (sourceStat.size !== item.size || data.length !== item.size || digest !== item.sha256) {
+      throw new Error(`Backup file changed after preview; refusing restore: ${item.relative}`);
+    }
     assertManagedRestoreTarget(item.target);
+    verified.push({ ...item, data });
   }
   const rollbackPath = createRollbackBackup(plan, archivePath);
-  for (const item of plan.files) {
-    fs.mkdirSync(path.dirname(item.target), { recursive: true });
-    fs.copyFileSync(item.path, item.target);
+  if (plan.replaceRoot) {
+    const targetRoot = plan.replaceRoot.targetRoot;
+    const displaced = path.join(
+      path.dirname(targetRoot),
+      `.codex-chef-restore-current-${plan.replaceRoot.skill}-${process.pid}-${Date.now()}`
+    );
+    assertManagedRestoreTarget(targetRoot);
+    assertManagedRestoreTarget(displaced);
+    let displacedCurrent = false;
+    try {
+      if (fs.existsSync(targetRoot)) {
+        const targetStat = fs.lstatSync(targetRoot);
+        if (targetStat.isSymbolicLink() || !targetStat.isDirectory()) {
+          throw new Error(`Refusing pinned skill restore over unsafe target: ${redactLocalPaths(targetRoot)}`);
+        }
+        fs.renameSync(targetRoot, displaced);
+        displacedCurrent = true;
+      }
+      fs.mkdirSync(targetRoot, { recursive: true });
+      let writeCount = 0;
+      for (const item of verified) {
+        fs.mkdirSync(path.dirname(item.target), { recursive: true });
+        fs.writeFileSync(item.target, item.data);
+        writeCount += 1;
+        if (
+          process.env.CODEX_CHEF_TEST_MODE === "1"
+          && Number(process.env.CODEX_CHEF_TEST_PINNED_RESTORE_FAIL_AFTER_WRITES) === writeCount
+        ) {
+          throw new Error("Injected pinned restore write failure.");
+        }
+      }
+      if (displacedCurrent) fs.rmSync(displaced, { recursive: true, force: false });
+    } catch (error) {
+      if (fs.existsSync(targetRoot)) fs.rmSync(targetRoot, { recursive: true, force: false });
+      if (displacedCurrent && fs.existsSync(displaced)) fs.renameSync(displaced, targetRoot);
+      throw error;
+    }
+    return { restored: verified.length, rollbackPath };
   }
-  return { restored: plan.files.length, rollbackPath };
+
+  const originals = verified.map((item) => ({
+    item,
+    existed: fs.existsSync(item.target),
+    rollbackRelative: isInside(item.target, codexHome())
+      ? path.join("codex", path.relative(codexHome(), item.target))
+      : path.join("agents", path.relative(agentsHome(), item.target))
+  }));
+  const touched = [];
+  try {
+    for (const original of originals) {
+      fs.mkdirSync(path.dirname(original.item.target), { recursive: true });
+      touched.push(original);
+      if (
+        process.env.CODEX_CHEF_TEST_MODE === "1"
+        && Number(process.env.CODEX_CHEF_TEST_RESTORE_FAIL_DURING_WRITE) === touched.length
+      ) {
+        fs.writeFileSync(original.item.target, Buffer.alloc(0));
+        throw new Error("Injected restore in-write failure.");
+      }
+      fs.writeFileSync(original.item.target, original.item.data);
+      if (
+        process.env.CODEX_CHEF_TEST_MODE === "1"
+        && Number(process.env.CODEX_CHEF_TEST_RESTORE_FAIL_AFTER_WRITES) === touched.length
+      ) {
+        throw new Error("Injected restore write failure.");
+      }
+    }
+  } catch (error) {
+    for (const original of [...touched].reverse()) {
+      if (original.existed && rollbackPath) {
+        const rollbackSource = path.join(rollbackPath, original.rollbackRelative);
+        fs.copyFileSync(rollbackSource, original.item.target);
+      } else if (fs.existsSync(original.item.target)) {
+        const targetStat = fs.lstatSync(original.item.target);
+        if (!targetStat.isFile() || targetStat.isSymbolicLink()) {
+          throw new Error(`Restore rollback found an unsafe target: ${redactLocalPaths(original.item.target)}`);
+        }
+        fs.rmSync(original.item.target, { force: false });
+      }
+    }
+    throw error;
+  }
+  return { restored: verified.length, rollbackPath };
 }
 
 function deleteBackupArchive(archivePath) {
@@ -2310,8 +2761,22 @@ function deleteBackupArchive(archivePath) {
 function summarizeBackupArchive(id, archivePath) {
   const stat = fs.statSync(archivePath);
   const manifest = readBackupManifest(archivePath);
-  const { files, issues } = listArchiveFiles(archivePath);
-  const restorableCount = files.filter((file) => mapBackupRelativeToTarget(file.relative)).length;
+  const { files } = listArchiveFiles(archivePath);
+  let plan;
+  try {
+    plan = restoreBackupPlan(archivePath);
+  } catch (error) {
+    plan = {
+      files: [],
+      unsupported: [],
+      issues: [error.message],
+      manifestVerified: false
+    };
+  }
+  const verifiedRestorable = plan.manifestVerified
+    && plan.unsupported.length === 0
+    && plan.files.length > 0;
+  const restorableCount = verifiedRestorable ? plan.files.length : 0;
   const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
   return {
     id,
@@ -2319,10 +2784,13 @@ function summarizeBackupArchive(id, archivePath) {
       ? "repair"
       : id.startsWith("codex-chef-restore-")
         ? "restore-rollback"
+        : id.startsWith("codex-chef-skill-")
+          ? "pinned-skill"
         : "install",
     path: archivePath,
     fileCount: files.length,
     restorableCount,
+    verifiedRestorable,
     totalBytes,
     modified: stat.mtime.toISOString(),
     manifest: manifest
@@ -2334,7 +2802,10 @@ function summarizeBackupArchive(id, archivePath) {
         invalid: manifest.invalid === true
       }
       : { present: false },
-    issues
+    issues: [
+      ...plan.issues,
+      ...plan.unsupported.map((relative) => `Unsupported backup entry: ${relative}`)
+    ]
   };
 }
 
@@ -2604,13 +3075,15 @@ async function runBackups(interaction = {}, requested = {}) {
       return { ok: false };
     }
     if (options.json) {
-      console.log(JSON.stringify({
+      const payload = {
         schemaVersion: 1,
         backup: path.basename(archivePath),
         backupPath: redactLocalPaths(archivePath),
         restore,
         delete: deleteBackup,
-        apply: options.apply,
+        applyRequested: options.apply,
+        applied: false,
+        outcome: "preview",
         restorableFiles: plan.files.map((file) => ({
           archiveFile: file.relative,
           target: redactLocalPaths(file.target),
@@ -2619,8 +3092,28 @@ async function runBackups(interaction = {}, requested = {}) {
           sha256: file.sha256
         })),
         unsupported: plan.unsupported,
-        issues: plan.issues
-      }, null, 2));
+        issues: plan.issues,
+        manifestVerified: plan.manifestVerified
+      };
+      if (restore && (plan.issues.length > 0 || plan.unsupported.length > 0)) {
+        payload.outcome = "blocked";
+        console.log(JSON.stringify(payload, null, 2));
+        return { ok: false };
+      }
+      if (deleteBackup && options.apply) {
+        deleteBackupArchive(archivePath);
+        payload.applied = true;
+        payload.outcome = "deleted";
+      } else if (restore && options.apply) {
+        const result = restoreBackupArchive(archivePath, plan);
+        payload.applied = true;
+        payload.outcome = "restored";
+        payload.restored = result.restored;
+        payload.rollbackPath = result.rollbackPath
+          ? redactLocalPaths(result.rollbackPath)
+          : null;
+      }
+      console.log(JSON.stringify(payload, null, 2));
       return { ok: true };
     }
 
@@ -2672,8 +3165,8 @@ async function runBackups(interaction = {}, requested = {}) {
       ICONS.info
     );
     printBackupInspect(archivePath, plan, interaction);
-    if (plan.issues.length > 0) {
-      console.error(`${ICONS.warn} ${localText("Restore blocked because the archive has unsafe entries.", "Arşiv güvenli olmayan girdiler içerdiği için geri yükleme engellendi.")}`);
+    if (plan.issues.length > 0 || plan.unsupported.length > 0) {
+      console.error(`${ICONS.warn} ${localText("Restore blocked because the archive is unverified or contains unsupported entries.", "Arşiv doğrulanmadığı veya desteklenmeyen girdiler içerdiği için geri yükleme engellendi.")}`);
       return { ok: false };
     }
     if (!writeFlowRequested(interaction)) {
@@ -2706,13 +3199,19 @@ async function runBackups(interaction = {}, requested = {}) {
     return { ok: true };
   } catch (error) {
     if (isUserInterrupt(error)) throw error;
-    console.error(`${ICONS.warn} ${error.message}`);
+    if (options.json) {
+      console.log(JSON.stringify({
+        schemaVersion: 1,
+        applyRequested: options.apply,
+        applied: false,
+        outcome: "failed",
+        error: redactSensitiveOutput(error.message)
+      }, null, 2));
+    } else {
+      console.error(`${ICONS.warn} ${error.message}`);
+    }
     return { ok: false };
   }
-}
-
-function npxCommand() {
-  return process.platform === "win32" ? "npx.cmd" : "npx";
 }
 
 async function askSelection(items, prompt, interaction = {}) {
@@ -2730,17 +3229,18 @@ async function installSelectedSkill(skill, interaction = {}) {
     interaction
   );
   if (!allowed) return { ok: false, skipped: true };
-  return runLoggedCommand("skill-install", npxCommand(), [
-    "skills",
-    "add",
+  const catalog = readJson("catalog/skills.json");
+  return runLoggedCommand("skill-install", process.execPath, [
+    path.join(root, "scripts", "install-pinned-skill.mjs"),
+    "--package",
     skill.package,
+    "--commit",
+    skill.commit,
     "--skill",
     skill.skill,
+    "--cli-version",
+    catalog.skillsCliVersion,
     ...(skill.fullDepth ? ["--full-depth"] : []),
-    "--agent",
-    "codex",
-    "--yes",
-    "--global"
   ], { timeout: 300000 });
 }
 
@@ -2781,7 +3281,8 @@ function inspectInstallState() {
   const skills = report.skills || {};
   const skillCatalog = readJson("catalog/skills.json");
   const curatedSkillState = inspectCuratedSkillStatus(
-    (skillCatalog.skills || []).filter((skill) => skill.install === true)
+    (skillCatalog.skills || []).filter((skill) => skill.install === true || skill.directInstall === true),
+    skillCatalog.skillsCliVersion
   );
   const current = Number(managed.current || 0);
   const expected = Number(managed.expected || 0);
@@ -2822,12 +3323,12 @@ function printInstallState(installation) {
   console.log("");
   console.log(styleHeading(localText("Installation state", "Kurulum durumu")));
   console.log(`${styleLabel(labels[installation.kind])}: ${localText(
-    `${installation.managed.current}/${installation.managed.expected} managed files current; ${installation.managed.planned} planned change(s); ${installation.skills.missing} curated skill(s) missing; ${installation.skills.invalid} invalid.`,
-    `${installation.managed.current}/${installation.managed.expected} yönetilen dosya güncel; ${installation.managed.planned} planlı değişiklik; ${installation.skills.missing} curated skill eksik; ${installation.skills.invalid} geçersiz.`
+    `${installation.managed.current}/${installation.managed.expected} managed files current; ${installation.managed.planned} planned change(s); ${installation.skills.missing} Chef-managed skill(s) missing; ${installation.skills.invalid} invalid.`,
+    `${installation.managed.current}/${installation.managed.expected} yönetilen dosya güncel; ${installation.managed.planned} planlı değişiklik; ${installation.skills.missing} Chef yönetimli skill eksik; ${installation.skills.invalid} geçersiz.`
   )}`);
 }
 
-function inspectCuratedSkillStatus(installable) {
+function inspectCuratedSkillStatus(managedSkills, skillsCliVersion = "") {
   const roots = [
     path.join(codexHome(), "skills"),
     path.join(agentsHome(), "skills")
@@ -2843,19 +3344,58 @@ function inspectCuratedSkillStatus(installable) {
   const readyNames = new Set();
   const invalidNames = new Set();
   const missingNames = new Set();
-  for (const skill of installable) {
-    const hasDirectory = roots.some((root) => fs.existsSync(path.join(root, skill.name)));
-    const hasSkillFile = roots.some((root) => fs.existsSync(path.join(root, skill.name, "SKILL.md")));
-    const state = hasSkillFile ? "ready" : hasDirectory ? "invalid" : "missing";
+  const reasons = new Map();
+  for (const skill of managedSkills) {
+    const matchingRoots = roots.filter((skillRoot) => fs.existsSync(path.join(skillRoot, skill.name)));
+    let state = "missing";
+    let reason = "missing";
+    if (matchingRoots.length > 1) {
+      state = "invalid";
+      reason = "duplicate-global-roots";
+    } else if (matchingRoots.length === 1) {
+      const target = path.join(matchingRoots[0], skill.name);
+      try {
+        const inspection = skill.directInstall === true
+          ? inspectDirectSkillTarget(
+              path.join(root, "plugins", "codex-chef-workflows", "skills", skill.name),
+              target
+            )
+          : inspectPinnedSkillTarget(target, {
+              package: skill.package,
+              commit: skill.commit,
+              skill: skill.skill,
+              cliVersion: skillsCliVersion
+            });
+        const valid = skill.directInstall === true
+          ? inspection.status === "managed"
+          : inspection.valid === true;
+        state = valid ? "ready" : "invalid";
+        reason = valid ? "verified" : inspection.reason || inspection.status || "invalid";
+      } catch (error) {
+        state = "invalid";
+        reason = error.message;
+      }
+    }
     states.set(skill.name, state);
+    reasons.set(skill.name, reason);
     if (state === "ready") readyNames.add(skill.name);
     else if (state === "invalid") invalidNames.add(skill.name);
     else missingNames.add(skill.name);
   }
-  const curatedNames = new Set(installable.map((skill) => skill.name));
+  const curatedNames = new Set(managedSkills.map((skill) => skill.name));
   const otherNames = [...discoveredNames].filter((name) => !curatedNames.has(name)).sort();
+  const summarize = (predicate) => {
+    const entries = managedSkills.filter(predicate);
+    return {
+      expected: entries.length,
+      ready: entries.filter((skill) => states.get(skill.name) === "ready").length,
+      invalid: entries.filter((skill) => states.get(skill.name) === "invalid").length,
+      missing: entries.filter((skill) => states.get(skill.name) === "missing").length
+    };
+  };
   return {
     states,
+    reasons,
     readyNames,
     invalidNames,
     missingNames,
@@ -2865,6 +3405,10 @@ function inspectCuratedSkillStatus(installable) {
     ready: readyNames.size,
     invalid: invalidNames.size,
     missing: missingNames.size,
+    expected: managedSkills.length,
+    upstream: summarize((skill) => skill.install === true),
+    bundled: summarize((skill) => skill.directInstall === true),
+    totalVisible: discoveredNames.size,
     roots
   };
 }
@@ -2877,7 +3421,7 @@ function skillStateText(state) {
 
 function printCuratedSkillStates(installable, installation) {
   console.log("");
-  console.log(styleHeading(localText("Curated skill status", "Curated skill durumu")));
+  console.log(styleHeading(localText("Codex Chef-managed skill status", "Codex Chef yönetimli skill durumu")));
   installable.forEach((skill, index) => {
     const state = installation.states.get(skill.name);
     const color = state === "ready" ? "brightGreen" : state === "invalid" ? "brightYellow" : "brightMagenta";
@@ -2925,54 +3469,99 @@ async function runSkills(interaction = {}) {
   const catalog = readJson("catalog/skills.json");
   const routing = readJson("catalog/routing-profiles.json");
   const installable = (catalog.skills || []).filter((skill) => skill.install === true);
+  const bundled = (catalog.skills || []).filter((skill) => skill.directInstall === true);
+  const managedSkills = [...installable, ...bundled];
   const profileCount = (routing.profiles || []).length;
-  const installation = inspectCuratedSkillStatus(installable);
+  const installation = inspectCuratedSkillStatus(managedSkills, catalog.skillsCliVersion);
+  if (options.json) {
+    console.log(JSON.stringify({
+      schemaVersion: "codex-chef.skills.v1",
+      generatedAt: new Date().toISOString(),
+      managed: {
+        expected: managedSkills.length,
+        ready: installation.ready,
+        missing: installation.missing,
+        invalid: installation.invalid,
+        upstream: installation.upstream,
+        bundled: installation.bundled
+      },
+      otherUserInstalled: installation.otherNames,
+      totalVisible: installation.totalVisible,
+      routingProfiles: profileCount,
+      skills: managedSkills.map((skill) => ({
+        name: skill.name,
+        sourceType: skill.directInstall === true ? "bundled-direct" : "commit-pinned-upstream",
+        state: installation.states.get(skill.name),
+        reason: installation.reasons.get(skill.name),
+        source: skill.source
+      }))
+    }, null, 2));
+    return { ok: installation.missing === 0 && installation.invalid === 0 };
+  }
   printSurfaceHeader(
     localText("Skill status & catalog", "Skill durumu ve katalog"),
-    localText(`${installable.length} curated installable skills with source checks and activation rules.`, `Kaynak kontrolü ve aktivasyon kuralları olan ${installable.length} curated skill.`),
+    localText(
+      `${managedSkills.length} Codex Chef-managed skills: ${installable.length} commit-pinned upstream and ${bundled.length} bundled/direct.`,
+      `${managedSkills.length} Codex Chef yönetimli skill: ${installable.length} commit-pinned upstream ve ${bundled.length} bundled/direct.`
+    ),
     ICONS.docs
   );
   console.log(styleHeading(localText("Installation status", "Kurulum durumu")));
-  console.log(`${ICONS.info} ${localText(
-    `${installation.ready} of ${installable.length} curated skills ready; ${installation.missing} missing; ${installation.invalid} invalid.`,
-    `${installable.length} curated skill'in ${installation.ready} tanesi hazır; ${installation.missing} tanesi eksik; ${installation.invalid} tanesi geçersiz.`
+  printWrapped(`${stripAnsi(ICONS.info)} ${localText(
+    `${installation.ready} of ${managedSkills.length} Chef-managed skills ready; ${installation.missing} missing; ${installation.invalid} invalid.`,
+    `${managedSkills.length} Chef yönetimli skill'in ${installation.ready} tanesi hazır; ${installation.missing} tanesi eksik; ${installation.invalid} tanesi geçersiz.`
   )}`);
-  console.log(`${ICONS.info} ${localText(
-    `${installation.otherNames.length} other/user-installed skill(s) are preserved.`,
-    `${installation.otherNames.length} diğer/kullanıcı kurulu skill korunuyor.`
+  printWrapped(`${stripAnsi(ICONS.info)} ${localText(
+    `Upstream: ${installation.upstream.ready}/${installation.upstream.expected} ready. Bundled/direct: ${installation.bundled.ready}/${installation.bundled.expected} ready.`,
+    `Upstream: ${installation.upstream.ready}/${installation.upstream.expected} hazır. Bundled/direct: ${installation.bundled.ready}/${installation.bundled.expected} hazır.`
   )}`);
-  console.log(styleMuted(localText(
+  printWrapped(`${stripAnsi(ICONS.info)} ${localText(
+    `${installation.otherNames.length} other/user-installed skill(s) are preserved; ${installation.totalVisible} total skills are visible across global roots.`,
+    `${installation.otherNames.length} diğer/kullanıcı kurulu skill korunuyor; global köklerde toplam ${installation.totalVisible} skill görünür.`
+  )}`);
+  printWrapped(localText(
     "Installed means ready for task-based activation; skills do not run continuously in the background.",
     "Kurulu, görevle eşleştiğinde kullanıma hazır demektir; skill'ler arka planda sürekli çalışmaz."
-  )));
+  ), { styler: styleMuted });
   if (!options.details) {
-    printCuratedSkillStates(installable, installation);
-    const counts = groupByCategory(installable)
+    printCuratedSkillStates(managedSkills, installation);
+    const counts = groupByCategory(managedSkills)
       .map(({ category, entries }) => `${category}: ${entries.length}`)
       .join(" | ");
-    console.log(counts);
-    console.log(`${ICONS.info} ${localText("Skills activate only when named or clearly matched to the task.", "Skill'ler yalnız adı söylendiğinde veya görevle açıkça eşleştiğinde etkinleşir.")}`);
-    console.log(`${ICONS.info} ${localText(`${profileCount} routing profiles are available. Use --details for the full catalog.`, `${profileCount} routing profili var. Tam katalog için --details kullanın.`)}`);
+    printWrapped(counts);
+    printWrapped(`${stripAnsi(ICONS.info)} ${localText("Skills activate only when named or clearly matched to the task.", "Skill'ler yalnız adı söylendiğinde veya görevle açıkça eşleştiğinde etkinleşir.")}`);
+    printWrapped(`${stripAnsi(ICONS.info)} ${localText(`${profileCount} routing profiles are available. Use --details for the full catalog.`, `${profileCount} routing profili var. Tam katalog için --details kullanın.`)}`);
     const verification = runNode("skills", "scripts/verify-skill-sources.mjs", [], { quiet: true });
     if (!verification.ok || (!process.stdin.isTTY && !interaction.question)) return verification;
     if (installation.missing === 0 && installation.invalid === 0) {
       console.log(`${ICONS.ok} ${localText(
-        "All curated skills are installed and ready.",
-        "Tüm curated skill'ler kurulu ve hazır."
+        "All Codex Chef-managed skills are installed and ready.",
+        "Tüm Codex Chef yönetimli skill'ler kurulu ve hazır."
       )}`);
       return { ok: true };
     }
     const actionable = installable.filter((skill) => installation.states.get(skill.name) !== "ready");
+    if (actionable.length === 0) {
+      console.log(`${ICONS.warn} ${localText(
+        "Bundled/direct skill repair is required; run npm run chef -- --repair --apply.",
+        "Bundled/direct skill onarımı gerekiyor; npm run chef -- --repair --apply çalıştırın."
+      )}`);
+      return { ok: false };
+    }
     return selectSkill(actionable, installation, interaction);
   }
   printRows(
-    groupByCategory(installable).map(({ category, entries }) => ({
+    groupByCategory(managedSkills).map(({ category, entries }) => ({
       category,
       count: entries.length,
       examples: summarizeNames(entries),
       auth: entries.some((skill) => skill.authRequired) ? "yes" : "no",
-      risk: entries.some((skill) => skill.risk === "high") ? "high" : "medium",
-      checked: entries.map((skill) => skill.lastChecked).sort().at(-1)
+      risk: entries.some((skill) => skill.risk === "high")
+        ? "high"
+        : entries.every((skill) => skill.directInstall === true)
+          ? "bundled-local"
+          : "medium",
+      checked: entries.map((skill) => skill.lastChecked).filter(Boolean).sort().at(-1) || "bundled"
     })),
     isTr()
       ? [
@@ -2993,9 +3582,12 @@ async function runSkills(interaction = {}) {
         ]
   );
   printRows(
-    installable.map((skill) => ({
+    managedSkills.map((skill) => ({
       skill: skill.name,
       category: skill.category,
+      source: skill.directInstall === true
+        ? localText("Bundled/direct", "Bundled/direct")
+        : localText("Commit-pinned upstream", "Commit-pinned upstream"),
       status: skillStateText(installation.states.get(skill.name)),
       activation: localText("Task matched", "Görev eşleşince")
     })),
@@ -3003,33 +3595,60 @@ async function runSkills(interaction = {}) {
       ? [
           { key: "skill", label: "Skill" },
           { key: "category", label: "Akış" },
+          { key: "source", label: "Kaynak tipi" },
           { key: "status", label: "Durum" },
           { key: "activation", label: "Aktivasyon" }
         ]
       : [
           { key: "skill", label: "Skill" },
           { key: "category", label: "Workflow" },
+          { key: "source", label: "Source type" },
           { key: "status", label: "Status" },
           { key: "activation", label: "Activation" }
         ]
   );
   console.log("");
   console.log(styleHeading(localText("How skill activation works", "Skill aktivasyonu nasıl çalışır")));
-  console.log(`- ${localText("Installed skills do not run by themselves or grant hidden permissions.", "Kurulu skill'ler kendiliğinden çalışmaz ve gizli yetki vermez.")}`);
-  console.log(`- ${localText("A skill enters context when the user names it, for example $SkillName, or when the task clearly matches its description.", "Skill, kullanıcı adını söylediğinde veya görev açıkça açıklamasına uyduğunda context'e girer.")}`);
-  console.log(`- ${localText("Codex reads the selected skill's SKILL.md before acting, then loads only referenced files needed for the task.", "Codex harekete geçmeden önce seçilen skill'in SKILL.md dosyasını okur, sonra yalnız görev için gereken referansları yükler.")}`);
-  console.log(`- ${localText(`${profileCount} routing profiles map task shapes to recommended skills; inspect them with npm run chef -- --routing.`, `${profileCount} routing profile'i görev tiplerini önerilen skill'lere bağlar; npm run chef -- --routing ile inceleyin.`)}`);
-  console.log(`${ICONS.info} ${localText("Offline verification runs by default. Online resolution: npm run verify:skills:online -- --timeout-ms=90000", "Varsayılan doğrulama offline çalışır. Online çözümleme: npm run verify:skills:online -- --timeout-ms=90000")}`);
-  const verification = runNode("skills", "scripts/verify-skill-sources.mjs");
+  printWrapped(localText(
+    "Installed skills do not run by themselves or grant hidden permissions.",
+    "Kurulu skill'ler kendiliğinden çalışmaz ve gizli yetki vermez."
+  ), { indent: "- " });
+  printWrapped(localText(
+    "A skill enters context when the user names it, for example $SkillName, or when the task clearly matches its description.",
+    "Skill, kullanıcı adını söylediğinde veya görev açıkça açıklamasına uyduğunda context'e girer."
+  ), { indent: "- " });
+  printWrapped(localText(
+    "Codex reads the selected skill's SKILL.md before acting, then loads only referenced files needed for the task.",
+    "Codex harekete geçmeden önce seçilen skill'in SKILL.md dosyasını okur, sonra yalnız görev için gereken referansları yükler."
+  ), { indent: "- " });
+  printWrapped(localText(
+    `${profileCount} routing profiles map task shapes to recommended skills; inspect them with npm run chef -- --routing.`,
+    `${profileCount} routing profile'i görev tiplerini önerilen skill'lere bağlar; npm run chef -- --routing ile inceleyin.`
+  ), { indent: "- " });
+  printWrapped(localText(
+    "Offline verification runs by default. Online resolution: npm run verify:skills:online -- --timeout-ms=90000",
+    "Varsayılan doğrulama offline çalışır. Online çözümleme: npm run verify:skills:online -- --timeout-ms=90000"
+  ), { indent: `${ICONS.info} ` });
+  const verification = runNode("skills", "scripts/verify-skill-sources.mjs", [], { captureOnly: true });
+  for (const line of String(verification.output || "").split(/\r?\n/).filter((entry) => entry.trim())) {
+    printWrapped(line);
+  }
   if (!verification.ok || (!process.stdin.isTTY && !interaction.question)) return verification;
   if (installation.missing === 0 && installation.invalid === 0) {
     console.log(`${ICONS.ok} ${localText(
-      "All curated skills are installed and ready.",
-      "Tüm curated skill'ler kurulu ve hazır."
+      "All Codex Chef-managed skills are installed and ready.",
+      "Tüm Codex Chef yönetimli skill'ler kurulu ve hazır."
     )}`);
     return { ok: true };
   }
   const actionable = installable.filter((skill) => installation.states.get(skill.name) !== "ready");
+  if (actionable.length === 0) {
+    console.log(`${ICONS.warn} ${localText(
+      "Bundled/direct skill repair is required; run npm run chef -- --repair --apply.",
+      "Bundled/direct skill onarımı gerekiyor; npm run chef -- --repair --apply çalıştırın."
+    )}`);
+    return { ok: false };
+  }
   return selectSkill(actionable, installation, interaction);
 }
 
@@ -3163,6 +3782,177 @@ function printMcpInstallationSummary(installation) {
     "Live status was not probed; these states come from the installed config only.",
     "Canlı durum ölçülmedi; bu durumlar yalnız kurulu config dosyasından okunur."
   )));
+}
+
+function inspectGlobalSkill(name) {
+  const matches = [
+    path.join(codexHome(), "skills", name),
+    path.join(agentsHome(), "skills", name)
+  ].filter((target) => fs.existsSync(target));
+  if (matches.length === 0) return { ready: false, state: "missing" };
+  if (matches.length > 1) return { ready: false, state: "duplicate-global-roots" };
+  try {
+    const state = inspectSkillTree(matches[0], name);
+    return {
+      ready: state.valid === true,
+      state: state.valid ? "ready" : state.reason,
+      path: redactLocalPaths(matches[0])
+    };
+  } catch (error) {
+    return {
+      ready: false,
+      state: sanitizeCliError(error, { root }),
+      path: redactLocalPaths(matches[0])
+    };
+  }
+}
+
+function inspectBrainContinuity() {
+  const source = path.join(root, "plugins", "codex-chef-workflows", "skills", "codex-chef-brain");
+  const target = path.join(agentsHome(), "skills", "codex-chef-brain");
+  let skill = { ready: false, state: "missing" };
+  try {
+    const state = inspectDirectSkillTarget(source, target);
+    skill = {
+      ready: state.status === "managed",
+      state: state.status === "managed"
+        ? "ready"
+        : sanitizeCliError(state.reason || state.status, { root })
+    };
+  } catch (error) {
+    skill = { ready: false, state: sanitizeCliError(error, { root }) };
+  }
+
+  const configuredTarget = String(process.env.CODEX_CHEF_BRAIN_HOME || "").trim();
+  const vault = {
+    configured: Boolean(configuredTarget),
+    exists: configuredTarget ? fs.existsSync(configuredTarget) : false,
+    target: configuredTarget ? redactLocalPaths(path.resolve(configuredTarget)) : null,
+    status: configuredTarget ? "not-checked" : "not-configured"
+  };
+  if (configuredTarget) {
+    const result = spawnSync(process.execPath, [
+      path.join(root, "scripts", "brain-cli.mjs"),
+      "status",
+      "--target",
+      configuredTarget,
+      "--json"
+    ], {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: 30000,
+      windowsHide: true
+    });
+    if (!result.error && String(result.stdout || "").trim()) {
+      try {
+        const report = JSON.parse(result.stdout);
+        vault.status = report.ok === true ? "ok" : "attention";
+        vault.contentOk = report.contentStatus?.ok ?? null;
+        vault.securityOk = report.securityStatus?.ok ?? null;
+        if (result.status !== 0) {
+          vault.error = Array.isArray(report.errors) && report.errors.length > 0
+            ? report.errors.map((message) => sanitizeCliError(message, { root })).join("; ")
+            : `exit ${result.status}`;
+        }
+      } catch (error) {
+        vault.status = "invalid-status-output";
+        vault.error = sanitizeCliError(error, { root });
+      }
+    } else {
+      vault.status = "attention";
+      vault.error = sanitizeCliError(
+        result.error?.message || result.stderr?.trim() || result.stdout?.trim() || `exit ${result.status}`,
+        { root }
+      );
+    }
+  }
+  return { skill, vault };
+}
+
+function runContinuity() {
+  const { configured } = parseInstalledMcpConfig();
+  const controlConfig = configured.get("codex_control");
+  const control = {
+    router: inspectGlobalSkill("codex-control-router"),
+    configured: Boolean(controlConfig),
+    enabled: controlConfig?.enabled ?? false,
+    liveStatus: "session-MCP-only",
+    liveProbe: {
+      cliSubprocessCanProbe: false,
+      availableFrom: "current-codex-session-mcp",
+      explanation: "This CLI verifies installed configuration only; live project health must be queried through the current Codex session's Control MCP."
+    }
+  };
+  const brain = inspectBrainContinuity();
+  brain.vault.scope = "local CODEX_CHEF_BRAIN_HOME only; separate from Control project Brain mappings";
+  const payload = {
+    schemaVersion: "codex-chef.continuity.v1",
+    control,
+    brain,
+    boundaries: {
+      immediateWork: "current-session",
+      controlActivation: "explicit delayed, background, recurring, restart-resilient, monitored, or Control-managed request",
+      controlProposalIsExecutionAuthority: false,
+      brainAutomaticCapture: false,
+      brainWritesRequirePreviewAndExplicitApply: true,
+      controlBrainBridge: "bounded read-only context only when explicitly requested and project-mapped",
+      controlProjectBrainMappingIsSeparateFromLocalVault: true
+    }
+  };
+
+  if (options.json) {
+    console.log(JSON.stringify(payload, null, 2));
+    return { ok: true };
+  }
+
+  printSurfaceHeader(
+    localText("Control & Brain continuity", "Control ve Brain sürekliliği"),
+    localText(
+      "Read-only visibility for background routing and durable project knowledge. Neither surface runs automatically.",
+      "Arka plan yönlendirmesi ve kalıcı proje bilgisi için yazmasız görünürlük. İki yüzey de kendiliğinden çalışmaz."
+    ),
+    ICONS.docs
+  );
+  console.log(styleHeading("Codex Chef Control"));
+  printWrapped(`${localText("Router skill", "Router skill")}: ${control.router.ready ? localText("ready", "hazır") : localText(`attention (${control.router.state})`, `dikkat (${control.router.state})`)}`);
+  printWrapped(`codex_control MCP: ${control.configured ? (control.enabled ? localText("configured and enabled", "yapılandırılmış ve açık") : localText("configured but disabled", "yapılandırılmış ama kapalı")) : localText("not configured", "yapılandırılmamış")}`);
+  printWrapped(localText(
+    "This CLI verifies installed Control configuration only. Live project health is queried by the current Codex session through the Control MCP.",
+    "Bu CLI yalnızca kurulu Control yapılandırmasını doğrular. Canlı proje sağlığı, mevcut Codex oturumundan Control MCP ile sorgulanır."
+  ), { indent: "- " });
+  printWrapped(localText(
+    "Immediate work stays in the current session. Control activates only for an explicit delayed, background, recurring, restart-resilient, monitored, or Control-managed request.",
+    "Anlık işler mevcut oturumda kalır. Control yalnız açıkça gecikmeli, arka plan, tekrarlı, yeniden başlatmaya dayanıklı, izlenen veya Control yönetimli isteklerde etkinleşir."
+  ), { indent: "- " });
+  printWrapped(localText(
+    "A prepared Control proposal is not execution approval; the Control console remains the authority.",
+    "Hazırlanmış Control önerisi çalıştırma onayı değildir; yetki Control konsolunda kalır."
+  ), { indent: "- " });
+
+  console.log("");
+  console.log(styleHeading("Codex Chef Brain"));
+  printWrapped(`${localText("Brain skill", "Brain skill")}: ${brain.skill.ready ? localText("ready", "hazır") : localText(`attention (${brain.skill.state})`, `dikkat (${brain.skill.state})`)}`);
+  printWrapped(`${localText("Vault target", "Vault hedefi")}: ${brain.vault.configured ? `${brain.vault.status} (${brain.vault.target})` : localText("not configured; set CODEX_CHEF_BRAIN_HOME or pass --target explicitly", "yapılandırılmamış; CODEX_CHEF_BRAIN_HOME ayarlayın veya açıkça --target verin")}`);
+  printWrapped(localText(
+    "The local CODEX_CHEF_BRAIN_HOME vault is separate from any Brain mapping owned by a Control project.",
+    "Yerel CODEX_CHEF_BRAIN_HOME vault'u, Control projesinin yönettiği Brain eşlemesinden ayrıdır."
+  ), { indent: "- " });
+  printWrapped(localText(
+    "Automatic chat capture and automatic Brain writes are disabled by design. Capture, backup, and restore are preview-first and require explicit apply.",
+    "Otomatik sohbet kaydı ve otomatik Brain yazması tasarım gereği kapalıdır. Capture, backup ve restore önce ön izleme yapar ve açık apply ister."
+  ), { indent: "- " });
+  printWrapped(localText(
+    "Control may read only a bounded project-mapped Brain context when the user explicitly requests it; Control never writes to Brain.",
+    "Control yalnız kullanıcı açıkça istediğinde proje eşlemeli sınırlı Brain bağlamını okuyabilir; Brain'e asla yazmaz."
+  ), { indent: "- " });
+
+  console.log("");
+  console.log(styleHeading(localText("Safe next checks", "Güvenli sonraki kontroller")));
+  printWrapped("codex-control console", { indent: "- " });
+  printWrapped("npm run brain -- status --target <vault> --json", { indent: "- " });
+  printWrapped("npm run test:brain", { indent: "- " });
+  return { ok: true };
 }
 
 async function runMcp(interaction = {}) {
@@ -3491,7 +4281,7 @@ function translateSetupHint(message) {
     .replace("Requires Notion workspace authorization.", "Notion workspace yetkilendirmesi gerekir.")
     .replace("Requires Sentry organization authorization and may expose production error data.", "Sentry organization yetkilendirmesi gerekir ve production hata verisini açığa çıkarabilir.")
     .replace("Requires Vercel account/team authorization and may expose project or deployment data.", "Vercel hesap/team yetkilendirmesi gerekir ve proje veya deployment verisini açığa çıkarabilir.")
-    .replace("Set SUPABASE_DB_URL in the shell environment, then add a task-specific local launcher only after explicit database approval; never commit the value.", "Shell ortamında SUPABASE_DB_URL ayarlayın; task-specific lokal launcher'ı yalnızca açık database onayından sonra ekleyin ve değeri asla commit etmeyin.");
+    .replace("Before enabling, add a task-specific project_ref query parameter, keep read_only=true, retain only the required feature groups, and complete Supabase OAuth.", "Etkinleştirmeden önce göreve özel project_ref query parametresini ekleyin, read_only=true ayarını koruyun, yalnız gerekli feature group'larını bırakın ve Supabase OAuth akışını tamamlayın.");
 }
 
 function scanRecentCliLogSignals(logs) {
@@ -3953,6 +4743,8 @@ async function runAction(action, interaction = {}) {
       return runMcp(interaction);
     case "routing":
       return runRouting();
+    case "continuity":
+      return runContinuity();
     case "diagnostics":
       return runDiagnostics();
     case "processes":

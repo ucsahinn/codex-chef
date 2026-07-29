@@ -4,6 +4,16 @@ These settings shape the project’s public first impression. Apply them manuall
 
 Current published baseline: **v0.5.57**.
 
+Live read-back after the approved account writes on 2026-07-29: secret scanning,
+push protection, vulnerability alerts, Dependabot security updates, and private
+vulnerability reporting are enabled; Wiki is disabled; the topic set matches
+the list below; and `main` requires the four validation checks while blocking
+force-pushes and deletion. Repository administrators remain exempt so approved
+maintainer pushes are possible. A custom social preview is the only pending
+target: GitHub exposes upload through an authenticated web session, while the
+available isolated browser session is anonymous and the public GraphQL field
+still returns GitHub's generated image.
+
 ## Description
 
 ```text
@@ -34,11 +44,16 @@ setup
 
 Leave the website blank unless a stable public project page exists. Never use a local path, temporary preview URL, or private workspace link.
 
-Use `assets/social-preview.png` for GitHub’s social preview. Keep `assets/social-preview.svg` as the editable source.
+Use `assets/social-preview.png` for GitHub’s social preview. Keep
+`assets/social-preview.svg` as the editable source. The PNG is prepared and
+validated locally but is not yet uploaded to the account-level setting.
 
 ## Repository Features
 
-- Issues: enabled.
+- Issues: keep enabled.
+- Vulnerability alerts and Dependabot security updates: enabled.
+- Private vulnerability reporting: enabled; this makes the route documented in
+  `SECURITY.md` directly available.
 - Discussions: enable only if maintainers plan to answer community questions.
 - Wiki: disabled while the versioned docs in this repository remain canonical.
 - Projects: optional.
@@ -47,7 +62,11 @@ Use `assets/social-preview.png` for GitHub’s social preview. Keep `assets/soci
 ## Branch And Actions
 
 - Default branch: `main`.
-- Require the validation workflow to pass before release claims.
+- `main` protection requires `validate`, `windows-installer`,
+  `portability (ubuntu-latest, Node 18)`, and
+  `portability (macos-latest, Node 24)` with strict branch freshness.
+- Force-pushes and branch deletion are disabled; repository administrators are
+  not enforced so an explicitly approved maintainer push remains possible.
 - Keep workflow permissions read-only and action references pinned to full commit SHAs.
 - Keep release publication manual; validation workflows must not push, tag, or publish.
 

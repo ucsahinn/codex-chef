@@ -4,6 +4,13 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import {
+  hashSkillTree,
+  pinnedSkillProvenanceFileName,
+  pinnedSkillSchemaVersion
+} from "./lib/skill-provenance.mjs";
+import { activatePinnedSkill } from "./lib/pinned-skill-activation.mjs";
+import { writeDirectSkillMarker } from "./manage-direct-skill-target.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
@@ -68,6 +75,16 @@ function runCliSmoke(name, cliArgs, expectedSnippets, extra = {}) {
     const lineCount = output.split(/\r?\n/).filter((line) => line.trim()).length;
     if (lineCount > extra.maxLines) fail(`chef-cli smoke ${name} should be <= ${extra.maxLines} non-empty lines, got ${lineCount}`);
   }
+  if (extra.maxVisualWidth) {
+    const ansiPattern = /\x1b\[[0-9;]*m/g;
+    for (const [index, line] of output.split(/\r?\n/).entries()) {
+      const width = line.replace(ansiPattern, "").length;
+      if (width > extra.maxVisualWidth) {
+        fail(`chef-cli smoke ${name} line ${index + 1} exceeds ${extra.maxVisualWidth} columns (${width})`);
+        break;
+      }
+    }
+  }
   if (output.includes("Log: tmp/chef-cli/logs")) {
     fail(`chef-cli smoke ${name} should not create logs when --no-log is used`);
   }
@@ -111,15 +128,43 @@ function countOccurrences(value, needle) {
 }
 
 function createCuratedSkillFixture(rootPath, { invalid = [] } = {}) {
-  const skills = JSON.parse(read("catalog/skills.json")).skills
-    .filter((skill) => skill.install === true);
-  const skillsRoot = path.join(rootPath, ".codex", "skills");
-  for (const skill of skills) {
-    const skillRoot = path.join(skillsRoot, skill.name);
+  const catalog = JSON.parse(read("catalog/skills.json"));
+  const installable = catalog.skills.filter((skill) => skill.install === true);
+  const bundled = catalog.skills.filter((skill) => skill.directInstall === true);
+  const upstreamRoot = path.join(rootPath, ".codex", "skills");
+  for (const skill of installable) {
+    const skillRoot = path.join(upstreamRoot, skill.name);
     fs.mkdirSync(skillRoot, { recursive: true });
     if (!invalid.includes(skill.name)) {
-      fs.writeFileSync(path.join(skillRoot, "SKILL.md"), `# ${skill.name}\n`, "utf8");
+      fs.writeFileSync(
+        path.join(skillRoot, "SKILL.md"),
+        `---\nname: ${skill.name}\ndescription: Test fixture for ${skill.name}.\n---\n`,
+        "utf8"
+      );
+      fs.writeFileSync(
+        path.join(skillRoot, pinnedSkillProvenanceFileName),
+        `${JSON.stringify({
+          schemaVersion: pinnedSkillSchemaVersion,
+          package: skill.package,
+          commit: skill.commit,
+          skill: skill.skill,
+          cliVersion: catalog.skillsCliVersion,
+          sourceTreeSha256: hashSkillTree(skillRoot)
+        }, null, 2)}\n`,
+        "utf8"
+      );
     }
+  }
+  const directRoot = path.join(rootPath, ".agents", "skills");
+  for (const skill of bundled) {
+    const source = path.join(root, "plugins", "codex-chef-workflows", "skills", skill.name);
+    const target = path.join(directRoot, skill.name);
+    if (invalid.includes(skill.name)) {
+      fs.mkdirSync(target, { recursive: true });
+      continue;
+    }
+    fs.cpSync(source, target, { recursive: true });
+    writeDirectSkillMarker(source, target);
   }
   return {
     CODEX_HOME: path.join(rootPath, ".codex"),
@@ -131,7 +176,8 @@ function runMenuTranscriptSmoke() {
   const baseEnv = {
     CODEX_CHEF_TEST_MENU: "1",
     FORCE_COLOR: "0",
-    NO_COLOR: "1"
+    NO_COLOR: "1",
+    COLUMNS: "72"
   };
   const invalid = runCliSmokeRaw("menu-invalid-input-transcript", ["--plain", "--no-log"], {
     env: baseEnv,
@@ -149,6 +195,9 @@ function runMenuTranscriptSmoke() {
     if (!invalid.output.includes("System status")) fail("chef-cli menu transcript must use natural-language action labels");
     if (!invalid.output.includes("Impact")) fail("chef-cli menu transcript must use natural-language impact wording instead of raw write jargon");
     if (!invalid.output.includes("Shortcuts: l = language, q = quit")) fail("chef-cli menu transcript must show language and quit shortcuts");
+    for (const line of invalid.output.split(/\r?\n/).filter((entry) => entry.includes("Shortcuts:"))) {
+      if (line.length > 72) fail(`chef-cli menu shortcut line must fit 72 columns, got ${line.length}`);
+    }
     if (countOccurrences(invalid.output, "Operator menu") !== 1) {
       fail("chef-cli menu transcript must not repaint the full menu for empty or invalid input");
     }
@@ -246,7 +295,7 @@ function runMenuTranscriptSmoke() {
     for (const snippet of [
       "Opening: Skill status & catalog",
       "Installed (ready)",
-      "All curated skills are installed and ready.",
+      "All Codex Chef-managed skills are installed and ready.",
       "Press Enter to return to the operator board."
     ]) {
       if (!skillSelection.output.includes(snippet)) {
@@ -285,6 +334,13 @@ function runMenuTranscriptSmoke() {
   const backupMenuArchive = path.join(backupMenuCodexHome, "backups", "codex-chef-menu-test", "codex");
   fs.mkdirSync(backupMenuArchive, { recursive: true });
   fs.writeFileSync(path.join(backupMenuArchive, "AGENTS.md"), "menu backup fixture\n", "utf8");
+  spawnSync(process.execPath, [
+    path.join(root, "scripts", "write-backup-manifest.mjs"),
+    "--backup-root",
+    path.dirname(backupMenuArchive),
+    "--operation",
+    "menu-fixture"
+  ], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
   const backupInspect = runCliSmokeRaw("menu-backup-inspect-transcript", ["--plain", "--no-log"], {
     env: {
       ...baseEnv,
@@ -390,7 +446,7 @@ function runMenuTranscriptSmoke() {
 
 function runCommandCenterSmoke() {
   const result = runCliSmokeRaw("command-center-v2", ["--plain", "--no-log"], {
-    input: "1\n1\nb\n2\n1\n2\n3\n4\n5\nb\n3\n1\n2\n3\nb\n4\n1\n2\n3\n4\nb\n5\n1\n2\nb\n6\n1\n2\nb\nq\n",
+    input: "1\n1\nb\n2\n1\n2\n3\n4\n5\nb\n3\n1\n2\n3\n4\nb\n4\n1\n2\n3\n4\nb\n5\n1\n2\nb\n6\n1\n2\nb\nq\n",
     env: {
       CODEX_CHEF_TEST_MENU: "1",
       CODEX_CHEF_TEST_MENU_V2: "1",
@@ -435,6 +491,7 @@ function runCommandCenterSmoke() {
     "skills",
     "mcp",
     "routing",
+    "continuity",
     "backups",
     "diagnostics",
     "processes",
@@ -467,7 +524,7 @@ function runCommandCenterSmoke() {
     timeout: 30000
   });
   if (readySkills.ok) {
-    if (!readySkills.output.includes("All curated skills are installed and ready.")) {
+    if (!readySkills.output.includes("All Codex Chef-managed skills are installed and ready.")) {
       fail("chef-cli command center must show an all-ready skill state without an install chooser.");
     }
     if (readySkills.output.includes("Choose a skill to install")) {
@@ -524,6 +581,41 @@ function runCliJsonSmoke(name, cliArgs) {
   }
 }
 
+function runCliJsonEnvelopeSmoke(name, cliArgs, expectedSchema) {
+  const result = spawnSync(process.execPath, [path.join(root, "scripts/chef-cli.mjs"), ...cliArgs], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true,
+    timeout: 240000
+  });
+  if (result.error) {
+    fail(`chef-cli JSON envelope smoke ${name} failed: ${result.error.message}`);
+    return;
+  }
+  const stdout = String(result.stdout || "").trim();
+  let parsed;
+  try {
+    parsed = JSON.parse(stdout);
+  } catch (error) {
+    fail(`chef-cli JSON envelope smoke ${name} did not emit one parseable JSON document: ${error.message}`);
+    return;
+  }
+  if (parsed.schemaVersion !== expectedSchema) {
+    fail(`chef-cli JSON envelope smoke ${name} schema drifted: ${parsed.schemaVersion}`);
+  }
+  if (!["ok", "attention", "fail"].includes(parsed.status)) {
+    fail(`chef-cli JSON envelope smoke ${name} status must be ok, attention, or fail.`);
+  }
+  if (result.status !== 0 && parsed.status !== "fail") {
+    fail(`chef-cli JSON envelope smoke ${name} exited non-zero without fail status.`);
+  }
+  const stderr = String(result.stderr || "");
+  if (/(?:^|\n)\s*at\s+file:|(?:^|\n)Error:\s|node:internal/i.test(stderr)) {
+    fail(`chef-cli JSON envelope smoke ${name} must not print a Node stack trace.`);
+  }
+}
+
 function runNpmSilentJsonSmoke(name, npmArgs, expectedPath = []) {
   const command = process.platform === "win32" ? "cmd.exe" : "npm";
   const args = process.platform === "win32"
@@ -574,6 +666,21 @@ function runBackupsFixtureSmokes() {
   fs.writeFileSync(path.join(backupRoot, "config.toml"), "sandbox_mode = \"workspace-write\"\n", "utf8");
   fs.writeFileSync(path.join(backupRoot, "rules", "default.rules"), "allow [\"rg\"]\n", "utf8");
   fs.writeFileSync(path.join(backupRoot, "marketplace.json"), "{\"name\":\"codex-chef\"}\n", "utf8");
+  const manifestResult = spawnSync(process.execPath, [
+    path.join(root, "scripts", "write-backup-manifest.mjs"),
+    "--backup-root",
+    backupRoot,
+    "--operation",
+    "cli-test-fixture"
+  ], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true
+  });
+  if (manifestResult.status !== 0) {
+    fail(`chef-cli backup fixture manifest failed: ${manifestResult.stderr || manifestResult.stdout}`);
+  }
 
   fs.mkdirSync(path.join(codexHome, "rules"), { recursive: true });
   fs.mkdirSync(path.join(agentsHome, "plugins"), { recursive: true });
@@ -639,6 +746,221 @@ function runBackupsFixtureSmokes() {
     fail("chef-cli backup restore apply must create a rollback backup before overwriting current targets");
   }
 
+  fs.writeFileSync(path.join(codexHome, "AGENTS.md"), "# current before JSON restore\n", "utf8");
+  const jsonRestoreApply = runCliSmokeRaw(
+    "backups-restore-json-apply-fixture",
+    ["--backups", "--backup", backupId, "--restore", "--apply", "--json", "--no-log"],
+    { env }
+  );
+  if (jsonRestoreApply.ok) {
+    try {
+      const parsed = JSON.parse(jsonRestoreApply.stdout);
+      if (parsed.outcome !== "restored" || parsed.applied !== true || parsed.applyRequested !== true) {
+        fail("chef-cli JSON restore apply must report a truthful restored/applied result.");
+      }
+    } catch (error) {
+      fail(`chef-cli JSON restore apply did not emit parseable JSON: ${error.message}`);
+    }
+  }
+  if (!fs.readFileSync(path.join(codexHome, "AGENTS.md"), "utf8").includes("restored agents")) {
+    fail("chef-cli JSON restore apply must perform the requested restore.");
+  }
+
+  fs.writeFileSync(path.join(codexHome, "AGENTS.md"), "# transaction-current\n", "utf8");
+  fs.writeFileSync(path.join(codexHome, "config.toml"), "model = \"transaction-current\"\n", "utf8");
+  const injectedFailure = runCliSmokeRaw(
+    "backups-restore-transaction-rollback-fixture",
+    ["--backups", "--backup", backupId, "--restore", "--apply", "--plain", "--no-log"],
+    {
+      env: {
+        ...env,
+        CODEX_CHEF_TEST_MODE: "1",
+        CODEX_CHEF_TEST_RESTORE_FAIL_AFTER_WRITES: "1"
+      },
+      expectedStatus: 1
+    }
+  );
+  if (!injectedFailure.ok || !injectedFailure.output.includes("Injected restore write failure")) {
+    fail("chef-cli backup restore transaction test must exercise an injected post-write failure.");
+  }
+  if (fs.readFileSync(path.join(codexHome, "AGENTS.md"), "utf8") !== "# transaction-current\n") {
+    fail("chef-cli backup restore must roll back files already overwritten when a later write fails.");
+  }
+  if (fs.readFileSync(path.join(codexHome, "config.toml"), "utf8") !== "model = \"transaction-current\"\n") {
+    fail("chef-cli backup restore failure must leave untouched targets unchanged.");
+  }
+
+  const inWriteFailure = runCliSmokeRaw(
+    "backups-restore-in-write-json-failure-fixture",
+    ["--backups", "--backup", backupId, "--restore", "--apply", "--json", "--no-log"],
+    {
+      env: {
+        ...env,
+        CODEX_CHEF_TEST_MODE: "1",
+        CODEX_CHEF_TEST_RESTORE_FAIL_DURING_WRITE: "1"
+      },
+      expectedStatus: 1
+    }
+  );
+  if (inWriteFailure.ok) {
+    try {
+      const parsed = JSON.parse(inWriteFailure.stdout);
+      if (
+        parsed.outcome !== "failed"
+        || parsed.applied !== false
+        || parsed.applyRequested !== true
+        || !String(parsed.error || "").includes("Injected restore in-write failure")
+      ) {
+        fail("chef-cli JSON restore failure must emit a truthful structured failure result.");
+      }
+    } catch (error) {
+      fail(`chef-cli JSON restore failure did not emit parseable JSON: ${error.message}`);
+    }
+  }
+  if (fs.readFileSync(path.join(codexHome, "AGENTS.md"), "utf8") !== "# transaction-current\n") {
+    fail("chef-cli backup restore must roll back a target truncated during the write call.");
+  }
+
+  const pinnedSkillId = "codex-chef-skill-20990101-accessibility";
+  const pinnedSkillBackup = path.join(codexHome, "backups", pinnedSkillId);
+  const pinnedSkillSource = path.join(fixtureRoot, "source", "accessibility");
+  const pinnedSkillTarget = path.join(agentsHome, "skills", "accessibility");
+  fs.mkdirSync(pinnedSkillSource, { recursive: true });
+  fs.mkdirSync(pinnedSkillTarget, { recursive: true });
+  fs.writeFileSync(
+    path.join(pinnedSkillSource, "SKILL.md"),
+    "---\nname: accessibility\ndescription: New accessibility workflow.\n---\n",
+    "utf8"
+  );
+  fs.writeFileSync(path.join(pinnedSkillSource, "new-only.txt"), "new\n", "utf8");
+  fs.writeFileSync(path.join(pinnedSkillTarget, "SKILL.md"), "previous accessibility skill\n", "utf8");
+  fs.writeFileSync(path.join(pinnedSkillTarget, "legacy-only.txt"), "legacy\n", "utf8");
+  const pinnedExpected = {
+    package: "test/accessibility",
+    commit: "d".repeat(40),
+    skill: "accessibility",
+    cliVersion: "1.5.20",
+    sourceTreeSha256: hashSkillTree(pinnedSkillSource)
+  };
+  activatePinnedSkill({
+    source: pinnedSkillSource,
+    target: pinnedSkillTarget,
+    backupRoot: pinnedSkillBackup,
+    managedRoots: [agentsHome, codexHome],
+    expected: pinnedExpected,
+    allowAdopt: true
+  });
+  const pinnedInjectedFailure = runCliSmokeRaw(
+    "backups-pinned-skill-rollback-fixture",
+    ["--backups", "--backup", pinnedSkillId, "--restore", "--apply", "--json", "--no-log"],
+    {
+      env: {
+        ...env,
+        CODEX_CHEF_TEST_MODE: "1",
+        CODEX_CHEF_TEST_PINNED_RESTORE_FAIL_AFTER_WRITES: "1"
+      },
+      expectedStatus: 1
+    }
+  );
+  if (pinnedInjectedFailure.ok) {
+    try {
+      const parsed = JSON.parse(pinnedInjectedFailure.stdout);
+      if (parsed.outcome !== "failed" || parsed.applied !== false) {
+        fail("chef-cli pinned restore failure must emit a truthful structured failure result.");
+      }
+    } catch (error) {
+      fail(`chef-cli pinned restore failure did not emit parseable JSON: ${error.message}`);
+    }
+  }
+  if (
+    fs.readFileSync(path.join(pinnedSkillTarget, "new-only.txt"), "utf8") !== "new\n"
+    || fs.existsSync(path.join(pinnedSkillTarget, "legacy-only.txt"))
+    || !fs.existsSync(path.join(pinnedSkillTarget, pinnedSkillProvenanceFileName))
+  ) {
+    fail("chef-cli pinned skill restore must put the complete displaced current tree back after failure.");
+  }
+  const pinnedRestore = runCliSmokeRaw(
+    "backups-pinned-skill-round-trip-fixture",
+    ["--backups", "--backup", pinnedSkillId, "--restore", "--apply", "--json", "--no-log"],
+    { env }
+  );
+  if (pinnedRestore.ok) {
+    try {
+      const parsed = JSON.parse(pinnedRestore.stdout);
+      if (parsed.outcome !== "restored" || parsed.applied !== true) {
+        fail("chef-cli pinned skill backup must report a restored JSON outcome.");
+      }
+    } catch (error) {
+      fail(`chef-cli pinned skill restore did not emit parseable JSON: ${error.message}`);
+    }
+  }
+  const restoredPinnedFiles = fs.readdirSync(pinnedSkillTarget).sort();
+  const expectedPinnedFiles = ["SKILL.md", "legacy-only.txt"].sort();
+  if (JSON.stringify(restoredPinnedFiles) !== JSON.stringify(expectedPinnedFiles)) {
+    fail(
+      `chef-cli pinned skill restore must replace the active tree exactly; got ${restoredPinnedFiles.join(", ")}`
+    );
+  }
+  if (fs.readFileSync(path.join(pinnedSkillTarget, "legacy-only.txt"), "utf8") !== "legacy\n") {
+    fail("chef-cli pinned skill restore did not recover the prior tree bytes.");
+  }
+
+  const unsupportedId = "codex-chef-20990101-000001";
+  const unsupportedRoot = path.join(codexHome, "backups", unsupportedId);
+  fs.mkdirSync(path.join(unsupportedRoot, "codex"), { recursive: true });
+  fs.writeFileSync(path.join(unsupportedRoot, "codex", "auth.json"), "{\"token\":\"fixture\"}\n", "utf8");
+  fs.writeFileSync(path.join(unsupportedRoot, "codex", "hooks.json"), "{\"hooks\":[]}\n", "utf8");
+  spawnSync(process.execPath, [
+    path.join(root, "scripts", "write-backup-manifest.mjs"),
+    "--backup-root",
+    unsupportedRoot,
+    "--operation",
+    "unsupported-fixture"
+  ], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+  const unsupportedRestore = runCliSmokeRaw(
+    "backups-restore-unsupported-fixture",
+    ["--backups", "--backup", unsupportedId, "--restore", "--apply", "--plain", "--no-log"],
+    { env, expectedStatus: 1 }
+  );
+  if (!unsupportedRestore.ok || !unsupportedRestore.output.includes("unsupported entries")) {
+    fail("chef-cli backup restore must reject manifest-listed auth, hooks, and other non-managed files.");
+  }
+  if (fs.existsSync(path.join(codexHome, "auth.json")) || fs.existsSync(path.join(codexHome, "hooks.json"))) {
+    fail("chef-cli backup restore must never create unsupported Codex control-plane files.");
+  }
+
+  const tamperedId = "codex-chef-20990101-000002";
+  const tamperedRoot = path.join(codexHome, "backups", tamperedId);
+  fs.mkdirSync(tamperedRoot, { recursive: true });
+  fs.writeFileSync(path.join(tamperedRoot, "AGENTS.md"), "# manifest version\n", "utf8");
+  spawnSync(process.execPath, [
+    path.join(root, "scripts", "write-backup-manifest.mjs"),
+    "--backup-root",
+    tamperedRoot,
+    "--operation",
+    "tamper-fixture"
+  ], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+  fs.writeFileSync(path.join(tamperedRoot, "AGENTS.md"), "# changed after manifest\n", "utf8");
+  const tamperedRestore = runCliSmokeRaw(
+    "backups-restore-tampered-fixture",
+    ["--backups", "--backup", tamperedId, "--restore", "--apply", "--plain", "--no-log"],
+    { env, expectedStatus: 1 }
+  );
+  if (!tamperedRestore.ok || !tamperedRestore.output.includes("manifest hash or size")) {
+    fail("chef-cli backup restore must reject archive bytes changed after manifest creation.");
+  }
+
+  const emptyId = "codex-chef-20990101-000003";
+  const emptyRoot = path.join(codexHome, "backups", emptyId);
+  fs.mkdirSync(emptyRoot, { recursive: true });
+  spawnSync(process.execPath, [
+    path.join(root, "scripts", "write-backup-manifest.mjs"),
+    "--backup-root",
+    emptyRoot,
+    "--operation",
+    "empty-fixture"
+  ], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+
   const json = runCliSmokeRaw("backups-json-fixture", ["--backups", "--json", "--no-log"], { env });
   if (json.ok) {
     try {
@@ -646,6 +968,16 @@ function runBackupsFixtureSmokes() {
       if (parsed.schemaVersion !== 1) fail("chef-cli backups JSON must include schemaVersion 1");
       if (!Array.isArray(parsed.backups) || !parsed.backups.some((backup) => backup.id === backupId)) {
         fail("chef-cli backups JSON must include fixture backup id");
+      }
+      for (const invalidId of [unsupportedId, tamperedId]) {
+        const invalidBackup = parsed.backups.find((backup) => backup.id === invalidId);
+        if (!invalidBackup || invalidBackup.restorableCount !== 0 || invalidBackup.verifiedRestorable !== false) {
+          fail(`chef-cli backup inventory must not label unverified archive ${invalidId} as restorable.`);
+        }
+      }
+      const emptyBackup = parsed.backups.find((backup) => backup.id === emptyId);
+      if (!emptyBackup || emptyBackup.restorableCount !== 0 || emptyBackup.verifiedRestorable !== false) {
+        fail("chef-cli backup inventory must not label an empty manifest as restorable.");
       }
     } catch (error) {
       fail(`chef-cli backups JSON fixture did not emit parseable JSON: ${error.message}`);
@@ -662,10 +994,15 @@ function runBackupsFixtureSmokes() {
     fail("chef-cli backup delete preview must not remove the archive");
   }
 
-  const deleteApply = runCliSmokeRaw("backups-delete-apply-fixture", ["--backups", "--backup", backupId, "--delete", "--apply", "--plain", "--no-log"], { env });
+  const deleteApply = runCliSmokeRaw("backups-delete-json-apply-fixture", ["--backups", "--backup", backupId, "--delete", "--apply", "--json", "--no-log"], { env });
   if (deleteApply.ok) {
-    for (const snippet of ["Backup archive deleted", backupId]) {
-      if (!deleteApply.output.includes(snippet)) fail(`chef-cli smoke backups-delete-apply-fixture missing output snippet: ${snippet}`);
+    try {
+      const parsed = JSON.parse(deleteApply.stdout);
+      if (parsed.outcome !== "deleted" || parsed.applied !== true || parsed.applyRequested !== true) {
+        fail("chef-cli JSON delete apply must report a truthful deleted/applied result.");
+      }
+    } catch (error) {
+      fail(`chef-cli JSON delete apply did not emit parseable JSON: ${error.message}`);
     }
   }
   if (fs.existsSync(backupRoot)) {
@@ -692,8 +1029,12 @@ function runCliErrorSmoke(name, cliArgs, expectedSnippets) {
   if (/(?:^|\n)\s*at\s+file:|(?:^|\n)Error:\s|node:internal/i.test(output)) {
     fail(`chef-cli error smoke ${name} must not print a Node stack trace`);
   }
+  const normalizedOutput = output.replace(/\s+/g, " ").trim();
   for (const snippet of expectedSnippets) {
-    if (!output.includes(snippet)) fail(`chef-cli error smoke ${name} missing output snippet: ${snippet}`);
+    const normalizedSnippet = snippet.replace(/\s+/g, " ").trim();
+    if (!output.includes(snippet) && !normalizedOutput.includes(normalizedSnippet)) {
+      fail(`chef-cli error smoke ${name} missing output snippet: ${snippet}`);
+    }
   }
 }
 
@@ -730,6 +1071,8 @@ if (!exists(cliPath)) {
     "--skills",
     "--mcp",
     "--routing",
+    "--continuity",
+    "--control-brain",
     "--diagnostics",
     "--diagnose",
     "--processes",
@@ -746,6 +1089,7 @@ if (!exists(cliPath)) {
     "verify-skill-sources.mjs",
     "codex-routing-board.mjs",
     "runDiagnostics",
+    "runContinuity",
     "runProcesses",
     "processAuditPayload",
     "recentCliLogs",
@@ -791,6 +1135,7 @@ if (!exists(cliPath)) {
     "mcpTarget",
     "redactLocalPaths",
     "redactSensitiveOutput",
+    "sanitizeCliError",
     "[REDACTED_GITHUB_TOKEN]",
     "[REDACTED_CONNECTION_STRING]",
     "fileURLToPath",
@@ -985,6 +1330,24 @@ runCliErrorSmoke("unsupported-lang", ["--lang", "de", "--plain", "--no-log"], [
   "Codex Chef CLI error:",
   "Supported languages"
 ]);
+runCliErrorSmoke("conflicting-actions", ["--install", "--repair", "--plain", "--no-log"], [
+  "Codex Chef CLI error:",
+  "Choose exactly one action",
+  "--install, --repair"
+]);
+runCliErrorSmoke("missing-profile-value", ["--routing", "--profile", "--plain", "--no-log"], [
+  "Codex Chef CLI error:",
+  "--profile requires"
+]);
+runCliErrorSmoke("repo-only-doctor", ["--doctor", "--repo-only", "--plain", "--no-log"], [
+  "Codex Chef CLI error:",
+  "--repo-only can only be used with --status"
+]);
+runCliJsonEnvelopeSmoke(
+  "doctor",
+  ["--doctor", "--json", "--no-log"],
+  "codex-chef.doctor-bundle.v1"
+);
 runCliSmoke("forced-color", ["--help", "--no-log"], [
   "Codex Chef CLI"
 ], {
@@ -1031,8 +1394,9 @@ const skillStatusRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-skills
 try {
   runCliSmoke("skills-status-empty", ["--skills", "--details", "--plain", "--no-log"], [
     "Installation status",
-    "0 of 16 curated skills ready",
-    "16 missing",
+    "0 of 24 Chef-managed skills ready",
+    "24 missing",
+    "Upstream: 0/15 ready. Bundled/direct: 0/9 ready.",
     "0 invalid"
   ], {
     env: {
@@ -1051,9 +1415,10 @@ try {
   });
   fs.rmSync(path.join(invalidEnv.CODEX_HOME, "skills", "systematic-debugging"), { recursive: true, force: true });
   runCliSmoke("skills-status-invalid", ["--skills", "--details", "--plain", "--no-log"], [
-    "14 of 16 curated skills ready",
+    "22 of 24 Chef-managed skills ready",
     "1 missing",
     "1 invalid",
+    "Upstream: 13/15 ready. Bundled/direct: 9/9 ready.",
     "Invalid installation"
   ], {
     env: invalidEnv
@@ -1111,7 +1476,9 @@ if (skillsWorkspaceMenu.ok && !skillsWorkspaceMenu.output.includes("Skill status
 
 runCliSmoke("skills", ["--skills", "--details", "--plain", "--no-log"], [
   "Skill status & catalog",
-  "16 curated installable skills",
+  "24 Codex Chef-managed skills:",
+  "15 commit-pinned upstream",
+  "bundled/direct.",
   "How skill activation works",
   "Installed skills do not run by themselves",
   "A skill enters context when the user names it",
@@ -1119,15 +1486,159 @@ runCliSmoke("skills", ["--skills", "--details", "--plain", "--no-log"], [
   "routing profiles map task shapes to recommended skills",
   "Skill source verification passed",
   "Log disabled by --no-log"
-]);
-runCliSmoke("routing", ["--routing", "--details", "--plain", "--no-log"], [
+], {
+  env: { COLUMNS: "72" },
+  maxVisualWidth: 72
+});
+runCliSmoke("skills-narrow", ["--skills", "--plain", "--no-log"], [
+  "24 Codex Chef-managed skills",
+  "24 of 24 Chef-managed skills ready"
+], {
+  env: { COLUMNS: "72" },
+  maxVisualWidth: 72
+});
+
+const continuityRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-continuity-"));
+try {
+  const continuityEnv = createCuratedSkillFixture(continuityRoot);
+  const routerRoot = path.join(continuityEnv.CODEX_HOME, "skills", "codex-control-router");
+  fs.mkdirSync(routerRoot, { recursive: true });
+  fs.writeFileSync(
+    path.join(routerRoot, "SKILL.md"),
+    "---\nname: codex-control-router\ndescription: Test Control routing fixture.\n---\n",
+    "utf8"
+  );
+  fs.mkdirSync(continuityEnv.CODEX_HOME, { recursive: true });
+  fs.writeFileSync(
+    path.join(continuityEnv.CODEX_HOME, "config.toml"),
+    "[mcp_servers.codex_control]\nenabled = true\n",
+    "utf8"
+  );
+  runCliSmoke("continuity-configured", ["--continuity", "--details", "--plain", "--no-log"], [
+    "Control & Brain continuity",
+    "Router skill: ready",
+    "codex_control MCP: configured and enabled",
+    "Brain skill: ready",
+    "Vault target: not configured",
+    "This CLI verifies installed Control configuration only",
+    "local CODEX_CHEF_BRAIN_HOME vault is separate",
+    "Immediate work stays in the current session",
+    "Automatic chat capture and automatic Brain writes are disabled by",
+    "codex-control console"
+  ], {
+    env: {
+      ...continuityEnv,
+      CODEX_CHEF_BRAIN_HOME: "",
+      COLUMNS: "72"
+    },
+    maxVisualWidth: 72
+  });
+
+  fs.writeFileSync(
+    path.join(continuityEnv.CODEX_HOME, "config.toml"),
+    "[mcp_servers.codex_control]\nenabled = false\n",
+    "utf8"
+  );
+  const disabledControl = runCliSmokeRaw(
+    "continuity-control-disabled-json",
+    ["--continuity", "--json", "--no-log"],
+    { env: { ...continuityEnv, CODEX_CHEF_BRAIN_HOME: "" } }
+  );
+  if (disabledControl.ok) {
+    try {
+      const parsed = JSON.parse(disabledControl.stdout);
+      if (parsed.control.configured !== true || parsed.control.enabled !== false) {
+        fail("chef-cli continuity JSON must distinguish configured-but-disabled Control.");
+      }
+      if (
+        parsed.control.liveProbe?.cliSubprocessCanProbe !== false
+        || parsed.control.liveProbe?.availableFrom !== "current-codex-session-mcp"
+        || parsed.brain.vault?.scope?.includes("separate from Control project Brain mappings") !== true
+        || parsed.boundaries?.controlProjectBrainMappingIsSeparateFromLocalVault !== true
+      ) {
+        fail("chef-cli continuity JSON must explain live MCP probing and the separate local/Control Brain scopes.");
+      }
+    } catch (error) {
+      fail(`chef-cli disabled Control continuity JSON was invalid: ${error.message}`);
+    }
+  }
+
+  fs.writeFileSync(path.join(continuityEnv.CODEX_HOME, "config.toml"), "", "utf8");
+  const missingControl = runCliSmokeRaw(
+    "continuity-control-not-configured-json",
+    ["--continuity", "--json", "--no-log"],
+    { env: { ...continuityEnv, CODEX_CHEF_BRAIN_HOME: "" } }
+  );
+  if (missingControl.ok) {
+    try {
+      const parsed = JSON.parse(missingControl.stdout);
+      if (parsed.control.configured !== false || parsed.control.enabled !== false) {
+        fail("chef-cli continuity JSON must distinguish Control that is not configured.");
+      }
+    } catch (error) {
+      fail(`chef-cli missing Control continuity JSON was invalid: ${error.message}`);
+    }
+  }
+
+  const brainVault = path.join(continuityRoot, "brain-vault");
+  const brainInit = spawnSync(process.execPath, [
+    path.join(root, "scripts", "brain-cli.mjs"),
+    "init",
+    "--target",
+    brainVault,
+    "--apply",
+    "--json"
+  ], {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true,
+    timeout: 30000
+  });
+  if (brainInit.error || brainInit.status !== 0) {
+    fail(`chef-cli continuity Brain fixture init failed: ${brainInit.error?.message || brainInit.stderr || brainInit.stdout}`);
+  } else {
+    const configuredBrain = runCliSmokeRaw(
+      "continuity-brain-configured-json",
+      ["--continuity", "--json", "--no-log"],
+      { env: { ...continuityEnv, CODEX_CHEF_BRAIN_HOME: brainVault } }
+    );
+    if (configuredBrain.ok) {
+      try {
+        const parsed = JSON.parse(configuredBrain.stdout);
+        if (
+          parsed.brain.vault.configured !== true
+          || parsed.brain.vault.exists !== true
+          || !["ok", "attention"].includes(parsed.brain.vault.status)
+          || parsed.brain.vault.contentOk !== true
+        ) {
+          fail("chef-cli continuity JSON must report an initialized Brain vault with valid content and explicit ACL status.");
+        }
+      } catch (error) {
+        fail(`chef-cli configured Brain continuity JSON was invalid: ${error.message}`);
+      }
+    }
+  }
+} finally {
+  fs.rmSync(continuityRoot, { recursive: true, force: true });
+}
+
+runCliSmoke("routing-rich-narrow", ["--routing", "--details", "--no-log"], [
   "Codex Chef enterprise routing board",
   "Routing visibility contract",
   "Lifecycle hygiene",
   "Routing plan",
   "Routing result",
   "Use /agent in Codex CLI"
-]);
+], {
+  env: {
+    COLUMNS: "72",
+    FORCE_COLOR: "1",
+    NO_COLOR: ""
+  },
+  maxVisualWidth: 72,
+  expectAnsi: true
+});
 runCliSmoke("diagnostics", ["--diagnostics", "--details", "--plain", "--no-log"], [
   "Diagnostics hub",
   "Current health",
@@ -1191,6 +1702,11 @@ runCliSmoke("routing-profile-wrong-cwd", ["--routing", "--profile", "starter-hea
   "Owner:",
   "Validation:"
 ], { cwd: path.dirname(root) });
+const managedPreviewRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-managed-preview-"));
+const managedPreviewEnv = {
+  CODEX_HOME: path.join(managedPreviewRoot, ".codex"),
+  AGENTS_HOME: path.join(managedPreviewRoot, ".agents")
+};
 runCliSmoke("update-preview", ["--update", "--plain", "--no-log"], [
   "Update preview",
   "No managed or global files changed",
@@ -1198,6 +1714,7 @@ runCliSmoke("update-preview", ["--update", "--plain", "--no-log"], [
   "Managed targets",
   "Full evidence"
 ], {
+  env: managedPreviewEnv,
   forbiddenSnippets: ["What if:"],
   maxLines: 80
 });
@@ -1208,6 +1725,7 @@ runCliSmoke("update-preview-tr", ["--update", "--tr", "--plain", "--no-log"], [
   "Yönetilen hedefler",
   "Tam kanıt"
 ], {
+  env: managedPreviewEnv,
   forbiddenSnippets: ["What if:"],
   maxLines: 80
 });
@@ -1215,9 +1733,12 @@ runCliSmoke("update-preview-verbose", ["--update", "--verbose-plan", "--plain", 
   "Update preview",
   "npm run chef -- --update --apply",
   "--force"
-]);
+], { env: managedPreviewEnv });
 runCliJsonSmoke("status-repo-only-json", ["--status", "--repo-only", "--json", "--no-log"]);
 runCliJsonSmoke("status-repo-only-json-tr", ["--status", "--repo-only", "--json", "--lang", "tr", "--no-log"]);
+runCliJsonSmoke("continuity-json", ["--continuity", "--json", "--no-log"]);
+runCliJsonSmoke("skills-json", ["--skills", "--json", "--no-log"]);
+runCliJsonSmoke("skills-json-tr", ["--skills", "--json", "--tr", "--no-log"]);
 runCliSmoke("status-repo-only", ["--status", "--repo-only", "--plain", "--no-log"], [
   "Codex Chef status",
   "Overall:",
@@ -1228,7 +1749,7 @@ runCliSmoke("status-repo-only", ["--status", "--repo-only", "--plain", "--no-log
   "Installed runtime: skipped by this mode",
   "Skills: skipped",
   "Next action:",
-  "Details: npm run chef -- --status --details",
+  "Details: npm run chef -- --status --repo-only --details --no-log",
   "Log disabled by --no-log"
 ], {
   timeout: 180000,
@@ -1254,7 +1775,8 @@ runCliSmoke("reset-preview", ["--reset", "--details", "--plain", "--no-log"], [
   "--force",
   "completed: Codex Chef dry run",
   "Log disabled by --no-log"
-]);
+], { env: managedPreviewEnv });
+fs.rmSync(managedPreviewRoot, { recursive: true, force: true });
 runCliSmoke("auth", ["--auth", "--plain", "--no-log"], [
   "Authentication notes",
   "does not print account-scoped re-auth",

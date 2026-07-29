@@ -9,6 +9,16 @@
       "codex-agents",
       "codex-profiles",
       "codex-plugin",
+      "codex-plugin-marketplace-source",
+      "codex-chef-operator-direct-skill",
+      "context-budget-planner-direct-skill",
+      "adaptive-agent-routing-direct-skill",
+      "codex-chef-brain-direct-skill",
+      "external-review-workflow-direct-skill",
+      "fetch-direct-skill",
+      "seo-direct-skill",
+      "evidence-research-direct-skill",
+      "offline-diagram-triplet-direct-skill",
       "plugin-marketplace"
     ],
     "all": [
@@ -18,6 +28,16 @@
       "codex-agents",
       "codex-profiles",
       "codex-plugin",
+      "codex-plugin-marketplace-source",
+      "codex-chef-operator-direct-skill",
+      "context-budget-planner-direct-skill",
+      "adaptive-agent-routing-direct-skill",
+      "codex-chef-brain-direct-skill",
+      "external-review-workflow-direct-skill",
+      "fetch-direct-skill",
+      "seo-direct-skill",
+      "evidence-research-direct-skill",
+      "offline-diagram-triplet-direct-skill",
       "plugin-marketplace",
       "curated-skills"
     ]
@@ -99,6 +119,126 @@
       "conflictPolicy": "Managed plugin files are refreshed after backup while extra files are preserved by default; destructive pruning requires an explicit repair flag."
     },
     {
+      "id": "codex-chef-operator-direct-skill",
+      "kind": "copy-directory",
+      "summary": "Install the Codex Chef operator workflow for direct routing-profile invocation.",
+      "source": "plugins/codex-chef-workflows/skills/codex-chef-operator",
+      "destination": "${AGENTS_HOME}/skills/codex-chef-operator",
+      "platforms": ["windows", "unix"],
+      "collision": "sync-only-when-owned-or-exact-legacy-match-explicit-adoption-required-otherwise",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The operator skill is synchronized from the canonical plugin source only when the target is absent, marked as Codex Chef-managed, or an exact legacy match. A foreign collision fails before any write unless that exact target is explicitly adopted."
+    },
+    {
+      "id": "context-budget-planner-direct-skill",
+      "kind": "copy-directory",
+      "summary": "Install the context budget planner required by the global operating contract.",
+      "source": "plugins/codex-chef-workflows/skills/context-budget-planner",
+      "destination": "${AGENTS_HOME}/skills/context-budget-planner",
+      "platforms": ["windows", "unix"],
+      "collision": "sync-only-when-owned-or-exact-legacy-match-explicit-adoption-required-otherwise",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The context planner is synchronized from the canonical plugin source only when the target is absent, marked as Codex Chef-managed, or an exact legacy match. A foreign collision fails before any write unless that exact target is explicitly adopted."
+    },
+    {
+      "id": "adaptive-agent-routing-direct-skill",
+      "kind": "copy-directory",
+      "summary": "Install the adaptive routing workflow required by the global operating contract.",
+      "source": "plugins/codex-chef-workflows/skills/adaptive-agent-routing",
+      "destination": "${AGENTS_HOME}/skills/adaptive-agent-routing",
+      "platforms": ["windows", "unix"],
+      "collision": "sync-only-when-owned-or-exact-legacy-match-explicit-adoption-required-otherwise",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The routing skill is synchronized from the canonical plugin source only when the target is absent, marked as Codex Chef-managed, or an exact legacy match. A foreign collision fails before any write unless that exact target is explicitly adopted."
+    },
+    {
+      "id": "codex-chef-brain-direct-skill",
+      "kind": "copy-directory",
+      "summary": "Install the local Markdown Brain workflow for direct invocation.",
+      "source": "plugins/codex-chef-workflows/skills/codex-chef-brain",
+      "destination": "${AGENTS_HOME}/skills/codex-chef-brain",
+      "platforms": ["windows", "unix"],
+      "collision": "sync-only-when-owned-or-exact-legacy-match-explicit-adoption-required-otherwise",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The Brain workflow is synchronized from the canonical plugin source only when the target is absent, marked as Codex Chef-managed, or an exact legacy match. A foreign collision fails before any write unless that exact target is explicitly adopted."
+    },
+    {
+      "id": "external-review-workflow-direct-skill",
+      "kind": "copy-directory",
+      "summary": "Install the secret-safe external review workflow for direct invocation.",
+      "source": "plugins/codex-chef-workflows/skills/external-review-workflow",
+      "destination": "${AGENTS_HOME}/skills/external-review-workflow",
+      "platforms": ["windows", "unix"],
+      "collision": "sync-only-when-owned-or-exact-legacy-match-explicit-adoption-required-otherwise",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The external review workflow is synchronized from the canonical plugin source only when the target is absent, marked as Codex Chef-managed, or an exact legacy match. A foreign collision fails before any write unless that exact target is explicitly adopted."
+    },
+    {
+      "id": "fetch-direct-skill",
+      "kind": "copy-directory",
+      "summary": "Install the explicit-only Fetch workflow for direct $fetch invocation.",
+      "source": "plugins/codex-chef-workflows/skills/fetch",
+      "destination": "${AGENTS_HOME}/skills/fetch",
+      "platforms": ["windows", "unix"],
+      "collision": "sync-only-when-owned-or-exact-legacy-match-explicit-adoption-required-otherwise",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The direct skill is synchronized from the same canonical source as the plugin-bundled version only when the target is absent, marked as Codex Chef-managed, or an exact legacy match. A foreign collision fails before any write unless the exact target is explicitly adopted; implicit invocation remains disabled."
+    },
+    {
+      "id": "seo-direct-skill",
+      "kind": "copy-directory",
+      "summary": "Install the evidence-backed SEO workflow for direct $seo invocation.",
+      "source": "plugins/codex-chef-workflows/skills/seo",
+      "destination": "${AGENTS_HOME}/skills/seo",
+      "platforms": ["windows", "unix"],
+      "collision": "sync-only-when-owned-or-exact-legacy-match-explicit-adoption-required-otherwise",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The direct skill is synchronized from the canonical plugin source only when the target is absent, marked as Codex Chef-managed, or an exact legacy match. A foreign collision fails before any write unless the exact SEO target is explicitly adopted."
+    },
+    {
+      "id": "evidence-research-direct-skill",
+      "kind": "copy-directory",
+      "summary": "Install the source-traceable research workflow for direct $evidence-research invocation.",
+      "source": "plugins/codex-chef-workflows/skills/evidence-research",
+      "destination": "${AGENTS_HOME}/skills/evidence-research",
+      "platforms": ["windows", "unix"],
+      "collision": "sync-only-when-owned-or-exact-legacy-match-explicit-adoption-required-otherwise",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The direct skill is synchronized from the canonical plugin source only when the target is absent, marked as Codex Chef-managed, or an exact legacy match. A foreign collision fails before any write unless the exact evidence-research target is explicitly adopted."
+    },
+    {
+      "id": "offline-diagram-triplet-direct-skill",
+      "kind": "copy-directory",
+      "summary": "Install the offline diagram workflow for direct invocation.",
+      "source": "plugins/codex-chef-workflows/skills/offline-diagram-triplet",
+      "destination": "${AGENTS_HOME}/skills/offline-diagram-triplet",
+      "platforms": ["windows", "unix"],
+      "collision": "sync-only-when-owned-or-exact-legacy-match-explicit-adoption-required-otherwise",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The offline diagram workflow is synchronized from the canonical plugin source only when the target is absent, marked as Codex Chef-managed, or an exact legacy match. A foreign collision fails before any write unless that exact target is explicitly adopted."
+    },
+    {
+      "id": "codex-plugin-marketplace-source",
+      "kind": "copy-directory",
+      "summary": "Mirror the local workflow plugin inside the personal marketplace root.",
+      "source": "plugins/codex-chef-workflows",
+      "destination": "${AGENTS_HOME}/plugins/sources/codex-chef-workflows",
+      "platforms": ["windows", "unix"],
+      "collision": "sync-managed-files-preserve-extras-backup-before-sync",
+      "backup": true,
+      "risk": "medium",
+      "conflictPolicy": "The marketplace source stays inside the marketplace root required by current Codex schema, so independently customized CODEX_HOME and AGENTS_HOME values remain portable."
+    },
+    {
       "id": "plugin-marketplace",
       "kind": "write-marketplace",
       "summary": "Register the local workflow plugin in the personal marketplace file.",
@@ -169,10 +309,10 @@
       "lock": "catalog/skills-lock.json",
       "requiresFlag": "InstallSkills",
       "platforms": ["windows", "unix"],
-      "collision": "skip-if-already-installed",
-      "backup": false,
+      "collision": "preserve-foreign-update-owned-mandatory-backup-explicit-adoption-required",
+      "backup": true,
       "risk": "high",
-      "conflictPolicy": "Only locked package/skill pairs are allowed; broad external skill catalogs are not imported by default."
+      "conflictPolicy": "Only locked package/skill pairs are allowed. Unmarked, foreign, or locally drifted same-name targets are preserved and skipped by default. A valid Codex Chef provenance marker permits a mandatory-backup managed upgrade; replacing any other exact target requires a separately reviewed per-skill --adopt-existing invocation."
     }
   ]
 }

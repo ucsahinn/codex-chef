@@ -1,6 +1,6 @@
 {
   "version": "0.3.0",
-  "dateChecked": "2026-07-21",
+  "dateChecked": "2026-07-29",
   "sourcePolicy": "Routing profiles recommend the narrowest useful surfaces. A match does not force delegation: spawn only for independent parallel work, noisy log or research isolation, or explicit user-requested agents. Preserve the active user profile and keep destructive, credentialed, publishing, deployment, database, broad filesystem, and broad or destructive graph actions approval-gated.",
   "delegationPolicy": {
     "mode": "conditional",
@@ -61,6 +61,26 @@
       "privilegeDelta": "none for read-only docs lookup.",
       "validationGate": "Source URLs or official docs surfaces are listed before relying on version-sensitive claims.",
       "rollback": "Remove the citation or docs-dependent claim and fall back to repository evidence."
+    },
+    {
+      "id": "evidence-backed-research",
+      "title": "Evidence-backed decision research",
+      "trigger": "Deep research, literature or market review, landscape comparison, evidence synthesis, or a decision that requires traceable current sources and explicit uncertainty.",
+      "agents": ["docs_researcher", "product_strategist"],
+      "skills": ["evidence-research", "context-budget-planner"],
+      "mcp": ["context7", "sequential-thinking"],
+      "flags": ["web_search:official-first", "source-ledger:required"],
+      "delegationMode": "conditional",
+      "skillMode": "narrowest-owner",
+      "mcpMode": "use-when-available-and-approved",
+      "evidence": ["A charter states the decision, question, scope, exclusions, and evidence standard before broad collection.", "Material claims cite checked source records and separate facts, inferences, recommendations, disagreements, and uncertainty."],
+      "boundary": "Do not fabricate sources or systematic-review rigor; private data, paid APIs, participant contact, publication, and other external writes require explicit approval.",
+      "owner": "evidence-research in the main thread with optional docs_researcher or product_strategist review",
+      "primarySurface": "research charter, search log, source matrix, claim ledger, synthesis, and reproducible appendix",
+      "durability": "Per-task evidence package; durable publication only after explicit review and approval.",
+      "privilegeDelta": "public read-only research by default; private, paid, participant, and publishing surfaces stay gated.",
+      "validationGate": "The evidence-research report validator passes and every material claim resolves to a checked source ID.",
+      "rollback": "Remove unsupported claims or narrow the recommendation to the remaining verified evidence."
     },
     {
       "id": "context-surface-decision",

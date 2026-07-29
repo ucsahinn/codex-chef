@@ -53,7 +53,8 @@ This runs:
   profile, AGENTS token discipline, context-budget skill reference, README
   command docs, and unpinned agent model/reasoning contract.
 - `scripts/verify-skill-sources.mjs`: offline skill catalog validation and
-  `catalog/skills-lock.json` source-allowlist drift checks.
+  `catalog/skills-lock.json` commit, skill, CLI version, and integrity pin drift
+  checks.
 - `scripts/scan-supply-chain-iocs.mjs`: high-signal remote execution,
   dangerous shell, floating package, and implicit installer dependency checks.
 - `scripts/security-audit.mjs`: public-readiness files, bilingual docs, safe
@@ -86,6 +87,11 @@ instructions, discoverability metadata, invoked or deferred skill/agent
 content, repository maintenance size, tool schema/context, measured session
 telemetry when available, and per-agent cost. Repository byte/token estimates
 are diagnostic context weights, not provider billing or measured usage.
+The audit normally requires Git so ignored/private local files stay outside the
+source set. Outside a Git worktree it fails closed; use
+`node scripts/analyze-token-surfaces.mjs --allow-filesystem-fallback` only
+after reviewing that directory. The explicit fallback rejects linked,
+secret-like, special, and oversized files.
 
 When installable skills change, also run the network-backed resolver check:
 
@@ -243,8 +249,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 
 Expected skill behavior is idempotent and quiet: already installed skills are
 reported as `Skill already installed`, successful new installs are reported as
-`Installed skill`, and raw Skills CLI output is shown only when clone,
-installation, or write failures need diagnosis.
+`Installed pinned skill`, and native-copy failures identify the fetch, staging,
+hash, activation, or rollback phase without executing a registry installer.
 
 Skill activation has two evidence levels. Repo checks prove that the catalog,
 routing profiles, and activation contract are present:

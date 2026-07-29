@@ -70,11 +70,13 @@ make it a skill. If it needs tools or distribution, package it as a plugin.
   package/skill pairs.
 - Every installable skill must declare `package`, `skill`, and
   `source = package@skill`.
-- `catalog/skills-lock.json` is a reviewed source allowlist, not an immutable
-  upstream commit lock. The current Skills CLI install path resolves owner/repo
-  plus skill name, so release preparation must re-run online source
-  verification.
-- The installer must call `npx skills add <package> --skill <skill> --agent codex --yes --global`.
+- `catalog/skills-lock.json` pins every installable source to a full upstream
+  commit SHA. The Skills CLI version and registry integrity remain dated
+  compatibility and discovery metadata.
+- The installer must use `scripts/install-pinned-skill.mjs`; that helper fetches
+  only the locked commit, verifies `HEAD` and the selected skill, stages and
+  hashes an exact native copy, then activates it without executing fetched
+  repository code or a registry-delivered installer.
 - Default checks stay offline and deterministic. Network checks are explicit:
   `npm run verify:skills:online`.
 - Skills that are already local and not safely installable from a public package

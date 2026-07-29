@@ -6,7 +6,7 @@ usually become skills, bounded specialist work may go to subagents, live
 external context belongs in MCP/connectors, and publish or deploy actions stay
 behind explicit approval.
 
-Date checked: 2026-06-15
+Date checked: 2026-07-29
 
 References:
 
@@ -63,6 +63,9 @@ Decision rationale: [ADR-001](decisions/001-adaptive-routing-and-user-owned-conf
 | `/document-generate` | `docs_author` subagent or docs skill | `docs_author` | Match docs to code and commands. |
 | `/codex` / cross-model review | Explicit review workflow | `code_reviewer`, manual Codex CLI use | Do not auto-invoke another agent or CLI; the user must ask for the cross-model check. |
 | `/browse` | Browser MCP plus `frontend_verifier` | `frontend_verifier`, Playwright/Chrome MCP entries | Browser tools are prompt-gated. |
+| `$fetch <url>` | Explicit authorized site reconstruction skill | `fetch`, browser MCP, optional bounded specialists | Public capture is passive; auth, private routes, protected assets, installs, and external writes stay gated. |
+| `$seo <target>` | Evidence-backed audit, implementation, and verification skill | `seo`, `google_seo_auditor`, browser MCP, optional performance verification | Local, rendered, deployed, and account evidence stay distinct; rankings, indexing, account writes, publication, and deploy are never inferred. |
+| `$evidence-research <question>` | Source-traceable deep research skill | `evidence-research`, official-source search, optional domain reviewer | Facts, inferences, and recommendations stay distinct; private data, paid APIs, participants, and publication require approval. |
 | `/setup-browser-cookies` | Auth/session connector workflow | Not enabled by default | Cookie/session import is sensitive and explicit only. |
 | `/pair-agent` | External-agent collaboration service | Not imported | Tunnels, scoped tokens, and external agents need a separate reviewed design. |
 | `/ship` | Release verification workflow | `release_verifier` | Commit, push, PR, tag, release, and deploy still need explicit approval. |
@@ -110,11 +113,13 @@ Use this sequence for serious work:
 
 1. `product_strategist` or `spec_author` clarifies the target.
 2. `context-budget-planner` budgets sources and handoff when the task is broad.
-3. `engineering_planner` maps architecture, data flow, and tests.
-4. `code_mapper` gathers repo evidence before broad edits.
-5. Main thread implements the scoped change.
-6. `code_reviewer`, `security_auditor`, `qa_lead`, or `test_verifier` verifies the risky surface.
-7. `release_verifier` checks publish readiness only when a push/release is requested.
+3. `$evidence-research` handles a decision-critical source study, or `$seo`
+   handles search-specific evidence and implementation, when either is in scope.
+4. `engineering_planner` maps architecture, data flow, and tests.
+5. `code_mapper` gathers repo evidence before broad edits.
+6. Main thread implements the scoped change.
+7. `code_reviewer`, `security_auditor`, `qa_lead`, or `test_verifier` verifies the risky surface.
+8. `release_verifier` checks publish readiness only when a push/release is requested.
 
 The main thread remains responsible for synthesis, edits, user-visible
 decisions, and final evidence. Subagents are not a way to bypass approvals,

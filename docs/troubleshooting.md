@@ -47,9 +47,14 @@ or Git Bash.
 The Windows-safe install pattern is:
 
 ```powershell
-npx.cmd skills list --global --json
-npx.cmd skills add <package> --skill <skill> --agent codex --yes --global
+npx.cmd --yes skills@1.5.20 list --global --json
+node scripts/install-pinned-skill.mjs --package <owner/repo> --commit <40-char-sha> --skill <skill> --cli-version 1.5.20
 ```
+
+If that exact skill name already belongs to the user, the helper preserves it
+and prints `Skipped existing user-owned skill`. Inspect the target and its
+backup implications first; only then may you rerun that one command with
+`--adopt-existing`. Never add the flag to a catalog loop or broad installer.
 
 This repo validates installable sources offline by default:
 

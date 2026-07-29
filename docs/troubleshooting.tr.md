@@ -46,9 +46,14 @@ Windows'ta `bash` yoksa PowerShell kullan veya Bash yolunu WSL/Git Bash içinde
 Windows-safe install pattern:
 
 ```powershell
-npx.cmd skills list --global --json
-npx.cmd skills add <package> --skill <skill> --agent codex --yes --global
+npx.cmd --yes skills@1.5.20 list --global --json
+node scripts/install-pinned-skill.mjs --package <owner/repo> --commit <40-char-sha> --skill <skill> --cli-version 1.5.20
 ```
+
+Exact skill adı zaten kullanıcıya aitse helper hedefi korur ve
+`Skipped existing user-owned skill` yazar. Önce hedefi ve backup etkisini
+incele; yalnızca bundan sonra o tek komutu `--adopt-existing` ile tekrar
+çalıştır. Bu flag'i katalog döngüsüne veya geniş installer'a ekleme.
 
 Bu repo installable kaynakları default olarak offline doğrular:
 

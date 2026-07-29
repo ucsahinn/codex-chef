@@ -4,10 +4,21 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  CliUsageError,
+  installCliErrorBoundary,
+  requireCliValue
+} from "./lib/cli-error-contract.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
+installCliErrorBoundary({
+  tool: "codex-status",
+  argv: args,
+  root,
+  prefix: "Codex Chef status error"
+});
 const DEFAULT_CHILD_TIMEOUT_MS = 120000;
 const RUNTIME_VERIFY_TIMEOUT_MS = 300000;
 
@@ -34,8 +45,8 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--details") options.details = true;
   else if (arg === "--tr") options.lang = "tr";
   else if (arg === "--lang") {
-    const value = args[index + 1];
-    if (!["en", "tr"].includes(value)) throw new Error("--lang must be en or tr");
+    const value = requireCliValue(args, index, "--lang");
+    if (!["en", "tr"].includes(value)) throw new CliUsageError("--lang must be en or tr");
     options.lang = value;
     index += 1;
   }
@@ -56,19 +67,19 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--skip-codex-cli") options.skipCodexCli = true;
   else if (arg === "--force-output") options.forceOutput = true;
   else if (arg === "--output") {
-    options.output = args[index + 1];
+    options.output = requireCliValue(args, index, "--output");
     index += 1;
   } else if (arg === "--codex-home") {
-    options.codexHome = path.resolve(args[index + 1]);
+    options.codexHome = path.resolve(requireCliValue(args, index, "--codex-home"));
     index += 1;
   } else if (arg === "--agents-home") {
-    options.agentsHome = path.resolve(args[index + 1]);
+    options.agentsHome = path.resolve(requireCliValue(args, index, "--agents-home"));
     index += 1;
   } else if (arg === "--help" || arg === "-h") {
     printHelp();
     process.exit(0);
   } else {
-    throw new Error(`Unknown argument: ${arg}`);
+    throw new CliUsageError(`Unknown argument: ${arg}`);
   }
 }
 
@@ -232,7 +243,7 @@ function translateSetupHint(message) {
     .replace("Requires Notion workspace authorization.", "Notion workspace yetkilendirmesi gerekir.")
     .replace("Requires Sentry organization authorization and may expose production error data.", "Sentry organizasyon yetkilendirmesi gerekir ve production hata verisini açığa çıkarabilir.")
     .replace("Requires Vercel account/team authorization and may expose project or deployment data.", "Vercel hesap/takım yetkilendirmesi gerekir ve proje/deploy verisini açığa çıkarabilir.")
-    .replace("Set SUPABASE_DB_URL in the shell environment, then add a task-specific local launcher only after explicit database approval; never commit the value.", "Shell ortamında SUPABASE_DB_URL ayarlayın; task-specific yerel launcher'ı yalnız açık veritabanı onayından sonra ekleyin ve değeri asla commit etmeyin.");
+    .replace("Before enabling, add a task-specific project_ref query parameter, keep read_only=true, retain only the required feature groups, and complete Supabase OAuth.", "Etkinleştirmeden önce göreve özel project_ref query parametresini ekleyin, read_only=true ayarını koruyun, yalnız gerekli feature group'larını bırakın ve Supabase OAuth akışını tamamlayın.");
 }
 
 function translateNextAction(message) {
@@ -401,7 +412,7 @@ function codexCommand() {
 function inspectSkillInventory(skipGlobal = false) {
   const expected = readJson("catalog/skills.json")
     .skills
-    .filter((skill) => skill.install === true)
+    .filter((skill) => skill.install === true || skill.directInstall === true)
     .map((skill) => skill.name)
     .sort();
   if (skipGlobal) {
@@ -1045,7 +1056,7 @@ function summarizeSkillContext(runtimeReport, skillInventory) {
         ? "Installed skill count was not inspected in repo-only mode; use npm run codex:status for runtime skill pressure."
         : "Installed skill count is unlikely to pressure the initial skills list.",
     recommendation: warningLikely
-      ? "Disable unused global skills or plugins when implicit skill discovery feels noisy; explicit skill names still work."
+      ? "Disable only unused or duplicate skill sources when implicit discovery feels noisy; explicit invocation remains available only through an enabled copy."
       : skills.inspected === false
         ? "No action needed for repo-only audits."
         : "No action needed."
@@ -1272,7 +1283,7 @@ if (options.json) {
     console.log(`${localText("Installed runtime", "Kurulu ortam")}: ${runtimeText}`);
   }
   if (!runtime.report?.skills?.inspected && skillInventory.inspected) {
-    console.log(`${localText("Skills", "Skill'ler")}: ${skillInventory.installed} ${localText("total installed across global roots", "global köklerde toplam kurulu")} (${skillInventory.expected} Codex Chef curated, ${skillInventory.missing.length} ${localText("missing", "eksik")}, ${skillInventory.extraCount} ${localText("other/user-installed", "diğer/kullanıcı kurulu")})`);
+    console.log(`${localText("Skills", "Skill'ler")}: ${skillInventory.installed} ${localText("total installed across global roots", "global köklerde toplam kurulu")} (${skillInventory.expected} Codex Chef managed, ${skillInventory.missing.length} ${localText("missing", "eksik")}, ${skillInventory.extraCount} ${localText("other/user-installed", "diğer/kullanıcı kurulu")})`);
   } else if (!runtime.report?.skills?.inspected && skillInventory.inspected === false) {
     console.log(`${localText("Skills", "Skill'ler")}: ${localText("skipped", "atlandı")} (${translateStatusMessage(skillInventory.note)})`);
   }
@@ -1323,7 +1334,10 @@ if (options.json) {
     console.log(`${index === 0 ? localText("Next action", "Sonraki adım") : "  "}: ${translateNextAction(action)}`);
   }
   if (!options.details) {
-    console.log(`${localText("Details", "Ayrıntılar")}: npm run chef -- --status --details`);
+    const detailsCommand = options.skipRuntime
+      ? "npm run chef -- --status --repo-only --details --no-log"
+      : "npm run chef -- --status --details";
+    console.log(`${localText("Details", "Ayrıntılar")}: ${detailsCommand}`);
   }
   if (options.output) console.log(`${localText("Report", "Rapor")}: ${redact(path.resolve(root, options.output))}`);
 }

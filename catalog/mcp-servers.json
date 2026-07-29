@@ -56,14 +56,14 @@
       "package": "@playwright/mcp@0.0.76",
       "auth": "none",
       "setupKind": "tooling",
-      "setupHint": "Requires npm/npx network access and local browser control; no credential is required.",
+      "setupHint": "Requires npm/npx network access and local browser control; the managed launcher uses an isolated in-memory profile, blocks service-worker registration, and requires no credential.",
       "approval": "prompt",
       "enabledTools": ["browser_snapshot", "browser_take_screenshot", "browser_console_messages", "browser_network_requests", "browser_wait_for", "browser_resize", "browser_navigate", "browser_navigate_back", "browser_close", "browser_tabs"],
-      "toolApprovals": {"browser_snapshot":"approve", "browser_take_screenshot":"approve", "browser_console_messages":"approve", "browser_network_requests":"approve", "browser_wait_for":"approve", "browser_resize":"approve", "browser_navigate":"prompt", "browser_navigate_back":"prompt", "browser_close":"prompt", "browser_tabs":"prompt"},
+      "toolApprovals": {"browser_snapshot":"approve", "browser_take_screenshot":"approve", "browser_console_messages":"approve", "browser_network_requests":"prompt", "browser_wait_for":"approve", "browser_resize":"approve", "browser_navigate":"prompt", "browser_navigate_back":"prompt", "browser_close":"prompt", "browser_tabs":"prompt"},
       "risk": "medium",
       "sourceUrl": "https://github.com/microsoft/playwright-mcp",
-      "defaultReason": "Useful for UI evidence; only read/navigation evidence tools are allowlisted and interaction tools stay prompt-gated.",
-      "notes": "Browser automation and UI verification."
+      "defaultReason": "Useful for UI evidence; an isolated non-persistent profile is used, and interaction plus request-detail tools stay prompt-gated or disabled.",
+      "notes": "Browser automation and UI verification with isolated state and service workers blocked by default."
     },
     {
       "name": "chrome-devtools",
@@ -76,7 +76,7 @@
       "setupHint": "Requires npm/npx network access and starts an isolated Chrome/DevTools bridge; no credential is required.",
       "approval": "prompt",
       "enabledTools": ["list_pages", "select_page", "take_snapshot", "take_screenshot", "list_console_messages", "get_console_message", "list_network_requests", "wait_for", "resize_page", "navigate_page", "navigate_page_history", "close_page"],
-      "toolApprovals": {"list_pages":"approve", "select_page":"approve", "take_snapshot":"approve", "take_screenshot":"approve", "list_console_messages":"approve", "get_console_message":"approve", "list_network_requests":"approve", "wait_for":"approve", "resize_page":"approve", "navigate_page":"prompt", "navigate_page_history":"prompt", "close_page":"prompt"},
+      "toolApprovals": {"list_pages":"approve", "select_page":"approve", "take_snapshot":"approve", "take_screenshot":"approve", "list_console_messages":"approve", "get_console_message":"approve", "list_network_requests":"prompt", "wait_for":"approve", "resize_page":"approve", "navigate_page":"prompt", "navigate_page_history":"prompt", "close_page":"prompt"},
       "risk": "medium",
       "sourceUrl": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
       "defaultReason": "Browser inspection with isolated mode and redacted headers; only read/navigation evidence tools are allowlisted.",
@@ -157,10 +157,10 @@
       "auth": "oauth",
       "setupKind": "oauth",
       "setupHint": "Requires GitHub/Copilot account authorization; keep disabled until private GitHub context is needed.",
-      "approval": "approve",
+      "approval": "prompt",
       "risk": "high",
       "sourceUrl": "https://docs.github.com/en/copilot",
-      "defaultReason": "Disabled because it requires account authorization; configured readonly endpoint may be approved after deliberate enablement.",
+      "defaultReason": "Disabled because it requires account authorization; even the readonly endpoint stays prompt-gated after deliberate enablement.",
       "notes": "Repository and PR context. Keep disabled until needed."
     },
     {
@@ -241,17 +241,17 @@
     {
       "name": "supabase",
       "category": "database",
-      "transport": "stdio",
+      "transport": "remote",
       "defaultEnabled": false,
-      "package": "@modelcontextprotocol/server-postgres@0.6.2",
-      "auth": "env:SUPABASE_DB_URL",
-      "setupKind": "env",
-      "setupHint": "Set SUPABASE_DB_URL in the shell environment, then add a task-specific local launcher only after explicit database approval; never commit the value.",
+      "url": "https://mcp.supabase.com/mcp?read_only=true&features=database,docs",
+      "auth": "oauth",
+      "setupKind": "oauth",
+      "setupHint": "Before enabling, add a task-specific project_ref query parameter, keep read_only=true, retain only the required feature groups, and complete Supabase OAuth.",
       "approval": "prompt",
       "risk": "critical",
-      "sourceUrl": "https://github.com/modelcontextprotocol/servers",
-      "defaultReason": "Disabled because database access must be task-specific and explicit.",
-      "notes": "Database access. Enable only with explicit task need; keep the DB URL out of committed launcher args."
+      "sourceUrl": "https://github.com/supabase/mcp",
+      "defaultReason": "Disabled because authenticated database access must be task-specific, project-scoped, read-only by default, and explicit.",
+      "notes": "Official hosted Supabase MCP over OAuth. Enable only after adding project_ref, retaining read_only=true, minimizing feature groups, and obtaining explicit task approval."
     }
   ]
 }

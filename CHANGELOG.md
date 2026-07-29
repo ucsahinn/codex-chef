@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Add the explicit-only `fetch` bundled skill for authorized, browser-evidenced website reconstruction with public-passive defaults, inert authentication, prompt-injection and SSRF boundaries, lawful asset handling, zero-egress local output, fidelity reporting, and deterministic report validation.
+- Replace the upstream SEO reference with a Chef-owned `$seo` workflow that separates local, rendered, deployed, field, and account evidence; corrects retired or restricted Google Search features; implements technical/content/international/local guidance; and validates claim-safe audit reports.
+- Add the Chef-owned `$evidence-research` workflow for scoped search, screening, appraisal, claim-level traceability, disagreement and uncertainty synthesis, reproducibility, and ethics-aware decision packages.
+- Install Fetch, SEO, and Evidence Research from their canonical plugin source as managed direct skills, with per-target fail-closed collision checks, backup-backed repair, explicit adoption flags, runtime parity checks, and forward-tested report validators.
+- Add a shared, sanitized plain/JSON error contract and truthful result receipts across the Chef, status, routing, doctor, Brain, external-review, release-note, and pinned-skill CLIs; expand Continuity and runtime health evidence without exposing local secrets.
+- Harden commit-pinned skill installation with native exact-tree hashing, provenance-aware managed upgrades, foreign-target preservation, explicit per-skill adoption, mandatory replacement backups, rollback verification, and functional full-history fetch support.
+- Correct layered token-budget diagnostics, tighten external-review snapshot and credential-path containment, align MCP/runtime catalogs and approval boundaries, and expand release, installer, CLI, security, and cross-platform verification coverage.
+
 ## 0.5.57 - 2026-07-26
 
 - Make the command center installation-aware: fresh and incomplete setups preview before typed approval, current setups exit without reinstalling, managed drift routes to backup-backed repair, and invalid skill directories route to focused skill recovery.

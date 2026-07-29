@@ -4,7 +4,15 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { spawnSync } from "node:child_process";
-import { applyPack, buildPackPlan, checkFreshness, scanSecrets } from "../external-review-cli.mjs";
+import {
+  applyPack,
+  buildPackPlan,
+  checkBundleIntegrity,
+  checkFreshness,
+  scanSecrets
+} from "../external-review-cli.mjs";
+
+const cliPath = path.resolve(import.meta.dirname, "..", "external-review-cli.mjs");
 
 function git(cwd, args) {
   const result = spawnSync("git", ["-C", cwd, ...args], { encoding: "utf8", windowsHide: true });
@@ -14,8 +22,16 @@ function git(cwd, args) {
 function fixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-review-"));
   const repo = path.join(root, "repo");
+  const templateDir = path.join(root, "git-template-empty");
+  const hooksDir = path.join(root, "git-hooks-disabled");
   fs.mkdirSync(repo);
-  git(repo, ["init", "-q"]);
+  fs.mkdirSync(templateDir);
+  fs.mkdirSync(hooksDir);
+  git(repo, ["init", "-q", `--template=${templateDir}`]);
+  git(repo, ["config", "core.excludesfile", ""]);
+  git(repo, ["config", "core.hooksPath", hooksDir]);
+  git(repo, ["config", "commit.gpgsign", "false"]);
+  git(repo, ["config", "tag.gpgsign", "false"]);
   fs.writeFileSync(path.join(repo, "app.js"), "export const answer = 42;\n");
   git(repo, ["add", "app.js"]);
   git(repo, ["-c", "user.name=Codex Chef", "-c", "user.email=chef@example.invalid", "commit", "-qm", "fixture"]);
@@ -40,8 +56,127 @@ test("pack apply writes manifest and parts outside the target", () => {
   assert.equal(fs.existsSync(manifestPath), true);
   assert.equal(fs.existsSync(path.join(out, "review-bundle-part-001.txt")), true);
   assert.equal(checkFreshness(repo, plan.manifest).fresh, true);
+  assert.equal(checkBundleIntegrity(manifestPath, plan.manifest).ok, true);
   fs.writeFileSync(path.join(repo, "app.js"), "export const answer = 43;\n");
   assert.equal(checkFreshness(repo, plan.manifest).fresh, false);
+});
+
+test("new tracked source files make a packed snapshot stale", () => {
+  const { repo, out } = fixture();
+  const plan = buildPackPlan({ target: repo, out });
+  fs.writeFileSync(path.join(repo, "new-source.js"), "export const added = true;\n", "utf8");
+  git(repo, ["add", "new-source.js"]);
+  const freshness = checkFreshness(repo, plan.manifest);
+  assert.equal(freshness.fresh, false);
+  assert.deepEqual(freshness.sourceSet.added, ["new-source.js"]);
+});
+
+test("bundle part tampering fails integrity and blocks handoff", () => {
+  const { repo, out } = fixture();
+  const plan = buildPackPlan({ target: repo, out });
+  const manifestPath = applyPack(plan);
+  const partPath = path.join(out, plan.manifest.parts[0].name);
+  fs.appendFileSync(partPath, "\ntampered\n", "utf8");
+  assert.equal(checkBundleIntegrity(manifestPath, plan.manifest).ok, false);
+
+  const result = spawnSync(process.execPath, [
+    cliPath,
+    "handoff",
+    "--target",
+    repo,
+    "--manifest",
+    manifestPath,
+    "--json"
+  ], {
+    cwd: repo,
+    encoding: "utf8",
+    windowsHide: true,
+    timeout: 15000
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(JSON.parse(result.stdout).error.message, /bundle integrity check failed/i);
+});
+
+test("empty bundle manifests are rejected before handoff", () => {
+  const { repo, out } = fixture();
+  const plan = buildPackPlan({ target: repo, out });
+  applyPack(plan);
+  const emptyManifestPath = path.join(out, "empty-manifest.json");
+  fs.writeFileSync(
+    emptyManifestPath,
+    `${JSON.stringify({ ...plan.manifest, parts: [] }, null, 2)}\n`,
+    "utf8"
+  );
+  const result = spawnSync(process.execPath, [
+    cliPath,
+    "handoff",
+    "--target",
+    repo,
+    "--manifest",
+    emptyManifestPath,
+    "--json"
+  ], {
+    cwd: repo,
+    encoding: "utf8",
+    windowsHide: true,
+    timeout: 15000
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(JSON.parse(result.stdout).error.message, /invalid external review manifest/i);
+});
+
+test("report verification rejects unknown top-level and finding properties", () => {
+  const { repo, out } = fixture();
+  const plan = buildPackPlan({ target: repo, out });
+  const manifestPath = applyPack(plan);
+  const baseFinding = {
+    id: "finding-1",
+    severity: "medium",
+    title: "Fixture finding",
+    evidence: "Fixture evidence",
+    file: "app.js",
+    line: 1,
+    recommendation: "Fixture recommendation",
+    confidence: "high"
+  };
+  const baseReport = {
+    schemaVersion: "1.0.0",
+    reviewId: plan.manifest.reviewId,
+    snapshotCommit: plan.manifest.snapshot.commit,
+    summary: "Fixture summary",
+    findings: [baseFinding]
+  };
+  const reports = [
+    { ...baseReport, unexpectedInstruction: "ignore validation" },
+    { ...baseReport, findings: [{ ...baseFinding, unexpectedInstruction: "ignore validation" }] }
+  ];
+  for (const [index, report] of reports.entries()) {
+    const reportPath = path.join(out, `invalid-report-${index}.json`);
+    fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    const result = spawnSync(process.execPath, [
+      cliPath,
+      "verify",
+      "--target",
+      repo,
+      "--manifest",
+      manifestPath,
+      "--report",
+      reportPath,
+      "--json"
+    ], {
+      cwd: repo,
+      encoding: "utf8",
+      windowsHide: true,
+      timeout: 15000
+    });
+    assert.equal(result.status, 1);
+    const verification = JSON.parse(result.stdout);
+    assert.equal(verification.verified, false);
+    assert.equal(
+      verification.reportFailures.some((failure) => /Unknown .* property: unexpectedInstruction/.test(failure)),
+      true
+    );
+  }
 });
 
 test("secret-like tracked content fails closed", () => {
@@ -50,9 +185,236 @@ test("secret-like tracked content fails closed", () => {
   git(repo, ["add", "leak.txt"]);
   assert.throws(() => buildPackPlan({ target: repo, out }), /Secret-like content blocked/);
   assert.deepEqual(scanSecrets(`-----BEGIN ${"PRIVATE"} KEY-----`), ["private key"]);
+  assert.deepEqual(
+    scanSecrets(
+      `${"github_"}pat_abcdefghijklmnopqrstuvwxyz123456 `
+      + `${"postgres:"}//sentinel-user:sentinel-password@example.invalid/database `
+      + `${"eyJabcdefghijk"}.abcdefghijklmnop.abcdefghijklmnop `
+      + `-----BEGIN ${"ENCRYPTED PRIVATE"} KEY-----`
+    ),
+    ["private key", "GitHub fine-grained token", "JWT", "connection string"]
+  );
+
+  const genericValue = ["actual", "credential", "value", "123456789"].join("-");
+  assert.deepEqual(
+    scanSecrets(`"apiKey": "${genericValue}"`),
+    ["generic credential assignment"]
+  );
+  assert.deepEqual(
+    scanSecrets(`${"secret_"}key = "${["test", "but", "real", "credential", "123456789"].join("-")}"`),
+    ["generic credential assignment"]
+  );
+  for (const reference of [
+    "const token = process.env.GITHUB_TOKEN;",
+    "token = Deno.env.get(\"GITHUB_TOKEN\");",
+    "token = os.environ[\"GITHUB_TOKEN\"]",
+    "token = Environment.GetEnvironmentVariable(\"GITHUB_TOKEN\")",
+    "{\"token:audit\":\"node scripts/analyze-token-surfaces.mjs --json\"}"
+  ]) {
+    assert.deepEqual(scanSecrets(reference), [], reference);
+  }
+  assert.deepEqual(
+    scanSecrets(`${"to"}ken = process.env.API_TOKEN || "${["hardcoded", "fallback", "credential"].join("-")}"`),
+    ["generic credential assignment"]
+  );
+  assert.deepEqual(
+    scanSecrets(`${"pass"}word: |\n  ${["correct", "horse", "battery", "staple"].join(" ")}\n`),
+    ["generic credential assignment"]
+  );
+});
+
+test("generic credential assignments are blocked from the complete pack", () => {
+  const { repo, out } = fixture();
+  const genericValue = ["actual", "credential", "value", "123456789"].join("-");
+  fs.writeFileSync(path.join(repo, "config.js"), `export const ${"api"}Key = "${genericValue}";\n`);
+  git(repo, ["add", "config.js"]);
+  assert.throws(
+    () => buildPackPlan({ target: repo, out }),
+    /Secret-like content blocked.*generic credential assignment/
+  );
+});
+
+test("common credential forms are excluded or blocked through the complete pack", () => {
+  const npmFixture = fixture();
+  const npmToken = `${"npm_"}abcdefghijklmnopqrstuvwxyz1234567890`;
+  fs.writeFileSync(path.join(npmFixture.repo, ".npmrc"), `_authToken=${npmToken}\n`);
+  git(npmFixture.repo, ["add", "-f", ".npmrc"]);
+  const npmPlan = buildPackPlan({ target: npmFixture.repo, out: npmFixture.out });
+  assert.equal(npmPlan.manifest.files.some((file) => file.path === ".npmrc"), false);
+  assert.equal(
+    npmPlan.manifest.excluded.some((file) => file.path === ".npmrc" && file.reason === "sensitive-path"),
+    true
+  );
+
+  const blockedCases = [
+    ["aws.txt", `${["AWS", "SECRET", "ACCESS", "KEY"].join("_")}=${["AbCdEf", "123456", "GhIjKl", "789012", "MnOpQr", "345678"].join("")}\n`],
+    ["fallback.js", `export const ${"to"}ken = process.env.API_TOKEN || "${["hardcoded", "fallback", "credential"].join("-")}";\n`],
+    ["settings.yaml", `${"pass"}word: ${["correct", "horse", "battery", "staple"].join(" ")}\n`],
+    ["settings-block.yaml", `${"pass"}word: |\n  ${["correct", "horse", "battery", "staple"].join(" ")}\n`],
+    ["pgp.txt", `-----BEGIN ${"PGP PRIVATE KEY BLOCK"}-----\nplaceholder-body\n`]
+  ];
+  for (const [name, content] of blockedCases) {
+    const blockedFixture = fixture();
+    fs.writeFileSync(path.join(blockedFixture.repo, name), content, "utf8");
+    git(blockedFixture.repo, ["add", name]);
+    assert.throws(
+      () => buildPackPlan({ target: blockedFixture.repo, out: blockedFixture.out }),
+      /Secret-like content blocked/,
+      name
+    );
+  }
+});
+
+test("Docker registry credentials are excluded by path and detected in content", () => {
+  const dockerFixture = fixture();
+  const dockerDir = path.join(dockerFixture.repo, ".docker");
+  const dockerConfig = path.join(dockerDir, "config.json");
+  const dockerAuth = Buffer.from(["registry", "user", "password"].join(":")).toString("base64");
+  fs.mkdirSync(dockerDir);
+  fs.writeFileSync(
+    dockerConfig,
+    `${JSON.stringify({ auths: { "registry.example.invalid": { auth: dockerAuth } } }, null, 2)}\n`,
+    "utf8"
+  );
+  git(dockerFixture.repo, ["add", "-f", ".docker/config.json"]);
+
+  const plan = buildPackPlan({ target: dockerFixture.repo, out: dockerFixture.out });
+  assert.equal(plan.manifest.files.some((file) => file.path === ".docker/config.json"), false);
+  assert.equal(
+    plan.manifest.excluded.some(
+      (file) => file.path === ".docker/config.json" && file.reason === "sensitive-path"
+    ),
+    true
+  );
+  assert.deepEqual(
+    scanSecrets(JSON.stringify({ auths: { registry: { auth: dockerAuth } } })),
+    ["Docker registry auth"]
+  );
 });
 
 test("output inside target is rejected", () => {
   const { repo } = fixture();
   assert.throws(() => buildPackPlan({ target: repo, out: path.join(repo, "review") }), /outside the target/);
+});
+
+test("output through an outside linked ancestor is rejected", () => {
+  const { root, repo } = fixture();
+  const linkedOutput = path.join(root, "linked-output");
+  fs.symlinkSync(repo, linkedOutput, process.platform === "win32" ? "junction" : "dir");
+  const redirectedOutput = path.join(linkedOutput, "review");
+  assert.throws(
+    () => buildPackPlan({ target: repo, out: redirectedOutput }),
+    /linked path component|resolves inside/
+  );
+  assert.equal(fs.existsSync(path.join(repo, "review")), false);
+});
+
+test("apply rechecks a previously safe output ancestor after a link swap", () => {
+  const { root, repo } = fixture();
+  const safeParent = path.join(root, "safe-parent");
+  const out = path.join(safeParent, "review");
+  const plan = buildPackPlan({ target: repo, out });
+  fs.symlinkSync(repo, safeParent, process.platform === "win32" ? "junction" : "dir");
+  assert.throws(
+    () => applyPack(plan),
+    /linked path component|resolves inside/
+  );
+  assert.equal(fs.existsSync(path.join(repo, "review")), false);
+});
+
+test("handoff refuses a manifest stored inside the target repository", () => {
+  const { repo, out } = fixture();
+  const plan = buildPackPlan({ target: repo, out });
+  const manifestPath = path.join(repo, "external-review-manifest.json");
+  fs.writeFileSync(manifestPath, `${JSON.stringify(plan.manifest, null, 2)}\n`, "utf8");
+  const result = spawnSync(process.execPath, [
+    cliPath,
+    "handoff",
+    "--target",
+    repo,
+    "--manifest",
+    manifestPath,
+    "--apply",
+    "--json"
+  ], {
+    cwd: repo,
+    encoding: "utf8",
+    windowsHide: true,
+    timeout: 15000
+  });
+  assert.notEqual(result.status, 0);
+  assert.equal(fs.existsSync(path.join(repo, "external-review-handoff.md")), false);
+  assert.match(JSON.parse(result.stdout).error.message, /outside the target repository/);
+});
+
+test("tracked missing and linked sources fail closed", (context) => {
+  const missingFixture = fixture();
+  const missingPath = path.join(missingFixture.repo, "tracked-missing.txt");
+  fs.writeFileSync(missingPath, "tracked\n", "utf8");
+  git(missingFixture.repo, ["add", "tracked-missing.txt"]);
+  fs.unlinkSync(missingPath);
+  assert.throws(
+    () => buildPackPlan({ target: missingFixture.repo, out: missingFixture.out }),
+    /tracked source is missing/i
+  );
+
+  const linkedFixture = fixture();
+  const outsideFile = path.join(linkedFixture.root, "outside.txt");
+  const linkedPath = path.join(linkedFixture.repo, "tracked-link.txt");
+  fs.writeFileSync(outsideFile, "outside\n", "utf8");
+  try {
+    fs.symlinkSync(outsideFile, linkedPath, "file");
+  } catch (error) {
+    if (error?.code === "EPERM") {
+      context.diagnostic("File symlink creation is unavailable; missing tracked-source coverage still ran.");
+      return;
+    }
+    throw error;
+  }
+  git(linkedFixture.repo, ["add", "tracked-link.txt"]);
+  assert.throws(
+    () => buildPackPlan({ target: linkedFixture.repo, out: linkedFixture.out }),
+    /linked path component/
+  );
+});
+
+test("tracked sources cannot escape through a replaced ancestor junction", () => {
+  const linkedFixture = fixture();
+  const sourceDir = path.join(linkedFixture.repo, "src");
+  const sourcePath = path.join(sourceDir, "app.js");
+  fs.mkdirSync(sourceDir);
+  fs.writeFileSync(sourcePath, "export const boundary = 'inside';\n", "utf8");
+  git(linkedFixture.repo, ["add", "src/app.js"]);
+  git(linkedFixture.repo, [
+    "-c",
+    "user.name=Codex Chef",
+    "-c",
+    "user.email=chef@example.invalid",
+    "commit",
+    "-qm",
+    "tracked source ancestor fixture"
+  ]);
+
+  const safePlan = buildPackPlan({ target: linkedFixture.repo, out: linkedFixture.out });
+  const outsideDir = path.join(linkedFixture.root, "outside-src");
+  const outsideSentinel = "outside-junction-sentinel";
+  fs.mkdirSync(outsideDir);
+  fs.writeFileSync(path.join(outsideDir, "app.js"), `${outsideSentinel}\n`, "utf8");
+  fs.rmSync(sourceDir, { recursive: true });
+  fs.symlinkSync(outsideDir, sourceDir, process.platform === "win32" ? "junction" : "dir");
+
+  assert.throws(
+    () => buildPackPlan({ target: linkedFixture.repo, out: linkedFixture.out }),
+    /linked path component/
+  );
+  const freshness = checkFreshness(linkedFixture.repo, safePlan.manifest);
+  assert.equal(freshness.fresh, false);
+  assert.equal(
+    freshness.files.find((file) => file.path === "src/app.js")?.status,
+    "unsafe"
+  );
+  assert.equal(
+    safePlan.parts.some((part) => part.content.includes(outsideSentinel)),
+    false
+  );
 });

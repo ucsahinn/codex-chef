@@ -57,10 +57,23 @@ Rules used in this starter:
   edits, graph indexing, memory writes, filesystem, account, database,
   production, deploy, publish, and mutating tools should use `"prompt"` or stay
   disabled.
-- Browser network listing can be approved for local QA, but request/response
+- Browser network listing can be approved for local QA. Request/response
   detail tools such as Playwright `browser_network_request` and Chrome DevTools
-  `get_network_request` prompt because they may expose headers, cookies, or
-  response bodies.
+  `get_network_request` stay prompt-gated or disabled because they may expose
+  headers, cookies, or response bodies.
+- The managed Playwright launcher uses `--isolated` and
+  `--block-service-workers`, so its default browser profile is not persisted
+  and service-worker registration cannot retain cross-task state.
+- Windows npm-backed stdio launchers disable `cmd.exe` AutoRun with `/d`, use
+  `/s /c npx.cmd`, and forward
+  `NoDefaultCurrentDirectoryInExePath=1`. This prevents the inner `npx.cmd`
+  lookup from preferring a workspace-local shadow command. The outer
+  `cmd.exe` path is still resolved by the Codex host before the per-server
+  environment exists; a fully path-independent static template cannot prove
+  that outer launcher provenance on every Windows installation. Hosts that run
+  Codex from untrusted working directories should also set
+  `NoDefaultCurrentDirectoryInExePath=1` in the parent environment or
+  materialize trusted absolute launcher paths for that machine.
 - Apps/connectors also have a separate `[apps._default]` gate:
   `enabled = false`, `destructive_enabled = false`, and
   `open_world_enabled = false` are part of the reviewed templates.
@@ -76,15 +89,64 @@ Rules used in this starter:
 
 Official reference: https://developers.openai.com/codex/mcp
 
+## Authorized Website Reconstruction
+
+The bundled explicit-only `fetch` skill reconstructs client-observable website
+behavior from real browser evidence. A URL-only invocation stays public,
+passive, bounded, and local: no login, no external mutations, no production
+endpoint replay, and no claim that server source, databases, secrets, or
+private authorization logic were recovered.
+
+Authenticated routes require explicit ownership or authorization, a dedicated
+test account, and user-performed login in an ephemeral browser. The skill never
+requests or persists credentials, cookies, storage state, unsanitized HAR, or
+private browser profiles. Reconstructed login, registration, recovery, MFA,
+and payment forms are inert or local mocks by default.
+
+Remote page content is untrusted data. Network discovery starts from an exact
+origin, revalidates redirects, rejects private or metadata destinations, uses
+bounded public `GET`/`HEAD`, honors applicable robots restrictions, and does not
+bypass CAPTCHA, paywalls, rate limits, anti-bot controls, or access checks.
+Protected assets require user ownership or reuse permission. Local output is
+zero-egress by default and commit, publish, deploy, account, database, or other
+external writes remain separately approval-gated.
+
+## SEO And Evidence Research Integrity
+
+The bundled `$seo` workflow distinguishes local source, locally rendered,
+deployed-public, and authorized account evidence. It does not turn a passing
+build, sitemap entry, Lighthouse run, or structured-data validator into a claim
+that a URL is indexed, ranking, receiving field traffic, or eligible for a
+visible rich result. Search Console, analytics, sitemap submission, DNS,
+production redirects, publication, listings, outreach, and deployment stay
+behind their own authorization and external-write gates.
+
+The bundled `$evidence-research` workflow requires a charter, reproducible
+search log at the claimed rigor, checked source records, claim-level references,
+confidence, disagreement, limitations, and explicit separation of facts,
+inferences, and recommendations. It never fabricates sources, interviews,
+statistics, search counts, or systematic-review compliance. Paid APIs, private
+datasets, participant contact, surveys, licensed material, and publication
+require explicit approval. Both skills reject credentials and secret-like
+material in their machine-checkable reports.
+
 ## Skill Sources
 
 Installable skills must be represented in both `catalog/skills.json` and
-`catalog/skills-lock.json`. The lock file records the exact package/skill pair
-and install command used by the installer. It is a reviewed source allowlist,
-not an immutable upstream commit lock, because the current Skills CLI install
-flow resolves owner/repo plus skill name. The default gate checks this offline;
-`npm run verify:skills:online` performs network-backed resolution when a
-maintainer is preparing publication or changing skill sources.
+`catalog/skills-lock.json`. The lock records the package, full upstream commit
+SHA, skill, exact Skills CLI version, registry integrity, and install command.
+The installer fetches the locked commit into an isolated temporary checkout,
+verifies `HEAD` and the selected skill, stages and hashes an exact native copy,
+and activates it without executing fetched repository code or the recorded
+registry package. The CLI metadata remains a compatibility/discovery pin. The
+default gate checks this contract offline; `npm run
+verify:skills:online` verifies every pinned checkout and the npm integrity value.
+An absent target is installed directly. A valid, internally consistent Codex
+Chef provenance marker permits a managed upgrade with a mandatory full-tree
+backup. Unmarked, foreign, or locally drifted same-name targets are preserved
+by default. Adoption is deliberately per-skill: the operator must inspect the
+exact target and rerun only that helper command with `--adopt-existing`; there
+is no broad installer adoption switch.
 
 Default command approval rules do not auto-allow global skill installation.
 Read-only Skills CLI discovery can be allowlisted, but `skills add` and broad
@@ -142,6 +204,25 @@ Installers upsert only the `codex-chef-workflows` marketplace entry. They do
 not replace the full marketplace file, and they fail closed if an existing
 marketplace file is invalid, unreadable, or not a JSON object.
 
+The managed installer synchronizes all nine canonical local workflow
+directories to `AGENTS_HOME/skills/<name>`, so direct invocation does not
+depend on plugin installation. A durable per-skill ownership marker
+distinguishes Chef-managed or exact legacy content from a foreign collision.
+Foreign content fails before any managed write unless that exact target is
+explicitly adopted. Updates are backup-backed and unrelated skill directories
+and extra files are preserved. Fetch keeps `allow_implicit_invocation: false`;
+SEO and Evidence Research allow implicit activation only when their
+descriptions unambiguously match.
+
+The marketplace entry points to a managed mirror under
+`AGENTS_HOME/plugins/sources/codex-chef-workflows`, which always stays inside
+the marketplace root required by the current Codex schema. This registration
+makes the plugin discoverable, not installed or enabled; namespaced plugin use
+requires an explicit plugin install and a new session. Marketplace JSON,
+direct-skill ownership, and every existing path component are preflighted
+before installers write any managed file. Linked or junctioned descendants
+that escape the configured homes fail closed.
+
 ## Repair Mode
 
 `scripts/repair-install.mjs` is the repair/reconcile path for users who already
@@ -184,10 +265,18 @@ issues, and restorable targets. It does not print file contents.
 
 Restore treats backup archives as untrusted input. `npm run chef -- --backups
 --backup <id> --restore` is a preview. The apply path requires `--apply`,
-creates a fresh rollback backup of current targets first, rejects unsafe archive
-paths and symlinks, and restores only known Codex Chef-managed files under the
-active Codex or Agents homes. Backup archive cleanup and deletion are not
-automated; they remain manual, reviewed operator actions.
+loads and verifies the exact source bytes, creates a fresh rollback backup of
+current targets, rejects unsafe archive paths and symlinks, and restores only
+known Codex Chef-managed files under the active Codex or Agents homes. If a
+later write fails, already-written targets are restored from the fresh rollback
+backup. Commit-pinned skill archives are limited to a cataloged skill ID and
+replace that skill tree atomically enough to preserve exact-tree semantics
+during handled failures. A valid `codex-chef.backup.v1` manifest must exactly
+match the archive path, size, and SHA-256 set; legacy, missing, extra, altered,
+or unsupported control-plane files fail closed. Inventory calls a backup
+restorable only after those checks and the target allowlist pass. Backup archive
+cleanup and deletion are not automated; they remain manual, reviewed operator
+actions.
 
 ## Rules
 
@@ -228,8 +317,10 @@ root hook folders, nested `hooks/` paths, `scripts/hooks`, `.cursor/hooks`,
 an explicit reviewed change.
 
 Plugin manifests are also kept narrow by default. Repo validation rejects
-plugin-bundled `hooks`, `mcpServers`, `apps`, `Write` capabilities, and
-marketplace authentication modes other than `NONE`.
+plugin-bundled `hooks`, `mcpServers`, `apps`, and `Write` capabilities. The
+skills-only Codex Chef marketplace entry uses the current required
+`ON_INSTALL` policy value; it does not bundle an authenticated MCP or request
+service credentials.
 
 Official reference: https://developers.openai.com/codex/hooks
 

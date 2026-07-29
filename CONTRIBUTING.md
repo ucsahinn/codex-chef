@@ -9,7 +9,12 @@ Codex Chef changes global developer tooling, so small and reviewable beats cleve
 - Do not broaden approval rules for publishing, credential access, destructive file operations, or unrestricted shells.
 - Prefer environment placeholders over static credentials.
 - Keep English and Turkish operator docs aligned when behavior changes.
-- Preserve user-owned config, profiles, skills, MCPs, and unrelated plugin files during install or repair.
+- Preserve user-owned config, profiles, skills, MCPs, and unrelated plugin files
+  during install or repair. Replacement is allowed only for an exact direct
+  skill adopted with its named flag, or an exact commit-pinned skill adopted by
+  manually rerunning its reviewed helper command with `--adopt-existing`.
+  Direct-skill adoption preserves unrelated files inside that target; pinned
+  adoption creates a complete mandatory backup before exact-tree replacement.
 
 ## Verification
 

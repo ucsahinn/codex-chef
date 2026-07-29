@@ -1,10 +1,12 @@
 {
   "version": "0.1.0",
   "dateChecked": "2026-06-20",
-  "installCommand": "npx skills add <package> --skill <skill> --agent codex --yes --global",
-  "sourcePolicy": "Installable entries must declare package, skill, source, sourceUrl, license, risk, and lastChecked. Online resolution is verified separately with npm run verify:skills:online.",
-  "lockSemantics": "source-allowlist",
-  "immutability": "Skills CLI installation uses owner/repo plus skill name; this catalog is an allowlist, not a commit-pinned lock. Re-run online verification before release or after changing skill sources.",
+  "skillsCliVersion": "1.5.20",
+  "skillsCliIntegrity": "sha512-lPl5KzMfTW+qwHFwc8t6R+wAqmdmSHw1+HWbGdJ/FZYbWLdB34bAZNFWiencM5DVoRaKAgXArmfTWMlNAbl9Gg==",
+  "installCommand": "node scripts/install-pinned-skill.mjs --package <package> --commit <commit> --skill <skill> --cli-version 1.5.20",
+  "sourcePolicy": "Installable entries must declare package, commit, skill, source, sourceUrl, license, risk, and lastChecked. The helper fetches the exact commit, verifies HEAD and the selected skill, stages an exact native copy, verifies its tree hash and provenance, then activates it without executing fetched repository code or a registry-delivered installer.",
+  "lockSemantics": "commit-pinned",
+  "immutability": "Every installable upstream is pinned to a full Git commit SHA. The recorded Skills CLI version and integrity remain compatibility and discovery metadata; installation uses the repository native-copy helper and does not execute that registry package.",
   "compatibilityAliases": {
     "context-engineering-project-starter": "ai-project-starter",
     "codex-skill-forge": "ai-skill-create",
@@ -21,7 +23,9 @@
       "name": "codex-chef-operator",
       "category": "codex-setup",
       "install": false,
-      "reason": "Bundled local plugin skill for safe Codex Chef repo maintenance, catalog alignment, installer safety, docs updates, and verification gates."
+      "directInstall": true,
+      "directTarget": "${AGENTS_HOME}/skills/codex-chef-operator",
+      "reason": "Bundled local plugin skill for safe Codex Chef repo maintenance, catalog alignment, installer safety, docs updates, and verification gates, with direct invocation for routing profiles."
     },
     {
       "name": "git-hygiene",
@@ -33,25 +37,33 @@
       "name": "context-budget-planner",
       "category": "context-engineering",
       "install": false,
-      "reason": "Bundled local plugin skill for token/context budgeting, source prioritization, compaction handoff, and verification planning."
+      "directInstall": true,
+      "directTarget": "${AGENTS_HOME}/skills/context-budget-planner",
+      "reason": "Bundled local plugin skill for token/context budgeting, source prioritization, compaction handoff, and verification planning, with direct invocation required by the global operating contract."
     },
     {
       "name": "external-review-workflow",
       "category": "code-review",
       "install": false,
-      "reason": "Bundled local plugin skill for secret-safe external review packaging, manual handoff, snapshot freshness checks, and structured finding verification without automatic upload."
+      "directInstall": true,
+      "directTarget": "${AGENTS_HOME}/skills/external-review-workflow",
+      "reason": "Bundled local plugin skill for secret-safe external review packaging, manual handoff, snapshot freshness checks, and structured finding verification without automatic upload, with direct invocation."
     },
     {
       "name": "adaptive-agent-routing",
       "category": "context-engineering",
       "install": false,
-      "reason": "Bundled local plugin skill for conditional delegation, canonical skill ownership, profile-inherited agent model selection, and compact routing visibility."
+      "directInstall": true,
+      "directTarget": "${AGENTS_HOME}/skills/adaptive-agent-routing",
+      "reason": "Bundled local plugin skill for conditional delegation, canonical skill ownership, profile-inherited agent model selection, and compact routing visibility, with direct invocation required by the global operating contract."
     },
     {
       "name": "codex-chef-brain",
       "category": "context-engineering",
       "install": false,
-      "reason": "Bundled local plugin skill for preview-first capture, project-scoped retrieval, backup, and restore of a user-owned Markdown Brain vault."
+      "directInstall": true,
+      "directTarget": "${AGENTS_HOME}/skills/codex-chef-brain",
+      "reason": "Bundled local plugin skill for preview-first capture, project-scoped retrieval, backup, and restore of a user-owned Markdown Brain vault, with direct invocation."
     },
     {
       "name": "investigate",
@@ -82,6 +94,7 @@
       "category": "maintenance",
       "install": true,
       "package": "wshobson/agents",
+      "commit": "c4b82b0ad771190355eb8e204b1329732a18449a",
       "skill": "dependency-upgrade",
       "source": "wshobson/agents@dependency-upgrade",
       "sourceUrl": "https://github.com/wshobson/agents",
@@ -97,6 +110,7 @@
       "category": "github-ci",
       "install": true,
       "package": "openai/skills",
+      "commit": "49f948faa9258a0c61caceaf225e179651397431",
       "skill": "gh-fix-ci",
       "source": "openai/skills@gh-fix-ci",
       "sourceUrl": "https://github.com/openai/skills",
@@ -118,6 +132,7 @@
       "category": "debugging",
       "install": true,
       "package": "obra/superpowers",
+      "commit": "44c9b2d6e889982ac18c27d05a19fefe335194e1",
       "skill": "systematic-debugging",
       "source": "obra/superpowers@systematic-debugging",
       "sourceUrl": "https://github.com/obra/superpowers",
@@ -145,6 +160,7 @@
       "category": "implementation",
       "install": true,
       "package": "mattpocock/skills",
+      "commit": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
       "skill": "request-refactor-plan",
       "source": "mattpocock/skills@request-refactor-plan",
       "sourceUrl": "https://github.com/mattpocock/skills",
@@ -196,6 +212,7 @@
       "category": "security",
       "install": true,
       "package": "openai/skills",
+      "commit": "49f948faa9258a0c61caceaf225e179651397431",
       "skill": "security-best-practices",
       "source": "openai/skills@security-best-practices",
       "sourceUrl": "https://github.com/openai/skills",
@@ -223,6 +240,7 @@
       "category": "frontend-design",
       "install": true,
       "package": "nexu-io/open-design",
+      "commit": "f52fda29a8a6fc65c501a45bb165b6f5208194a1",
       "skill": "frontend-skill",
       "source": "nexu-io/open-design@frontend-skill",
       "sourceUrl": "https://github.com/nexu-io/open-design",
@@ -238,6 +256,7 @@
       "category": "browser-testing",
       "install": true,
       "package": "anthropics/skills",
+      "commit": "b29e7cf65e5cb78a5ac33d582270551bc74a14eb",
       "skill": "webapp-testing",
       "source": "anthropics/skills@webapp-testing",
       "sourceUrl": "https://github.com/anthropics/skills",
@@ -253,6 +272,7 @@
       "category": "web-quality",
       "install": true,
       "package": "addyosmani/web-quality-skills",
+      "commit": "95d6e255afe1596b557d7a8498517884438f5b3a",
       "skill": "web-quality-audit",
       "source": "addyosmani/web-quality-skills@web-quality-audit",
       "sourceUrl": "https://github.com/addyosmani/web-quality-skills",
@@ -266,23 +286,25 @@
     {
       "name": "seo",
       "category": "search-discoverability",
-      "install": true,
-      "package": "addyosmani/web-quality-skills",
-      "skill": "seo",
-      "source": "addyosmani/web-quality-skills@seo",
-      "sourceUrl": "https://github.com/addyosmani/web-quality-skills",
-      "license": "MIT",
-      "risk": "medium",
-      "networkRequired": true,
-      "authRequired": false,
-      "lastChecked": "2026-06-15",
-      "reason": "Audit crawlability, metadata, structured data, sitemaps, mobile readiness, and search discoverability."
+      "install": false,
+      "directInstall": true,
+      "directTarget": "${AGENTS_HOME}/skills/seo",
+      "reason": "Bundled local plugin skill for evidence-backed technical, content, structured-data, international, local, performance, measurement, implementation, and verification work, with direct $seo invocation."
+    },
+    {
+      "name": "evidence-research",
+      "category": "research",
+      "install": false,
+      "directInstall": true,
+      "directTarget": "${AGENTS_HOME}/skills/evidence-research",
+      "reason": "Bundled local plugin skill for scoped, source-traceable deep research, screening, appraisal, synthesis, uncertainty, reproducibility, and decision-ready evidence packages, with direct $evidence-research invocation."
     },
     {
       "name": "accessibility",
       "category": "accessibility",
       "install": true,
       "package": "addyosmani/web-quality-skills",
+      "commit": "95d6e255afe1596b557d7a8498517884438f5b3a",
       "skill": "accessibility",
       "source": "addyosmani/web-quality-skills@accessibility",
       "sourceUrl": "https://github.com/addyosmani/web-quality-skills",
@@ -298,6 +320,7 @@
       "category": "testing",
       "install": true,
       "package": "obra/superpowers",
+      "commit": "44c9b2d6e889982ac18c27d05a19fefe335194e1",
       "skill": "test-driven-development",
       "source": "obra/superpowers@test-driven-development",
       "sourceUrl": "https://github.com/obra/superpowers",
@@ -313,6 +336,7 @@
       "category": "documentation",
       "install": true,
       "package": "addyosmani/agent-skills",
+      "commit": "7829ffd90d973b6325f5f12f1b1226dcace74443",
       "skill": "documentation-and-adrs",
       "source": "addyosmani/agent-skills@documentation-and-adrs",
       "sourceUrl": "https://github.com/addyosmani/agent-skills",
@@ -328,6 +352,7 @@
       "category": "connectors",
       "install": true,
       "package": "anthropics/skills",
+      "commit": "b29e7cf65e5cb78a5ac33d582270551bc74a14eb",
       "skill": "mcp-builder",
       "source": "anthropics/skills@mcp-builder",
       "sourceUrl": "https://github.com/anthropics/skills",
@@ -463,6 +488,7 @@
       "category": "context-engineering",
       "install": true,
       "package": "ucsahinn/ai-project-starter",
+      "commit": "9da8cdced620a89d4c4540cbbe562359eeb99c33",
       "skill": "ai-project-starter",
       "source": "ucsahinn/ai-project-starter@ai-project-starter",
       "sourceUrl": "https://github.com/ucsahinn/ai-project-starter",
@@ -493,6 +519,7 @@
       "category": "prompt-engineering",
       "install": true,
       "package": "ucsahinn/prompt-architect",
+      "commit": "6d62cb0cfe44580e3422cdd9900f8be57ad8cd0f",
       "skill": "prompt-architect",
       "source": "ucsahinn/prompt-architect@prompt-architect",
       "sourceUrl": "https://github.com/ucsahinn/prompt-architect",
@@ -538,6 +565,7 @@
       "category": "skill-authoring",
       "install": true,
       "package": "ucsahinn/ai-skill-create",
+      "commit": "78144e434a5216799b0d0932579c7d9d84781d39",
       "skill": "ai-skill-create",
       "source": "ucsahinn/ai-skill-create@ai-skill-create",
       "sourceUrl": "https://github.com/ucsahinn/ai-skill-create",
@@ -586,10 +614,20 @@
       "reason": "Local/global reference. The default installable equivalent is webapp-testing from anthropics/skills."
     },
     {
+      "name": "fetch",
+      "category": "browser-reconstruction",
+      "install": false,
+      "directInstall": true,
+      "directTarget": "${AGENTS_HOME}/skills/fetch",
+      "reason": "Bundled local plugin skill for explicit, authorized website reconstruction with browser evidence, inert authentication defaults, zero-egress local output, and validated fidelity gaps."
+    },
+    {
       "name": "offline-diagram-triplet",
       "category": "documentation-diagrams",
       "install": false,
-      "reason": "Bundled local plugin skill that converts Mermaid source into editable Excalidraw plus SVG/PNG artifacts with zero network."
+      "directInstall": true,
+      "directTarget": "${AGENTS_HOME}/skills/offline-diagram-triplet",
+      "reason": "Bundled local plugin skill that converts Mermaid source into editable Excalidraw plus SVG/PNG artifacts with zero network, with direct invocation."
     }
   ]
 }

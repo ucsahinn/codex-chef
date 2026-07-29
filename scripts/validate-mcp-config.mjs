@@ -169,6 +169,7 @@ const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
 const catalogNames = new Set((catalog.servers || []).map((server) => server.name));
 const codebaseMemoryDisabledTools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"];
 const codebaseMemory = (catalog.servers || []).find((server) => server.name === "codebase-memory");
+const supabase = (catalog.servers || []).find((server) => server.name === "supabase");
 
 if (!codebaseMemory) {
   fail("MCP catalog must include codebase-memory.");
@@ -178,6 +179,27 @@ if (!codebaseMemory) {
   if (codebaseMemory.defaultEnabled !== true) fail("codebase-memory must stay enabled by default for local read-heavy repo intelligence.");
   if (codebaseMemory.approval !== "prompt") fail("codebase-memory default approval must stay prompt so indexing is not silently approved.");
   if (codebaseMemory.risk !== "medium") fail("codebase-memory catalog risk must stay medium while destructive/admin tools are disabled.");
+}
+
+if (!supabase) {
+  fail("MCP catalog must include supabase.");
+} else {
+  if (supabase.transport !== "remote") fail("Supabase MCP must use the official hosted remote transport.");
+  if (supabase.setupKind !== "oauth" || supabase.auth !== "oauth") {
+    fail("Supabase MCP must use the hosted OAuth credential boundary.");
+  }
+  if (!String(supabase.url || "").startsWith("https://mcp.supabase.com/mcp?")) {
+    fail("Supabase MCP must use the official mcp.supabase.com endpoint.");
+  }
+  if (!String(supabase.url || "").includes("read_only=true")) {
+    fail("Supabase MCP must keep read_only=true in the disabled template.");
+  }
+  if (!String(supabase.url || "").includes("features=database,docs")) {
+    fail("Supabase MCP must minimize the default feature groups.");
+  }
+  if (supabase.package || String(supabase.auth || "").includes("SUPABASE_DB_URL")) {
+    fail("Supabase MCP must not retain the deprecated Postgres launcher or database URL credential path.");
+  }
 }
 
 const gitignore = read(".gitignore");
@@ -264,6 +286,23 @@ for (const configFile of configFiles) {
 
     const enabled = readTomlValue(block, "enabled");
     const approval = unquote(readTomlValue(block, "default_tools_approval_mode"));
+    if (configFile.endsWith("config.windows.toml") && unquote(readTomlValue(block, "command")) === "cmd.exe") {
+      const launcherArgs = parseInlineStringArray(readTomlValue(block, "args"));
+      if (
+        launcherArgs[0] !== "/d"
+        || launcherArgs[1] !== "/s"
+        || launcherArgs[2] !== "/c"
+        || launcherArgs[3] !== "npx.cmd"
+      ) {
+        fail(`${configFile} ${server.name} must disable cmd AutoRun and invoke npx.cmd explicitly with /d /s /c.`);
+      }
+      const launcherEnv = readTomlValue(block, "env") || "";
+      if (!/NoDefaultCurrentDirectoryInExePath\s*=\s*"1"/.test(launcherEnv)) {
+        fail(
+          `${configFile} ${server.name} must disable current-directory executable lookup for npx.cmd.`
+        );
+      }
+    }
     if (enabled !== String(server.defaultEnabled)) {
       fail(`${configFile} enabled drift for ${server.name}: expected ${server.defaultEnabled}, found ${enabled}`);
     }
@@ -314,8 +353,8 @@ for (const configFile of configFiles) {
       if (server.risk === "critical" && approval !== "prompt") {
         fail(`${configFile} critical MCP must use prompt approval mode: ${server.name}`);
       }
-      if (server.risk === "high" && server.defaultEnabled === true && approval !== "prompt") {
-        fail(`${configFile} enabled high-risk MCP must use prompt approval mode: ${server.name}`);
+      if (server.risk === "high" && approval !== "prompt") {
+        fail(`${configFile} high-risk MCP must use prompt approval mode even while disabled: ${server.name}`);
       }
     }
     if (server.setupKind === "env") {

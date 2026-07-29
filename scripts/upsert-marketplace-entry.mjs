@@ -7,8 +7,10 @@ const scriptPath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(scriptPath), "..");
 const sourceMarketplacePath = path.join(repoRoot, ".agents", "plugins", "marketplace.json");
 const pluginName = "codex-chef-workflows";
+const allowedInstallPolicies = new Set(["NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"]);
+const allowedAuthenticationPolicies = new Set(["ON_INSTALL", "ON_USE"]);
 
-export function canonicalMarketplaceEntry(pluginTarget, sourcePath = sourceMarketplacePath) {
+export function canonicalMarketplaceEntry(pluginSource, sourcePath = sourceMarketplacePath) {
   const source = readJsonFile(sourcePath);
   if (!source || typeof source !== "object" || Array.isArray(source)) {
     throw new Error(`Source marketplace root must be a JSON object: ${sourcePath}`);
@@ -16,6 +18,7 @@ export function canonicalMarketplaceEntry(pluginTarget, sourcePath = sourceMarke
   if (!Array.isArray(source.plugins)) {
     throw new Error(`Source marketplace plugins must be an array: ${sourcePath}`);
   }
+  validateMarketplacePlugins(source.plugins, sourcePath);
   const entry = source.plugins.find((plugin) => plugin?.name === pluginName);
   if (!entry) {
     throw new Error(`Source marketplace is missing ${pluginName}: ${sourcePath}`);
@@ -26,14 +29,14 @@ export function canonicalMarketplaceEntry(pluginTarget, sourcePath = sourceMarke
       ? desired.source
       : {}),
     source: "local",
-    path: pluginTarget
+    path: pluginSource
   };
   return desired;
 }
 
 export function inspectMarketplaceEntry(marketplacePath, pluginTarget) {
   const marketplace = readMarketplaceOrDefault(marketplacePath);
-  const desired = canonicalMarketplaceEntry(pluginTarget);
+  const desired = canonicalMarketplaceEntry(relativePluginSource(marketplacePath, pluginTarget));
   const existingIndex = marketplace.plugins.findIndex((plugin) => plugin?.name === desired.name);
   const before = existingIndex >= 0 ? marketplace.plugins[existingIndex] : null;
   return {
@@ -43,6 +46,16 @@ export function inspectMarketplaceEntry(marketplacePath, pluginTarget) {
     beforeCount: marketplace.plugins.length,
     changed: stableJson(before) !== stableJson(desired)
   };
+}
+
+function relativePluginSource(marketplacePath, pluginTarget) {
+  const marketplaceRoot = path.resolve(path.dirname(marketplacePath), "..", "..");
+  const target = path.resolve(pluginTarget);
+  const relative = path.relative(marketplaceRoot, target);
+  if (!relative || relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    throw new Error(`plugin target must stay inside the marketplace root: ${pluginTarget}`);
+  }
+  return `./${relative.replaceAll(path.sep, "/")}`;
 }
 
 export function writeMarketplaceEntry(marketplacePath, pluginTarget) {
@@ -75,7 +88,24 @@ function readMarketplaceOrDefault(marketplacePath) {
   if (!Array.isArray(marketplace.plugins)) {
     throw new Error(`plugin marketplace plugins must be an array: ${marketplacePath}`);
   }
+  validateMarketplacePlugins(marketplace.plugins, marketplacePath);
   return marketplace;
+}
+
+function validateMarketplacePlugins(plugins, marketplacePath) {
+  for (const [index, plugin] of plugins.entries()) {
+    if (!plugin || typeof plugin !== "object" || Array.isArray(plugin)) {
+      throw new Error(`plugin marketplace entry ${index} must be an object: ${marketplacePath}`);
+    }
+    if (!allowedInstallPolicies.has(plugin.policy?.installation)) {
+      throw new Error(`plugin marketplace entry ${index} has unsupported installation policy: ${marketplacePath}`);
+    }
+    const isLegacyManagedEntry = plugin.name === pluginName
+      && plugin.policy?.authentication === "NONE";
+    if (!allowedAuthenticationPolicies.has(plugin.policy?.authentication) && !isLegacyManagedEntry) {
+      throw new Error(`plugin marketplace entry ${index} has unsupported authentication policy: ${marketplacePath}`);
+    }
+  }
 }
 
 function readJsonFile(filePath) {

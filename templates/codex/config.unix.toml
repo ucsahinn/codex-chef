@@ -151,7 +151,7 @@ tool_timeout_sec = 120
 [mcp_servers.playwright]
 enabled = true
 command = "npx"
-args = ["-y", "@playwright/mcp@0.0.76"]
+args = ["-y", "@playwright/mcp@0.0.76", "--isolated", "--block-service-workers"]
 default_tools_approval_mode = "prompt"
 enabled_tools = ["browser_snapshot", "browser_take_screenshot", "browser_console_messages", "browser_network_requests", "browser_wait_for", "browser_resize", "browser_navigate", "browser_navigate_back", "browser_close", "browser_tabs"]
 startup_timeout_sec = 20
@@ -168,7 +168,7 @@ approval_mode = "approve"
 approval_mode = "approve"
 
 [mcp_servers.playwright.tools.browser_network_requests]
-approval_mode = "approve"
+approval_mode = "prompt"
 
 [mcp_servers.playwright.tools.browser_wait_for]
 approval_mode = "approve"
@@ -216,7 +216,7 @@ approval_mode = "approve"
 approval_mode = "approve"
 
 [mcp_servers.chrome-devtools.tools.list_network_requests]
-approval_mode = "approve"
+approval_mode = "prompt"
 
 [mcp_servers.chrome-devtools.tools.wait_for]
 approval_mode = "approve"
@@ -351,7 +351,7 @@ tool_timeout_sec = 60
 [mcp_servers.github]
 enabled = false
 url = "https://api.githubcopilot.com/mcp/readonly"
-default_tools_approval_mode = "approve"
+default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 60
 
@@ -392,11 +392,8 @@ tool_timeout_sec = 60
 
 [mcp_servers.supabase]
 enabled = false
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-postgres@0.6.2"]
-# Add the DB URL argument only after explicit database-task approval.
-# Keep SUPABASE_DB_URL out of committed args because this upstream server uses a DB URL argument.
+url = "https://mcp.supabase.com/mcp?read_only=true&features=database,docs"
+# Add a task-specific project_ref query parameter before enabling this OAuth connector.
 default_tools_approval_mode = "prompt"
-env_vars = ["SUPABASE_DB_URL"]
 startup_timeout_sec = 20
 tool_timeout_sec = 60

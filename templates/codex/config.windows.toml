@@ -139,7 +139,8 @@ tool_timeout_sec = 120
 [mcp_servers.context7]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@upstash/context7-mcp@3.2.1"]
+args = ["/d", "/s", "/c", "npx.cmd", "-y", "@upstash/context7-mcp@3.2.1"]
+env = { NoDefaultCurrentDirectoryInExePath = "1" }
 default_tools_approval_mode = "approve"
 startup_timeout_sec = 20
 tool_timeout_sec = 120
@@ -147,7 +148,8 @@ tool_timeout_sec = 120
 [mcp_servers.sequential-thinking]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking@2025.12.18"]
+args = ["/d", "/s", "/c", "npx.cmd", "-y", "@modelcontextprotocol/server-sequential-thinking@2025.12.18"]
+env = { NoDefaultCurrentDirectoryInExePath = "1" }
 default_tools_approval_mode = "approve"
 startup_timeout_sec = 20
 tool_timeout_sec = 120
@@ -155,7 +157,8 @@ tool_timeout_sec = 120
 [mcp_servers.playwright]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@playwright/mcp@0.0.76"]
+args = ["/d", "/s", "/c", "npx.cmd", "-y", "@playwright/mcp@0.0.76", "--isolated", "--block-service-workers"]
+env = { NoDefaultCurrentDirectoryInExePath = "1" }
 default_tools_approval_mode = "prompt"
 enabled_tools = ["browser_snapshot", "browser_take_screenshot", "browser_console_messages", "browser_network_requests", "browser_wait_for", "browser_resize", "browser_navigate", "browser_navigate_back", "browser_close", "browser_tabs"]
 startup_timeout_sec = 20
@@ -172,7 +175,7 @@ approval_mode = "approve"
 approval_mode = "approve"
 
 [mcp_servers.playwright.tools.browser_network_requests]
-approval_mode = "approve"
+approval_mode = "prompt"
 
 [mcp_servers.playwright.tools.browser_wait_for]
 approval_mode = "approve"
@@ -195,7 +198,8 @@ approval_mode = "prompt"
 [mcp_servers.chrome-devtools]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "chrome-devtools-mcp@1.2.0", "--isolated", "--no-usage-statistics", "--redactNetworkHeaders", "--viewport", "1366x900"]
+args = ["/d", "/s", "/c", "npx.cmd", "-y", "chrome-devtools-mcp@1.2.0", "--isolated", "--no-usage-statistics", "--redactNetworkHeaders", "--viewport", "1366x900"]
+env = { NoDefaultCurrentDirectoryInExePath = "1" }
 default_tools_approval_mode = "prompt"
 enabled_tools = ["list_pages", "select_page", "take_snapshot", "take_screenshot", "list_console_messages", "get_console_message", "list_network_requests", "wait_for", "resize_page", "navigate_page", "navigate_page_history", "close_page"]
 startup_timeout_sec = 20
@@ -220,7 +224,7 @@ approval_mode = "approve"
 approval_mode = "approve"
 
 [mcp_servers.chrome-devtools.tools.list_network_requests]
-approval_mode = "approve"
+approval_mode = "prompt"
 
 [mcp_servers.chrome-devtools.tools.wait_for]
 approval_mode = "approve"
@@ -285,7 +289,8 @@ approval_mode = "approve"
 [mcp_servers.memory]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-memory@2026.1.26"]
+args = ["/d", "/s", "/c", "npx.cmd", "-y", "@modelcontextprotocol/server-memory@2026.1.26"]
+env = { NoDefaultCurrentDirectoryInExePath = "1" }
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 60
@@ -304,7 +309,8 @@ approval_mode = "approve"
 [mcp_servers.codebase-memory]
 enabled = true
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "codebase-memory-mcp@0.8.1"]
+args = ["/d", "/s", "/c", "npx.cmd", "-y", "codebase-memory-mcp@0.8.1"]
+env = { NoDefaultCurrentDirectoryInExePath = "1" }
 default_tools_approval_mode = "prompt"
 enabled_tools = ["list_projects", "index_status", "search_graph", "trace_path", "detect_changes", "query_graph", "get_graph_schema", "get_code_snippet", "get_architecture", "search_code"]
 disabled_tools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"]
@@ -347,7 +353,8 @@ approval_mode = "approve"
 [mcp_servers.filesystem]
 enabled = false
 command = "cmd.exe"
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "."]
+args = ["/d", "/s", "/c", "npx.cmd", "-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "."]
+env = { NoDefaultCurrentDirectoryInExePath = "1" }
 default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 60
@@ -356,7 +363,7 @@ tool_timeout_sec = 60
 [mcp_servers.github]
 enabled = false
 url = "https://api.githubcopilot.com/mcp/readonly"
-default_tools_approval_mode = "approve"
+default_tools_approval_mode = "prompt"
 startup_timeout_sec = 20
 tool_timeout_sec = 60
 
@@ -397,11 +404,8 @@ tool_timeout_sec = 60
 
 [mcp_servers.supabase]
 enabled = false
-command = "cmd.exe"
-args = ["/c", "npx", "-y", "@modelcontextprotocol/server-postgres@0.6.2"]
-# Add the DB URL argument only after explicit database-task approval.
-# Keep SUPABASE_DB_URL out of committed args because this upstream server uses a DB URL argument.
+url = "https://mcp.supabase.com/mcp?read_only=true&features=database,docs"
+# Add a task-specific project_ref query parameter before enabling this OAuth connector.
 default_tools_approval_mode = "prompt"
-env_vars = ["SUPABASE_DB_URL"]
 startup_timeout_sec = 20
 tool_timeout_sec = 60

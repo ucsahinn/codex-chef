@@ -150,6 +150,7 @@ for (const profile of routing.profiles || []) {
 
 for (const required of [
   "current-docs-research",
+  "evidence-backed-research",
   "context-surface-decision",
   "bug-root-cause",
   "frontend-ui",

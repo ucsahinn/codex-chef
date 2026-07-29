@@ -6,9 +6,7 @@ import { spawnSync } from "node:child_process";
 const root = path.resolve(process.cwd());
 const catalogPath = path.join(root, "catalog", "skills.json");
 const lockPath = path.join(root, "catalog", "skills-lock.json");
-const onlineCacheDir = path.join(root, "tmp", "npm-cache");
-const onlineWorkDir = path.join(root, "tmp", "skill-source-check");
-const windowsNpxWrapper = path.join(onlineCacheDir, "npx-openssl.cmd");
+const pinnedInstallerPath = path.join(root, "scripts", "install-pinned-skill.mjs");
 const online = process.argv.includes("--online");
 const timeoutArg = process.argv.find((arg) => arg.startsWith("--timeout-ms="));
 const onlineTimeoutMs = timeoutArg ? Number(timeoutArg.split("=")[1]) : 90000;
@@ -18,45 +16,22 @@ function fail(message) {
   failures.push(message);
 }
 
-function ensureWindowsNpxWrapper() {
-  if (process.platform !== "win32") return null;
-  fs.mkdirSync(onlineCacheDir, { recursive: true });
-  // npm can drop GIT_CONFIG_* before the Skills CLI invokes git. Keep the
-  // TLS override in a repo-local wrapper and pass catalog values as argv.
-  fs.writeFileSync(windowsNpxWrapper, [
-    "@echo off",
-    "set \"GIT_CONFIG_COUNT=1\"",
-    "set \"GIT_CONFIG_KEY_0=http.sslBackend\"",
-    "set \"GIT_CONFIG_VALUE_0=openssl\"",
-    "set \"GIT_SSL_BACKEND=openssl\"",
-    "call npx.cmd %*",
-    ""
-  ].join("\r\n"), "utf8");
-  return windowsNpxWrapper;
-}
-
-function safePathSegment(value) {
-  return String(value).replace(/[^A-Za-z0-9_.-]/g, "_");
-}
-
-function prepareOnlineWorkDir(entry) {
-  const dir = path.join(onlineWorkDir, safePathSegment(entry.name));
-  fs.rmSync(dir, { recursive: true, force: true });
-  fs.mkdirSync(dir, { recursive: true });
-  return dir;
-}
-
-function runSkillsUse(entry) {
-  const executable = process.platform === "win32" ? "cmd.exe" : "npx";
-  const cwd = prepareOnlineWorkDir(entry);
-  const skillArgs = entry.fullDepth
-    ? [entry.package, "--skill", entry.skill, "--full-depth"]
-    : [entry.package, "--skill", entry.skill];
-  const args = process.platform === "win32"
-    ? ["/d", "/s", "/c", ensureWindowsNpxWrapper(), "--yes", "skills", "use", ...skillArgs]
-    : ["--yes", "skills", "use", ...skillArgs];
-  const result = spawnSync(executable, args, {
-    cwd,
+function runPinnedSkillVerification(entry, cliVersion) {
+  const args = [
+    pinnedInstallerPath,
+    "--package",
+    entry.package,
+    "--commit",
+    entry.commit,
+    "--skill",
+    entry.skill,
+    "--cli-version",
+    cliVersion,
+    "--verify-only"
+  ];
+  if (entry.fullDepth) args.push("--full-depth");
+  const result = spawnSync(process.execPath, args, {
+    cwd: root,
     encoding: "utf8",
     env: {
       ...process.env,
@@ -67,12 +42,8 @@ function runSkillsUse(entry) {
       GIT_CONFIG_VALUE_0: process.env.GIT_CONFIG_VALUE_0 || "openssl",
       GIT_SSL_BACKEND: process.env.GIT_SSL_BACKEND || "openssl",
       NO_COLOR: "1",
-      NPM_CONFIG_CACHE: onlineCacheDir,
       TERM: "dumb",
-      npm_config_cache: onlineCacheDir,
-      npm_config_loglevel: "error",
-      npm_config_update_notifier: "false",
-      npm_config_yes: "true"
+      npm_config_loglevel: "error"
     },
     stdio: ["ignore", "pipe", "pipe"],
     timeout: onlineTimeoutMs,
@@ -80,13 +51,41 @@ function runSkillsUse(entry) {
   });
 
   if (result.error) {
-    fail(`Online skill resolution failed for ${entry.name}: ${result.error.message}`);
+    fail(`Pinned skill verification failed for ${entry.name}: ${result.error.message}`);
     return;
   }
 
   if (result.status !== 0) {
     const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
-    fail(`Online skill resolution failed for ${entry.name}: ${output || `exit ${result.status}`}`);
+    fail(`Pinned skill verification failed for ${entry.name}: ${output || `exit ${result.status}`}`);
+  }
+}
+
+function verifySkillsCliIntegrity(version, expectedIntegrity) {
+  const command = process.platform === "win32" ? "cmd.exe" : "npm";
+  const args = process.platform === "win32"
+    ? ["/d", "/s", "/c", "npm.cmd", "view", `skills@${version}`, "dist.integrity", "--json"]
+    : ["view", `skills@${version}`, "dist.integrity", "--json"];
+  const result = spawnSync(command, args, {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: onlineTimeoutMs,
+    windowsHide: true
+  });
+  if (result.error || result.status !== 0) {
+    const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
+    fail(`Skills CLI integrity lookup failed: ${result.error?.message || output || `exit ${result.status}`}`);
+    return;
+  }
+  let actual;
+  try {
+    actual = JSON.parse(result.stdout);
+  } catch {
+    actual = result.stdout.trim().replace(/^"|"$/g, "");
+  }
+  if (actual !== expectedIntegrity) {
+    fail(`Skills CLI integrity mismatch for skills@${version}.`);
   }
 }
 
@@ -101,11 +100,17 @@ if (!fs.existsSync(catalogPath)) {
   const names = new Set();
   const installable = [];
 
-  if (catalog.lockSemantics !== "source-allowlist") {
-    fail("catalog/skills.json must declare lockSemantics=source-allowlist.");
+  if (catalog.lockSemantics !== "commit-pinned") {
+    fail("catalog/skills.json must declare lockSemantics=commit-pinned.");
   }
-  if (!String(catalog.immutability || "").includes("not a commit-pinned lock")) {
-    fail("catalog/skills.json must state that Skills CLI sources are not commit-pinned locks.");
+  if (!String(catalog.immutability || "").includes("full Git commit SHA")) {
+    fail("catalog/skills.json must state that installable sources are commit-pinned.");
+  }
+  if (!/^\d+\.\d+\.\d+$/.test(catalog.skillsCliVersion || "")) {
+    fail("catalog/skills.json must pin an exact skillsCliVersion.");
+  }
+  if (!String(catalog.skillsCliIntegrity || "").startsWith("sha512-")) {
+    fail("catalog/skills.json must pin the Skills CLI registry integrity.");
   }
 
   if (!Array.isArray(catalog.skills)) {
@@ -136,6 +141,9 @@ if (!fs.existsSync(catalogPath)) {
         if (!entry.skill || typeof entry.skill !== "string" || !/^[A-Za-z0-9._-]+$/.test(entry.skill)) {
           fail(`Installable skill ${entry.name} must declare a single skill name`);
         }
+        if (!/^[a-f0-9]{40}$/.test(entry.commit || "")) {
+          fail(`Installable skill ${entry.name} must declare a full commit SHA`);
+        }
         if (entry.source !== `${entry.package}@${entry.skill}`) {
           fail(`Installable skill ${entry.name} source must equal package@skill`);
         }
@@ -148,7 +156,7 @@ if (!fs.existsSync(catalogPath)) {
         if (!locked) {
           fail(`catalog/skills-lock.json missing installable skill ${entry.name}`);
         } else {
-          for (const key of ["package", "skill", "source", "sourceUrl"]) {
+          for (const key of ["package", "commit", "skill", "source", "sourceUrl"]) {
             if (locked[key] !== entry[key]) {
               fail(`Skill lock mismatch for ${entry.name}: ${key}`);
             }
@@ -157,8 +165,8 @@ if (!fs.existsSync(catalogPath)) {
             fail(`Skill lock mismatch for ${entry.name}: fullDepth`);
           }
           const expectedInstallCommand = entry.fullDepth
-            ? `npx skills add ${entry.package} --skill ${entry.skill} --full-depth --agent codex --yes --global`
-            : `npx skills add ${entry.package} --skill ${entry.skill} --agent codex --yes --global`;
+            ? `node scripts/install-pinned-skill.mjs --package ${entry.package} --commit ${entry.commit} --skill ${entry.skill} --cli-version ${catalog.skillsCliVersion} --full-depth`
+            : `node scripts/install-pinned-skill.mjs --package ${entry.package} --commit ${entry.commit} --skill ${entry.skill} --cli-version ${catalog.skillsCliVersion}`;
           if (locked.installCommand !== expectedInstallCommand) {
             fail(`Skill lock installCommand mismatch for ${entry.name}`);
           }
@@ -171,19 +179,25 @@ if (!fs.existsSync(catalogPath)) {
   if (!lock) {
     fail("Missing catalog/skills-lock.json");
   } else {
-    if (lock.lockSemantics !== "source-allowlist") {
-      fail("catalog/skills-lock.json must declare lockSemantics=source-allowlist.");
+    if (lock.lockSemantics !== "commit-pinned") {
+      fail("catalog/skills-lock.json must declare lockSemantics=commit-pinned.");
     }
-    if (!String(lock.immutability || "").includes("does not pin upstream commits")) {
-      fail("catalog/skills-lock.json must state that it does not pin upstream commits.");
+    if (!String(lock.immutability || "").includes("full upstream commit SHA")) {
+      fail("catalog/skills-lock.json must state that it pins upstream commits.");
+    }
+    if (
+      lock.skillsCliVersion !== catalog.skillsCliVersion
+      || lock.skillsCliIntegrity !== catalog.skillsCliIntegrity
+    ) {
+      fail("Skill lock must match the catalog Skills CLI version and integrity pins.");
     }
   }
 
   if (online && failures.length === 0) {
-    fs.mkdirSync(onlineCacheDir, { recursive: true });
+    verifySkillsCliIntegrity(catalog.skillsCliVersion, catalog.skillsCliIntegrity);
     installable.forEach((entry, index) => {
       console.log(`Checking installable skill ${index + 1}/${installable.length}: ${entry.name}`);
-      runSkillsUse(entry);
+      runPinnedSkillVerification(entry, catalog.skillsCliVersion);
     });
   }
 

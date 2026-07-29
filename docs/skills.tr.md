@@ -14,9 +14,20 @@ ayrı gösterir.
 
 Resmi Codex kaynağı: [Skill oluşturma](https://developers.openai.com/codex/skills)
 
-## 🍱 Repo İle Gelen Altı Workflow
+## 🍱 Repo İle Gelen Dokuz Workflow
 
 Bu skill'ler Codex Chef plugin'inin içindedir ve repo ile birlikte gelir.
+Installer dokuz workflow'un tamamını aynı canonical kaynaktan
+`AGENTS_HOME/skills/<ad>` hedeflerine senkronize eder. Böylece
+`$adaptive-agent-routing`, `$context-budget-planner`, `$fetch <url>`, `$seo
+<hedef>` ve `$evidence-research <soru>` gibi çağrılar doğrudan çalışır. Fetch
+yalnız explicit çağrıyla çalışır; SEO ile Evidence Research ise istek
+açıklamalarıyla açıkça eşleştiğinde otomatik de seçilebilir.
+
+Kişisel marketplace kaydı plugin'i yalnızca keşfedilebilir yapar; kurmaz veya
+etkinleştirmez. `$codex-chef-workflows:fetch` gibi namespace'li çağrılar için
+`codex-chef-workflows@codex-chef` plugin'ini `/plugins` ya da `codex plugin add`
+ile kurup yeni bir Codex oturumu başlatmak gerekir.
 
 | Skill | Ne için kullanılır? |
 | --- | --- |
@@ -25,9 +36,12 @@ Bu skill'ler Codex Chef plugin'inin içindedir ve repo ile birlikte gelir.
 | [`context-budget-planner`](../plugins/codex-chef-workflows/skills/context-budget-planner/SKILL.md) | Geniş işlerde kaynak, token kullanımı, compaction handoff ve doğrulama planlamak için. |
 | [`adaptive-agent-routing`](../plugins/codex-chef-workflows/skills/adaptive-agent-routing/SKILL.md) | Varsayılan olarak spawn etmeden en dar agent, skill, MCP ve bekleme politikasını seçmek için. |
 | [`external-review-workflow`](../plugins/codex-chef-workflows/skills/external-review-workflow/SKILL.md) | Hiçbir şeyi otomatik yüklemeden secret-safe ve hash-pinned manuel review handoff'u hazırlamak için. |
+| [`fetch`](../plugins/codex-chef-workflows/skills/fetch/SKILL.md) | Yetkili bir referans siteyi gerçek browser kanıtıyla yeniden kurmak, responsive etkileşimleri doğrulamak ve credential ya da server içi mantık kopyalamadan bütün fidelity farklarını raporlamak için. |
+| [`seo`](../plugins/codex-chef-workflows/skills/seo/SKILL.md) | Ranking veya indexing kanıtı uydurmadan teknik SEO, rendering, structured data, content intent, uluslararası/lokal SEO, performans ve ölçüm işlerini audit etmek, uygulamak ve doğrulamak için. |
+| [`evidence-research`](../plugins/codex-chef-workflows/skills/evidence-research/SKILL.md) | Karar sorusunu çerçevelemek, güncel kaynakları arayıp değerlendirmek, claim'leri izlenebilir tutmak, görüş ayrılıklarını ve belirsizliği açıklamak, yeniden üretilebilir araştırma paketi hazırlamak için. |
 | [`offline-diagram-triplet`](../plugins/codex-chef-workflows/skills/offline-diagram-triplet/SKILL.md) | Mermaid kaynağını network kullanmadan editable Excalidraw, SVG, PNG ve Markdown asset'lerine çevirmek için. |
 
-## ✅ Full Install İçin İncelenmiş On Altı Skill
+## ✅ Full Install İçin İncelenmiş On Beş Skill
 
 Bu kayıtlar katalogda `install: true` taşır. Full install profili için
 uygundurlar; package/skill çifti katalogda sabitlenir ve online doğrulama bu
@@ -43,7 +57,6 @@ uygundurlar; package/skill çifti katalogda sabitlenir ve online doğrulama bu
 | `frontend-skill` | Geniş kapsamlı frontend üretim workflow'u. | [nexu-io/open-design](https://github.com/nexu-io/open-design) |
 | `webapp-testing` | Lokal web app için browser kanıtı, screenshot ve log. | [anthropics/skills](https://github.com/anthropics/skills) |
 | `web-quality-audit` | Performance, accessibility, SEO ve best-practice kontrolü. | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) |
-| `seo` | Crawlability, metadata, structured data, sitemap ve discoverability. | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) |
 | `accessibility` | Keyboard, focus, form, ARIA, semantic HTML ve WCAG odaklı inceleme. | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) |
 | `test-driven-development` | Implementation öncesi odaklı davranış testleri. | [obra/superpowers](https://github.com/obra/superpowers) |
 | `documentation-and-adrs` | README, ADR ve kalıcı proje dokümantasyonu. | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) |
@@ -91,7 +104,9 @@ listesini kalabalıklaştırmamak için opt-in tutulan özel upstream seçenekle
 ## “Katalogda Var” Ne Demek?
 
 - Katalog kaydı incelenmiş metadata'dır; skill'in kurulu olduğunu kanıtlamaz.
-- Bundled skill bu repodaki plugin'in içinde yaşar.
+- Bundled skill bu repodaki plugin'in içinde yaşar. Dokuz bundled workflow'un
+  tamamı, repoda ikinci bir canonical kaynak oluşturmadan yönetilen direct
+  skill olarak da senkronize edilir.
 - `install: true` kaydı full install profiline uygun demektir.
 - Manuel referans, varsayılan bir skill ile çakışabilir veya credential, vendor
   kurulumu ya da daha özel bir görev gerektirebilir.
@@ -101,7 +116,8 @@ listesini kalabalıklaştırmamak için opt-in tutulan özel upstream seçenekle
 Makine tarafından okunan kaynak
 [`catalog/skills.json`](../catalog/skills.json) dosyasıdır. İncelenmiş kurulum
 hedefleri [`catalog/skills-lock.json`](../catalog/skills-lock.json) içinde
-yansıtılır.
+tam upstream commit SHA'ları ve tarihli Skills CLI uyumluluk/keşif metadatasıyla
+yansıtılır. Kurulumun kendisi doğrulanmış native-copy yolunu kullanır.
 
 [README'ye dön](../README.tr.md) veya [agent'lar](agents.tr.md) ve
 [MCP'lerle](mcp-catalog.tr.md) devam et.

@@ -2,10 +2,21 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  CliUsageError,
+  installCliErrorBoundary,
+  requireCliValue
+} from "./lib/cli-error-contract.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
+installCliErrorBoundary({
+  tool: "codex-routing-board",
+  argv: args,
+  root,
+  prefix: "Codex Chef routing error"
+});
 const options = {
   json: false,
   profile: null
@@ -15,13 +26,13 @@ for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
   if (arg === "--json") options.json = true;
   else if (arg === "--profile") {
-    options.profile = args[index + 1];
+    options.profile = requireCliValue(args, index, "--profile");
     index += 1;
   } else if (arg === "--help" || arg === "-h") {
     printHelp();
     process.exit(0);
   } else {
-    throw new Error(`Unknown argument: ${arg}`);
+    throw new CliUsageError(`Unknown argument: ${arg}`);
   }
 }
 
@@ -44,13 +55,36 @@ function listOrFallback(values, fallback) {
   return values.length ? values.join(", ") : fallback;
 }
 
+function terminalWidth() {
+  const requested = Number(process.stdout.columns || process.env.COLUMNS || 96);
+  return Math.max(72, Math.min(120, Number.isFinite(requested) ? requested : 96));
+}
+
+function printWrapped(value, { prefix = "", continuationPrefix = " ".repeat(prefix.length) } = {}) {
+  const width = terminalWidth();
+  const words = String(value ?? "").trim().split(/\s+/).filter(Boolean);
+  let current = prefix;
+  let currentPrefix = prefix;
+  for (const word of words) {
+    const separator = current === currentPrefix ? "" : " ";
+    if (current.length + separator.length + word.length <= width) {
+      current += `${separator}${word}`;
+      continue;
+    }
+    if (current !== currentPrefix) console.log(current);
+    currentPrefix = continuationPrefix;
+    current = `${currentPrefix}${word}`;
+  }
+  if (current !== currentPrefix || words.length === 0) console.log(current);
+}
+
 const routing = readJson("catalog/routing-profiles.json");
 const profiles = options.profile
   ? routing.profiles.filter((profile) => profile.id === options.profile)
   : routing.profiles;
 
 if (options.profile && profiles.length === 0) {
-  throw new Error(`Unknown routing profile: ${options.profile}`);
+  throw new CliUsageError(`Unknown routing profile: ${options.profile}`);
 }
 
 const report = {
@@ -81,37 +115,37 @@ if (options.json) {
 } else {
   console.log("Codex Chef enterprise routing board");
   console.log(`Profiles: ${profiles.length}`);
-  console.log("Policy: route matches are recommendations; delegation is conditional and inherits the active user profile.");
+  printWrapped("Policy: route matches are recommendations; delegation is conditional and inherits the active user profile.");
   console.log("");
   console.log("Routing visibility contract:");
-  console.log("- Routing plan: selected agents, skills, MCPs, commands, and skips in one initial line.");
-  console.log("- Routing result: completion state and evidence in one final table or line.");
-  console.log("- Use /agent in Codex CLI to inspect active agent threads, switch to one, or steer/close it.");
-  console.log("- Boundary: routing profiles make specialists visible, not hidden permission to spawn agents or enable risky tools.");
+  printWrapped("Routing plan: selected agents, skills, MCPs, commands, and skips in one initial line.", { prefix: "- ", continuationPrefix: "  " });
+  printWrapped("Routing result: completion state and evidence in one final table or line.", { prefix: "- ", continuationPrefix: "  " });
+  printWrapped("Use /agent in Codex CLI to inspect active agent threads, switch to one, or steer/close it.", { prefix: "- ", continuationPrefix: "  " });
+  printWrapped("Boundary: routing profiles make specialists visible, not hidden permission to spawn agents or enable risky tools.", { prefix: "- ", continuationPrefix: "  " });
   console.log("");
   console.log("Lifecycle hygiene:");
-  console.log("- Close completed subagent threads when they are no longer needed.");
-  console.log("- Use /agent before finalizing large work to inspect, switch, steer, or close agent threads.");
-  console.log("- Use /ps for background terminals and /stop to cancel terminal work started by the current session.");
-  console.log("- Close browser/MCP pages or sessions when the selected tool exposes a close operation.");
-  console.log("- If an external MCP process such as Serena persists after the task, report it and ask before killing processes or deleting state.");
+  printWrapped("Close completed subagent threads when they are no longer needed.", { prefix: "- ", continuationPrefix: "  " });
+  printWrapped("Use /agent before finalizing large work to inspect, switch, steer, or close agent threads.", { prefix: "- ", continuationPrefix: "  " });
+  printWrapped("Use /ps for background terminals and /stop to cancel terminal work started by the current session.", { prefix: "- ", continuationPrefix: "  " });
+  printWrapped("Close browser/MCP pages or sessions when the selected tool exposes a close operation.", { prefix: "- ", continuationPrefix: "  " });
+  printWrapped("If an external MCP process such as Serena persists after the task, report it and ask before killing processes or deleting state.", { prefix: "- ", continuationPrefix: "  " });
   for (const profile of profiles) {
     console.log("");
-    console.log(`- ${profile.title} (${profile.id})`);
-    console.log(`  Trigger: ${profile.trigger}`);
-    console.log(`  Agents: ${listOrFallback(profile.agents, "No specialist agent route")}`);
-    console.log(`  Skills: ${listOrFallback(profile.skills, "No matching skill route")}`);
-    console.log(`  MCP: ${listOrFallback(profile.mcp, "No MCP route")}`);
-    console.log(`  Flags/checks: ${listOrFallback(profile.flags, "No extra flags/checks")}`);
-    console.log(`  Delegation mode: ${profile.delegationMode}`);
-    console.log(`  Skill mode: ${profile.skillMode}`);
-    console.log(`  MCP mode: ${profile.mcpMode}`);
-    console.log(`  Owner: ${profile.owner}`);
-    console.log(`  Surface: ${profile.primarySurface}`);
-    console.log(`  Durability: ${profile.durability}`);
-    console.log(`  Privilege delta: ${profile.privilegeDelta}`);
-    console.log(`  Validation: ${profile.validationGate}`);
-    console.log(`  Rollback: ${profile.rollback}`);
-    console.log(`  Boundary: ${profile.boundary}`);
+    printWrapped(`${profile.title} (${profile.id})`, { prefix: "- ", continuationPrefix: "  " });
+    printWrapped(profile.trigger, { prefix: "  Trigger: ", continuationPrefix: "    " });
+    printWrapped(listOrFallback(profile.agents, "No specialist agent route"), { prefix: "  Agents: ", continuationPrefix: "    " });
+    printWrapped(listOrFallback(profile.skills, "No matching skill route"), { prefix: "  Skills: ", continuationPrefix: "    " });
+    printWrapped(listOrFallback(profile.mcp, "No MCP route"), { prefix: "  MCP: ", continuationPrefix: "    " });
+    printWrapped(listOrFallback(profile.flags, "No extra flags/checks"), { prefix: "  Flags/checks: ", continuationPrefix: "    " });
+    printWrapped(profile.delegationMode, { prefix: "  Delegation mode: ", continuationPrefix: "    " });
+    printWrapped(profile.skillMode, { prefix: "  Skill mode: ", continuationPrefix: "    " });
+    printWrapped(profile.mcpMode, { prefix: "  MCP mode: ", continuationPrefix: "    " });
+    printWrapped(profile.owner, { prefix: "  Owner: ", continuationPrefix: "    " });
+    printWrapped(profile.primarySurface, { prefix: "  Surface: ", continuationPrefix: "    " });
+    printWrapped(profile.durability, { prefix: "  Durability: ", continuationPrefix: "    " });
+    printWrapped(profile.privilegeDelta, { prefix: "  Privilege delta: ", continuationPrefix: "    " });
+    printWrapped(profile.validationGate, { prefix: "  Validation: ", continuationPrefix: "    " });
+    printWrapped(profile.rollback, { prefix: "  Rollback: ", continuationPrefix: "    " });
+    printWrapped(profile.boundary, { prefix: "  Boundary: ", continuationPrefix: "    " });
   }
 }

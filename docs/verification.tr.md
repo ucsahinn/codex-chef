@@ -54,7 +54,8 @@ Bu komut şunları çalıştırır:
   profil, AGENTS token disiplini, context-budget skill referansi, README komut
   dokumani ve pinlenmeyen agent model/reasoning sozlesmesi.
 - `scripts/verify-skill-sources.mjs`: offline skill catalog validation ve
-  `catalog/skills-lock.json` kaynak allowlist drift kontrolleri.
+  `catalog/skills-lock.json` commit, skill, CLI surumu ve integrity pin drift
+  kontrolleri.
 - `scripts/scan-supply-chain-iocs.mjs`: remote execution, tehlikeli shell,
   floating package ve implicit installer dependency kontrolleri.
 - `scripts/security-audit.mjs`: public-readiness dosyaları, iki dilli docs,
@@ -87,6 +88,11 @@ metadata'sini, cagrilan veya deferred skill/ajan icerigini, repo bakim
 boyutunu, tool schema/context'i, varsa olculen session telemetry'sini ve ajan
 basi maliyeti ayri raporlar. Repo byte/token tahminleri tanilama amacli context
 agirligidir; saglayici faturasi veya olculmus kullanim degildir.
+Audit normalde Git gerektirir; boylece ignored/private lokal dosyalar kaynak
+setine girmez. Git worktree disinda fail-closed davranir.
+`node scripts/analyze-token-surfaces.mjs --allow-filesystem-fallback` komutunu
+yalniz dizini inceledikten sonra kullanin. Acik fallback; linked, secret-like,
+special ve asiri buyuk dosyalari reddeder.
 
 Installable skill'ler değiştiğinde network-backed resolver kontrolünü de çalıştır:
 
@@ -246,8 +252,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -A
 ```
 
 Beklenen skill davranışı idempotent ve sessizdir: kurulu skill'ler `Skill
-already installed`, başarılı yeni kurulumlar `Installed skill` olarak görünür;
-raw Skills CLI çıktısı yalnızca clone, installation veya write hatasında basılır.
+already installed`, başarılı yeni kurulumlar `Installed pinned skill` olarak
+görünür; native-copy hataları registry installer çalıştırmadan fetch, staging,
+hash, activation veya rollback aşamasını belirtir.
 
 Skill aktivasyonunda iki kanit seviyesi vardir. Repo check'leri katalogun,
 routing profillerinin ve activation contract'in varligini kanitlar:

@@ -6,6 +6,13 @@ import { spawnSync } from "node:child_process";
 const root = path.resolve(process.cwd());
 const failures = [];
 const warnings = [];
+const args = process.argv.slice(2);
+const allowDirty = args.includes("--allow-dirty");
+const unknownArgs = args.filter((arg) => arg !== "--allow-dirty");
+if (unknownArgs.length > 0) {
+  console.error(`Unknown release readiness argument: ${unknownArgs.join(", ")}`);
+  process.exit(2);
+}
 
 const requiredFiles = [
   "README.md",
@@ -83,6 +90,36 @@ function run(command, args) {
     encoding: "utf8",
     windowsHide: true
   });
+}
+
+function isLocalAgentStatePath(file) {
+  const normalized = file.replace(/\\/g, "/");
+  const folded = normalized.toLowerCase();
+  if (folded === ".serena" || folded.startsWith(".serena/")) return true;
+  if (folded === ".codex" || folded.startsWith(".codex/")) return true;
+  if (folded === ".agents" || folded.startsWith(".agents/")) {
+    return normalized !== ".agents/plugins/marketplace.json";
+  }
+  return false;
+}
+
+function parsePorcelainZ(value) {
+  const records = String(value || "").split("\0").filter(Boolean);
+  const entries = [];
+  for (let index = 0; index < records.length; index += 1) {
+    const record = records[index];
+    if (record.length < 4) {
+      fail("Could not parse machine-readable git status output.");
+      continue;
+    }
+    const xy = record.slice(0, 2);
+    entries.push({ xy, file: record.slice(3).replace(/\\/g, "/") });
+    if (/[RC]/.test(xy) && records[index + 1]) {
+      entries.push({ xy: "  ", file: records[index + 1].replace(/\\/g, "/"), renameSource: true });
+      index += 1;
+    }
+  }
+  return entries;
 }
 
 for (const file of requiredFiles) {
@@ -164,40 +201,58 @@ for (const [label, text] of [
   }
 }
 
-const status = run("git", ["status", "--short"]);
+const status = run("git", ["status", "--porcelain=v1", "-z", "--untracked-files=all"]);
 if (status.status !== 0) {
-  warn(`Could not inspect git status: ${status.stderr || status.stdout || "git status failed"}`);
+  fail(`Could not inspect git status: ${status.error?.message || status.stderr || status.stdout || "git status failed"}`);
 } else {
-  for (const line of status.stdout.split(/\r?\n/).filter(Boolean)) {
-    const file = line.slice(3).replace(/\\/g, "/");
+  const statusEntries = parsePorcelainZ(status.stdout);
+  if (!allowDirty && statusEntries.length > 0) {
+    fail("Release candidate must have a clean index and worktree; commit or intentionally discard reviewed changes before release validation.");
+  }
+  const mixedPaths = [];
+  for (const entry of statusEntries) {
+    if (!entry.renameSource && entry.xy[0] !== " " && entry.xy[0] !== "?" && entry.xy[1] !== " " && entry.xy[1] !== "?") {
+      mixedPaths.push(entry.file);
+    }
+    const { file } = entry;
     if (/^(tmp|temp|node_modules|dist|build|coverage|\.next|out)\//.test(file)) {
       fail(`Release candidate includes scratch/build/dependency path in git status: ${file}`);
     }
-    if (/^(?:\.serena|\.codex\/sessions|\.codex\/memories)\//.test(file)) {
+    if (isLocalAgentStatePath(file)) {
       fail(`Release candidate includes local agent state in git status: ${file}`);
     }
   }
+  if (mixedPaths.length > 0) {
+    const message = `Paths contain both staged and unstaged changes: ${mixedPaths.join(", ")}`;
+    if (allowDirty) warn(message);
+    else fail(message);
+  }
 }
 
-const tracked = run("git", ["ls-files"]);
+const tracked = run("git", ["ls-files", "-z"]);
 if (tracked.status !== 0) {
-  warn(`Could not inspect tracked files: ${tracked.stderr || tracked.stdout || "git ls-files failed"}`);
+  fail(`Could not inspect tracked files: ${tracked.error?.message || tracked.stderr || tracked.stdout || "git ls-files failed"}`);
 } else {
-  for (const file of tracked.stdout.split(/\r?\n/).filter(Boolean)) {
+  for (const file of tracked.stdout.split("\0").filter(Boolean)) {
     if (/^(tmp|temp|node_modules|dist|build|coverage|\.next|out)\//.test(file)) {
       fail(`Tracked release file must not live under ignored output path: ${file}`);
     }
     if (/\.(?:zip|tar\.gz|tgz|msi|exe|dmg)$/i.test(file)) {
       fail(`Release artifact must not be committed to source: ${file}`);
     }
+    if (isLocalAgentStatePath(file)) {
+      fail(`Tracked release file must not contain local agent state: ${file}`);
+    }
   }
 }
 
 const currentTag = run("git", ["tag", "--list", expectedTag]);
 if (currentTag.status !== 0) {
-  warn(`Could not inspect existing tag ${expectedTag}: ${currentTag.stderr || currentTag.stdout || "git tag failed"}`);
+  fail(`Could not inspect existing tag ${expectedTag}: ${currentTag.error?.message || currentTag.stderr || currentTag.stdout || "git tag failed"}`);
 } else if (currentTag.stdout.trim() === expectedTag) {
-  warn(`Tag ${expectedTag} already exists locally; verify it points at the intended release commit before publishing`);
+  const message = `Tag ${expectedTag} already exists locally; bump the release version before preparing another candidate`;
+  if (allowDirty) warn(message);
+  else fail(message);
 }
 
 if (failures.length > 0) {

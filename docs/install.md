@@ -74,10 +74,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -R
 
 Repair mode is for machines that already have a Codex setup. It previews or
 applies backup-backed reconciliation for Codex Chef-managed guidance, rules,
-agent/profile files, the bundled plugin, missing config blocks, and the local
-plugin marketplace entry. It preserves unrelated marketplace plugins and never
-deletes user skills; extra or duplicate global skills are reported as cleanup
-candidates.
+agent/profile files, the bundled plugin, all nine managed direct local
+workflows, missing config blocks, and the local plugin marketplace entry. It
+preserves unrelated marketplace plugins and never deletes user skills; extra
+or duplicate global skills are reported as cleanup candidates.
 
 Update an existing checkout and managed setup through the guided CLI:
 
@@ -112,13 +112,23 @@ npm run chef -- --backups --backup <id> --delete --apply
 ```
 
 The list and inspect commands are metadata-only: they show backup archive
-locations, manifest status, restorable file counts, sizes, and hashes without
-printing file contents. Restore is a preview unless `--apply` is supplied. The
-apply path creates a new rollback backup of current targets before copying
-known Codex Chef-managed files back from the selected archive. Delete is also
-preview-first: `--delete` prints the resolved archive path without removing it,
-and `--delete --apply` removes only the selected Codex Chef backup archive under
-the canonical backup root.
+locations, manifest status, verified-restorable file counts, sizes, and hashes
+without printing file contents. An archive is not labelled restorable until its
+manifest, full file set, hashes, and target allowlist all pass. Restore is a
+preview unless `--apply` is supplied. The apply path reads and verifies the
+exact source bytes, creates a new rollback backup of current targets, and then
+copies known Codex Chef-managed files back as a rollback-protected transaction.
+Commit-pinned skill replacement backups use a namespaced manifest and restore
+the previous skill tree exactly, rather than leaving files from the replacement.
+Restore fails
+closed unless a valid `codex-chef.backup.v1` manifest exactly matches every
+archive file by path, size, and SHA-256; missing, extra, altered, or unsupported
+control-plane files such as auth, hook, session, memory, and cache state are
+rejected. `--json` follows the same behavior: write requests report explicit
+`applyRequested`, `applied`, and `outcome` fields and do not return a preview as
+an applied result. Delete is also preview-first: `--delete` prints the resolved
+archive path without removing it, and `--delete --apply` removes only the
+selected Codex Chef backup archive under the canonical backup root.
 
 ## Codex Chef CLI Reference
 
@@ -143,6 +153,7 @@ npm run chef -- --install --apply
 npm run chef -- --skills
 npm run chef -- --mcp
 npm run chef -- --routing
+npm run chef -- --continuity
 npm run chef -- --diagnostics
 npm run chef -- --processes
 npm run chef -- --auth
@@ -159,17 +170,20 @@ backup-backed repair flow instead of being presented as a clean first install.
 Direct commands remain preview-first unless their documented `--apply` flag is
 present.
 
-`Skill status & catalog` checks for a real `SKILL.md`, not just a same-named
-directory. Every curated skill is shown as ready, missing, or invalid. Only
-missing or invalid entries are offered for installation, and an all-ready setup
-does not show an install chooser. Other user-installed skills are counted and
+`Skill status & catalog` separates commit-pinned upstream skills, bundled/direct
+Codex Chef skills, other user-installed skills, and the total visible global
+inventory. A same-named directory is not enough: upstream entries need matching
+source provenance and bundled entries need valid managed ownership. Only
+missing or invalid upstream entries are offered for individual installation;
+bundled/direct drift routes to repair. User-installed skills are counted and
 preserved.
 
 `MCP connectors` reads the installed `CODEX_HOME/config.toml` and separates
 configured-and-enabled, configured-but-disabled, cataloged-but-not-configured,
 and user-added connectors. These are configuration states, not live-health
-claims; live status remains unprobed until Codex `/mcp`, `codex mcp`, or another
-safe probe succeeds.
+claims. `codex mcp list --json` proves configuration discovery only; live
+server/tool health remains unprobed until `/mcp` in a restarted Codex session
+or another actual initialization probe succeeds.
 
 The default status board is compact. Add `--details` to restore the per-MCP
 inventory, routing controls, context budget, setup notes, target/ambient Codex
@@ -181,6 +195,22 @@ use `/ps` and `/stop` for live terminal work started by the current
 Codex session. `--diagnostics` includes the Serena/MCP process-audit command
 and other read-only evidence commands, but it does not stop processes or mutate
 global files.
+
+`--continuity` makes Control and Brain visible without changing either system.
+It reports the `codex-control-router` skill, installed `codex_control` MCP
+configuration, bundled Brain skill, and an explicitly configured
+`CODEX_CHEF_BRAIN_HOME` vault. Immediate work remains in the current session;
+Control activates only for an explicit delayed, background, recurring,
+restart-resilient, monitored, or Control-managed request. Brain automatic
+capture stays disabled, and all Brain writes remain preview-first and
+apply-gated.
+
+The CLI subprocess can verify installed Control configuration but cannot call
+the current Codex session's MCP tools. Confirm live project health from the
+active Codex session with the Control MCP (or use `codex-control status --json`
+from the owner terminal). A Control project's `brainMapped: true` state is
+separate from the local `CODEX_CHEF_BRAIN_HOME` vault; configuring one does not
+silently configure or write the other.
 
 Installed and ready skills do not execute by themselves. A skill enters Codex
 context when the user names it or the task clearly matches its description;
@@ -198,11 +228,47 @@ Useful switches:
 - `-All`: install Codex templates, the local Codex Chef plugin, specialist
   agents, profiles, rules, and verified public/first-party skills. It does not
   change global Git config.
+- Every default managed install synchronizes all nine canonical local workflow
+  sources to `AGENTS_HOME/skills/<name>`. This makes direct calls such as
+  `$adaptive-agent-routing`, `$context-budget-planner`, `$fetch <url>`, `$seo
+  <target>`, and `$evidence-research <question>` available without installing
+  the plugin. Fetch disables implicit invocation; SEO and Evidence Research
+  allow it only for unambiguous matching requests. If an exact direct target
+  contains a foreign skill, installation fails before any managed write.
+- The personal marketplace entry makes `codex-chef-workflows` discoverable; it
+  does not install or enable the plugin. To use
+  `$codex-chef-workflows:<skill-name>`, run `codex plugin add
+  codex-chef-workflows@codex-chef --json` (or use `/plugins`) and start a new
+  Codex session.
+- The personal marketplace reads its plugin mirror from
+  `AGENTS_HOME/plugins/sources/codex-chef-workflows` through a path relative to
+  the marketplace root. A custom `AGENTS_HOME` is an installer destination,
+  not proof that the active Codex host discovers that marketplace. For a
+  non-default root, register it with `codex plugin marketplace add <root>` and
+  verify the resolved root with `codex plugin marketplace list --json`.
+- `-AdoptFetchSkill`: explicitly adopt only
+  `AGENTS_HOME/skills/fetch` after a foreign-collision preflight. The Bash
+  equivalent is `--adopt-fetch-skill`. Normal install and repair never infer
+  this authority.
+- `-AdoptSeoSkill`: explicitly adopt only `AGENTS_HOME/skills/seo` after
+  reviewing the foreign collision. The Bash equivalent is
+  `--adopt-seo-skill`.
+- `-AdoptEvidenceResearchSkill`: explicitly adopt only
+  `AGENTS_HOME/skills/evidence-research`. The Bash equivalent is
+  `--adopt-evidence-research-skill`.
+- `-AdoptDirectSkill <name>`: explicitly adopt another cataloged direct skill.
+  The Bash equivalent is `--adopt-direct-skill=<name>`.
 - `-InstallSkills`: install `catalog/skills.json` entries that have
-  `install: true`, a verified `package` in `owner/repo` format, and a matching
-  `skill` name. The installer calls `npx.cmd skills add <package> --skill
-  <skill> --agent codex --yes --global` with a repo-local npm cache under
-  ignored `tmp/npm-cache` unless the user already set npm cache env vars.
+  `install: true`, a verified `package` in `owner/repo` format, a full commit
+  SHA, and a matching `skill` name. The installer fetches that exact commit,
+  verifies the selected skill, stages and hashes a native copy, then atomically
+  activates it. It does not execute fetched repository code or a
+  registry-delivered installer. A matching valid Codex Chef provenance marker
+  permits a backup-backed managed upgrade. An unmarked, foreign, or locally
+  drifted same-name target is preserved and reported as skipped.
+  `--adopt-existing` is intentionally not a broad installer flag: after
+  reviewing that exact target, rerun only its printed
+  `install-pinned-skill.mjs` command with `--adopt-existing`.
 - `-InstallGitGuards`: install global Git ignore, global pre-commit hook, and
   set `core.excludesfile` plus `core.hooksPath`. This is intentionally separate
   because it affects every Git repository for the current user.
@@ -215,7 +281,9 @@ Useful switches:
 - `-Repair`: repair an existing setup with the shared repair engine. With
   `-WhatIf`, it prints a no-write repair plan. Without `-WhatIf`, it backs up
   and repairs managed drift. It does not delete user skills.
-- `-NoBackup`: skip backups. Not recommended.
+- `-NoBackup`: skip optional managed-file backups. Not recommended. It never
+  disables the mandatory safety backup for a pinned-skill upgrade or explicit
+  pinned-skill adoption.
 - `-WhatIf`: preview file, Git, and skill operations without changing the real
   setup.
 - `-Interactive`: ask before using custom Codex/Agents home values and before
@@ -247,6 +315,11 @@ Useful flags:
 
 - `--all`: recommended full Codex Chef setup without global Git config changes.
 - `--install-skills`
+- `--adopt-fetch-skill`, `--adopt-seo-skill`, and
+  `--adopt-evidence-research-skill`: adopt only the named foreign direct target
+  after review; normal install and repair fail closed.
+- `--adopt-direct-skill=<name>`: adopt another cataloged foreign direct target
+  after review.
 - `--install-git-guards`: opt in to global Git ignore and hook settings.
 - `--force`: replace managed targets after backup; without it, existing
   `config.toml` is merged and other existing managed files are skipped. The
@@ -265,7 +338,7 @@ agents, default-ready MCP servers, disabled opt-in MCP connectors, bundled
 plugin skills, reviewed global skills, enterprise routing profiles, and MCP
 setup notes. The setup notes call out local tooling, OAuth authorization,
 filesystem-path selection, broad/destructive graph-indexing, and
-`SUPABASE_DB_URL` requirements before a task needs that connector. Account,
+Supabase project/read-only requirements before a task needs that connector. Account,
 database, production, broad filesystem, and broad/destructive graph-indexing
 connectors remain disabled unless you explicitly enable them later. Local
 codebase graph reads are enabled only with destructive/admin graph tools
@@ -303,11 +376,14 @@ The installer backs up managed targets before replacing them:
 - `config.toml`
 - `rules/default.rules`
 - `agents/*.toml`
+- managed profile files in `CODEX_HOME`
 - personal plugin marketplace file
-- bundled local plugin directory
+- both managed plugin mirrors
+- all managed direct-skill directories and ownership markers
 
 Directory replacement is allowed only under the managed Codex or Agents home.
-The installer refuses unmanaged directory targets.
+Before any write, the installer rejects symlink or junction components below
+those roots so a managed-looking path cannot escape to another directory.
 
 ## Post-Install Checks
 

@@ -2,12 +2,40 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import {
+  CliUsageError,
+  installCliErrorBoundary
+} from "./lib/cli-error-contract.mjs";
 
 const root = path.resolve(process.cwd());
-const args = new Set(process.argv.slice(2));
-const jsonOutput = args.has("--json");
-const redactPaths = args.has("--redact-paths");
-const includeGlobal = args.has("--include-global");
+const args = process.argv.slice(2);
+installCliErrorBoundary({
+  tool: "codex-doctor",
+  argv: args,
+  root,
+  prefix: "Codex Chef doctor error"
+});
+
+let jsonOutput = false;
+let redactPaths = false;
+let includeGlobal = false;
+for (const arg of args) {
+  if (arg === "--json") jsonOutput = true;
+  else if (arg === "--redact-paths") redactPaths = true;
+  else if (arg === "--include-global") includeGlobal = true;
+  else if (arg === "--help" || arg === "-h") {
+    console.log(`Usage: node scripts/codex-doctor.mjs [options]
+
+Options:
+  --json             Emit machine-readable JSON
+  --redact-paths     Redact repository and home paths
+  --include-global   Inspect installed global targets
+`);
+    process.exit(0);
+  } else {
+    throw new CliUsageError(`Unknown argument: ${arg}`);
+  }
+}
 
 const localeCodes = ["tr"];
 const agentConfigFiles = [
@@ -185,6 +213,7 @@ function inspectSkills() {
   return {
     catalogCount: skills.length,
     installableCount: skills.filter((skill) => skill.install === true).length,
+    directInstallCount: skills.filter((skill) => skill.directInstall === true).length,
     lockEntries: Array.isArray(lock.entries) ? lock.entries.length : 0,
     highRiskInstallableCount: skills.filter((skill) => skill.install === true && skill.risk === "high").length
   };

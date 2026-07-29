@@ -9,12 +9,12 @@
       },
       "policy": {
         "installation": "AVAILABLE",
-        "authentication": "NONE"
+        "authentication": "ON_INSTALL"
       },
       "category": "Productivity",
       "interface": {
         "displayName": "Codex Chef Workflows",
-        "shortDescription": "Security-first Codex setup maintenance workflow."
+        "shortDescription": "Security-first Codex planning, maintenance, and verification workflows."
       }
     }
   ]

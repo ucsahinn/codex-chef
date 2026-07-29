@@ -8,8 +8,11 @@ const root = path.resolve(process.cwd());
 const failures = [];
 
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "manifests", "install-plan.json"), "utf8"));
+const skillCatalog = JSON.parse(fs.readFileSync(path.join(root, "catalog", "skills.json"), "utf8"));
 const ps = fs.readFileSync(path.join(root, "scripts", "install.ps1"), "utf8");
 const sh = fs.readFileSync(path.join(root, "scripts", "install.sh"), "utf8");
+const pinnedSkillHelper = fs.readFileSync(path.join(root, "scripts", "install-pinned-skill.mjs"), "utf8");
+const pinnedSkillActivation = fs.readFileSync(path.join(root, "scripts", "lib", "pinned-skill-activation.mjs"), "utf8");
 const marketplaceHelper = fs.readFileSync(path.join(root, "scripts", "upsert-marketplace-entry.mjs"), "utf8");
 
 function fail(message) {
@@ -32,6 +35,7 @@ function runMarketplaceHelperSmokes() {
   const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-marketplace-"));
   const marketplacePath = path.join(fixtureRoot, "agents", "plugins", "marketplace.json");
   const pluginTarget = path.join(fixtureRoot, "codex", "plugins", "codex-chef-workflows");
+  const expectedPluginSource = `./${path.relative(fixtureRoot, pluginTarget).replaceAll(path.sep, "/")}`;
   fs.mkdirSync(path.dirname(marketplacePath), { recursive: true });
 
   fs.writeFileSync(
@@ -43,7 +47,7 @@ function runMarketplaceHelperSmokes() {
           {
             name: "other-plugin",
             source: { source: "local", path: "C:/other/plugin" },
-            policy: { installation: "AVAILABLE", authentication: "NONE" },
+            policy: { installation: "AVAILABLE", authentication: "ON_USE" },
             category: "Testing",
             interface: { displayName: "Other Plugin", shortDescription: "Must survive." }
           },
@@ -72,11 +76,14 @@ function runMarketplaceHelperSmokes() {
   if (!other || other.interface?.displayName !== "Other Plugin") {
     fail("Marketplace helper smoke must preserve unrelated plugin entries and interface metadata.");
   }
-  if (!chef || chef.source?.path !== pluginTarget) {
-    fail("Marketplace helper smoke must update the Codex Chef plugin path.");
+  if (!chef || chef.source?.path !== expectedPluginSource) {
+    fail("Marketplace helper smoke must write a portable marketplace-root-relative plugin path.");
   }
-  if (chef.interface?.shortDescription !== "Security-first Codex setup maintenance workflow.") {
+  if (chef.interface?.shortDescription !== "Security-first Codex planning, maintenance, and verification workflows.") {
     fail("Marketplace helper smoke must preserve Codex Chef interface metadata.");
+  }
+  if (chef.policy?.authentication !== "ON_INSTALL") {
+    fail("Marketplace helper smoke must write the current Codex ON_INSTALL policy.");
   }
   const after = inspectMarketplaceEntry(marketplacePath, pluginTarget);
   if (after.changed) fail("Marketplace helper smoke must report current after write.");
@@ -95,6 +102,27 @@ function runMarketplaceHelperSmokes() {
   try {
     inspectMarketplaceEntry(badShapePath, pluginTarget);
     fail("Marketplace helper smoke must fail closed when plugins is not an array.");
+  } catch {
+    // Expected.
+  }
+
+  const invalidPolicyPath = path.join(fixtureRoot, "invalid-policy-marketplace.json");
+  fs.writeFileSync(
+    invalidPolicyPath,
+    JSON.stringify({
+      name: "invalid-policy",
+      plugins: [{
+        name: "legacy-plugin",
+        source: { source: "local", path: "C:/legacy/plugin" },
+        policy: { installation: "AVAILABLE", authentication: "NONE" },
+        category: "Testing"
+      }]
+    }),
+    "utf8"
+  );
+  try {
+    inspectMarketplaceEntry(invalidPolicyPath, pluginTarget);
+    fail("Marketplace helper smoke must reject unsupported authentication policy values.");
   } catch {
     // Expected.
   }
@@ -134,6 +162,20 @@ const requiredOperations = [
 for (const id of requiredOperations) {
   if (!operation(id)) fail(`Manifest missing installer-covered operation: ${id}`);
 }
+for (const skill of skillCatalog.skills.filter((entry) => entry.directInstall === true)) {
+  const id = `${skill.name}-direct-skill`;
+  const directOperation = operation(id);
+  if (!directOperation) {
+    fail(`Manifest missing managed direct-skill operation: ${id}`);
+    continue;
+  }
+  if (directOperation.source !== `plugins/codex-chef-workflows/skills/${skill.name}`) {
+    fail(`Manifest direct-skill source drifted for ${skill.name}.`);
+  }
+  if (directOperation.destination !== `\${AGENTS_HOME}/skills/${skill.name}`) {
+    fail(`Manifest direct-skill destination drifted for ${skill.name}.`);
+  }
+}
 
 requireText(ps, "[switch]$All", "PowerShell installer");
 requireText(ps, "[switch]$InstallSkills", "PowerShell installer");
@@ -148,6 +190,7 @@ requireText(ps, "CODEX_HOME", "PowerShell installer");
 requireText(ps, "AGENTS_HOME", "PowerShell installer");
 requireText(ps, "Backup-Target", "PowerShell installer");
 requireText(ps, "Assert-ManagedDirectoryTarget", "PowerShell installer");
+requireText(ps, "assert-install-surface.mjs", "PowerShell installer");
 requireText(ps, "Sync managed directory files from", "PowerShell installer");
 requireText(ps, "synced directory", "PowerShell installer");
 requireText(ps, "Install-CodexConfig", "PowerShell installer");
@@ -170,6 +213,13 @@ requireText(ps, "rules\\default.rules", "PowerShell installer");
 requireText(ps, "agents", "PowerShell installer");
 requireText(ps, "profiles", "PowerShell installer");
 requireText(ps, "plugins\\codex-chef-workflows", "PowerShell installer");
+requireText(ps, "plugins\\sources\\codex-chef-workflows", "PowerShell installer");
+requireText(ps, "manage-direct-skill-target.mjs", "PowerShell installer");
+requireText(ps, "AdoptFetchSkill", "PowerShell installer");
+requireText(ps, "AdoptSeoSkill", "PowerShell installer");
+requireText(ps, "AdoptEvidenceResearchSkill", "PowerShell installer");
+requireText(ps, "AdoptDirectSkill", "PowerShell installer");
+requireText(ps, "Get-ManagedDirectSkills", "PowerShell installer");
 requireText(ps, "marketplace.json", "PowerShell installer");
 requireText(ps, "upsert-marketplace-entry.mjs", "PowerShell installer");
 requireText(ps, "Upsert Codex Chef plugin marketplace entry", "PowerShell installer");
@@ -181,21 +231,29 @@ requireText(ps, "templates\\git\\pre-commit", "PowerShell installer");
 requireText(ps, "core.excludesfile", "PowerShell installer");
 requireText(ps, "core.hooksPath", "PowerShell installer");
 requireText(ps, "catalog\\skills.json", "PowerShell installer");
-requireText(ps, "skills list --global --json", "PowerShell installer");
-requireText(ps, '"--agent", "codex", "--yes", "--global"', "PowerShell installer");
+requireText(ps, "install-pinned-skill.mjs", "PowerShell installer");
+requireText(ps, '"--commit"', "PowerShell installer");
+requireText(ps, '"--cli-version"', "PowerShell installer");
+requireText(ps, "Assert-ManagedWriteTarget", "PowerShell installer");
+requireText(ps, "assert-managed-target.mjs", "PowerShell installer");
 requireRegex(ps, /if\s*\(\$All\)\s*\{[\s\S]*\$InstallSkills\s*=\s*\$true[\s\S]*\}/, "PowerShell installer");
 const psAllBlock = ps.match(/if\s*\(\$All\)\s*\{(?<body>[\s\S]*?)\n\}/)?.groups?.body || "";
 if (/\$InstallGitGuards\s*=\s*\$true/.test(psAllBlock)) {
   fail("PowerShell -All must not enable InstallGitGuards; global Git guards require the explicit InstallGitGuards flag.");
 }
 requireRegex(ps, /if\s*\(\$InstallGitGuards\)\s*\{[\s\S]*core\.excludesfile[\s\S]*core\.hooksPath[\s\S]*\}/, "PowerShell installer");
-requireRegex(ps, /if\s*\(\$InstallSkills\)\s*\{[\s\S]*"skills",\s*"add"[\s\S]*"--agent",\s*"codex"[\s\S]*"--yes"[\s\S]*"--global"[\s\S]*\}/, "PowerShell installer");
+requireRegex(ps, /if\s*\(\$InstallSkills\)\s*\{[\s\S]*install-pinned-skill\.mjs[\s\S]*"--commit"[\s\S]*"--cli-version"[\s\S]*\}/, "PowerShell installer");
+if (/InstalledSkills|ContainsKey\(\$Skill\.name\)/.test(ps)) {
+  fail("PowerShell installer must not skip pinned verification based only on an installed skill name.");
+}
 
 requireText(sh, "INSTALL_SKILLS=0", "Bash installer");
 requireText(sh, "INSTALL_GIT_GUARDS=0", "Bash installer");
 requireText(sh, "ALL=0", "Bash installer");
 requireText(sh, "FORCE=0", "Bash installer");
 requireText(sh, "REPAIR=0", "Bash installer");
+requireText(sh, "--adopt-direct-skill=", "Bash installer");
+requireText(sh, "direct_skill_names", "Bash installer");
 requireText(sh, "NO_BACKUP=0", "Bash installer");
 requireText(sh, "DRY_RUN=0", "Bash installer");
 requireText(sh, "PLAIN_OUTPUT=0", "Bash installer");
@@ -209,6 +267,7 @@ requireText(sh, "CODEX_HOME_DIR", "Bash installer");
 requireText(sh, "AGENTS_HOME_DIR", "Bash installer");
 requireText(sh, "backup_target", "Bash installer");
 requireText(sh, "assert_managed_directory_target", "Bash installer");
+requireText(sh, "assert-install-surface.mjs", "Bash installer");
 requireText(sh, "sync managed directory files from", "Bash installer");
 requireText(sh, "synced directory", "Bash installer");
 requireText(sh, "install_codex_config", "Bash installer");
@@ -232,6 +291,11 @@ requireText(sh, "rules/default.rules", "Bash installer");
 requireText(sh, "/agents", "Bash installer");
 requireText(sh, "/profiles", "Bash installer");
 requireText(sh, "plugins/codex-chef-workflows", "Bash installer");
+requireText(sh, "plugins/sources/codex-chef-workflows", "Bash installer");
+requireText(sh, "manage-direct-skill-target.mjs", "Bash installer");
+requireText(sh, "adopt-fetch-skill", "Bash installer");
+requireText(sh, "adopt-seo-skill", "Bash installer");
+requireText(sh, "adopt-evidence-research-skill", "Bash installer");
 requireText(sh, "marketplace.json", "Bash installer");
 requireText(sh, "upsert-marketplace-entry.mjs", "Bash installer");
 requireText(sh, "Would upsert Codex Chef plugin marketplace entry", "Bash installer");
@@ -243,21 +307,74 @@ requireText(sh, "templates/git/pre-commit", "Bash installer");
 requireText(sh, "core.excludesfile", "Bash installer");
 requireText(sh, "core.hooksPath", "Bash installer");
 requireText(sh, "catalog/skills.json", "Bash installer");
-requireText(sh, "\"skills\", \"list\", \"--global\", \"--json\"", "Bash installer");
-requireText(sh, "\"--agent\", \"codex\", \"--yes\", \"--global\"", "Bash installer");
+requireText(sh, "install-pinned-skill.mjs", "Bash installer");
+requireText(sh, "\"--commit\"", "Bash installer");
+requireText(sh, "\"--cli-version\"", "Bash installer");
+requireText(sh, "assert_managed_write_target", "Bash installer");
+requireText(sh, "assert-managed-target.mjs", "Bash installer");
 requireRegex(sh, /if \[ "\$ALL" -eq 1 \]; then[\s\S]*INSTALL_SKILLS=1[\s\S]*fi/, "Bash installer");
 const shAllBlock = sh.match(/if \[ "\$ALL" -eq 1 \]; then(?<body>[\s\S]*?)\nfi/)?.groups?.body || "";
 if (/INSTALL_GIT_GUARDS=1/.test(shAllBlock)) {
   fail("Bash --all must not enable INSTALL_GIT_GUARDS; global Git guards require the explicit --install-git-guards flag.");
 }
 requireRegex(sh, /if \[ "\$INSTALL_GIT_GUARDS" -eq 1 \]; then[\s\S]*core\.excludesfile[\s\S]*core\.hooksPath[\s\S]*fi/, "Bash installer");
-requireRegex(sh, /if \[ "\$INSTALL_SKILLS" -eq 1 \]; then[\s\S]*"skills", "add"[\s\S]*"--agent", "codex"[\s\S]*"--yes", "--global"[\s\S]*fi/, "Bash installer");
+requireRegex(sh, /if \[ "\$INSTALL_SKILLS" -eq 1 \]; then[\s\S]*install-pinned-skill\.mjs[\s\S]*"--commit"[\s\S]*"--cli-version"[\s\S]*fi/, "Bash installer");
+if (/installed\.has\(skill\.name\)/.test(sh)) {
+  fail("Bash installer must not skip pinned verification based only on an installed skill name.");
+}
+
+for (const required of [
+  "inspectPinnedSkillTarget",
+  "sourceTreeSha256",
+  "activatePinnedSkill",
+  "--adopt-existing",
+  "--json",
+  "skipped-user-owned",
+  "already-current"
+]) {
+  requireText(pinnedSkillHelper, required, "Pinned skill installer");
+}
+if (/\bnpx(?:\.cmd)?\b|\bnpm\s+exec\b|`skills@\$\{options\.cliVersion\}`/.test(pinnedSkillHelper)) {
+  fail("Pinned skill installer must copy the verified checkout natively and must not execute a registry-delivered Skills CLI.");
+}
+for (const required of [
+  "fs.cpSync(source, staging",
+  "fs.renameSync(staging, target)",
+  "inspectPinnedSkillTarget",
+  "afterActivate"
+]) {
+  requireText(pinnedSkillActivation, required, "Pinned skill activation helper");
+}
 
 const allProfile = new Set(manifest.profiles.all || []);
 for (const id of ["git-ignore-global", "git-pre-commit-hook", "git-config-excludesfile", "git-config-hooks-path"]) {
   if (allProfile.has(id)) {
     fail(`All profile must not include ${id}; global Git guards require the explicit InstallGitGuards flag.`);
   }
+}
+
+const curatedSkillsOperation = operation("curated-skills");
+if (
+  curatedSkillsOperation?.collision
+  !== "preserve-foreign-update-owned-mandatory-backup-explicit-adoption-required"
+) {
+  fail("curated-skills collision must preserve foreign targets and require explicit adoption.");
+}
+if (curatedSkillsOperation?.backup !== true) {
+  fail("curated-skills must declare mandatory backup for managed upgrades or explicit adoption.");
+}
+for (const required of ["foreign", "--adopt-existing"]) {
+  requireText(
+    curatedSkillsOperation?.conflictPolicy || "",
+    required,
+    "curated-skills conflictPolicy"
+  );
+}
+for (const required of ["--json", "preserved user-owned skill", "already current"]) {
+  requireText(ps, required, "PowerShell curated skill status contract");
+}
+for (const required of ["--json", "Preserved user-owned skill", "Skill already current"]) {
+  requireText(sh, required, "Bash curated skill status contract");
 }
 
 for (const op of manifest.operations) {

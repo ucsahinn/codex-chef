@@ -24,8 +24,11 @@ the global Git config only when the user runs them. They must not:
 
 ## Reporting A Vulnerability
 
-Open a private security report or contact the repository maintainer. Do not
-include real secrets in issue text, screenshots, logs, or reproduction steps.
+Use GitHub's **Report a vulnerability** link when it is visible. If the
+repository does not currently expose that private-reporting feature, contact
+the maintainer through the public GitHub profile only to request a private
+channel; do not put vulnerability details in a public issue. Never include real
+secrets in issue text, screenshots, logs, or reproduction steps.
 
 ## Pre-Push Checklist
 

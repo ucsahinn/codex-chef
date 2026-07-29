@@ -5,11 +5,28 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { findProblemRules } from "./lib/approval-rules.mjs";
+import { assertManagedTargetPath } from "./lib/managed-path-safety.mjs";
 import { platformCommand } from "./lib/platform-command.mjs";
+import {
+  inspectPinnedSkillTarget,
+  inspectSkillTree
+} from "./lib/skill-provenance.mjs";
+import { inspectDirectSkillTarget } from "./manage-direct-skill-target.mjs";
+import {
+  CliUsageError,
+  installCliErrorBoundary,
+  requireCliValue
+} from "./lib/cli-error-contract.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
+installCliErrorBoundary({
+  tool: "verify-install-runtime",
+  argv: args,
+  root,
+  prefix: "Codex Chef runtime verification error"
+});
 const options = {
   json: false,
   redactPaths: false,
@@ -38,21 +55,21 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--require-live-runtime") options.requireLiveRuntime = true;
   else if (["--probe-timeout-ms", "--doctor-timeout-ms", "--mcp-timeout-ms"].includes(arg)) {
     const key = arg === "--probe-timeout-ms" ? "probeTimeoutMs" : arg === "--doctor-timeout-ms" ? "doctorTimeoutMs" : "mcpTimeoutMs";
-    options[key] = Number.parseInt(args[index + 1], 10);
-    if (!Number.isFinite(options[key]) || options[key] < 1000) throw new Error(`${arg} must be at least 1000.`);
+    options[key] = Number.parseInt(requireCliValue(args, index, arg), 10);
+    if (!Number.isFinite(options[key]) || options[key] < 1000) throw new CliUsageError(`${arg} must be at least 1000.`);
     index += 1;
   }
   else if (arg === "--codex-home") {
-    options.codexHome = path.resolve(args[index + 1]);
+    options.codexHome = path.resolve(requireCliValue(args, index, "--codex-home"));
     index += 1;
   } else if (arg === "--agents-home") {
-    options.agentsHome = path.resolve(args[index + 1]);
+    options.agentsHome = path.resolve(requireCliValue(args, index, "--agents-home"));
     index += 1;
   } else if (arg === "--help" || arg === "-h") {
     printHelp();
     process.exit(0);
   } else {
-    throw new Error(`Unknown argument: ${arg}`);
+    throw new CliUsageError(`Unknown argument: ${arg}`);
   }
 }
 
@@ -138,18 +155,26 @@ function posixPath(filePath) {
   return filePath.split(path.sep).join("/");
 }
 
-function listFilesRecursive(directory) {
+function listFilesRecursive(directory, { rejectLinks = false } = {}) {
   const files = [];
   if (!fs.existsSync(directory)) return files;
+  const rootStat = fs.lstatSync(directory);
+  if (rejectLinks && (!rootStat.isDirectory() || rootStat.isSymbolicLink())) {
+    throw new Error(`Managed directory must be a real directory: ${directory}`);
+  }
 
   function walk(current) {
     for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
       const fullPath = path.join(current, entry.name);
-      if (entry.isDirectory()) {
-        walk(fullPath);
-      } else if (entry.isFile()) {
-        files.push(posixPath(path.relative(directory, fullPath)));
+      const stat = fs.lstatSync(fullPath);
+      if (rejectLinks && stat.isSymbolicLink()) {
+        throw new Error(`Managed directory tree must not contain links: ${fullPath}`);
       }
+      if (stat.isDirectory()) {
+        walk(fullPath);
+      } else if (stat.isFile()) {
+        files.push(posixPath(path.relative(directory, fullPath)));
+      } else if (rejectLinks) throw new Error(`Managed directory tree contains an unsupported entry: ${fullPath}`);
     }
   }
 
@@ -238,17 +263,44 @@ function inspectInstalledFiles(failures) {
   const globalAgentsPath = path.join(options.codexHome, "AGENTS.md");
   const marketplacePath = path.join(options.agentsHome, "plugins", "marketplace.json");
   const pluginPath = path.join(options.codexHome, "plugins", "codex-chef-workflows");
+  const marketplacePluginPath = path.join(options.agentsHome, "plugins", "sources", "codex-chef-workflows");
+  const directSkills = readJson("catalog/skills.json").skills.filter((skill) => skill.directInstall === true);
 
   const requiredFiles = [
     globalAgentsPath,
     configPath,
     rulesPath,
-    marketplacePath
+    marketplacePath,
+    ...directSkills.map((skill) => path.join(options.agentsHome, "skills", skill.name, ".codex-chef-managed.json"))
   ];
+  for (const target of [...requiredFiles, pluginPath, marketplacePluginPath]) {
+    try {
+      assertManagedTargetPath(target, [options.codexHome, options.agentsHome]);
+    } catch (error) {
+      failures.push(error.message);
+    }
+  }
   for (const file of requiredFiles) {
     if (!fs.existsSync(file)) failures.push(`Required installed file is missing: ${redact(file)}`);
   }
   if (!fs.existsSync(pluginPath)) failures.push(`Installed plugin directory is missing: ${redact(pluginPath)}`);
+  if (!fs.existsSync(marketplacePluginPath)) {
+    failures.push(`Installed marketplace plugin source is missing: ${redact(marketplacePluginPath)}`);
+  }
+  for (const skill of directSkills) {
+    const source = path.join(root, "plugins", "codex-chef-workflows", "skills", skill.name);
+    const target = path.join(options.agentsHome, "skills", skill.name);
+    try {
+      const state = inspectDirectSkillTarget(source, target);
+      if (state.status !== "managed") {
+        failures.push(
+          `Installed direct skill ownership is invalid for ${skill.name}: ${redact(target)} (${state.reason || state.status})`
+        );
+      }
+    } catch (error) {
+      failures.push(`Installed direct skill ownership could not be verified for ${skill.name}: ${error.message}`);
+    }
+  }
 
   let installedMcp = new Set();
   if (fs.existsSync(configPath)) {
@@ -274,6 +326,7 @@ function inspectInstalledFiles(failures) {
     agentsHome: redact(options.agentsHome),
     requiredFiles: requiredFiles.map((file) => ({ path: redact(file), exists: fs.existsSync(file) })),
     plugin: { path: redact(pluginPath), exists: fs.existsSync(pluginPath) },
+    marketplacePlugin: { path: redact(marketplacePluginPath), exists: fs.existsSync(marketplacePluginPath) },
     agents: {
       expected: expectedAgents.length,
       installed: installedAgents.size,
@@ -356,6 +409,13 @@ function inspectManagedFileDrift(failures) {
   function compareFile(sourceRel, targetPath) {
     expectedFiles += 1;
     const sourcePath = path.join(root, sourceRel);
+    try {
+      assertManagedTargetPath(targetPath, [options.codexHome, options.agentsHome]);
+    } catch (error) {
+      failures.push(error.message);
+      mismatched.push({ source: sourceRel, target: redact(targetPath), reason: "unsafe-managed-path" });
+      return;
+    }
     if (!fs.existsSync(sourcePath) || !fs.existsSync(targetPath)) {
       recordMissing(sourceRel, targetPath);
       return;
@@ -389,19 +449,40 @@ function inspectManagedFileDrift(failures) {
   const pluginSourceRel = "plugins/codex-chef-workflows";
   const pluginSource = path.join(root, pluginSourceRel);
   const pluginTarget = path.join(options.codexHome, "plugins", "codex-chef-workflows");
-  const pluginSourceFiles = listFilesRecursive(pluginSource);
-  const pluginTargetFiles = listFilesRecursive(pluginTarget);
+  const marketplacePluginTarget = path.join(options.agentsHome, "plugins", "sources", "codex-chef-workflows");
+  const pluginSourceFiles = listFilesRecursive(pluginSource, { rejectLinks: true });
   const pluginSourceSet = new Set(pluginSourceFiles);
 
   for (const file of pluginSourceFiles) {
     compareFile(posixPath(path.join(pluginSourceRel, file)), path.join(pluginTarget, file));
+    compareFile(posixPath(path.join(pluginSourceRel, file)), path.join(marketplacePluginTarget, file));
   }
 
-  for (const file of pluginTargetFiles) {
-    if (!pluginSourceSet.has(file)) {
-      const extraPath = path.join(pluginTarget, file);
-      extra.push(redact(extraPath));
-      failures.push(`Installed managed plugin has an extra file not present in source: ${redact(extraPath)}`);
+  const directSkills = readJson("catalog/skills.json").skills.filter((skill) => skill.directInstall === true);
+  for (const skill of directSkills) {
+    const sourceRel = `plugins/codex-chef-workflows/skills/${skill.name}`;
+    const source = path.join(root, sourceRel);
+    const target = path.join(options.agentsHome, "skills", skill.name);
+    for (const file of listFilesRecursive(source)) {
+      compareFile(posixPath(path.join(sourceRel, file)), path.join(target, file));
+    }
+  }
+
+  for (const mirrorTarget of [pluginTarget, marketplacePluginTarget]) {
+    let mirrorFiles = [];
+    try {
+      assertManagedTargetPath(mirrorTarget, [options.codexHome, options.agentsHome]);
+      mirrorFiles = listFilesRecursive(mirrorTarget, { rejectLinks: true });
+    } catch (error) {
+      failures.push(error.message);
+      continue;
+    }
+    for (const file of mirrorFiles) {
+      if (!pluginSourceSet.has(file)) {
+        const extraPath = path.join(mirrorTarget, file);
+        extra.push(redact(extraPath));
+        failures.push(`Installed managed plugin mirror has an extra file not present in source: ${redact(extraPath)}`);
+      }
     }
   }
 
@@ -491,6 +572,10 @@ function inspectCodexRuntime(failures, warnings) {
       inspected: true,
       ...parseCodexDoctorRuntime(ambientDoctor, warnings, "ambient codex doctor --json")
     };
+    if (ambientDoctor.status !== 0) {
+      const message = `Ambient codex doctor --json exited ${ambientDoctor.status}.`;
+      (options.requireLiveRuntime ? failures : warnings).push(message);
+    }
     if (ambient.activeHomeMatchesInstall === false) {
       warnings.push(
         `Ambient Codex runtime home differs from installed target; verifying with explicit CODEX_HOME=${redact(options.codexHome)}.`
@@ -514,6 +599,10 @@ function inspectCodexRuntime(failures, warnings) {
     ...parseCodexDoctorRuntime(doctor, warnings, "codex doctor --json with installed CODEX_HOME"),
     ambient
   };
+  if (doctor.status !== 0) {
+    const message = `Codex doctor --json with installed CODEX_HOME exited ${doctor.status}.`;
+    (options.requireLiveRuntime ? failures : warnings).push(message);
+  }
 
   if (runtime.activeHomeMatchesInstall === false) {
     failures.push(
@@ -562,12 +651,71 @@ function inspectCodexRuntime(failures, warnings) {
   return runtime;
 }
 
+function inspectPluginRuntime(failures, warnings) {
+  if (options.offline || options.skipCodexCli) {
+    return { inspected: false, note: "Skipped by offline or Codex CLI mode." };
+  }
+
+  const installedEnv = { ...process.env, CODEX_HOME: options.codexHome };
+  const result = runProbe(
+    "installed-home codex plugin list",
+    codexCommand(),
+    ["plugin", "list", "--available", "--json"],
+    { env: installedEnv, timeout: options.probeTimeoutMs }
+  );
+  if (result.error || result.status !== 0) {
+    const detail = result.error?.message || `exit ${result.status}`;
+    const message = `Could not inspect Codex Chef plugin state with installed CODEX_HOME: ${detail}`;
+    (options.requireLiveRuntime ? failures : warnings).push(message);
+    return { inspected: false, error: detail };
+  }
+
+  try {
+    const parsed = JSON.parse(result.stdout || "{}");
+    const entries = [
+      ...(Array.isArray(parsed.installed) ? parsed.installed : []),
+      ...(Array.isArray(parsed.available) ? parsed.available : [])
+    ];
+    const entry = entries.find((plugin) => plugin?.name === "codex-chef-workflows");
+    if (!entry) {
+      warnings.push(
+        "Codex Chef plugin is neither installed nor discoverable in the active marketplace set; managed direct skills remain the guaranteed invocation path."
+      );
+      return { inspected: true, found: false, installed: false, enabled: false };
+    }
+    const expectedVersion = readJson("plugins/codex-chef-workflows/.codex-plugin/plugin.json").version;
+    if (entry.installed !== true) {
+      warnings.push(
+        "Codex Chef plugin is discoverable but not installed; namespaced plugin calls require explicit installation and a new session."
+      );
+    } else if (entry.enabled !== true) {
+      warnings.push("Codex Chef plugin is installed but disabled; namespaced plugin calls are unavailable.");
+    }
+    if (entry.installed === true && entry.version !== expectedVersion) {
+      failures.push(
+        `Installed Codex Chef plugin version drifted: expected ${expectedVersion}, got ${entry.version || "unknown"}.`
+      );
+    }
+    return {
+      inspected: true,
+      found: true,
+      installed: entry.installed === true,
+      enabled: entry.enabled === true,
+      version: entry.version || null,
+      expectedVersion
+    };
+  } catch (error) {
+    warnings.push(`codex plugin list --available --json did not emit parseable plugin state: ${error.message}`);
+    return { inspected: false, error: error.message };
+  }
+}
+
 function inspectSkills(failures, warnings) {
-  const expected = readJson("catalog/skills.json")
-    .skills
-    .filter((skill) => skill.install === true)
-    .map((skill) => skill.name)
-    .sort();
+  const skillsCatalog = readJson("catalog/skills.json");
+  const expectedEntries = skillsCatalog.skills
+    .filter((skill) => skill.install === true || skill.directInstall === true)
+    .sort((left, right) => left.name.localeCompare(right.name));
+  const expected = expectedEntries.map((skill) => skill.name);
 
   if (!options.expectSkills) {
     return {
@@ -581,20 +729,64 @@ function inspectSkills(failures, warnings) {
     path.join(options.codexHome, "skills"),
     path.join(options.agentsHome, "skills")
   ];
-  const actual = new Set();
+  const locations = new Map();
   for (const skillRoot of skillRoots) {
     if (!fs.existsSync(skillRoot)) continue;
+    try {
+      assertManagedTargetPath(skillRoot, [options.codexHome, options.agentsHome]);
+    } catch (error) {
+      failures.push(error.message);
+      continue;
+    }
     for (const entry of fs.readdirSync(skillRoot, { withFileTypes: true })) {
-      if (entry.isDirectory() && !entry.name.startsWith(".")) actual.add(entry.name);
+      if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+      const roots = locations.get(entry.name) || [];
+      roots.push(skillRoot);
+      locations.set(entry.name, roots);
     }
   }
+  const actual = new Set(locations.keys());
   const missing = expected.filter((skill) => !actual.has(skill));
+  const duplicates = [...locations.entries()]
+    .filter(([, roots]) => roots.length > 1)
+    .map(([name, roots]) => ({ name, roots: roots.map(redact) }));
   if (missing.length > 0) failures.push(`Curated global skills missing: ${missing.join(", ")}`);
+  if (duplicates.length > 0) {
+    failures.push(`Duplicate global skill names are visible across skill roots: ${duplicates.map((entry) => entry.name).join(", ")}`);
+  }
+  const invalid = [];
+  for (const skill of expectedEntries) {
+    const roots = locations.get(skill.name) || [];
+    if (roots.length !== 1) continue;
+    const target = path.join(roots[0], skill.name);
+    try {
+      assertManagedTargetPath(target, [options.codexHome, options.agentsHome]);
+      const state = skill.install === true
+        ? inspectPinnedSkillTarget(target, {
+            package: skill.package,
+            commit: skill.commit,
+            skill: skill.skill,
+            cliVersion: skillsCatalog.skillsCliVersion
+          })
+        : inspectSkillTree(target, skill.name);
+      if (!state.valid) {
+        invalid.push({ name: skill.name, reason: state.reason, path: redact(target) });
+        failures.push(`Curated global skill is invalid: ${skill.name} (${state.reason}) at ${redact(target)}`);
+      }
+    } catch (error) {
+      invalid.push({ name: skill.name, reason: error.message, path: redact(target) });
+      failures.push(`Curated global skill could not be verified: ${skill.name} (${error.message})`);
+    }
+  }
   return {
     inspected: true,
     expected: expected.length,
     installed: actual.size,
     missing,
+    invalidCount: invalid.length,
+    invalid,
+    duplicateCount: duplicates.length,
+    duplicates,
     roots: skillRoots.map((skillRoot) => ({ path: redact(skillRoot), exists: fs.existsSync(skillRoot) }))
   };
 }
@@ -640,13 +832,14 @@ const report = {
   managedFiles: inspectManagedFileDrift(failures),
   configDrift: inspectConfigDrift(failures),
   runtime: inspectCodexRuntime(failures, warnings),
+  plugin: inspectPluginRuntime(failures, warnings),
   skills: inspectSkills(failures, warnings),
   gitGuards: inspectGitGuards(failures),
   warnings,
   failures
 };
 
-report.status = failures.length === 0 ? "ok" : "fail";
+report.status = failures.length > 0 ? "fail" : warnings.length > 0 ? "attention" : "ok";
 
 if (options.json) {
   console.log(JSON.stringify(report, null, 2));
@@ -670,6 +863,9 @@ if (options.json) {
   }
   if (report.skills.inspected) {
     console.log(`Skills: ${report.skills.installed} listed, ${report.skills.missing.length} missing from curated install set`);
+  }
+  if (report.plugin.inspected) {
+    console.log(`Plugin: installed=${report.plugin.installed} enabled=${report.plugin.enabled}`);
   }
   for (const warning of warnings) console.log(`Warning: ${warning}`);
   for (const failure of failures) console.error(`Failure: ${failure}`);

@@ -22,7 +22,7 @@ Resmi kaynaklar:
 | `AGENTS.md` | Kalici repo/global calisma anlasmalari | Repo-local onceligi koruyan incelenmis global rehber | `npm run validate` |
 | `config.toml` | Model, sandbox, approval, MCP, feature ve profile ayarlari | Workspace-write sandbox ve on-request approval | `npm run validate:mcp` |
 | Rules | Dar komut approval varsayilanlari | Sadece dogrulama komutlari; destructive/publish aksiyonlari gated | `npm run validate:content` |
-| Skills | Progressive disclosure ile yeniden kullanilabilir workflow'lar | Curated install allowlist ve uc yerel plugin skill'i: operator, offline diagram ve context budget planner | `npm run verify:skills` |
+| Skills | Progressive disclosure ile yeniden kullanilabilir workflow'lar | Commit-pinned curated kurulumlar ve yetkili reconstruction, kanıta dayalı SEO, izlenebilir deep research dahil dokuz yerel plugin skill'i | `npm run verify:skills` |
 | Plugins | Paylasilabilir skill ve gelecekte bundled yuzey paketi | Tek local plugin, default hook/MCP/app yok | `npm run validate` |
 | MCP/connectors | Canli docs, browser, code navigation ve dis sistemler | Docs/code/browser yardimcilari acik; auth isteyenler kapali | `npm run validate:mcp` |
 | Subagents | Evidence-heavy uzman delegasyonu | Sandbox'li role dosyalariyla 21 incelenmis uzman ajan | `npm run validate:agents` |
@@ -184,8 +184,9 @@ Bu repo bu ayrimi korur:
 - Curated public ve first-party skill'ler `catalog/skills.json` icinde kalir.
 - Installable skill'ler reviewed `package`, `skill`, `sourceUrl`, `license`,
   `risk` ve `lastChecked` alanlarini tasimalidir.
-- Local plugin default olarak enterprise operator, zero-network offline diagram
-  triplet ve context budget planner skill'lerini sunar.
+- Local plugin dokuz workflow sunar; enterprise operator, zero-network offline
+  diagram triplet, explicit-only Fetch, kanıta dayalı `$seo`, izlenebilir
+  `$evidence-research` ve context budget planner bunların içindedir.
 - Plugin hook, MCP server ve app yuzeyleri ayri review olmadan manifest'e girmez.
 
 `/diagram` benzeri cikti gerektiğinde local renderer'i dogrudan calistir:

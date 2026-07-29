@@ -7,6 +7,10 @@ ALL=0
 FORCE=0
 UPDATE=0
 REPAIR=0
+ADOPT_FETCH_SKILL=0
+ADOPT_SEO_SKILL=0
+ADOPT_EVIDENCE_RESEARCH_SKILL=0
+ADOPT_DIRECT_SKILLS=" "
 NO_BACKUP=0
 DRY_RUN=0
 PLAIN_OUTPUT=0
@@ -21,6 +25,17 @@ for arg in "$@"; do
     --force) FORCE=1 ;;
     --update) UPDATE=1 ;;
     --repair) REPAIR=1 ;;
+    --adopt-fetch-skill) ADOPT_FETCH_SKILL=1 ;;
+    --adopt-seo-skill) ADOPT_SEO_SKILL=1 ;;
+    --adopt-evidence-research-skill) ADOPT_EVIDENCE_RESEARCH_SKILL=1 ;;
+    --adopt-direct-skill=*)
+      direct_skill_name="${arg#*=}"
+      if [ "$direct_skill_name" = "" ]; then
+        echo "--adopt-direct-skill requires a skill name after =." >&2
+        exit 2
+      fi
+      ADOPT_DIRECT_SKILLS="${ADOPT_DIRECT_SKILLS}${direct_skill_name} "
+      ;;
     --no-backup) NO_BACKUP=1 ;;
     --dry-run) DRY_RUN=1 ;;
     --plain-output) PLAIN_OUTPUT=1 ;;
@@ -51,6 +66,28 @@ done
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
 AGENTS_HOME_DIR="${AGENTS_HOME:-$HOME/.agents}"
+CURATED_SKILLS_CATALOG="$REPO_ROOT/catalog/skills.json"
+if [ "${CODEX_CHEF_TEST_MODE:-}" = "1" ] && [ "${CODEX_CHEF_TEST_SKILLS_CATALOG:-}" != "" ]; then
+  CURATED_SKILLS_CATALOG="$CODEX_CHEF_TEST_SKILLS_CATALOG"
+fi
+
+direct_skill_names() {
+  node -e 'const fs=require("fs");const skills=JSON.parse(fs.readFileSync(process.argv[1],"utf8")).skills;for(const skill of skills){if(skill.directInstall===true)console.log(skill.name)}' "$REPO_ROOT/catalog/skills.json"
+}
+
+for requested_name in $ADOPT_DIRECT_SKILLS; do
+  known_direct_skill=0
+  while IFS= read -r catalog_name; do
+    if [ "$requested_name" = "$catalog_name" ]; then
+      known_direct_skill=1
+      break
+    fi
+  done < <(direct_skill_names)
+  if [ "$known_direct_skill" -ne 1 ]; then
+    echo "Unknown managed direct skill adoption target: $requested_name" >&2
+    exit 2
+  fi
+done
 
 icon() {
   if [ "$PLAIN_OUTPUT" -eq 1 ] || [ "${NO_COLOR:-}" != "" ] || [ "${TERM:-}" = "dumb" ]; then
@@ -147,6 +184,81 @@ run_preflight_validators() {
   done
 }
 
+preflight_install_targets() {
+  if ! node "$REPO_ROOT/scripts/assert-install-surface.mjs" \
+    --codex-home "$CODEX_HOME_DIR" \
+    --agents-home "$AGENTS_HOME_DIR" >/dev/null; then
+    echo "Managed install surface contains an unsafe linked path; refusing all writes." >&2
+    exit 1
+  fi
+
+  local plugin_source="$REPO_ROOT/plugins/codex-chef-workflows"
+  local direct_helper="$REPO_ROOT/scripts/manage-direct-skill-target.mjs"
+  local direct_name direct_display direct_adopt direct_flag direct_source direct_target
+  while IFS= read -r direct_name; do
+    case "$direct_name" in
+      fetch)
+        direct_display="Fetch"
+        direct_adopt="$ADOPT_FETCH_SKILL"
+        direct_flag="--adopt-fetch-skill"
+        ;;
+      seo)
+        direct_display="SEO"
+        direct_adopt="$ADOPT_SEO_SKILL"
+        direct_flag="--adopt-seo-skill"
+        ;;
+      evidence-research)
+        direct_display="Evidence Research"
+        direct_adopt="$ADOPT_EVIDENCE_RESEARCH_SKILL"
+        direct_flag="--adopt-evidence-research-skill"
+        ;;
+      *)
+        direct_display="$direct_name"
+        direct_adopt=0
+        direct_flag="--adopt-direct-skill=$direct_name"
+        case "$ADOPT_DIRECT_SKILLS" in
+          *" $direct_name "*) direct_adopt=1 ;;
+        esac
+        ;;
+    esac
+    direct_source="$plugin_source/skills/$direct_name"
+    direct_target="$AGENTS_HOME_DIR/skills/$direct_name"
+    local alternate_target="$CODEX_HOME_DIR/skills/$direct_name"
+    if [ "$alternate_target" != "$direct_target" ] && { [ -e "$alternate_target" ] || [ -L "$alternate_target" ]; }; then
+      echo "Duplicate direct skill root detected; move or explicitly reconcile the existing CODEX_HOME copy before install: $alternate_target" >&2
+      exit 1
+    fi
+    local direct_args=("$direct_helper" "$direct_source" "$direct_target" "--check")
+    if [ "$direct_adopt" -eq 1 ]; then
+      direct_args+=("--allow-adopt")
+    fi
+    if node "${direct_args[@]}" >/dev/null; then
+      :
+    else
+      local direct_status=$?
+      if [ "$direct_status" -eq 2 ]; then
+        echo "Refusing to overwrite user-owned $direct_display skill without $direct_flag: $direct_target" >&2
+      else
+        echo "Direct $direct_display ownership preflight failed: $direct_target" >&2
+      fi
+      exit 1
+    fi
+  done < <(direct_skill_names)
+
+  local marketplace_path="$AGENTS_HOME_DIR/plugins/marketplace.json"
+  local marketplace_plugin_target="$AGENTS_HOME_DIR/plugins/sources/codex-chef-workflows"
+  local marketplace_helper="$REPO_ROOT/scripts/upsert-marketplace-entry.mjs"
+  if node "$marketplace_helper" "$marketplace_path" "$marketplace_plugin_target" --check; then
+    :
+  else
+    local marketplace_status=$?
+    if [ "$marketplace_status" -ne 2 ]; then
+      echo "Plugin marketplace preflight failed before any managed write: $marketplace_path" >&2
+      exit 1
+    fi
+  fi
+}
+
 if [ "$INTERACTIVE" -eq 1 ]; then
   section "Guided setup"
   note "Press Enter to accept the safe default shown in brackets."
@@ -179,12 +291,24 @@ if [ "$REPAIR" -eq 1 ]; then
   if [ "$NO_BACKUP" -eq 1 ]; then
     REPAIR_ARGS+=("--no-backup")
   fi
+  if [ "$ADOPT_FETCH_SKILL" -eq 1 ]; then
+    REPAIR_ARGS+=("--adopt-fetch-skill")
+  fi
+  if [ "$ADOPT_SEO_SKILL" -eq 1 ]; then
+    REPAIR_ARGS+=("--adopt-seo-skill")
+  fi
+  if [ "$ADOPT_EVIDENCE_RESEARCH_SKILL" -eq 1 ]; then
+    REPAIR_ARGS+=("--adopt-evidence-research-skill")
+  fi
+  for requested_name in $ADOPT_DIRECT_SKILLS; do
+    REPAIR_ARGS+=("--adopt-direct-skill" "$requested_name")
+  done
   node "${REPAIR_ARGS[@]}"
   exit $?
 fi
 
 if [ "$INTERACTIVE" -eq 1 ] && [ "$ALL" -eq 1 ] && [ "$INSTALL_SKILLS" -eq 1 ]; then
-  if ! yes_no "Install or reconcile the 16 reviewed global Codex skills now?" "yes"; then
+  if ! yes_no "Install or reconcile the 15 reviewed global Codex skills now?" "yes"; then
     INSTALL_SKILLS=0
   fi
 fi
@@ -218,8 +342,68 @@ run_change() {
   "$@"
 }
 
+assert_managed_write_target() {
+  local target="$1"
+  local managed_root=""
+  case "$target" in
+    "$CODEX_HOME_DIR"|"$CODEX_HOME_DIR"/*) managed_root="$CODEX_HOME_DIR" ;;
+    "$AGENTS_HOME_DIR"|"$AGENTS_HOME_DIR"/*) managed_root="$AGENTS_HOME_DIR" ;;
+    "$HOME/.gitignore_global")
+      if [ "$INSTALL_GIT_GUARDS" -eq 1 ]; then managed_root="$HOME"; fi
+      ;;
+    "$HOME/.githooks"|"$HOME/.githooks"/*)
+      if [ "$INSTALL_GIT_GUARDS" -eq 1 ]; then managed_root="$HOME/.githooks"; fi
+      ;;
+  esac
+  if [ "$managed_root" = "" ]; then
+    case "$target" in
+    *)
+      echo "Refusing to access unmanaged install target: $target" >&2
+      exit 1
+      ;;
+    esac
+  fi
+  if ! node "$REPO_ROOT/scripts/assert-managed-target.mjs" "$managed_root" "$target" >/dev/null; then
+    echo "Managed write target became unsafe; refusing access: $target" >&2
+    exit 1
+  fi
+}
+
+managed_mkdir() {
+  assert_managed_write_target "$1"
+  mkdir -p "$1"
+}
+
+managed_copy_file() {
+  local source="$1"
+  local destination="$2"
+  assert_managed_write_target "$destination"
+  cp "$source" "$destination"
+}
+
+managed_copy_tree() {
+  local source="$1"
+  local destination="$2"
+  assert_managed_write_target "$destination"
+  cp -R "$source" "$destination"
+}
+
+managed_backup_copy() {
+  local source="$1"
+  local destination="$2"
+  assert_managed_write_target "$source"
+  assert_managed_write_target "$destination"
+  cp -R "$source" "$destination"
+}
+
+managed_remove_tree() {
+  assert_managed_write_target "$1"
+  rm -rf "$1"
+}
+
 ensure_dir() {
-  run_change "$1" "ensure directory exists" mkdir -p "$1" || true
+  assert_managed_write_target "$1"
+  run_change "$1" "ensure directory exists" managed_mkdir "$1" || true
 }
 
 assert_managed_directory_target() {
@@ -238,6 +422,7 @@ backup_target() {
   if [ "$NO_BACKUP" -eq 1 ] || [ ! -e "$target" ]; then
     return
   fi
+  assert_managed_write_target "$target"
   ensure_dir "$BACKUP_ROOT"
   local rel
   case "$target" in
@@ -245,7 +430,7 @@ backup_target() {
     *) rel="$(basename "$target")" ;;
   esac
   ensure_dir "$(dirname "$BACKUP_ROOT/$rel")"
-  if ! run_change "$BACKUP_ROOT/$rel" "back up $target" cp -R "$target" "$BACKUP_ROOT/$rel"; then
+  if ! run_change "$BACKUP_ROOT/$rel" "back up $target" managed_backup_copy "$target" "$BACKUP_ROOT/$rel"; then
     if [ "$DRY_RUN" -eq 1 ]; then
       return
     fi
@@ -257,13 +442,14 @@ backup_target() {
 install_file() {
   local source="$1"
   local destination="$2"
+  assert_managed_write_target "$destination"
   if [ -e "$destination" ] && [ "$FORCE" -ne 1 ]; then
     SKIPPED_EXISTING_COUNT=$((SKIPPED_EXISTING_COUNT + 1))
     return
   fi
   ensure_dir "$(dirname "$destination")"
   backup_target "$destination"
-  if run_change "$destination" "install file from $source" cp "$source" "$destination"; then
+  if run_change "$destination" "install file from $source" managed_copy_file "$source" "$destination"; then
     action "installed" "$destination"
   elif [ "$DRY_RUN" -ne 1 ]; then
     echo "Failed to install file from $source to $destination" >&2
@@ -274,6 +460,7 @@ install_file() {
 install_codex_config() {
   local source="$1"
   local destination="$2"
+  assert_managed_write_target "$destination"
   if [ -e "$destination" ] && { [ "$FORCE" -ne 1 ] || [ "$UPDATE" -eq 1 ]; }; then
     ensure_dir "$(dirname "$destination")"
     backup_target "$destination"
@@ -288,6 +475,7 @@ install_codex_config() {
       node "${merge_args[@]}" --dry-run
       return
     fi
+    assert_managed_write_target "$destination"
     if run_change "$destination" "$merge_action" node "${merge_args[@]}"; then
       if [ "$UPDATE" -eq 1 ]; then
         action "updated config" "$destination"
@@ -304,6 +492,7 @@ install_codex_config() {
 install_directory() {
   local source="$1"
   local destination="$2"
+  assert_managed_write_target "$destination"
   if [ -e "$destination" ] && [ "$FORCE" -ne 1 ]; then
     ensure_dir "$(dirname "$destination")"
     backup_target "$destination"
@@ -312,7 +501,7 @@ install_directory() {
       (cd "$source" && find . -type f -print) | while IFS= read -r rel; do
         rel="${rel#./}"
         ensure_dir "$(dirname "$destination/$rel")"
-        cp "$source/$rel" "$destination/$rel"
+        managed_copy_file "$source/$rel" "$destination/$rel"
       done
       action "synced directory" "$destination"
     fi
@@ -322,14 +511,14 @@ install_directory() {
   backup_target "$destination"
   assert_managed_directory_target "$destination"
   if [ -e "$destination" ]; then
-    if ! run_change "$destination" "replace existing managed directory" rm -rf "$destination"; then
+    if ! run_change "$destination" "replace existing managed directory" managed_remove_tree "$destination"; then
       if [ "$DRY_RUN" -ne 1 ]; then
         echo "Failed to replace existing managed directory: $destination" >&2
         exit 1
       fi
     fi
   fi
-  if run_change "$destination" "install directory from $source" cp -R "$source" "$destination"; then
+  if run_change "$destination" "install directory from $source" managed_copy_tree "$source" "$destination"; then
     action "installed" "$destination"
   elif [ "$DRY_RUN" -ne 1 ]; then
     echo "Failed to install directory from $source to $destination" >&2
@@ -348,7 +537,7 @@ else
   note "Mode: preserve existing files; merge missing config blocks"
 fi
 if [ "$INSTALL_SKILLS" -eq 1 ]; then
-  note "Skills: install reviewed catalog entries with --agent codex"
+  note "Skills: install reviewed commit-pinned entries by verified native copy"
 else
   note "Skills: skipped unless --all or --install-skills is used"
 fi
@@ -374,6 +563,7 @@ if [ "$INTERACTIVE" -eq 1 ]; then
 fi
 
 run_preflight_validators
+preflight_install_targets
 
 section "Managed Codex files"
 ensure_dir "$CODEX_HOME_DIR"
@@ -398,15 +588,43 @@ done
 PLUGIN_SOURCE="$REPO_ROOT/plugins/codex-chef-workflows"
 PLUGIN_TARGET="$CODEX_HOME_DIR/plugins/codex-chef-workflows"
 install_directory "$PLUGIN_SOURCE" "$PLUGIN_TARGET"
+MARKETPLACE_PLUGIN_TARGET="$AGENTS_HOME_DIR/plugins/sources/codex-chef-workflows"
+install_directory "$PLUGIN_SOURCE" "$MARKETPLACE_PLUGIN_TARGET"
+DIRECT_SKILL_HELPER="$REPO_ROOT/scripts/manage-direct-skill-target.mjs"
+while IFS= read -r DIRECT_SKILL_NAME; do
+  DIRECT_SKILL_SOURCE="$PLUGIN_SOURCE/skills/$DIRECT_SKILL_NAME"
+  DIRECT_SKILL_TARGET="$AGENTS_HOME_DIR/skills/$DIRECT_SKILL_NAME"
+  install_directory "$DIRECT_SKILL_SOURCE" "$DIRECT_SKILL_TARGET"
+  if [ "$DRY_RUN" -ne 1 ]; then
+    assert_managed_write_target "$DIRECT_SKILL_TARGET/.codex-chef-managed.json"
+    DIRECT_MARK_ARGS=("$DIRECT_SKILL_HELPER" "$DIRECT_SKILL_SOURCE" "$DIRECT_SKILL_TARGET" "--mark")
+    case "$DIRECT_SKILL_NAME" in
+      fetch) DIRECT_SKILL_ADOPT="$ADOPT_FETCH_SKILL" ;;
+      seo) DIRECT_SKILL_ADOPT="$ADOPT_SEO_SKILL" ;;
+      evidence-research) DIRECT_SKILL_ADOPT="$ADOPT_EVIDENCE_RESEARCH_SKILL" ;;
+      *)
+        DIRECT_SKILL_ADOPT=0
+        case "$ADOPT_DIRECT_SKILLS" in
+          *" $DIRECT_SKILL_NAME "*) DIRECT_SKILL_ADOPT=1 ;;
+        esac
+        ;;
+    esac
+    if [ "$DIRECT_SKILL_ADOPT" -eq 1 ]; then
+      DIRECT_MARK_ARGS+=("--allow-adopt")
+    fi
+    node "${DIRECT_MARK_ARGS[@]}" >/dev/null
+  fi
+done < <(direct_skill_names)
 
 MARKETPLACE_DIR="$AGENTS_HOME_DIR/plugins"
 MARKETPLACE_PATH="$MARKETPLACE_DIR/marketplace.json"
 ensure_dir "$MARKETPLACE_DIR"
+assert_managed_write_target "$MARKETPLACE_PATH"
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "Would upsert Codex Chef plugin marketplace entry: $MARKETPLACE_PATH"
 else
   MARKETPLACE_HELPER="$REPO_ROOT/scripts/upsert-marketplace-entry.mjs"
-  if node "$MARKETPLACE_HELPER" "$MARKETPLACE_PATH" "$PLUGIN_TARGET" --check
+  if node "$MARKETPLACE_HELPER" "$MARKETPLACE_PATH" "$MARKETPLACE_PLUGIN_TARGET" --check
   then
     marketplace_status=0
   else
@@ -414,7 +632,8 @@ else
   fi
   if [ "$marketplace_status" -eq 2 ]; then
     backup_target "$MARKETPLACE_PATH"
-    node "$MARKETPLACE_HELPER" "$MARKETPLACE_PATH" "$PLUGIN_TARGET" --write
+    assert_managed_write_target "$MARKETPLACE_PATH"
+    node "$MARKETPLACE_HELPER" "$MARKETPLACE_PATH" "$MARKETPLACE_PLUGIN_TARGET" --write
     action "updated marketplace" "$MARKETPLACE_PATH"
   elif [ "$marketplace_status" -eq 0 ]; then
     SKIPPED_EXISTING_COUNT=$((SKIPPED_EXISTING_COUNT + 1))
@@ -445,17 +664,17 @@ fi
 if [ "$INSTALL_SKILLS" -eq 1 ]; then
   section "Curated skills"
   if [ "$DRY_RUN" -eq 1 ]; then
-    node - "$REPO_ROOT/catalog/skills.json" <<'NODE'
+    node - "$CURATED_SKILLS_CATALOG" <<'NODE'
 const fs = require("fs");
 const catalog = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 for (const skill of catalog.skills.filter((item) => item.install)) {
   const depthFlag = skill.fullDepth ? " --full-depth" : "";
-  console.log(`Would install skill: ${skill.name} from ${skill.package} --skill ${skill.skill}${depthFlag}`);
+  console.log(`Would install pinned skill: ${skill.name} from ${skill.package}@${skill.commit} --skill ${skill.skill}${depthFlag}`);
 }
 NODE
     echo "Skipped skill installation because --dry-run is active."
   else
-  node - "$REPO_ROOT/catalog/skills.json" <<'NODE'
+  node - "$CURATED_SKILLS_CATALOG" "$REPO_ROOT" <<'NODE'
 const fs = require("fs");
 const { spawnSync } = require("child_process");
 const catalog = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
@@ -471,34 +690,28 @@ const env = {
   npm_config_cache: process.env.npm_config_cache || `${process.cwd()}/tmp/npm-cache`,
   NPM_CONFIG_CACHE: process.env.NPM_CONFIG_CACHE || process.env.npm_config_cache || `${process.cwd()}/tmp/npm-cache`
 };
-const installed = new Set();
-const listResult = spawnSync("npx", ["skills", "list", "--global", "--json"], {
-  encoding: "utf8",
-  env
-});
-if (listResult.status === 0 && listResult.stdout.trim()) {
-  for (const skill of JSON.parse(listResult.stdout)) {
-    installed.add(skill.name);
-  }
-}
-
 for (const skill of catalog.skills.filter((item) => item.install)) {
-  if (!skill.package || !skill.skill) {
-    console.warn(`Skipped skill without verified package and skill fields: ${skill.name}`);
+  if (!skill.package || !skill.commit || !skill.skill) {
+    console.warn(`Skipped skill without verified package, commit, and skill fields: ${skill.name}`);
     continue;
   }
-  if (installed.has(skill.name)) {
-    console.log(`Skill already installed: ${skill.name}`);
-    continue;
-  }
-
   const depthFlag = skill.fullDepth ? " --full-depth" : "";
-  console.log(`Installing skill: ${skill.name} from ${skill.package} --skill ${skill.skill}${depthFlag}`);
-  const args = ["skills", "add", skill.package, "--skill", skill.skill];
+  console.log(`Installing pinned skill: ${skill.name} from ${skill.package}@${skill.commit} --skill ${skill.skill}${depthFlag}`);
+  const args = [
+    `${process.argv[3]}/scripts/install-pinned-skill.mjs`,
+    "--package",
+    skill.package,
+    "--commit",
+    skill.commit,
+    "--skill",
+    skill.skill,
+    "--cli-version",
+    catalog.skillsCliVersion,
+    "--json"
+  ];
   if (skill.fullDepth) args.push("--full-depth");
-  args.push("--agent", "codex", "--yes", "--global");
   const result = spawnSync(
-    "npx",
+    process.execPath,
     args,
     { encoding: "utf8", env }
   );
@@ -509,7 +722,28 @@ for (const skill of catalog.skills.filter((item) => item.install)) {
     console.error(`Skill install failed for ${skill.name}`);
     process.exit(1);
   }
-  console.log(`Installed skill: ${skill.name}`);
+  let receipt;
+  try {
+    receipt = JSON.parse(result.stdout);
+  } catch {
+    process.stdout.write(result.stdout || "");
+    process.stderr.write(result.stderr || "");
+    console.error(`Skill install returned an invalid status receipt for ${skill.name}`);
+    process.exit(1);
+  }
+  const statusByOutcome = {
+    "installed": "Installed skill",
+    "upgraded": "Upgraded managed skill",
+    "already-current": "Skill already current",
+    "skipped-user-owned": "Preserved user-owned skill",
+    "adopted": "Adopted skill"
+  };
+  const status = statusByOutcome[receipt.outcome];
+  if (!status) {
+    console.error(`Skill install returned an unknown outcome for ${skill.name}: ${receipt.outcome}`);
+    process.exit(1);
+  }
+  console.log(`${status}: ${skill.name}`);
 }
 NODE
   fi

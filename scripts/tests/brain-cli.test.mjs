@@ -20,6 +20,15 @@ function run(args, env = {}) {
   });
 }
 
+function jsonError(result) {
+  assert.equal(result.stderr, "");
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.schemaVersion, "codex-chef.cli-error.v1");
+  assert.equal(report.status, "error");
+  assert.equal(report.tool, "brain");
+  return report.error?.message || "";
+}
+
 function snapshotVault(root) {
   const entries = [];
   const stack = [root];
@@ -43,7 +52,7 @@ function snapshotVault(root) {
 test("CLI requires an explicit target source and preview writes nothing", () => {
   const missing = run(["init", "--preview", "--json"], { CODEX_CHEF_BRAIN_HOME: "" });
   assert.notEqual(missing.status, 0);
-  assert.match(missing.stderr, /target|vault/i);
+  assert.match(jsonError(missing), /target|vault/i);
 
   const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "brain cli Türkçe "));
   const target = path.join(sandbox, "CodexChefBrain");
@@ -100,7 +109,7 @@ test("CLI builds a read-only Obsidian URI and rejects vault escapes", () => {
 
   const escaped = run(["uri", "--target", target, "--note", "../outside.md", "--json"]);
   assert.notEqual(escaped.status, 0);
-  assert.match(escaped.stderr, /escapes the vault/i);
+  assert.match(jsonError(escaped), /escapes the vault/i);
 });
 
 test("CLI exposes a read-only Windows Brain permission audit", () => {

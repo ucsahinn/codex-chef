@@ -7,9 +7,14 @@ const failures = [];
 const fixtureCodexHome = path.resolve("tmp/nonexistent-codex-status-codex-home");
 const fixtureAgentsHome = path.resolve("tmp/nonexistent-codex-status-agents-home");
 const outputFixtureDir = path.resolve("tmp/validate-codex-status-output");
+const statusSource = fs.readFileSync("scripts/codex-status.mjs", "utf8");
 
 function fail(message) {
   failures.push(message);
+}
+
+if (!statusSource.includes("explicit invocation remains available only through an enabled copy")) {
+  fail("codex status must not imply that a disabled skill remains explicitly invokable.");
 }
 
 function run(args, extra = {}) {
@@ -218,8 +223,8 @@ if (report) {
   if (!report.mcpSetupBoard || report.mcpSetupBoard.serverCount !== 16) {
     fail("codex status must include the MCP setup board with all 16 servers.");
   }
-  if (!Array.isArray(report.mcpSetupBoard.servers) || !report.mcpSetupBoard.servers.some((server) => server.name === "supabase" && server.setupKind === "env" && String(server.setupHint || "").includes("SUPABASE_DB_URL"))) {
-    fail("codex status MCP setup board must explain Supabase SUPABASE_DB_URL setup.");
+  if (!Array.isArray(report.mcpSetupBoard.servers) || !report.mcpSetupBoard.servers.some((server) => server.name === "supabase" && server.setupKind === "oauth" && String(server.setupHint || "").includes("project_ref") && String(server.setupHint || "").includes("read_only=true"))) {
+    fail("codex status MCP setup board must explain project-scoped, read-only Supabase OAuth setup.");
   }
   if (report.effectiveControls?.features?.multiAgent !== true) {
     fail("codex status must report that multi-agent routing is enabled in effective controls.");
@@ -433,6 +438,9 @@ if (textResult.error) {
   }
   if (textResult.stdout.includes("[status] running codex:doctor")) {
     fail("codex status repo-only output must not imply direct Codex CLI doctor checks are running.");
+  }
+  if (!textResult.stdout.includes("npm run chef -- --status --repo-only --details --no-log")) {
+    fail("codex status repo-only output must preserve the repo-only boundary in its details command.");
   }
 }
 

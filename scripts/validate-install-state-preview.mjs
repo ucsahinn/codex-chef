@@ -9,7 +9,9 @@ const failures = [];
 const manifest = readJson("manifests/install-plan.json");
 const packageJson = readJson("package.json");
 const schema = readJson("schemas/install-state-preview.schema.json");
+const skillsLock = readJson("catalog/skills-lock.json");
 const operationById = new Map((manifest.operations || []).map((operation) => [operation.id, operation]));
+const lockedSkillByName = new Map((skillsLock.entries || []).map((entry) => [entry.name, entry]));
 const allowedKinds = new Set(["copy-file", "copy-directory", "write-marketplace", "git-config", "skill-install"]);
 const allowedManifestKinds = new Set([...allowedKinds, "copy-glob"]);
 const allowedRisks = new Set(["low", "medium", "high"]);
@@ -320,8 +322,22 @@ function validateOperation(operation, label, selected) {
     if (!nonEmptyString(operation.command)) fail(`${label} ${operation.id} must include command`);
     if (!nonEmptyString(operation.source)) fail(`${label} ${operation.id} must include source`);
     if (!nonEmptyString(operation.sourceUrl)) fail(`${label} ${operation.id} must include sourceUrl`);
-    if (!operation.command.includes("--agent codex --yes --global")) {
-      fail(`${label} ${operation.id} must install skills for Codex globally with yes flag`);
+    const skillName = operation.id.startsWith("curated-skills:")
+      ? operation.id.slice("curated-skills:".length)
+      : "";
+    const lockedSkill = lockedSkillByName.get(skillName);
+    if (!lockedSkill) {
+      fail(`${label} ${operation.id} must map to a commit-pinned catalog entry`);
+    } else {
+      if (operation.command !== lockedSkill.installCommand) {
+        fail(`${label} ${operation.id} must use the exact commit-pinned install command`);
+      }
+      if (operation.source !== lockedSkill.source) {
+        fail(`${label} ${operation.id} source must match the locked skill source`);
+      }
+      if (operation.sourceUrl !== lockedSkill.sourceUrl) {
+        fail(`${label} ${operation.id} sourceUrl must match the locked skill source URL`);
+      }
     }
   }
 }

@@ -42,6 +42,9 @@ jobs:
       - run: node --check plugins/codex-chef-workflows/skills/offline-diagram-triplet/scripts/render-diagram-triplet.mjs
       - run: node --check scripts/analyze-token-surfaces.mjs
       - run: node --check scripts/validate-token-surfaces.mjs
+      - run: node --check scripts/lib/cli-error-contract.mjs
+      - run: node --check scripts/tests/cli-error-contract.test.mjs
+      - run: node --check scripts/tests/release-readiness.test.mjs
       - run: node --check scripts/validate-adaptive-runtime.mjs
       - run: node --check scripts/lib/platform-command.mjs
       - run: node --check scripts/verify-install-runtime.mjs
@@ -117,3 +120,5 @@ jobs:
       - run: npm run validate:installer-smoke
       - run: npm run validate:chef-cli
       - run: npm run validate:status
+      - run: npm run validate:fetch-skill
+      - run: npm run validate:growth-skills

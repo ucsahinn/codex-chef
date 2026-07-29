@@ -12,6 +12,7 @@ Codex Chef’in ayrıntılı operatör dokümantasyonu İngilizce ve Türkçe tu
 | --- | --- |
 | Güvenli ön izleme veya kurulum | [Kurulum rehberi](install.tr.md) |
 | Günlük çalışma akışını anlamak | [Kurulum nasıl kullanılır?](how-to.tr.md) |
+| Proje notlarını lokal yakalamak veya geri çağırmak | [Markdown Brain workflow'u](brain/README.tr.md) |
 | Terminal çıktısını karşılaştırmak | [Beklenen çıktı](expected-output.tr.md) |
 | Hatalı bir komutu teşhis etmek | [Sorun giderme](troubleshooting.tr.md) |
 | Lokal tercihleri kaybetmeden güncellemek | [Güncelleme rehberi](upgrade.tr.md) |

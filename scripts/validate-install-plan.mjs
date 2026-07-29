@@ -6,6 +6,7 @@ import { spawnSync } from "node:child_process";
 const root = path.resolve(process.cwd());
 const manifestPath = path.join(root, "manifests", "install-plan.json");
 const schemaPath = path.join(root, "schemas", "install-plan.schema.json");
+const skillsPath = path.join(root, "catalog", "skills.json");
 const failures = [];
 
 const allowedKinds = new Set(["copy-file", "copy-directory", "copy-glob", "write-marketplace", "git-config", "skill-install"]);
@@ -138,9 +139,15 @@ function validatePlanOutputSmoke() {
   const noBackupOutput = runPlan(["--no-backup", "--json"], "Install plan no-backup smoke");
   if (noBackupOutput) {
     const plan = parsePlan(noBackupOutput, "Install plan no-backup smoke");
-    const backupManaged = plan?.operations?.filter((operation) => operation.collision.includes("backup")) || [];
+    const backupManaged = plan?.operations?.filter(
+      (operation) => operation.kind !== "skill-install" && operation.collision.includes("backup")
+    ) || [];
     if (plan && backupManaged.some((operation) => operation.backup !== false)) {
       fail("Install plan --no-backup smoke must mark backup-managed operations as backup=false");
+    }
+    const curatedSkills = plan?.operations?.filter((operation) => operation.kind === "skill-install") || [];
+    if (plan && curatedSkills.some((operation) => operation.backup !== true)) {
+      fail("Install plan --no-backup must keep mandatory pinned-skill replacement backups enabled");
     }
   }
 
@@ -193,6 +200,7 @@ function validatePlanOutputSmoke() {
 
 const manifest = readJson(manifestPath, "manifests/install-plan.json");
 const schema = readJson(schemaPath, "schemas/install-plan.schema.json");
+const skillsCatalog = readJson(skillsPath, "catalog/skills.json");
 
 if (!manifest) {
   process.exit(1);
@@ -290,6 +298,21 @@ for (const operation of manifest.operations || []) {
   }
 }
 
+const curatedSkillsOperation = (manifest.operations || []).find(
+  (operation) => operation.id === "curated-skills"
+);
+if (
+  curatedSkillsOperation?.collision
+  !== "preserve-foreign-update-owned-mandatory-backup-explicit-adoption-required"
+  || curatedSkillsOperation?.backup !== true
+  || !/foreign|unmarked/i.test(curatedSkillsOperation?.conflictPolicy || "")
+  || !/--adopt-existing/.test(curatedSkillsOperation?.conflictPolicy || "")
+) {
+  fail(
+    "curated-skills must preserve foreign targets, upgrade owned targets with mandatory backup, and require per-skill --adopt-existing"
+  );
+}
+
 for (const [profileId, operationIdsForProfile] of Object.entries(manifest.profiles || {})) {
   if (!Array.isArray(operationIdsForProfile)) {
     fail(`Profile ${profileId} must be an array`);
@@ -305,6 +328,20 @@ for (const [profileId, operationIdsForProfile] of Object.entries(manifest.profil
 
 if (!manifest.profiles?.default || !manifest.profiles?.all) {
   fail("Install plan manifest must declare default and all profiles");
+}
+
+for (const skill of skillsCatalog?.skills?.filter((entry) => entry.directInstall === true) || []) {
+  const operationId = `${skill.name}-direct-skill`;
+  const operation = manifest.operations?.find((entry) => entry.id === operationId);
+  if (!operation) {
+    fail(`Install plan is missing cataloged direct-skill operation: ${operationId}`);
+    continue;
+  }
+  for (const profileName of ["default", "all"]) {
+    if (!manifest.profiles?.[profileName]?.includes(operationId)) {
+      fail(`Install plan ${profileName} profile is missing direct-skill operation: ${operationId}`);
+    }
+  }
 }
 
 validatePlanOutputSmoke();

@@ -56,10 +56,23 @@ Bu starter'ın kuralları:
   Browser request/response detail, browser interaction, symbol edit, graph
   indexing, memory write, filesystem, account, database, production, deploy,
   publish ve mutating tool'lar `"prompt"` kullanmali ya da disabled kalmalidir.
-- Browser network listing lokal QA icin approved olabilir; fakat Playwright
+- Browser network listing yerel QA için approved olabilir. Playwright
   `browser_network_request` ve Chrome DevTools `get_network_request` gibi
-  request/response detail tool'lari prompt ister. Bu tool'lar header, cookie
-  veya response body gibi hassas icerik gosterebilir.
+  request/response detail tool'ları prompt-gated veya disabled kalır; header,
+  cookie ya da response body gösterebilirler.
+- Yonetilen Playwright launcher'i `--isolated` ve
+  `--block-service-workers` kullanir; varsayilan browser profili diske
+  kalici yazilmaz ve service-worker kaydi gorevler arasi state biriktiremez.
+- Windows npm-backed stdio launcher'lari `/d` ile `cmd.exe` AutoRun'i kapatir,
+  `/s /c npx.cmd` kullanir ve
+  `NoDefaultCurrentDirectoryInExePath=1` environment degerini aktarir. Boylece
+  inner `npx.cmd` lookup workspace icindeki shadow command'i oncelemez. Outer
+  `cmd.exe` path'i per-server environment olusmadan once Codex host tarafindan
+  resolve edilir; path-independent statik template her Windows kurulumunda bu
+  outer launcher provenance'ini kanitlayamaz. Codex'i untrusted working
+  directory'den calistiran host'lar parent environment'ta da
+  `NoDefaultCurrentDirectoryInExePath=1` ayarlamali veya o makine icin guvenilir
+  absolute launcher path'lerini materialize etmelidir.
 - Apps/connectors icin ayri bir `[apps._default]` kapisi vardir:
   `enabled = false`, `destructive_enabled = false` ve
   `open_world_enabled = false` incelenmis template'lerin parcasidir.
@@ -76,16 +89,66 @@ Bu starter'ın kuralları:
 
 Resmi kaynak: https://developers.openai.com/codex/mcp
 
+## Yetkili Site Reconstruction
+
+Repo ile gelen explicit-only `fetch` skill'i, gerçek browser kanıtından
+client-visible site davranışını yeniden kurar. Yalnız URL ile yapılan çağrı
+public, pasif, sınırlı ve lokal kalır: login yapılmaz, dış sistemde mutation
+çalıştırılmaz, production endpoint replay edilmez; server source, database,
+secret veya private authorization mantığı alınmış gibi gösterilmez.
+
+Authenticated route'lar için açık ownership veya yetki, yalnız bu iş için
+ayrılmış test account'u ve ephemeral browser içinde kullanıcının kendisinin
+login olması gerekir. Skill credential, cookie, storage state, unsanitized HAR
+veya private browser profile istemez ve saklamaz. Yeniden kurulan login,
+registration, recovery, MFA ve payment formları default olarak inert veya lokal
+mock'tur.
+
+Uzak sayfa içeriği güvenilmeyen veridir. Network discovery exact origin ile
+başlar, redirect'leri yeniden doğrular, private ve metadata hedeflerini
+reddeder, public `GET`/`HEAD` için sınırlar uygular, geçerli robots
+kısıtlamalarına uyar; CAPTCHA, paywall, rate limit, anti-bot veya access check
+bypass etmez. Korumalı asset'ler ownership ya da reuse izni ister. Lokal çıktı
+default olarak zero-egress'tir; commit, publish, deploy, account, database ve
+diğer external write işlemleri ayrıca onaya bağlı kalır.
+
+## SEO ve Evidence Research Bütünlüğü
+
+Repo ile gelen `$seo` workflow'u local source, local rendered, deployed-public
+ve yetkili account kanıtını birbirinden ayırır. Passing build, sitemap kaydı,
+Lighthouse ölçümü veya structured-data validator sonucu; URL'nin indexlendiği,
+ranking aldığı, field traffic ürettiği ya da görünür rich result'a uygun olduğu
+iddiasına çevrilmez. Search Console, analytics, sitemap submission, DNS,
+production redirect, yayın, listing, outreach ve deploy işlemleri kendi yetki
+ve external-write kapılarında kalır.
+
+Repo ile gelen `$evidence-research` workflow'u charter, iddia edilen rigor
+düzeyine uygun yeniden üretilebilir search log, kontrol edilmiş source kaydı,
+claim-level referans, confidence, disagreement, limitation ve fact/inference/
+recommendation ayrımı ister. Kaynak, görüşme, istatistik, search count veya
+systematic-review uyumu uydurmaz. Ücretli API, private dataset, katılımcıyla
+iletişim, survey, lisanslı materyal ve publication açık onay gerektirir. İki
+skill de machine-checkable raporlarında credential ve secret-benzeri içeriği
+reddeder.
+
 ## Skill Kaynakları
 
 Installable skill'ler hem `catalog/skills.json` hem de
 `catalog/skills-lock.json` içinde temsil edilmelidir. Lock dosyası installer'ın
-kullandığı exact package/skill çiftini ve install command'ı kaydeder. Bu dosya
-degistirilemez upstream commit lock'u degil, incelenmis kaynak allowlist'idir;
-cunku mevcut Skills CLI kurulum akisi owner/repo + skill adi cozer. Default
-gate bunu offline kontrol eder; maintainer publish hazirliginda veya skill
-kaynaklari degistiginde `npm run verify:skills:online` ile network-backed
-resolution calistirir.
+kullandığı package, tam upstream commit SHA, skill, exact Skills CLI sürümü,
+registry integrity ve install command bilgisini kaydeder. Installer kilitli
+commit'i izole geçici checkout'a fetch eder, `HEAD` ile seçilen skill'i doğrular
+ve exact native copy'yi stage edip hash'ledikten sonra fetch edilen repo kodunu
+veya kayıtlı registry paketini çalıştırmadan etkinleştirir. CLI metadatası
+uyumluluk/keşif pini olarak kalır. Default gate bu sözleşmeyi offline kontrol
+eder; `npm run verify:skills:online` her pinli checkout'u ve npm integrity
+değerini doğrular.
+Hedef yoksa doğrudan kurulur. Geçerli ve kendi içinde tutarlı Codex Chef
+provenance marker'ı, zorunlu full-tree backup ile managed upgrade'e izin verir.
+Unmarked, foreign veya lokal olarak drift etmiş aynı adlı hedefler default
+olarak korunur. Adoption bilinçli olarak skill bazındadır: operator exact hedefi
+inceleyip yalnızca o helper komutunu `--adopt-existing` ile tekrar
+çalıştırmalıdır; geniş installer adoption switch'i yoktur.
 
 Default command approval rule'lari global skill kurulumunu auto-allow yapmaz.
 Read-only Skills CLI discovery allowlist'e alinabilir, fakat `skills add` ve
@@ -150,6 +213,24 @@ Installer'lar yalniz `codex-chef-workflows` marketplace kaydini upsert eder.
 Tum marketplace dosyasini bastan yazmaz; mevcut marketplace dosyasi invalid,
 okunamaz veya JSON object degilse fail-closed davranir.
 
+Yonetilen installer dokuz canonical lokal workflow dizininin tamamını
+`AGENTS_HOME/skills/<ad>` hedeflerine senkronize eder; böylece direct invocation
+plugin kurulumuna bağlı kalmaz. Skill başına kalıcı ownership marker,
+Chef-managed veya exact legacy içeriği foreign collision'dan ayırır. Foreign
+içerikte installer hiçbir managed dosya yazmadan durur; exact hedef açıkça
+sahiplenilmedikçe üzerine yazmaz. Güncellemeler backup desteklidir, ilgisiz
+skill dizinleri ve extra dosyalar korunur. Fetch
+`allow_implicit_invocation: false` kalır; SEO ile Evidence Research yalnız
+açıklamaları açıkça eşleştiğinde implicit seçilebilir.
+
+Marketplace kaydi, current Codex schema'nin istedigi marketplace root'u icinde
+kalan `AGENTS_HOME/plugins/sources/codex-chef-workflows` yonetilen aynasini
+kullanir. Bu kayıt plugin'i keşfedilebilir yapar; kurmaz veya etkinleştirmez.
+Namespace'li plugin kullanımı explicit plugin kurulumu ve yeni oturum gerektirir.
+Marketplace JSON, direct-skill ownership ve mevcut path component'lerinin tamamı
+herhangi bir managed write öncesinde preflight edilir. Configured home dışına
+kaçan symlink veya junction descendant'ları fail-closed davranır.
+
 ## Repair Modu
 
 `scripts/repair-install.mjs`, zaten global Codex setup'i olan kullanicilar icin
@@ -191,11 +272,19 @@ issue ve restorable target bilgisi. File content basmaz.
 
 Restore backup archive'larini untrusted input kabul eder. `npm run chef --
 --backups --backup <id> --restore` preview'dir. Apply path'i `--apply` ister,
-once mevcut target'larin fresh rollback backup'ini olusturur, unsafe archive
-path'lerini ve symlink'leri reddeder, yalniz aktif Codex veya Agents home
-altindaki bilinen Codex Chef managed dosyalarini restore eder. Backup archive
-cleanup ve delete otomatik degildir; manuel ve review edilmis operator aksiyonu
-olarak kalir.
+exact source byte'larini okuyup dogrular, mevcut target'larin fresh rollback
+backup'ini olusturur, unsafe archive path'lerini ve symlink'leri reddeder,
+yalniz aktif Codex veya Agents home altindaki bilinen Codex Chef managed
+dosyalarini restore eder. Sonraki bir write fail olursa daha once yazilan
+target'lar fresh rollback backup'tan geri alinir. Commit-pinned skill
+archive'lari catalog'daki tek bir skill ID ile sinirlanir ve handled failure
+sirasinda exact-tree semantigini koruyacak sekilde o skill tree'sini degistirir.
+Valid `codex-chef.backup.v1` manifest archive path, size ve SHA-256 setini
+birebir dogrulamalidir; legacy, missing, extra, degistirilmis veya unsupported
+control-plane dosyalari fail-closed olur. Inventory ancak bu kontroller ve
+target allowlist gectikten sonra bir backup'i restorable diye etiketler. Backup
+archive cleanup ve delete otomatik degildir; manuel ve review edilmis operator
+aksiyonu olarak kalir.
 
 ## Rules
 
@@ -236,8 +325,10 @@ templates veya plugin bundle'lari uzerinden gelirse de acik review olmadan
 reddedilir.
 
 Plugin manifest'leri de varsayilan olarak dar tutulur. Repo validation,
-plugin-bundled `hooks`, `mcpServers`, `apps`, `Write` capability ve `NONE`
-disinda marketplace authentication modlarini reddeder.
+plugin-bundled `hooks`, `mcpServers`, `apps` ve `Write` capability'lerini
+reddeder. Yalniz skill iceren Codex Chef marketplace kaydi, guncel semanin
+zorunlu `ON_INSTALL` degerini kullanir; authenticated MCP paketlemez veya
+servis credential'i istemez.
 
 Resmi kaynak: https://developers.openai.com/codex/hooks
 

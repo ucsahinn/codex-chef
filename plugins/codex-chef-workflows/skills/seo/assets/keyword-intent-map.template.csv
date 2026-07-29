@@ -1,0 +1,2 @@
+cluster,query_or_topic,intent,funnel_stage,target_page,page_type,primary_or_supporting,evidence_source,checked_at,confidence,priority,notes
+example-cluster,example topic,informational,awareness,/example/,guide,primary,Named research source,2026-07-29,low,P2,Replace example data with market-specific evidence

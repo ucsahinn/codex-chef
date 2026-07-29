@@ -4,10 +4,21 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import {
+  CliUsageError,
+  installCliErrorBoundary,
+  requireCliValue
+} from "./lib/cli-error-contract.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
 const args = process.argv.slice(2);
+installCliErrorBoundary({
+  tool: "write-backup-manifest",
+  argv: args,
+  root,
+  prefix: "Backup manifest generation failed"
+});
 const options = {
   backupRoot: null,
   operation: "unknown",
@@ -17,23 +28,23 @@ const options = {
 for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
   if (arg === "--backup-root") {
-    options.backupRoot = args[index + 1] || null;
+    options.backupRoot = requireCliValue(args, index, "--backup-root");
     index += 1;
   } else if (arg === "--operation") {
-    options.operation = args[index + 1] || "unknown";
+    options.operation = requireCliValue(args, index, "--operation");
     index += 1;
   } else if (arg === "--platform") {
-    options.platform = args[index + 1] || process.platform;
+    options.platform = requireCliValue(args, index, "--platform");
     index += 1;
   } else if (arg === "--help" || arg === "-h") {
     printHelp();
     process.exit(0);
   } else {
-    throw new Error(`Unknown argument: ${arg}`);
+    throw new CliUsageError(`Unknown argument: ${arg}`);
   }
 }
 
-if (!options.backupRoot) throw new Error("--backup-root is required");
+if (!options.backupRoot) throw new CliUsageError("--backup-root is required");
 
 const manifestName = ".codex-chef-backup.json";
 const backupRoot = path.resolve(options.backupRoot);

@@ -66,11 +66,13 @@ gerektiriyorsa skill yap. Tool veya dağıtım gerekiyorsa plugin olarak paketle
 - `catalog/skills.json` istek listesi degildir. Kurulabilir kayitlar bilinen
   package/skill ciftleri olmalidir.
 - Her kurulabilir skill `package`, `skill` ve `source = package@skill` tanimlar.
-- `catalog/skills-lock.json` incelenmis kaynak allowlist'idir; upstream
-  commit'i degistirilemez sekilde pinleyen bir lock dosyasi degildir. Mevcut
-  Skills CLI kurulumu owner/repo + skill adi cozdurdugu icin release hazirliginda
-  online kaynak dogrulamasi yeniden calistirilmalidir.
-- Installer `npx skills add <package> --skill <skill> --agent codex --yes --global` cagirir.
+- `catalog/skills-lock.json` her kurulabilir kaynagi tam upstream commit SHA'sina
+  pinler. Skills CLI surumu ve registry integrity degeri tarihli uyumluluk ve
+  kesif metadatasi olarak korunur.
+- Installer `scripts/install-pinned-skill.mjs` kullanir; helper yalniz kilitli
+  commit'i fetch eder, `HEAD` ve secilen skill'i dogrular, exact native copy'yi
+  stage edip hash'ler ve fetch edilen repo kodunu ya da registry kaynakli bir
+  installer'i calistirmadan etkinlestirir.
 - Varsayilan kontroller offline ve deterministik kalir. Network kontrolleri
   aciktir: `npm run verify:skills:online`.
 - Zaten lokal olan veya public package'tan guvenle kurulamayan skill'ler

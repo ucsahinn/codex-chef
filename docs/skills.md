@@ -14,9 +14,20 @@ reference.
 
 Official Codex reference: [Build skills](https://developers.openai.com/codex/skills)
 
-## 🍱 Six Bundled Workflows
+## 🍱 Nine Bundled Workflows
 
-These live in the Codex Chef plugin and travel with the repository.
+These live in the Codex Chef plugin and travel with the repository. The
+installer synchronizes all nine from that same canonical source to
+`AGENTS_HOME/skills/<name>`, so every workflow can be called directly. Examples
+include `$adaptive-agent-routing`, `$context-budget-planner`, `$fetch <url>`,
+`$seo <target>`, and `$evidence-research <question>`. Fetch remains
+explicit-only; SEO and Evidence Research can also activate when the request
+unambiguously matches their descriptions.
+
+The personal marketplace entry makes the plugin discoverable; it does not
+install or enable it. To use namespaced calls such as
+`$codex-chef-workflows:fetch`, install `codex-chef-workflows@codex-chef` from
+`/plugins` or with `codex plugin add`, then start a new Codex session.
 
 | Skill | Use it for |
 | --- | --- |
@@ -25,9 +36,12 @@ These live in the Codex Chef plugin and travel with the repository.
 | [`context-budget-planner`](../plugins/codex-chef-workflows/skills/context-budget-planner/SKILL.md) | Plan sources, token use, compaction handoff, and verification for broad work. |
 | [`adaptive-agent-routing`](../plugins/codex-chef-workflows/skills/adaptive-agent-routing/SKILL.md) | Select the narrowest useful agent, skill, MCP, and wait policy without spawning by default. |
 | [`external-review-workflow`](../plugins/codex-chef-workflows/skills/external-review-workflow/SKILL.md) | Prepare a secret-safe, hash-pinned manual review handoff without uploading anything automatically. |
+| [`fetch`](../plugins/codex-chef-workflows/skills/fetch/SKILL.md) | Reconstruct an authorized reference site from browser evidence, verify responsive interactions, and report every fidelity gap without copying credentials or server internals. |
+| [`seo`](../plugins/codex-chef-workflows/skills/seo/SKILL.md) | Audit, implement, and verify technical, rendering, structured-data, content-intent, international, local, performance, and measurement work without inventing rankings or indexing evidence. |
+| [`evidence-research`](../plugins/codex-chef-workflows/skills/evidence-research/SKILL.md) | Frame decision questions, search and appraise current sources, trace claims, explain disagreement and uncertainty, and package reproducible research. |
 | [`offline-diagram-triplet`](../plugins/codex-chef-workflows/skills/offline-diagram-triplet/SKILL.md) | Turn Mermaid source into editable Excalidraw, SVG, PNG, and Markdown assets without network access. |
 
-## ✅ Sixteen Reviewed Full-Install Skills
+## ✅ Fifteen Reviewed Full-Install Skills
 
 These entries have `install: true` in the catalog. They are eligible for the
 full install profile; the catalog pins the package/skill pair and the online
@@ -43,7 +57,6 @@ verification checks that the pair still resolves.
 | `frontend-skill` | A broad frontend production workflow. | [nexu-io/open-design](https://github.com/nexu-io/open-design) |
 | `webapp-testing` | Browser evidence, screenshots, and logs for local web apps. | [anthropics/skills](https://github.com/anthropics/skills) |
 | `web-quality-audit` | Performance, accessibility, SEO, and best-practice checks. | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) |
-| `seo` | Crawlability, metadata, structured data, sitemaps, and discoverability. | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) |
 | `accessibility` | Keyboard, focus, forms, ARIA, semantics, and WCAG-oriented review. | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) |
 | `test-driven-development` | Focused behavior tests before implementation. | [obra/superpowers](https://github.com/obra/superpowers) |
 | `documentation-and-adrs` | README, ADR, and durable project documentation work. | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) |
@@ -91,7 +104,9 @@ upstream options intentionally kept out of the default skill list.
 ## What “Cataloged” Does And Does Not Mean
 
 - A catalog entry is reviewed metadata, not proof that the skill is installed.
-- A bundled skill lives in this repository's plugin.
+- A bundled skill lives in this repository's plugin. All nine bundled
+  workflows are also synchronized as managed direct skills without creating a
+  second canonical source in the repository.
 - An `install: true` entry is eligible for the full install profile.
 - A manual reference may overlap with a default skill or require credentials,
   vendor setup, or a more specialized task.
@@ -100,7 +115,9 @@ upstream options intentionally kept out of the default skill list.
 
 The machine-readable source is
 [`catalog/skills.json`](../catalog/skills.json). Reviewed install targets are
-mirrored in [`catalog/skills-lock.json`](../catalog/skills-lock.json).
+mirrored in [`catalog/skills-lock.json`](../catalog/skills-lock.json), including
+full upstream commit SHAs plus dated Skills CLI compatibility/discovery
+metadata. Installation itself uses a verified native-copy path.
 
 Return to [the README](../README.md) or continue with
 [agents](agents.md) and [MCPs](mcp-catalog.md).

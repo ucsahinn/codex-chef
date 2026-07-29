@@ -18,6 +18,10 @@ git diff --check
 git diff --cached --check
 ```
 
+`npm run check` can run during development with a dirty worktree. The separate
+`validate:release` gate is intentionally strict: the index and worktree must be
+clean, and the package version must not already have a local tag.
+
 If Gitleaks is available:
 
 ```bash

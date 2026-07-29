@@ -43,7 +43,7 @@ kopyalamadan sağlam bir başlangıç düzeni kurar.
 | İncele | Ne bulacaksın? |
 | --- | --- |
 | [🤖 21 agent'ın tamamını gör](docs/agents.tr.md) | Her uzman rolün ne yaptığını, ne zaman seçildiğini ve delegasyonun ne zaman gerçekten faydalı olduğunu. |
-| [🧩 Skill kataloğunu aç](docs/skills.tr.md) | Altı bundled workflow'u, full install ile gelen on altı incelenmiş skill'i ve varsayılan yolu kalabalıklaştırmayan opsiyonları. |
+| [🧩 Skill kataloğunu aç](docs/skills.tr.md) | Dokuz bundled workflow'u, full install ile gelen on beş incelenmiş skill'i ve varsayılan yolu kalabalıklaştırmayan opsiyonları. |
 | [🔌 MCP kataloğuna bak](docs/mcp-catalog.tr.md) | Varsayılan açık sekiz MCP'yi, gerektiğinde açılan sekiz connector'ı, gereksinimleri ve erişim sınırlarını. |
 | [🛡️ Güvenlik modelini oku](docs/security-model.tr.md) | Ön izleme, yedekleme, onay kapıları, secret sınırları ve Codex Chef'in bilerek kendi başına yapmadığı işlemleri. |
 
@@ -63,8 +63,13 @@ başlatır.
 
 Skill, Codex'e belirli bir işi hangi adımlarla yapacağını anlatır. Codex önce
 kısa açıklamayı görür; tam talimatı yalnızca görev eşleştiğinde yükler. Codex
-Chef altı lokal plugin workflow'u sunar ve full install profilinde on altı
-incelenmiş skill'e yer verir.
+Chef dokuz lokal plugin workflow'u sunar ve full install profilinde on beş
+incelenmiş skill'e yer verir. Dokuz lokal workflow'un tamamı yönetilen direct
+skill olarak senkronize edilir; `$adaptive-agent-routing`,
+`$context-budget-planner`, `$fetch`, `$seo` ve `$evidence-research` gibi
+çağrılar ayrı bir plugin kurulumu olmadan çalışır. Plugin namespace'i ise
+marketplace plugin'i kurulduktan ve yeni bir Codex oturumu açıldıktan sonra
+kullanılabilir.
 
 [Hangisi bundled, hangisi kurulur, hangisi opsiyonel gör →](docs/skills.tr.md)
 
@@ -112,13 +117,14 @@ Aynı komutlar macOS, Linux ve WSL üzerinde de çalışır. Installer, yönetti
 hedefleri değiştirmeden önce yedek alır; sana ait skill, MCP, profil veya ilgisiz
 plugin dosyalarını temizlemez.
 
-### Hatırlaman gereken üç komut
+### Hatırlaman gereken dört komut
 
 | İhtiyaç | Komut |
 | --- | --- |
 | Kurulumu ön izle | `npm run chef -- --install` |
 | Repo sağlığını kontrol et | `npm run chef -- --status --repo-only --no-log` |
 | Routing sözleşmesini gör | `npm run chef -- --routing --profile starter-health` |
+| Control ve Brain görünürlüğünü kontrol et | `npm run chef -- --continuity --details` |
 
 Repair, diagnostics, update, process kontrolü, beklenen çıktılar ve doğrudan
 installer komutları [operatör dokümantasyonunda](docs/README.tr.md) duruyor.
@@ -148,6 +154,7 @@ supply-chain göstergeleri ve güvenlik sınırlarını birlikte denetler.
 - [Kurulum ve güvenli ön izleme](docs/install.tr.md)
 - [Agent'lar](docs/agents.tr.md)
 - [Skill ve plugin'ler](docs/skills.tr.md)
+- [Lokal Markdown Brain workflow'u](docs/brain/README.tr.md)
 - [MCP kataloğu](docs/mcp-catalog.tr.md)
 - [Bilgi bankası](kb/README.tr.md)
 - [Sorun giderme](docs/troubleshooting.tr.md)

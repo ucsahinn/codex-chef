@@ -18,6 +18,10 @@ git diff --check
 git diff --cached --check
 ```
 
+`npm run check` geliştirme sırasında dirty worktree ile çalışabilir. Ayrı
+`validate:release` kapısı bilerek strict'tir: index ve worktree temiz olmalı,
+package version için mevcut bir lokal tag bulunmamalıdır.
+
 Gitleaks varsa:
 
 ```bash
