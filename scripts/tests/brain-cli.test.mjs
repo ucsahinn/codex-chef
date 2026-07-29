@@ -7,8 +7,9 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(import.meta.dirname, "../..");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const cli = path.join(root, "scripts/brain-cli.mjs");
 
 function run(args, env = {}) {

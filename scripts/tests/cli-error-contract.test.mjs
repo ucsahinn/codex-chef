@@ -4,9 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { sanitizeCliError } from "../lib/cli-error-contract.mjs";
 
-const root = path.resolve(import.meta.dirname, "..", "..");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 function run(script, args, { env = {} } = {}) {
   return spawnSync(process.execPath, [path.join(root, script), ...args], {

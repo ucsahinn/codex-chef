@@ -1240,7 +1240,7 @@ function runLoggedCommand(action, command, commandArgs, extra = {}) {
   const startedMs = Date.now();
   if (!options.json && !extra.quiet) {
     console.log(`${ICONS.run} [----------]   0% RUNNING  ${action}`);
-    console.log(`${ICONS.run} ${commandForDisplay(command, commandArgs)}`);
+    printWrapped(commandForDisplay(command, commandArgs), { indent: `${ICONS.run} ` });
   }
   if (extra.waitNote && !options.json && !extra.quiet) {
     printWrapped(extra.waitNote, { indent: `${ICONS.info} ` });

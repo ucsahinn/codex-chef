@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import {
   applyPack,
   buildPackPlan,
@@ -12,7 +13,7 @@ import {
   scanSecrets
 } from "../external-review-cli.mjs";
 
-const cliPath = path.resolve(import.meta.dirname, "..", "external-review-cli.mjs");
+const cliPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "external-review-cli.mjs");
 
 function git(cwd, args) {
   const result = spawnSync("git", ["-C", cwd, ...args], { encoding: "utf8", windowsHide: true });

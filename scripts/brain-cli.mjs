@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   applyBackupPlan,
   applyBrainPlan,
@@ -22,7 +23,7 @@ import {
   requireCliValue
 } from "./lib/cli-error-contract.mjs";
 
-const root = path.resolve(import.meta.dirname, "..");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const templateRoot = path.join(root, "templates", "brain");
 const ACTIONS = new Set(["init", "status", "doctor", "permissions", "capture", "retrieve", "uri", "backup", "restore"]);
 

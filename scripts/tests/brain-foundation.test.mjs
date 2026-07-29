@@ -5,9 +5,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
-const root = path.resolve(import.meta.dirname, "../..");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const modulePath = path.join(root, "scripts/lib/brain-foundation.mjs");
 const templateRoot = path.join(root, "templates/brain");
 const manifestPath = path.join(root, "manifests/brain-vault.json");

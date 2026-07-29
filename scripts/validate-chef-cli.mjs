@@ -554,13 +554,17 @@ function runCommandCenterSmoke() {
   }
 }
 
-function runCliJsonSmoke(name, cliArgs) {
+function runCliJsonSmoke(name, cliArgs, extra = {}) {
   const result = spawnSync(process.execPath, [path.join(root, "scripts/chef-cli.mjs"), ...cliArgs], {
-    cwd: root,
+    cwd: extra.cwd || root,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
+    env: {
+      ...process.env,
+      ...(extra.env || {})
+    },
     windowsHide: true,
-    timeout: 180000
+    timeout: extra.timeout || 180000
   });
   if (result.error) {
     fail(`chef-cli JSON smoke ${name} failed: ${result.error.message}`);
@@ -1474,29 +1478,37 @@ if (skillsWorkspaceMenu.ok && !skillsWorkspaceMenu.output.includes("Skill status
   fail("chef-cli skills workspace must advertise installed/missing status alongside the catalog.");
 }
 
-runCliSmoke("skills", ["--skills", "--details", "--plain", "--no-log"], [
-  "Skill status & catalog",
-  "24 Codex Chef-managed skills:",
-  "15 commit-pinned upstream",
-  "bundled/direct.",
-  "How skill activation works",
-  "Installed skills do not run by themselves",
-  "A skill enters context when the user names it",
-  "Codex reads the selected skill's SKILL.md before acting",
-  "routing profiles map task shapes to recommended skills",
-  "Skill source verification passed",
-  "Log disabled by --no-log"
-], {
-  env: { COLUMNS: "72" },
-  maxVisualWidth: 72
-});
-runCliSmoke("skills-narrow", ["--skills", "--plain", "--no-log"], [
-  "24 Codex Chef-managed skills",
-  "24 of 24 Chef-managed skills ready"
-], {
-  env: { COLUMNS: "72" },
-  maxVisualWidth: 72
-});
+const readySkillStatusRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-skills-ready-"));
+try {
+  const readySkillStatusEnv = createCuratedSkillFixture(readySkillStatusRoot);
+  runCliSmoke("skills", ["--skills", "--details", "--plain", "--no-log"], [
+    "Skill status & catalog",
+    "24 Codex Chef-managed skills:",
+    "15 commit-pinned upstream",
+    "bundled/direct.",
+    "How skill activation works",
+    "Installed skills do not run by themselves",
+    "A skill enters context when the user names it",
+    "Codex reads the selected skill's SKILL.md before acting",
+    "routing profiles map task shapes to recommended skills",
+    "Skill source verification passed",
+    "Log disabled by --no-log"
+  ], {
+    env: { ...readySkillStatusEnv, COLUMNS: "72" },
+    maxVisualWidth: 72
+  });
+  runCliSmoke("skills-narrow", ["--skills", "--plain", "--no-log"], [
+    "24 Codex Chef-managed skills",
+    "24 of 24 Chef-managed skills ready"
+  ], {
+    env: { ...readySkillStatusEnv, COLUMNS: "72" },
+    maxVisualWidth: 72
+  });
+  runCliJsonSmoke("skills-json", ["--skills", "--json", "--no-log"], { env: readySkillStatusEnv });
+  runCliJsonSmoke("skills-json-tr", ["--skills", "--json", "--tr", "--no-log"], { env: readySkillStatusEnv });
+} finally {
+  fs.rmSync(readySkillStatusRoot, { recursive: true, force: true });
+}
 
 const continuityRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-continuity-"));
 try {
@@ -1737,8 +1749,6 @@ runCliSmoke("update-preview-verbose", ["--update", "--verbose-plan", "--plain", 
 runCliJsonSmoke("status-repo-only-json", ["--status", "--repo-only", "--json", "--no-log"]);
 runCliJsonSmoke("status-repo-only-json-tr", ["--status", "--repo-only", "--json", "--lang", "tr", "--no-log"]);
 runCliJsonSmoke("continuity-json", ["--continuity", "--json", "--no-log"]);
-runCliJsonSmoke("skills-json", ["--skills", "--json", "--no-log"]);
-runCliJsonSmoke("skills-json-tr", ["--skills", "--json", "--tr", "--no-log"]);
 runCliSmoke("status-repo-only", ["--status", "--repo-only", "--plain", "--no-log"], [
   "Codex Chef status",
   "Overall:",

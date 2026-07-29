@@ -118,6 +118,16 @@ jobs:
       - run: bash -n scripts/install.sh
       - run: npm run validate:installer
       - run: npm run validate:installer-smoke
+      - if: matrix.node == 18
+        run: >-
+          node --test
+          scripts/tests/brain-foundation.test.mjs
+          scripts/tests/brain-cli.test.mjs
+          scripts/tests/brain-permissions-windows.test.mjs
+          scripts/tests/growth-skills.test.mjs
+          scripts/tests/cli-error-contract.test.mjs
+          scripts/tests/release-readiness.test.mjs
+          scripts/tests/external-review.test.mjs
       - run: npm run validate:chef-cli
       - run: npm run validate:status
       - run: npm run validate:fetch-skill
