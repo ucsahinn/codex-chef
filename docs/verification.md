@@ -193,7 +193,8 @@ npm run chef -- --processes --cleanup-stale
 `npm run chef` opens the numbered operator menu. The noninteractive smoke
 commands above do not write global/user state. They create ignored repo-local
 CLI logs unless `--no-log` is supplied. Write paths require `--apply`:
-`npm run chef -- --update --apply` for a clean-worktree Git fast-forward plus
+`npm run chef -- --update --apply` for a tracked-clean Git fast-forward that
+preserves unrelated untracked files plus
 a fresh preview when new commits are pulled, or backup-backed managed refresh
 when the repo is already current after local validation,
 `npm run chef -- --reset --apply` for backup-backed managed refresh,

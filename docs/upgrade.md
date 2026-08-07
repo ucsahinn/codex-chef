@@ -17,7 +17,8 @@ npm run chef -- --update --apply
 Without `--apply`, update mode does not change managed/global files; normal CLI
 logs are still repo-local unless `--no-log` is supplied. The default preview is
 concise; `npm run chef -- --update --verbose-plan` prints the full install
-dry-run evidence. Apply mode requires a clean worktree and runs
+dry-run evidence. Apply mode blocks tracked or staged worktree edits, while
+preserving unrelated untracked files, and runs
 `git pull --ff-only`. If the pull advances the repo, the same approved CLI
 prints a fresh preview, continues local validation, refreshes managed files,
 and verifies installed-runtime parity. A second invocation is not required.

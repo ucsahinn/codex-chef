@@ -194,7 +194,7 @@ npm run chef -- --processes --cleanup-stale
 `npm run chef` numarali operator menusunu acar. Yukaridaki noninteractive
 smoke komutlari global/user state'e yazmaz. `--no-log` verilmezse ignored
 repo-local CLI log'u olustururlar. Write path'leri `--apply` ister:
-`npm run chef -- --update --apply` clean worktree uzerinde Git fast-forward,
+`npm run chef -- --update --apply` tracked/staged degisiklik olmayan worktree uzerinde, ilgisiz untracked dosyalari koruyan Git fast-forward,
 yeni commit gelirse fresh preview, repo zaten guncelse backup'li managed
 refresh icin lokal validation sonrasinda,
 `npm run chef -- --reset --apply` backup'li managed refresh icin,

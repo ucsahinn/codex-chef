@@ -18,6 +18,7 @@ import {
   redactCliPaths,
   sanitizeCliError
 } from "./lib/cli-error-contract.mjs";
+import { classifyGitStatus } from "./lib/git-worktree.mjs";
 import {
   buildProcessAudit,
   terminateCleanupPlan
@@ -1733,7 +1734,15 @@ function inspectGitDirty() {
       output: redactSensitiveOutput([result.stdout, result.stderr].filter(Boolean).join("\n"))
     };
   }
-  return { ok: true, dirty: Boolean(String(result.stdout || "").trim()), output: redactLocalPaths(result.stdout || "") };
+  const output = redactLocalPaths(result.stdout || "");
+  const classification = classifyGitStatus(result.stdout || "");
+  return {
+    ok: true,
+    dirty: classification.blocking,
+    untrackedOnly: classification.untrackedOnly,
+    untracked: classification.untracked,
+    output
+  };
 }
 
 function gitHead() {
@@ -1878,8 +1887,17 @@ async function runUpdate(interaction = {}) {
     if (dirty.output.trim()) process.stdout.write(dirty.output.endsWith("\n") ? dirty.output : `${dirty.output}\n`);
     return { ok: false };
   }
+  if (dirty.untrackedOnly) {
+    console.log(`${ICONS.info} ${localText(
+      "Untracked local files detected; they will be preserved while the update runs.",
+      "Takip edilmeyen lokal dosyalar bulundu; güncelleme sırasında korunacaklar."
+    )}`);
+    for (const file of dirty.untracked || []) {
+      console.log(`- ${redactLocalPaths(file)}`);
+    }
+  }
   if (dirty.dirty) {
-    console.log(`${ICONS.warn} ${localText("Update apply requires a clean worktree so local edits are not overwritten.", "Update apply, yerel değişikliklerin üzerine yazmamak için temiz worktree ister.")}`);
+    console.log(`${ICONS.warn} ${localText("Update apply requires no tracked or staged worktree edits so local changes are not overwritten.", "Update apply, lokal değişikliklerin üzerine yazılmaması için tracked veya staged worktree değişikliği olmamasını ister.")}`);
     process.stdout.write(dirty.output.endsWith("\n") ? dirty.output : `${dirty.output}\n`);
     console.log(`${ICONS.info} ${localText(
       isMenuInteraction(interaction)

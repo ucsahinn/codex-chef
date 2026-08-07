@@ -254,7 +254,7 @@ yalnizca tek managed plugin hedefiyle sinirli kalir.
 yoksa normal repo-local CLI loglari yine yazilir. Managed-file install plan ve
 installer dry-run yolunu kullanir; curated global skill kurulumlarini ve
 opsiyonel global Git guard'lari disarida birakir. Apply
-modu once clean Git worktree ister, sonra `git pull --ff-only` calistirir. Yeni commit cekilirse
+modu tracked veya staged degisiklikleri durdurur, ilgisiz untracked dosyalari korur ve sonra `git pull --ff-only` calistirir. Yeni commit cekilirse
 updated tree uzerinden fresh preview basar ve durur. Repo zaten guncelse
 managed refresh oncesi lokal validation calistirir, sonra scoped managed Codex
 Chef dosyalarini backup alan installer uzerinden yeniler. Bu refresh, managed
