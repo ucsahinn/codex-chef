@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.5.63 - 2026-08-07
+
+- Make the validation workflow fetch complete Git history so the Gitleaks push-range scan can resolve multi-commit pushes reliably.
+
 ## 0.5.62 - 2026-08-07
 
 - Make the Codex Chef update path continue with unrelated untracked local files while still blocking tracked or staged edits that could be overwritten.

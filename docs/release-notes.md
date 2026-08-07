@@ -2,6 +2,16 @@
 
 This page follows the release users should install now. Older engineering history remains available in [CHANGELOG.md](../CHANGELOG.md), so the public release guide stays useful instead of becoming an ever-growing archive.
 
+## v0.5.63 - 2026-08-07
+
+Codex Chef 0.5.63 fixes the CI history boundary used by the Gitleaks push scan.
+
+### What Changed
+
+- The validation workflow now fetches complete Git history, so multi-commit
+  pushes can be scanned from the previous commit without an unknown-revision
+  failure.
+
 ## v0.5.62 - 2026-08-07
 
 Codex Chef 0.5.62 makes the normal update flow complete in one approved run
