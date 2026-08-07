@@ -2,6 +2,15 @@
 
 Bu sayfa kullanıcıların şimdi kurması gereken sürümü anlatır. Eski mühendislik geçmişi [CHANGELOG.md](../CHANGELOG.md) içinde korunur; böylece public sürüm rehberi büyüyen bir arşive dönüşmeden güncel kalır.
 
+## v0.5.64 - 2026-08-07
+
+Codex Chef 0.5.64, yerel kaynak zaten güncel olsa bile update akışını tamamlar.
+
+### Neler Degisti?
+
+- Uygun sürüm yerel sürümle aynı olduğunda update action artık validation ve managed refresh öncesinde çıkmaz.
+- Aynı onaylı akış backup'lı managed refresh ve kurulu runtime doğrulamasıyla tamamlanır.
+
 ## v0.5.63 - 2026-08-07
 
 Codex Chef 0.5.63, Gitleaks push taramasında kullanılan CI Git geçmişi

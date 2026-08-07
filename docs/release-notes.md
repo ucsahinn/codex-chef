@@ -2,6 +2,15 @@
 
 This page follows the release users should install now. Older engineering history remains available in [CHANGELOG.md](../CHANGELOG.md), so the public release guide stays useful instead of becoming an ever-growing archive.
 
+## v0.5.64 - 2026-08-07
+
+Codex Chef 0.5.64 completes the update flow even when the local source is already current.
+
+### What Changed
+
+- The update action no longer exits before validation and managed refresh when the available version matches the local version.
+- The same approved flow now continues through backup-backed managed refresh and installed-runtime verification.
+
 ## v0.5.63 - 2026-08-07
 
 Codex Chef 0.5.63 fixes the CI history boundary used by the Gitleaks push scan.

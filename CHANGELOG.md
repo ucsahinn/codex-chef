@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.5.64 - 2026-08-07
+
+- Continue validation, backup-backed managed refresh, and installed-runtime verification when the local source is already at the available version.
+
 ## 0.5.63 - 2026-08-07
 
 - Make the validation workflow fetch complete Git history so the Gitleaks push-range scan can resolve multi-commit pushes reliably.

@@ -1148,6 +1148,7 @@ if (!exists(cliPath)) {
     "compareReleaseVersions",
     "gitPackageVersion",
     "Already current",
+    "Continuing with validation and managed refresh",
     "selectSkill",
     "installSelectedSkill",
     "explainMcpServer",

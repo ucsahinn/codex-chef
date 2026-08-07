@@ -1802,7 +1802,7 @@ function printUpdateContext() {
   console.log(`- ${localText("Commit", "Commit")}: ${head.ok && head.value ? head.value.slice(0, 12) : localText("not inspected", "kontrol edilmedi")}`);
   console.log(`- ${localText("Release notes", "Release notu")}: ${latestReleaseNoteTitle()}`);
   console.log(styleMuted(localText(
-    "Preview does not contact the remote. Apply checks the available version first and changes nothing unless it is newer.",
+    "Preview does not contact the remote. Apply checks the available version first, fast-forwards when newer, and refreshes managed files even when the source is current.",
     "Ön izleme remote'a bağlanmaz. Apply önce uygun sürümü kontrol eder; daha yeni değilse hiçbir şeyi değiştirmez."
   )));
 }
@@ -1937,8 +1937,19 @@ async function runUpdate(interaction = {}) {
     return { ok: false };
   }
   if (versionOrder === 0) {
-    printProgress(100, localText(`Already current: v${beforeVersion}. No files changed.`, `Zaten güncel: v${beforeVersion}. Hiçbir dosya değişmedi.`), "done");
-    return { ok: true, skipped: true, upToDate: true, localVersion: beforeVersion, availableVersion: remoteVersion.value };
+    printProgress(20, localText(
+      `Already current: v${beforeVersion}. Continuing with validation and managed refresh.`,
+      `Zaten güncel: v${beforeVersion}. Validation ve managed refresh ile devam ediliyor.`
+    ));
+    const allowed = await confirmWriteAction(
+      localText("Update", "Guncelleme"),
+      localText(
+        `Codex Chef is already at v${beforeVersion}; validate it, then refresh managed Codex files and verify the installed runtime.`,
+        `Codex Chef zaten v${beforeVersion} sürümünde; doğrulanacak, managed Codex dosyaları yenilenecek ve kurulu runtime kontrol edilecek.`
+      ),
+      interaction
+    );
+    if (!allowed) return { ok: false, skipped: true, upToDate: true, localVersion: beforeVersion, availableVersion: remoteVersion.value };
   }
   if (versionOrder > 0) {
     printProgress(100, localText("Local version is newer; update skipped.", "Yerel sürüm daha yeni; güncelleme atlandı."), "done");
