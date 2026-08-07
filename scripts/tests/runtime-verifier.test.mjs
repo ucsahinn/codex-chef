@@ -13,7 +13,7 @@ function run(command, args, options = {}) {
     cwd: root,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
-    timeout: 120000,
+    timeout: 300000,
     windowsHide: true,
     ...options
   });

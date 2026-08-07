@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.5.62 - 2026-08-07
+
+- Make the Codex Chef update path continue with unrelated untracked local files while still blocking tracked or staged edits that could be overwritten.
+- Add regression coverage for the update worktree classification and include it in the repository check suite.
+- Keep the update progress, validation, backup-backed managed refresh, and runtime verification path intact after the worktree check.
+
 ## 0.5.61 - 2026-08-07
 
 - Fix the Unix profile-launcher test fixture so Codex `-c` overrides are passed after Node's option terminator; this restores the GitHub Actions validation gate for the release candidate.

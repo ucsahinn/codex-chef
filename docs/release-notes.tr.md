@@ -2,6 +2,19 @@
 
 Bu sayfa kullanıcıların şimdi kurması gereken sürümü anlatır. Eski mühendislik geçmişi [CHANGELOG.md](../CHANGELOG.md) içinde korunur; böylece public sürüm rehberi büyüyen bir arşive dönüşmeden güncel kalır.
 
+## v0.5.62 - 2026-08-07
+
+Codex Chef 0.5.62, ilgisiz untracked lokal dosyalar varken normal update
+akışını tek onaylı çalışmada tamamlar.
+
+### Neler Degisti?
+
+- İlgisiz untracked dosyalar update sırasında korunur; üzerine yazılabilecek
+  tracked veya staged worktree değişiklikleri ise hâlâ engellenir.
+- Progress bar, kaynak fast-forward, tam validation, backup'lı managed refresh
+  ve kurulu runtime doğrulaması aynı akışta kalır.
+- Worktree kararı için regression testi eklenir ve repo check zincirine alınır.
+
 ## v0.5.61 - 2026-08-07
 
 Codex Chef 0.5.61, tasinabilir profil baslaticisi test fixture'inin Linux

@@ -2,6 +2,20 @@
 
 This page follows the release users should install now. Older engineering history remains available in [CHANGELOG.md](../CHANGELOG.md), so the public release guide stays useful instead of becoming an ever-growing archive.
 
+## v0.5.62 - 2026-08-07
+
+Codex Chef 0.5.62 makes the normal update flow complete in one approved run
+when unrelated untracked local files are present.
+
+### What Changed
+
+- Preserves unrelated untracked files during update while still blocking tracked
+  or staged worktree edits that could be overwritten.
+- Keeps the progress bar, source fast-forward, full validation, backup-backed
+  managed refresh, and installed-runtime verification in the same flow.
+- Adds regression coverage for the worktree decision and runs it through the
+  repository check suite.
+
 ## v0.5.61 - 2026-08-07
 
 Codex Chef 0.5.61 restores the Linux validation path for the portable profile
