@@ -2,6 +2,17 @@
 
 This page follows the release users should install now. Older engineering history remains available in [CHANGELOG.md](../CHANGELOG.md), so the public release guide stays useful instead of becoming an ever-growing archive.
 
+## v0.5.61 - 2026-08-07
+
+Codex Chef 0.5.61 restores the Linux validation path for the portable profile
+launcher test fixture.
+
+### What Changed
+
+- Passes Codex configuration overrides after Node's option terminator in the
+  Unix fake-launcher fixture, preventing `-c` from being interpreted as a Node
+  `--check` flag during GitHub Actions validation.
+
 ## v0.5.60 - 2026-08-07
 
 Codex Chef 0.5.60 hardens the cross-PC runtime path without broadening local

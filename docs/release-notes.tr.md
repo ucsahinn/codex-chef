@@ -2,6 +2,17 @@
 
 Bu sayfa kullanıcıların şimdi kurması gereken sürümü anlatır. Eski mühendislik geçmişi [CHANGELOG.md](../CHANGELOG.md) içinde korunur; böylece public sürüm rehberi büyüyen bir arşive dönüşmeden güncel kalır.
 
+## v0.5.61 - 2026-08-07
+
+Codex Chef 0.5.61, tasinabilir profil baslaticisi test fixture'inin Linux
+dogrulama yolunu geri yukler.
+
+### Neler Degisti?
+
+- Unix sahte launcher fixture'inda Codex config override'larini Node option
+  terminator'undan sonra iletir; boylece GitHub Actions dogrulamasinda `-c`,
+  Node `--check` bayragi olarak yorumlanmaz.
+
 ## v0.5.60 - 2026-08-07
 
 Codex Chef 0.5.60, yerel connector veya surec kontrol yetkisini genisletmeden

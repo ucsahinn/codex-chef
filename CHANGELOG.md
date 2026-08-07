@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.5.61 - 2026-08-07
+
+- Fix the Unix profile-launcher test fixture so Codex `-c` overrides are passed after Node's option terminator; this restores the GitHub Actions validation gate for the release candidate.
+
 ## 0.5.60 - 2026-08-07
 
 - Repair Codebase Memory startup with an isolated package cache, distinguish cache corruption from Serena cold-start timing, and verify the real MCP handshake and tool call.

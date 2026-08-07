@@ -108,7 +108,7 @@ test("installed profile launcher applies MCP enablement through Codex config ove
     } else {
       fs.writeFileSync(path.join(binDir, "codex"), [
         "#!/bin/sh",
-        "node -e 'require(\"fs\").writeFileSync(process.env.CAPTURE_PATH, JSON.stringify(process.argv.slice(1)))' \"$@\"",
+        "node -e 'require(\"fs\").writeFileSync(process.env.CAPTURE_PATH, JSON.stringify(process.argv.slice(1)))' -- \"$@\"",
         ""
       ].join("\n"), "utf8");
       fs.chmodSync(path.join(binDir, "codex"), 0o755);

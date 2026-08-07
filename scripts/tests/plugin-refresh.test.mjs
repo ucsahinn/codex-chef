@@ -6,7 +6,7 @@ import {
   refreshInstalledPlugin
 } from "../refresh-installed-plugin.mjs";
 
-const expectedVersion = "0.5.60";
+const expectedVersion = "0.5.61";
 
 function listResult(installed = []) {
   return {
