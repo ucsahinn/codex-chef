@@ -32,7 +32,10 @@ Resmi kaynaklar:
 
 ## Bu Starter'ın Yorumu
 
-- Davranış ve routing: `AGENTS.md`
+- Gözden geçirilebilir kullanıcı geneli davranış, routing, tasarım ve
+  doğrulama varsayılanları: [`templates/codex/AGENTS.md`](../templates/codex/AGENTS.md),
+  kurulumdan sonra `~/.codex/AGENTS.md`. Repo-içi `AGENTS.md` daha spesifiktir
+  ve önceliklidir.
 - Runtime ayarları: `config.toml`
 - Tekrarlı workflow: skills
 - Paylaşılabilir dağıtım: plugin

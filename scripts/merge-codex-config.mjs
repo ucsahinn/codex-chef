@@ -3,6 +3,81 @@ import fs from "node:fs";
 import path from "node:path";
 
 const args = process.argv.slice(2);
+
+function profileHeader(text) {
+  const firstTable = /^\s*\[/m.exec(normalizeNewlines(text));
+  return (firstTable ? text.slice(0, firstTable.index) : text).trimEnd();
+}
+
+function mcpProfileTargetStates(templateTables) {
+  const states = [];
+  for (const [name, block] of templateTables) {
+    const match = /^mcp_servers\.([A-Za-z0-9_-]+)$/.exec(name);
+    if (!match) continue;
+    const enabled = /^\s*enabled\s*=\s*(true|false)\s*$/m.exec(block);
+    if (!enabled) throw new Error(`Profile template is missing enabled state: ${name}`);
+    states.push({ server: match[1], enabled: enabled[1] === "true" });
+  }
+  if (states.length === 0) throw new Error("Profile template does not declare any MCP server states.");
+  return states;
+}
+
+function withMcpProfileEnabledState(block, enabled) {
+  const replacement = `enabled = ${enabled}`;
+  if (/^\s*enabled\s*=\s*(true|false)\s*$/m.test(block)) {
+    return block.replace(/^\s*enabled\s*=\s*(true|false)\s*$/m, replacement);
+  }
+  const lines = block.split("\n");
+  lines.splice(1, 0, replacement);
+  return lines.join("\n");
+}
+
+function renderMcpProfile(source, template) {
+  const sourceTables = parseTables(source);
+  const templateTables = parseTables(template);
+  const sections = [];
+  const header = profileHeader(template);
+  if (header) sections.push(header);
+  for (const { server, enabled } of mcpProfileTargetStates(templateTables)) {
+    const rootName = `mcp_servers.${server}`;
+    const rootBlock = sourceTables.get(rootName);
+    if (!rootBlock) throw new Error(`Installed config is missing transport details for ${server}.`);
+    sections.push(withMcpProfileEnabledState(rootBlock, enabled));
+    for (const [name, block] of sourceTables) {
+      if (name.startsWith(`${rootName}.`)) sections.push(block);
+    }
+  }
+  return `${sections.join("\n\n").trimEnd()}\n`;
+}
+
+function runMcpProfileRenderer() {
+  const takeValue = (flag) => {
+    const index = args.indexOf(flag);
+    return index < 0 || !args[index + 1] ? null : args[index + 1];
+  };
+  const sourcePath = takeValue("--source");
+  const templatePath = takeValue("--template");
+  const outputPath = takeValue("--output");
+  const known = new Set(["--render-mcp-profile", "--source", "--template", "--output", "--dry-run"]);
+  const unknown = args.filter((arg, index) => !known.has(arg) && !known.has(args[index - 1]));
+  if (!sourcePath || !templatePath || !outputPath || unknown.length > 0) {
+    throw new Error("Usage: node scripts/merge-codex-config.mjs --render-mcp-profile --source <config.toml> --template <profile.toml> --output <profile.toml> [--dry-run]");
+  }
+  const rendered = renderMcpProfile(fs.readFileSync(path.resolve(sourcePath), "utf8"), fs.readFileSync(path.resolve(templatePath), "utf8"));
+  if (args.includes("--dry-run")) process.stdout.write(rendered);
+  else fs.writeFileSync(path.resolve(outputPath), rendered, "utf8");
+}
+
+if (args.includes("--render-mcp-profile")) {
+  try {
+    runMcpProfileRenderer();
+    process.exit(0);
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+}
+
 const options = {
   dryRun: false,
   json: false,
@@ -202,6 +277,18 @@ function normalizeManagedFields(text) {
   return next.join("\n");
 }
 
+function templateBlockForDestination(tableName) {
+  const templateBlock = templateTables.get(tableName);
+  if (!templateBlock) return templateBlock;
+  if (!/^mcp_servers\.[A-Za-z0-9_-]+$/.test(tableName)) return templateBlock;
+  if (!destinationTables.has(`${tableName}.env`)) return templateBlock;
+
+  return templateBlock
+    .split("\n")
+    .filter((line) => !/^\s*env\s*=/.test(line))
+    .join("\n");
+}
+
 function syncManagedTables(text) {
   const normalized = normalizeNewlines(text);
   const lines = normalized.split("\n");
@@ -217,7 +304,7 @@ function syncManagedTables(text) {
     }
 
     const currentBlock = currentLines.join("\n").trimEnd();
-    const templateBlock = templateTables.get(currentTable);
+    const templateBlock = templateBlockForDestination(currentTable);
     if (currentTable === "apps._default") {
       next.push(...currentLines);
       currentTable = null;

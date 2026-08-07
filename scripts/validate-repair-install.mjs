@@ -529,6 +529,38 @@ if (managedTableDriftApplied) {
   }
 }
 
+const nestedMcpEnvRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-repair-nested-mcp-env-"));
+const nestedMcpEnvCodexHome = path.join(nestedMcpEnvRoot, ".codex");
+const nestedMcpEnvAgentsHome = path.join(nestedMcpEnvRoot, ".agents");
+write(
+  path.join(nestedMcpEnvCodexHome, "config.toml"),
+  [
+    "[mcp_servers.context7]",
+    "enabled = true",
+    "command = \"cmd.exe\"",
+    "args = [\"/d\", \"/s\", \"/c\", \"npx.cmd\", \"-y\", \"@upstash/context7-mcp@3.2.1\"]",
+    "",
+    "[mcp_servers.context7.env]",
+    "NoDefaultCurrentDirectoryInExePath = \"1\"",
+    ""
+  ].join("\n")
+);
+ensureDir(nestedMcpEnvAgentsHome);
+const nestedMcpEnvApplied = parseResult(
+  runRepair(["--apply"], nestedMcpEnvCodexHome, nestedMcpEnvAgentsHome),
+  "repair nested MCP env apply"
+);
+if (nestedMcpEnvApplied) {
+  const nestedEnvConfig = fs.readFileSync(path.join(nestedMcpEnvCodexHome, "config.toml"), "utf8");
+  const context7Block = /\[mcp_servers\.context7\]([\s\S]*?)(?=\n\[mcp_servers\.context7\.env\]|$)/.exec(nestedEnvConfig)?.[1] || "";
+  if (/^env\s*=/m.test(context7Block)) {
+    fail("repair must not add an inline MCP env value when the destination preserves an MCP env table.");
+  }
+  if (!/\[mcp_servers\.context7\.env\][\s\S]*?NoDefaultCurrentDirectoryInExePath\s*=\s*\"1\"/.test(nestedEnvConfig)) {
+    fail("repair must preserve a destination MCP env table without creating a TOML duplicate key.");
+  }
+}
+
 const pruned = parseResult(runRepair(["--apply", "--prune-managed-plugin-extras"], codexHome, agentsHome), "repair prune");
 if (pruned) {
   if (fs.existsSync(path.join(pluginTarget, "extra.txt"))) {

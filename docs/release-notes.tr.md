@@ -2,6 +2,29 @@
 
 Bu sayfa kullanıcıların şimdi kurması gereken sürümü anlatır. Eski mühendislik geçmişi [CHANGELOG.md](../CHANGELOG.md) içinde korunur; böylece public sürüm rehberi büyüyen bir arşive dönüşmeden güncel kalır.
 
+## v0.5.60 - 2026-08-07
+
+Codex Chef 0.5.60, yerel connector veya surec kontrol yetkisini genisletmeden
+farkli PC'lerdeki runtime yolunu guclendirir.
+
+### Neler Degisti?
+
+- Codebase Memory baslangicini ayrilmis cache ile onarir; full ve multi-session
+  MCP durumlari icin allowlist kullanan tasinabilir profil baslaticisi ekler.
+- Codebase Memory paketi dogrudan calistirilsa bile prompt-gated sinirini korur;
+  beklenmeyen Chef CLI hatalarini ortak redakte hata sozlesmesine yonlendirir.
+- Forge edilebilir SessionEnd worker snapshotlarini tek kullanimlik yerel state
+  dosyalariyla degistirir; tam kimlik ve owner-chain kontrollerini korur.
+- Control-managed routing icin ayri kurulu router skill'i ve etkin Control MCP'yi
+  birlikte zorunlu tutar.
+
+### Uyumluluk
+
+- Node.js 18 veya yeni
+- Windows PowerShell, macOS, Linux ve WSL
+- Kullaniciya ait config, skill, connector ve plugin dosyalari normal prune
+  davranisinin disinda kalir.
+
 ## v0.5.59 - 2026-07-29
 
 Codex Chef 0.5.59, yetenekleri kaldırmadan gereksiz lokal MCP başlangıçlarını

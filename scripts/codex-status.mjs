@@ -1215,13 +1215,22 @@ if (options.json) {
   }
   console.log(`${localText("Repo Git", "Repo Git")}: ${stateText(gitRepository.status)} - ${translateStatusMessage(gitRepository.summary)}`);
   if (gitRepository.remediation) console.log(`${localText("Repo Git remediation", "Repo Git önerisi")}: ${translateStatusMessage(gitRepository.remediation)}`);
-  const targetMcpText = codexCliRuntime.mcp.inspected === false
+  const runtimeMcpAmbiguous = runtime.report?.runtime?.mcpList?.ambiguous === true;
+  const targetMcpText = runtimeMcpAmbiguous
+    ? localText("MCP visibility ambiguous in this package-runner process", "bu package-runner sürecinde MCP görünürlüğü belirsiz")
+    : codexCliRuntime.mcp.inspected === false
     ? localText("MCP probe skipped", "MCP kontrolü atlandı")
     : localText(
         `MCP configured ${codexCliRuntime.mcp.configuredCount}, enabled ${codexCliRuntime.mcp.enabledCount}, disabled ${codexCliRuntime.mcp.disabledCount}, live not probed`,
         `MCP yapılandırılmış ${codexCliRuntime.mcp.configuredCount}, açık ${codexCliRuntime.mcp.enabledCount}, kapalı ${codexCliRuntime.mcp.disabledCount}, canlı durum ölçülmedi`
       );
-  if (codexCliRuntime.mcp.inspected === false) {
+  if (runtimeMcpAmbiguous) {
+    const expectedMcp = Number(runtime.report?.installed?.mcp?.expected || mcpSetupBoard.serverCount);
+    console.log(`${localText("MCP", "MCP")}: ${localText(
+      `runtime visibility ambiguous; ${expectedMcp}/${mcpSetupBoard.serverCount} cataloged entries are present in the managed installed config; verify with codex mcp list --json outside the package runner`,
+      `runtime görünürlüğü belirsiz; yönetilen kurulu config'te ${expectedMcp}/${mcpSetupBoard.serverCount} katalog girdisi mevcut; package runner dışında codex mcp list --json ile doğrulayın`
+    )}`);
+  } else if (codexCliRuntime.mcp.inspected === false) {
     console.log(`${localText("MCP", "MCP")}: ${stateText("skipped")}`);
   } else {
     const catalogNames = new Set(mcpSetupBoard.servers.map((server) => server.name));

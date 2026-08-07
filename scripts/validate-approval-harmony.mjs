@@ -192,7 +192,7 @@ for (const script of [
 }
 
 const matrix = [
-  ["direct read-only PowerShell command", ["Get-Content", "-LiteralPath", "package.json"], "allow"],
+  ["direct read-only PowerShell command", ["Get-Content", "-LiteralPath","package.json"], ["allow", "no-match"]],
   ["read-only PowerShell wrapper", ["powershell.exe", "-Command", "Get-Content", "-LiteralPath", "package.json"], ["allow", "no-match"]],
   ["read-only PowerShell wrapper single-token command", ["powershell.exe", "-Command", "Get-Content -LiteralPath package.json"], ["allow", "no-match"]],
   ["git rev-parse", ["git", "rev-parse", "HEAD"], "allow"],

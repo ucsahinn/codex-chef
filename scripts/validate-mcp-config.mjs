@@ -170,6 +170,10 @@ const catalogNames = new Set((catalog.servers || []).map((server) => server.name
 const codebaseMemoryDisabledTools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"];
 const codebaseMemory = (catalog.servers || []).find((server) => server.name === "codebase-memory");
 const supabase = (catalog.servers || []).find((server) => server.name === "supabase");
+const codebaseMemoryCacheLaunchers = {
+  "templates/codex/config.windows.toml": "set npm_config_cache=%LOCALAPPDATA%\\\\codex-chef\\\\npm-cache\\\\codebase-memory && npx.cmd -y codebase-memory-mcp@0.8.1",
+  "templates/codex/config.unix.toml": 'npm_config_cache=\\"${XDG_CACHE_HOME:-$HOME/.cache}/codex-chef/codebase-memory\\" exec npx -y codebase-memory-mcp@0.8.1'
+};
 
 if (!codebaseMemory) {
   fail("MCP catalog must include codebase-memory.");
@@ -321,7 +325,7 @@ for (const configFile of configFiles) {
         launcherArgs[0] !== "/d"
         || launcherArgs[1] !== "/s"
         || launcherArgs[2] !== "/c"
-        || launcherArgs[3] !== "npx.cmd"
+        || (server.name !== "codebase-memory" && launcherArgs[3] !== "npx.cmd")
       ) {
         fail(`${configFile} ${server.name} must disable cmd AutoRun and invoke npx.cmd explicitly with /d /s /c.`);
       }
@@ -401,6 +405,13 @@ for (const configFile of configFiles) {
       }
     }
     if (server.name === "codebase-memory") {
+      const expectedLauncher = codebaseMemoryCacheLaunchers[configFile];
+      if (!block.includes(expectedLauncher)) {
+        fail(`${configFile} codebase-memory must use its isolated per-user npm cache launcher.`);
+      }
+      if (readTomlValue(block, "startup_timeout_sec") !== "90") {
+        fail(`${configFile} codebase-memory must allow a 90-second cold-start window.`);
+      }
       const disabledTools = parseInlineStringArray(readTomlValue(block, "disabled_tools"));
       for (const expectedTool of codebaseMemoryDisabledTools) {
         if (!disabledTools.includes(expectedTool)) {

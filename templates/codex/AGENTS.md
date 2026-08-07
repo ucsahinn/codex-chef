@@ -79,6 +79,12 @@
 ## Implementation Standards
 
 - Make the smallest coherent change that fixes the root cause.
+- Prefer the simplest end-to-end implementation that meets the current requirement; avoid speculative abstractions, configuration, and indirection.
+- Grow a working system in verified layers. Add a capability on top of a working product instead of trading it for unfinished complexity.
+- Keep component responsibilities explicit and modular.
+- Reuse proven project or well-maintained dependencies when they reduce complexity or improve reliability; check their documentation and types before reimplementing a capability or adding a package.
+- Prefer durable architectural decisions over knowingly temporary stopgaps.
+- Preserve documented contracts and user data. Remove obsolete paths only when the project's compatibility and migration policy explicitly permits it.
 - Establish reproduction and root cause before unclear bug fixes.
 - Add dependencies only after proving they are necessary.
 - Do not weaken production code, auth, validation, tests, types, or error handling to make checks pass.
@@ -112,6 +118,6 @@
 
 ## Codex Chef Control Routing
 
-- Use `$codex-control-router` for explicit delayed, background, recurring, restart-resilient, monitored, or Control-managed work.
+- For explicit delayed, background, recurring, restart-resilient, monitored, or Control-managed work, use `$codex-control-router` only when both that separately installed skill and the `codex_control` MCP are available. Otherwise keep the work in the current session and report that the Control capability is unavailable; do not invent a Control command or fallback automation.
 - Keep immediate ordinary work in the current Codex session.
 - A Control MCP proposal is not execution authority. Model use, result-text disclosure, and recurring schedules require the exact Control UI decision; Brain write and workspace write remain disabled.

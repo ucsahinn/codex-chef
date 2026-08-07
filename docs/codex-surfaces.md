@@ -31,7 +31,10 @@ Official references:
 
 This starter uses:
 
-- `AGENTS.md` for behavior and routing.
+- [`templates/codex/AGENTS.md`](../templates/codex/AGENTS.md), installed as
+  `~/.codex/AGENTS.md`, for reviewable user-wide behavior, routing, design,
+  and verification defaults. A repository-local `AGENTS.md` remains more
+  specific and takes precedence.
 - `catalog/routing-profiles.json` plus `npm run chef -- --routing` for
   inspection evidence. This does not grant permission; it only shows which
   surfaces should be considered and which gates still apply.

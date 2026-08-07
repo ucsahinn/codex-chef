@@ -43,9 +43,17 @@ function parseInstalledPlugins(result, codexHome, phase) {
     };
   }
 
+  const rawOutput = typeof result.stdout === "string" ? result.stdout.trim() : "";
+  if (!rawOutput) {
+    return {
+      unavailable: true,
+      warning: `Codex plugin ${phase} returned empty output; plugin cache refresh was skipped.`
+    };
+  }
+
   let payload;
   try {
-    payload = JSON.parse(result.stdout);
+    payload = JSON.parse(rawOutput);
   } catch (error) {
     throw new Error(`Codex plugin ${phase} returned invalid JSON: ${error.message}`);
   }

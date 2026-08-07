@@ -122,6 +122,24 @@ test("SessionEnd hook fails closed without turning unavailable process metadata 
   assert.equal(result.stdout, "");
 });
 
+test("SessionEnd worker rejects forgeable serialized cleanup snapshots", () => {
+  const result = spawnSync(
+    process.execPath,
+    [
+      path.join(root, "plugins", "codex-chef-workflows", "scripts", "codex-process-hygiene.mjs"),
+      "--owned-sweep",
+      Buffer.from("{}", "utf8").toString("base64url"),
+      "--apply",
+      "--delay-ms",
+      "0"
+    ],
+    { cwd: root, encoding: "utf8", windowsHide: true, timeout: 30_000 }
+  );
+
+  assert.notEqual(result.status, 0);
+  assert.match(`${result.stderr}${result.stdout}`, /no longer accepts serialized snapshots/i);
+});
+
 test("process CLI reports sessions, MCP instances, and unrelated runtimes separately", () => {
   const result = spawnSync(
     process.execPath,

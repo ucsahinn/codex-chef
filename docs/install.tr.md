@@ -41,9 +41,13 @@ node scripts/plan-install.mjs --list-operations
 Summary normal preview'i kisa tutar; JSON ve full human plan managed
 target'lari, opsiyonel global Git degisikliklerini, curated skill komutlarini,
 collision policy'yi, backup davranisini ve risk seviyesini listeler.
-Profile copy operation `development.config.toml`, `review.config.toml`,
+Profile operasyonu `development.config.toml`, `review.config.toml`,
 `ci.config.toml`, `token-safe.config.toml`, `full.config.toml` ve
 `multi-session.config.toml` dosyalarini kapsar.
+`full` ve `multi-session`, kurulu platforma uygun MCP tasima bloklarindan
+uretilir; sadece bundled lokal server'larin `enabled` durumunu degistirir.
+Bu, profil katmaninda Sequential Thinking, Serena veya launcher ayrintilarinin
+kaybolmasini onler.
 
 Varsayilan acik MCP'lerin de launcher onkosullari vardir. Node/npx tabanli
 MCP'ler, Node pinned package'lari indirebildiginde baslar. Serena semantic code

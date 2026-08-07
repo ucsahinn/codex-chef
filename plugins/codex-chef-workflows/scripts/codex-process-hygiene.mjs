@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import process from "node:process";
 import path from "node:path";
+import fs from "node:fs";
+import os from "node:os";
+import crypto from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -8,6 +11,7 @@ const scriptPath = fileURLToPath(import.meta.url);
 const DEFAULT_ORPHAN_GRACE_MS = 60_000;
 const DEFAULT_SESSION_END_DELAY_MS = 45_000;
 const MAX_BUFFER = 16 * 1024 * 1024;
+const SESSION_STATE_ROOT = path.join(os.tmpdir(), "codex-chef-session-end");
 
 const MCP_SIGNATURES = [
   ["chrome-devtools", /chrome-devtools-mcp/i],
@@ -672,11 +676,31 @@ function readStdin() {
   });
 }
 
+function createOwnedSweepState(snapshot) {
+  fs.mkdirSync(SESSION_STATE_ROOT, { recursive: true, mode: 0o700 });
+  const statePath = path.join(SESSION_STATE_ROOT, `${crypto.randomUUID()}.json`);
+  fs.writeFileSync(statePath, JSON.stringify(snapshot), { encoding: "utf8", mode: 0o600, flag: "wx" });
+  return statePath;
+}
+
+function consumeOwnedSweepState(statePath) {
+  const resolvedRoot = path.resolve(SESSION_STATE_ROOT);
+  const resolvedState = path.resolve(String(statePath || ""));
+  if (path.dirname(resolvedState) !== resolvedRoot || !/^[0-9a-f-]{36}\.json$/i.test(path.basename(resolvedState))) {
+    throw new Error("SessionEnd state path is invalid.");
+  }
+  const stat = fs.lstatSync(resolvedState);
+  if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 1_000_000) throw new Error("SessionEnd state is invalid.");
+  const content = fs.readFileSync(resolvedState, "utf8");
+  fs.unlinkSync(resolvedState);
+  return JSON.parse(content);
+}
+
 function scheduleOwnedSweep(snapshot, delayMs) {
-  const encoded = Buffer.from(JSON.stringify(snapshot), "utf8").toString("base64url");
+  const statePath = createOwnedSweepState(snapshot);
   const child = spawn(
     process.execPath,
-    [scriptPath, "--owned-sweep", encoded, "--apply", "--delay-ms", String(delayMs)],
+    [scriptPath, "--owned-sweep-state", statePath, "--apply", "--delay-ms", String(delayMs)],
     {
       detached: true,
       windowsHide: true,
@@ -723,6 +747,7 @@ export async function runProcessHygieneCli(argv) {
   let cleanupStale = false;
   let sessionEnd = false;
   let ownedSweep = null;
+  let ownedSweepState = null;
   let delayMs = DEFAULT_SESSION_END_DELAY_MS;
   let orphanGraceMs = DEFAULT_ORPHAN_GRACE_MS;
   for (let index = 0; index < argv.length; index += 1) {
@@ -732,6 +757,7 @@ export async function runProcessHygieneCli(argv) {
     else if (arg === "--cleanup-stale") cleanupStale = true;
     else if (arg === "--session-end") sessionEnd = true;
     else if (arg === "--owned-sweep") ownedSweep = argv[++index];
+    else if (arg === "--owned-sweep-state") ownedSweepState = argv[++index];
     else if (arg === "--delay-ms") delayMs = parsePositiveInteger(argv[++index], DEFAULT_SESSION_END_DELAY_MS);
     else if (arg === "--grace-ms") orphanGraceMs = parsePositiveInteger(argv[++index], DEFAULT_ORPHAN_GRACE_MS);
     else throw new Error(`Unknown option: ${arg}`);
@@ -739,9 +765,12 @@ export async function runProcessHygieneCli(argv) {
 
   if (sessionEnd) return runSessionEndHook(delayMs);
   if (ownedSweep) {
+    throw new Error("--owned-sweep no longer accepts serialized snapshots.");
+  }
+  if (ownedSweepState) {
     if (!apply) throw new Error("--owned-sweep requires --apply.");
     if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
-    const snapshot = JSON.parse(Buffer.from(ownedSweep, "base64url").toString("utf8"));
+    const snapshot = consumeOwnedSweepState(ownedSweepState);
     const collected = collectProcessSnapshot();
     if (!collected.ok) return 0;
     terminateCleanupPlan(buildOwnedCleanupPlan(collected.processes, snapshot));

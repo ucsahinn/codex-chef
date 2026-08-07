@@ -106,7 +106,7 @@ function assertOutputOutsideTarget(target, outputPath) {
   assertNoLinkedOutputAncestor(resolvedOut);
   const canonicalOut = canonicalizeWithMissingTail(resolvedOut);
   if (isInside(resolvedTarget, canonicalOut)) {
-    fail("Review output resolves inside the target repository.", "UNSAFE_OUTPUT_PATH");
+    fail("Review output must be outside the target repository.", "UNSAFE_OUTPUT_PATH");
   }
   return resolvedOut;
 }

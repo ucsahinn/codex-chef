@@ -499,6 +499,39 @@ function Install-CodexConfig {
   Install-File -Source $Source -Destination $Destination
 }
 
+function Install-McpProfile {
+  param(
+    [Parameter(Mandatory=$true)][string]$Template,
+    [Parameter(Mandatory=$true)][string]$Destination,
+    [Parameter(Mandatory=$true)][string]$ConfigSource
+  )
+
+  Assert-ManagedWriteTarget $Destination
+  if ((Test-Path -LiteralPath $Destination) -and -not $Force) {
+    $Script:SkippedExistingCount += 1
+    return
+  }
+
+  Ensure-Dir (Split-Path -Parent $Destination)
+  Backup-Target $Destination
+  $Renderer = Join-Path $RepoRoot "scripts\merge-codex-config.mjs"
+  $RenderArgs = @($Renderer, "--render-mcp-profile", "--source", $ConfigSource, "--template", $Template, "--output", $Destination)
+  $Action = "Generate complete MCP profile from $ConfigSource"
+  if ($WhatIfPreference) {
+    $RenderArgs += "--dry-run"
+  }
+  $changed = Invoke-Change -Target $Destination -Action $Action -ScriptBlock {
+    Assert-ManagedWriteTarget $Destination
+    & node @RenderArgs
+    if ($LASTEXITCODE -ne 0) {
+      throw "MCP profile generation failed with code $LASTEXITCODE"
+    }
+  }
+  if ($changed) {
+    Write-Action -Status "generated profile" -Message $Destination
+  }
+}
+
 function Install-Directory {
   param(
     [Parameter(Mandatory=$true)][string]$Source,
@@ -599,6 +632,7 @@ $TemplateRoot = Join-Path $RepoRoot "templates\codex"
 
 Install-File -Source (Join-Path $TemplateRoot "AGENTS.md") -Destination (Join-Path $CodexHome "AGENTS.md")
 Install-CodexConfig -Source (Join-Path $TemplateRoot "config.windows.toml") -Destination (Join-Path $CodexHome "config.toml")
+Install-File -Source (Join-Path $TemplateRoot "codex-profile.mjs") -Destination (Join-Path $CodexHome "codex-profile.mjs")
 Install-File -Source (Join-Path $TemplateRoot "rules\default.rules") -Destination (Join-Path $CodexHome "rules\default.rules")
 
 Get-ChildItem -Path (Join-Path $TemplateRoot "agents") -Filter "*.toml" | ForEach-Object {
@@ -606,7 +640,11 @@ Get-ChildItem -Path (Join-Path $TemplateRoot "agents") -Filter "*.toml" | ForEac
 }
 
 Get-ChildItem -Path (Join-Path $TemplateRoot "profiles") -Filter "*.toml" | ForEach-Object {
-  Install-File -Source $_.FullName -Destination (Join-Path $CodexHome $_.Name)
+  if ($_.Name -in @("full.config.toml", "multi-session.config.toml")) {
+    Install-McpProfile -Template $_.FullName -Destination (Join-Path $CodexHome $_.Name) -ConfigSource (Join-Path $CodexHome "config.toml")
+  } else {
+    Install-File -Source $_.FullName -Destination (Join-Path $CodexHome $_.Name)
+  }
 }
 
 $PluginSource = Join-Path $RepoRoot "plugins\codex-chef-workflows"

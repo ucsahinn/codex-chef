@@ -45,6 +45,7 @@ kopyalamadan sağlam bir başlangıç düzeni kurar.
 | [🤖 21 agent'ın tamamını gör](docs/agents.tr.md) | Her uzman rolün ne yaptığını, ne zaman seçildiğini ve delegasyonun ne zaman gerçekten faydalı olduğunu. |
 | [🧩 Skill kataloğunu aç](docs/skills.tr.md) | Dokuz bundled workflow'u, full install ile gelen on beş incelenmiş skill'i ve varsayılan yolu kalabalıklaştırmayan opsiyonları. |
 | [🔌 MCP kataloğuna bak](docs/mcp-catalog.tr.md) | Dengeli üç sunuculu varsayılanı, opsiyonel lokal yetenekleri, sekiz kontrollü connector'ı ve süreç/erişim sınırlarını. |
+| [📜 Kurulan çalışma sözleşmesini oku](templates/codex/AGENTS.md) | `~/.codex/AGENTS.md` olarak kurulan kullanıcı-geneli varsayılanlar; repo-içi `AGENTS.md` yine daha yüksek önceliklidir. |
 | [🛡️ Güvenlik modelini oku](docs/security-model.tr.md) | Ön izleme, yedekleme, onay kapıları, secret sınırları ve Codex Chef'in bilerek kendi başına yapmadığı işlemleri. |
 
 ## 🍳 Codex Chef Neler Ekliyor?
@@ -58,6 +59,16 @@ Codex ancak iş güvenli biçimde bölünebiliyorsa veya sen açıkça istersen 
 başlatır.
 
 [Tüm agent'ları ve gerçek rol dosyalarını gör →](docs/agents.tr.md)
+
+### Global `AGENTS.md`: görünür ve kalıcı varsayılanlar
+
+Codex Chef bu [global çalışma sözleşmesini](templates/codex/AGENTS.md)
+`~/.codex/AGENTS.md` olarak kurar. Operating, güvenlik, routing, tasarım ve
+doğrulama varsayılanlarını kurulumdan önce görünür kılar. Repo-içi
+`AGENTS.md` daha spesifik kalır ve önceliklidir; proje sözleşmeleri gerektiği
+yerde üstün gelmeye devam eder.
+
+[Global rehberin config, skill, MCP ve rules ile yerini gör →](docs/codex-surfaces.tr.md)
 
 ### Skill'ler: aynı işi her seferinde düzgün yapabilmek için
 

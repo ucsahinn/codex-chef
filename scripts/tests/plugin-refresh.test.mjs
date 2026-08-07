@@ -6,7 +6,7 @@ import {
   refreshInstalledPlugin
 } from "../refresh-installed-plugin.mjs";
 
-const expectedVersion = "0.5.59";
+const expectedVersion = "0.5.60";
 
 function listResult(installed = []) {
   return {
@@ -137,4 +137,15 @@ test("treats a missing Codex CLI as a safe no-op", () => {
 
   assert.equal(result.status, "unavailable");
   assert.match(result.warning, /not available/i);
+});
+test("treats an empty plugin-list response as an unavailable inspection", () => {
+  const result = refreshInstalledPlugin({
+    expectedVersion,
+    runCodex() {
+      return { status: 0, stdout: "", stderr: "" };
+    }
+  });
+
+  assert.equal(result.status, "unavailable");
+  assert.match(result.warning, /empty output/i);
 });

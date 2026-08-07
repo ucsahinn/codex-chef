@@ -489,6 +489,30 @@ install_codex_config() {
   install_file "$source" "$destination"
 }
 
+install_mcp_profile() {
+  local template="$1"
+  local destination="$2"
+  local config_source="$3"
+  assert_managed_write_target "$destination"
+  if [ -e "$destination" ] && [ "$FORCE" -ne 1 ]; then
+    SKIPPED_EXISTING_COUNT=$((SKIPPED_EXISTING_COUNT + 1))
+    return
+  fi
+  ensure_dir "$(dirname "$destination")"
+  backup_target "$destination"
+  local render_args=("$REPO_ROOT/scripts/merge-codex-config.mjs" "--render-mcp-profile" "--source" "$config_source" "--template" "$template" "--output" "$destination")
+  local render_action="generate complete MCP profile from $config_source"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    render_args+=("--dry-run")
+  fi
+  if run_change "$destination" "$render_action" node "${render_args[@]}"; then
+    action "generated profile" "$destination"
+  elif [ "$DRY_RUN" -ne 1 ]; then
+    echo "Failed to generate MCP profile: $destination" >&2
+    exit 1
+  fi
+}
+
 install_directory() {
   local source="$1"
   local destination="$2"
@@ -575,6 +599,7 @@ TEMPLATE_ROOT="$REPO_ROOT/templates/codex"
 
 install_file "$TEMPLATE_ROOT/AGENTS.md" "$CODEX_HOME_DIR/AGENTS.md"
 install_codex_config "$TEMPLATE_ROOT/config.unix.toml" "$CODEX_HOME_DIR/config.toml"
+install_file "$TEMPLATE_ROOT/codex-profile.mjs" "$CODEX_HOME_DIR/codex-profile.mjs"
 install_file "$TEMPLATE_ROOT/rules/default.rules" "$CODEX_HOME_DIR/rules/default.rules"
 
 for file in "$TEMPLATE_ROOT"/agents/*.toml; do
@@ -582,7 +607,14 @@ for file in "$TEMPLATE_ROOT"/agents/*.toml; do
 done
 
 for file in "$TEMPLATE_ROOT"/profiles/*.toml; do
-  install_file "$file" "$CODEX_HOME_DIR/$(basename "$file")"
+  case "$(basename "$file")" in
+    full.config.toml|multi-session.config.toml)
+      install_mcp_profile "$file" "$CODEX_HOME_DIR/$(basename "$file")" "$CODEX_HOME_DIR/config.toml"
+      ;;
+    *)
+      install_file "$file" "$CODEX_HOME_DIR/$(basename "$file")"
+      ;;
+  esac
 done
 
 PLUGIN_SOURCE="$REPO_ROOT/plugins/codex-chef-workflows"

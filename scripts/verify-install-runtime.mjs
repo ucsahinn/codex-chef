@@ -429,7 +429,43 @@ function inspectManagedFileDrift(failures) {
     matchedFiles += 1;
   }
 
+  function compareGeneratedMcpProfile(sourceRel, targetPath) {
+    expectedFiles += 1;
+    try {
+      assertManagedTargetPath(targetPath, [options.codexHome, options.agentsHome]);
+      const sourceConfig = path.join(options.codexHome, "config.toml");
+      const templatePath = path.join(root, sourceRel);
+      if (!fs.existsSync(sourceConfig) || !fs.existsSync(templatePath) || !fs.existsSync(targetPath)) {
+        recordMissing(sourceRel, targetPath);
+        return;
+      }
+      const rendered = spawnSync(process.execPath, [
+        "scripts/merge-codex-config.mjs",
+        "--render-mcp-profile",
+        "--source", sourceConfig,
+        "--template", templatePath,
+        "--output", targetPath,
+        "--dry-run"
+      ], {
+        cwd: root,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+        windowsHide: true,
+        timeout: options.probeTimeoutMs
+      });
+      if (rendered.error || rendered.status !== 0 || fs.readFileSync(targetPath, "utf8") !== rendered.stdout) {
+        recordMismatch(sourceRel, targetPath);
+        return;
+      }
+      matchedFiles += 1;
+    } catch (error) {
+      failures.push(error.message);
+      mismatched.push({ source: sourceRel, target: redact(targetPath), reason: "generated-profile-verification-failed" });
+    }
+  }
+
   compareFile("templates/codex/AGENTS.md", path.join(options.codexHome, "AGENTS.md"));
+  compareFile("templates/codex/codex-profile.mjs", path.join(options.codexHome, "codex-profile.mjs"));
   compareRulesBaseline("templates/codex/rules/default.rules", path.join(options.codexHome, "rules", "default.rules"));
 
   for (const file of listFilesRecursive(path.join(root, "templates", "codex", "agents"))) {
@@ -440,10 +476,13 @@ function inspectManagedFileDrift(failures) {
   }
 
   for (const file of listFilesRecursive(path.join(root, "templates", "codex", "profiles"))) {
-    compareFile(
-      posixPath(path.join("templates", "codex", "profiles", file)),
-      path.join(options.codexHome, file)
-    );
+    const sourceRel = posixPath(path.join("templates", "codex", "profiles", file));
+    const targetPath = path.join(options.codexHome, file);
+    if (["full.config.toml", "multi-session.config.toml"].includes(file)) {
+      compareGeneratedMcpProfile(sourceRel, targetPath);
+    } else {
+      compareFile(sourceRel, targetPath);
+    }
   }
 
   const pluginSourceRel = "plugins/codex-chef-workflows";
@@ -632,6 +671,19 @@ function inspectCodexRuntime(failures, warnings) {
       .filter(Boolean)
       .sort();
     const expected = readJson("catalog/mcp-servers.json").servers.map((server) => server.name).sort();
+    if (servers.length === 0 && expected.length > 0) {
+      warnings.push(
+        "codex mcp list --json returned no MCP servers despite a managed installed configuration; live MCP visibility is ambiguous in this process. Run codex mcp list --json directly outside the package runner before repairing."
+      );
+      runtime.mcpList = {
+        inspected: true,
+        exitCode: mcpList.status,
+        servers: 0,
+        missing: [],
+        ambiguous: true
+      };
+      return runtime;
+    }
     const actual = new Set(servers);
     const missing = expected.filter((server) => !actual.has(server));
     if (missing.length > 0) {

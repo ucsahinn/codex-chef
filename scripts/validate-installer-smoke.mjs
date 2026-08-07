@@ -168,6 +168,55 @@ function canonicalPathForCompare(target) {
   return process.platform === "win32" ? normalized.toLowerCase() : normalized;
 }
 
+function profileRootBlock(text, serverName) {
+  const escaped = serverName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = new RegExp(`^\\[mcp_servers\\.${escaped}\\]\\r?\\n([\\s\\S]*?)(?=^\\[|(?![\\s\\S]))`, "m").exec(text);
+  return match ? match[1] : "";
+}
+
+function assertBundledMcpProfiles(codexHome, label) {
+  const bundledLocalServers = [
+    "context7",
+    "sequential-thinking",
+    "playwright",
+    "chrome-devtools",
+    "serena",
+    "memory",
+    "codebase-memory"
+  ];
+  for (const [profileName, enabled] of [["full", true], ["multi-session", false]]) {
+    const profilePath = path.join(codexHome, `${profileName}.config.toml`);
+    const profile = read(profilePath);
+    for (const serverName of bundledLocalServers) {
+      const block = profileRootBlock(profile, serverName);
+      if (!block) fail(`${label} ${profileName} profile is missing ${serverName}.`);
+      if (!new RegExp(`^\\s*enabled\\s*=\\s*${enabled}$`, "m").test(block)) {
+        fail(`${label} ${profileName} profile has the wrong enabled state for ${serverName}.`);
+      }
+      if (!/^\s*command\s*=/m.test(block)) {
+        fail(`${label} ${profileName} profile must retain ${serverName} transport details.`);
+      }
+    }
+  }
+}
+
+function hasOnlyEmptyArg0RunnerFootprint(target) {
+  // The Codex Windows command runner can create its own empty arg0 scratch
+  // directory as soon as a child inherits CODEX_HOME. This happens before
+  // install.ps1 executes, so it is not evidence that the installer followed
+  // a linked home. Keep this exception deliberately exact: any file or any
+  // other directory remains a failed no-write assertion.
+  if (process.platform !== "win32") return false;
+  const topLevel = fs.readdirSync(target).sort();
+  if (topLevel.join(",") !== "sentinel.txt,tmp") return false;
+  const tempRoot = path.join(target, "tmp");
+  if (!fs.lstatSync(tempRoot).isDirectory()) return false;
+  const tempEntries = fs.readdirSync(tempRoot).sort();
+  if (tempEntries.join(",") !== "arg0") return false;
+  const arg0Root = path.join(tempRoot, "arg0");
+  return fs.lstatSync(arg0Root).isDirectory() && fs.readdirSync(arg0Root).length === 0;
+}
+
 function assertInstalledBaseline(codexHome, agentsHome, label) {
   const configPath = path.join(codexHome, "config.toml");
   const agentsPath = path.join(codexHome, "AGENTS.md");
@@ -206,6 +255,9 @@ function assertInstalledBaseline(codexHome, agentsHome, label) {
   }
   for (const profile of expectedProfiles) {
     assertFileExists(path.join(codexHome, profile), `${label} profile install`);
+  }
+  if (expectedProfiles.every((profile) => fs.existsSync(path.join(codexHome, profile)))) {
+    assertBundledMcpProfiles(codexHome, label);
   }
   for (const agent of expectedAgents) {
     assertFileExists(path.join(codexHome, "agents", agent), `${label} specialist agent install`);
@@ -672,7 +724,10 @@ for (const home of ["codex", "agents"]) {
   } else if (linkedHomeResult.status === 0) {
     fail(`Installer must reject a linked ${home.toUpperCase()}_HOME root.`);
   }
-  if (fs.readdirSync(externalRoot).sort().join(",") !== "sentinel.txt") {
+  if (
+    fs.readdirSync(externalRoot).sort().join(",") !== "sentinel.txt" &&
+    !hasOnlyEmptyArg0RunnerFootprint(externalRoot)
+  ) {
     fail(`Installer must not write through a linked ${home.toUpperCase()}_HOME root.`);
   }
   if (fs.existsSync(untouchedHome)) {

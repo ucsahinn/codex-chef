@@ -4808,8 +4808,17 @@ try {
     await runMenu();
   }
 } catch (error) {
-  if (!isUserInterrupt(error)) throw error;
-  console.log("");
-  console.log(`${ICONS.info} ${localText("Interrupted by user.", "Kullanici tarafindan kesildi.")}`);
-  process.exitCode = 130;
+  if (isUserInterrupt(error)) {
+    console.log("");
+    console.log(`${ICONS.info} ${localText("Interrupted by user.", "Kullanici tarafindan kesildi.")}`);
+    process.exitCode = 130;
+  } else {
+    process.exitCode = emitCliError({
+      tool: "chef",
+      error,
+      argv: args,
+      root,
+      prefix: localText("Codex Chef CLI error", "Codex Chef CLI hatasi")
+    });
+  }
 }

@@ -42,9 +42,13 @@ node scripts/plan-install.mjs --list-operations
 The summary keeps normal previews short; the JSON and full human plan list
 managed targets, optional global Git changes, curated skill commands, collision
 policy, backup behavior, and risk level.
-The profile copy operation includes `development.config.toml`,
+The profile operation includes `development.config.toml`,
 `review.config.toml`, `ci.config.toml`, `token-safe.config.toml`,
 `full.config.toml`, and `multi-session.config.toml`.
+`full` and `multi-session` are generated from the installed platform-specific
+MCP transport blocks, then change only the bundled local servers' `enabled`
+states. This avoids profile-layer table replacement dropping Sequential
+Thinking, Serena, or their launch details.
 
 Default-enabled MCPs still have launcher prerequisites. Node/npx-backed MCPs
 start after Node can download their pinned packages. Serena is default-enabled

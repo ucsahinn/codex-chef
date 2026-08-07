@@ -322,6 +322,60 @@ function repairFile(sourceRel, targetPath, id) {
   return { status: action.status, source: sourceRel, target: redact(targetPath), reason: action.reason };
 }
 
+function repairGeneratedMcpProfile(templateRel, targetPath, id) {
+  assertManagedTarget(targetPath);
+  const templatePath = path.join(root, templateRel);
+  const configPath = path.join(options.codexHome, "config.toml");
+  const fallbackConfig = path.join(root, "templates", "codex", options.platform === "windows" ? "config.windows.toml" : "config.unix.toml");
+  const render = (sourcePath) => {
+    const result = spawnSync(process.execPath, [
+      "scripts/merge-codex-config.mjs",
+      "--render-mcp-profile",
+      "--source", sourcePath,
+      "--template", templatePath,
+      "--output", targetPath,
+      "--dry-run"
+    ], {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+      timeout: 30000
+    });
+    if (result.error) throw result.error;
+    if (result.status !== 0) throw new Error((result.stderr || result.stdout || "MCP profile generation failed.").trim());
+    return result.stdout;
+  };
+  let rendered;
+  try {
+    const sourceConfig = fs.existsSync(configPath) ? configPath : fallbackConfig;
+    rendered = render(sourceConfig);
+  } catch (error) {
+    if (!fs.existsSync(configPath)) throw error;
+    rendered = render(fallbackConfig);
+    warnings.push(`Generated ${path.basename(targetPath)} from the platform template because the installed config lacks one or more required bundled MCP transports.`);
+  }
+  const exists = fs.existsSync(targetPath);
+  const current = exists && fs.readFileSync(targetPath, "utf8") === rendered;
+  if (current) return { status: "current", source: templateRel, target: redact(targetPath) };
+
+  const action = {
+    id,
+    kind: "generate-mcp-profile",
+    source: templateRel,
+    target: targetPath,
+    status: options.apply ? "applied" : "planned",
+    reason: exists ? "drifted" : "missing"
+  };
+  if (options.apply) {
+    ensureDir(path.dirname(targetPath));
+    action.backup = backupTarget(targetPath);
+    fs.writeFileSync(targetPath, rendered, "utf8");
+  }
+  recordAction(action);
+  return { status: action.status, source: templateRel, target: redact(targetPath), reason: action.reason };
+}
+
 function repairRulesFile(sourceRel, targetPath, id) {
   const sourcePath = path.join(root, sourceRel);
   const exists = fs.existsSync(targetPath);
@@ -392,10 +446,16 @@ function repairRulesFile(sourceRel, targetPath, id) {
 
 function repairManagedFiles() {
   const entries = [];
+  const generatedProfiles = [];
   entries.push({
     id: "codex-agents-md",
     source: "templates/codex/AGENTS.md",
     target: path.join(options.codexHome, "AGENTS.md")
+  });
+  entries.push({
+    id: "codex-profile-launcher",
+    source: "templates/codex/codex-profile.mjs",
+    target: path.join(options.codexHome, "codex-profile.mjs")
   });
   const rulesEntry = {
     id: "codex-rules",
@@ -412,6 +472,14 @@ function repairManagedFiles() {
   }
 
   for (const file of listFilesRecursive(path.join(root, "templates", "codex", "profiles"))) {
+    if (["full.config.toml", "multi-session.config.toml"].includes(file)) {
+      generatedProfiles.push({
+        id: `codex-profile:${file}`,
+        source: toPosix(path.join("templates", "codex", "profiles", file)),
+        target: path.join(options.codexHome, file)
+      });
+      continue;
+    }
     entries.push({
       id: `codex-profile:${file}`,
       source: toPosix(path.join("templates", "codex", "profiles", file)),
@@ -458,6 +526,13 @@ function repairManagedFiles() {
   const changed = [];
   for (const entry of entries) {
     const result = repairFile(entry.source, entry.target, entry.id);
+    if (result.status === "current") current += 1;
+    else if (result.status === "planned") planned += 1;
+    else if (result.status === "applied") applied += 1;
+    if (result.status !== "current") changed.push(result);
+  }
+  for (const profile of generatedProfiles) {
+    const result = repairGeneratedMcpProfile(profile.source, profile.target, profile.id);
     if (result.status === "current") current += 1;
     else if (result.status === "planned") planned += 1;
     else if (result.status === "applied") applied += 1;
@@ -547,7 +622,7 @@ function repairManagedFiles() {
     });
   }
 
-  const expected = entries.length + 1 + directSkills.length;
+  const expected = entries.length + generatedProfiles.length + 1 + directSkills.length;
   if (current + planned + applied !== expected) {
     throw new Error(
       `Managed file accounting invariant failed: expected ${expected}, observed ${current + planned + applied}.`
@@ -911,8 +986,8 @@ try {
   if (preflight.status !== "ok") {
     throw new Error("Repair preflight failed; refusing to plan or apply managed global changes until validators pass.");
   }
-  managedFiles = repairManagedFiles();
   config = runConfigMerge();
+  managedFiles = repairManagedFiles();
   legacyProfileMigration = migrateLegacyProfilePins();
   marketplace = repairMarketplace();
   pluginRefresh = refreshInstalledPlugin({

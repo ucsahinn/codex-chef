@@ -241,7 +241,7 @@ command = "uvx"
 args = ["--from", "git+https://github.com/oraios/serena.git@22c135a881aaf17485e54ef0ccaedeaf51a202c0", "serena", "start-mcp-server", "--context", "codex"]
 default_tools_approval_mode = "prompt"
 enabled_tools = ["activate_project", "get_current_config", "initial_instructions", "list_memories", "read_memory", "search_for_pattern", "find_symbol", "find_declaration", "find_implementations", "find_referencing_symbols", "get_symbols_overview", "get_diagnostics_for_file"]
-startup_timeout_sec = 30
+startup_timeout_sec = 90
 tool_timeout_sec = 180
 
 [mcp_servers.serena.tools.activate_project]
@@ -301,12 +301,12 @@ approval_mode = "approve"
 # Enable only when a task needs local repository indexing.
 [mcp_servers.codebase-memory]
 enabled = false
-command = "npx"
-args = ["-y", "codebase-memory-mcp@0.8.1"]
+command = "sh"
+args = ["-lc", "npm_config_cache=\"${XDG_CACHE_HOME:-$HOME/.cache}/codex-chef/codebase-memory\" exec npx -y codebase-memory-mcp@0.8.1"]
 default_tools_approval_mode = "prompt"
 enabled_tools = ["list_projects", "index_status", "search_graph", "trace_path", "detect_changes", "query_graph", "get_graph_schema", "get_code_snippet", "get_architecture", "search_code"]
 disabled_tools = ["delete_project", "manage_adr", "ingest_traces", "index_repository"]
-startup_timeout_sec = 30
+startup_timeout_sec = 90
 tool_timeout_sec = 300
 
 [mcp_servers.codebase-memory.tools.list_projects]

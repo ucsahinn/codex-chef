@@ -189,6 +189,9 @@ Normal merge/repair preserves model/profile choice, approval and sandbox
 settings, project trust, custom MCPs, and unrelated marketplace entries.
 Chef-managed agent/MCP safety tables remain validated, while wholesale
 replacement requires the explicit force path and a backup.
+The generated `full` and `multi-session` profiles retain the installed local
+MCP transport definitions and change only their enabled state, so selecting a
+profile cannot turn a local MCP entry into an incomplete command definition.
 The interactive command center inspects this state before a full install. It
 does not silently reinstall an already current setup or present managed drift as
 a clean first install; current setups become a no-op, while drift is directed to

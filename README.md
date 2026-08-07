@@ -44,6 +44,7 @@ private machine, credentials, sessions, or local memory.
 | [🤖 See all 21 agents](docs/agents.md) | The specialist roles, what each one owns, and when delegation is actually useful. |
 | [🧩 Browse the skill catalog](docs/skills.md) | Nine bundled workflows, fifteen reviewed full-install skills, and the optional references that stay out of the default path. |
 | [🔌 Open the MCP catalog](docs/mcp-catalog.md) | The balanced three-server default, optional local capabilities, eight gated connectors, and their process/access boundaries. |
+| [📜 Read the installed working agreement](templates/codex/AGENTS.md) | The user-wide defaults installed as `~/.codex/AGENTS.md`; a repository-local `AGENTS.md` still has precedence. |
 | [🛡️ Read the security model](docs/security-model.md) | Preview-first changes, backups, approval gates, secret handling, and the actions Codex Chef deliberately leaves to you. |
 
 ## 🍳 What Codex Chef Adds
@@ -56,6 +57,16 @@ background services. A matching role is guidance; Codex spawns a subagent only
 when the work can be split safely or you ask for delegation.
 
 [Meet every agent and see its real role file →](docs/agents.md)
+
+### Global `AGENTS.md`: durable defaults that stay reviewable
+
+Codex Chef installs this [global working agreement](templates/codex/AGENTS.md)
+as `~/.codex/AGENTS.md`. It makes the operating, safety, routing, design, and
+verification defaults visible before you install them. A repository-local
+`AGENTS.md` remains more specific and takes precedence, so project conventions
+continue to win where they should.
+
+[See where global guidance fits with config, skills, MCPs, and rules →](docs/codex-surfaces.md)
 
 ### Skills: a reliable way to repeat a workflow
 

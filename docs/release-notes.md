@@ -2,6 +2,30 @@
 
 This page follows the release users should install now. Older engineering history remains available in [CHANGELOG.md](../CHANGELOG.md), so the public release guide stays useful instead of becoming an ever-growing archive.
 
+## v0.5.60 - 2026-08-07
+
+Codex Chef 0.5.60 hardens the cross-PC runtime path without broadening local
+connector or process-control authority.
+
+### What Changed
+
+- Repairs Codebase Memory startup using an isolated cache and adds a portable,
+  allowlisted profile launcher for reliable full and multi-session MCP states.
+- Keeps Codebase Memory prompt-gated even when its package launcher is invoked
+  directly, and routes unexpected Chef CLI errors through the shared redacted
+  error contract.
+- Replaces forgeable SessionEnd worker snapshots with single-use local state
+  files while retaining exact identity and owner-chain rechecks.
+- Requires both the separately installed Control router skill and enabled
+  Control MCP before Control-managed routing can be selected.
+
+### Compatibility
+
+- Node.js 18 or newer
+- Windows PowerShell, macOS, Linux, and WSL
+- Existing user-owned config, skills, connectors, and plugin files remain
+  outside normal prune behavior.
+
 ## v0.5.59 - 2026-07-29
 
 Codex Chef 0.5.59 keeps five or six concurrent Codex sessions practical by

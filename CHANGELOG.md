@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.5.60 - 2026-08-07
+
+- Repair Codebase Memory startup with an isolated package cache, distinguish cache corruption from Serena cold-start timing, and verify the real MCP handshake and tool call.
+- Add a portable profile launcher that reliably applies the reviewed full and multi-session local-MCP states when a Codex CLI profile layer does not.
+- Harden the launcher against Windows shell metacharacters, profile traversal, and activation of connectors outside the bundled local-MCP allowlist; include it in repair and runtime drift verification.
+- Remove automatic direct package execution for Codebase Memory, preserve its prompt-gated connector boundary, and normalize unexpected Chef CLI errors through the shared redacted contract.
+- Replace SessionEnd serialized cleanup snapshots with single-use local state files, rejecting forgeable worker input while retaining exact PID, creation-time, and owner-chain rechecks.
+- Gate Control routing on the separately installed router skill and enabled Control MCP, then expand runtime, process-hygiene, installer, security, and profile regression coverage.
+
 ## 0.5.59 - 2026-07-29
 
 - Add capability-preserving multi-session MCP profiles: the balanced base keeps remote OpenAI docs plus Context7 and Serena enabled, `full` restores every bundled local stdio MCP for one primary session, and `multi-session` parks local MCP launchers in secondary windows without disabling agents, skills, built-in memories, hooks, or apps.
