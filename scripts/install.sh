@@ -608,7 +608,7 @@ done
 
 for file in "$TEMPLATE_ROOT"/profiles/*.toml; do
   case "$(basename "$file")" in
-    full.config.toml|multi-session.config.toml)
+    full.config.toml|multi-session.config.toml|offline.config.toml)
       install_mcp_profile "$file" "$CODEX_HOME_DIR/$(basename "$file")" "$CODEX_HOME_DIR/config.toml"
       ;;
     *)

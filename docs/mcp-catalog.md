@@ -43,6 +43,11 @@ servers while leaving agents, skills, remote OpenAI docs, built-in memories,
 hooks, and apps available. Profiles layer over the base config, so disabling a
 server does not delete its definition.
 
+Use `codex --profile offline` only when you explicitly want every
+Chef-managed MCP transport disabled. It is an optional fallback profile, not a
+reduced default: it does not change agents, skills, shell permissions, browser
+permissions, or web-search networking.
+
 Browser navigation, memory writes, indexing, symbol edits, and similar actions
 are not silently approved just because the server is enabled. The templates
 allowlist reviewed read tools and keep the wider actions prompted or disabled.

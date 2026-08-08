@@ -640,7 +640,7 @@ Get-ChildItem -Path (Join-Path $TemplateRoot "agents") -Filter "*.toml" | ForEac
 }
 
 Get-ChildItem -Path (Join-Path $TemplateRoot "profiles") -Filter "*.toml" | ForEach-Object {
-  if ($_.Name -in @("full.config.toml", "multi-session.config.toml")) {
+  if ($_.Name -in @("full.config.toml", "multi-session.config.toml", "offline.config.toml")) {
     Install-McpProfile -Template $_.FullName -Destination (Join-Path $CodexHome $_.Name) -ConfigSource (Join-Path $CodexHome "config.toml")
   } else {
     Install-File -Source $_.FullName -Destination (Join-Path $CodexHome $_.Name)

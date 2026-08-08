@@ -214,6 +214,13 @@ for (const [profileFile, expectedEnabled] of [
   }
 }
 
+const offlineBlocks = parseMcpBlocks(read("templates/codex/profiles/offline.config.toml"));
+for (const server of catalog.servers || []) {
+  const block = offlineBlocks.get(server.name);
+  if (!block) fail(`offline.config.toml is missing [mcp_servers.${server.name}]`);
+  else if (readTomlValue(block, "enabled") !== "false") fail(`offline.config.toml must set ${server.name} enabled=false`);
+}
+
 if (!supabase) {
   fail("MCP catalog must include supabase.");
 } else {

@@ -245,6 +245,8 @@ if (result.error) {
     "templates/codex/profiles/development.config.toml",
     "templates/codex/profiles/full.config.toml",
     "templates/codex/profiles/multi-session.config.toml",
+    "templates/codex/profiles/offline.config.toml",
+    "scripts/validate-codex-config-compat.mjs",
     "templates/codex/profiles/review.config.toml",
     "templates/codex/profiles/token-safe.config.toml"
   ]) {

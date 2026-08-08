@@ -124,6 +124,13 @@ test("installed profile launcher applies MCP enablement through Codex config ove
     assert.deepEqual(normalized.slice(-2), ["exec", "hello"]);
     assert.ok(normalized.includes("mcp_servers.codebase-memory.enabled=true"));
     assert.ok(normalized.includes("mcp_servers.sequential-thinking.enabled=true"));
+
+    const offlineResult = run(process.execPath, [path.join(codexHome, "codex-profile.mjs"), "offline", "exec", "hello"], { env });
+    assert.equal(offlineResult.status, 0, offlineResult.stderr || offlineResult.stdout);
+    const offlineArgs = JSON.parse(fs.readFileSync(capturePath, "utf8")).map((arg) => arg.replace(/^"|"$/g, ""));
+    for (const name of ["openaiDeveloperDocs", "context7", "serena", "github", "supabase"]) {
+      assert.ok(offlineArgs.includes(`mcp_servers.${name}.enabled=false`), `offline profile must disable ${name}`);
+    }
   } finally {
     fs.rmSync(fixtureRoot, { recursive: true, force: true });
   }

@@ -231,6 +231,7 @@ function assertInstalledBaseline(codexHome, agentsHome, label) {
     "development.config.toml",
     "full.config.toml",
     "multi-session.config.toml",
+    "offline.config.toml",
     "review.config.toml",
     "token-safe.config.toml"
   ];
@@ -328,6 +329,10 @@ function assertRunOk(result, label) {
   return output;
 }
 
+function progress(label) {
+  process.stdout.write(`[installer-smoke] ${label}\n`);
+}
+
 function initializeCuratedSkillInstallerFixture() {
   const fixtureRoot = fs.mkdtempSync(
     path.join(os.tmpdir(), "Codex Chef Install Smoke [curated-status] #-")
@@ -413,6 +418,7 @@ fs.writeFileSync(
   "utf8"
 );
 fs.writeFileSync(path.join(curatedForeignTarget, "user-owned.txt"), "preserve me\n", "utf8");
+progress("curated user-owned skill preservation");
 const curatedStatusOutput = assertRunOk(
   runInstaller(
     curatedStatusCodexHome,
@@ -444,6 +450,7 @@ if (/installed skill:\s*example-skill/i.test(curatedStatusOutput)) {
 if (read(path.join(curatedForeignTarget, "user-owned.txt")) !== "preserve me\n") {
   fail("Installer curated user-owned status smoke must preserve the user-owned target byte-for-byte.");
 }
+progress("approval harmony without Codex CLI");
 const approvalHarmonyNoCodexOutput = assertRunOk(
   runApprovalHarmonyWithoutCodexCli(),
   "Approval harmony without Codex CLI smoke"
@@ -453,6 +460,7 @@ assertIncludes(
   "Skipped execpolicy matrix because Codex CLI could not run",
   "Approval harmony without Codex CLI smoke"
 );
+progress("full preview");
 const previewOutput = assertRunOk(runInstallerPreview(previewCodexHome, previewAgentsHome), "Installer full preview smoke");
 if (!previewOutput.includes("Dry run: no files") && !previewOutput.includes("Dry run: no files, Git settings, or skills will be changed")) {
   fail("Installer full preview smoke must clearly state that no files, Git settings, or skills are changed.");
@@ -461,6 +469,7 @@ if (fs.existsSync(path.join(previewCodexHome, "config.toml")) || fs.existsSync(p
   fail("Installer full preview smoke must not write Codex or Agents files.");
 }
 
+progress("zero-config install");
 const zeroOutput = assertRunOk(runInstaller(zeroCodexHome, zeroAgentsHome), "Installer zero-config smoke");
 assertInstalledBaseline(zeroCodexHome, zeroAgentsHome, "Installer zero-config smoke");
 assertDefaultBoundaries(zeroOutput, "Installer zero-config smoke");
@@ -485,6 +494,7 @@ fs.writeFileSync(
   "utf8"
 );
 
+progress("existing-config install");
 const firstExistingOutput = assertRunOk(runInstaller(codexHome, agentsHome), "Installer existing-config smoke");
 assertInstalledBaseline(codexHome, agentsHome, "Installer existing-config smoke");
 assertDefaultBoundaries(firstExistingOutput, "Installer existing-config smoke");
@@ -507,6 +517,7 @@ if (fs.existsSync(path.dirname(pluginExtraPath))) {
   fail("Installer existing-config smoke did not create the managed plugin directory before idempotent refresh.");
 }
 
+progress("idempotent refresh");
 const secondExistingOutput = assertRunOk(runInstaller(codexHome, agentsHome), "Installer idempotent smoke");
 assertInstalledBaseline(codexHome, agentsHome, "Installer idempotent smoke");
 assertDefaultBoundaries(secondExistingOutput, "Installer idempotent smoke");
@@ -524,12 +535,23 @@ const splitCodexRoot = fs.mkdtempSync(path.join(os.tmpdir(), "Codex Chef Install
 const splitAgentsRoot = fs.mkdtempSync(path.join(os.tmpdir(), "Codex Chef Install Smoke [split-agents] #-"));
 const splitCodexHome = path.join(splitCodexRoot, ".codex");
 const splitAgentsHome = path.join(splitAgentsRoot, ".agents");
+progress("independent-home install");
 const splitOutput = assertRunOk(
   runInstaller(splitCodexHome, splitAgentsHome),
   "Installer independent-home smoke"
 );
 assertInstalledBaseline(splitCodexHome, splitAgentsHome, "Installer independent-home smoke");
 assertDefaultBoundaries(splitOutput, "Installer independent-home smoke");
+
+if (process.argv.includes("--core")) {
+  if (failures.length > 0) {
+    console.error("Installer core smoke validation failed:");
+    for (const failure of failures) console.error(`- ${failure}`);
+    process.exit(1);
+  }
+  console.log("Installer core smoke validation passed: preview, zero-config, existing-config, idempotent, and independent-home scenarios.");
+  process.exit(0);
+}
 
 const collisionRoots = [];
 const directAdoptionScenarios = [

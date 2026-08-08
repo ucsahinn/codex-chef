@@ -10,7 +10,7 @@ Discovery output stays no-write and human-readable:
 
 ```text
 Codex Chef install profiles
-Package: codex-chef@0.5.64
+Package: codex-chef@0.5.65
 Platform: windows
 
 Profile | Operations | High risk | Optional flags
@@ -217,6 +217,10 @@ Details: npm run chef -- --status --details
 
 Use `--details` for target/ambient runtime comparison, individual MCP entries,
 routing controls, context-budget evidence, setup notes, and log metadata.
+
+An untracked-only worktree is informational: the status board keeps the files
+visible, reports no tracked or staged changes, and says that update preserves
+them. Tracked or staged edits remain `attention`.
 
 ## Bash Dry Run
 

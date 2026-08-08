@@ -7,6 +7,7 @@ import {
   installCliErrorBoundary,
   requireCliValue
 } from "./lib/cli-error-contract.mjs";
+import { recommendProfiles } from "./lib/routing-recommendation.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
@@ -19,7 +20,8 @@ installCliErrorBoundary({
 });
 const options = {
   json: false,
-  profile: null
+  profile: null,
+  task: null
 };
 
 for (let index = 0; index < args.length; index += 1) {
@@ -27,6 +29,9 @@ for (let index = 0; index < args.length; index += 1) {
   if (arg === "--json") options.json = true;
   else if (arg === "--profile") {
     options.profile = requireCliValue(args, index, "--profile");
+    index += 1;
+  } else if (arg === "--task") {
+    options.task = requireCliValue(args, index, "--task");
     index += 1;
   } else if (arg === "--help" || arg === "-h") {
     printHelp();
@@ -44,6 +49,7 @@ Show the Codex Chef enterprise routing board.
 Options:
   --json                Emit machine-readable JSON
   --profile <id>        Show one routing profile by id
+  --task <description>  Recommend up to three profiles; never spawns agents or enables MCPs
 `);
 }
 
@@ -79,9 +85,11 @@ function printWrapped(value, { prefix = "", continuationPrefix = " ".repeat(pref
 }
 
 const routing = readJson("catalog/routing-profiles.json");
+if (options.profile && options.task) throw new CliUsageError("Use either --profile or --task, not both.");
+const recommendations = options.task ? recommendProfiles(routing.profiles, options.task) : [];
 const profiles = options.profile
   ? routing.profiles.filter((profile) => profile.id === options.profile)
-  : routing.profiles;
+  : (options.task ? recommendations.map((entry) => entry.profile) : routing.profiles);
 
 if (options.profile && profiles.length === 0) {
   throw new CliUsageError(`Unknown routing profile: ${options.profile}`);
@@ -107,6 +115,7 @@ const report = {
     boundary: "A route match recommends a specialist but spawns only for independent parallel work, noisy isolation, or explicit user-requested delegation."
   },
   profileCount: profiles.length,
+  taskRecommendation: options.task ? { algorithm: "weighted-catalog-v1", task: options.task, recommendations: recommendations.map(({ profile, matchedTerms, matchedPhrases, excludedTerms, score, priority, confidence }) => ({ id: profile.id, title: profile.title, matchedTerms, matchedPhrases, excludedTerms, score, priority, confidence, advisory: true })) } : null,
   profiles
 };
 
@@ -115,6 +124,15 @@ if (options.json) {
 } else {
   console.log("Codex Chef enterprise routing board");
   console.log(`Profiles: ${profiles.length}`);
+  if (options.task) {
+    printWrapped(`Recommended for: ${options.task}`, { prefix: "[info] ", continuationPrefix: "       " });
+    if (recommendations.length === 0) printWrapped("No confident route match. Use the full board or select a profile explicitly; no agent or MCP was activated.", { prefix: "[info] ", continuationPrefix: "       " });
+    for (const recommendation of recommendations) {
+      const signals = [...recommendation.matchedPhrases, ...recommendation.matchedTerms].join(", ");
+      printWrapped(`${recommendation.profile.id}: ${recommendation.confidence} confidence; signals: ${signals}`, { prefix: "[signal] ", continuationPrefix: "         " });
+    }
+    for (const recommendation of recommendations) printWrapped(`${recommendation.profile.id} — matched: ${recommendation.matchedTerms.join(", ")}`, { prefix: "[recommend] ", continuationPrefix: "            " });
+  }
   printWrapped("Policy: route matches are recommendations; delegation is conditional and inherits the active user profile.");
   console.log("");
   console.log("Routing visibility contract:");

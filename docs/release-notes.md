@@ -2,6 +2,18 @@
 
 This page follows the release users should install now. Older engineering history remains available in [CHANGELOG.md](../CHANGELOG.md), so the public release guide stays useful instead of becoming an ever-growing archive.
 
+## v0.5.65 - 2026-08-08
+
+Codex Chef 0.5.65 makes cross-PC updates and route advice more dependable without reducing the normal capability set.
+
+### What Changed
+
+- Preserves unrelated untracked local notes during Update while still blocking tracked or staged edits that could be overwritten.
+- Adds the opt-in `offline` MCP profile while keeping balanced, `full`, and `multi-session` behavior unchanged.
+- Validates base and bundled profile syntax against the installed Codex CLI, then covers the same states in installer smoke tests.
+- Replaces substring route matches with explainable weighted catalog phrases and whole-word terms, including Turkish character normalization.
+- Shows capability tiers separately from catalog and runtime evidence so operators can see what is configured without a false live-health claim.
+
 ## v0.5.64 - 2026-08-07
 
 Codex Chef 0.5.64 completes the update flow even when the local source is already current.

@@ -478,7 +478,7 @@ function inspectManagedFileDrift(failures) {
   for (const file of listFilesRecursive(path.join(root, "templates", "codex", "profiles"))) {
     const sourceRel = posixPath(path.join("templates", "codex", "profiles", file));
     const targetPath = path.join(options.codexHome, file);
-    if (["full.config.toml", "multi-session.config.toml"].includes(file)) {
+    if (["full.config.toml", "multi-session.config.toml", "offline.config.toml"].includes(file)) {
       compareGeneratedMcpProfile(sourceRel, targetPath);
     } else {
       compareFile(sourceRel, targetPath);

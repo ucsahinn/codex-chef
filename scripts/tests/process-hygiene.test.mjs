@@ -49,7 +49,7 @@ function mcpEnabledState(file) {
   return states;
 }
 
-test("balanced, full, and multi-session profiles preserve MCP capability with different process cost", () => {
+test("balanced, full, multi-session, and offline profiles preserve MCP capability with different process cost", () => {
   const localMcp = [
     "context7",
     "sequential-thinking",
@@ -62,10 +62,12 @@ test("balanced, full, and multi-session profiles preserve MCP capability with di
   const base = mcpEnabledState(path.join(root, "templates", "codex", "config.windows.toml"));
   const full = mcpEnabledState(path.join(root, "templates", "codex", "profiles", "full.config.toml"));
   const multiSession = mcpEnabledState(path.join(root, "templates", "codex", "profiles", "multi-session.config.toml"));
+  const offline = mcpEnabledState(path.join(root, "templates", "codex", "profiles", "offline.config.toml"));
 
   assert.deepEqual(localMcp.filter((name) => base.get(name)), ["context7", "serena"]);
   assert.deepEqual(localMcp.filter((name) => full.get(name)), localMcp);
   assert.deepEqual(localMcp.filter((name) => multiSession.get(name)), []);
+  assert.equal([...offline.values()].every((enabled) => enabled === false), true);
 });
 
 test("plugin registers only the reviewed SessionEnd process-hygiene hook", () => {

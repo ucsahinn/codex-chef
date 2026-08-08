@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { classifyGitStatus, summarizeGitStatus } from "./lib/git-worktree.mjs";
 import {
   CliUsageError,
   installCliErrorBoundary,
@@ -215,6 +216,7 @@ function translateStatusMessage(message) {
   if (!isTr()) return text;
   text = text
     .replace("git status --short is clean.", "git status --short temiz.")
+    .replace(/No tracked or staged changes; (\d+) unrelated untracked file\(s\) are preserved by update\./, "Tracked veya staged degisiklik yok; $1 ilgisiz untracked dosya update tarafindan korunur.")
     .replace(/git status --short reports (\d+) changed line\(s\)\./, "git status --short $1 değişen satır bildiriyor.")
     .replace("one or more required provider endpoints are unreachable over HTTP", "bir veya daha fazla gerekli provider endpoint'ine HTTP üzerinden erişilemiyor")
     .replace("MCP configuration has optional issues", "MCP config içinde isteğe bağlı uyarılar var")
@@ -499,6 +501,17 @@ function inspectMcpSetupBoard() {
     enabledByDefault: enabled.map((server) => server.name),
     disabledByDefault: disabled.map((server) => server.name),
     setupRequiredCount: setupRequired.length,
+    tierCounts: servers.reduce((counts, server) => {
+      const tier = server.auth !== "none"
+        ? "account-gated"
+        : server.defaultEnabled === true
+          ? "balanced-default"
+          : server.transport === "stdio"
+            ? "local-optional"
+            : "network-optional";
+      counts[tier] = (counts[tier] || 0) + 1;
+      return counts;
+    }, {}),
     servers: servers.map((server) => ({
       name: server.name,
       category: server.category,
@@ -514,6 +527,17 @@ function inspectMcpSetupBoard() {
         installedConfig: "not_inferred_from_catalog",
         liveCodexMcpList: "not_checked_here",
         sessionVisible: "not_checked_here"
+      },
+      capabilityState: {
+        tier: server.auth !== "none"
+          ? "account-gated"
+          : server.defaultEnabled === true
+            ? "balanced-default"
+            : server.transport === "stdio"
+              ? "local-optional"
+              : "network-optional",
+        effective: server.defaultEnabled === true ? "available_unverified" : "disabled_by_default",
+        reasonCode: server.defaultEnabled === true ? "balanced_default" : "opt_in_or_profile_required"
       },
       rollback: "Set enabled=false for the connector in Codex config and restart Codex."
     }))
@@ -881,19 +905,17 @@ function inspectGitRepository() {
     };
   }
 
-  const dirtyLineCount = result.stdout
-    .split(/\r?\n/)
-    .filter((line) => line.trim().length > 0)
-    .length;
+  const worktree = classifyGitStatus(result.stdout);
+  const summary = summarizeGitStatus(result.stdout);
   return {
     inspected: true,
-    status: dirtyLineCount === 0 ? "ok" : "attention",
+    status: summary.status,
     issueId: null,
-    summary: dirtyLineCount === 0
-      ? "git status --short is clean."
-      : `git status --short reports ${dirtyLineCount} changed line(s).`,
-    dirtyLineCount,
-    outputPreview: dirtyLineCount === 0 ? [] : result.stdout.split(/\r?\n/).filter(Boolean).slice(0, 8)
+    summary: summary.summary,
+    dirtyLineCount: summary.dirtyLineCount,
+    untrackedCount: summary.untrackedCount,
+    untrackedOnly: summary.untrackedOnly,
+    outputPreview: worktree.dirty ? result.stdout.split(/\r?\n/).filter(Boolean).slice(0, 8) : []
   };
 }
 
@@ -1322,6 +1344,7 @@ if (options.json) {
     console.log(
       `${localText("MCP setup", "MCP kurulumu")}: ${mcpSetupBoard.serverCount} ${localText("servers", "sunucu")} (${mcpSetupBoard.enabledByDefault.length} ${localText("enabled", "açık")}, ${mcpSetupBoard.disabledByDefault.length} ${localText("disabled", "kapalı")}, ${mcpSetupBoard.setupRequiredCount} ${localText("with setup notes", "kurulum notlu")})`
     );
+    console.log(`${localText("MCP capability tiers", "MCP yetenek katmanları")}: balanced-default=${mcpSetupBoard.tierCounts["balanced-default"] || 0}, local-optional=${mcpSetupBoard.tierCounts["local-optional"] || 0}, network-optional=${mcpSetupBoard.tierCounts["network-optional"] || 0}, account-gated=${mcpSetupBoard.tierCounts["account-gated"] || 0}. ${localText("Catalog/config/live states remain distinct.", "Katalog/config/canlı durumları ayrı tutulur.")}`);
     for (const server of mcpSetupBoard.servers.filter((item) => item.setupKind !== "none" && (item.setupKind !== "local-state" || item.name === "codebase-memory"))) {
       console.log(`${localText("MCP setup note", "MCP kurulum notu")}: ${server.name} [${server.setupKind}] - ${translateSetupHint(server.setupHint)}`);
     }

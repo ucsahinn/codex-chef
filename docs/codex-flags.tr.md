@@ -25,12 +25,27 @@ https://developers.openai.com/codex/cli/reference
 | `--dangerously-bypass-approvals-and-sandbox` | Normal lokal geliştirme için kullanma. |
 | `--dangerously-bypass-hook-trust` | Sadece hook source dışarıda ayrıca doğrulanıyorsa. |
 
-Codex Chef iki MCP maliyet profili kurar:
+Codex Chef uc istege bagli MCP maliyet profili kurar. Acikca secilmedikce dengeli varsayilani degistirmezler:
 
 ```bash
 codex --profile full
 codex --profile multi-session
+codex --profile offline
 ```
+
+`offline`, istege bagli izole oturum profilidir: Chef-managed tum MCP aktarimlarini kapatir; varsayilan ajan, skill, shell/browser veya web-search ag izinlerini degistirmez.
+
+Agent veya MCP etkinlestirmeden deterministik route onerisi icin:
+
+```bash
+npm run codex:routing -- --task "offline MCP profile"
+```
+
+Sonuc sadece oneridir ve en fazla uc catalog route dondurur. Agirlikli katalog
+ifadeleri ve tum-kelime terimleri kullanir, Turkce karakterleri normalize eder,
+eslesen sinyalleri ve guven seviyesini gosterir. Esitlikte belgelenmis profil
+onceligi, sonra catalog sirasi kullanilir. Deterministiktir; gizli model cagrisi,
+agent baslatma, MCP acma veya onay ayari degisikligi yapmaz.
 
 `full`, tek ana oturumda bütün bundled lokal stdio MCP'leri açar.
 `multi-session`, ikincil eşzamanlı oturumlarda lokal stdio MCP'leri kapatır;

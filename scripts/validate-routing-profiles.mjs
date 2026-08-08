@@ -84,7 +84,7 @@ for (const required of [
 
 const seenIds = new Set();
 for (const profile of routing.profiles || []) {
-  for (const key of ["id", "title", "trigger", "agents", "skills", "mcp", "flags", "delegationMode", "skillMode", "mcpMode", "evidence", "boundary", "owner", "primarySurface", "durability", "privilegeDelta", "validationGate", "rollback"]) {
+  for (const key of ["id", "title", "trigger", "match", "agents", "skills", "mcp", "flags", "delegationMode", "skillMode", "mcpMode", "evidence", "boundary", "owner", "primarySurface", "durability", "privilegeDelta", "validationGate", "rollback"]) {
     if (!Object.prototype.hasOwnProperty.call(profile, key)) {
       fail(`routing profile missing ${key}: ${profile.id || "<unknown>"}`);
     }
@@ -92,6 +92,31 @@ for (const profile of routing.profiles || []) {
   if (!/^[a-z0-9-]+$/.test(profile.id || "")) fail(`routing profile id must be kebab-case: ${profile.id}`);
   if (seenIds.has(profile.id)) fail(`duplicate routing profile id: ${profile.id}`);
   seenIds.add(profile.id);
+
+  if (!Number.isInteger(profile.match?.priority) || profile.match.priority < 0 || profile.match.priority > 100) {
+    fail(`routing profile match.priority must be an integer from 0 to 100: ${profile.id}`);
+  }
+  for (const key of ["phrases", "terms", "excludeTerms"]) {
+    if (!Array.isArray(profile.match?.[key])) fail(`routing profile match.${key} must be an array: ${profile.id}`);
+  }
+  if ((profile.match?.phrases?.length || 0) + (profile.match?.terms?.length || 0) < 3) {
+    fail(`routing profile match needs at least three positive signals: ${profile.id}`);
+  }
+  for (const [kind, signals] of [["phrases", profile.match?.phrases], ["terms", profile.match?.terms]]) {
+    const seenSignals = new Set();
+    for (const signal of signals || []) {
+      if (!Array.isArray(signal) || signal.length !== 2 || typeof signal[0] !== "string" || !signal[0].trim() || !Number.isInteger(signal[1]) || signal[1] <= 0) {
+        fail(`routing profile match.${kind} entries must be [non-empty string, positive integer]: ${profile.id}`);
+        continue;
+      }
+      const normalized = signal[0].normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().trim();
+      if (seenSignals.has(normalized)) fail(`routing profile match.${kind} has duplicate signal: ${profile.id} (${signal[0]})`);
+      seenSignals.add(normalized);
+    }
+  }
+  for (const term of profile.match?.excludeTerms || []) {
+    if (typeof term !== "string" || !term.trim()) fail(`routing profile match.excludeTerms must contain non-empty strings: ${profile.id}`);
+  }
 
   if (!Array.isArray(profile.agents) || profile.agents.length === 0) {
     fail(`routing profile must name at least one agent: ${profile.id}`);

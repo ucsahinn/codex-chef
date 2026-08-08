@@ -26,17 +26,33 @@ https://developers.openai.com/codex/cli/reference
 | `--dangerously-bypass-approvals-and-sandbox` | Do not use for normal local development. Use only inside a hardened throwaway environment. |
 | `--dangerously-bypass-hook-trust` | Only for automation that already vets hook sources. |
 
-Codex Chef installs two MCP-cost profiles:
+Codex Chef installs three optional MCP-cost profiles. They never change the balanced default unless you explicitly select one:
 
 ```bash
 codex --profile full
 codex --profile multi-session
+codex --profile offline
 ```
 
 `full` enables every bundled local stdio MCP for one primary session.
 `multi-session` disables local stdio MCPs for secondary concurrent sessions
 while preserving agents, skills, remote OpenAI docs, built-in memories, hooks,
-and apps.
+and apps. `offline` disables every Chef-managed MCP transport for an isolated
+session; it does not change shell, browser, or web-search network permissions.
+
+For deterministic route advice without activating an agent or MCP, run:
+
+```bash
+npm run codex:routing -- --task "offline MCP profile"
+```
+
+The result is advisory-only and returns at most three catalog routes. It uses
+catalog-owned weighted phrases and whole-word terms, normalizes Turkish
+characters, reports its matched signals and confidence, and resolves ties by
+documented profile priority then catalog order. It is deterministic—not a
+hidden model call—and never spawns an agent, enables an MCP, or changes an
+approval setting. Use an explicit `--profile <id>` when you already know the
+route you want.
 
 ## Common Commands
 

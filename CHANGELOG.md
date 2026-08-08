@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.5.65 - 2026-08-08
+
+- Add an optional `offline` profile that parks every Chef-managed MCP without reducing the balanced, full, or multi-session defaults.
+- Make the update flow preserve unrelated untracked files while still failing closed for tracked or staged changes that could be overwritten.
+- Add strict Codex config compatibility checks and installer coverage for all bundled profiles.
+- Replace substring route advice with deterministic, catalog-owned weighted phrase and whole-word correlation, including Turkish normalization and explainable confidence evidence.
+- Make the status board distinguish capability tiers and catalog/config/runtime evidence without overstating live availability.
+
 ## 0.5.64 - 2026-08-07
 
 - Continue validation, backup-backed managed refresh, and installed-runtime verification when the local source is already at the available version.

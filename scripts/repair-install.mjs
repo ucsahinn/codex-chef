@@ -472,7 +472,7 @@ function repairManagedFiles() {
   }
 
   for (const file of listFilesRecursive(path.join(root, "templates", "codex", "profiles"))) {
-    if (["full.config.toml", "multi-session.config.toml"].includes(file)) {
+    if (["full.config.toml", "multi-session.config.toml", "offline.config.toml"].includes(file)) {
       generatedProfiles.push({
         id: `codex-profile:${file}`,
         source: toPosix(path.join("templates", "codex", "profiles", file)),

@@ -1,0 +1,35 @@
+# MCP-offline profile. Disables every Codex Chef-managed MCP transport.
+# It does not change Codex shell, browser, or web-search network permissions.
+
+[mcp_servers.openaiDeveloperDocs]
+enabled = false
+[mcp_servers.context7]
+enabled = false
+[mcp_servers.sequential-thinking]
+enabled = false
+[mcp_servers.playwright]
+enabled = false
+[mcp_servers.chrome-devtools]
+enabled = false
+[mcp_servers.serena]
+enabled = false
+[mcp_servers.memory]
+enabled = false
+[mcp_servers.codebase-memory]
+enabled = false
+[mcp_servers.filesystem]
+enabled = false
+[mcp_servers.github]
+enabled = false
+[mcp_servers.figma]
+enabled = false
+[mcp_servers.linear]
+enabled = false
+[mcp_servers.notion]
+enabled = false
+[mcp_servers.sentry]
+enabled = false
+[mcp_servers.vercel]
+enabled = false
+[mcp_servers.supabase]
+enabled = false

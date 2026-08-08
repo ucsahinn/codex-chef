@@ -2,6 +2,18 @@
 
 Bu sayfa kullanıcıların şimdi kurması gereken sürümü anlatır. Eski mühendislik geçmişi [CHANGELOG.md](../CHANGELOG.md) içinde korunur; böylece public sürüm rehberi büyüyen bir arşive dönüşmeden güncel kalır.
 
+## v0.5.65 - 2026-08-08
+
+Codex Chef 0.5.65, normal yetenek setini azaltmadan farkli bilgisayarlardaki guncelleme ve route onerilerini daha guvenilir hale getirir.
+
+### Neler Degisti?
+
+- Update, ilgisiz untracked yerel notlari korur; uzerine yazilabilecek tracked veya staged degisikliklerde ise fail-closed kalir.
+- Istege bagli `offline` MCP profili eklenir; balanced, `full` ve `multi-session` varsayilan davranislari degismez.
+- Base ve paketli profil soz dizimi kurulu Codex CLI ile dogrulanir; ayni durumlar installer smoke testlerinde de kapsanir.
+- Alt-dize route eslesmesi; Turkce karakter normalizasyonu, agirlikli katalog ifadeleri ve tum-kelime terimleri kullanan aciklanabilir mantikla degisir.
+- Operator durum panosu, yanlis bir canli saglik iddiasi olmadan capability tier, katalog ve runtime kanitlarini ayri gosterir.
+
 ## v0.5.64 - 2026-08-07
 
 Codex Chef 0.5.64, yerel kaynak zaten güncel olsa bile update akışını tamamlar.
