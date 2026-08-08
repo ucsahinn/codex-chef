@@ -100,9 +100,10 @@ CLI logs are still repo-local unless `--no-log` is supplied. The default
 preview is concise; `npm run chef -- --update --verbose-plan` prints the full
 install dry-run evidence. Apply mode requires a clean worktree and runs
 `git pull --ff-only`. If the pull advances the repo, the same approved CLI
-prints a fresh preview, continues local validation and managed refresh, then
+prints a fresh preview, runs the bounded update-integrity validation and managed refresh, then
 verifies installed-runtime parity. If the repo is already current, apply refreshes managed
-files through the backup-backed update mode. Update replaces Codex Chef-owned files, synchronizes
+files through the backup-backed update mode. The broad `npm run check` suite remains a CI/release
+gate; Update does not make routine users wait for installer-smoke scenarios. Update replaces Codex Chef-owned files, synchronizes
 managed config tables, and preserves user-owned `config.toml` settings. It does not install curated global skills
 or optional global Git guards; use `--install --apply` or `--skills --apply`
 when you want those explicit surfaces. An already-installed namespaced Codex

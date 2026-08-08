@@ -90,6 +90,56 @@ test("runtime verifier treats an empty live MCP list as ambiguous when managed c
   }
 });
 
+test("slow doctor is an attention signal when live MCP visibility still completes", () => {
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-runtime-slow-doctor-"));
+  try {
+    const codexHome = path.join(fixtureRoot, ".codex");
+    const agentsHome = path.join(fixtureRoot, ".agents");
+    const binDir = path.join(fixtureRoot, "bin");
+    fs.mkdirSync(binDir);
+    installFixture(codexHome, agentsHome);
+    const command = path.join(binDir, process.platform === "win32" ? "codex.cmd" : "codex");
+    if (process.platform === "win32") {
+      fs.writeFileSync(command, [
+        "@echo off",
+        "if \"%1\"==\"doctor\" ping -n 3 127.0.0.1 >nul & echo {} & exit /b 0",
+        "if \"%1\"==\"mcp\" echo [] & exit /b 0",
+        "if \"%1\"==\"plugin\" echo {\"installed\":[],\"available\":[]} & exit /b 0",
+        "exit /b 1",
+        ""
+      ].join("\r\n"), "utf8");
+    } else {
+      fs.writeFileSync(command, [
+        "#!/bin/sh",
+        "if [ \"$1\" = \"doctor\" ]; then sleep 2; printf '{}\\n'; exit 0; fi",
+        "if [ \"$1\" = \"mcp\" ]; then printf '[]\\n'; exit 0; fi",
+        "if [ \"$1\" = \"plugin\" ]; then printf '{\"installed\":[],\"available\":[]}\\n'; exit 0; fi",
+        "exit 1",
+        ""
+      ].join("\n"), "utf8");
+      fs.chmodSync(command, 0o755);
+    }
+    const env = { ...process.env, CODEX_HOME: codexHome, AGENTS_HOME: agentsHome };
+    env.PATH = `${binDir}${path.delimiter}${process.env.PATH || process.env.Path || ""}`;
+    env.Path = env.PATH;
+    const result = run(process.execPath, [
+      "scripts/verify-install-runtime.mjs",
+      "--json",
+      "--require-live-runtime",
+      "--doctor-timeout-ms", "1000",
+      "--codex-home", codexHome,
+      "--agents-home", agentsHome
+    ], { env });
+    const report = JSON.parse(result.stdout);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.equal(report.runtime.mcpList.inspected, true);
+    assert.match(report.warnings.join("\n"), /Could not run codex doctor --json with installed CODEX_HOME/i);
+    assert.equal(report.failures.some((failure) => /doctor --json/i.test(failure)), false);
+  } finally {
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
 test("installed profile launcher applies MCP enablement through Codex config overrides", () => {
   const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-chef-profile-launcher-"));
   try {

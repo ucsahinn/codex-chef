@@ -1,6 +1,6 @@
 {
   "name": "codex-chef",
-  "version": "0.5.65",
+  "version": "0.5.66",
   "private": true,
   "description": "Codex Chef: cross-platform Codex setup kit with agents, skills, MCPs, safe installers, and validation gates.",
   "files": [
@@ -71,6 +71,7 @@
     "validate:tokens": "node scripts/validate-token-surfaces.mjs",
     "validate:adaptive-runtime": "node scripts/validate-adaptive-runtime.mjs",
     "validate:package-surface": "node scripts/validate-package-surface.mjs",
+    "validate:update": "node scripts/validate-repo.mjs && node scripts/validate-install-plan.mjs && node scripts/validate-installer-alignment.mjs && node scripts/validate-mcp-config.mjs && node scripts/validate-approval-harmony.mjs && node scripts/validate-agent-config.mjs && node scripts/validate-routing-profiles.mjs && node scripts/validate-package-surface.mjs",
     "validate:release": "node scripts/validate-release-readiness.mjs",
     "test:process-hygiene": "node --test scripts/tests/process-hygiene.test.mjs",
     "release:notes:check": "node scripts/extract-release-notes.mjs --check",

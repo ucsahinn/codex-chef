@@ -97,8 +97,8 @@ npm run chef -- --update --apply
 `--apply` olmadan update modu managed/global dosyalari degistirmez; normal CLI
 loglari `--no-log` yoksa repo-local kalir. Varsayilan preview kisadir;
 `npm run chef -- --update --verbose-plan` tam install dry-run kanitini basar.
-Apply modunda clean worktree ister ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse aynı onaylı CLI fresh preview basar, managed refresh ve
-kurulu ortam doğrulamasıyla devam eder; ikinci çalıştırma gerekmez. Repo zaten guncelse managed dosyalari backup alan installer uzerinden yeniler.
+Apply modunda clean worktree ister ve `git pull --ff-only` calistirir. Pull repo HEAD'ini ilerletirse aynı onaylı CLI fresh preview basar, sinirli update-integrity kontrolu, managed refresh ve
+kurulu ortam doğrulamasıyla devam eder; ikinci çalıştırma gerekmez. Geniş `npm run check` paketi CI/release kapısı olarak kalır; Update rutin kullanıcıları installer-smoke senaryoları için bekletmez. Repo zaten guncelse managed dosyalari backup alan installer uzerinden yeniler.
 Update Codex Chef'e ait dosyalari backup sonrasinda yeniler, managed config tablolarini
 senkronlar ve kullaniciya ait `config.toml` ayarlarini korur. curated global skill veya
 opsiyonel global Git guard kurmaz; bunlar icin

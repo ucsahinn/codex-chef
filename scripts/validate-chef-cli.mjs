@@ -1142,7 +1142,7 @@ if (!exists(cliPath)) {
     "createRollbackBackup",
     "runUpdateValidation",
     "update-check",
-    "runPackageScript(\"update-check\", \"check\"",
+    "runPackageScript(\"update-check\", \"validate:update\"",
     "gitHead",
     "Repository updated from",
     "compareReleaseVersions",

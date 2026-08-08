@@ -1665,12 +1665,12 @@ function runPackageScript(action, scriptName, extra = {}) {
 
 function runUpdateValidation(extra = {}) {
   if (!extra.quiet) console.log(`${ICONS.info} ${localText("Checking the repo before managed files are refreshed.", "Yonetilen dosyalar yenilenmeden once repo kontrol ediliyor.")}`);
-  return runPackageScript("update-check", "check", {
-    timeout: 300000,
+  return runPackageScript("update-check", "validate:update", {
+    timeout: 120000,
     quiet: extra.quiet,
     waitNote: localText(
-      "Running the full repo check before global managed files are refreshed.",
-      "Global yönetilen dosyalar yenilenmeden önce tam repo kontrolü çalıştırılıyor."
+      "Running the bounded update integrity check before global managed files are refreshed.",
+      "Global yönetilen dosyalar yenilenmeden önce sınırlı güncelleme bütünlük kontrolü çalıştırılıyor."
     )
   });
 }

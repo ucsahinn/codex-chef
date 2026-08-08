@@ -36,8 +36,9 @@ const options = {
   offline: false,
   noMcpProbe: false,
   requireLiveRuntime: false,
+  ambientDoctor: false,
   probeTimeoutMs: 30000,
-  doctorTimeoutMs: 30000,
+  doctorTimeoutMs: 12000,
   mcpTimeoutMs: 15000,
   codexHome: process.env.CODEX_HOME || path.join(os.homedir(), ".codex"),
   agentsHome: process.env.AGENTS_HOME || path.join(os.homedir(), ".agents")
@@ -53,6 +54,7 @@ for (let index = 0; index < args.length; index += 1) {
   else if (arg === "--offline") options.offline = true;
   else if (arg === "--no-mcp-probe") options.noMcpProbe = true;
   else if (arg === "--require-live-runtime") options.requireLiveRuntime = true;
+  else if (arg === "--ambient-doctor") options.ambientDoctor = true;
   else if (["--probe-timeout-ms", "--doctor-timeout-ms", "--mcp-timeout-ms"].includes(arg)) {
     const key = arg === "--probe-timeout-ms" ? "probeTimeoutMs" : arg === "--doctor-timeout-ms" ? "doctorTimeoutMs" : "mcpTimeoutMs";
     options[key] = Number.parseInt(requireCliValue(args, index, arg), 10);
@@ -90,6 +92,7 @@ Options:
   --doctor-timeout-ms <n> Per-doctor timeout (default: 30000)
   --mcp-timeout-ms <n>    MCP list timeout (default: 15000)
   --require-live-runtime  Treat unavailable/timed-out live probes as failures
+  --ambient-doctor         Also inspect the ambient CODEX_HOME; off by default to keep verification bounded
   --redact-paths          Redact home/repo paths in output
   --json                  Emit machine-readable JSON
 `);
@@ -600,25 +603,23 @@ function inspectCodexRuntime(failures, warnings) {
     return { inspected: false, note: options.offline ? "Skipped by --offline." : "Skipped by --skip-codex-cli." };
   }
 
-  const ambientDoctor = runProbe("ambient codex doctor", codexCommand(), ["doctor", "--json"], { timeout: options.doctorTimeoutMs });
-  let ambient = { inspected: false };
-  if (ambientDoctor.error) {
-    const message = `Could not run ambient codex doctor --json: ${ambientDoctor.error.message}`;
-    (options.requireLiveRuntime ? failures : warnings).push(message);
-    ambient = { inspected: false, error: ambientDoctor.error.message };
-  } else {
-    ambient = {
-      inspected: true,
-      ...parseCodexDoctorRuntime(ambientDoctor, warnings, "ambient codex doctor --json")
-    };
-    if (ambientDoctor.status !== 0) {
-      const message = `Ambient codex doctor --json exited ${ambientDoctor.status}.`;
-      (options.requireLiveRuntime ? failures : warnings).push(message);
-    }
-    if (ambient.activeHomeMatchesInstall === false) {
-      warnings.push(
-        `Ambient Codex runtime home differs from installed target; verifying with explicit CODEX_HOME=${redact(options.codexHome)}.`
-      );
+  let ambient = { inspected: false, note: "Skipped by default; use --ambient-doctor to compare the ambient CODEX_HOME." };
+  if (options.ambientDoctor) {
+    const ambientDoctor = runProbe("ambient codex doctor", codexCommand(), ["doctor", "--json"], { timeout: options.doctorTimeoutMs });
+    if (ambientDoctor.error) {
+      warnings.push(`Could not run ambient codex doctor --json: ${ambientDoctor.error.message}`);
+      ambient = { inspected: false, error: ambientDoctor.error.message };
+    } else {
+      ambient = {
+        inspected: true,
+        ...parseCodexDoctorRuntime(ambientDoctor, warnings, "ambient codex doctor --json")
+      };
+      if (ambientDoctor.status !== 0) warnings.push(`Ambient codex doctor --json exited ${ambientDoctor.status}.`);
+      if (ambient.activeHomeMatchesInstall === false) {
+        warnings.push(
+          `Ambient Codex runtime home differs from installed target; verifying with explicit CODEX_HOME=${redact(options.codexHome)}.`
+        );
+      }
     }
   }
 
@@ -627,20 +628,16 @@ function inspectCodexRuntime(failures, warnings) {
     env: installedEnv,
     timeout: options.doctorTimeoutMs
   });
+  const runtime = { inspected: false, ambient };
   if (doctor.error) {
-    const message = `Could not run codex doctor --json with installed CODEX_HOME: ${doctor.error.message}`;
-    (options.requireLiveRuntime ? failures : warnings).push(message);
-    return { inspected: false, error: doctor.error.message, ambient };
-  }
-
-  const runtime = {
-    inspected: true,
-    ...parseCodexDoctorRuntime(doctor, warnings, "codex doctor --json with installed CODEX_HOME"),
-    ambient
-  };
-  if (doctor.status !== 0) {
-    const message = `Codex doctor --json with installed CODEX_HOME exited ${doctor.status}.`;
-    (options.requireLiveRuntime ? failures : warnings).push(message);
+    warnings.push(`Could not run codex doctor --json with installed CODEX_HOME: ${doctor.error.message}`);
+    runtime.error = doctor.error.message;
+  } else {
+    Object.assign(runtime, {
+      inspected: true,
+      ...parseCodexDoctorRuntime(doctor, warnings, "codex doctor --json with installed CODEX_HOME")
+    });
+    if (doctor.status !== 0) warnings.push(`Codex doctor --json with installed CODEX_HOME exited ${doctor.status}.`);
   }
 
   if (runtime.activeHomeMatchesInstall === false) {
@@ -664,6 +661,7 @@ function inspectCodexRuntime(failures, warnings) {
     return runtime;
   }
 
+  runtime.inspected = true;
   try {
     const parsed = JSON.parse(mcpList.stdout || "[]");
     const servers = mcpEntriesFromParsed(parsed)

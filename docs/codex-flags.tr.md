@@ -62,6 +62,15 @@ npm run chef -- --processes --cleanup-stale --apply --no-log
 İlk iki komut yazmasızdır. Son komut ayrıca onaylı tam hedefli temizlik yoludur;
 ayrıntı için [çoklu oturum süreç hijyenine](process-hygiene.tr.md) bak.
 
+## Runtime Dogrulama Davranisi
+
+`npm run verify:install:runtime` once managed dosya esligini, sonra kurulu Codex
+home, MCP envanteri ve plugin durumunu kontrol eder. Buyuk yerel rollout gecmisi
+`codex doctor --json` komutunu yavaslatabilir; hedef MCP ve plugin problari
+tamamlaniyorsa sinirli doctor timeout'u yanlis bir kurulum hatasi degil
+`attention` uyarisi olur. Farkli bir ambient `CODEX_HOME` karsilastirmasi ancak
+ozellikle gerekiyorsa `--ambient-doctor` kullanin.
+
 ## Güvenli Başlangıçlar
 
 İnteraktif çalışma:

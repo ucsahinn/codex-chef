@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.5.66 - 2026-08-08
+
+- Keep routine Update applies bounded by replacing the full CI suite with an update-integrity gate that covers repository, installer, plan, MCP, approval, agent, routing, and package contracts.
+- Keep exhaustive installer smoke and cross-platform regressions in `npm run check` and CI instead of delaying managed-file refresh for every operator.
+- Make installed runtime verification probe the target Codex home once by default and continue to MCP/plugin evidence when `codex doctor --json` times out on large rollout state.
+- Add regression coverage for a slow doctor with successful live MCP visibility, and document the resulting attention-level diagnostic behavior.
+
 ## 0.5.65 - 2026-08-08
 
 - Add an optional `offline` profile that parks every Chef-managed MCP without reducing the balanced, full, or multi-session defaults.

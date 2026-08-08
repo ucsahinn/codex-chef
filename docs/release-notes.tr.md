@@ -2,6 +2,17 @@
 
 Bu sayfa kullanıcıların şimdi kurması gereken sürümü anlatır. Eski mühendislik geçmişi [CHANGELOG.md](../CHANGELOG.md) içinde korunur; böylece public sürüm rehberi büyüyen bir arşive dönüşmeden güncel kalır.
 
+## v0.5.66 - 2026-08-08
+
+Codex Chef 0.5.66, buyuk yerel Codex rollout gecmisi olan makinelerde rutin Update akisini daha guvenilir hale getirir.
+
+### Neler Degisti?
+
+- Rutin Update icindeki tam CI paketi sinirli bir butunluk kapisiyla degisir; kapsamli installer smoke kontrolleri CI ve release dogrulamasinda kalir.
+- Managed profil ve plugin yenilemesi, ilgisiz cok-platformlu fixture senaryolari icin beklemez.
+- Hedef MCP ve plugin problari tamamlanirken yavas `codex doctor --json`, gecerli managed refresh'i bloklamak yerine gorunur attention olarak raporlanir.
+- Bu slow-doctor yolu icin regression testi eklenir.
+
 ## v0.5.65 - 2026-08-08
 
 Codex Chef 0.5.65, normal yetenek setini azaltmadan farkli bilgisayarlardaki guncelleme ve route onerilerini daha guvenilir hale getirir.

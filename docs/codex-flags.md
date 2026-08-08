@@ -81,6 +81,15 @@ npm run chef -- --processes --cleanup-stale --apply --no-log
 The first two are read-only. The last command is the separately gated exact
 cleanup path; see [multi-session process hygiene](process-hygiene.md).
 
+## Runtime Verification Behavior
+
+`npm run verify:install:runtime` checks managed-file parity first, then probes
+the installed Codex home, MCP inventory, and plugin state. A large local
+rollout history can make `codex doctor --json` slow; its bounded timeout is an
+`attention` warning, not a false install failure, when the target MCP and
+plugin probes still complete. Use `--ambient-doctor` only when comparing a
+different ambient `CODEX_HOME` is specifically useful.
+
 ## MCP Config Fields
 
 Codex MCP behavior is usually controlled in `config.toml`, not by one-off CLI

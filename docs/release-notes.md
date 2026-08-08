@@ -2,6 +2,17 @@
 
 This page follows the release users should install now. Older engineering history remains available in [CHANGELOG.md](../CHANGELOG.md), so the public release guide stays useful instead of becoming an ever-growing archive.
 
+## v0.5.66 - 2026-08-08
+
+Codex Chef 0.5.66 makes routine Update reliable on machines with a large local Codex rollout history.
+
+### What Changed
+
+- Replaces the full CI suite in routine Update with a bounded integrity gate; exhaustive installer smoke remains in CI and release verification.
+- Refreshes managed profiles and plugins without waiting for unrelated multi-platform fixture scenarios.
+- Treats a slow `codex doctor --json` as visible attention when target MCP and plugin probes still complete, rather than blocking a valid managed refresh.
+- Adds a regression test for this exact slow-doctor path.
+
 ## v0.5.65 - 2026-08-08
 
 Codex Chef 0.5.65 makes cross-PC updates and route advice more dependable without reducing the normal capability set.
